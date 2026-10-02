@@ -10705,16 +10705,20 @@ window.MetaCall = (function () {
          </div>`
       : '';
 
+    /* UI-61 (02.10.2026): ein Block statt vier Zeilen. Die Typ-Pillen sind
+       oval wie die der Leiste; Spieler, Runden, Punkte und Name stehen in
+       EINER Zeile (Umbruch erst auf dem Telefon). Die langen Erklaersaetze
+       (Typbeschreibung, Punkte-Hinweis) liegen hinter dem ⓘ — der
+       Warnsatz zu den Grenzen bleibt sichtbar. */
+    const infoSatz = t(_typeDescI18nKey(type)) + ' ' + t(targetHintKey);
     return `
-<div class="metacall-panel">
-  <div class="metacall-panel-title">
-    ${t('mc.panelSettings')}
-  </div>
+<div class="metacall-panel mc-turnier-kompakt">
   <div class="mc-tt-tabs" role="tablist" aria-label="${esc(t('matchupAnalysis.tournamentType'))}">
     ${TOURNAMENT_TYPES.map(tabBtn).join('')}
+    <span class="mc-runden-info mc-typ-info" tabindex="0" role="note"
+          title="${esc(infoSatz)}" aria-label="${esc(infoSatz)}">ⓘ</span>
   </div>
-  <p class="mc-tt-hint mc-tt-hint-type">${t(_typeDescI18nKey(type))}</p>
-  <div class="metacall-settings-grid">
+  <div class="metacall-settings-grid mc-einzeilig">
     <div class="metacall-field-group">
       <label for="mc-players">${t('mc.labelPlayers')}</label>
       <input type="number" id="mc-players" min="2" max="9999"
@@ -10750,22 +10754,18 @@ window.MetaCall = (function () {
              oninput="MetaCall._onTournamentName(this.value)">
     </div>
   </div>
-  ${/* Kein Eintrag in css/ — die Datei gehoert in diesem Durchgang
-        einem anderen Agenten. Die Warnfarbe kommt aus den Token, die
-        die Seite ohnehin fuehrt, damit der Satz im Dunkelmodus nicht
-        verschwindet. */ ''}
   <p class="mc-grenzen-hinweis" id="mc-grenzen-hinweis" role="status" aria-live="polite"
      style="margin:6px 0 0;font-size:0.85rem;font-weight:600;color:var(--tint-warn-ink,#b8860b)" hidden></p>
-  <p class="mc-tt-hint">${t(targetHintKey)} ${swissLink}</p>
   <div class="mc-bild-zeile">
-    <button type="button" class="mc-bild-btn" onclick="MetaCall.generateTournamentImage()">
+    <button type="button" class="mc-bild-btn" onclick="MetaCall.generateTournamentImage()"
+            title="${esc(t('mc.generateImageHint'))}">
       ${esc(t('mc.generateImage'))}
     </button>
     <button type="button" class="mc-bild-btn mc-bild-btn-leise" onclick="MetaCall.postSeiteOeffnen()"
             title="${esc(t('mc.postSeiteHint'))}">
       ${esc(t('mc.postSeite'))}
     </button>
-    <span class="mc-bild-hinweis">${esc(t('mc.generateImageHint'))}</span>
+    ${swissLink}
   </div>
 </div>`;
   }
@@ -12067,6 +12067,54 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
 </div>`;
   }
 
+  /* UI-60 (02.10.2026): die kleine Fassung des Ergebnisses, direkt unter der
+     Deck-Wahl. Zwei Zahlen, beide aus den Rechnungen, die auch die grossen
+     Bloecke unten benutzen (_evRechne, calcDay2) — keine zweite Formel.
+     Der Block wird von refreshResults() mitgezeichnet, damit er sich mit
+     jeder Aenderung in der Tabelle bewegt. */
+  function renderUebersichtPanel(field) {
+    if (_inFrozenPastMode()) return '';
+    const kopf = `<div class="mc-uebersicht-kopf">${esc(_evL('Dein Ergebnis auf einen Blick', 'Your result at a glance'))}</div>`;
+    if (!_settings.myDeck) {
+      return `
+<div class="metacall-panel mc-uebersicht" role="status" aria-live="polite">
+  ${kopf}
+  <p class="mc-uebersicht-leer">${esc(_evL(
+    'Wähle dein Deck — dann stehen hier deine erwartete ' + _evQuotenName() + ' gegen das Feld und die Day-2-Chance.',
+    'Pick your deck — then your expected ' + _evQuotenName() + ' against the field and your Day-2 chance appear here.'))}</p>
+</div>`;
+    }
+    const r  = _evRechne(field);
+    const d2 = calcDay2(field);
+    const pct = _mcNum(d2.day2Prob * 100, 1);
+    const cls = d2.day2Prob >= 0.6 ? '' : d2.day2Prob >= 0.4 ? ' pct-mid' : ' pct-low';
+    const evKachel = r
+      ? `<div class="mc-uebersicht-kachel ${r.ev >= 50 ? 'is-pos' : 'is-neg'}">
+      <span class="mc-uebersicht-label">${esc(_evL('Erwartete ', 'Expected ') + _evQuotenName())}</span>
+      <span class="mc-uebersicht-wert">${_mcNum(r.ev, 1)}<span class="mc-ev-einheit">${_mcPz()}</span></span>
+      <span class="mc-uebersicht-kontext">${esc(_evL('gegen das erwartete Meta', 'against the expected meta'))}</span>
+    </div>`
+      : `<div class="mc-uebersicht-kachel">
+      <span class="mc-uebersicht-label">${esc(_evL('Erwartete ', 'Expected ') + _evQuotenName())}</span>
+      <span class="mc-uebersicht-wert">\u2014</span>
+      <span class="mc-uebersicht-kontext">${esc(_evL('keine gemessene Paarung', 'no measured pairing'))}</span>
+    </div>`;
+    return `
+<div class="metacall-panel mc-uebersicht" role="status" aria-live="polite">
+  ${kopf}
+  <div class="mc-uebersicht-kacheln">
+    ${evKachel}
+    <div class="mc-uebersicht-kachel">
+      <span class="mc-uebersicht-label">${t(_predictTitleKey())}</span>
+      <span class="mc-uebersicht-wert mc-day2-pct${cls}">${pct}<span class="mc-ev-einheit">${_mcPz()}</span></span>
+      <span class="mc-uebersicht-kontext">${esc(_evL(
+        'ab ' + _settings.day2Points + ' Punkten nach ' + _settings.rounds + ' Runden',
+        'from ' + _settings.day2Points + ' points after ' + _settings.rounds + ' rounds'))}</span>
+    </div>
+  </div>
+</div>`;
+  }
+
   // ── Full Render ────────────────────────────────────────────
   /* ── DER ABLAUF, ALS ABLAUF SICHTBAR ──────────────────────────────
    *
@@ -12112,36 +12160,46 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
   </div>`;
   }
 
+  function _mcSchrittTurnier() {
+    return _mcIstDeutsch()
+      ? { t: 'Das Turnier',
+          s: 'Wofür rechnest du? Turnierart, Rundenzahl und Datenbasis setzen den Rahmen für '
+           + 'alles darunter.' }
+      : { t: 'The tournament',
+          s: 'What are you calculating for? Tournament type, round count and data window set the '
+           + 'frame for everything below.' };
+  }
+
   function _mcSchritte() {
     const d = _mcIstDeutsch();
     return d ? [
       { t: 'Das Turnier',
         s: 'Wofür rechnest du? Turnierart, Rundenzahl und Datenbasis setzen den Rahmen für '
          + 'alles darunter.' },
+      { t: 'Dein Deck',
+        s: 'Wähle dein Deck. Darunter steht live, was das Turnier für dich bedeutet — es '
+         + 'bewegt sich mit jeder Änderung in der Tabelle. Unter „' + _mcKnopfQuoten() + '" '
+         + 'kannst du jede Paarung selbst setzen.' },
       { t: 'Das Meta und deine Chancen',
         s: 'Wer spielt was, wie oft triffst du es, und wie weit kommst du mit welchem Deck — '
          + 'alles in einer Tabelle. Sortieren per Klick auf die Spaltenköpfe.' },
-      { t: 'Dein Deck',
-        s: 'Wähle dein Deck. Unter „' + _mcKnopfQuoten() + '" kannst du jede Paarung selbst '
-         + 'setzen; daneben steht immer, was die gemessenen Daten sagen.' },
-      { t: 'Dein Ergebnis',
-        s: 'Erst deine erwartete ' + _evQuotenName() + ' gegen genau dieses Meta, dann die '
-         + 'Chance, aus dem Swiss aufzusteigen — und zum Schluss, welche Decks in diesem Meta '
-         + 'besser stünden.' },
+      { t: 'Dein Ergebnis im Detail',
+        s: 'Deine erwartete ' + _evQuotenName() + ' gegen genau dieses Meta, die Verteilung '
+         + 'der Punkte — und welche Decks in diesem Meta besser stünden.' },
     ] : [
       { t: 'The tournament',
         s: 'What are you calculating for? Tournament type, round count and data window set the '
          + 'frame for everything below.' },
+      { t: 'Your deck',
+        s: 'Pick your deck. Below it you see live what the tournament means for you — it moves '
+         + 'with every change in the table. Under "' + _mcKnopfQuoten() + '" you can set any '
+         + 'pairing yourself.' },
       { t: 'The meta and your chances',
         s: 'Who plays what, how often you face it, and how far you get with which deck — all in '
          + 'one table. Click a column header to sort.' },
-      { t: 'Your deck',
-        s: 'Pick your deck. Under "' + _mcKnopfQuoten() + '" you can set any pairing yourself; '
-         + 'the measured number is always shown next to it.' },
-      { t: 'Your result',
-        s: 'First your expected ' + _evQuotenName() + ' against exactly this meta, then your '
-         + 'chance of making it out of the Swiss — and finally which decks would do better in '
-         + 'this meta.' },
+      { t: 'Your result in detail',
+        s: 'Your expected ' + _evQuotenName() + ' against exactly this meta, the points '
+         + 'distribution — and which decks would do better in this meta.' },
     ];
   }
 
@@ -12150,6 +12208,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     if (!container || !_shareList) return;
     const field = buildField();
     const _SCHRITTE = _mcSchritte();
+    const _SCHRITT_TURNIER = _mcSchrittTurnier();
     // Date-window control — duplicates the picker in Card Analysis so
     // users on the Meta Call tab can narrow the predictor's input
     // window without context-switching. Both inputs read/write the
@@ -12204,7 +12263,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
   <div class="mc-top-bar">
     ${renderScenariosBar()}
   </div>
-  ${_inFrozenPastMode() ? '' : _mcSchritt(1, _SCHRITTE[0].t, _SCHRITTE[0].s)}
+  ${_inFrozenPastMode() ? '' : _mcSchritt(1, _SCHRITT_TURNIER.t, _SCHRITT_TURNIER.s)}
   ${_inFrozenPastMode() ? _renderFrozenSourceOnlyPanel() : _renderCombinedConfigPanel(dateBanner)}
   ${renderSettingsPanel()}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
@@ -12226,13 +12285,14 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
        weiter, und im sichtbaren Text steht davon kein Wort.
        Die Diagnose-Marken (Quelle, aktive Rotation) sind dabei
        ausgeblendet — sonst waere das derselbe Fehler wie oben. */ ''}
-  ${_inFrozenPastMode() ? '' : _mcSchritt(2, _SCHRITTE[1].t, _SCHRITTE[1].s)}
+  ${_inFrozenPastMode() ? '' : _mcSchritt(2, _SCHRITTE[0].t, _SCHRITTE[0].s)}
+  ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}
+  ${_inFrozenPastMode() ? '' : renderUebersichtPanel(field)}
+  ${_inFrozenPastMode() ? '' : _mcSchritt(3, _SCHRITTE[1].t, _SCHRITTE[1].s)}
   ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
   ${_inFrozenPastMode() ? '' : `<details class="mc-rechenweg"><summary>${esc(_mcIstDeutsch() ? 'Datenbasis und Rechenweg' : 'Data and method')}</summary>${renderPredictorBanner()}</details>`}
-  ${_inFrozenPastMode() ? '' : _mcSchritt(3, _SCHRITTE[2].t, _SCHRITTE[2].s)}
-  ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}
-  ${_inFrozenPastMode() ? '' : _mcSchritt(4, _SCHRITTE[3].t, _SCHRITTE[3].s)}
+  ${_inFrozenPastMode() ? '' : _mcSchritt(4, _SCHRITTE[2].t, _SCHRITTE[2].s)}
   ${_inFrozenPastMode() ? '' : renderDeckGegenMetaPanel(field)}
   ${_inFrozenPastMode() ? '' : renderResultsPanel(field)}
   ${_inFrozenPastMode() ? renderFrozenSharePanel() : ''}
@@ -12863,8 +12923,8 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       const de = _mcIstDeutsch();
       if (typeof window.showToast === 'function') {
         window.showToast(de
-          ? `Zu „${gesucht}" liegen im Meta Call keine Anteile vor — wähle dein Deck unten von Hand.`
-          : `No shares on record for "${gesucht}" in the Meta Call — pick your deck below by hand.`,
+          ? `Zu „${gesucht}" liegen im Meta Call keine Anteile vor — wähle dein Deck oben von Hand.`
+          : `No shares on record for "${gesucht}" in the Meta Call — pick your deck above by hand.`,
           'info', 6000);
       }
       return;
@@ -12907,6 +12967,13 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     tmp.innerHTML = renderDeckGegenMetaPanel(buildField());
     const neu = tmp.querySelector('.mc-ev-panel');
     if (neu) alt.innerHTML = neu.innerHTML;
+    const ue = container.querySelector('.mc-uebersicht');
+    if (ue) {
+      const t2 = document.createElement('div');
+      t2.innerHTML = renderUebersichtPanel(buildField());
+      const n2 = t2.querySelector('.mc-uebersicht');
+      if (n2) ue.innerHTML = n2.innerHTML;
+    }
   }
 
   // Recommendations panel — top N decks ranked by Day-2 probability
@@ -14549,6 +14616,13 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       tmp.innerHTML = renderDeckGegenMetaPanel(field);
       const neu = tmp.querySelector('.mc-ev-panel');
       if (neu) evPanel.innerHTML = neu.innerHTML;
+    }
+    const uebersicht = container.querySelector('.mc-uebersicht');
+    if (uebersicht) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = renderUebersichtPanel(field);
+      const neu = tmp.querySelector('.mc-uebersicht');
+      if (neu) uebersicht.innerHTML = neu.innerHTML;
     }
     // Recommendations panel — re-runs calcRecommendations with the
     // updated field. Day-2 numbers shift whenever the field shifts so

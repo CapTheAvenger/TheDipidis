@@ -258,23 +258,23 @@
 /* --- Tournament-type tabs (Regional / Local Challenge / Local Cup) --- */
 .mc-tt-tabs {
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  align-items: center;
   flex-wrap: wrap;
   margin: 0 0 8px;
-  padding: 3px;
-  background: var(--surface-2);
-  border-radius: 8px;
+  padding: 0;
+  background: transparent;
 }
 .mc-tt-tab {
-  flex: 1 1 auto;
-  min-width: 90px;
-  padding: 5px 10px;
-  border: 1px solid transparent;
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 5px 14px;
+  border: 1px solid var(--mc-border, var(--border-color, #cbd5e1));
   background: transparent;
   color: var(--mc-text-muted-strong);
   font-size: 0.80rem;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 999px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
@@ -285,8 +285,8 @@
 .mc-tt-tab-active {
   background: var(--surface-1);
   color: var(--mc-text-heading-soft);
-  border-color: #c5cfde;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border-color: var(--mc-accent);
+  box-shadow: inset 0 0 0 1px var(--mc-accent);
 }
 .mc-tt-hint {
   margin: 8px 0 0;
@@ -4317,3 +4317,49 @@
   .mc-combo-panel.mc-leiste { flex-wrap: wrap; }
   .mc-leiste .mc-meta-zeile { flex: 1 1 100%; border-top: none; }
 }
+
+/* UI-61 (02.10.2026): ovale Pillen stehen oben bei .mc-tt-tabs / .mc-tt-tab
+   (eine Regel fuer Turnierart, Meta und Modus). */
+.mc-turnier-kompakt { padding-top: 10px; padding-bottom: 10px; }
+.mc-turnier-kompakt .mc-tt-tabs { margin-bottom: 8px; }
+.mc-typ-info { margin-left: 2px; }
+.metacall-settings-grid.mc-einzeilig {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px 12px; margin-bottom: 4px;
+}
+.mc-einzeilig .metacall-field-group { gap: 3px; }
+.mc-einzeilig .metacall-field-group label { font-size: 0.7rem; }
+.mc-einzeilig .metacall-field-group input[type="number"],
+.mc-einzeilig .metacall-field-group input[type="text"],
+.mc-einzeilig .metacall-field-group select { padding: 5px 9px; font-size: 0.9rem; }
+.mc-einzeilig .mc-turnier-name { grid-column: span 2; }
+.mc-turnier-kompakt .mc-bild-zeile { margin-top: 8px; gap: 8px; }
+.mc-turnier-kompakt .mc-bild-btn { padding: 5px 14px; border-radius: 999px; font-size: 0.8rem; }
+.mc-turnier-kompakt .mc-tt-swisscalc { font-size: 0.78rem; margin-left: auto; }
+@media (max-width: 768px) {
+  .mc-einzeilig .mc-turnier-name { grid-column: 1 / -1; }
+  .mc-turnier-kompakt .mc-bild-btn { width: auto; }
+}
+
+/* UI-60 (02.10.2026): die kleine Ergebnis-Uebersicht unter der Deck-Wahl. */
+.mc-uebersicht { padding-top: 10px; padding-bottom: 10px; }
+.mc-uebersicht-kopf {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--mc-text-muted); margin-bottom: 6px;
+}
+.mc-uebersicht-leer { margin: 0; font-size: 0.85rem; color: var(--mc-text-muted); }
+.mc-uebersicht-kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.mc-uebersicht-kachel {
+  display: flex; flex-direction: column; gap: 1px; padding: 8px 12px;
+  border: 1px solid var(--mc-border); border-top: 3px solid var(--mc-border);
+  border-radius: 10px; background: var(--surface-1);
+}
+.mc-uebersicht-kachel.is-pos { border-top-color: var(--color-success); }
+.mc-uebersicht-kachel.is-neg { border-top-color: var(--color-danger); }
+.mc-uebersicht-label { font-size: 0.75rem; font-weight: 600; color: var(--mc-text-heading); }
+.mc-uebersicht-wert {
+  font-size: 1.5rem; font-weight: 800; line-height: 1.15;
+  color: var(--mc-text-heading); font-variant-numeric: tabular-nums;
+}
+.mc-uebersicht-kontext { font-size: 0.72rem; color: var(--mc-text-muted); }
+.mc-uebersicht-wert.mc-day2-pct { font-size: 1.5rem; line-height: 1.15; margin: 0; }

@@ -1,0 +1,72 @@
++    const f = tor();|
++    assert.equal(f(karte(200, 100, -60, 100, 3), 2), null);|
++  });|
++|
++  it('(v) DETERMINISMUS: gleiche Eingabe, gleiches p', () => {|
++    const f = tor();|
++    const a = f(karte(200, 100, 25, 100, 1), 2);|
++    const b = f(karte(200, 100, 25, 100, 1), 2);|
++    assert.ok(a && b);|
++    assert.equal(a.p_value, b.p_value);|
++    assert.equal(a.placement_gap, b.placement_gap);|
++  });|
++|
++  it('zu kleine Gruppe (< MIN_GROUP) wird nie gezeigt', () => {|
++    const f = tor();|
++    const k = karte(40, SCHWELLEN.MIN_GROUP - 1, 300, 20, 4);|
++    assert.equal(f(k, 2), null);|
+   });|
+@@ -378,17 +291,12 @@ describe('das Tor wirkt in der richtigen Richtung — von Hand gerechnet', () =>|
+ |
+-describe('der Quelltext gibt die Herkunft der Zahl ehrlich an', () => {|
++describe('der Quelltext gibt die Herkunft der Zahlen ehrlich an', () => {|
++|
++  it('ALPHA ist als KONVENTION gekennzeichnet, nicht als belegt', () => {|
++    assert.ok(/ALT_SUGGESTION_ALPHA\s*=\s*[0-9.]+;\s*\/\/\s*KONVENTION/.test(KONS),|
++      'ALPHA steht ohne den Hinweis, dass es eine Konvention ist');|
++    assert.ok(/Permutationstest/.test(KONS) && /NICHT GEPRUEFT/.test(KONS),|
++      'der Kopf nennt Verfahren oder Grenzen nicht mehr');|
++  });|
+ |
+-  it('die 50 ist als gegriffen gekennzeichnet, nicht als belegt', () => {|
+-    /* Der alte Kommentar berief sich auf einen "Turin sweep", den es im|
+-       Repo nicht gibt. Wer den Beleg nachtraegt, darf diese Zusicherung|
+-       aendern — wer den Hinweis nur loescht, faellt hier auf. */|
+-    assert.ok(/GEGRIFFEN/.test(KONS),|
+-      'der Quelltext kennzeichnet ALT_SUGGESTION_MIN_GAP nicht mehr als gegriffen');|
+-    /* Die Turin-Begruendung DARF im Quelltext stehen bleiben — sie ist|
+-       die Geschichte der Zahl. Sie darf nur nicht als Beleg dastehen.|
+-       Geprueft wird deshalb nicht ihre Abwesenheit, sondern dass der|
+-       Widerruf unmittelbar dabeisteht. */|
+-    /* Auf "Turin sweep" verankert, nicht auf "Turin": das Turnier|
+-       Turin steht in dieser Datei an sechs weiteren, harmlosen|
+-       Stellen (Feldgroessen, Turnier-Kennungen). */|
++  it('die alte Turin-Begruendung steht nur noch mit ihrem Widerruf da', () => {|
+     const turin = KONS.indexOf('Turin sweep');|
+@@ -403,4 +311,3 @@ describe('der Quelltext gibt die Herkunft der Zahl ehrlich an', () => {|
+     assert.ok(KONS.includes('tests/unit/test-alt-vorschlag-schwelle.js'),|
+-      'der Kommentar verweist nicht auf die Datei, die seine Zahlen misst — '|
+-      + 'dann ist die Messung beim naechsten Leser wieder verloren');|
++      'der Kommentar verweist nicht auf die Datei, die seine Zahlen misst');|
+   });|
+diff --git a/tests/unit/test-eigene-decks-vorschlaege.js b/tests/unit/test-eigene-decks-vorschlaege.js|
+index eb980dcd..f88effb1 100644|
+--- a/tests/unit/test-eigene-decks-vorschlaege.js|
++++ b/tests/unit/test-eigene-decks-vorschlaege.js|
+@@ -7,2 +7,6 @@|
+  *|
++ * UI-71 (03.10.2026): das Panel heisst "Weitere Decks im erwarteten Meta" und|
++ * bietet NUR Decks an, die oben nicht schon einzeln im Meta stehen und in keiner|
++ * anderen Zeile eingetragen sind.|
++ *|
+  * Dieser Test FUEHRT die Funktionen aus (Kommentare vorher herausgeschnitten).|
+@@ -32,4 +36,4 @@ function umgebung(elemente, vorschlaege, gewaehlt) {|
+     .map(funktion).join('\n') + '\nreturn { zeige: _zeigeCustomVorschlaege, waehle: _waehleCustomAus, taste: _customTaste };';|
+-  return new Function('document', '_myDeckVorschlaege', '_onCustomDeckName', 'esc', 'setTimeout', '_versteckeCustomVorschlaege', body)(|
+-    doc, vorschlaege, (i, n) => gewaehlt.push([i, n]), (s) => String(s), (f) => f(), () => {});|
++  return new Function('document', '_customVorschlaege', '_onCustomDeckName', 'esc', 'setTimeout', '_versteckeCustomVorschlaege', '_vorschlaegeEinpassen', body)(|
++    doc, vorschlaege, (i, n) => gewaehlt.push([i, n]), (s) => String(s), (f) => f(), () => {}, () => {});|
+ }|
+@@ -41,3 +45,3 @@ function feld() {|
+ |
+-describe('Panel "Eigene Decks"', () => {|

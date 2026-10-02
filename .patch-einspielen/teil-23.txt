@@ -1,0 +1,33 @@
+-    'test-alt-vorschlag-schwelle.js':    'Befund 10.09.2026: ALT_SUGGESTION_MIN_GAP = 50 in js/deck-builder-consistency.js berief sich auf einen "Turin sweep", den es im Repo nicht gibt — die Zahl ist gegriffen. STEHT HIER FREIWILLIG UND IST DER HEIKELSTE EINTRAG DIESES REGISTERS: die Datei liest data/tournament_decklists_per_player.csv, baut damit alle 58 baubaren Archetypen durch und misst, was die Schwelle tut. Das sind LEBENDE Daten, die jeder Scraperlauf verschiebt. Deshalb behauptet keine Zusicherung einen Wert, sondern nur VORHANDENSEIN mit weitem Band: dass das Tor ueberhaupt erreicht wird (gemessen 37 Kandidaten), dass es etwas durchlaesst (10) und dass es etwas unterdrueckt (27). Faellt eine der drei auf null, ist die Schwelle entweder tot oder ein Totalfilter — beides gehoert angeschaut, und dann MUSS der Test rot werden. Die vierte, urspruenglich als ">= 2 Plaetze Abstand zur Kante" geschriebene Zusicherung wurde bewusst auf "> 0" geweitet: ein enges Band waere genau die Bauart, an der der Deploy schon zweimal haengengeblieben ist. Verlangt wird jetzt nur noch, dass die 50 nicht EXAKT auf einem gemessenen Abstand sitzt (Sicherheitsabstand am 10.09.2026: 8 nach unten, 14 nach oben). Die Richtungspruefungen des Tors laufen datenfrei an einem von Hand gerechneten Listensatz und lesen die Schwelle aus dem Modul, statt sie abzuschreiben. SIEBEN Ungleichungen, die der Zaehler unten nicht sieht, alle von dieser Bauart; die Obergrenze wird dafuer nicht erhoeht.',|
++    'test-alt-vorschlag-schwelle.js':    'DA-31 (03.10.2026): die feste Schwelle ALT_SUGGESTION_MIN_GAP = 50 in js/deck-builder-consistency.js (ihr Beleg, ein "Turin sweep", ist im Repo nicht auffindbar) ist durch einen Permutationstest mit ALPHA = 0,001 (Konvention) ersetzt. STEHT HIER FREIWILLIG: die Datei liest data/tournament_decklists_per_player.csv, baut alle baubaren Archetypen durch und MELDET, was das Tor tut — als BEOBACHTUNG auf stderr, nicht als Sperre, denn wie viele Vorschlaege entstehen, haengt von der Datenlage der Woche ab (heute 0, und das ist bei Rauschen die richtige Antwort). Die Messung an den echten Daten behauptet keinen Wert; nur die Zaehler muessen aufgehen. Blockierend sind die datenfreien, seed-festen Zusicherungen: Rauschen zeigt kaum Vorschlaege, ein grosser Effekt wird gezeigt, eine kleine Stichprobe nie, die Richtung, der Determinismus. SIEBEN Ungleichungen, die der Zaehler unten nicht sieht, alle von dieser Bauart; die Obergrenze wird dafuer nicht erhoeht.',|
+     'test-testdaten-wachhund.js':        'dieser Wachhund selbst',|
+diff --git a/tests/unit/test-ui70-mobile-deckkarte.js b/tests/unit/test-ui70-mobile-deckkarte.js|
+new file mode 100644|
+index 00000000..58f38574|
+--- /dev/null|
++++ b/tests/unit/test-ui70-mobile-deckkarte.js|
+@@ -0,0 +1,78 @@|
++/**|
++ * UI-70 — DIE DECKKARTE AUF DEM HANDY (03.10.2026).|
++ *|
++ * BEFUND (Playwright, 390x844, erste 10 Zeilen): die Deckzelle behielt auf dem|
++ * Handy `width: 24%` aus der Desktop-Regel (77 px, davon 40 px Innenabstand), der|
++ * Name bekam 39-96 px und brach in 7 von 10 Zeilen um, der „Details" -Knopf lief|
++ * ueber den Namen, es gab zwei „Details"-Knoepfe, und vier von sieben Kachel-|
++ * Beschriftungen wurden abgeschnitten. Nach der Aenderung: 0 von 10 Namen|
++ * brechen um (360 px: 1 von 10), kein Ueberlappen, 0 von 7 abgeschnitten;|
++ * Desktop 701/1280 px pixelgleich zur Basis.|
++ *|
++ * WAS DIESER TEST PRUEFT — UND WAS NICHT: er liest den Quelltext von|
++ * css/meta-call.css und verlangt, dass die fuenf Regeln im Block|
++ * `@media (max-width: 700px)` stehen. Das Layout selbst (Ueberlappung, Umbruch)|
++ * laesst sich in node nicht messen; es wurde mit Playwright gemessen und muss|
++ * bei Aenderungen dort neu gemessen werden. NICHT GEPRUEFT: echtes iPhone.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++|
++const CSS = fs.readFileSync(path.join(__dirname, '..', '..', 'css', 'meta-call.css'), 'utf8')|

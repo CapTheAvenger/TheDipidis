@@ -41,13 +41,13 @@
 - * Dazu eine vierte, datenfreie Zusicherung: dass das Tor an einem von|
 - * Hand gerechneten Fall in der richtigen RICHTUNG wirkt — knapp|
 - * darunter still, knapp darueber laut. Sie liest die Schwelle aus dem|
-- * Modul, statt sie abzuschreiben, und bleibt deshalb gültig, wenn|
+- * Modul, statt sie abzuschreiben, und bleibt deshalb gueltig, wenn|
 - * jemand die 50 begruendet aendert.|
 - *|
 - * NICHT GEPRUEFT: ob die 50 die RICHTIGE Zahl ist. Das waere eine|
-- * Aussage darüber, ob die Mehrheit der Tag-2-Listen tatsächlich besser|
-- * platziert — sie bräuchte Turniere, die es noch nicht gibt, und einen|
-- * Abruf, den dieser Sandkasten nicht hätte.|
+- * Aussage darueber, ob die Mehrheit der Tag-2-Listen tatsaechlich besser|
+- * platziert — sie braeuchte Turniere, die es noch nicht gibt, und einen|
+- * Abruf, den dieser Sandkasten nicht hat.|
 + * NICHT GEPRUEFT: ob eine Kartenzahl KAUSAL besser platziert oder nur eine Variante|
 + * anzeigt; die Laufzeit im Browser.|
   */|

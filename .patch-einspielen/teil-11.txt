@@ -1,0 +1,39 @@
+     'mc.frozenShareTotals':     '{archetypes} archetypes · {players} Day-1 players · {n} tournaments.',|
+@@ -1397,6 +1397,6 @@ const translations = {|
+     'mc.postSeite':               'Posts page',|
+-    'mc.postSeiteHint':           'Hand this Meta Call over to the posts page: field, your deck, expected encounters and recommendations ¤u2014 one image each, or all of them as a carousel.',|
++    'mc.postSeiteHint':           'Hand this Meta Call over to the posts page: meta, your deck, expected encounters and recommendations ¤u2014 one image each, or all of them as a carousel.',|
+     'mc.postSeiteFehler':         'The handover failed.',|
+     'mc.postSeiteHand':           'Meta Call handed over. Open the posts page manually:',|
+-    'mc.generateImageHint':       'The image shows the field from the table above — top 10 by expected share. To change a number, type it into “Your estimate” in that table; the difference goes to Others.',|
++    'mc.generateImageHint':       'The image shows the meta from the table above — top 10 by expected share. To change a number, type it into “Your estimate” in that table; the difference goes to Others.',|
+     'mc.generateImageEmpty':      'No prediction yet — nothing to draw.',|
+@@ -1413,3 +1413,3 @@ const translations = {|
+     'mc.predictTitleTopFinish': '1st / 2nd place chance',|
+-    'mc.shareFieldAndRecs':     'Share Field + Recommendations image',|
++    'mc.shareFieldAndRecs':     'Share Meta + Recommendations image',|
+     'mc.labelJunkPlayers':      'Others Players',|
+@@ -1417,3 +1417,3 @@ const translations = {|
+     'mc.junkDecks':             'Others',|
+-    'mc.panelField':            'Field Composition',|
++    'mc.panelField':            'Meta Composition',|
+     'mc.variants':              'Variants',|
+@@ -1424,3 +1424,3 @@ const translations = {|
+     'mc.headerOnline':          'Forecast %',|
+-    'mc.headerOnlineTooltip':   'What the model expects this deck to make up of the field. NOT the raw online share — that number is in the detail row below (labelled "Online share (N days)" while the recent-window applies, otherwise "Online share today"). The two differ by design: the model weights the raw share with tournament conversion, trend and format.',|
++    'mc.headerOnlineTooltip':   'What the model expects this deck to make up of the meta. NOT the raw online share — that number is in the detail row below (labelled "Online share (N days)" while the recent-window applies, otherwise "Online share today"). The two differ by design: the model weights the raw share with tournament conversion, trend and format.',|
+     'mc.headerPersonal':        'My Estimate',|
+@@ -1478,6 +1478,6 @@ const translations = {|
+     'mc.wrNennerTitel':         'The number after the win rate is the matches it rests on — online matches plus the major matches that were blended in. 13 % out of 737 matches and 73 % out of 9 are not the same statement.',|
+-    'mc.customDecksTitle':      'Custom Decks',|
+-    'mc.customDecksHint':       'Add up to {max} decks you expect more of at your event than the online data suggests. Their share is taken from Others.',|
++    'mc.customDecksTitle':      'More decks in the expected meta',|
++    'mc.customDecksHint':       'Add up to {max} more decks you expect at your event on top of the meta above. Their share is taken from "Others".',|
+     'mc.customDecksMaxed':      'Limit reached ({n} of {n}).',|
+-    'mc.addCustomDeck':         'Add Custom Deck',|
++    'mc.addCustomDeck':         'Add deck',|
+     'mc.customDeckNamePh':      'Deck name…',|
+@@ -1567,3 +1567,3 @@ const translations = {|
+     'tg.loadedIntoMetaCall':    'Loaded into Meta Call.',|
+-    'tg.loadedIntoMetaCallSummary': 'Loaded into Meta Call:\n• {personal} personal shares\n• {custom} custom decks\n• {wr} win-rate overrides\n\nIf 0 personal shares were loaded, the deck names in this group likely don\'t match the current Limitless names yet.',|
++    'tg.loadedIntoMetaCallSummary': 'Loaded into Meta Call:\n• {personal} personal shares\n• {custom} additional decks\n• {wr} win-rate overrides\n\nIf 0 personal shares were loaded, the deck names in this group likely don\'t match the current Limitless names yet.',|

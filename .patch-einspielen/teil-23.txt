@@ -12,7 +12,7 @@ index 00000000..58f38574|
 + *|
 + * BEFUND (Playwright, 390x844, erste 10 Zeilen): die Deckzelle behielt auf dem|
 + * Handy `width: 24%` aus der Desktop-Regel (77 px, davon 40 px Innenabstand), der|
-+ * Name bekam 39-96 px und brach in 7 von 10 Zeilen um, der „Details" -Knopf lief|
++ * Name bekam 39-96 px und brach in 7 von 10 Zeilen um, der „Details"-Knopf lief|
 + * ueber den Namen, es gab zwei „Details"-Knoepfe, und vier von sieben Kachel-|
 + * Beschriftungen wurden abgeschnitten. Nach der Aenderung: 0 von 10 Namen|
 + * brechen um (360 px: 1 von 10), kein Ueberlappen, 0 von 7 abgeschnitten;|

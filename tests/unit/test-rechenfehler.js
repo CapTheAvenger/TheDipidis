@@ -572,10 +572,11 @@ describe('Begegnungen: dieselbe Verteilung wie die Day-2-Kette daneben', () => {
         assert.equal(Math.round(poisson(1, 3.6) * 1000) / 10, 9.8);
     });
 
-    it('die Begegnungsliste ruft binomialP, nicht mehr poissonP', () => {
-        const zeile = schnitt(MC, "      const pRunde =", "binomialP(2, _settings.rounds, pRunde) * 100;", 'Zeile');
-        assert.ok(zeile.includes('binomialP(1,') && zeile.includes('binomialP(2,'));
-        assert.ok(!zeile.includes('poissonP'));
+    it('die Begegnungsliste ist entfernt — und mit ihr jeder poissonP-Aufruf', () => {
+        /* UI-62 (02.10.2026): Hausi hat die Liste „Erwartete Begegnungen"
+           gestrichen (ohne Mehrwert). Die Sperre gegen poissonP bleibt. */
+        assert.ok(!MC.includes('poissonP('), 'poissonP ist zurueck');
+        assert.ok(!MC.includes('mc-encounter-row'), 'die Begegnungsliste ist zurueck');
     });
 
     it('und die Ueberschrift nennt die Verteilung, die gerechnet wird', () => {

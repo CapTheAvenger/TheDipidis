@@ -104,7 +104,7 @@ describe('Befund 2 — "Day 2" nur, wo es einen zweiten Tag gibt', () => {
         assert.match(rumpf, /cup/, '_zielKurz kennt den Cup nicht mehr');
         assert.match(rumpf, /challenge/, '_zielKurz kennt die Challenge nicht mehr');
 
-        for (const stelle of ['mc.histZielLabel', 'mc.recHintZiel',
+        for (const stelle of ['mc.recHintZiel',
                               'mc.recBadgeZielCount']) {
             assert.ok(MC.includes(stelle),
                 `${stelle} wird nicht mehr benutzt — dann steht dort wieder `

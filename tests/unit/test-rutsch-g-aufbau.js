@@ -22,73 +22,118 @@ function renderAllRumpf(src) {
     const b = src.indexOf('function _inFrozenPastMode()', a);
     return src.slice(a, b);
 }
+/* UI-62 (02.10.2026): zwei Schritte statt vier; Ergebnis, Day-2 und Bilanz
+   stehen als Kacheln direkt unter der Deck-Wahl, die Tabelle „Alle Paarungen",
+   das Histogramm und die Begegnungsliste sind entfernt. */
 function reihenfolge(rumpf) {
-    const marken = ['_renderCombinedConfigPanel(', 'renderSettingsPanel()', 'renderMyDeckPanel()',
-        'renderUebersichtPanel(field)', 'renderFieldPanel(field)', 'renderDeckGegenMetaPanel(field)',
-        'renderResultsPanel(field)'];
+    const marken = ['_mcSchritt(1,', '_renderCombinedConfigPanel(', 'renderSettingsPanel(', 'renderMyDeckPanel()',
+        'renderDeckGegenMetaPanel(field)', '_mcSchritt(2,', 'renderFieldPanel(field)',
+        'renderRecommendationsPanel(field)', 'renderBildZeile()'];
     return marken.map(m => rumpf.indexOf(m));
 }
 
-describe('UI-60: Reihenfolge', () => {
-    it('Turnier -> Deck -> Uebersicht -> Meta-Tabelle -> Detail', () => {
+describe('UI-60/62: Reihenfolge', () => {
+    it('Turnier -> Deck -> Ergebnis-Kacheln -> Meta-Tabelle -> Empfehlungen -> Bild', () => {
         const p = reihenfolge(renderAllRumpf(QUELLE));
         assert.ok(p.every(i => i > 0), 'jede Marke steht in renderAll: ' + p);
         for (let i = 1; i < p.length; i++) assert.ok(p[i - 1] < p[i], 'Marke ' + i + ' folgt auf ' + (i - 1) + ': ' + p);
     });
     it('VERFAELSCHUNG: steht die Deck-Wahl wieder unter der Tabelle, schlaegt die Pruefung an', () => {
         const kaputt = QUELLE.replace('${_inFrozenPastMode() ? \'\' : renderMyDeckPanel()}\n', '')
-            .replace('${_inFrozenPastMode() ? \'\' : renderResultsPanel(field)}',
-                '${_inFrozenPastMode() ? \'\' : renderMyDeckPanel()}\n  ${_inFrozenPastMode() ? \'\' : renderResultsPanel(field)}');
+            .replace('${_inFrozenPastMode() ? \'\' : renderFieldPanel(field)}',
+                '${_inFrozenPastMode() ? \'\' : renderFieldPanel(field)}\n  ${_inFrozenPastMode() ? \'\' : renderMyDeckPanel()}');
         const p = reihenfolge(renderAllRumpf(kaputt));
         const ok = p.every(i => i > 0) && p.every((x, i) => i === 0 || p[i - 1] < x);
         assert.equal(ok, false);
     });
-    it('refreshResults zeichnet die Uebersicht mit (sonst steht sie auf dem Feld von vorhin)', () => {
+    it('die entfernten Bloecke sind weg: Ergebnis-Karte, Histogramm, Begegnungsliste, Einzeltabelle', () => {
+        for (const weg of ['function renderResultsPanel(', 'function renderUebersichtPanel(', 'mc-histogram-wrap',
+            'mc-encounter-row', 'Alle Paarungen einzeln']) {
+            assert.ok(!QUELLE.includes(weg), weg + ' ist wieder da');
+        }
+    });
+    it('refreshResults zeichnet die Kacheln mit (sonst stehen sie auf dem Feld von vorhin)', () => {
         const a = QUELLE.indexOf('function refreshResults()');
         const b = QUELLE.indexOf('// ── Share Images', a);
-        assert.match(QUELLE.slice(a, b), /renderUebersichtPanel\(field\)/);
+        assert.match(QUELLE.slice(a, b), /renderDeckGegenMetaPanel\(field\)/);
     });
-    it('im eingefrorenen Vergangenheits-Meta bleibt die Uebersicht aus', () => {
-        const ctx = baue(MC, ['function renderUebersichtPanel('], {
+    it('im eingefrorenen Vergangenheits-Meta bleibt der Block aus', () => {
+        const ctx = baue(MC, ['function renderDeckGegenMetaPanel('], {
             _inFrozenPastMode: () => true, _settings: {}, esc, t: (k) => k });
-        assert.equal(ctx.renderUebersichtPanel([]), '');
+        assert.equal(ctx.renderDeckGegenMetaPanel([]), '');
+    });
+    it('die Schritt-Titel stimmen mit der Zahl der Schritte ueberein (kein verschobener Index)', () => {
+        const ctx = baue(MC, ['function _mcSchritte('], { _mcIstDeutsch: () => true });
+        const titel = ctx._mcSchritte().map(x => x.t);
+        assert.equal(JSON.stringify(titel), JSON.stringify(['Turnier und Deck', 'Das Meta und deine Chancen']));
+        const rumpf = renderAllRumpf(QUELLE);
+        const benutzt = [...rumpf.matchAll(/_SCHRITTE\[(\d+)\]/g)].map(m => Number(m[1]));
+        assert.ok(benutzt.length && benutzt.every(i => i < titel.length), 'Index hinter dem Ende: ' + benutzt);
+    });
+    it('VERFAELSCHUNG: ein dritter Index waere hinter dem Ende', () => {
+        const kaputt = renderAllRumpf(QUELLE).replace('_SCHRITTE[1]', '_SCHRITTE[2]');
+        const benutzt = [...kaputt.matchAll(/_SCHRITTE\[(\d+)\]/g)].map(m => Number(m[1]));
+        assert.ok(!benutzt.every(i => i < 2));
     });
 });
 
+const ABHAENGIG = ['function renderDeckGegenMetaPanel('];
 function uebersicht(o) {
-    return baue(MC, ['function renderUebersichtPanel('], Object.assign({
+    return baue(MC, ABHAENGIG, Object.assign({
         _inFrozenPastMode: () => false, _evL: (d) => d, _evQuotenName: () => 'Siegquote',
         _mcNum: (n, k) => n.toFixed(k).replace('.', ','), _mcPz: () => ' %',
-        _predictTitleKey: () => 'mc.day2Chance', esc, t: (k) => k,
+        _predictTitleKey: () => 'mc.day2Chance', esc, t: (k) => k, zahlLokal: (n) => String(n),
         _settings: { myDeck: 'Dragapult', day2Points: 18, rounds: 9 },
-        _evRechne: () => ({ ev: 53.4 }),
-        calcDay2: () => ({ day2Prob: 0.41 }),
+        _evRechne: () => ({ ev: 53.4, unten: 49, oben: 58, sd: 2, partien: 400, abdeckung: 80, gegner: 12,
+            eigene: 0, ohneBand: 0, zeilen: [] }),
+        calcDay2: () => ({ day2Prob: 0.41, expWin: 5.1, expLoss: 3.4, expTie: 0.5 }),
+        _evUmfang: 'alle', _evEinzel: '', _evKandidaten: () => [], normalize: (x) => x, EV_TOP_N: 8,
+        _evVorbereitungHtml: () => '', _mcIconHtml: () => '', _evUmfangZeile: () => '',
+        _evAbgrenzungDe: () => '', _evAbgrenzungEn: () => '',
+        _day2RechnungsZeile: () => 'RECHNUNG', _day2RahmenZeile: () => 'RAHMEN',
+        _unentschiedenQuote: () => ({ gemessen: false, quote: 0.02 }),
     }, o || {}));
 }
-describe('UI-60: Uebersicht', () => {
+describe('UI-60/62: Ergebnis-Kacheln', () => {
     it('ohne Deck: eine Aufforderung, keine Zahl', () => {
-        const h = uebersicht({ _settings: { myDeck: '' } }).renderUebersichtPanel([]);
+        const h = uebersicht({ _settings: { myDeck: '' } }).renderDeckGegenMetaPanel([]);
         assert.match(h, /mc-uebersicht-leer/);
-        assert.ok(!/mc-uebersicht-wert/.test(h));
+        assert.ok(!/mc-ev-wert/.test(h));
     });
-    it('mit Deck: Quote und Day-2-Chance kommen aus _evRechne / calcDay2', () => {
-        const h = uebersicht().renderUebersichtPanel([]);
+    it('mit Deck: Quote, Day-2 (gefaerbt) und Bilanz in der Reihenfolge Siege-Niederlagen-Unentschieden', () => {
+        const h = uebersicht().renderDeckGegenMetaPanel([]);
         assert.match(h, /53,4/);
         assert.match(h, /41,0/);
         assert.match(h, /pct-mid/);
         assert.match(h, /ab 18 Punkten nach 9 Runden/);
+        const bil = h.match(/mc-ev-bilanz">([\s\S]*?)<\/span>\s*<span class="mc-ev-kontext"/)[1]
+            .replace(/<[^>]+>/g, '');
+        assert.equal(bil, '5,1–3,4–0,5', 'S–N–U, nicht S–U–N');
     });
-    it('VERFAELSCHUNG: aendert sich die Rechnung, aendert sich die Zahl', () => {
-        const h = uebersicht({ _evRechne: () => ({ ev: 61.2 }), calcDay2: () => ({ day2Prob: 0.7 }) })
-            .renderUebersichtPanel([]);
-        assert.match(h, /61,2/);
+    it('VERFAELSCHUNG: aendert sich die Rechnung, aendert sich die Zahl; vertauschte Bilanz faellt auf', () => {
+        const h = uebersicht({ calcDay2: () => ({ day2Prob: 0.7, expWin: 7, expLoss: 1, expTie: 1 }) })
+            .renderDeckGegenMetaPanel([]);
         assert.match(h, /70,0/);
-        assert.ok(!/53,4/.test(h));
+        assert.ok(!/41,0/.test(h));
+        // Vertauschte Bilanz im Quelltext muss auffallen:
+        const reihe = /mc-ev-bilanz">[\s\S]*?expWin[\s\S]*?expLoss[\s\S]*?expTie/;
+        assert.ok(reihe.test(QUELLE));
+        const kaputt = QUELLE.replace('${_mcNum(d2.expLoss, 1)}</span>–<span style="color:#f39c12">${_mcNum(d2.expTie, 1)}',
+            '${_mcNum(d2.expTie, 1)}</span>–<span style="color:#f39c12">${_mcNum(d2.expLoss, 1)}');
+        assert.notEqual(kaputt, QUELLE, 'die Mutation hat nichts geaendert');
+        assert.ok(/mc-ev-bilanz[\s\S]*?d2\.expTie[\s\S]*?d2\.expLoss/.test(kaputt));
     });
-    it('ohne gemessene Paarung: Gedankenstrich statt erfundener Quote', () => {
-        const h = uebersicht({ _evRechne: () => null }).renderUebersichtPanel([]);
-        assert.match(h, /—/);
-        assert.match(h, /keine gemessene Paarung/);
+    it('keine Erklaersaetze mehr: Lead und Einzeltabelle sind weg, der Rechenweg ist zugeklappt', () => {
+        const h = uebersicht().renderDeckGegenMetaPanel([]);
+        assert.ok(!/mc-ev-lead/.test(h));
+        assert.ok(!/mc-ev-tabelle/.test(h));
+        assert.match(h, /<details class="mc-klappe">[\s\S]*Rechenweg/);
+        assert.ok(!/<details class="mc-klappe" open/.test(h));
+    });
+    it('ohne gemessene Paarung: Aussage statt erfundener Quote', () => {
+        const h = uebersicht({ _evRechne: () => null }).renderDeckGegenMetaPanel([]);
+        assert.match(h, /keine? gemessene Paarung|gemessene Paarung vor/);
+        assert.ok(!/mc-ev-wert/.test(h));
     });
 });
 
@@ -103,23 +148,33 @@ function einstellungen(typ) {
 }
 describe('UI-61: kompakte Turniereinstellungen', () => {
     it('keine Absatz-Hinweise mehr; Beschreibung liegt hinter dem ⓘ', () => {
-        const h = einstellungen('cup').renderSettingsPanel();
+        const h = einstellungen('cup').renderSettingsPanel(true);
         assert.ok(!/mc-tt-hint/.test(h), 'kein mc-tt-hint-Absatz');
         assert.match(h, /mc-typ-info[^>]*title="desc\.cup/);
         assert.match(h, /mc-einzeilig/);
         assert.ok(!/mc-bild-hinweis/.test(h));
     });
     it('alle Felder bleiben: Spieler, Runden, Punkte, Name, Top-Cut beim Cup, Bild-Knoepfe', () => {
-        const h = einstellungen('cup').renderSettingsPanel();
+        const h = einstellungen('cup').renderSettingsPanel(false);
         for (const id of ['mc-players', 'mc-rounds', 'mc-day2pts', 'mc-turniername', 'mc-topcut', 'mc-grenzen-hinweis'])
             assert.ok(h.includes('id="' + id + '"'), id);
-        assert.match(h, /generateTournamentImage/);
-        assert.match(h, /postSeiteOeffnen/);
-        assert.equal((h.match(/class="mc-tt-tab(?: mc-tt-tab-active)?"/g) || []).length, 3);
+        assert.ok(!/generateTournamentImage|postSeiteOeffnen/.test(h), 'Bild-Knoepfe stehen jetzt unten');
+        assert.ok(!/mc-tt-tab/.test(h), 'die Pillen stehen in der Leiste, nicht hier');
+        assert.equal((einstellungen('cup').renderSettingsPanel(true).match(/class="mc-tt-tab(?: mc-tt-tab-active)?"/g) || []).length, 3);
+    });
+    it('Turnierart-Pillen stehen in der Leiste, Bild-Knoepfe ganz unten', () => {
+        const leiste = QUELLE.slice(QUELLE.indexOf('function _renderCombinedConfigPanel('));
+        assert.match(leiste.slice(0, 900), /\$\{_renderTurnierartPillen\(\)\}/);
+        const rumpf = renderAllRumpf(QUELLE);
+        assert.ok(rumpf.indexOf('renderRecommendationsPanel(field)') < rumpf.indexOf('renderBildZeile()'));
     });
     it('Swiss-Rechner nur bei lokalen Turnieren', () => {
-        assert.match(einstellungen('challenge').renderSettingsPanel(), /swisscalc/);
-        assert.ok(!/swisscalc/.test(einstellungen('regional').renderSettingsPanel()));
+        const bild = (typ) => baue(MC, ['function renderBildZeile('], {
+            _settings: { tournamentType: typ }, MAJOR_TYPES: ['regional'], esc, t: (k) => k });
+        assert.match(bild('challenge').renderBildZeile(), /swisscalc/);
+        assert.ok(!/swisscalc/.test(bild('regional').renderBildZeile()));
+        assert.match(bild('cup').renderBildZeile(), /generateTournamentImage/);
+        assert.match(bild('cup').renderBildZeile(), /postSeiteOeffnen/);
     });
     it('Pillen sind oval (999px) und die Regel gilt fuer .mc-tt-tab', () => {
         const m = CSS.match(/\.mc-tt-tab\s*\{[^}]*\}/g) || [];

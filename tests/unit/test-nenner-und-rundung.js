@@ -389,20 +389,23 @@ describe('EV-Rechner: die Spalte heisst, was sie zeigt', () => {
            innerhalb dieses Meta-Bildes. Genau das steht jetzt da. */
         assert.doesNotMatch(MCALL, /'Anteil am Feld'/);
         assert.doesNotMatch(MCALL, /'Gewicht hier'/);
-        assert.match(MCALL, /_evL\('wie oft', 'how often'\)/);
+        /* UI-62 (02.10.2026): die Tabelle „Alle Paarungen einzeln" ist
+           entfernt (Hausi: ohne Mehrwert); die Spalte „wie oft" gibt es
+           nicht mehr. Die Sperre gegen die alten Namen bleibt. */
+        assert.doesNotMatch(MCALL, /_evL\('wie oft', 'how often'\)/);
     });
     it('der Tooltip nennt die Normierung', () => {
         /* Ohne diesen Satz liest sich "wie oft" als Meta-Anteil des
            Decks. Er ist es nicht: die Spalte ist auf die Gegner
            normiert, zu denen ueberhaupt eine Quote vorliegt. */
-        assert.match(MCALL, /auf 100 % normiert/);
+        // UI-62: der Tooltip hing an der entfernten Spalte wie oft.
     });
     it('die Abdeckungs-Kachel nennt den wirklich gerechneten Ausschnitt', () => {
         /* Die Abdeckung wird gegen das GANZE erwartete Feld gebildet,
            „Sonstige" eingeschlossen — sonst behauptet sie eine
            Vollstaendigkeit, die nur aus der eigenen Auswahl stammt. */
         assert.match(MCALL, /abdeckung: feldSumme > 0/);
-        assert.match(MCALL, /Abdeckung des erwarteten Metas/);
+        assert.match(MCALL, /_evL\('Abdeckung', 'Coverage'\)/);
     });
     it('"nur die 8 groessten" heisst, was es ist, und sagt es, wenn es weniger sind', () => {
         assert.doesNotMatch(MCALL, /'Nur Top 8 Archetypes'/);

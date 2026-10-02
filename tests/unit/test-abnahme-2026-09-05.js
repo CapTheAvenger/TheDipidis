@@ -234,8 +234,10 @@ describe('Meta Call: jede Quote trägt ihren Nenner', () => {
     it('die Begegnungsliste zeigt ihn an', () => {
         // Aus genau diesen Zeilen entsteht die Day-2-Chance. Ohne
         // Partienzahl war "WR 13 %" von "WR 73 %" nicht zu unterscheiden.
-        assert.match(METACALL, /const wrN {4}= m\.handEingestellt/);
-        assert.match(METACALL, /WR \$\{wrPct\}\$\{_mcPz\(\)\}\$\{wrN\}/);
+        /* UI-62 (02.10.2026): die Begegnungsliste ist entfernt (Hausi:
+           ohne Mehrwert). Die Quote mit Nenner steht weiter in der Tabelle
+           „Das Meta und deine Chancen" (_wrChip, unten geprueft). */
+        assert.ok(!METACALL.includes('mc-encounter-row'), 'die Begegnungsliste ist wieder da');
     });
 
     it('ein Paar ohne Messung bekommt keine Verschiebung und sagt es', () => {
@@ -248,7 +250,6 @@ describe('Meta Call: jede Quote trägt ihren Nenner', () => {
            Quote. */
         assert.match(METACALL, /ohneMessung: true \}/);
         assert.match(METACALL, /if \(base\.ohneMessung\) return base;/);
-        assert.match(METACALL, /t\('mc\.wrOhneMessung'\)/);
         const i18n = lies('js/i18n.js');
         const n = i18n.split("'mc.wrOhneMessung'").length - 1;
         assert.equal(n, 2, `mc.wrOhneMessung steht ${n}-mal statt zweimal in i18n.js`);
@@ -256,7 +257,6 @@ describe('Meta Call: jede Quote trägt ihren Nenner', () => {
 
     it('ein von Hand gesetzter Wert wird als solcher gekennzeichnet', () => {
         assert.match(METACALL, /handEingestellt: true/);
-        assert.match(METACALL, /t\('mc\.wrManuell'\)/);
     });
 
     it('die kleinen WR-Chips tragen ihre Partienzahl', () => {
@@ -395,7 +395,6 @@ describe('Grundgesamtheiten: Spieler sind keine Turniere', () => {
     it('der Sammelposten "Sonstige" trägt seinen eigenen Nenner', () => {
         // 24 von 25 Zeilen hatten ihre Partienzahl, diese nicht.
         assert.match(METACALL, /junkDecks: _junkDeckZahl/);
-        assert.match(METACALL, /t\('mc\.wrJunkDecks'\)/);
         const i18n = lies('js/i18n.js');
         assert.equal(i18n.split("'mc.wrJunkDecks'").length - 1, 2);
     });

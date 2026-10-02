@@ -417,15 +417,8 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
                               paar.match(/title="([^"]*)"/)[1]);
     });
 
-    it('die Begegnungsliste nennt ihre Konvention — und es ist die andere', () => {
-        /* Auf derselben Seite stehen zwei Zahlen mit dem Etikett "WR":
-           der Chip am Deck (Papier, S/(S+N+U)) und die Zeile in der
-           Begegnungsliste (S/(S+N)). Genau dieses Nebeneinander war der
-           Anlass. */
-        const zeile = MC.match(/class="mc-enc-wr \$\{wrCls\}" title="\$\{esc\(([^]*?)\)\}"/);
-        assert.ok(zeile, 'die Begegnungszeile hat ihren title verloren');
-        assert.match(zeile[1], /_wrKonventionsTitel\('ohneUnentschieden'\)/,
-            'die Begegnungsliste sagt nicht mehr, nach welcher Formel sie rechnet');
+    it('die Begegnungsliste ist entfernt (UI-62) — der Chip bleibt der Ort der Konventions-Hinweise', () => {
+        assert.ok(!MC.includes('mc-enc-wr'), 'die Begegnungszeile ist zurueck');
     });
 
     it('der Predictor-5.3-Hinweis nennt die Konvention beider Seiten', () => {

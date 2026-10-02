@@ -1267,10 +1267,12 @@ window.MetaCall = (function () {
     }
   } catch (_e) { /* localStorage disabled — fall back to defaults */ }
 
-  try {
-    const gemerkt = localStorage.getItem(TOURNAMENT_NAME_KEY);
-    if (gemerkt) _settings.tournamentName = String(gemerkt).slice(0, 60);
-  } catch (_e) { /* privater Modus */ }
+  /* UI-62 (02.10.2026): ein frischer Meta Call beginnt ohne Turniername.
+     Der Name wurde bisher bei jedem Tippen gemerkt und beim naechsten
+     Besuch eingesetzt — Hausi sah so „Frankfurt" in einem leeren Feld.
+     Der Name gehoert zum Szenario (dort steht er in settings), nicht zum
+     Browser. Der alte Merkzettel wird einmal weggeraeumt. */
+  try { localStorage.removeItem(TOURNAMENT_NAME_KEY); } catch (_e) { /* privater Modus */ }
 
   // Whether the user has explicitly typed into the Players input.
   // Calculations always use _settings.totalPlayers (default 2000), but
@@ -10662,7 +10664,7 @@ window.MetaCall = (function () {
     return t('mc.recDay2');
   }
 
-  function renderSettingsPanel() {
+  function renderSettingsPanel(mitPillen) {
     const s = _settings;
     const type = TOURNAMENT_TYPES.includes(s.tournamentType) ? s.tournamentType : 'regional';
 
@@ -10682,10 +10684,6 @@ window.MetaCall = (function () {
     const targetHintKey = istMajor
       ? 'mc.targetHintRegional'
       : (type === 'cup' ? 'mc.targetHintCup' : 'mc.targetHintChallenge');
-
-    const swissLink = istMajor
-      ? ''
-      : `<a class="mc-tt-swisscalc" href="https://limitlesstcg.com/tools/swisscalc" target="_blank" rel="noopener">↗ ${esc(t('mc.swissCalcLink'))}</a>`;
 
     const cupTopCutField = type === 'cup'
       ? `<div class="metacall-field-group">
@@ -10711,13 +10709,14 @@ window.MetaCall = (function () {
        (Typbeschreibung, Punkte-Hinweis) liegen hinter dem ⓘ — der
        Warnsatz zu den Grenzen bleibt sichtbar. */
     const infoSatz = t(_typeDescI18nKey(type)) + ' ' + t(targetHintKey);
-    return `
-<div class="metacall-panel mc-turnier-kompakt">
+    const pillen = mitPillen ? `
   <div class="mc-tt-tabs" role="tablist" aria-label="${esc(t('matchupAnalysis.tournamentType'))}">
     ${TOURNAMENT_TYPES.map(tabBtn).join('')}
     <span class="mc-runden-info mc-typ-info" tabindex="0" role="note"
           title="${esc(infoSatz)}" aria-label="${esc(infoSatz)}">ⓘ</span>
-  </div>
+  </div>` : '';
+    return `
+<div class="metacall-panel mc-turnier-kompakt">${pillen}
   <div class="metacall-settings-grid mc-einzeilig">
     <div class="metacall-field-group">
       <label for="mc-players">${t('mc.labelPlayers')}</label>
@@ -10756,17 +10755,51 @@ window.MetaCall = (function () {
   </div>
   <p class="mc-grenzen-hinweis" id="mc-grenzen-hinweis" role="status" aria-live="polite"
      style="margin:6px 0 0;font-size:0.85rem;font-weight:600;color:var(--tint-warn-ink,#b8860b)" hidden></p>
-  <div class="mc-bild-zeile">
-    <button type="button" class="mc-bild-btn" onclick="MetaCall.generateTournamentImage()"
-            title="${esc(t('mc.generateImageHint'))}">
-      ${esc(t('mc.generateImage'))}
-    </button>
-    <button type="button" class="mc-bild-btn mc-bild-btn-leise" onclick="MetaCall.postSeiteOeffnen()"
-            title="${esc(t('mc.postSeiteHint'))}">
-      ${esc(t('mc.postSeite'))}
-    </button>
-    ${swissLink}
-  </div>
+</div>`;
+  }
+
+  /* UI-62 (02.10.2026): Turnierart als ovale Pillen in der schmalen Leiste,
+     neben dem Meta und vor dem Zahnrad (Hausi: Meta und Turnierart in eine
+     Zeile). Die Typbeschreibung liegt hinter dem ⓘ. */
+  function _renderTurnierartPillen() {
+    const s = _settings;
+    const type = TOURNAMENT_TYPES.includes(s.tournamentType) ? s.tournamentType : 'regional';
+    const istMajor = MAJOR_TYPES.includes(type);
+    const targetHintKey = istMajor
+      ? 'mc.targetHintRegional'
+      : (type === 'cup' ? 'mc.targetHintCup' : 'mc.targetHintChallenge');
+    const infoSatz = t(_typeDescI18nKey(type)) + ' ' + t(targetHintKey);
+    const tabBtn = (key) => {
+      const active = key === type ? ' mc-tt-tab-active' : '';
+      return `<button type="button" class="mc-tt-tab${active}"
+        onclick="MetaCall._setTournamentType('${key}')">${esc(t(_typeLabelI18nKey(key)))}</button>`;
+    };
+    return `
+  <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="${esc(t('matchupAnalysis.tournamentType'))}">
+    ${TOURNAMENT_TYPES.map(tabBtn).join('')}
+    <span class="mc-runden-info mc-typ-info" tabindex="0" role="note"
+          title="${esc(infoSatz)}" aria-label="${esc(infoSatz)}">ⓘ</span>
+  </div>`;
+  }
+
+  /* Bild und Post-Seite stehen ganz unten (UI-62): sie sind das, was man am
+     Ende tut, nicht das, womit man anfaengt. */
+  function renderBildZeile() {
+    const istMajor = MAJOR_TYPES.includes(_settings.tournamentType);
+    const swissLink = istMajor
+      ? ''
+      : `<a class="mc-tt-swisscalc" href="https://limitlesstcg.com/tools/swisscalc" target="_blank" rel="noopener">↗ ${esc(t('mc.swissCalcLink'))}</a>`;
+    return `
+<div class="metacall-panel mc-bild-zeile">
+  <button type="button" class="mc-bild-btn" onclick="MetaCall.generateTournamentImage()"
+          title="${esc(t('mc.generateImageHint'))}">
+    ${esc(t('mc.generateImage'))}
+  </button>
+  <button type="button" class="mc-bild-btn mc-bild-btn-leise" onclick="MetaCall.postSeiteOeffnen()"
+          title="${esc(t('mc.postSeiteHint'))}">
+    ${esc(t('mc.postSeite'))}
+  </button>
+  ${swissLink}
 </div>`;
   }
 
@@ -10853,6 +10886,7 @@ window.MetaCall = (function () {
     return `
 <div class="metacall-panel mc-combo-panel mc-leiste">
   ${source}
+  ${_renderTurnierartPillen()}
   <div class="mc-optionen-wrap${_optionenOffen ? ' offen' : ''}">
     <button type="button" class="mc-zahnrad${_optionenAbweichend() ? ' hat-punkt' : ''}"
             aria-haspopup="true" aria-expanded="${_optionenOffen ? 'true' : 'false'}"
@@ -11253,11 +11287,11 @@ window.MetaCall = (function () {
   }
 
   function _mctZelleBilanz(z, L) {
-    const titel = L('Erwartete Siege – Unentschieden – Niederlagen über ' + _settings.rounds + ' Runden',
-      'Expected wins – ties – losses over ' + _settings.rounds + ' rounds')
+    const titel = L('Erwartete Siege – Niederlagen – Unentschieden über ' + _settings.rounds + ' Runden',
+      'Expected wins – losses – ties over ' + _settings.rounds + ' rounds')
       + ' · ' + _mctQuotenName('mitUnentschieden') + ' ' + _mcPct(z.quote, 1);
     return `<span class="mc-mct-bilanz" title="${esc(titel)}">${_mcNum(z.w, 1)}–${
-      _mcNum(z.u, 1)}–${_mcNum(z.n, 1)}</span>`;
+      _mcNum(z.n, 1)}–${_mcNum(z.u, 1)}</span>`;
   }
 
   function _mctPrognoseZelle(prog, online) {
@@ -11455,8 +11489,8 @@ window.MetaCall = (function () {
       ${th('day2', 'mc-mct-d2', L('Day-2 mit diesem Deck', 'Day 2 with this deck'),
         L('Chance auf ' + _settings.day2Points + ' Punkte in ' + _settings.rounds + ' Runden, wenn DU dieses Deck gegen genau dieses Feld spielst.',
           'Chance of ' + _settings.day2Points + ' points in ' + _settings.rounds + ' rounds if YOU play this deck against exactly this field.'))}
-      ${th('bilanz', 'mc-mct-bil', L('Bilanz S–U–N', 'Record W–T–L'),
-        L('Erwartete Siege – Unentschieden – Niederlagen mit diesem Deck.', 'Expected wins – ties – losses with this deck.'))}
+      ${th('bilanz', 'mc-mct-bil', L('Bilanz S–N–U', 'Record W–L–T'),
+        L('Erwartete Siege – Niederlagen – Unentschieden mit diesem Deck.', 'Expected wins – losses – ties with this deck.'))}
     </tr>`;
   }
 
@@ -11718,18 +11752,15 @@ window.MetaCall = (function () {
      Journalpartien, die er gerade traegt — und wenn es keine gibt, dass
      es keine gibt. Erfundene Zahlen gibt es hier nicht; steht nichts im
      Journal, steht es genau so da. */
-  function _brickFilterStand() {
-    if (!_settings.myDeck) {
-      return '<span class="mc-brick-filter-stand" style="margin-left:8px;font-size:0.8rem;color:var(--ink-2,#667)">wirkt erst, wenn ein Deck gewählt ist</span>';
-    }
+  function _journalFilterTitel() {
+    if (!_settings.myDeck) return 'Wirkt erst, wenn ein Deck gewählt ist.';
     const partien = Object.keys(_journalStats)
       .reduce((n, opp) => n + ((_journalStats[opp] || {}).total || 0), 0);
     const gegner = Object.keys(_journalStats)
       .filter(opp => ((_journalStats[opp] || {}).total || 0) > 0).length;
-    const text = partien > 0
-      ? `wirkt auf ${zahlLokal(partien)} Journalpartie(n) gegen ${zahlLokal(gegner)} Deck(s)`
-      : 'keine Journal-Matches für dieses Deck — der Filter hat nichts zu filtern';
-    return `<span class="mc-brick-filter-stand" style="margin-left:8px;font-size:0.8rem;color:var(--ink-2,#667)">${esc(text)}</span>`;
+    return partien > 0
+      ? 'Wirkt auf ' + zahlLokal(partien) + ' Journalpartie(n) gegen ' + zahlLokal(gegner) + ' Deck(s).'
+      : 'Keine Journal-Matches für dieses Deck.';
   }
 
   /* Gegenstueck fuer das Eingabefeld "Mein Deck". `_onMyDeckInput`
@@ -11738,8 +11769,7 @@ window.MetaCall = (function () {
      sah es bei der Pruefung am 07.09.2026 aus wie ein totes Feld.
      Jetzt sagt die Zeile darunter, ob das Deck angekommen ist. */
   function _myDeckStatusText() {
-    if (!_settings.myDeck) return 'Noch kein Deck gewählt — tippe einen Namen aus der Liste, dann erscheint die Day-2-Kachel darunter.';
-    return `Gewählt: ${esc(_settings.myDeck)} — die Day-2-Chance unten rechnet gegen dieses Deck.`;
+    return '';   // UI-62: erscheint nur noch als Rueckmeldung beim Tippen
   }
 
   /* Der laufende Hinweis waehrend des Tippens: was da steht, ist (noch)
@@ -11773,28 +11803,17 @@ window.MetaCall = (function () {
              onchange="MetaCall._onMyDeckCommit(this)">
       <datalist id="mc-my-deck-options">${options}</datalist>
     </div>
-    <button class="mc-override-toggle" onclick="MetaCall._toggleOverrides()" id="mc-override-btn"
-            title="${esc(_wrEineKonvention(
-              'ohneUnentschieden',
-              _wrKurzform(t('mc.colWrBlended')),
-              _wrKurzform(t('mc.colManualWr'))))}">
-      ${t('mc.adjustWinRates')}
-    </button>
     <div class="mc-brick-filter-wrap">
       <label class="mc-brick-filter-label">${t('mc.journalBricks')}</label>
-      <select class="mc-brick-filter-select" onchange="MetaCall._onBrickFilter(this.value)">
+      <select class="mc-brick-filter-select" onchange="MetaCall._onBrickFilter(this.value)"
+              title="${esc(_journalFilterTitel())}">
         <option value="all" ${!_settings.excludeBricks ? 'selected' : ''}>${t('mc.inclBricks')}</option>
         <option value="exclude" ${_settings.excludeBricks ? 'selected' : ''}>${t('mc.exclBricks')}</option>
       </select>
-      ${_brickFilterStand()}
     </div>
   </div>
   <p class="mc-my-deck-status" id="mc-my-deck-status" role="status" aria-live="polite"
      style="margin:6px 0 0;font-size:0.85rem;color:var(--ink-2,#667)">${_myDeckStatusText()}</p>
-  <div class="mc-override-panel" id="mc-override-panel">
-    ${renderOverrideTable()}
-  </div>
-  <div class="mc-swiss-note">${t('mc.swissNote')}</div>
 </div>`;
   }
 
@@ -11902,219 +11921,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       : `Tournament frame: ${n} ${t('mc.labelPlayers')} — not an input to this chance. It follows from rounds, target points, field shares and matchups.`;
   }
 
-  function renderResultsPanel(field) {
-    if (!_settings.myDeck) {
-      return `
-<div class="metacall-panel">
-  <div class="mc-no-deck-msg">${t('mc.noDeckMsg')}</div>
-</div>`;
-    }
-
-    const { day2Prob, dp, expWin, expTie, expLoss, unentschieden } = calcDay2(field);
-    /* _mcNum, nicht toFixed. Die Runde vom 30.08.2026 hat 36 Stellen auf
-       das deutsche Komma gezogen und diese hier uebersehen: der Block
-       schrieb "16.1 %" ueber "Ties 10,6 %" — zwei Zahlformate in
-       derselben Kachel, gefunden bei der Live-Pruefung am 06.09.2026. */
-    const pct    = _mcNum(day2Prob * 100, 1);
-    const cls    = day2Prob >= 0.6 ? '' : day2Prob >= 0.4 ? ' pct-mid' : ' pct-low';
-    const maxPts = _settings.rounds * 3;
-
-    // Journal influence summary
-    const journalOpps = Object.keys(_journalStats).filter(opp => (_journalStats[opp] || {}).total > 0);
-    const totalJGames = journalOpps.reduce((s, opp) => s + (_journalStats[opp].total || 0), 0);
-    const journalBadge = journalOpps.length > 0 ? `
-<div class="mc-journal-influence">
-  <span class="mc-ji-icon">📓</span>
-  <div>
-    <strong>${t('mc.journalInfluence')}</strong> ${t('mc.journalMatchups').replace('{n}', journalOpps.length).replace('{g}', totalJGames)}
-    <span class="mc-ji-hint"> ${t('mc.journalWeightHint')}</span>
-  </div>
-</div>` : '';
-
-    // Points histogram
-    const maxProb  = Math.max(...dp, 0.001);
-    const histBars = Array.from(dp).map((prob, pts) => {
-      const h   = Math.round((prob / maxProb) * 100);
-      const cls = pts >= _settings.day2Points ? 'above-threshold' : 'below-threshold';
-      const lbl = pts % 3 === 0 ? pts : '';
-      return `<div class="mc-hist-bar-wrap">
-        <div class="mc-hist-bar ${cls}" style="height:${h}%"></div>
-        <div class="mc-hist-label">${lbl}</div>
-      </div>`;
-    }).join('');
-
-    const thresholdPct = _mcNum(_settings.day2Points / maxPts * 100, 1);
-
-    /* Diese Liste zeigt `_anzeigeQuote(m)` = pWin/(pWin+pLoss), also
-       S/(S+N). Das Kuerzel „WR" ist nur zulaessig, solange der Hinweis
-       mit vollem Namen und Formel danebenhaengt (BEFUND W2,
-       08.09.2026) — er haengt jetzt als title UND als data-hinweis
-       dran. Der Nennersatz aus js/i18n.js nannte die Groesse „Win
-       Rate"; dieser Hausname wird durch den Namen ersetzt, den
-       js/win-rate-konvention.js fuer S/(S+N) vergibt. */
-
-    const topDecks = [...field].sort((a, b) => b.finalShare - a.finalShare).slice(0, TOP_N);
-    const maxEnc   = Math.max(...topDecks.map(d => _settings.rounds * d.finalShare / 100), 0.1);
-    const encRows  = topDecks.map(deck => {
-      const lambda = _settings.rounds * deck.finalShare / 100;
-      const m      = getMatchup(_settings.myDeck, deck.name);
-      const wrPct  = Math.round(_anzeigeQuote(m));
-      /* JEDE QUOTE TRAEGT IHREN NENNER (05.09.2026). Aus genau diesen
-         Zeilen entsteht die Day-2-Chance; ohne Partienzahl war "WR 13 %"
-         von "WR 73 %" nicht zu unterscheiden. Handeingestellte Werte
-         bekommen keinen Nenner, sondern werden als solche gekennzeichnet. */
-      const wrN    = m.handEingestellt
-        ? ' · ' + t('mc.wrManuell')
-        : (m.junkDecks > 0
-            ? ' · ' + t('mc.wrJunkDecks').replace('{n}', window.zahlLokal(m.junkDecks))
-            : (m.ohneMessung
-                ? ' · ' + t('mc.wrOhneMessung')
-                : ((m.partien > 0) ? ' · ' + window.zahlLokal(m.partien) : '')));
-      const wrCls  = wrPct >= 55 ? 'favorable' : wrPct <= 45 ? 'unfavorable' : 'even';
-      const barW   = Math.round((lambda / maxEnc) * 100);
-      const name   = deck.name === '_junk' ? t('mc.junkDecks') : deck.name;
-      // Binomial, nicht Poisson — siehe die Notiz bei binomialP().
-      const pRunde = Math.max(0, Math.min(1, deck.finalShare / 100));
-      const p1     = binomialP(1, _settings.rounds, pRunde) * 100;
-      const p2     = binomialP(2, _settings.rounds, pRunde) * 100;
-      const js     = _journalStats[deck.name];
-      const jTag   = js && js.total > 0
-        ? `<span class="mc-enc-journal-tag" title="${t('mc.personalGames').replace('{n}', js.total)}">📓${js.total}</span>`
-        : '';
-      return `<div class="mc-encounter-row">
-        <div>
-          <div class="mc-enc-name" title="${esc(deck.name)}">${esc(name)}${jTag}</div>
-          <div class="mc-enc-wr ${wrCls}" title="${esc(_wrVollname(t('mc.wrNennerTitel'), 'ohneUnentschieden') + ' · ' + _wrKonventionsTitel('ohneUnentschieden'))}" data-hinweis="${esc(_wrKonventionsTitel('ohneUnentschieden'))}">WR ${wrPct}${_mcPz()}${wrN} · P(1×) ${p1.toFixed(0)}${_mcPz()} · P(2×) ${p2.toFixed(0)}${_mcPz()}</div>
-        </div>
-        <div class="mc-enc-bar-bg"><div class="mc-enc-bar-fill" style="width:${barW}%"></div></div>
-        <div class="mc-enc-val">∅ ${_mcNum(lambda, 2)}</div>
-      </div>`;
-    }).join('');
-
-    const day2Sub    = _day2RechnungsZeile();
-    const day2Rahmen = _day2RahmenZeile();
-
-    /* Die Unentschieden-Annahme gehoert unter die Zahl, nicht in den
-       Quelltext. Sie verschiebt das Ergebnis um mehrere Prozentpunkte
-       und war bis zum 06.09.2026 falsch gesetzt — genau die Art
-       Konstante, die niemand nachprueft, solange sie niemand sieht. */
-    const _uq = unentschieden || _unentschiedenQuote();
-    const _uqText = _uq.gemessen
-      ? t('mc.day2Unentschieden')
-          .replace('{q}', _mcNum(_uq.quote * 100, 1) + _mcPz())
-          .replace('{n}', zahlLokal(_uq.partien))
-          .replace('{meta}', esc(_uq.meta))
-      : t('mc.day2UnentschiedenLeer')
-          .replace('{q}', _mcNum(_uq.quote * 100, 1) + _mcPz());
-
-    return `
-<div class="metacall-panel">
-  <div class="metacall-panel-title">
-    ${t('mc.panelResult')}
-    <button class="mc-share-btn" onclick="MetaCall.exportDay2ShareImage()" title="${esc(t('mc.shareDay2'))}">
-      📤 ${t('mc.share')}
-    </button>
-  </div>
-  ${journalBadge}
-  <div class="metacall-results-grid">
-
-    <div class="mc-day2-card">
-      <div class="mc-day2-deck-name">${esc(_settings.myDeck)}</div>
-      <div class="mc-day2-pct${cls}">${pct}${_mcPz()}</div>
-      <div class="mc-day2-label">${t(_predictTitleKey())}</div>
-      <div class="mc-day2-sub">${day2Sub}</div>
-      <div class="mc-day2-sub mc-day2-rahmen">${day2Rahmen}</div>
-      <div class="mc-day2-sub mc-day2-unentschieden">${_uqText}</div>
-      <div class="mc-day2-stats">
-        <div class="mc-day2-stat">
-          <div class="mc-day2-stat-val" style="color:var(--tint-ok-ink)">${_mcNum(expWin, 1)}</div>
-          <div class="mc-day2-stat-lbl">${t('mc.avgWins')}</div>
-        </div>
-        <div class="mc-day2-stat">
-          <div class="mc-day2-stat-val" style="color:#f39c12">${_mcNum(expTie, 1)}</div>
-          <div class="mc-day2-stat-lbl">${t('mc.avgTies')}</div>
-        </div>
-        <div class="mc-day2-stat">
-          <div class="mc-day2-stat-val" style="color:var(--tint-bad-ink)">${_mcNum(expLoss, 1)}</div>
-          <div class="mc-day2-stat-lbl">${t('mc.avgLosses')}</div>
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <div class="mc-histogram-wrap">
-        <div class="mc-histogram-title">${t('mc.histTitle').replace('{r}', _settings.rounds)}</div>
-        <div class="mc-histogram" style="position:relative">
-          ${histBars}
-          <div class="mc-threshold-line" style="left:${thresholdPct}%">
-            <div class="mc-threshold-tag">${t('mc.thresholdTag').replace('{n}', _settings.day2Points)}</div>
-          </div>
-        </div>
-        <div class="mc-histogram-axis">
-          <span>0 ${t('mc.ptsAbbr')}</span>
-          <span style="color:var(--tint-ok-ink)">${t('mc.histZielLabel')
-              .replace('{n}', _settings.day2Points).replace('{ziel}', esc(_zielKurz()))}</span>
-          <span>${maxPts} ${t('mc.ptsAbbr')}</span>
-        </div>
-      </div>
-
-      <details class="mc-klappe">
-        <summary>${esc(t('mc.encounters').replace('{r}', String(_settings.rounds)))}</summary>
-        <div class="mc-encounter-list">${encRows}</div>
-      </details>
-    </div>
-  </div>
-</div>`;
-  }
-
-  /* UI-60 (02.10.2026): die kleine Fassung des Ergebnisses, direkt unter der
-     Deck-Wahl. Zwei Zahlen, beide aus den Rechnungen, die auch die grossen
-     Bloecke unten benutzen (_evRechne, calcDay2) — keine zweite Formel.
-     Der Block wird von refreshResults() mitgezeichnet, damit er sich mit
-     jeder Aenderung in der Tabelle bewegt. */
-  function renderUebersichtPanel(field) {
-    if (_inFrozenPastMode()) return '';
-    const kopf = `<div class="mc-uebersicht-kopf">${esc(_evL('Dein Ergebnis auf einen Blick', 'Your result at a glance'))}</div>`;
-    if (!_settings.myDeck) {
-      return `
-<div class="metacall-panel mc-uebersicht" role="status" aria-live="polite">
-  ${kopf}
-  <p class="mc-uebersicht-leer">${esc(_evL(
-    'Wähle dein Deck — dann stehen hier deine erwartete ' + _evQuotenName() + ' gegen das Feld und die Day-2-Chance.',
-    'Pick your deck — then your expected ' + _evQuotenName() + ' against the field and your Day-2 chance appear here.'))}</p>
-</div>`;
-    }
-    const r  = _evRechne(field);
-    const d2 = calcDay2(field);
-    const pct = _mcNum(d2.day2Prob * 100, 1);
-    const cls = d2.day2Prob >= 0.6 ? '' : d2.day2Prob >= 0.4 ? ' pct-mid' : ' pct-low';
-    const evKachel = r
-      ? `<div class="mc-uebersicht-kachel ${r.ev >= 50 ? 'is-pos' : 'is-neg'}">
-      <span class="mc-uebersicht-label">${esc(_evL('Erwartete ', 'Expected ') + _evQuotenName())}</span>
-      <span class="mc-uebersicht-wert">${_mcNum(r.ev, 1)}<span class="mc-ev-einheit">${_mcPz()}</span></span>
-      <span class="mc-uebersicht-kontext">${esc(_evL('gegen das erwartete Meta', 'against the expected meta'))}</span>
-    </div>`
-      : `<div class="mc-uebersicht-kachel">
-      <span class="mc-uebersicht-label">${esc(_evL('Erwartete ', 'Expected ') + _evQuotenName())}</span>
-      <span class="mc-uebersicht-wert">\u2014</span>
-      <span class="mc-uebersicht-kontext">${esc(_evL('keine gemessene Paarung', 'no measured pairing'))}</span>
-    </div>`;
-    return `
-<div class="metacall-panel mc-uebersicht" role="status" aria-live="polite">
-  ${kopf}
-  <div class="mc-uebersicht-kacheln">
-    ${evKachel}
-    <div class="mc-uebersicht-kachel">
-      <span class="mc-uebersicht-label">${t(_predictTitleKey())}</span>
-      <span class="mc-uebersicht-wert mc-day2-pct${cls}">${pct}<span class="mc-ev-einheit">${_mcPz()}</span></span>
-      <span class="mc-uebersicht-kontext">${esc(_evL(
-        'ab ' + _settings.day2Points + ' Punkten nach ' + _settings.rounds + ' Runden',
-        'from ' + _settings.day2Points + ' points after ' + _settings.rounds + ' rounds'))}</span>
-    </div>
-  </div>
-</div>`;
-  }
-
   // ── Full Render ────────────────────────────────────────────
   /* ── DER ABLAUF, ALS ABLAUF SICHTBAR ──────────────────────────────
    *
@@ -12149,58 +11955,20 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     return String(t('mc.adjustWinRates') || '').replace(/[\u25b2\u25bc]/g, '').trim();
   }
 
-  function _mcSchritt(n, titel, satz) {
+  function _mcSchritt(n, titel) {
     return `
   <div class="mc-schritt">
     <span class="mc-schritt-nr" aria-hidden="true">${n}</span>
-    <div class="mc-schritt-text">
-      <h3 class="mc-schritt-titel">${esc(titel)}</h3>
-      <p class="mc-schritt-satz">${esc(satz)}</p>
-    </div>
+    <h3 class="mc-schritt-titel">${esc(titel)}</h3>
   </div>`;
   }
 
-  function _mcSchrittTurnier() {
-    return _mcIstDeutsch()
-      ? { t: 'Das Turnier',
-          s: 'Wofür rechnest du? Turnierart, Rundenzahl und Datenbasis setzen den Rahmen für '
-           + 'alles darunter.' }
-      : { t: 'The tournament',
-          s: 'What are you calculating for? Tournament type, round count and data window set the '
-           + 'frame for everything below.' };
-  }
-
+  /* UI-62 (02.10.2026): zwei Schritte statt vier. Die Erklaersaetze unter
+     den Titeln sind weg — die Seite soll nicht erzaehlen, was man sieht. */
   function _mcSchritte() {
-    const d = _mcIstDeutsch();
-    return d ? [
-      { t: 'Das Turnier',
-        s: 'Wofür rechnest du? Turnierart, Rundenzahl und Datenbasis setzen den Rahmen für '
-         + 'alles darunter.' },
-      { t: 'Dein Deck',
-        s: 'Wähle dein Deck. Darunter steht live, was das Turnier für dich bedeutet — es '
-         + 'bewegt sich mit jeder Änderung in der Tabelle. Unter „' + _mcKnopfQuoten() + '" '
-         + 'kannst du jede Paarung selbst setzen.' },
-      { t: 'Das Meta und deine Chancen',
-        s: 'Wer spielt was, wie oft triffst du es, und wie weit kommst du mit welchem Deck — '
-         + 'alles in einer Tabelle. Sortieren per Klick auf die Spaltenköpfe.' },
-      { t: 'Dein Ergebnis im Detail',
-        s: 'Deine erwartete ' + _evQuotenName() + ' gegen genau dieses Meta, die Verteilung '
-         + 'der Punkte — und welche Decks in diesem Meta besser stünden.' },
-    ] : [
-      { t: 'The tournament',
-        s: 'What are you calculating for? Tournament type, round count and data window set the '
-         + 'frame for everything below.' },
-      { t: 'Your deck',
-        s: 'Pick your deck. Below it you see live what the tournament means for you — it moves '
-         + 'with every change in the table. Under "' + _mcKnopfQuoten() + '" you can set any '
-         + 'pairing yourself.' },
-      { t: 'The meta and your chances',
-        s: 'Who plays what, how often you face it, and how far you get with which deck — all in '
-         + 'one table. Click a column header to sort.' },
-      { t: 'Your result in detail',
-        s: 'Your expected ' + _evQuotenName() + ' against exactly this meta, the points '
-         + 'distribution — and which decks would do better in this meta.' },
-    ];
+    return _mcIstDeutsch()
+      ? [{ t: 'Turnier und Deck' }, { t: 'Das Meta und deine Chancen' }]
+      : [{ t: 'Tournament and deck' }, { t: 'The meta and your chances' }];
   }
 
   function renderAll() {
@@ -12208,7 +11976,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     if (!container || !_shareList) return;
     const field = buildField();
     const _SCHRITTE = _mcSchritte();
-    const _SCHRITT_TURNIER = _mcSchrittTurnier();
     // Date-window control — duplicates the picker in Card Analysis so
     // users on the Meta Call tab can narrow the predictor's input
     // window without context-switching. Both inputs read/write the
@@ -12263,40 +12030,19 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
   <div class="mc-top-bar">
     ${renderScenariosBar()}
   </div>
-  ${_inFrozenPastMode() ? '' : _mcSchritt(1, _SCHRITT_TURNIER.t, _SCHRITT_TURNIER.s)}
+  ${_inFrozenPastMode() ? '' : _mcSchritt(1, _SCHRITTE[0].t)}
   ${_inFrozenPastMode() ? _renderFrozenSourceOnlyPanel() : _renderCombinedConfigPanel(dateBanner)}
-  ${renderSettingsPanel()}
+  ${renderSettingsPanel(_inFrozenPastMode())}
   ${_inFrozenPastMode() ? renderFrozenBanner() : ''}
-  ${/* Der GROSSE Statusstreifen (_renderPredictorStatusBanner) bleibt
-       aus. Am 12.06.2026 abgeschaltet, mit Recht: "Data window: from
-       2026-05-22 onwards · 4520 of 4585 major-tournament rows
-       excluded" ist Maschinenzustand, keine Nutzeraussage. Abrufbar
-       ueber MetaCall._renderPredictorStatusBanner in der Konsole. */ ''}
-  ${/* Der KLEINE Streifen dagegen war nie verdrahtet — renderPredictorBanner
-       existierte samt Stylesheet (css/meta-call.css:1646) und wurde von
-       keiner Stelle aufgerufen. Nachgemessen am 18.08.2026: 0 Aufrufe im
-       ganzen Projekt.
-       Er beantwortet die eine Frage, die man einer Vorhersage stellen
-       muss, bevor man ein Turnier danach plant: worauf beruht sie? Der
-       Satz dazu lag fertig und uebersetzt in i18n.js ('mc.bannerModeA':
-       "Erstes Major im Meta — Vorhersage basiert auf Online-Ladder und
-       Online-Turnier-Top-8"). Ohne ihn verwirft die Maschine still
-       4.520 von 4.667 Turnierzeilen und laeuft im reinen Ladder-Modus
-       weiter, und im sichtbaren Text steht davon kein Wort.
-       Die Diagnose-Marken (Quelle, aktive Rotation) sind dabei
-       ausgeblendet — sonst waere das derselbe Fehler wie oben. */ ''}
-  ${_inFrozenPastMode() ? '' : _mcSchritt(2, _SCHRITTE[0].t, _SCHRITTE[0].s)}
   ${_inFrozenPastMode() ? '' : renderMyDeckPanel()}
-  ${_inFrozenPastMode() ? '' : renderUebersichtPanel(field)}
-  ${_inFrozenPastMode() ? '' : _mcSchritt(3, _SCHRITTE[1].t, _SCHRITTE[1].s)}
+  ${_inFrozenPastMode() ? '' : renderDeckGegenMetaPanel(field)}
+  ${_inFrozenPastMode() ? '' : _mcSchritt(2, _SCHRITTE[1].t)}
   ${_inFrozenPastMode() ? '' : renderFieldPanel(field)}
   ${_inFrozenPastMode() ? '' : renderCustomDecksPanel()}
   ${_inFrozenPastMode() ? '' : `<details class="mc-rechenweg"><summary>${esc(_mcIstDeutsch() ? 'Datenbasis und Rechenweg' : 'Data and method')}</summary>${renderPredictorBanner()}</details>`}
-  ${_inFrozenPastMode() ? '' : _mcSchritt(4, _SCHRITTE[2].t, _SCHRITTE[2].s)}
-  ${_inFrozenPastMode() ? '' : renderDeckGegenMetaPanel(field)}
-  ${_inFrozenPastMode() ? '' : renderResultsPanel(field)}
   ${_inFrozenPastMode() ? renderFrozenSharePanel() : ''}
   ${_inFrozenPastMode() ? renderFrozenRecommendationsPanel() : renderRecommendationsPanel(field)}
+  ${renderBildZeile()}
 </div>`;
   }
 
@@ -12641,35 +12387,27 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
 
   function renderDeckGegenMetaPanel(field) {
     if (_inFrozenPastMode()) return '';
-    const titel = _evL('Dein Deck gegen das Meta, das du erwartest',
-                       'Your deck vs. the meta you expect');
+    const titel = _evL('Dein Ergebnis', 'Your result');
 
     if (!_settings.myDeck) {
       return `
-<div class="metacall-panel mc-ev-panel">
+<div class="metacall-panel mc-ev-panel mc-uebersicht" role="status" aria-live="polite">
   <div class="metacall-panel-title">${esc(titel)}</div>
-  <p class="mc-ev-lead">${esc(_evL(
-    'Wähle oben dein Deck — dann steht hier die ' + _evQuotenName() + ', mit der du über ein '
-    + 'ganzes Turnier rechnen kannst. Nicht gegen ein Deck, sondern gegen alle auf einmal, '
-    + 'jedes mit dem Anteil, den du in Schritt 2 erwartest.',
-    'Pick your deck above — then this shows the ' + _evQuotenName() + ' to expect across a whole '
-    + 'tournament. Not against one deck, but against all of them at once, each weighted by the '
-    + 'share you set in step 2.'))}</p>
+  <p class="mc-uebersicht-leer">${esc(_evL(
+    'Wähle dein Deck — dann stehen hier die ' + _evQuotenName() + ', die Day-2-Chance und deine erwartete Bilanz.',
+    'Pick your deck — then the ' + _evQuotenName() + ', the Day-2 chance and your expected record appear here.'))}</p>
 </div>`;
     }
 
     const r = _evRechne(field);
     if (!r) {
       return `
-<div class="metacall-panel mc-ev-panel">
-  <div class="metacall-panel-title">${esc(titel)}</div>
-  <p class="mc-ev-lead">${esc(_evL(
-    'Zu ' + _settings.myDeck + ' liegt gegen keinen einzigen Gegner deines erwarteten Metas eine '
-    + 'gemessene Paarung vor. Trage unter „' + _mcKnopfQuoten() + '" eigene Quoten ein, dann '
-    + 'rechnet die Seite damit — und schreibt daneben, dass die Zahlen von dir kommen.',
-    'There is not a single measured pairing for ' + _settings.myDeck + ' against the meta you '
-    + 'expect. Enter your own rates under "' + _mcKnopfQuoten() + '" and the page will use '
-    + 'them — and say next to the result that the numbers are yours.'))}</p>
+<div class="metacall-panel mc-ev-panel mc-uebersicht">
+  <div class="metacall-panel-title">${esc(titel)}
+    <span class="mc-ev-deckname">${_mcIconHtml(_settings.myDeck)}${esc(_settings.myDeck)}</span></div>
+  <p class="mc-uebersicht-leer">${esc(_evL(
+    'Zu ' + _settings.myDeck + ' liegt gegen keinen Gegner deines erwarteten Metas eine gemessene Paarung vor.',
+    'There is no measured pairing for ' + _settings.myDeck + ' against any opponent of the meta you expect.'))}</p>
 </div>`;
     }
 
@@ -12695,13 +12433,11 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
 
     const umfangHtml = `
   <div class="mc-ev-umfang">
-    <span class="mc-ev-umfang-label">${esc(_evL('Gegen welchen Ausschnitt?', 'Against which part?'))}</span>
     ${pille('alle',  _evL('Ganzes erwartetes Meta', 'The whole expected meta'))}
     ${pille('top8',  _evL('Nur die ' + EV_TOP_N + ' größten', 'Only the ' + EV_TOP_N + ' largest'))}
     ${pille('einzel', _evL('Nur ein Deck', 'A single deck'))}
     ${einzelHtml}
-  </div>
-  <p class="mc-ev-umfang-note">${esc(_evUmfangZeile(r))}</p>`;
+  </div>`;
 
     /* Eine dünne Rechnung sieht aus wie eine dicke. Der Vorbehalt hängt
        an der Rolle über der Zahl, nicht in einer Fußnote — die liest
@@ -12718,99 +12454,60 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       : _evL('kein Band — keine der gerechneten Quoten ist gemessen',
              'no band — none of the rates used is measured');
 
+    /* UI-62 (02.10.2026): alles, was ein Spieler wissen will, in EINER Reihe
+       kleiner Kacheln ganz oben: Siegquote, erwartete Siege, Day-2-Chance
+       (gefaerbt) und die erwartete Bilanz in der Hausreihenfolge
+       Siege–Niederlagen–Unentschieden. Day-2 und Bilanz kommen aus
+       calcDay2, dieselbe Rechnung wie die Tabelle darunter. */
+    const d2   = calcDay2(field);
+    /* Die Unentschieden-Annahme gehoert zur Zahl, nicht in den Quelltext.
+       Sie verschiebt das Ergebnis um mehrere Prozentpunkte und war bis zum
+       06.09.2026 falsch gesetzt. Seit UI-62 steht sie im Rechenweg. */
+    const _uq = d2.unentschieden || _unentschiedenQuote();
+    const _uqText = _uq.gemessen
+      ? t('mc.day2Unentschieden')
+          .replace('{q}', _mcNum(_uq.quote * 100, 1) + _mcPz())
+          .replace('{n}', zahlLokal(_uq.partien))
+          .replace('{meta}', esc(_uq.meta))
+      : t('mc.day2UnentschiedenLeer')
+          .replace('{q}', _mcNum(_uq.quote * 100, 1) + _mcPz());
+    const d2pct = _mcNum(d2.day2Prob * 100, 1);
+    const d2cls = d2.day2Prob >= 0.6 ? '' : d2.day2Prob >= 0.4 ? ' pct-mid' : ' pct-low';
     const kacheln = `
   <div class="mc-ev-kacheln">
     <div class="mc-ev-kachel ${r.ev >= 50 ? 'is-pos' : 'is-neg'}${duenn ? ' is-duenn' : ''}">
-      <span class="mc-ev-rolle">${esc(_evL('gegen dein erwartetes Meta', 'against the meta you expect') + duennText)}</span>
       <span class="mc-ev-label">${esc(_evL('Erwartete ', 'Expected ') + _evQuotenName())}</span>
       <span class="mc-ev-wert">${_mcNum(r.ev, 1)}<span class="mc-ev-einheit">${_mcPz()}</span></span>
-      <span class="mc-ev-kontext">${esc(bandText)}</span>
+      <span class="mc-ev-kontext">${esc(bandText + duennText)}</span>
     </div>
     <div class="mc-ev-kachel">
-      <span class="mc-ev-rolle">${esc(_evL('bei ' + runden + ' Runden', 'over ' + runden + ' rounds'))}</span>
       <span class="mc-ev-label">${esc(_evL('Erwartete Siege', 'Expected wins'))}</span>
       <span class="mc-ev-wert">${_mcNum(siege, 1)}</span>
       <span class="mc-ev-kontext">${esc(_evL(
-        _mcNum(sUnten, 1) + ' bis ' + _mcNum(sOben, 1) + ' Siege · Runden × Quote, kein Turniermodell',
-        _mcNum(sUnten, 1) + ' to ' + _mcNum(sOben, 1) + ' wins · rounds × rate, not a tournament model'))}</span>
+        _mcNum(sUnten, 1) + ' bis ' + _mcNum(sOben, 1) + ' in ' + runden + ' Runden',
+        _mcNum(sUnten, 1) + ' to ' + _mcNum(sOben, 1) + ' in ' + runden + ' rounds'))}</span>
+    </div>
+    <div class="mc-ev-kachel mc-ev-kachel-day2">
+      <span class="mc-ev-label">${t(_predictTitleKey())}</span>
+      <span class="mc-ev-wert mc-day2-pct${d2cls}">${d2pct}<span class="mc-ev-einheit">${_mcPz()}</span></span>
+      <span class="mc-ev-kontext">${esc(_evL(
+        'ab ' + _settings.day2Points + ' Punkten nach ' + runden + ' Runden',
+        'from ' + _settings.day2Points + ' points after ' + runden + ' rounds'))}</span>
+    </div>
+    <div class="mc-ev-kachel mc-ev-kachel-bilanz">
+      <span class="mc-ev-label">${esc(_evL('Erwartete Bilanz S–N–U', 'Expected record W–L–T'))}</span>
+      <span class="mc-ev-wert mc-ev-bilanz"><span style="color:var(--tint-ok-ink)">${_mcNum(d2.expWin, 1)}</span>–<span style="color:var(--tint-bad-ink)">${_mcNum(d2.expLoss, 1)}</span>–<span style="color:#f39c12">${_mcNum(d2.expTie, 1)}</span></span>
+      <span class="mc-ev-kontext">${esc(_evL('Siege – Niederlagen – Unentschieden', 'wins – losses – ties'))}</span>
     </div>
     <div class="mc-ev-kachel">
-      <span class="mc-ev-rolle">${esc(_evL('Wovon die Zahl kommt', 'What the number rests on'))}</span>
-      <span class="mc-ev-label">${esc(_evL('Abdeckung des erwarteten Metas', 'Coverage of the expected meta'))}</span>
+      <span class="mc-ev-label">${esc(_evL('Abdeckung', 'Coverage'))}</span>
       <span class="mc-ev-wert">${_mcNum(r.abdeckung, 0)}<span class="mc-ev-einheit">${_mcPz()}</span></span>
       <span class="mc-ev-kontext">${esc(_evL(
-        r.gegner + ' Gegner-Decks · ' + zahlLokal(r.partien) + ' gezählte Matches'
-          + (r.eigene ? ' · ' + r.eigene + ' Quote(n) von dir' : ''),
-        r.gegner + ' opponent decks · ' + zahlLokal(r.partien) + ' games counted'
-          + (r.eigene ? ' · ' + r.eigene + ' rate(s) from you' : '')))}</span>
+        r.gegner + ' Decks · ' + zahlLokal(r.partien) + ' Matches'
+          + (r.eigene ? ' · ' + r.eigene + ' von dir' : ''),
+        r.gegner + ' decks · ' + zahlLokal(r.partien) + ' games'
+          + (r.eigene ? ' · ' + r.eigene + ' from you' : '')))}</span>
     </div>
-  </div>`;
-
-    /* Die Spaltennamen an EINER Stelle: der Kopf und das Etikett an der
-       Zelle (fuer die Kartenansicht auf dem Telefon) muessen dasselbe
-       sagen, sonst heisst dieselbe Spalte je nach Bildschirmbreite
-       anders. */
-    const S = {
-      deck:     _evL('Gegner-Deck', 'Opponent deck'),
-      wieOft:   _evL('wie oft', 'how often'),
-      quote:    _evQuotenKuerzel(),
-      balken:   _evL('gegen 50 %', 'vs. 50%'),
-      herkunft: _evL('Herkunft', 'Source'),
-      matches:  _evL('Matches', 'Matches'),
-    };
-
-    /* Sortiert nach „wie oft". Eine Sortierung, deren Schlüssel nicht in
-       der Tabelle steht, sieht aus wie keine — wer am stärksten zieht,
-       steht in den zwei Zeilen darüber. */
-    const zeilen = r.zeilen.slice().sort((a, b) => b.gewicht - a.gewicht).map(z => {
-      const h = _evHerkunft(z);
-      const wrCls = z.quote >= 55 ? 'is-gut' : z.quote <= 45 ? 'is-schlecht' : '';
-      /* data-label traegt den Spaltennamen an der Zelle selbst. Auf dem
-         Telefon faellt der Tabellenkopf weg und jede Zeile wird zur
-         Karte; ohne das Etikett stuenden dort vier nackte Zahlen. Es an
-         der Zelle zu fuehren statt im Stylesheet ist der Unterschied
-         zwischen „die Beschriftung folgt der Spalte" und „die
-         Beschriftung folgt der Position" — die zweite Sorte ist genau
-         die, die hier schon einmal fremde Namen angezeigt hat. */
-      return `<tr class="${(!z.hand && z.partien > 0 && z.partien < 20) ? 'is-duenn' : ''}">
-        <td class="mc-ev-td-deck"><span class="mc-ev-deckzelle">${_mcIconHtml(z.name)}<span class="mc-ev-deckwort">${esc(z.name)}</span>${
-          z.anteilEigen ? `<span class="mc-ev-eigen-punkt" title="${esc(_evL(
-            'Anteil von dir gesetzt („Meine Schätzung")', 'Share set by you ("My estimate")'))}">●</span>` : ''}</span></td>
-        <td class="mc-ev-num" data-label="${esc(S.wieOft)}">${_mcNum(z.gewicht * 100, 1)}${_mcPz()}</td>
-        <td class="mc-ev-num ${wrCls}" data-label="${esc(S.quote)}">${_mcNum(z.quote, 1)}${_mcPz()}</td>
-        <td class="mc-ev-td-balken" data-label="${esc(S.balken)}">${_evBalken(z.quote)}</td>
-        <td class="mc-ev-td-quelle" data-label="${esc(S.herkunft)}"><span class="mc-ev-quelle ${h.klasse}" title="${esc(h.titel)}">${esc(h.text)}</span></td>
-        <td class="mc-ev-num" data-label="${esc(S.matches)}">${z.hand ? '—' : zahlLokal(z.partien)}</td>
-      </tr>`;
-    }).join('');
-
-    const tabelle = `
-  <div class="mc-ev-tabelle-wrap">
-    <table class="mc-ev-tabelle">
-      <thead><tr>
-        <th>${esc(S.deck)}</th>
-        <th class="mc-ev-num" title="${esc(_evL(
-          'Anteil unter den Gegnern, mit denen hier gerechnet wird — auf 100 % normiert, weil '
-          + 'Paarungen ohne Daten weggelassen statt mit 50 % aufgefüllt werden.',
-          'Share among the opponents this calculation uses — normalised to 100 % because pairings '
-          + 'without data are left out rather than filled in at 50 %.'))}">${esc(S.wieOft)}</th>
-        <th class="mc-ev-num" title="${esc(_evL(
-          _evQuotenName() + ' deines Decks gegen diesen Gegner. Ein 3-0 zählt hier nicht als 100 %.',
-          _evQuotenName() + ' of your deck against this opponent. A 3-0 does not count as 100 % here.'))}">${
-          esc(S.quote)}</th>
-        <th title="${esc(_evL(
-          'Dieselbe Quote als Abstand zur 50. Die Skala reicht bis ±' + EV_BALKEN_SPANNE
-            + ' Punkte; was darüber hinausgeht, stößt an den Rand.',
-          'The same rate as a distance from 50. The scale runs to ±' + EV_BALKEN_SPANNE
-            + ' points; anything beyond hits the edge.'))}">${esc(S.balken)}</th>
-        <th title="${esc(_evL('Woher diese Quote kommt.', 'Where this rate comes from.'))}">${
-          esc(S.herkunft)}</th>
-        <th class="mc-ev-num" title="${esc(_evL(
-          'Gezählte Matches hinter dieser Quote.', 'Games counted behind this rate.'))}">${
-          esc(S.matches)}</th>
-      </tr></thead>
-      <tbody>${zeilen}</tbody>
-    </table>
   </div>`;
 
     const eigenSatz = (r.ohneBand >= 1)
@@ -12841,26 +12538,24 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       + 'known.' + _evAbgrenzungEn() + eigenSatz);
 
     return `
-<div class="metacall-panel mc-ev-panel">
+<div class="metacall-panel mc-ev-panel mc-uebersicht">
   <div class="metacall-panel-title">${esc(titel)}
     <span class="mc-ev-deckname">${_mcIconHtml(_settings.myDeck)}${esc(_settings.myDeck)}</span>
+    <button class="mc-share-btn" onclick="MetaCall.exportDay2ShareImage()" title="${esc(t('mc.shareDay2'))}">
+      📤 ${t('mc.share')}
+    </button>
   </div>
-  <p class="mc-ev-lead">${esc(_evL(
-    'Die Heatmap sagt, wer wen schlägt. Hier steht, was daraus für dich folgt: jede Paarung deines '
-    + 'Decks, gewichtet mit dem Anteil, den du für dieses Turnier erwartest — nicht mit dem, was '
-    + 'online gerade gespielt wird.',
-    'The heatmap says who beats whom. This says what that means for you: every pairing of your '
-    + 'deck, weighted by the share you expect at this tournament — not by what is being played '
-    + 'online right now.'))}</p>
   ${umfangHtml}
   ${kacheln}
   ${_evVorbereitungHtml(r.zeilen)}
   <details class="mc-klappe">
-    <summary>${esc(_evL('Alle Paarungen einzeln — Anteil, Quote, Herkunft, Matches',
-      'Every pairing — share, rate, source, matches'))}</summary>
-    ${tabelle}
+    <summary>${esc(_evL('Rechenweg', 'Method'))}</summary>
+    <p class="mc-ev-fuss">${esc(_evUmfangZeile(r))}</p>
+    <p class="mc-day2-sub">${_day2RechnungsZeile()}</p>
+    <p class="mc-day2-sub mc-day2-rahmen">${_day2RahmenZeile()}</p>
+    <p class="mc-day2-sub mc-day2-unentschieden">${_uqText}</p>
+    <p class="mc-ev-fuss">${fuss}</p>
   </details>
-  <p class="mc-ev-fuss">${fuss}</p>
 </div>`;
   }
 
@@ -12967,13 +12662,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     tmp.innerHTML = renderDeckGegenMetaPanel(buildField());
     const neu = tmp.querySelector('.mc-ev-panel');
     if (neu) alt.innerHTML = neu.innerHTML;
-    const ue = container.querySelector('.mc-uebersicht');
-    if (ue) {
-      const t2 = document.createElement('div');
-      t2.innerHTML = renderUebersichtPanel(buildField());
-      const n2 = t2.querySelector('.mc-uebersicht');
-      if (n2) ue.innerHTML = n2.innerHTML;
-    }
   }
 
   // Recommendations panel — top N decks ranked by Day-2 probability
@@ -14465,17 +14153,14 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     const container = document.getElementById('metaCallHost');
     if (!container || !_shareList) return;
     const recPanel = container.querySelector('.mc-rec-panel');
-    const resultsGrid = container.querySelector('.metacall-results-grid');
-    if (!recPanel && !resultsGrid) return;   // noch nichts da
+    const evPanel0 = container.querySelector('.mc-ev-panel');
+    if (!recPanel && !evPanel0) return;   // noch nichts da
     const field = buildField();
-    if (resultsGrid) {
-      const wrap = resultsGrid.closest('.metacall-panel');
-      if (wrap) {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = renderResultsPanel(field);
-        const neu = tmp.querySelector('.metacall-panel');
-        if (neu) wrap.innerHTML = neu.innerHTML;
-      }
+    if (evPanel0) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = renderDeckGegenMetaPanel(field);
+      const neu = tmp.querySelector('.mc-ev-panel');
+      if (neu) evPanel0.innerHTML = neu.innerHTML;
     }
     if (recPanel) {
       const tmp = document.createElement('div');
@@ -14597,14 +14282,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       roundsBadge.title       = _rundenAbzeichenTitel();
       roundsBadge.setAttribute('data-hinweis', _rundenAbzeichenTitel());
     }
-    const resultsPanel = container.querySelector('.metacall-results-grid');
-    const resultsWrap  = resultsPanel ? resultsPanel.closest('.metacall-panel') : null;
-    if (resultsWrap) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = renderResultsPanel(field);
-      const newPanel = tmp.querySelector('.metacall-panel');
-      if (newPanel) resultsWrap.innerHTML = newPanel.innerHTML;
-    }
     /* Der EV-Block haengt am selben Feld wie die Day-2-Zahl: aendert
        sich eine erwartete Anteilszahl oben, aendert sich hier das
        Gewicht jeder Paarung. Ohne diese Zeilen stuende die erwartete
@@ -14616,13 +14293,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
       tmp.innerHTML = renderDeckGegenMetaPanel(field);
       const neu = tmp.querySelector('.mc-ev-panel');
       if (neu) evPanel.innerHTML = neu.innerHTML;
-    }
-    const uebersicht = container.querySelector('.mc-uebersicht');
-    if (uebersicht) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = renderUebersichtPanel(field);
-      const neu = tmp.querySelector('.mc-uebersicht');
-      if (neu) uebersicht.innerHTML = neu.innerHTML;
     }
     // Recommendations panel — re-runs calcRecommendations with the
     // updated field. Day-2 numbers shift whenever the field shifts so
@@ -15557,8 +15227,8 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     ctx.textBaseline = 'middle';
     const statBlocks = [
       { label: t('mc.avgWins'),   val: expWin.toFixed(1),  color: '#2ecc71' },
-      { label: t('mc.avgTies'),   val: expTie.toFixed(1),  color: '#f39c12' },
       { label: t('mc.avgLosses'), val: expLoss.toFixed(1), color: '#e74c3c' },
+      { label: t('mc.avgTies'),   val: expTie.toFixed(1),  color: '#f39c12' },
     ];
     const blockW = W / 3;
     statBlocks.forEach((b, i) => {
@@ -15663,9 +15333,6 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
   // das Merken.
   function _onTournamentName(val) {
     _settings.tournamentName = String(val || '').slice(0, 60);
-    try {
-      localStorage.setItem(TOURNAMENT_NAME_KEY, _settings.tournamentName);
-    } catch (_e) { /* privater Modus */ }
   }
 
   // "Bild generieren" — baut die Spezifikation aus dem, was gerade auf
@@ -16275,13 +15942,17 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     renderAll();
   }
 
+  function _bekannteDeckNamen() {
+    return (_shareList || []).map(d => d.name);
+  }
+
   function _onMyDeck(val) {
     _settings.myDeck = val;
     _winRateOverrides = {};
     _journalStats     = {};
     _journalRateKeys  = [];
     if (val && typeof window.getBattleJournalWinRates === 'function') {
-      const rates = window.getBattleJournalWinRates(val, 1, { excludeBricks: _settings.excludeBricks });
+      const rates = window.getBattleJournalWinRates(val, 1, { excludeBricks: _settings.excludeBricks, bekannteDecks: _bekannteDeckNamen() });
       Object.keys(rates).forEach(opp => {
         _journalStats[opp] = rates[opp];
         if (rates[opp].total >= 3) _journalRateKeys.push(opp);
@@ -16659,7 +16330,7 @@ ${_zweiKonv ? `<p class="mc-wr-konventionen" style="font-size:0.75rem;color:#888
     _journalStats = {};
     _journalRateKeys = [];
     if (_settings.myDeck && typeof window.getBattleJournalWinRates === 'function') {
-      const rates = window.getBattleJournalWinRates(_settings.myDeck, 1, { excludeBricks: _settings.excludeBricks });
+      const rates = window.getBattleJournalWinRates(_settings.myDeck, 1, { excludeBricks: _settings.excludeBricks, bekannteDecks: _bekannteDeckNamen() });
       Object.keys(rates).forEach(opp => {
         _journalStats[opp] = rates[opp];
         if (rates[opp].total >= 3) _journalRateKeys.push(opp);

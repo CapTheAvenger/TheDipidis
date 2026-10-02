@@ -78,6 +78,7 @@ describe('UI-59: Wahl nur im Uebergang', () => {
 describe('UI-59: Zahnrad', () => {
     function leiste(o) {
         return baue(MC, ['function _optionenAbweichend(', 'function _renderCombinedConfigPanel('], Object.assign({
+            _renderTurnierartPillen: () => '',
             _metaCallMode: 'standard', _useClCurrent: false, _useClPast: false, window: {},
             _optionenOffen: false, esc, _mcIstDeutsch: () => true,
             renderMetaSourcePanel: () => '<i id="QUELLE"></i>',

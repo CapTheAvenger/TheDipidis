@@ -338,9 +338,18 @@
 /* ── Eigene Box und Deckliste (Rutsch O) ── */
 .abx-eigen, .abx-liste { margin: var(--s-3) 0; max-width: 560px; }
 .abx-eigen summary, .abx-liste summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+/* Die Box-anlegen-Zeile muss wie ein Knopf aussehen: als blosse Zeile las sie auf dem
+   Handy niemand als bedienbar (Hausi, 03.10.2026). */
+.abx-eigen > summary.abx-eigen-knopf, .abx-liste > summary.abx-eigen-knopf { list-style: none; display: inline-flex; font-weight: 600; }
+.abx-eigen > summary.abx-eigen-knopf::-webkit-details-marker, .abx-liste > summary.abx-eigen-knopf::-webkit-details-marker { display: none; }
+.abx-eigen > summary.abx-eigen-knopf::before, .abx-liste > summary.abx-eigen-knopf::before { content: '+'; font-weight: 700; margin-right: var(--s-2); }
+.abx-eigen[open] > summary.abx-eigen-knopf::before, .abx-liste[open] > summary.abx-eigen-knopf::before { content: '\2212'; }
 .abx-eigen label, .abx-liste label { display: block; font-weight: 700; font-size: var(--fs-sm); color: var(--ink-2); margin: var(--s-2) 0 var(--s-1); }
 .abx-eigen input, .abx-liste textarea { width: 100%; box-sizing: border-box; }
 .abx-eigen input { min-height: 44px; }
 .abx-eigen .btn, .abx-liste .btn { min-height: 44px; margin-top: var(--s-2); }
 .abx-ergebnis-zeile { margin: var(--s-1) 0; font-size: var(--fs-sm); overflow-wrap: anywhere; }
 .abx-ergebnis-zeile.abx-warn { font-weight: 700; }
+
+/* Das Einfuegefeld: gross genug zum Arbeiten, 16 px gegen den iOS-Zoom beim Antippen. */
+.abx-liste textarea { min-height: 16em; font-size: 16px; line-height: 1.4; }

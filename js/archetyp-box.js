@@ -2634,7 +2634,7 @@
     let letzteListe = null;   // { id, hinzu, erhoeht, schon, unbekannt, unlesbar, abweichend }
 
     function eigeneBoxBlock() {
-        return '<details class="abx-eigen"><summary>' + esc(tx('abx.eigenKnopf', null, 'Eigene Box anlegen')) + '</summary>'
+        return '<details class="abx-eigen"><summary class="btn btn-primary abx-eigen-knopf">' + esc(tx('abx.eigenKnopf', null, 'Eigene Box anlegen')) + '</summary>'
             + '<p class="abx-leer">' + esc(tx('abx.eigenText', null,
                 'Eine Box ohne Turnierdaten: du gibst ihr einen Namen und fügst Decklisten ein. Es kommt nur dazu, was noch fehlt.')) + '</p>'
             + '<label for="abxEigenName">' + esc(tx('abx.eigenName', null, 'Name der Box')) + '</label>'
@@ -2664,7 +2664,7 @@
                 'Name in der Liste weicht von der Datenbankkarte ab (zugeordnet wurde über Set + Nummer):')) + ' ' + esc(r.abweichend.join('; ')) + '</p>';
             erg = html;
         }
-        return '<details class="abx-liste"' + (r ? ' open' : '') + '><summary>' + esc(tx('abx.listeKnopf', null, 'Deckliste einfügen')) + '</summary>'
+        return '<details class="abx-liste"' + (r ? ' open' : '') + '><summary class="btn btn-primary abx-eigen-knopf">' + esc(tx('abx.listeKnopf', null, 'Deckliste einfügen')) + '</summary>'
             + '<label for="abxListe">' + esc(tx('abx.listeLabel', null, 'Deckliste (eine Karte je Zeile)')) + '</label>'
             + '<textarea id="abxListe" class="input-system" rows="10" spellcheck="false" placeholder="'
             + esc(tx('abx.listePlatzhalter', null, '3 Mow Rotom (DRI 9)\n2 Rotom ex (PFL 29)\n4 Arven (OBF 186)')) + '"></textarea>'

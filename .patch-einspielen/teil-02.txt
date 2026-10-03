@@ -1,0 +1,176 @@
+-    <script src="js/app-profile-deck-builder.js?v=202610031731" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202610031731" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202610031731" defer></script>|
+-    <script src="js/ds-nav.js?v=202610031731" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202610031921" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202610031921" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202610031921" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202610031921" defer></script>|
++    <script src="js/ds-nav.js?v=202610031921" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4259,6 +4259,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202610031731" defer></script>|
+-    <script src="js/ds-sections.js?v=202610031731" defer></script>|
+-    <script src="js/ds-filter.js?v=202610031731" defer></script>|
+-    <script src="js/ds-share.js?v=202610031731" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202610031921" defer></script>|
++    <script src="js/ds-sections.js?v=202610031921" defer></script>|
++    <script src="js/ds-filter.js?v=202610031921" defer></script>|
++    <script src="js/ds-share.js?v=202610031921" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4267,5 +4267,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202610031731" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202610031731" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202610031731" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202610031921" defer></script>|
++    <script src="js/ds-tutorial.js?v=202610031921" defer></script>|
++    <script src="js/ds-masterclass.js?v=202610031921" defer></script>|
+ |
+diff --git a/js/archetyp-box.js b/js/archetyp-box.js|
+index cdd81508..bed11842 100644|
+--- a/js/archetyp-box.js|
++++ b/js/archetyp-box.js|
+@@ -1131,17 +1131,37 @@|
+     function deckzeilenAus(karten) {|
+-        const gesehen = new Set();|
+-        const zeilen = [];|
++        /* Je Karte-ID eine Zeile; kommt dieselbe Karte in mehreren Boxen vor,|
++           gilt die GROESSTE Anzahl (nicht die der ersten Box). */|
++        const nachId = new Map();|
++        const reihe = [];|
+         (karten || []).forEach(function (k) {|
+-            if (!k || gesehen.has(k.id)) return;|
+-            gesehen.add(k.id);|
+-            zeilen.push(Math.max(1, Number(k.gefordert) || 0) + ' ' + k.name + ' ' + k.set + ' ' + k.number);|
++            if (!k) return;|
++            const n = Math.max(1, Number(k.gefordert) || 0);|
++            const alt = nachId.get(k.id);|
++            if (alt) { if (n > alt.n) alt.n = n; return; }|
++            const z = { n: n, text: k.name + ' ' + k.set + ' ' + k.number, basis: istBasisEnergie(k) };|
++            nachId.set(k.id, z);|
++            reihe.push(z);|
+         });|
+-        return zeilen;|
++        return reihe.map(function (z) { return z.n + ' ' + z.text; });|
++    }|
++|
++    /** Basis-Energie (Gras bis Fee): zaehlt beim Stueck-Umfang nicht mit, steht aber in der Kopie. */|
++    function istBasisEnergie(k) {|
++        return !!k && k.typ === 'Energy'|
++            && /^(basic )?(grass|fire|water|lightning|psychic|fighting|darkness|metal|fairy)( basic)? energy$/i.test(String(k.name || '').trim());|
+     }|
+ |
+-    /** Umfang der Auswahl in Karten (verschieden) und Stueck (mit Kopien); gleiche Zahlen wie beim Kopieren. */|
++    /**|
++     * Umfang der Auswahl: verschiedene Karten und Stueck mit Kopien, ohne|
++     * Basis-Energien (Hausi, 03.10.2026). Gleiche Zeilen wie beim Kopieren.|
++     */|
+     function auswahlUmfang(karten) {|
+         const zeilen = deckzeilenAus(karten);|
++        const basis = new Set();|
++        (karten || []).forEach(function (k) { if (k && istBasisEnergie(k)) basis.add(k.name + ' ' + k.set + ' ' + k.number); });|
+         let stueck = 0;|
+-        zeilen.forEach(function (z) { stueck += parseInt(z, 10) || 0; });|
++        zeilen.forEach(function (z) {|
++            if (basis.has(z.replace(/^\d+ /, ''))) return;|
++            stueck += parseInt(z, 10) || 0;|
++        });|
+         return { karten: zeilen.length, stueck: stueck };|
+@@ -1152,2 +1172,3 @@|
+         deckzeilenAus: deckzeilenAus,|
++        istBasisEnergie: istBasisEnergie,|
+         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,|
+@@ -2194,5 +2215,5 @@|
+                 : '')|
+-            + (sichtbareKarten.length|
++            + (deckzeilenAus(sichtbareKarten).length|
+                 ? '<button type="button" class="btn btn-outline abx-kopieren-btn" onclick="ArchetypBox.kopieren()">'|
+-                    + esc(tx('abx.kopieren', { n: sichtbareKarten.length }, 'Gefilterte Karten kopieren ({n})')) + '</button>'|
++                    + esc(tx('abx.kopieren', { n: deckzeilenAus(sichtbareKarten).length }, 'Gefilterte Karten kopieren ({n})')) + '</button>'|
+                 : '')|
+@@ -2217,3 +2238,3 @@|
+             ? '<p class="abx-umfang">' + esc(tx('abx.auswahlUmfang', { karten: au.karten, stueck: au.stueck },|
+-                '{karten} verschiedene Karten · {stueck} Stück mit Kopien')) + '</p>'|
++                '{karten} verschiedene Karten · {stueck} Stück mit Kopien (ohne Basis-Energien)')) + '</p>'|
+             : '';|
+diff --git a/js/i18n.js b/js/i18n.js|
+index 189bc78d..9081960c 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -968,3 +968,3 @@ const translations = {|
+     'abx.kopieren': 'Copy filtered cards ({n})',|
+-    'abx.auswahlUmfang': '{karten} different cards · {stueck} pieces incl. copies',|
++    'abx.auswahlUmfang': '{karten} different cards · {stueck} pieces incl. copies (no basic energy)',|
+     'abx.kopiert': '{n} cards copied — paste them into the deck builder.',|
+@@ -3838,3 +3838,3 @@ const translations = {|
+     'abx.kopieren': 'Gefilterte Karten kopieren ({n})',|
+-    'abx.auswahlUmfang': '{karten} verschiedene Karten · {stueck} Stück mit Kopien',|
++    'abx.auswahlUmfang': '{karten} verschiedene Karten · {stueck} Stück mit Kopien (ohne Basis-Energien)',|
+     'abx.kopiert': '{n} Karten kopiert — im Deckbuilder einfügen.',|
+diff --git a/service-worker.js b/service-worker.js|
+index e091c45e..a0bc96df 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202610031731|
++// v202610031921|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202610031731';|
++const CACHE_NAME = 'tcg-analysis-v202610031921';|
+ |
+diff --git a/tests/unit/test-eigene-box.js b/tests/unit/test-eigene-box.js|
+index beb02325..25e3d635 100644|
+--- a/tests/unit/test-eigene-box.js|
++++ b/tests/unit/test-eigene-box.js|
+@@ -208,6 +208,6 @@ describe('Rutsch Q: Umfang der Auswahl mit Kopien (Hausi, 03.10.2026)', () => {|
+     const m = z.match(/^(\d+) (.+) ([A-Z0-9]+) (\w+)$/);|
+-    return { id: 'k' + i, name: m[2], set: m[3], number: m[4], gefordert: Number(m[1]) };|
++    return { id: 'k' + i, name: m[2], set: m[3], number: m[4], gefordert: Number(m[1]), typ: / Energy$/.test(m[2]) ? 'Energy' : 'Pokemon' };|
+   });|
+-  it('Umfang: 36 verschiedene Karten, 81 Stueck mit Kopien', () => {|
+-    assert.deepEqual(L.auswahlUmfang(karten), { karten: 36, stueck: 81 });|
++  it('Umfang: 36 verschiedene Karten, 65 Stueck mit Kopien (81 minus 16 Basis-Energien)', () => {|
++    assert.deepEqual(L.auswahlUmfang(karten), { karten: 36, stueck: 65 });|
+   });|
+@@ -223 +223,23 @@ describe('Rutsch Q: Umfang der Auswahl mit Kopien (Hausi, 03.10.2026)', () => {|
+ });|
++|
++describe('Rutsch R: Umfang ueber mehrere Boxen und ohne Basis-Energien (Hausi, 03.10.2026)', () => {|
++  const code = QUELLE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++  const K = (id, n, extra) => Object.assign({ id: id, name: 'Karte ' + id, set: 'TWM', number: id, gefordert: n, typ: 'Item' }, extra || {});|
++  it('dieselbe Karte in zwei Boxen: die groesste Anzahl gilt, nicht die der ersten', () => {|
++    const u = L.auswahlUmfang([K('1', 1), K('1', 4), K('1', 2)]);|
++    assert.deepEqual(u, { karten: 1, stueck: 4 });|
++    assert.deepEqual(L.deckzeilenAus([K('1', 1), K('1', 4)]), ['4 Karte 1 TWM 1']);|
++  });|
++  it('Basis-Energien stehen in der Kopie, zaehlen aber nicht zum Stueck-Umfang', () => {|
++    const e = K('e', 12, { name: 'Fire Energy', typ: 'Energy' });|
++    const sp = K('s', 3, { name: 'Enriching Energy', typ: 'Energy' });|
++    assert.deepEqual(L.deckzeilenAus([e, sp]), ['12 Fire Energy TWM e', '3 Enriching Energy TWM s']);|
++    assert.deepEqual(L.auswahlUmfang([e, sp, K('1', 2)]), { karten: 3, stueck: 5 });|
++    assert.equal(L.istBasisEnergie(sp), false);|
++    assert.equal(L.istBasisEnergie(K('x', 1, { name: 'Fire Energy', typ: 'Item' })), false);|
++  });|
++  it('Der Kopierknopf zeigt die Zahl der Zeilen, nicht die der Eintraege', () => {|
++    assert.match(code, /tx\('abx\.kopieren', \{ n: deckzeilenAus\(sichtbareKarten\)\.length \}/);|
++    assert.doesNotMatch(code, /abx\.kopieren', \{ n: sichtbareKarten\.length/);|
++  });|
++});|
+diff --git a/version.json b/version.json|
+index 2efbc348..54bc2ab9 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610031731"}|
+\ No newline at end of file|
++{"version":"202610031921"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

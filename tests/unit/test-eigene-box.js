@@ -152,3 +152,43 @@ describe('Eigene Box anlegen sieht aus wie ein Knopf (Hausi, 03.10.2026)', () =>
     assert.match(CSS, /abx-eigen-knopf::before \{ content: '\+'/);
   });
 });
+
+describe('Rutsch P: Box-Ansicht (Hausi, 03.10.2026)', () => {
+  const code = QUELLE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const mk = (id, set, number, name, gef) => ({ id, set, number, name, gefordert: gef });
+
+  it('Kopieren: eine Zeile je Karte, Anzahl = hoechstens gespielt (mind. 1), Format "n Name SET Nr"', () => {
+    const z = L.deckzeilenAus([mk('a', 'DRI', '9', 'Mow Rotom', 3), mk('b', 'PFL', '29', 'Rotom ex', 0), mk('c', 'OBF', '186', 'Arven', 4)]);
+    assert.deepEqual(z, ['3 Mow Rotom DRI 9', '1 Rotom ex PFL 29', '4 Arven OBF 186']);
+  });
+  it('Kopieren: dieselbe Karte nur einmal (ueber die ID, nicht den Namen)', () => {
+    const z = L.deckzeilenAus([mk('a', 'DRI', '9', 'Mow Rotom', 3), mk('a', 'DRI', '9', 'Mow Rotom', 2), mk('x', 'TWM', '1', 'Mow Rotom', 1)]);
+    assert.equal(z.length, 2);
+  });
+  it('Kopieren: das Ergebnis liest der Deckbuilder-Parser (count, Name, Set, Nummer)', () => {
+    const re = /^\s*(\d+)\s+(.+?)\s+([A-Z][A-Z0-9]+)\s+([A-Za-z0-9]+)\s*$/;
+    L.deckzeilenAus([mk('a', 'DRI', '9', 'Mow Rotom', 3), mk('c', 'MEE', '4', 'Basic Lightning Energy', 4)]).forEach((zeile) => assert.match(zeile, re));
+  });
+  it('Kopierknopf haengt an der gefilterten Ansicht und ist verdrahtet', () => {
+    assert.match(code, /sichtbareKarten = eintraege\.map\(/);
+    assert.match(code, /onclick="ArchetypBox\.kopieren\(\)"/);
+    assert.match(code, /kopieren: kopieren,/);
+    assert.match(code, /navigator\.clipboard\.writeText\(text\)/);
+  });
+  it('Eigene Box hat Stufe "eigen" (Balken), auch ohne Formatdaten', () => {
+    const b = L.neueEigeneBox('Rotom', '2026-10-03');
+    assert.equal(L.boxStufe(b, null), 'eigen');
+    assert.equal(L.boxStufe(b, { aktuell: 'X' }), 'eigen');
+    assert.equal(L.chipReihe([b], null, null)[0].stufe, 'eigen');
+    assert.match(code, /\['gespielt', 'legal', 'raus', 'eigen'\]/);
+  });
+  it('Keine Namensliste mehr ueber der Kartenansicht', () => {
+    assert.ok(!/boxen\.map\(nameVon\)\.join\(', '\)/.test(code), 'Namensliste "Alle Boxen" ist zurueck');
+    assert.ok(!/liste: alt\.map\(nameVon\)/.test(code), 'Namensliste "noch nicht abgeglichen" ist zurueck');
+  });
+  it('Standard-Marke steht an der Einzel- und an der Zusammen-Kachel', () => {
+    assert.equal((code.match(/\+ legalMarke\(k\)/g) || []).length, 2);
+    assert.match(code, /abx-legal-standard/);
+    assert.match(code, /abx-legal-expanded/);
+  });
+});

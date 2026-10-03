@@ -46,6 +46,8 @@
 .abx-stufe-gespielt .abx-stufe-punkt { background: var(--tint-ok-ink); }
 .abx-stufe-legal .abx-stufe-punkt { background: var(--tint-warn-ink); }
 .abx-stufe-raus .abx-stufe-punkt { background: var(--ink-3); }
+.abx-chip.abx-stufe-eigen { background: var(--umschalter-bg); border-left: 4px solid var(--umschalter-ink); }
+.abx-stufe-eigen .abx-stufe-punkt { background: var(--umschalter-ink); }
 .abx-chip.is-active { border-color: var(--brand); }
 /* UI-52: eine Variante steht direkt hinter ihrer Familienbox und ist
    leiser gesetzt. */
@@ -353,3 +355,8 @@
 
 /* Das Einfuegefeld: gross genug zum Arbeiten, 16 px gegen den iOS-Zoom beim Antippen. */
 .abx-liste textarea { min-height: 16em; font-size: 16px; line-height: 1.4; }
+
+/* Standard-Marke an der Kachel (Hausi, 03.10.2026): beim Durchblaettern sehen, ob eine Karte Standard ist. */
+.abx-legal { flex: 0 0 auto; padding: 1px 8px; border-radius: 999px; font-size: var(--fs-xs); font-weight: 700; line-height: 1.5; white-space: nowrap; }
+.abx-legal-standard { background: var(--tint-ok); color: var(--tint-ok-ink); }
+.abx-legal-expanded { background: var(--surface-2, var(--surface-1)); color: var(--ink-2); border: 1px solid var(--line); }

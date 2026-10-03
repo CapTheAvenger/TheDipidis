@@ -125,6 +125,11 @@ describe('Rutsch O: Verdrahtung', () => {
       assert.equal(I.split("'" + k + "':").length - 1, 2, k);
     }
   });
+  it('"Eigene Box anlegen" steht oben, vor der Kartenliste (Hausi 03.10.: sonst nicht zu finden)', () => {
+    const z = code.split('wurzel.innerHTML = kopf + hinweis')[1].split(';')[0];
+    assert.ok(z.indexOf('eigeneBoxBlock()') >= 0 && z.indexOf('eigeneBoxBlock()') < z.indexOf('hauptteil'), z);
+    assert.ok(z.indexOf('eigeneBoxBlock()') < z.indexOf('filterLeiste'));
+  });
   it('Oeffentliche Funktionen sind ausgeliefert', () => {
     assert.match(QUELLE, /eigeneAnlegen: eigeneAnlegen,\s*listeEinfuegen: listeEinfuegen/);
   });

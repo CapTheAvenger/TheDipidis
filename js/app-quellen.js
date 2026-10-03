@@ -243,7 +243,7 @@
                          'Ein Deck taucht in der Auswertung erst auf, wenn mindestens so viele ' +
                          'Spieler es gespielt haben. Darunter ist die Quote Rauschen. Die ' +
                          'Schwelle hängt am Format und steht deshalb bei der Empfehlung selbst.'],
-                        ['„% vom Feld sind neu“',
+                        ['„% vom Meta sind neu“',
                          'Der Anteil des Feldes, für den es noch keine Präsenzdaten gibt — ' +
                          'meist frisch gebaute Decks aus dem Online-Fenster. Gegen sie ist der ' +
                          'Pick ungetestet, weil sie in keinem ausgewerteten Turnier vorkamen.'],
@@ -406,7 +406,7 @@
                          'A deck only enters the evaluation once at least that many players ran ' +
                          'it. Below that the rate is noise. The threshold depends on the format ' +
                          'and therefore stands with the recommendation itself.'],
-                        ['“% of the field is new”',
+                        ['“% of the meta is new”',
                          'The share of the field with no in-person data yet — mostly freshly ' +
                          'built decks from the online window. The pick is untested against them ' +
                          'because they appeared in none of the evaluated tournaments.'],

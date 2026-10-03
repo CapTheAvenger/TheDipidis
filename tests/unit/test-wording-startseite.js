@@ -67,7 +67,7 @@ describe('Die neuen Formulierungen stehen in beiden Sprachen', () => {
         // der Turniere war Schluss, nicht in 75 %. Faktor 33.
         [EMPF, "'Und trotzdem: von je vier Spielern dieses Decks scheitern rund '", "'And still: about '"],
         [EMPF, "' % der Antritte, gemittelt über '", "' % of entries, averaged over '"],
-        [EMPF, "' % vom Feld sind neu.</strong> '", null],
+        [EMPF, "' % vom Meta sind neu.</strong> '", null],
         [HUB, "'Was gerade läuft'", "'What is running right now'"],
     ];
     for (const [quelle, de, en] of paare) {
@@ -79,7 +79,7 @@ describe('Die neuen Formulierungen stehen in beiden Sprachen', () => {
 
     it('der Vorbehalt spricht in beiden Sprachen vom Pick, nicht von der Empfehlung', () => {
         // Sonst heißt dasselbe Ding auf einer Seite zweimal anders.
-        assert.match(EMPF, /% vom Feld sind neu/);
+        assert.match(EMPF, /% vom Meta sind neu/);
         assert.match(EMPF, /The pick is untested against those decks/);
         assert.ok(!/The recommendation is untested/.test(EMPF));
     });
@@ -162,7 +162,7 @@ describe('Was von der Startseite wegging, steht unter Quellen & Methodik', () =>
         ['„schafft Day 2“', '“makes Day 2”'],
         ['„Day-2-Rate bisher“', '“Day 2 rate so far”'],
         ['„min. 30 pro Deck“', '“min. 30 per deck”'],
-        ['„% vom Feld sind neu“', '“% of the field is new”'],
+        ['„% vom Meta sind neu“', '“% of the meta is new”'],
     ];
     for (const [de, en] of begriffe) {
         it(`${de} ist erklärt — deutsch und englisch`, () => {

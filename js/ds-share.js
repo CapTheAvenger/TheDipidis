@@ -618,7 +618,7 @@
             L('Top-8-Quote · online', 'Top-8 rate · online'),
             hasConv
                 ? (isFinite(convFeld)
-                    ? L('Schnitt aller Decks ', 'field average ') + num(convFeld, 2) + ' %'
+                    ? L('Schnitt aller Decks ', 'meta average ') + num(convFeld, 2) + ' %'
                     : num(spec.top8, 0) + ' / ' + num(spec.brought, 0))
                 : L('zu wenig Daten', 'not enough data'),
             /* „empirisch-bayessche Glaettung, K=50" ist weg (11.09.2026).
@@ -630,8 +630,8 @@
                bleibt auch — ohne ihn stuende dort ein Strich ohne Grund. */
             hasConv
                 ? (spec.thin
-                    ? L('kleine Stichprobe — zum Feld hin geglättet',
-                        'small sample — smoothed toward the field')
+                    ? L('kleine Stichprobe — zum Meta hin geglättet',
+                        'small sample — smoothed toward the meta')
                     : '')
                 : L('Deck fehlt in der Top-Cut-Datei', 'deck absent from the top-cut file'),
             /* Day 2 hat KEINE Online-Seite — Online-Turniere haben keinen
@@ -640,7 +640,7 @@
             isFinite(spec.majorDay2)
                 ? 'Day 2 (Major) ' + num(spec.majorDay2, 1) + ' %'
                     + (isFinite(spec.majorDay2Feld)
-                        ? '  ·  ' + L('Schnitt', 'field') + ' ' + num(spec.majorDay2Feld, 1) + ' %'
+                        ? '  ·  ' + L('Schnitt', 'meta') + ' ' + num(spec.majorDay2Feld, 1) + ' %'
                         : '')
                 : (isFinite(spec.majorDay2Antritte) && spec.majorDay2Antritte > 0
                     /* Unterscheidet "war nicht dabei" von "zu wenige

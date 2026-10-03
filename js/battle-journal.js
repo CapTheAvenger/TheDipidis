@@ -3254,6 +3254,24 @@
             }
             return true;
         }
+        const JZ = (typeof window !== 'undefined') ? window.JournalZuordnung : null;
+        const zuordnen = !!(JZ && options && options.gegnerZuordnen);
+        function _kartenNamen(snap) {
+            const map = (typeof window !== 'undefined' && window.cardsBySetNumberMap) || {};
+            const raus = {};
+            Object.keys((snap && snap.cards) || {}).forEach(function(k) {
+                const c = map[k];
+                if (!c || !c.name) return;
+                const g = JZ.norm(String(c.name).replace(/\s+(ex|EX|V|VSTAR|VMAX|GX)$/, ''));
+                raus[g] = (raus[g] || 0) + (Number(snap.cards[k]) || 0);
+            });
+            return raus;
+        }
+        function _gehoertPerSchnappschuss(e) {
+            if (!JZ || !e || !e.deckSnapshot) return false;
+            return JZ.gehoertZuEigenem({ ownDeck: '', deckSnapshot: e.deckSnapshot }, ownDeck,
+                (options && options.bekannteDecks) || [], _kartenNamen).ja;
+        }
         const all = Array.isArray(journalHistoryCache) ? journalHistoryCache : [];
         const matchups = {};
         all.forEach(function(e) {
@@ -3263,8 +3281,15 @@
             // gespielt. Ohne diese Zeile landet er unten im `else` und
             // zaehlt als Unentschieden.
             if (istNoShow(e)) return;
-            if (!_gehoertZuEigenemDeck(e.ownDeck)) return;
-            const opp = e.opponentArchetype;
+            if (!_gehoertZuEigenemDeck(e.ownDeck) && !_gehoertPerSchnappschuss(e)) return;
+            let opp = e.opponentArchetype;
+            if (zuordnen) {
+                /* FE-20: Gegnernamen nur bei SICHERER Zuordnung zusammenfuehren;
+                   der Rest bleibt unter seinem eigenen Namen (und erscheint in der
+                   Liste „nicht zugeordnet"). */
+                const z = JZ.ordneZu(opp, options.bekannteDecks, options.manuell);
+                if (z.deck) opp = z.deck;
+            }
             if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0 };
             matchups[opp].total++;
             if (e.result === 'win')       matchups[opp].wins++;
@@ -3284,6 +3309,27 @@
         return result;
     }
     window.getBattleJournalWinRates = getBattleJournalWinRates;
+    /** FE-20: Gegnernamen des Journals, die keinem bekannten Deck sicher zugeordnet
+     *  werden koennen. @returns {Array<{name,total,art}>} absteigend nach Partien. */
+    function getBattleJournalUnzugeordnet(options) {
+        const JZ = window.JournalZuordnung;
+        if (!JZ) return [];
+        const bekannte = (options && options.bekannteDecks) || [];
+        const all = Array.isArray(journalHistoryCache) ? journalHistoryCache : [];
+        const zaehl = {};
+        all.forEach(function(e) {
+            if (!e || !e.opponentArchetype || istNoShow(e)) return;
+            if (options && options.excludeBricks && e.brick) return;
+            const z = JZ.ordneZu(e.opponentArchetype, bekannte, options && options.manuell);
+            if (z.deck) return;
+            const k = JZ.norm(e.opponentArchetype);
+            if (!zaehl[k]) zaehl[k] = { name: String(e.opponentArchetype), total: 0, art: z.art };
+            zaehl[k].total++;
+        });
+        return Object.keys(zaehl).map(function(k) { return zaehl[k]; })
+            .sort(function(x, y) { return y.total - x.total || x.name.localeCompare(y.name); });
+    }
+    window.getBattleJournalUnzugeordnet = getBattleJournalUnzugeordnet;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBattleJournal, { once: true });

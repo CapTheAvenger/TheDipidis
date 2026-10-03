@@ -17,8 +17,9 @@
  * Bereich: js/app-meta-call.js, js/win-rate-konvention.js und die
  * `mc.*`-Schluessel in js/i18n.js (deutsch UND englisch).
  *
- * NICHT GEPRUEFT: Nebenbereiche (Playtest „Spielfeld", Deck-Detail-Bild,
- * Deck-Empfehlung, Matchup-Tab) — ob die Regel dort ebenfalls gilt, ist offen.
+ * Nebenbereiche seit Rutsch N (Betreiber: „Feld in immer Meta"): Deck-Detail-Bild
+ * (js/ds-share.js), Deck-Empfehlung, Matchup-Tab-Schluessel. „Spielfeld" im
+ * Playtest ist ein echtes Spielbrett und bleibt.
  */
 'use strict';
 const { describe, it } = require('node:test');
@@ -63,7 +64,7 @@ function literale(quelle) {
 function befunde(datei, nurMc) {
   const q = lies(datei);
   const liste = datei.endsWith('i18n.js')
-    ? q.split('\n').map((z, i) => ({ z, i })).filter(({ z }) => /^\s*'mc\.[A-Za-z0-9_]+'\s*:/.test(z))
+    ? q.split('\n').map((z, i) => ({ z, i })).filter(({ z }) => /^\s*'(?:mc\.[A-Za-z0-9_]+|matchup\.uvTag2Titel|aria\.fullSpread)'\s*:/.test(z))
         .map(({ z, i }) => ({ zeile: i + 1, text: z }))
     : literale(q);
   const raus = [];
@@ -78,7 +79,7 @@ function befunde(datei, nurMc) {
   return raus;
 }
 
-const DATEIEN = ['js/app-meta-call.js', 'js/win-rate-konvention.js', 'js/i18n.js'];
+const DATEIEN = ['js/app-meta-call.js', 'js/win-rate-konvention.js', 'js/i18n.js', 'js/ds-share.js', 'js/app-deckempfehlung.js'];
 
 describe('W5 — kein „Feld" im Meta Call', () => {
   for (const d of DATEIEN) {

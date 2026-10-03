@@ -1708,6 +1708,7 @@
             return { karten: a.karten + u.karten, stueck: a.stueck + u.stueck, fehlen: a.fehlen + u.fehlen, offen: a.offen + u.offen };
         }, { karten: 0, stueck: 0, fehlen: 0, offen: 0 });
         alle.verschieden = verschiedeneKarten(boxen);
+        alle.boxen = boxen.length;
         const chip = function (id, name, u, stufe, rang) {
             const aktiv = boxen.length === 1 || (id || null) === (aktiveId || null);
             const stufeText = stufe ? tx('abx.stufe.' + stufe, { fmt: (kontext && kontext.aktuell) || '' }, stufe) : '';
@@ -1719,7 +1720,7 @@
                 + '<span class="abx-chip-name">' + (stufe ? '<span class="abx-stufe-punkt" aria-hidden="true"></span>' : '')
                 + esc(name) + (stufeText ? '<span class="visually-hidden"> (' + esc(stufeText) + ')</span>' : '') + '</span>'
                 + '<span class="abx-chip-zahl">' + esc(u.verschieden != null
-                    ? tx('abx.chipUmfangAlle', { plaetze: u.karten, karten: u.verschieden, stueck: u.stueck }, '{plaetze} Kartenplätze · {karten} verschiedene Karten · {stueck} Stück')
+                    ? tx('abx.chipUmfangAlle', { boxen: u.boxen, karten: u.verschieden, stueck: u.stueck }, '{boxen} Boxen · {karten} verschiedene Karten · {stueck} Stück')
                     : tx('abx.chipUmfang', { karten: u.karten, stueck: u.stueck }, '{karten} Karten · {stueck} Stück')) + '</span>'
                 + '<span class="abx-chip-zahl">' + esc(u.verschieden != null
                     ? tx('abx.chipOffenAlle', { offen: u.offen }, '{offen} Stück offen')

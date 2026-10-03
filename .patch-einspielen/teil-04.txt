@@ -1,0 +1,72 @@
++      <option value="">${esc(t('mc.journalNichtZugeordnet'))}</option>${decks.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('')}</select></li>`).join('')}</ul></details>` : '';|
++    const kopf = partien > 0 ? t('mc.journalKopf', { n: partien, g: her.length }) : t('mc.journalKeine');|
++    return `<div class="mc-journal-zuordnung">${an}<p class="mc-journal-hinweis">${esc(kopf)}</p>|
++      ${zeilen ? `<details class="mc-journal-herkunft"><summary>${esc(t('mc.journalHerkunftTitel'))}</summary><ul>${zeilen}</ul></details>` : ''}${offenHtml}</div>`;|
++  }|
++|
+   function _bekannteDeckNamen() {|
+@@ -15807,11 +15896,3 @@ window.MetaCall = (function () {|
+     _winRateOverrides = {};|
+-    _journalStats     = {};|
+-    _journalRateKeys  = [];|
+-    if (val && typeof window.getBattleJournalWinRates === 'function') {|
+-      const rates = window.getBattleJournalWinRates(val, 1, { excludeBricks: _settings.excludeBricks, bekannteDecks: _bekannteDeckNamen() });|
+-      Object.keys(rates).forEach(opp => {|
+-        _journalStats[opp] = rates[opp];|
+-        if (rates[opp].total >= 3) _journalRateKeys.push(opp);|
+-      });|
+-    }|
++    _ladeJournal(val);|
+     // Preserve scroll so the user stays where they were picking the deck|
+@@ -16316,11 +16397,3 @@ window.MetaCall = (function () {|
+     // Rebuild journal stats for the new deck if one is set|
+-    _journalStats = {};|
+-    _journalRateKeys = [];|
+-    if (_settings.myDeck && typeof window.getBattleJournalWinRates === 'function') {|
+-      const rates = window.getBattleJournalWinRates(_settings.myDeck, 1, { excludeBricks: _settings.excludeBricks, bekannteDecks: _bekannteDeckNamen() });|
+-      Object.keys(rates).forEach(opp => {|
+-        _journalStats[opp] = rates[opp];|
+-        if (rates[opp].total >= 3) _journalRateKeys.push(opp);|
+-      });|
+-    }|
++    _ladeJournal(_settings.myDeck);|
+   }|
+@@ -16872,2 +16945,4 @@ window.MetaCall = (function () {|
+     _onBrickFilter,|
++    _onJournalAn,|
++    _onJournalZuordnen,|
+     _setEvUmfang,|
+diff --git a/js/app-quellen.js b/js/app-quellen.js|
+index e2b6c8ca..8188a5f3 100644|
+--- a/js/app-quellen.js|
++++ b/js/app-quellen.js|
+@@ -245,3 +245,3 @@|
+                          'Schwelle hängt am Format und steht deshalb bei der Empfehlung selbst.'],|
+-                        ['„% vom Feld sind neu“',|
++                        ['„% vom Meta sind neu“',|
+                          'Der Anteil des Feldes, für den es noch keine Präsenzdaten gibt — ' +|
+@@ -408,3 +408,3 @@|
+                          'and therefore stands with the recommendation itself.'],|
+-                        ['“% of the field is new”',|
++                        ['“% of the meta is new”',|
+                          'The share of the field with no in-person data yet — mostly freshly ' +|
+ diff --git a/js/archetyp-box.js b/js/archetyp-box.js|
+index c06bb623..65992798 100644|
+--- a/js/archetyp-box.js|
++++ b/js/archetyp-box.js|
+@@ -1710,2 +1710,3 @@|
+         alle.verschieden = verschiedeneKarten(boxen);|
++        alle.boxen = boxen.length;|
+         const chip = function (id, name, u, stufe, rang) {|
+@@ -1721,3 +1722,3 @@|
+                 + '<span class="abx-chip-zahl">' + esc(u.verschieden != null|
+-                    ? tx('abx.chipUmfangAlle', { plaetze: u.karten, karten: u.verschieden, stueck: u.stueck }, '{plaetze} Kartenplätze · {karten} verschiedene Karten · {stueck} Stück')|
++                    ? tx('abx.chipUmfangAlle', { boxen: u.boxen, karten: u.verschieden, stueck: u.stueck }, '{boxen} Boxen · {karten} verschiedene Karten · {stueck} Stück')|
+                     : tx('abx.chipUmfang', { karten: u.karten, stueck: u.stueck }, '{karten} Karten · {stueck} Stück')) + '</span>'|
+diff --git a/js/battle-journal.js b/js/battle-journal.js|
+index e2210355..52d15f2a 100644|
+--- a/js/battle-journal.js|
++++ b/js/battle-journal.js|
+@@ -3256,2 +3256,20 @@|
+         }|
++        const JZ = (typeof window !== 'undefined') ? window.JournalZuordnung : null;|

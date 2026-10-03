@@ -1,0 +1,105 @@
+From 618a7c9d49f5eb409e66eb1cf3ec644f68fb45f6 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sat, 3 Oct 2026 07:25:57 +0200|
+Subject: [PATCH] Rutsch N: FE-20 Journal-Zuordnung und -Schalter, Feld->Meta,|
+ Alle-Boxen-Zaehler, UI-69|
+|
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01GJRPmzWKvVLov74GZFLXL7|
+---|
+ css/meta-call.css                         |  66 ++--------|
+ index.html                                | Bin 365226 -> 365299 bytes|
+ js/app-deckempfehlung.js                  |   4 +-|
+ js/app-meta-call.js                       | 111 ++++++++++++++---|
+ js/app-quellen.js                         |   4 +-|
+ js/archetyp-box.js                        |   3 +-|
+ js/battle-journal.js                      |  50 +++++++-|
+ js/ds-share.js                            |   8 +-|
+ js/i18n.js                                |  76 ++++++------|
+ js/journal-zuordnung.js                   | 142 ++++++++++++++++++++++|
+ service-worker.js                         | Bin 15782 -> 15813 bytes|
+ tests/e2e_i18n_language_purity.py         |   4 +-|
+ tests/unit/test-fe20-journal-zuordnung.js | 101 +++++++++++++++|
+ tests/unit/test-rutsch-c.js               |   6 +-|
+ tests/unit/test-rutsch-h-straffen.js      |   7 +-|
+ tests/unit/test-w5-hausname-meta.js       |   9 +-|
+ tests/unit/test-wording-startseite.js     |   6 +-|
+ version.json                              |   2 +-|
+ 18 files changed, 464 insertions(+), 135 deletions(-)|
+ create mode 100644 js/journal-zuordnung.js|
+ create mode 100644 tests/unit/test-fe20-journal-zuordnung.js|
+|
+diff --git a/css/meta-call.css b/css/meta-call.css|
+index 9caa3d0f..cf3f36f1 100644|
+--- a/css/meta-call.css|
++++ b/css/meta-call.css|
+@@ -756,58 +756,2 @@|
+ |
+-/* Win rate overrides table */|
+-.mc-override-panel {|
+-  margin-top: 14px;|
+-  display: none;|
+-}|
+-.mc-override-panel.open {|
+-  display: block;|
+-}|
+-.mc-override-table {|
+-  width: 100%;|
+-  border-collapse: collapse;|
+-  font-size: 0.86rem;|
+-}|
+-.mc-override-table th {|
+-  text-align: left;|
+-  padding: 6px 10px;|
+-  border-bottom: 1px solid var(--mc-border);|
+-  font-size: 0.75rem;|
+-  font-weight: 700;|
+-  text-transform: uppercase;|
+-  letter-spacing: 0.04em;|
+-  color: var(--on-dark);|
+-}|
+-.mc-override-table td {|
+-  padding: 5px 10px;|
+-  border-bottom: 1px solid var(--mc-border-faint);|
+-  vertical-align: middle;|
+-}|
+-.mc-wr-meta {|
+-  color: var(--color-info-ink);|
+-  font-size: 0.84rem;|
+-}|
+-/* Dieselbe Luecke wie bei .mc-share-personal daneben. */|
+-.mc-wr-override input[type="number"] {|
+-  width: 68px;|
+-  padding: 4px 6px;|
+-  border: 1px solid var(--mc-border-strong);|
+-  border-radius: 6px;|
+-  font-size: 0.84rem;|
+-  text-align: center;|
+-  background: var(--mc-bg-subtle);|
+-  color: var(--mc-text-heading);|
+-}|
+-.mc-wr-override input[type="number"]:focus {|
+-  outline: none;|
+-  border-color: var(--mc-personal-accent);|
+-  background: var(--surface-1);|
+-}|
+-.mc-wr-indicator {|
+-  font-size: 0.78rem;|
+-  font-weight: 700;|
+-}|
+-.mc-wr-indicator.favorable { color: var(--color-success-ink); }|
+-.mc-wr-indicator.even { color: var(--color-warning-ink); }|
+-.mc-wr-indicator.unfavorable { color: var(--color-danger-ink); }|
+-|
+ /* --- Results Panel --- */|
+@@ -4313 +4257,11 @@|
+ .mc-ev-bilanz { letter-spacing: 0.02em; }|
++|
++/* FE-20: Journal einbeziehen, Herkunft je Gegner, nicht zugeordnete Namen */|
++.mc-journal-zuordnung { margin-top: 10px; font-size: 0.9rem; }|
++.mc-journal-an { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; cursor: pointer; }|
++.mc-journal-hinweis { margin: 4px 0; color: var(--ink-2, #667); }|
++.mc-journal-zuordnung details { margin-top: 6px; }|
++.mc-journal-zuordnung summary { cursor: pointer; min-height: 32px; }|
++.mc-journal-zuordnung ul { margin: 6px 0 0; padding-left: 18px; }|
++.mc-journal-offen li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 6px; list-style: none; margin-left: -18px; }|

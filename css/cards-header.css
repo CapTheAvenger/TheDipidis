@@ -90,6 +90,17 @@
     z-index: 1;
 }
 
+/* UI-72 (03.10.2026): Die Zeile mit dem Pokeball-Menue muss ueber dem
+ * Seiteninhalt liegen. `.cards-header` bildet keinen eigenen Stapel, also
+ * konkurriert z-index 1 hier mit allem darunter — Heatmap-Spaltenkoepfe
+ * (sticky, z 2), Tier-Kacheln und die Handy-Reiterleiste (fixed, 900)
+ * lagen ueber dem aufgeklappten Menue, ein Klick auf „Meta Call" traf eine
+ * Archetyp-Kachel. Knapp unter dem Modal-Hintergrund, damit Dialoge
+ * weiter darueber liegen. */
+.cards-header > .header-flex-row {
+    z-index: calc(var(--z-modal-backdrop) - 1);
+}
+
 /* Auf dem Telefon steht der Kopf gestapelt und ist doppelt so hoch.
  * Dieselbe Lage waere dort ein Fleck mitten im Bild — also nur noch
  * eine Bluete in der Ecke, kleiner und blasser. */

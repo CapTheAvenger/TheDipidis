@@ -1,0 +1,35 @@
+     }|
+diff --git a/service-worker.js b/service-worker.js|
+index 17e60e3589d66bb9c29f54c6e949e4d1ac8afd43..6026bc180aa87c3bbfbc21be015a550e23422097 100644|
+GIT binary patch|
+delta 25|
+dcmX?FeYARlHH)EvvE@elN=7ha^BzV{8vuBC2n_%L|
+|
+delta 25|
+dcmX?FeYARlHH(3zsqsepN=7ha^BzV{8vuCj2o(ST|
+|
+diff --git a/tests/unit/test-eigene-box.js b/tests/unit/test-eigene-box.js|
+index dcfaaef6..e94b64ca 100644|
+--- a/tests/unit/test-eigene-box.js|
++++ b/tests/unit/test-eigene-box.js|
+@@ -127,2 +127,7 @@ describe('Rutsch O: Verdrahtung', () => {|
+   });|
++  it('"Eigene Box anlegen" steht oben, vor der Kartenliste (Hausi 03.10.: sonst nicht zu finden)', () => {|
++    const z = code.split('wurzel.innerHTML = kopf + hinweis')[1].split(';')[0];|
++    assert.ok(z.indexOf('eigeneBoxBlock()') >= 0 && z.indexOf('eigeneBoxBlock()') < z.indexOf('hauptteil'), z);|
++    assert.ok(z.indexOf('eigeneBoxBlock()') < z.indexOf('filterLeiste'));|
++  });|
+   it('Oeffentliche Funktionen sind ausgeliefert', () => {|
+diff --git a/version.json b/version.json|
+index 7d9495fb..18a95b50 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610030953"}|
+\ No newline at end of file|
++{"version":"202610031039"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

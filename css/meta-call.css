@@ -754,62 +754,6 @@
   color: var(--color-info-hover);
 }
 
-/* Win rate overrides table */
-.mc-override-panel {
-  margin-top: 14px;
-  display: none;
-}
-.mc-override-panel.open {
-  display: block;
-}
-.mc-override-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.86rem;
-}
-.mc-override-table th {
-  text-align: left;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--mc-border);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--on-dark);
-}
-.mc-override-table td {
-  padding: 5px 10px;
-  border-bottom: 1px solid var(--mc-border-faint);
-  vertical-align: middle;
-}
-.mc-wr-meta {
-  color: var(--color-info-ink);
-  font-size: 0.84rem;
-}
-/* Dieselbe Luecke wie bei .mc-share-personal daneben. */
-.mc-wr-override input[type="number"] {
-  width: 68px;
-  padding: 4px 6px;
-  border: 1px solid var(--mc-border-strong);
-  border-radius: 6px;
-  font-size: 0.84rem;
-  text-align: center;
-  background: var(--mc-bg-subtle);
-  color: var(--mc-text-heading);
-}
-.mc-wr-override input[type="number"]:focus {
-  outline: none;
-  border-color: var(--mc-personal-accent);
-  background: var(--surface-1);
-}
-.mc-wr-indicator {
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-.mc-wr-indicator.favorable { color: var(--color-success-ink); }
-.mc-wr-indicator.even { color: var(--color-warning-ink); }
-.mc-wr-indicator.unfavorable { color: var(--color-danger-ink); }
-
 /* --- Results Panel --- */
 .metacall-results-grid {
   display: grid;
@@ -4311,3 +4255,13 @@
 .mc-uebersicht .mc-ev-kacheln { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
 .mc-uebersicht .mc-ev-wert { font-size: 1.35rem; }
 .mc-ev-bilanz { letter-spacing: 0.02em; }
+
+/* FE-20: Journal einbeziehen, Herkunft je Gegner, nicht zugeordnete Namen */
+.mc-journal-zuordnung { margin-top: 10px; font-size: 0.9rem; }
+.mc-journal-an { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; cursor: pointer; }
+.mc-journal-hinweis { margin: 4px 0; color: var(--ink-2, #667); }
+.mc-journal-zuordnung details { margin-top: 6px; }
+.mc-journal-zuordnung summary { cursor: pointer; min-height: 32px; }
+.mc-journal-zuordnung ul { margin: 6px 0 0; padding-left: 18px; }
+.mc-journal-offen li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 6px; list-style: none; margin-left: -18px; }
+.mc-journal-offen select { max-width: 100%; min-height: 36px; }

@@ -455,8 +455,10 @@ def run():
         # absichtlich englisch, weil die Szene sie so sagt. Gemessen:
         # 108. Die Zahl ist ein Abdrift-Waechter, keine Qualitaetsgrenze;
         # sie soll melden, wenn UNGEWOLLT Uebersetzungen ausbleiben.
+        # 03.10.2026: 120 -> 125. 'matchup.fieldShare' heisst jetzt in beiden
+        # Sprachen 'Meta %' (Betreiber: "Feld ist immer Meta") — gemessen: 121.
         check(f"EN.8 identical EN/DE keys (excluding brand/TCG terms): {len(identical_keys)}",
-              len(identical_keys) <= 120,
+              len(identical_keys) <= 125,
               f"{len(identical_keys)} keys" if identical_keys else "")
 
         # ═══════════════════════════════════════════════════════

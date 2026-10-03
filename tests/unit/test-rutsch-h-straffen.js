@@ -55,8 +55,11 @@ describe('UI-63: Journal-Abgleich mit Namenszusatz', () => {
         assert.equal(ctx.f('Dragapult', 1, { bekannteDecks: BEKANNT }).X.total, 1, 'ohne Pruefung zaehlt sie mit');
     });
     it('Meta Call reicht die bekannten Decks durch', () => {
-        const treffer = QUELLE.match(/getBattleJournalWinRates\([^)]*bekannteDecks: _bekannteDeckNamen\(\)/g) || [];
-        assert.equal(treffer.length, 2);
+        /* FE-20: ein Lader, ein Optionenblock — beide Stellen laufen darueber. */
+        const aufrufe = QUELLE.match(/window\.getBattleJournalWinRates\(deck, 1, _journalOptionen\(\)\)/g) || [];
+        assert.equal(aufrufe.length, 1);
+        assert.match(QUELLE, /function _journalOptionen\(\)[\s\S]{0,200}bekannteDecks: _bekannteDeckNamen\(\)/);
+        assert.equal((QUELLE.match(/_ladeJournal\(/g) || []).length, 3, 'Definition + zwei Aufrufer');
     });
 });
 

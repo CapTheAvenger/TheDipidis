@@ -116,7 +116,7 @@ describe('UI-40: Online- und Major-Format einmal in der Ueberschrift', () => {
     });
 });
 
-describe('Alle Boxen: Kartenplaetze und verschiedene Karten (01.10.2026)', () => {
+describe('Alle Boxen: Boxen und verschiedene Karten (01.10.2026)', () => {
     const QUELLE = lies('js', 'archetyp-box.js');
     const L = (() => { const c = { module: { exports: {} }, console }; vm.runInNewContext(QUELLE, c); return c.module.exports; })();
     const k = (id, set, nr) => ({ id, set, number: nr, name: id, typ: 'Pokemon' });
@@ -132,6 +132,10 @@ describe('Alle Boxen: Kartenplaetze und verschiedene Karten (01.10.2026)', () =>
     });
     it('der Chip "Alle Boxen" nennt beide Zahlen', () => {
         assert.match(QUELLE, /alle\.verschieden = verschiedeneKarten\(boxen\)/);
+        assert.match(QUELLE, /alle\.boxen = boxen\.length/);
+        const zeileDe = I18N.split("'abx.chipUmfangAlle':")[2].split('\n')[0];
+        assert.ok(!/Kartenpl/.test(zeileDe), 'Kartenplaetze steht wieder im Chip (Hausi 03.10.: 7.500 verschiedene Karten)');
+        assert.ok(/\{boxen\}/.test(zeileDe));
         assert.match(QUELLE, /u\.verschieden != null\s*\?\s*tx\('abx\.chipUmfangAlle'/);
         assert.strictEqual(I18N.split("'abx.chipUmfangAlle':").length - 1, 2);
         assert.strictEqual(I18N.split("'abx.chipOffenAlle':").length - 1, 2);

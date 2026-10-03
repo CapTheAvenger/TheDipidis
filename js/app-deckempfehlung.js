@@ -195,10 +195,10 @@
         if (!oa || typeof oa.anteil_unbekannt !== 'number') return '';
         if (oa.anteil_unbekannt < VORBEHALT_AB) return '';
         var text = de()
-            ? '<strong>' + pz(oa.anteil_unbekannt) + ' % vom Feld sind neu.</strong> '
+            ? '<strong>' + pz(oa.anteil_unbekannt) + ' % vom Meta sind neu.</strong> '
               + 'Gegen die Decks ist der Pick ungetestet — '
               + '<a href="#meta-call">im Meta Call nachsehen</a>.'
-            : '<strong>' + pz(oa.anteil_unbekannt) + ' % of the field is new.</strong> '
+            : '<strong>' + pz(oa.anteil_unbekannt) + ' % of the meta is new.</strong> '
               + 'The pick is untested against those decks — '
               + '<a href="#meta-call">check the Meta Call</a>.';
         return '<p class="de-vorbehalt">' + text + '</p>';

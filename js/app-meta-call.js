@@ -11811,6 +11811,7 @@ window.MetaCall = (function () {
       </select>
     </div>
   </div>
+  ${renderJournalZuordnung()}
   <p class="mc-my-deck-status" id="mc-my-deck-status" role="status" aria-live="polite"
      style="margin:6px 0 0;font-size:0.85rem;color:var(--ink-2,#667)">${_myDeckStatusText()}</p>
 </div>`;
@@ -15798,6 +15799,94 @@ window.MetaCall = (function () {
     renderAll();
   }
 
+  /* FE-20 (03.10.2026): Journal einbeziehen — Schalter, Zuordnung, Herkunft.
+     Schalter und Handzuordnung liegen NUR hier (localStorage); das Journal
+     selbst wird nie veraendert. Aus = `_journalStats` leer = reine Meta-Zahlen. */
+  const JOURNAL_AN_KEY = 'metacall_journal_an_v1';
+  const JOURNAL_ZUORDNUNG_KEY = 'metacall_journal_zuordnung_v1';
+  let _journalAn = true;
+  let _journalManuell = {};
+  try {
+    _journalAn = localStorage.getItem(JOURNAL_AN_KEY) !== '0';
+    const roh = JSON.parse(localStorage.getItem(JOURNAL_ZUORDNUNG_KEY) || '{}');
+    if (roh && typeof roh === 'object' && !Array.isArray(roh)) _journalManuell = roh;
+  } catch (e) { /* ohne Speicher: Standard */ }
+
+  function _journalSpeichern() {
+    try {
+      localStorage.setItem(JOURNAL_AN_KEY, _journalAn ? '1' : '0');
+      localStorage.setItem(JOURNAL_ZUORDNUNG_KEY, JSON.stringify(_journalManuell));
+    } catch (e) { /* best effort */ }
+  }
+
+  function _journalOptionen() {
+    return { excludeBricks: _settings.excludeBricks, bekannteDecks: _bekannteDeckNamen(),
+             gegnerZuordnen: true, manuell: _journalManuell };
+  }
+
+  function _ladeJournal(deck) {
+    _journalStats    = {};
+    _journalRateKeys = [];
+    if (!_journalAn || !deck || typeof window.getBattleJournalWinRates !== 'function') return;
+    const rates = window.getBattleJournalWinRates(deck, 1, _journalOptionen());
+    Object.keys(rates).forEach(opp => {
+      _journalStats[opp] = rates[opp];
+      if (rates[opp].total >= 3) _journalRateKeys.push(opp);
+    });
+  }
+
+  function _onJournalAn(an) {
+    _journalAn = !!an;
+    _journalSpeichern();
+    _onMyDeck(_settings.myDeck);
+  }
+
+  function _onJournalZuordnen(name, ziel) {
+    const k = window.JournalZuordnung ? window.JournalZuordnung.norm(name) : '';
+    if (!k) return;
+    if (ziel) _journalManuell[k] = String(ziel); else delete _journalManuell[k];
+    _journalSpeichern();
+    _onMyDeck(_settings.myDeck);
+  }
+
+  /* Je Gegner mit Journalpartien: Meta-Quote, Mischquote, Partien, Gewicht. */
+  function _journalHerkunft() {
+    const meins = _settings.myDeck;
+    if (!_journalAn || !meins) return [];
+    return Object.keys(_journalStats).filter(o => (_journalStats[o].total || 0) > 0).map(o => {
+      const js = _journalStats[o];
+      const meta = getBaseMatchup(meins, o);
+      const n = js.total;
+      const gew = n / (30 + n);
+      const mix = meta ? (meta.pWin * (1 - gew) + (js.wins / n) * gew) : null;
+      return { name: o, partien: n, gewicht: gew,
+               meta: meta ? meta.pWin * 100 : null, mix: mix == null ? null : mix * 100 };
+    }).sort((a, b) => b.partien - a.partien);
+  }
+
+  function renderJournalZuordnung() {
+    const meins = _settings.myDeck;
+    const an = `<label class="mc-journal-an"><input type="checkbox" ${_journalAn ? 'checked' : ''}
+      onchange="MetaCall._onJournalAn(this.checked)"> ${esc(t('mc.journalEinbeziehen'))}</label>`;
+    if (!meins) return `<div class="mc-journal-zuordnung">${an}</div>`;
+    if (!_journalAn) return `<div class="mc-journal-zuordnung">${an}<p class="mc-journal-hinweis">${esc(t('mc.journalAusHinweis'))}</p></div>`;
+    const her = _journalHerkunft();
+    const partien = her.reduce((n, r) => n + r.partien, 0);
+    const offen = (typeof window.getBattleJournalUnzugeordnet === 'function')
+      ? window.getBattleJournalUnzugeordnet(_journalOptionen()) : [];
+    const decks = _bekannteDeckNamen();
+    const zeilen = her.map(r => `<li>${esc(t('mc.journalHerkunftZeile', {
+      name: r.name, meta: r.meta == null ? '–' : _mcNum(r.meta, 1), mix: r.mix == null ? '–' : _mcNum(r.mix, 1),
+      n: r.partien, gew: _mcNum(r.gewicht * 100, 0), nenner: 30 + r.partien }))}</li>`).join('');
+    const offenHtml = offen.length ? `<details class="mc-journal-offen"><summary>${esc(t('mc.journalOffenTitel', { n: offen.length }))}</summary>
+      <p class="mc-journal-hinweis">${esc(t('mc.journalOffenHinweis'))}</p><ul>${offen.slice(0, 40).map(o => `<li><span>${esc(o.name)} · ${esc(t('mc.journalPartienKurz', { n: o.total }))}</span>
+      <select onchange="MetaCall._onJournalZuordnen(${esc(JSON.stringify(o.name))}, this.value)" aria-label="${esc(t('mc.journalZuordnenLabel', { name: o.name }))}">
+      <option value="">${esc(t('mc.journalNichtZugeordnet'))}</option>${decks.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('')}</select></li>`).join('')}</ul></details>` : '';
+    const kopf = partien > 0 ? t('mc.journalKopf', { n: partien, g: her.length }) : t('mc.journalKeine');
+    return `<div class="mc-journal-zuordnung">${an}<p class="mc-journal-hinweis">${esc(kopf)}</p>
+      ${zeilen ? `<details class="mc-journal-herkunft"><summary>${esc(t('mc.journalHerkunftTitel'))}</summary><ul>${zeilen}</ul></details>` : ''}${offenHtml}</div>`;
+  }
+
   function _bekannteDeckNamen() {
     return (_shareList || []).map(d => d.name);
   }
@@ -15805,15 +15894,7 @@ window.MetaCall = (function () {
   function _onMyDeck(val) {
     _settings.myDeck = val;
     _winRateOverrides = {};
-    _journalStats     = {};
-    _journalRateKeys  = [];
-    if (val && typeof window.getBattleJournalWinRates === 'function') {
-      const rates = window.getBattleJournalWinRates(val, 1, { excludeBricks: _settings.excludeBricks, bekannteDecks: _bekannteDeckNamen() });
-      Object.keys(rates).forEach(opp => {
-        _journalStats[opp] = rates[opp];
-        if (rates[opp].total >= 3) _journalRateKeys.push(opp);
-      });
-    }
+    _ladeJournal(val);
     // Preserve scroll so the user stays where they were picking the deck
     const sy = window.scrollY;
     renderAll();
@@ -16314,15 +16395,7 @@ window.MetaCall = (function () {
     _feldAuswahlMerken();
 
     // Rebuild journal stats for the new deck if one is set
-    _journalStats = {};
-    _journalRateKeys = [];
-    if (_settings.myDeck && typeof window.getBattleJournalWinRates === 'function') {
-      const rates = window.getBattleJournalWinRates(_settings.myDeck, 1, { excludeBricks: _settings.excludeBricks, bekannteDecks: _bekannteDeckNamen() });
-      Object.keys(rates).forEach(opp => {
-        _journalStats[opp] = rates[opp];
-        if (rates[opp].total >= 3) _journalRateKeys.push(opp);
-      });
-    }
+    _ladeJournal(_settings.myDeck);
   }
 
   function _saveScenario() {
@@ -16870,6 +16943,8 @@ window.MetaCall = (function () {
     _onPersonalShare,
     _onWrOverride,
     _onBrickFilter,
+    _onJournalAn,
+    _onJournalZuordnen,
     _setEvUmfang,
     _onEvEinzelDeck,
     /* Einstieg von aussen: die Deck-Karten der Tier-Liste springen

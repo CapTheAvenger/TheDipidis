@@ -103,6 +103,7 @@
 .abx-treffer-name { font-weight: 600; font-size: var(--fs-sm); }
 .abx-treffer-druck { color: var(--ink-3); font-size: var(--fs-xs); white-space: nowrap; }
 
+.abx-umfang { margin: var(--s-3) 0 0; color: var(--ink); font-size: var(--fs-md, 1rem); font-weight: 700; }
 .abx-summe { margin: var(--s-3) 0 var(--s-2); color: var(--ink-2); font-size: var(--fs-sm); font-weight: 700; }
 
 /* ── Rubriken und Karten ── */

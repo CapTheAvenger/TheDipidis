@@ -1139,7 +1139,16 @@
         return zeilen;
     }
 
+    /** Umfang der Auswahl in Karten (verschieden) und Stueck (mit Kopien); gleiche Zahlen wie beim Kopieren. */
+    function auswahlUmfang(karten) {
+        const zeilen = deckzeilenAus(karten);
+        let stueck = 0;
+        zeilen.forEach(function (z) { stueck += parseInt(z, 10) || 0; });
+        return { karten: zeilen.length, stueck: stueck };
+    }
+
     const Logik = {
+        auswahlUmfang: auswahlUmfang,
         deckzeilenAus: deckzeilenAus,
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, verschiedeneKarten, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
@@ -2202,6 +2211,12 @@
         }, '{fehlt} fehlen · {original} als Original drin · {proxy} als Proxy drin'))
             + (eintraege.length < gesamt ? ' <span class="abx-gefiltert">' + esc(tx('abx.gefiltert', { n: eintraege.length, g: gesamt },
                 '({n} von {g} nach Filter)')) + '</span>' : '') + '</p>';
+        // Hausi, 03.10.2026: nicht nur die verschiedenen Karten, auch wie viele Stueck mit Kopien.
+        const au = auswahlUmfang(sichtbareKarten);
+        const umfangZeile = au.karten
+            ? '<p class="abx-umfang">' + esc(tx('abx.auswahlUmfang', { karten: au.karten, stueck: au.stueck },
+                '{karten} verschiedene Karten · {stueck} Stück mit Kopien')) + '</p>'
+            : '';
         let hauptteil;
         if (zusammen) {
             const gruppen = zusammenfassen(eintraege);
@@ -2222,7 +2237,7 @@
         }
         // Eigene Box oben (nicht ans Ende): bei "Alle Boxen" liegen darunter ueber tausend Karten.
         wurzel.innerHTML = kopf + hinweis + aktionen + eigeneBoxBlock() + erg + liste + suche + wiederBereich(gewaehlt, mitBoxName)
-            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + hauptteil;
+            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + umfangZeile + hauptteil;
     }
 
     function boxVon(boxId) { return boxen.find(function (b) { return b.id === boxId; }) || null; }

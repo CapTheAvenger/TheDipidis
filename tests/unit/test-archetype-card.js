@@ -189,7 +189,8 @@ describe('missing conversion data is said out loud', () => {
     });
 
     it('still shows share and win rate for such a deck', () => {
-        api.setData({ Dhelmise: { share: 4.45, winRate: 48.2, count: 900, partien: 3120 } },
+        // DA-34: die Kachel rechnet S/(S+N) aus Siegen und Niederlagen (1504/3120 = 48,2 %).
+        api.setData({ Dhelmise: { share: 4.45, winRate: 48.2, count: 900, partien: 3120, siege: 1504, niederlagen: 1616, unentschieden: 0 } },
                     { expected: 0.0632, decks: [] });
         const html = api.tilesHtml('Dhelmise');
         assert.match(html, /4,5 %/);

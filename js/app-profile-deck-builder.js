@@ -98,6 +98,11 @@
             pasteBtn:      'Liste übernehmen',
             pasteAdded:    (n, miss) => `${n} Karte(n) hinzugefügt` + (miss ? ` · ${miss} Zeilen nicht erkannt` : ''),
             clearBtn:      'Deck leeren',
+            saveBtn:       'In Meine Decks speichern',
+            saveAsk:       'Name des Decks:',
+            saveDone:      (name, n) => `„${name}" mit ${n} Karten in Meine Decks gespeichert`,
+            saveEmpty:     'Das Deck ist leer — erst Karten hinzufügen.',
+            saveNoAccount: 'Zum Speichern bitte anmelden.',
             mulliganTitle: 'Eröffnungs-Hand (7 Karten)',
             mulliganBasic: 'Basis-Pokémon in der Hand',
             mulliganMull:  'Mulligan',
@@ -150,6 +155,11 @@
             pasteBtn:      'Import list',
             pasteAdded:    (n, miss) => `Added ${n} card(s)` + (miss ? ` · ${miss} lines not recognised` : ''),
             clearBtn:      'Clear deck',
+            saveBtn:       'Save to My Decks',
+            saveAsk:       'Name of the deck:',
+            saveDone:      (name, n) => `"${name}" with ${n} cards saved to My Decks`,
+            saveEmpty:     'The deck is empty — add cards first.',
+            saveNoAccount: 'Please sign in to save.',
             mulliganTitle: 'Opening hand (7 cards)',
             mulliganBasic: 'Basic in hand',
             mulliganMull:  'Mulligan',
@@ -940,6 +950,26 @@
         return { ok: true, karten: nutzlast.totalCards, name: nutzlast.name };
     }
 
+    async function speichernInsKonto() {
+        const L = t();
+        if (countCards(ensureDeck()) === 0) { pulseToast(L.saveEmpty); return { ok: false, grund: 'leer' }; }
+        const angemeldet = !!(window.auth && window.auth.currentUser)
+            || !!(window.firebase && window.firebase.auth && window.firebase.auth().currentUser);
+        if (!angemeldet) { pulseToast(L.saveNoAccount); return { ok: false, grund: 'kein-konto' }; }
+        let name = (_deck.name || '').trim();
+        const frage = (typeof showInputModal === 'function') ? showInputModal : window.showInputModal;
+        if (typeof frage === 'function') {
+            const antwort = await frage({ title: L.saveBtn, message: L.saveAsk, defaultValue: name || 'Deck' });
+            if (antwort === null || antwort === undefined || String(antwort).trim() === '') return { ok: false, grund: 'abgebrochen' };
+            name = String(antwort).trim();
+        }
+        const r = saveToAccount(name);
+        if (r.ok) pulseToast(L.saveDone(r.name, r.karten));
+        else if (r.grund === 'leer') pulseToast(L.saveEmpty);
+        else pulseToast(L.saveNoAccount);
+        return r;
+    }
+
     function removeOne(key) {
         if (!_deck) return;
         const card = _deck.cards.find(c => cardKey(c) === key);
@@ -1165,6 +1195,7 @@
                     </div>
                     <div id="pdb-deck-body" class="pdb-deck-body"></div>
                     <div class="pdb-deck-actions">
+                        <button type="button" class="btn btn-primary btn-sm" id="pdb-save-account">${escapeHtml(L.saveBtn)}</button>
                         <button type="button" class="pdb-link-btn pdb-link-btn--danger" id="pdb-clear-deck">${escapeHtml(L.clearBtn)}</button>
                     </div>
                 </section>
@@ -1216,6 +1247,13 @@
             if (confirm(uiLang() === 'de' ? 'Wirklich das ganze Deck leeren?' : 'Clear the whole deck?')) {
                 clearDeck();
             }
+        });
+        // UI-73 (03.10.2026, Tiefenanalyse N-02): der Builder speicherte nur
+        // im Browser — kein Weg nach „Meine Decks". Entscheidung Hausi
+        // 03.10.: Speichern-Knopf rein. saveToAccount legt IMMER ein neues
+        // Deck an, ein bestehendes wird nie ueberschrieben.
+        document.getElementById('pdb-save-account').addEventListener('click', async () => {
+            await speichernInsKonto();
         });
         document.getElementById('pdb-paste-btn').addEventListener('click', () => {
             const txt = document.getElementById('pdb-paste').value;
@@ -1607,5 +1645,6 @@
         addCopies,
         removeOne,
         saveToAccount,
+        speichernInsKonto,
     };
 })();

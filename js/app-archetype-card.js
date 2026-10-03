@@ -531,6 +531,10 @@
                     // NICHT die Spalte `win_pct` der Datei: die fuehrt
                     // Matchpunkte (3S+U)/3n und ist eine andere Skala.
                     e.winRate = e.partien > 0 ? (e.siege / e.partien) * 100 : null;
+                    // DA-34 (03.10.2026, Entscheidung Hausi): wo Online und
+                    // Major nebeneinanderstehen, gilt S/(S+N).
+                    const _entschieden = e.partien - e.unentschieden;
+                    e.winRateOhneU = _entschieden > 0 ? (e.siege / _entschieden) * 100 : null;
                     e.remisQuote = e.partien > 0 ? (e.unentschieden / e.partien) * 100 : null;
                     e.day2Quote = e.day1 > 0 ? (e.day2 / e.day1) * 100 : null;
                 }
@@ -579,6 +583,9 @@
                     // wie belastbar die Win Rate ist: 80 der 132 Decks liegen
                     // unter 300 Partien, dort wackelt die Zahl sichtbar.
                     partien: num(r.wins) + num(r.losses) + num(r.ties),
+                    siege: num(r.wins),
+                    niederlagen: num(r.losses),
+                    unentschieden: num(r.ties),
                 };
             }
             const rows = parseSemicolonCsv(top8Txt);
@@ -1165,9 +1172,9 @@
         function _wrKonventionsSatz(deutsch) {
             var K = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
             if (!K) return '';
-            var mit = K.kurz('mitUnentschieden');
+            var mit = K.kurz('ohneUnentschieden');
             var mp = K.kurz('matchpunkte');
-            var fMit = K.hol('mitUnentschieden') ? K.hol('mitUnentschieden').formel : '';
+            var fMit = K.hol('ohneUnentschieden') ? K.hol('ohneUnentschieden').formel : '';
             var fMp = K.hol('matchpunkte') ? K.hol('matchpunkte').formel : '';
             /* Kein neuer i18n-Schlüssel: js/i18n.js gehört einem anderen
                Arbeitspaket. Zweisprachig inline über getLang(). */
@@ -1182,18 +1189,28 @@
                   + 'differently there.';
         }
 
-        const wrDelta = d ? d.winRate - 50 : null;
-        // Gezeigt, sobald es Partien gibt. Wie sicher sie ist, steht daneben.
-        const wrMajor = (m && m.winRate != null && m.partien > 0)
-            ? `${esc(fmt(m.winRate))} %` : '';
+        /* DA-34 (03.10.2026, Tiefenanalyse D-04/F-13; Entscheidung Hausi:
+           S/(S+N) ueberall, wo Online und Major nebeneinanderstehen).
+           Vorher S/(S+N+U) auf beiden Seiten: Dragapult online 53,0 neben
+           Major 45,9 — bei 1,7 % gegen 16,2 % Unentschieden. Jedes Top-Deck
+           wirkte auf Majors 6–8 Punkte schwaecher. Jetzt kuerzt die Quote
+           die Unentschieden heraus; ihr Anteil steht im Hinweis. */
+        const _ohneU = (x) => (x && (x.siege + x.niederlagen) > 0) ? x.siege / (x.siege + x.niederlagen) * 100 : null;
+        const dWr = d ? _ohneU(d) : null;
+        const mWr = (m && m.winRateOhneU != null) ? m.winRateOhneU : null;
+        const dRemis = (d && d.partien > 0) ? d.unentschieden / d.partien * 100 : null;
+        const wrDelta = dWr != null ? dWr - 50 : null;
+        // Gezeigt, sobald es entschiedene Partien gibt. Wie sicher sie ist, steht daneben.
+        const wrMajor = (mWr != null && m.partien > 0)
+            ? `${esc(fmt(mWr))} %` : '';
         // Halbe Breite des 95-%-Intervalls, in Prozentpunkten. Bei einer
         // Quote nahe 50 % ist 1,96·sqrt(0,25/n) die konservative Schaetzung —
         // sie wird nie zu schmal.
         const wrKi = (m && m.partien > 0) ? 196 * Math.sqrt(0.25 / m.partien) : null;
         const wrDuenn = !!(m && m.partien > 0 && m.partien < MAJOR_DUENN_PARTIEN);
-        const wr = d
-            ? tileGeteilt('wr', toneFor(wrDelta), mitQuote(L('arc.wrLabel', '{quote}'), 'mitUnentschieden'),
-                `${esc(fmt(d.winRate))} %`,
+        const wr = (d && dWr != null)
+            ? tileGeteilt('wr', toneFor(wrDelta), mitQuote(L('arc.wrLabel', '{quote}'), 'ohneUnentschieden'),
+                `${esc(fmt(dWr))} %`,
                 /* UI-17 (27.09.2026, Hausi): die Matchzahl steht NICHT mehr
                    auf der Kachel — „fuer Enduser ohne Erklaerung
                    verwirrend". Sie bleibt im Hinweis der Kachel („Online aus
@@ -1214,13 +1231,14 @@
                    Unentschieden. Ohne diesen Satz liest sich das als
                    Leistungseinbruch — und das waere falsch. */
                 L('arc.wrTip2', de
-                    ? 'Siege geteilt durch alle Matches, auf beiden Seiten gleich gerechnet. Online aus {n} Matches. {mj}'
-                    : 'Wins divided by all matches, same on both sides. Online from {n} matches. {mj}')
+                    ? 'Siege geteilt durch entschiedene Matches (ohne Unentschieden), auf beiden Seiten gleich gerechnet — so sind Online und Major vergleichbar. Online aus {n} Matches, davon {uo} % unentschieden. {mj}'
+                    : 'Wins divided by decided matches (ties left out), same on both sides — so online and major compare. Online from {n} matches, {uo} % of them ties. {mj}')
                     .replace('{n}', fmtGanz(d.partien))
+                    .replace('{uo}', fmt(dRemis))
                     .replace('{mj}', (m && m.partien > 0)
                         ? L('arc.wrTipMajor', de
-                            ? 'Major aus {p} Matches, davon {u} % unentschieden — online sind es 1,3 %. Unentschieden zählen auf beiden Seiten nicht als Sieg, drücken die Major-Spalte also spürbar. Bei dieser Matchzahl liegt der Wert auf ±{k} Punkte genau.'
-                            : 'Major from {p} matches, {u} % of them ties — online it is 1.3 %. Ties count as non-wins on both sides, so they push the major column down. At this sample the value is accurate to ±{k} points.')
+                            ? 'Major aus {p} Matches, davon {u} % unentschieden. Bei dieser Matchzahl liegt der Wert auf ±{k} Punkte genau.'
+                            : 'Major from {p} matches, {u} % of them ties. At this sample the value is accurate to ±{k} points.')
                             .replace('{p}', fmtGanz(m.partien))
                             .replace('{u}', fmt(m.remisQuote))
                             .replace('{k}', fmt(wrKi, 0))
@@ -1229,7 +1247,7 @@
                             : 'No in-person matches for this deck in this format yet.'))
                     + _wrKonventionsSatz(de),
                 arrow(wrDelta))
-            : tile('wr', 'tie', mitQuote(L('arc.wrLabel', '{quote}'), 'mitUnentschieden'), '–',
+            : tile('wr', 'tie', mitQuote(L('arc.wrLabel', '{quote}'), 'ohneUnentschieden'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
 
         // The conversion file covers fewer decks than the deck list —

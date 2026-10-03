@@ -1716,12 +1716,25 @@ const PRICE_TRUST_CASES = {
 };
 
 function priceTrustBadge(card, cmUrl) {
+  /* "2026-04-01..." -> "01.04.2026", wenn mehr als 30 Tage vor `jetzt`; sonst ''.
+     Steht innen, weil Tests die Funktion einzeln ausschneiden. */
+  function _preisDatumWennAlt(stand, jetzt) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(stand || ''));
+    if (!m) return '';
+    const d = Date.UTC(+m[1], +m[2] - 1, +m[3]);
+    const alter = (jetzt.getTime() - d) / 86400000;
+    return alter > 30 ? m[3] + '.' + m[2] + '.' + m[1] : '';
+  }
   try {
     if (!window.cardDBHasMappingStatus) return '';
     if (!card) return '';
     const fall = PRICE_TRUST_CASES[card.mapping_status];
     if (!fall) return '';
-    const label = escapeHtml(t(fall.label));
+    // DA-37 (03.10.2026, Tiefenanalyse D-11): 3.026 Preise ohne Zuordnung
+    // stammen vom 01./02.04.2026 und standen ohne Datum da. Ist der Preis
+    // aelter als 30 Tage, nennt die Plakette sein Datum.
+    const datum = _preisDatumWennAlt(card.price_last_updated, new Date());
+    const label = escapeHtml(t(fall.label) + (datum ? ' · ' + t('preis.vom').replace('{datum}', datum) : ''));
     const title = t(fall.title);
     if (cmUrl) {
       return `<a href="${escapeHtml(cmUrl)}" target="_blank" rel="noopener noreferrer" `
@@ -3410,6 +3423,47 @@ function compareActiveDecks() {
 // Removed 2026-06-12 per AUDIT_GITHUB.md F-01.
 
 // Copy a saved deck to clipboard in Pokémon TCG Live format
+/* FE-42 (03.10.2026, Tiefenanalyse F-05/F-06): Der PTCGL-Export aus
+ * „Meine Decks" schrieb die Zahl der ZEILEN statt der Karten
+ * („Pokémon: 9" bei 19 Karten), ordnete Basis-Energien unter Trainer ein
+ * (Kartensuche ueber den Namen schlug fehl) und hatte kein „Total Cards".
+ * Eine Funktion fuer beide Knoepfe; die Kartenart kommt NUR ueber
+ * (Set, Nummer) — nie ueber den Namen (Hausregel 5). Ohne Set/Nummer bleibt
+ * die Zeile, wie sie ist, und zaehlt nach der Namensendung „Energy" als
+ * Energie, sonst als Trainer. */
+function meinDeckAlsPtcgl(deck, db) {
+  const gruppen = { pokemon: [], trainer: [], energy: [] };
+  const summe = { pokemon: 0, trainer: 0, energy: 0 };
+  const karten = Array.isArray(db) ? db : [];
+  for (const [deckKey, roh] of Object.entries((deck && deck.cards) || {})) {
+    const count = Number(roh) || 0;
+    if (count <= 0) continue;
+    const m = String(deckKey).match(/^(.+?)\s+\(([A-Za-z0-9-]+)\s+([A-Za-z0-9-]+)\)$/);
+    const cardName = m ? m[1] : String(deckKey);
+    const setCode = m ? m[2].toUpperCase() : '';
+    const setNumber = m ? m[3] : '';
+    let gruppe = /energy$/i.test(cardName) ? 'energy' : 'trainer';
+    if (setCode && setNumber) {
+      const nr = String(setNumber).replace(/^0+(?=\d)/, '');
+      const c = karten.find(k => String(k.set || '').toUpperCase() === setCode
+        && String(k.number || '').replace(/^0+(?=\d)/, '') === nr);
+      if (c) {
+        const kat = getCardTypeCategory(c.type || '');
+        gruppe = kat === 'Pokemon' ? 'pokemon' : /energy/i.test(kat) ? 'energy' : 'trainer';
+      }
+    }
+    gruppen[gruppe].push(setCode && setNumber ? `${count} ${cardName} ${setCode} ${setNumber}` : `${count} ${cardName}`);
+    summe[gruppe] += count;
+  }
+  const teile = [];
+  if (gruppen.pokemon.length) teile.push(`Pok\u00e9mon: ${summe.pokemon}\n${gruppen.pokemon.join('\n')}`);
+  if (gruppen.trainer.length) teile.push(`Trainer: ${summe.trainer}\n${gruppen.trainer.join('\n')}`);
+  if (gruppen.energy.length) teile.push(`Energy: ${summe.energy}\n${gruppen.energy.join('\n')}`);
+  teile.push(`Total Cards: ${summe.pokemon + summe.trainer + summe.energy}`);
+  return teile.join('\n\n');
+}
+if (typeof window !== 'undefined') window.meinDeckAlsPtcgl = meinDeckAlsPtcgl;
+
 function copyMyDeck(deckIndex) {
   const deck = window.userDecks && window.userDecks[deckIndex];
   if (!deck || !deck.cards) {
@@ -3417,63 +3471,7 @@ function copyMyDeck(deckIndex) {
     return;
   }
 
-  const pokemon = [];
-  const trainer = [];
-  const energy = [];
-
-  for (const [deckKey, count] of Object.entries(deck.cards)) {
-    if (!count || count <= 0) continue;
-
-    // Parse "CardName (SET NUMBER)" or just "CardName"
-    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-    let cardName = deckKey;
-    let setCode = '';
-    let setNumber = '';
-
-    if (setMatch) {
-      cardName = setMatch[1];
-      setCode = setMatch[2];
-      setNumber = setMatch[3];
-    } else {
-      // Fallback: look up set info from database
-      const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
-      if (cardData) {
-        setCode = cardData.set || '';
-        setNumber = cardData.number || '';
-      }
-    }
-
-    const line = setCode && setNumber
-      ? `${count} ${cardName} ${setCode} ${setNumber}`
-      : `${count} ${cardName}`;
-
-    // Determine category by looking up type in allCardsDatabase
-    let category = 'trainer';
-    const cardData = window.allCardsDatabase && (
-      (setCode && setNumber)
-        ? window.allCardsDatabase.find(c => c.name === cardName && c.set === setCode && c.number === setNumber)
-        : window.allCardsDatabase.find(c => c.name === cardName)
-    );
-
-    if (cardData) {
-      const cat = getCardTypeCategory(cardData.type || '');
-      if (cat === 'Pokemon') category = 'pokemon';
-      else if (cat === 'Energy' || cat === 'Special Energy') category = 'energy';
-    } else {
-      // Heuristic: basic energies by name
-      if (/Energy$/.test(cardName)) category = 'energy';
-    }
-
-    if (category === 'pokemon') pokemon.push(line);
-    else if (category === 'energy') energy.push(line);
-    else trainer.push(line);
-  }
-
-  let output = '';
-  if (pokemon.length > 0) output += `Pokémon: ${pokemon.length}\n${pokemon.join('\n')}\n\n`;
-  if (trainer.length > 0) output += `Trainer: ${trainer.length}\n${trainer.join('\n')}\n\n`;
-  if (energy.length > 0) output += `Energy: ${energy.length}\n${energy.join('\n')}`;
-  output = output.trim();
+  const output = meinDeckAlsPtcgl(deck, window.allCardsDatabase);
 
   navigator.clipboard.writeText(output).then(() => {
     showToast(t('toast.deckCopied'), 'success');
@@ -3489,43 +3487,7 @@ function copyDeckAndOpenLimitless(deckIndex) {
     return;
   }
 
-  // Reuse copyMyDeck logic to build the decklist string
-  const pokemon = [];
-  const trainer = [];
-  const energy = [];
-
-  for (const [deckKey, count] of Object.entries(deck.cards)) {
-    if (!count || count <= 0) continue;
-    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-    let cardName = deckKey, setCode = '', setNumber = '';
-    if (setMatch) {
-      cardName = setMatch[1]; setCode = setMatch[2]; setNumber = setMatch[3];
-    } else {
-      const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
-      if (cardData) { setCode = cardData.set || ''; setNumber = cardData.number || ''; }
-    }
-    const line = setCode && setNumber ? `${count} ${cardName} ${setCode} ${setNumber}` : `${count} ${cardName}`;
-    let category = 'trainer';
-    const cardData = window.allCardsDatabase && (
-      (setCode && setNumber)
-        ? window.allCardsDatabase.find(c => c.name === cardName && c.set === setCode && c.number === setNumber)
-        : window.allCardsDatabase.find(c => c.name === cardName)
-    );
-    if (cardData) {
-      const cat = getCardTypeCategory(cardData.type || '');
-      if (cat === 'Pokemon') category = 'pokemon';
-      else if (cat === 'Energy' || cat === 'Special Energy') category = 'energy';
-    } else if (/Energy$/.test(cardName)) category = 'energy';
-    if (category === 'pokemon') pokemon.push(line);
-    else if (category === 'energy') energy.push(line);
-    else trainer.push(line);
-  }
-
-  let output = '';
-  if (pokemon.length > 0) output += `Pok\u00e9mon: ${pokemon.length}\n${pokemon.join('\n')}\n\n`;
-  if (trainer.length > 0) output += `Trainer: ${trainer.length}\n${trainer.join('\n')}\n\n`;
-  if (energy.length > 0) output += `Energy: ${energy.length}\n${energy.join('\n')}`;
-  output = output.trim();
+  const output = meinDeckAlsPtcgl(deck, window.allCardsDatabase);
 
   navigator.clipboard.writeText(output).then(() => {
     const de = getLang() === 'de';
@@ -3537,35 +3499,12 @@ function copyDeckAndOpenLimitless(deckIndex) {
 }
 
 // Helper: Card type sorting (same as Deck Builder)
-function getCardTypeCategory(cardType) {
-  /**
-   * Determines the category of a card based on the type field
-   * type format: "GBasic", "WBasic", "PStage1", "PStage2", "Supporter", "Item", "Tool", "Stadium", "Special Energy", "Energy"
-   */
-  if (!cardType) return 'Pokemon';
-  
-  // IMPORTANT FIX: Check for Energy BEFORE element letter check
-  // This fixes "Basic Fighting Energy" being sorted as Pokemon instead of Energy
-  const typeLower = cardType.toLowerCase();
-  if (typeLower.includes('energy')) return 'Energy';
-  if (cardType === 'Special Energy') return 'Special Energy';
-  if (cardType === 'Energy') return 'Energy';
-  
-  // Check if it's a Pokemon (type starts with element letter)
-  if (cardType.charAt(0).match(/[GRWLPFDMNC]/)) {
-    return 'Pokemon';
-  }
-  
-  // Check exact matches for trainer types
-  if (cardType === 'Supporter') return 'Supporter';
-  if (cardType === 'Item') return 'Item';
-  if (cardType === 'Tool') return 'Tool';
-  if (cardType === 'Stadium') return 'Stadium';
-  if (cardType === 'Trainer') return 'Item';
-  
-  // Fallback to Pokemon
-  return 'Pokemon';
-}
+/* getCardTypeCategory stand hier ein zweites Mal (FE-42, 03.10.2026
+ * entfernt). Zur Laufzeit gewann immer die Fassung aus
+ * js/app-deck-builder.js (spaeter geladen; live gemessen:
+ * getCardTypeCategory('Basic Energy') === 'Basic Energy') — diese hier war
+ * toter Code mit anderem Ergebnis ('Energy'), und genau dieser Unterschied
+ * schob Basis-Energien im Export unter „Trainer". */
 
 function sortCardsByTypeSimple(cards) {
   const elementOrder = {

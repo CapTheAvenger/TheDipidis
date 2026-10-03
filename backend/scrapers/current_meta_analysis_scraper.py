@@ -99,6 +99,48 @@ _SET_CODE_SUFFIX_RE = re.compile(
 _TRAILING_EX_RE = re.compile(r"\s+ex$", re.IGNORECASE)
 
 
+# DA-32 (03.10.2026): Slug -> Anzeigename aus labs_tournament_decks.csv.
+# Der title-cased Slug ("Basic Box M" aus basic-box-m, "Mew Ex 30C") traf
+# den Namen auf der Seite ("Basic Box", "Mew Box") nicht; die Deck-Analyse
+# fand Basic Box (Tier 1) deshalb nicht. Verbunden wird ueber den Slug,
+# nie ueber Namensaehnlichkeit. Fehlt die Datei, bleibt der alte Weg.
+def _lade_slug_namen() -> Dict[str, str]:
+    kandidaten = [
+        os.path.join(get_data_dir(), "labs_tournament_decks.csv"),
+        os.path.join(os.path.dirname(__file__), "..", "..", "data", "labs_tournament_decks.csv"),
+    ]
+    for pfad in kandidaten:
+        if not os.path.exists(pfad):
+            continue
+        try:
+            with open(pfad, encoding="utf-8-sig", newline="") as f:
+                m = {}
+                for r in csv.DictReader(f):
+                    slug = (r.get("deck_slug") or "").strip()
+                    name = (r.get("deck_name") or "").strip()
+                    if slug and name:
+                        m[slug] = name
+                return m
+        except Exception as e:  # pragma: no cover - defensiv
+            print(f"[current_meta_analysis_scraper] Slug-Namen nicht lesbar ({pfad}): {e}")
+    return {}
+
+
+_SLUG_NAMEN: Optional[Dict[str, str]] = None
+
+
+def archetyp_aus_slug(slug: str) -> str:
+    """Anzeigename fuer einen Limitless-Slug: erst die Slug-Zuordnung aus
+    labs_tournament_decks.csv, sonst die bisherige Kanonisierung."""
+    global _SLUG_NAMEN
+    if _SLUG_NAMEN is None:
+        _SLUG_NAMEN = _lade_slug_namen()
+    name = _SLUG_NAMEN.get((slug or "").strip())
+    if name:
+        return name
+    return _canonicalize_archetype(slug_to_archetype(slug))
+
+
 def _canonicalize_archetype(raw_name: str) -> str:
     """Return the bare Limitless-style archetype name.
 
@@ -419,7 +461,7 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
     all_decks = []
 
     for idx, (slug, url) in enumerate(deck_links, 1):
-        deck_name = _canonicalize_archetype(slug_to_archetype(slug))
+        deck_name = archetyp_aus_slug(slug)
         logger.info("[%s/%s] %s (Sammle Decklisten...)", idx, len(deck_links), deck_name)
 
         deck_html = safe_fetch_html(url, timeout)

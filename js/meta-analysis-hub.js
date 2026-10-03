@@ -419,13 +419,23 @@
                   + 'from the last seven days count fully, older ones half. That is '
                   + 'why half values occur.');
         const q = `<span class="mah-quote" title="${escapeHtml(gew)}">${quote}</span>`;
+        /* DA-35 (03.10.2026, Tiefenanalyse D-08): „ist gerade das staerkste
+           Deck" stuetzte sich auf 22 von 179 Antritten (95-%-Intervall
+           8–18 %, ueberlappt mit Platz 2–4). Der Satz sagt jetzt, was
+           gemessen ist — die hoechste Top-8-Quote —, und unter
+           UNSICHER_UNTER Antritten, dass die Reihenfolge wackelt. */
+        const UNSICHER_UNTER = 300;
+        const duenn = Number.isFinite(best.brought) && best.brought < UNSICHER_UNTER;
+        const nTxt = Number.isFinite(best.brought) ? Math.round(best.brought).toLocaleString(de ? 'de-DE' : 'en-US') : '';
         return de
-            ? `<strong>${escapeHtml(best.name)}</strong> ist gerade das stärkste Deck: `
-              + `${q} Top-8-Quote gegen ${schnitt} im Schnitt — `
+            ? `<strong>${escapeHtml(best.name)}</strong> hat gerade die höchste Top-8-Quote: `
+              + `${q} gegen ${schnitt} im Schnitt — `
               + `rund ${fak}-mal so oft.`
-            : `<strong>${escapeHtml(best.name)}</strong> is the strongest deck right now: `
-              + `${q} top-8 rate against ${schnitt} on average — `
-              + `about ${fak}× as often.`;
+              + (duenn ? ` Aus nur ${nTxt} Antritten — die Reihenfolge an der Spitze ist unsicher.` : '')
+            : `<strong>${escapeHtml(best.name)}</strong> has the highest top-8 rate right now: `
+              + `${q} against ${schnitt} on average — `
+              + `about ${fak}× as often.`
+              + (duenn ? ` From only ${nTxt} entries — the order at the top is uncertain.` : '');
     }
 
     /* Der Nenner zum Satz darueber: aus wie vielen Antritten die Quote
@@ -583,16 +593,24 @@
                Zahlen bleiben, weil beide etwas anderes zaehlen; was sie
                zaehlen, steht jetzt an beiden. */
             const gesamtAntritte = Math.round(model.totalBrought).toLocaleString(loc);
-            const anteilBezug = de
-                ? `${antritte} von ${gesamtAntritte} Antritten`
-                : `${antritte} of ${gesamtAntritte} entries`;
+            const ausLimitless = Number.isFinite(d.limitlessAntritte) && model.limitlessGesamt > 0;
+            const anteilBezug = ausLimitless
+                ? (de
+                    ? `${Math.round(d.limitlessAntritte).toLocaleString(loc)} von ${Math.round(model.limitlessGesamt).toLocaleString(loc)} Online-Antritten (Limitless)`
+                    : `${Math.round(d.limitlessAntritte).toLocaleString(loc)} of ${Math.round(model.limitlessGesamt).toLocaleString(loc)} online entries (Limitless)`)
+                : (de
+                    ? `${antritte} von ${gesamtAntritte} Antritten`
+                    : `${antritte} of ${gesamtAntritte} entries`);
+            const top8Bezug = ausLimitless
+                ? (de ? ` (${antritte} Turnier-Antritte)` : ` (${antritte} tournament entries)`)
+                : '';
             return `
                 <div class="ds-stat${cls}">
                     <span class="ds-stat-role">${role}</span>
                     <span class="ds-stat-label">${escapeHtml(d.name)}</span>
                     <span class="ds-stat-value">${fmtPct(d.sharePct)}</span>
                     <span class="ds-stat-context">${anteilWort} · ${anteilBezug}<br>${
-                        de ? 'Top-8-Quote' : 'top-8 rate'} ${fmtPct(d.convPct)}${
+                        de ? 'Top-8-Quote' : 'top-8 rate'} ${fmtPct(d.convPct)}${top8Bezug}${
                         verglichen ? ` · ${verglichen}` : ''}</span>
                 </div>`;
         };
@@ -635,6 +653,41 @@
     // Aenderung ist und kein Umbau.
     const ANSWER_HOSTS = [ANSWER_HOST_ID];
 
+    /* DA-33 (03.10.2026, Tiefenanalyse N-10/D-02; Entscheidung Hausi:
+       Startseite, Tierliste und Hub zeigen denselben Online-Anteil —
+       Limitless kumulativ seit Formatstart). Der Hub rechnete den Anteil
+       aus den Turnieren mit Top-8-Daten (Dragapult 11,7 % von 10.640),
+       Startseite und Tierliste aus Limitless (10,2 % von 12.257). Der
+       Anteil kommt jetzt aus derselben Quelle wie dort
+       (getArchetypeShares, data/limitless_online_decks.csv); die
+       Top-8-Quote bleibt aus den Turnieren und nennt ihre eigene Basis.
+       Fehlt die Quelle, bleibt die alte Rechnung samt ihrem Nenner. */
+    async function anteileAusLimitless(model) {
+        if (typeof window.getArchetypeShares !== 'function' || !model || !Array.isArray(model.top)) return false;
+        let anteile;
+        try { anteile = await window.getArchetypeShares(); } catch (_e) { return false; }
+        if (!anteile) return false;
+        let gesamt = 0;
+        Object.keys(anteile).forEach(k => {
+            const a = anteile[k];
+            if (a && a.share > 0 && a.count > 0 && !(gesamt > 0)) gesamt = a.count * 100 / a.share;
+        });
+        if (!(gesamt > 0)) return false;
+        let getroffen = 0;
+        model.top.forEach(d => {
+            const a = anteile[d.name];
+            if (a && Number.isFinite(a.share) && Number.isFinite(a.count)) {
+                d.sharePctTurniere = d.sharePct;
+                d.sharePct = a.share;
+                d.limitlessAntritte = a.count;
+                getroffen++;
+            }
+        });
+        model.limitlessGesamt = gesamt;
+        return getroffen > 0;
+    }
+    window._metaHubAnteileAusLimitless = anteileAusLimitless;
+
     async function renderAnswer() {
         const hosts = ANSWER_HOSTS
             .map(id => document.getElementById(id))
@@ -642,6 +695,7 @@
         if (!hosts.length) return;
         const rows = await loadAnswerRows();
         const model = answerModel(rows);
+        if (model) await anteileAusLimitless(model);
         // Kein Modell, kein Block: eine leere Kachelreihe mit Strichen
         // wäre schlechter als gar keine.
         const html = model ? answerHtml(model) : '';

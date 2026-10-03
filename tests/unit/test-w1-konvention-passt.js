@@ -147,6 +147,22 @@ function probenOnlineDecks() {
     })).filter(p => [p.wert, p.s, p.n, p.u].every(Number.isFinite) && (p.s + p.n + p.u) > 0);
 }
 
+/* DA-34 (03.10.2026): die Quoten-Kachel liest win_rate_numeric nicht mehr,
+   sie rechnet selbst aus wins/losses. Gemessen wird deshalb die Formel, die
+   im Quelltext der Kachel steht (`const _ohneU = ...`), ausgefuehrt auf den
+   Zeilen der Datei — nicht eine Annahme darueber. */
+function probenOnlineKachel() {
+    const q = lies('js', 'app-archetype-card.js');
+    const m = q.match(/const _ohneU = (\(x\) => [^;]+);/);
+    assert.ok(m, 'die Formel der Kachel (_ohneU) steht nicht mehr in js/app-archetype-card.js');
+    // eslint-disable-next-line no-new-func
+    const formel = Function('return ' + m[1])();
+    return csv('data/limitless_online_decks.csv', ';').map(r => {
+        const s = zahl(r.wins), n = zahl(r.losses), u = zahl(r.ties);
+        return { wert: formel({ siege: s, niederlagen: n }), s, n, u };
+    }).filter(p => [p.wert, p.s, p.n, p.u].every(Number.isFinite) && (p.s + p.n) > 0);
+}
+
 function probenMatchups() {
     return csv('data/limitless_online_decks_matchups.csv', ';').map((r) => {
         const t = String(r.record || '').split('-').map(x => parseInt(x.trim(), 10));
@@ -231,8 +247,8 @@ const STELLEN = [
         praefix: '',
         anker: /tileGeteilt\('wr',[\s\S]{0,80}?mitQuote\(L\('arc\.wrLabel', '\{quote\}'\), '([A-Za-z]+)'\)/,
         schluessel: 'arc.wrLabel',
-        proben: probenOnlineDecks,
-        quelle: 'data/limitless_online_decks.csv, Spalte win_rate_numeric',
+        proben: probenOnlineKachel,
+        quelle: 'data/limitless_online_decks.csv, wins/losses durch die Formel der Kachel (DA-34)',
     },
     {
         name: 'Archetyp-Kachel: Spaltenkopf „WR" der Paarungstabelle',

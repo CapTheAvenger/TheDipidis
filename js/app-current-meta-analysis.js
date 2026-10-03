@@ -2803,12 +2803,12 @@
                     : `Source: the tournament-cards file of the current format. Which one it is could not be resolved here `
                       + `(data/tournament_cards_manifest.json or data/format_window.json unreadable) — hence no file name. `);
             const _hinweis256 = _de256
-                ? `Zahl vor dem Turniernamen = Decklisten dieses Archetyps in den Top 256 dieses Turniers `
+                ? `Zahl vor dem Turniernamen = Day-2-Listen dieses Archetyps in diesem Turnier `
                   + `(Summe über die Schnappschuss-Etikette, Spalte total_decks_in_archetype). `
                   + _quelle256
                   + `Zeitraum: ${tourList.length} ${tourList.length === 1 ? 'Turnier' : 'Turniere'} im aktuellen Meta-Fenster, zusammen ${_summe256} Listen. `
                   + `Das Datenfenster „Daten ab“ wirkt auf diese Liste nicht.`
-                : `The number before each event = decklists of this archetype in that event's top 256 `
+                : `The number before each event = Day 2 lists of this archetype in that event `
                   + `(sum over snapshot labels, column total_decks_in_archetype). `
                   + _quelle256
                   + `Period: ${tourList.length} ${tourList.length === 1 ? 'event' : 'events'} in the current meta window, ${_summe256} lists in total. `

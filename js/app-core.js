@@ -2472,6 +2472,53 @@ const BASE_PATH = './data/';
             }).filter(row => row && row.card_name && row.archetype);
         }
 
+        /* DA-32 (03.10.2026, Tiefenanalyse D-01/D-14): current_meta_card_data.csv
+           nennt manche Archetypen nach dem Limitless-Slug, title-cased
+           ("Basic Box M" aus basic-box-m, "Mew Ex 30C", "Beedrill Ex Cri"),
+           alle anderen Dateien nach dem Anzeigenamen ("Basic Box", "Mew Box").
+           Folge: Die Deck-Analyse fand Basic Box (Tier 1) nicht — SHARE
+           „keine Daten", Kartenquoten aus 20 statt 72 Listen.
+           Verbunden wird ueber den SLUG, nicht ueber Namensaehnlichkeit: der
+           Scraper hat den Rohnamen aus dem Slug gebaut (slug_to_archetype),
+           also ist er umkehrbar. Die Zuordnung Slug -> Anzeigename steht in
+           labs_tournament_decks.csv (deck_slug, deck_name). Nur ein Treffer
+           im Slug benennt um; alles andere bleibt unveraendert. */
+        function slugAusArchetypName(name) {
+            return String(name || '').toLowerCase()
+                .replace(/['’]/g, '')
+                .trim().replace(/\s+/g, '-');
+        }
+        function archetypNamenNachSlug(rows, slugZuName) {
+            if (!Array.isArray(rows) || !slugZuName) return { rows: rows, umbenannt: {} };
+            const umbenannt = {};
+            rows.forEach(function (r) {
+                if (!r || !r.archetype) return;
+                const ziel = slugZuName[slugAusArchetypName(r.archetype)];
+                if (ziel && ziel !== r.archetype) {
+                    umbenannt[r.archetype] = ziel;
+                    r.archetype = ziel;
+                }
+            });
+            return { rows: rows, umbenannt: umbenannt };
+        }
+        window.slugAusArchetypName = slugAusArchetypName;
+        window.archetypNamenNachSlug = archetypNamenNachSlug;
+
+        async function _slugZuArchetypName(options) {
+            try {
+                // Komma-getrennt — loadCSV nimmt ';' an, deshalb direkt.
+                const labs = await fetchAndParseCSV(`${BASE_PATH}labs_tournament_decks.csv`, ',');
+                const m = {};
+                (labs || []).forEach(function (r) {
+                    if (r && r.deck_slug && r.deck_name) m[String(r.deck_slug).trim()] = String(r.deck_name).trim();
+                });
+                return m;
+            } catch (e) {
+                console.warn('[DA-32] Slug-Zuordnung nicht geladen:', e && e.message);
+                return null;
+            }
+        }
+
         let currentMetaRowsFallbackCache = null;
         let currentMetaRowsFallbackInFlight = null;
 
@@ -2489,6 +2536,10 @@ const BASE_PATH = './data/';
             const loadPromise = (async () => {
                 const primary = await loadCSV('current_meta_card_data.csv', options);
                 if (Array.isArray(primary) && primary.length > 0) {
+                    const _da32 = archetypNamenNachSlug(primary, await _slugZuArchetypName(options));
+                    if (Object.keys(_da32.umbenannt).length) {
+                        console.info('[DA-32] Archetypnamen ueber den Slug angeglichen:', _da32.umbenannt);
+                    }
                     window.currentMetaUsingFallback = false;
                     if (!forceRefresh) currentMetaRowsFallbackCache = primary;
                     return primary;

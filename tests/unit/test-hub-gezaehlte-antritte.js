@@ -264,8 +264,10 @@ describe('Gezaehlte Antritte — der Satz, den man liest', () => {
                mit schmalem Leerzeichen. Beides zulassen — geprueft wird
                die Rechnung, nicht die Typografie. */
             const mm = nackt.match(lang === 'de'
-                ? /([\d.,]+) ?% Top-8-Quote gegen ([\d.,]+) ?% im Schnitt — rund ([\d.,]+)-mal/
-                : /([\d.,]+) ?% top-8 rate against ([\d.,]+) ?% on average — about ([\d.,]+)×/);
+                /* DA-35 (03.10.2026): der Satz nennt die hoechste Top-8-Quote
+                   statt „das staerkste Deck"; die drei Zahlen bleiben. */
+                ? /Top-8-Quote: ([\d.,]+) ?% gegen ([\d.,]+) ?% im Schnitt — rund ([\d.,]+)-mal/
+                : /top-8 rate right now: ([\d.,]+) ?% against ([\d.,]+) ?% on average — about ([\d.,]+)×/);
             assert.ok(mm, `${lang}: Satz nicht lesbar: ${nackt}`);
             /* Tausenderpunkte gibt es bei Prozentwerten unter 100 nicht,
                also ist der Punkt hier immer das Dezimalzeichen. */

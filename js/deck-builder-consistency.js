@@ -2125,7 +2125,7 @@
       satz += de ? ` von ${zahl(piloten)} Piloten` : ` from ${zahl(piloten)} pilots`;
     }
     if (feld !== null) {
-      satz += de ? ` (Feld ${zahl(feld)})` : ` (field ${zahl(feld)})`;
+      satz += de ? ` (${zahl(feld)} Spieler)` : ` (${zahl(feld)} players)`;
     }
     return satz;
   }

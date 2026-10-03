@@ -482,7 +482,9 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
             'die harte Mindest-Stichprobe ist zurueck — sie verbarg 27 von 44 '
             + 'Decks und trennte dabei nichts (45 Partien angezeigt, 39 verborgen, '
             + 'bei praktisch gleicher Unsicherheit)');
-        assert.ok(/wrMajor = \(m && m\.winRate != null && m\.partien > 0\)/.test(ohneKomm),
+        // DA-34 (03.10.2026): die Kachel zeigt S/(S+N) (mWr aus winRateOhneU);
+        // die Bedingung bleibt „es gibt ueberhaupt Partien".
+        assert.ok(/wrMajor = \(mWr != null && m\.partien > 0\)/.test(ohneKomm),
             'die Major-Win-Rate haengt wieder an einer anderen Bedingung als '
             + '"es gibt ueberhaupt Partien"');
     });

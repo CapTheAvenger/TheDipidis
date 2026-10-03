@@ -500,7 +500,8 @@
                 const winPct = games > 0 ? e.wins / games * 100 : 0;
                 const day2Conv = e.day1 > 0 ? e.day2 / e.day1 : 0;
                 out[name] = { games, winPct, matchPointPct, day2Conv,
-                              players: e.players, tournaments: e.tournaments.size };
+                              players: e.players, tournaments: e.tournaments.size,
+                              wins: e.wins, losses: e.losses, ties: e.ties };
             }
             return out;
         }
@@ -2909,7 +2910,16 @@
                             const _labsTitle = tierQuotenHinweis('mitUnentschieden') + '  ' + (getLang() === 'de'
                                 ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Matches. Die Spalte, die Limitless „${_wpName}“ nennt ${_wpFormel}, steht bei denselben Zeilen auf ${fmtPct(ent.matchPointPct)} — angezeigt wird sie hier NICHT.`
                                 : `Limitless Labs tournament data · ${ent.tournaments} tournaments, ${ent.games} games. The column Limitless calls “${_wpName}” ${_wpFormel} sits at ${fmtPct(ent.matchPointPct)} for the same rows — it is NOT what is shown here.`);
-                            labsBadge = `<span class="stat-badge stat-labs" title="${escapeHtml(_labsTitle)}" data-quote-konvention="mitUnentschieden">🏆 ${fmtPct(ent.winPct)} WR · ${ent.tournaments}T</span>`;
+                            /* DA-35 (03.10.2026, Tiefenanalyse D-09): die Quote kam
+                               teils aus 4–7 Spielern („40,5 %" aus 4 Spielern) ohne
+                               Hinweis. Unter RUTSCH_MIN_SPIELER steht die Bilanz
+                               S–N–U statt einer Prozentzahl. */
+                            const RUTSCH_MIN_SPIELER = 10;
+                            const _duennMajor = Number.isFinite(ent.players) && ent.players < RUTSCH_MIN_SPIELER;
+                            const _wert = _duennMajor
+                                ? `${ent.wins}–${ent.losses}–${ent.ties} · ${ent.players} ${getLang() === 'de' ? 'Spieler' : 'players'}`
+                                : `${fmtPct(ent.winPct)} WR`;
+                            labsBadge = `<span class="stat-badge stat-labs" title="${escapeHtml(_labsTitle)}" data-quote-konvention="mitUnentschieden">🏆 ${_wert} · ${ent.tournaments}T</span>`;
                         }
                     }
 

@@ -40,6 +40,6 @@
 +            try {|
 +                var l = JSON.parse(localStorage.getItem('__tcg_version_check') || 'null');|
 +                if (l && l.status) {|
-+                    var wort = { 'aktuell': '✓', 'neu-laden': '↻', 'abweichend': '⚠ ' + (l.server || '?'), 'offline': '∅', 'keine-antwort': '?' }[l.status] || l.status;|
++                    var wort = { 'aktuell': '¤u2713', 'neu-laden': '¤u21BB', 'abweichend': '¤u26A0 ' + (l.server || '?'), 'offline': '¤u2205', 'keine-antwort': '?' }[l.status] || l.status;|
 +                    var d = new Date(l.t);|
 +                    txt += ' · ' + wort + ' (' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ')';|

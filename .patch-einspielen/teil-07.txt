@@ -1,0 +1,72 @@
+@@ -4249,7 +4249,7 @@|
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202610031607" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202610031607" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202610031607" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202610031607" defer></script>|
+-    <script src="js/ds-nav.js?v=202610031607" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202610031731" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202610031731" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202610031731" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202610031731" defer></script>|
++    <script src="js/ds-nav.js?v=202610031731" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4259,6 +4259,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202610031607" defer></script>|
+-    <script src="js/ds-sections.js?v=202610031607" defer></script>|
+-    <script src="js/ds-filter.js?v=202610031607" defer></script>|
+-    <script src="js/ds-share.js?v=202610031607" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202610031731" defer></script>|
++    <script src="js/ds-sections.js?v=202610031731" defer></script>|
++    <script src="js/ds-filter.js?v=202610031731" defer></script>|
++    <script src="js/ds-share.js?v=202610031731" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4267,5 +4267,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202610031607" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202610031607" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202610031607" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202610031731" defer></script>|
++    <script src="js/ds-tutorial.js?v=202610031731" defer></script>|
++    <script src="js/ds-masterclass.js?v=202610031731" defer></script>|
+ |
+diff --git a/js/archetyp-box.js b/js/archetyp-box.js|
+index 75440b60..cdd81508 100644|
+--- a/js/archetyp-box.js|
++++ b/js/archetyp-box.js|
+@@ -1141,3 +1141,12 @@|
+ |
++    /** Umfang der Auswahl in Karten (verschieden) und Stueck (mit Kopien); gleiche Zahlen wie beim Kopieren. */|
++    function auswahlUmfang(karten) {|
++        const zeilen = deckzeilenAus(karten);|
++        let stueck = 0;|
++        zeilen.forEach(function (z) { stueck += parseInt(z, 10) || 0; });|
++        return { karten: zeilen.length, stueck: stueck };|
++    }|
++|
+     const Logik = {|
++        auswahlUmfang: auswahlUmfang,|
+         deckzeilenAus: deckzeilenAus,|
+@@ -2204,2 +2213,8 @@|
+                 '({n} von {g} nach Filter)')) + '</span>' : '') + '</p>';|
++        // Hausi, 03.10.2026: nicht nur die verschiedenen Karten, auch wie viele Stueck mit Kopien.|
++        const au = auswahlUmfang(sichtbareKarten);|
++        const umfangZeile = au.karten|
++            ? '<p class="abx-umfang">' + esc(tx('abx.auswahlUmfang', { karten: au.karten, stueck: au.stueck },|
++                '{karten} verschiedene Karten · {stueck} Stück mit Kopien')) + '</p>'|
++            : '';|
+         let hauptteil;|
+@@ -2224,3 +2239,3 @@|
+         wurzel.innerHTML = kopf + hinweis + aktionen + eigeneBoxBlock() + erg + liste + suche + wiederBereich(gewaehlt, mitBoxName)|
+-            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + hauptteil;|
++            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + umfangZeile + hauptteil;|
+     }|
+diff --git a/js/i18n.js b/js/i18n.js|
+index ce69e59e..189bc78d 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -968,2 +968,3 @@ const translations = {|
+     'abx.kopieren': 'Copy filtered cards ({n})',|
++    'abx.auswahlUmfang': '{karten} different cards · {stueck} pieces incl. copies',|
+     'abx.kopiert': '{n} cards copied — paste them into the deck builder.',|

@@ -770,6 +770,9 @@
 
     function boxStufe(box, kontext) {
         const c = kontext || {};
+        // Eigene Box (Hausi, 03.10.2026): hat keinen Archetyp und kein Format, bekommt
+        // aber wie die anderen einen Seitenbalken, in eigener Farbe.
+        if (box && box.eigen === true) return 'eigen';
         if (!box || !c.aktuell) return null;
         if (imFormatGespielt(box, c.aktuell)) return 'gespielt';
         if (typeof c.legal !== 'function' || !c.legalBekannt) return null;
@@ -791,7 +794,7 @@
         return unbekannt ? null : 'legal';
     }
 
-    const STUFEN_RANG = { gespielt: 0, legal: 1, raus: 2 };
+    const STUFEN_RANG = { gespielt: 0, legal: 1, raus: 2, eigen: 3 };
 
     /**
      * Reihenfolge der Box-Chips (UI-51/UI-52): nach Stufe (gespielt, legal,
@@ -1119,7 +1122,25 @@
         return manifestDatum > box.datenStand;
     }
 
+    /**
+     * Deckliste aus den sichtbaren Karten, im Format fuer den Deckbuilder
+     * ("3 Mow Rotom DRI 9", eine Zeile je Karte). Je Karte nur einmal (ueber
+     * die Karten-ID, nie ueber den Namen), so oft wie sie in einer Liste
+     * hoechstens gespielt wird (gefordert), mindestens einmal.
+     */
+    function deckzeilenAus(karten) {
+        const gesehen = new Set();
+        const zeilen = [];
+        (karten || []).forEach(function (k) {
+            if (!k || gesehen.has(k.id)) return;
+            gesehen.add(k.id);
+            zeilen.push(Math.max(1, Number(k.gefordert) || 0) + ' ' + k.name + ' ' + k.set + ' ' + k.number);
+        });
+        return zeilen;
+    }
+
     const Logik = {
+        deckzeilenAus: deckzeilenAus,
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, verschiedeneKarten, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, neueEigeneBox, istEigen, deckzeilenLesen, listeEinlegen, namenVertragen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
@@ -1196,6 +1217,8 @@
     let ladeLauf = null;
     let aktiveId = null;
     let letztesErgebnis = null; // {id, neu:[], nichtMehr:[]}
+    let sichtbareKarten = [];   // Karten der aktuellen (gefilterten) Ansicht, fuer "Gefilterte kopieren"
+    let ansichtKontext = null;  // Formatkontext der aktuellen Ansicht, fuer die Standard-Marke an der Kachel
     let manifestDatum = null;
 
     function spiegelLesen(uid) {
@@ -1838,7 +1861,7 @@
         const stufen = {};
         reihe.forEach(function (r) { if (r.stufe) stufen[r.stufe] = (stufen[r.stufe] || 0) + 1; });
         const legende = Object.keys(stufen).length
-            ? '<p class="abx-stufen-legende">' + ['gespielt', 'legal', 'raus'].filter(function (s) { return stufen[s]; })
+            ? '<p class="abx-stufen-legende">' + ['gespielt', 'legal', 'raus', 'eigen'].filter(function (s) { return stufen[s]; })
                 .map(function (s) {
                     return '<span class="abx-stufe-' + s + '"><span class="abx-stufe-punkt" aria-hidden="true"></span>'
                         + esc(tx('abx.stufe.' + s, { fmt: (kontext && kontext.aktuell) || '' }, s)) + '</span>';
@@ -1847,6 +1870,18 @@
         leiste.innerHTML = (boxen.length > 1 ? chip(null, tx('abx.alleBoxen', null, 'Alle Boxen'), alle) : '')
             + reihe.map(function (r) { return chip(r.box.id, nameVon(r.box), umfang(r.box), r.stufe, r.rang); }).join('')
             + legende;
+    }
+
+    /** Standard-Marke an der Karte: Standard-legal (mindestens ein Druck) oder nur Expanded; unbekannt -> keine. */
+    function legalMarke(k) {
+        const c = ansichtKontext;
+        if (!c || typeof c.legal !== 'function' || !c.legalBekannt) return '';
+        const l = c.legal(k);
+        if (l === true) return '<span class="abx-legal abx-legal-standard" title="' + esc(tx('abx.legalStandardTitel', { fmt: c.standard || '' },
+            'Mindestens ein Druck ist in {fmt} legal.')) + '">' + esc(tx('abx.legalStandard', null, 'Standard')) + '</span>';
+        if (l === false) return '<span class="abx-legal abx-legal-expanded" title="' + esc(tx('abx.legalExpandedTitel', null,
+            'Nicht Standard-legal, nur Expanded.')) + '">' + esc(tx('abx.legalExpanded', null, 'Expanded')) + '</span>';
+        return '';
     }
 
     function kachel(eintrag, mitBoxName) {
@@ -1898,7 +1933,7 @@
             + '<div class="abx-bild">' + bild + sollKnopf + herz + drinPlakette
             + (marken.length ? '<div class="abx-marken">' + marken.join('') + '</div>' : '') + '</div>'
             + '<div class="abx-text">' + boxZeile + '<div class="abx-name" title="' + esc(k.name) + '">' + esc(k.name) + '</div>'
-            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + druckZusatz + '</span>' + anteil + '</div>'
+            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + druckZusatz + '</span>' + legalMarke(k) + anteil + '</div>'
             + (eintrag.formatZeile ? '<div class="abx-formatzeile">' + esc(eintrag.formatZeile) + '</div>' : '') + '</div>'
             + '<div class="abx-segmente" role="group" aria-label="' + esc(tx('abx.statusAria', null, 'Status in der Box')) + '">' + knoepfe + '</div>'
             + '<div class="abx-zeile2">'
@@ -1943,7 +1978,7 @@
             + '<div class="abx-text"><div class="abx-boxname">' + esc(n === 1 ? tx('abx.inEinerBox', null, 'in 1 Box')
                 : tx('abx.inBoxen', { n: n }, 'in {n} Boxen')) + '</div>'
             + '<div class="abx-name" title="' + esc(k.name) + '">' + esc(k.name) + '</div>'
-            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + '</span></div>'
+            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + '</span>' + legalMarke(k) + '</div>'
             + '<div class="abx-offen-zeile">' + esc(tx('abx.drinOffen', { drin: g.drin, offen: g.offen }, '{drin} drin · {offen} offen')) + '</div></div>'
             + '<button type="button" class="abx-mini abx-vert-btn" onclick="ArchetypBox.verteilung(' + arg + ')">' + esc(titel) + '</button>'
             + '</div>';
@@ -2105,6 +2140,8 @@
         }
         const ohneFormate = gewaehlt.some(function (b) { return !b.mitFormaten && !istEigen(b); });
         eintraege = sortieren(eintraege, ansicht.sort, !!eine);
+        sichtbareKarten = eintraege.map(function (e) { return e.k; });
+        ansichtKontext = kontext;
         const zusammen = mitBoxName && ansicht.gruppe === 'zusammen';
         const r = { fehlt: [], original: [], proxy: [] };
         eintraege.forEach(function (e) { r[STATUS.indexOf(e.k.status) >= 0 ? e.k.status : 'fehlt'].push(e); });
@@ -2122,17 +2159,16 @@
                         datum: datumLesbar(eine.aktualisiert)
                     }, 'Alle Formate · {schwelle} · Turnierdaten bis {daten} · abgeglichen am {datum}')) + '</p></div>';
         } else {
-            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleBoxen', null, 'Alle Boxen')) + '</h3>'
-                + '<p class="abx-meta">' + esc(tx('abx.alleMeta', { n: boxen.length, liste: boxen.map(nameVon).join(', ') },
-                    '{n} Boxen zusammen: {liste}')) + '</p></div>';
+            // Keine Namensliste mehr (Hausi, 03.10.2026: "viel zu viel Text"): die Chips oben nennen jede Box.
+            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleBoxen', null, 'Alle Boxen')) + '</h3></div>';
         }
         const alt = gewaehlt.filter(function (b) { return !istEigen(b) && neueDatenDa(b, manifestDatum); });
         const hinweis = alt.length
             ? '<p class="abx-neudaten">' + esc(eine
                 ? tx('abx.neueDaten', { datum: datumLesbar(manifestDatum) },
                     'Es gibt Turnierdaten bis {datum}, die diese Box noch nicht kennt — „Archetyp-Box aktualisieren“ übernimmt neue Karten.')
-                : tx('abx.neueDatenAlle', { datum: datumLesbar(manifestDatum), liste: alt.map(nameVon).join(', ') },
-                    'Turnierdaten bis {datum} — noch nicht abgeglichen: {liste}. Box antippen und aktualisieren.')) + '</p>'
+                : tx('abx.neueDatenAlle', { datum: datumLesbar(manifestDatum), n: alt.length },
+                    'Turnierdaten bis {datum} — bei {n} Boxen noch nicht abgeglichen. „Alle Boxen aktualisieren“ holt sie nach.')) + '</p>'
             : '';
         const erg = (eine && letztesErgebnis && letztesErgebnis.id === eine.id)
             ? '<p class="abx-ergebnis" role="status">' + esc(ergebnisSatz(letztesErgebnis)) + '</p>' : '';
@@ -2146,6 +2182,10 @@
             + (r.proxy.length
                 ? '<button type="button" class="btn btn-outline abx-druck-btn" onclick="ArchetypBox.proxysDrucken(' + druckId + ')">'
                     + esc(tx('abx.proxysDrucken', { n: proxyKopien }, 'Proxys drucken ({n})')) + '</button>'
+                : '')
+            + (sichtbareKarten.length
+                ? '<button type="button" class="btn btn-outline abx-kopieren-btn" onclick="ArchetypBox.kopieren()">'
+                    + esc(tx('abx.kopieren', { n: sichtbareKarten.length }, 'Gefilterte Karten kopieren ({n})')) + '</button>'
                 : '')
             + (eine ? '<button type="button" class="btn btn-outline" onclick="ArchetypBox.loeschen(\'' + esc(eine.id) + '\')">'
                 + esc(tx('abx.loeschen', null, 'Box löschen')) + '</button>' : '')
@@ -2672,6 +2712,31 @@
             + esc(tx('abx.listeAbgleichen', null, 'Abgleichen und Fehlendes ergänzen')) + '</button>' + erg + '</details>';
     }
 
+    /** Legt die gerade sichtbaren (gefilterten) Karten als Deckliste in die Zwischenablage. */
+    async function kopieren() {
+        const zeilen = deckzeilenAus(sichtbareKarten);
+        if (!zeilen.length) {
+            toast(tx('abx.kopierenLeer', null, 'Keine Karten zum Kopieren.'), 'warning');
+            return;
+        }
+        const text = zeilen.join('\n');
+        let ok = false;
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); ok = true; }
+        } catch (_) { ok = false; }
+        if (!ok) {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length);
+                ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+            } catch (_) { ok = false; }
+        }
+        toast(ok ? tx('abx.kopiert', { n: zeilen.length }, '{n} Karten kopiert — im Deckbuilder einfügen.')
+                 : tx('abx.kopierenFehler', null, 'Kopieren hat nicht geklappt.'), ok ? 'success' : 'error');
+    }
+
     async function eigeneAnlegen() {
         if (!nutzer()) {
             toast(tx('abx.anmelden', null, 'Bitte melde dich an — die Archetyp-Box liegt in deinem Konto.'), 'warning');
@@ -2770,6 +2835,7 @@
         anzahl: anzahl,
         auffuellen: fuellen,
         wunsch: wunsch,
+        kopieren: kopieren,
         wieder: wieder,
         wiederAlle: wiederAlle,
         ansicht: ansichtSetzen,

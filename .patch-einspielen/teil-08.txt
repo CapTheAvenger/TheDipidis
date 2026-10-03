@@ -1,0 +1,68 @@
+-        assert.match(code, /const liste = id \? boxen\.filter\(function \(b\) \{ return b\.id === id; \}\) : boxen\.slice\(\);/);|
++        assert.match(code, /const liste = \(id \? boxen\.filter\(function \(b\) \{ return b\.id === id; \}\) : boxen\.slice\(\)\)\s*\.filter\(function \(b\) \{ return !istEigen\(b\); \}\);/);|
+         const i18n = R('js/i18n.js');|
+diff --git a/tests/unit/test-eigene-box.js b/tests/unit/test-eigene-box.js|
+new file mode 100644|
+index 00000000..dcfaaef6|
+--- /dev/null|
++++ b/tests/unit/test-eigene-box.js|
+@@ -0,0 +1,131 @@|
++/**|
++ * Rutsch O (03.10.2026) — eigene Archetyp-Box und Deckliste einfuegen.|
++ * Hausi: "legt man die Box an mit Namen, da kann ich Decklisten einfuegen,|
++ * und es wird immer abgeglichen was schon drin ist und nur das ergaenzt was|
++ * noch fehlt." Die Logik wird AUSGEFUEHRT; die Verdrahtung wird gelesen.|
++ *|
++ * Zusagen:|
++ *  1. Die Liste wird gelesen (mehrere Schreibweisen); Ueberschriften zaehlen|
++ *     nicht; alles andere ohne Set + Nummer landet sichtbar in `unlesbar`.|
++ *  2. Nur Fehlendes kommt dazu. Zweites Einfuegen derselben Liste aendert|
++ *     nichts; ein anderer Druck derselben Karte gilt als schon drin.|
++ *  3. Zugeordnet wird nie ueber den Namen — zwei Karten gleichen Namens mit|
++ *     anderem Set/Nummer und ohne gemeinsamen Druck bleiben zwei Karten.|
++ *  4. Anzahl: hoechste Anzahl ueber alle Listen, nie abgezogen; Karten aus|
++ *     Turnierdaten behalten ihre Datenzahl.|
++ *  5. Eigene Boxen werden vom Aktualisieren nicht angefasst.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const L = require('../../js/archetyp-box.js');|
++const QUELLE = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'archetyp-box.js'), 'utf8');|
++const lies = (p) => fs.readFileSync(path.join(__dirname, '..', '..', p), 'utf8');|
++|
++const karte = (set, number, name, refs) => ({ id: L.kartenId(set, number), name, set, number, bild: '', typ: 'Pokemon',|
++  element: '', anzahl: 1, maxAnzahl: 0, anteil: null, refs: refs || [] });|
++const leer = () => L.neueEigeneBox('Rotom', '2026-10-03');|
++|
++describe('Rutsch O: Liste lesen', () => {|
++  it('Limitless-, PTCGL- und x-Schreibweise', () => {|
++    const r = L.deckzeilenLesen('3 Mow Rotom (DRI 9)\n2x Rotom ex PFL 29\n4 Basic Lightning Energy MEE 012\r\n1 Night Stretcher (SFA 61)');|
++    assert.deepEqual(r.zeilen.map((z) => [z.n, z.set, z.number]),|
++      [[3, 'DRI', '9'], [2, 'PFL', '29'], [4, 'MEE', '012'], [1, 'SFA', '61']]);|
++    assert.equal(r.zeilen[0].name, 'Mow Rotom');|
++    assert.deepEqual(r.unlesbar, []);|
++  });|
++  it('Ueberschriften und Leerzeilen zaehlen nicht, unlesbare Zeilen werden genannt', () => {|
++    const r = L.deckzeilenLesen('Pokémon: 8\n\n3 Mow Rotom (DRI 9)\nTrainer: 30\nTotal Cards: 60\nirgendwas ohne Zahl\n2 Karte ohne Nummer');|
++    assert.equal(r.zeilen.length, 1);|
++    assert.deepEqual(r.unlesbar, ['irgendwas ohne Zahl', '2 Karte ohne Nummer']);|
++  });|
++});|
++|
++describe('Rutsch O: nur Fehlendes ergaenzen', () => {|
++  const liste = [{ eintrag: karte('DRI', '9', 'Mow Rotom'), n: 3 }, { eintrag: karte('PFL', '29', 'Rotom ex', ['PFL-111']), n: 2 }];|
++  it('erstes Einfuegen legt beide Karten an, mit Soll-Anzahl und Marke', () => {|
++    const e = L.listeEinlegen(leer(), liste, '2026-10-03');|
++    assert.equal(e.hinzu.length, 2);|
++    assert.deepEqual(e.box.karten.map((k) => [k.id, k.gefordert, k.status, k.aus]), [['DRI-9', 3, 'fehlt', 'liste'], ['PFL-29', 2, 'fehlt', 'liste']]);|
++  });|
++  it('zweites Einfuegen derselben Liste aendert nichts', () => {|
++    const a = L.listeEinlegen(leer(), liste, '2026-10-03');|
++    const b = L.listeEinlegen(a.box, liste, '2026-10-04');|
++    assert.equal(b.hinzu.length, 0);|
++    assert.equal(b.schon.length, 2);|
++    assert.equal(b.box.karten.length, 2);|
++    assert.deepEqual(b.box.karten.map((k) => k.gefordert), [3, 2]);|

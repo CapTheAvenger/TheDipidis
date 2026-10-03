@@ -334,3 +334,13 @@
 .abx-wieder-zeile { color: var(--ink-2); font-size: var(--fs-xs); font-weight: 700; }
 .abx-wieder-knoepfe { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 .abx-karte .abx-wieder-knoepfe .abx-seg { font-size: var(--fs-xs); }
+
+/* ── Eigene Box und Deckliste (Rutsch O) ── */
+.abx-eigen, .abx-liste { margin: var(--s-3) 0; max-width: 560px; }
+.abx-eigen summary, .abx-liste summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+.abx-eigen label, .abx-liste label { display: block; font-weight: 700; font-size: var(--fs-sm); color: var(--ink-2); margin: var(--s-2) 0 var(--s-1); }
+.abx-eigen input, .abx-liste textarea { width: 100%; box-sizing: border-box; }
+.abx-eigen input { min-height: 44px; }
+.abx-eigen .btn, .abx-liste .btn { min-height: 44px; margin-top: var(--s-2); }
+.abx-ergebnis-zeile { margin: var(--s-1) 0; font-size: var(--fs-sm); overflow-wrap: anywhere; }
+.abx-ergebnis-zeile.abx-warn { font-weight: 700; }

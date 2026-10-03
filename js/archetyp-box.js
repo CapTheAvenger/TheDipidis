@@ -490,6 +490,111 @@
         }), hinzugefuegt: true };
     }
 
+    // ════════════════════════════════════════════════════════
+    // Eigene Box und Deckliste einfuegen (Rutsch O, 03.10.2026)
+    // ════════════════════════════════════════════════════════
+
+    /** Eine Box ohne Turnierdaten: Name von Hand, Karten aus eingefuegten Listen. */
+    function neueEigeneBox(name, heute) {
+        return {
+            schemaVersion: 2,
+            name: String(name || '').trim(),
+            archetyp: '',
+            eigen: true,
+            schwelle: 'all',
+            datenStand: null,
+            erstellt: heute,
+            aktualisiert: heute,
+            mitFormaten: false,
+            karten: []
+        };
+    }
+
+    function istEigen(box) { return !!(box && box.eigen === true); }
+
+    /**
+     * Deckliste lesen: "3 Mow Rotom (DRI 9)", "3x Mow Rotom DRI 009",
+     * "4 Basic Lightning Energy MEE 12". Zugeordnet wird spaeter NUR ueber
+     * Set und Nummer, der Name ist nur Anzeige und Gegenprobe.
+     * Ueberschriften ("Pokémon: 12", "Total Cards: 60") und Leerzeilen
+     * zaehlen nicht; jede andere Zeile ohne Set + Nummer kommt in `unlesbar`.
+     * Liefert { zeilen: [{ n, name, set, number, roh }], unlesbar: [roh] }.
+     */
+    function deckzeilenLesen(text) {
+        const zeilen = [];
+        const unlesbar = [];
+        String(text == null ? '' : text).split(/\r?\n/).forEach(function (rohZeile) {
+            const roh = rohZeile.replace(/\s+/g, ' ').trim();
+            if (!roh || /^[#/]/.test(roh)) return;
+            if (/^(pok[eé]mon|trainers?|energy|energies|total cards|deck|cards)\b[^0-9]*:?\s*\(?\d*\)?\s*$/i.test(roh)
+                && !/^\d/.test(roh)) return;
+            const m = roh.match(/^(\d{1,2})\s*[x×]?\s+(.+?)\s+\(?([A-Za-z][A-Za-z0-9-]{1,5})\s+([A-Za-z]{0,3}\d+[A-Za-z]?)\)?$/);
+            if (!m) { unlesbar.push(roh); return; }
+            const n = parseInt(m[1], 10);
+            if (!(n >= 1)) { unlesbar.push(roh); return; }
+            zeilen.push({ n: n, name: m[2].replace(/\s*\($/, '').trim(), set: m[3].toUpperCase(), number: m[4], roh: roh });
+        });
+        return { zeilen: zeilen, unlesbar: unlesbar };
+    }
+
+    /**
+     * Gelesene und aufgeloeste Listenzeilen in die Box legen. Es kommt nur
+     * dazu, was noch fehlt; eine Karte, die (oder ein anderer Druck davon)
+     * schon drinliegt, bleibt unberuehrt.
+     *   aufgeloest: [{ eintrag: <Karte wie bei manuellHinzufuegen>, n }]
+     * Dieselbe Karte mehrfach in der Liste (auch in zwei Drucken) zaehlt
+     * zusammen. Die Soll-Anzahl ("gefordert") einer von Hand oder aus einer
+     * Liste stammenden Karte steigt auf die hoechste Anzahl aller Listen;
+     * Karten aus Turnierdaten behalten ihre Datenzahl. Eine Liste kann
+     * nichts abziehen. Liefert { box, hinzu, erhoeht, schon }.
+     */
+    function listeEinlegen(box, aufgeloest, heute) {
+        const gruppen = [];
+        (aufgeloest || []).forEach(function (a) {
+            if (!a || !a.eintrag || !a.eintrag.id) return;
+            const g = gruppen.find(function (x) { return gleicheKarte(x.eintrag, a.eintrag); });
+            if (g) {
+                g.n += a.n;
+                g.eintrag = Object.assign({}, g.eintrag, { refs: Array.from(new Set([].concat(g.eintrag.refs || [], a.eintrag.refs || [], [a.eintrag.id])
+                    .filter(function (r) { return r && r !== g.eintrag.id; }))) });
+            } else gruppen.push({ eintrag: a.eintrag, n: a.n });
+        });
+        let aktuell = Object.assign({}, box, { karten: (box.karten || []).map(function (k) { return Object.assign({}, k); }) });
+        const hinzu = [];
+        const erhoeht = [];
+        const schon = [];
+        gruppen.forEach(function (g) {
+            const n = anzahlBegrenzen(g.n);
+            const idx = aktuell.karten.findIndex(function (k) { return gleicheKarte(k, g.eintrag); });
+            if (idx >= 0) {
+                const k = aktuell.karten[idx];
+                const soll = gefordertVon(k);
+                if (k.manuell && n > (soll || 0)) {
+                    k.gefordert = n;
+                    erhoeht.push({ karte: k, von: soll, auf: n });
+                } else schon.push(k);
+                return;
+            }
+            const erg = manuellHinzufuegen(aktuell, g.eintrag, heute);
+            if (!erg.hinzugefuegt) return;
+            aktuell = erg.box;
+            const neuK = aktuell.karten[aktuell.karten.length - 1];
+            neuK.gefordert = n;
+            neuK.aus = 'liste';
+            hinzu.push(neuK);
+        });
+        aktuell.aktualisiert = heute;
+        return { box: aktuell, hinzu: hinzu, erhoeht: erhoeht, schon: schon };
+    }
+
+    /** Namen gelten als gleich, wenn einer im anderen steckt (nur Gegenprobe, nie Zuordnung). */
+    function namenVertragen(a, b) {
+        const k = function (t) { return String(t || '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+        const x = k(a), y = k(b);
+        if (!x || !y) return true;
+        return x.indexOf(y) >= 0 || y.indexOf(x) >= 0;
+    }
+
     /**
      * Karte aus der Box nehmen. Sie wird gemerkt (Hausi, 28.09.2026): wird
      * sie spaeter oefter gespielt, bietet das Aktualisieren sie wieder an,
@@ -1017,7 +1122,7 @@
     const Logik = {
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, verschiedeneKarten, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
-        manuellHinzufuegen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
+        manuellHinzufuegen, neueEigeneBox, istEigen, deckzeilenLesen, listeEinlegen, namenVertragen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
         markenKontext, basisEnergieRegel, formatPasst, imFormatGespielt, boxStufe, hauptkartenDerBox, chipReihe, KERN_SCHWELLE, formateNachDatum, blockVorRotation, druckIn, druckLegal, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
         isoTag, neuestesDatumImManifest, neueDatenDa, anzahlBegrenzen, STATUS
@@ -1509,6 +1614,7 @@
 
     /** Eine Box gegen die geladenen Rotationen-Daten halten und speichern. null = Archetyp nicht mehr in den Daten. */
     async function abgleichSpeichern(box) {
+        if (istEigen(box)) return null;
         const auswahl = _pmDeckAuswahl('all', 'all', box.archetyp);
         if (!auswahl.matchingDecks.length) return null;
         const summe = _pmAggregiereDecks(auswahl.matchingDecks);
@@ -1526,7 +1632,8 @@
      */
     async function aktualisieren(id) {
         if (aktualisiertGerade) return;
-        const liste = id ? boxen.filter(function (b) { return b.id === id; }) : boxen.slice();
+        const liste = (id ? boxen.filter(function (b) { return b.id === id; }) : boxen.slice())
+            .filter(function (b) { return !istEigen(b); });   // eigene Boxen haben keine Turnierdaten
         if (!liste.length) return;
         aktualisiertGerade = true;
         const zeile = function (text) {
@@ -1751,7 +1858,7 @@
         const soll = k.gefordert;
         const marken = [];
         if (k.neu) marken.push('<span class="abx-marke abx-marke-neu">' + esc(tx('abx.markeNeu', null, 'Neu')) + '</span>');
-        if (k.manuell) marken.push('<span class="abx-marke">' + esc(tx('abx.markeManuell', null, 'von Hand')) + '</span>');
+        if (k.manuell) marken.push('<span class="abx-marke">' + (k.aus === 'liste' ? esc(tx('abx.markeListe', null, 'aus Liste')) : esc(tx('abx.markeManuell', null, 'von Hand'))) + '</span>');
         if (k.inDaten === false) marken.push('<span class="abx-marke abx-marke-alt" title="'
             + esc(tx('abx.markeNichtMehrTitel', null, 'Kommt in den aktuellen Turnierlisten nicht mehr vor.')) + '">'
             + esc(tx('abx.markeNichtMehr', null, 'nicht mehr gespielt')) + '</span>');
@@ -1973,7 +2080,7 @@
             wurzel.innerHTML = '<div class="abx-leer-block"><p>' + esc(tx('abx.keineBox', null,
                 'Noch keine Archetyp-Box. Öffne Rotationen, wähle „Alle Formate“ und einen Archetyp und tippe in der Kartenübersicht auf „Zu Archetyp-Box hinzufügen“.'))
                 + '</p><button type="button" class="btn btn-primary" onclick="switchTabAndUpdateMenu(\'past-meta\')">'
-                + esc(tx('abx.zuRotationen', null, 'Zu Rotationen')) + '</button></div>';
+                + esc(tx('abx.zuRotationen', null, 'Zu Rotationen')) + '</button></div>' + eigeneBoxBlock();
             return;
         }
         // Eine Box gilt als gewaehlt, wenn es nur eine gibt oder eine angetippt wurde.
@@ -1996,7 +2103,7 @@
         if (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu') {
             eintraege.forEach(function (e) { e.formatZeile = formatZeileVon(e.k, ansicht.format, kontext); });
         }
-        const ohneFormate = gewaehlt.some(function (b) { return !b.mitFormaten; });
+        const ohneFormate = gewaehlt.some(function (b) { return !b.mitFormaten && !istEigen(b); });
         eintraege = sortieren(eintraege, ansicht.sort, !!eine);
         const zusammen = mitBoxName && ansicht.gruppe === 'zusammen';
         const r = { fehlt: [], original: [], proxy: [] };
@@ -2006,17 +2113,20 @@
         let kopf;
         if (eine) {
             kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(nameVon(eine)) + '</h3>'
-                + '<p class="abx-meta">' + esc(tx('abx.metaZeile', {
-                    schwelle: schwelleText(eine.schwelle || 'all'),
-                    daten: datumLesbar(eine.datenStand),
-                    datum: datumLesbar(eine.aktualisiert)
-                }, 'Alle Formate · {schwelle} · Turnierdaten bis {daten} · abgeglichen am {datum}')) + '</p></div>';
+                + '<p class="abx-meta">' + esc(istEigen(eine)
+                    ? tx('abx.metaEigen', { erstellt: datumLesbar(eine.erstellt), datum: datumLesbar(eine.aktualisiert) },
+                        'Eigene Box · angelegt am {erstellt} · zuletzt ergänzt am {datum}')
+                    : tx('abx.metaZeile', {
+                        schwelle: schwelleText(eine.schwelle || 'all'),
+                        daten: datumLesbar(eine.datenStand),
+                        datum: datumLesbar(eine.aktualisiert)
+                    }, 'Alle Formate · {schwelle} · Turnierdaten bis {daten} · abgeglichen am {datum}')) + '</p></div>';
         } else {
             kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleBoxen', null, 'Alle Boxen')) + '</h3>'
                 + '<p class="abx-meta">' + esc(tx('abx.alleMeta', { n: boxen.length, liste: boxen.map(nameVon).join(', ') },
                     '{n} Boxen zusammen: {liste}')) + '</p></div>';
         }
-        const alt = gewaehlt.filter(function (b) { return neueDatenDa(b, manifestDatum); });
+        const alt = gewaehlt.filter(function (b) { return !istEigen(b) && neueDatenDa(b, manifestDatum); });
         const hinweis = alt.length
             ? '<p class="abx-neudaten">' + esc(eine
                 ? tx('abx.neueDaten', { datum: datumLesbar(manifestDatum) },
@@ -2027,11 +2137,12 @@
         const erg = (eine && letztesErgebnis && letztesErgebnis.id === eine.id)
             ? '<p class="abx-ergebnis" role="status">' + esc(ergebnisSatz(letztesErgebnis)) + '</p>' : '';
         const druckId = eine ? '\'' + esc(eine.id) + '\'' : 'null';
+        const mitDaten = boxen.filter(function (b) { return !istEigen(b); }).length;
         const aktionen = '<div class="abx-aktionen">'
-            + (eine ? '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(\''
-                + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>'
-                : '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(null)">'
-                + esc(tx('abx.alleAktualisieren', { n: boxen.length }, 'Alle {n} Boxen aktualisieren')) + '</button>')
+            + (eine ? (istEigen(eine) ? '' : '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(\''
+                + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>')
+                : (mitDaten ? '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(null)">'
+                + esc(tx('abx.alleAktualisieren', { n: mitDaten }, 'Alle {n} Boxen aktualisieren')) + '</button>' : ''))
             + (r.proxy.length
                 ? '<button type="button" class="btn btn-outline abx-druck-btn" onclick="ArchetypBox.proxysDrucken(' + druckId + ')">'
                     + esc(tx('abx.proxysDrucken', { n: proxyKopien }, 'Proxys drucken ({n})')) + '</button>'
@@ -2045,6 +2156,7 @@
                 + esc(tx('abx.suchePlatzhalter', null, 'Name oder Set + Nummer, z. B. TWM 130'))
                 + '" oninput="ArchetypBox.suchen(this.value)"><div id="abxTreffer" class="abx-treffer"></div></div>'
             : '';
+        const liste = eine ? listeBlock(eine) : '';
         const summe = '<p class="abx-summe">' + esc(tx('abx.summe', {
             fehlt: r.fehlt.length, original: r.original.length, proxy: r.proxy.length
         }, '{fehlt} fehlen · {original} als Original drin · {proxy} als Proxy drin'))
@@ -2068,8 +2180,8 @@
                 + rubrik('original', tx('abx.rubrikOriginal', null, 'Schon drin (Original)'), r.original, mitBoxName)
                 + rubrik('proxy', tx('abx.rubrikProxy', null, 'Als Proxy drin'), r.proxy, mitBoxName);
         }
-        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName)
-            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + hauptteil;
+        wurzel.innerHTML = kopf + hinweis + aktionen + erg + liste + suche + wiederBereich(gewaehlt, mitBoxName)
+            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + hauptteil + eigeneBoxBlock();
     }
 
     function boxVon(boxId) { return boxen.find(function (b) { return b.id === boxId; }) || null; }
@@ -2470,11 +2582,8 @@
         }, 180);
     }
 
-    function hinzufuegen(set, nummer) {
-        const box = aktiveId ? boxVon(aktiveId) : (boxen.length === 1 ? boxen[0] : null);
-        if (!box) return;
-        const k = (typeof getCanonicalCardRecord === 'function') ? getCanonicalCardRecord(set, nummer) : null;
-        if (!k) return;
+    /** Box-Eintrag aus einem Datensatz der Kartendatenbank (Set und Nummer sind der Schluessel). */
+    function eintragAusKarte(k) {
         const id = kartenId(k.set, k.number);
         let refs = [];
         if (typeof getInternationalPrintsForCard === 'function') {
@@ -2489,12 +2598,21 @@
             try { bild = getBestCardImage(Object.assign({}, k, { set_code: k.set, set_number: k.number, card_name: name })) || bild; }
             catch (_) { /* Datenbankbild */ }
         }
-        const eintrag = {
+        return {
             id: id, name: name, set: String(k.set).toUpperCase(), number: String(k.number), bild: bild,
             typ: (typeof getCardType === 'function') ? getCardType(name, k.set, k.number) : '',
             element: k.energy_type || '',
             anzahl: 1, maxAnzahl: 0, anteil: null, refs: refs
         };
+    }
+
+    function hinzufuegen(set, nummer) {
+        const box = aktiveId ? boxVon(aktiveId) : (boxen.length === 1 ? boxen[0] : null);
+        if (!box) return;
+        const k = (typeof getCanonicalCardRecord === 'function') ? getCanonicalCardRecord(set, nummer) : null;
+        if (!k) return;
+        const name = k.name_en || k.name || '';
+        const eintrag = eintragAusKarte(k);
         const erg = manuellHinzufuegen(box, eintrag, heuteIso());
         if (!erg.hinzugefuegt) {
             toast(tx('abx.schonDrin', { name: name }, '„{name}“ liegt schon in der Box.'), 'info');
@@ -2507,6 +2625,107 @@
         const ziel = el('abxTreffer');
         if (ziel) ziel.innerHTML = '';
         toast(tx('abx.hinzugefuegt', { name: name }, '„{name}“ hinzugefügt.'), 'success');
+        zeichnen();
+    }
+
+    // ── Eigene Box und Deckliste einfuegen ──
+
+    let letzteListe = null;   // { id, hinzu, erhoeht, schon, unbekannt, unlesbar, abweichend }
+
+    function eigeneBoxBlock() {
+        return '<details class="abx-eigen"><summary>' + esc(tx('abx.eigenKnopf', null, 'Eigene Box anlegen')) + '</summary>'
+            + '<p class="abx-leer">' + esc(tx('abx.eigenText', null,
+                'Eine Box ohne Turnierdaten: du gibst ihr einen Namen und fügst Decklisten ein. Es kommt nur dazu, was noch fehlt.')) + '</p>'
+            + '<label for="abxEigenName">' + esc(tx('abx.eigenName', null, 'Name der Box')) + '</label>'
+            + '<input type="text" id="abxEigenName" class="input-system" maxlength="60" autocomplete="off" placeholder="'
+            + esc(tx('abx.eigenPlatzhalter', null, 'z. B. Rotom-Tool-Deck')) + '">'
+            + '<button type="button" class="btn btn-primary" onclick="ArchetypBox.eigeneAnlegen()">'
+            + esc(tx('abx.eigenAnlegen', null, 'Box anlegen')) + '</button></details>';
+    }
+
+    function listeBlock(box) {
+        const r = (letzteListe && letzteListe.id === box.id) ? letzteListe : null;
+        const namen = function (a) { return a.map(function (k) { return k.name + ' (' + k.set + ' ' + k.number + ')'; }).join(', '); };
+        let erg = '';
+        if (r) {
+            const teile = [];
+            teile.push(tx('abx.listeErgebnis', { neu: r.hinzu.length, schon: r.schon.length, mehr: r.erhoeht.length, nein: r.unbekannt.length + r.unlesbar.length },
+                '{neu} Karten ergänzt · {schon} schon drin · {mehr} Anzahl angehoben · {nein} nicht erkannt'));
+            let html = '<p class="abx-ergebnis" role="status">' + esc(teile.join(' ')) + '</p>';
+            if (r.hinzu.length) html += '<p class="abx-ergebnis-zeile">' + esc(tx('abx.listeHinzu', null, 'Neu in der Box:')) + ' ' + esc(namen(r.hinzu)) + '</p>';
+            if (r.erhoeht.length) html += '<p class="abx-ergebnis-zeile">' + esc(tx('abx.listeMehr', null, 'Anzahl angehoben:')) + ' '
+                + esc(r.erhoeht.map(function (e) { return e.karte.name + ' (' + (e.von || 0) + ' → ' + e.auf + ')'; }).join(', ')) + '</p>';
+            if (r.unbekannt.length) html += '<p class="abx-ergebnis-zeile abx-warn">' + esc(tx('abx.listeUnbekannt', null,
+                'Nicht in der Kartendatenbank (Set + Nummer unbekannt), nicht übernommen:')) + ' ' + esc(r.unbekannt.join('; ')) + '</p>';
+            if (r.unlesbar.length) html += '<p class="abx-ergebnis-zeile abx-warn">' + esc(tx('abx.listeUnlesbar', null,
+                'Zeilen ohne Anzahl, Set und Nummer, nicht gelesen:')) + ' ' + esc(r.unlesbar.join('; ')) + '</p>';
+            if (r.abweichend.length) html += '<p class="abx-ergebnis-zeile abx-warn">' + esc(tx('abx.listeAbweichend', null,
+                'Name in der Liste weicht von der Datenbankkarte ab (zugeordnet wurde über Set + Nummer):')) + ' ' + esc(r.abweichend.join('; ')) + '</p>';
+            erg = html;
+        }
+        return '<details class="abx-liste"' + (r ? ' open' : '') + '><summary>' + esc(tx('abx.listeKnopf', null, 'Deckliste einfügen')) + '</summary>'
+            + '<label for="abxListe">' + esc(tx('abx.listeLabel', null, 'Deckliste (eine Karte je Zeile)')) + '</label>'
+            + '<textarea id="abxListe" class="input-system" rows="10" spellcheck="false" placeholder="'
+            + esc(tx('abx.listePlatzhalter', null, '3 Mow Rotom (DRI 9)\n2 Rotom ex (PFL 29)\n4 Arven (OBF 186)')) + '"></textarea>'
+            + '<button type="button" class="btn btn-primary" onclick="ArchetypBox.listeEinfuegen()">'
+            + esc(tx('abx.listeAbgleichen', null, 'Abgleichen und Fehlendes ergänzen')) + '</button>' + erg + '</details>';
+    }
+
+    async function eigeneAnlegen() {
+        if (!nutzer()) {
+            toast(tx('abx.anmelden', null, 'Bitte melde dich an — die Archetyp-Box liegt in deinem Konto.'), 'warning');
+            return;
+        }
+        const feld = el('abxEigenName');
+        const name = feld ? String(feld.value || '').trim() : '';
+        if (!name) {
+            toast(tx('abx.eigenNameFehlt', null, 'Bitte gib der Box einen Namen.'), 'warning');
+            return;
+        }
+        await laden();
+        if (boxen.some(function (b) { return nameVon(b).toLowerCase() === name.toLowerCase(); })) {
+            toast(tx('abx.eigenNameDoppelt', { name: name }, 'Eine Box „{name}“ gibt es schon.'), 'warning');
+            return;
+        }
+        const box = neueEigeneBox(name, heuteIso());
+        box.id = neueId();
+        if (!(await schreiben(box))) return;
+        aktiveId = box.id;
+        letzteListe = null;
+        toast(tx('abx.eigenAngelegt', { name: name }, 'Box „{name}“ angelegt — füge jetzt eine Deckliste ein.'), 'success');
+        zeichnen();
+    }
+
+    async function listeEinfuegen() {
+        const box = aktiveId ? boxVon(aktiveId) : (boxen.length === 1 ? boxen[0] : null);
+        const feld = el('abxListe');
+        if (!box || !feld) return;
+        const gelesen = deckzeilenLesen(feld.value);
+        if (!gelesen.zeilen.length && !gelesen.unlesbar.length) {
+            toast(tx('abx.listeLeer', null, 'Die Liste ist leer.'), 'warning');
+            return;
+        }
+        if ((!window.allCardsDatabase || !window.allCardsDatabase.length) && typeof loadAllCardsDatabase === 'function') {
+            try { await loadAllCardsDatabase(); } catch (_) { /* unten: nicht erkannt */ }
+        }
+        const aufgeloest = [];
+        const unbekannt = [];
+        const abweichend = [];
+        gelesen.zeilen.forEach(function (z) {
+            const k = (typeof getCanonicalCardRecord === 'function') ? getCanonicalCardRecord(z.set, z.number) : null;
+            if (!k) { unbekannt.push(z.roh); return; }
+            if (!namenVertragen(z.name, k.name_en || k.name) && !namenVertragen(z.name, k.name_de)) {
+                abweichend.push(z.name + ' ≠ ' + (k.name_en || k.name) + ' (' + z.set + ' ' + z.number + ')');
+            }
+            aufgeloest.push({ eintrag: eintragAusKarte(k), n: z.n });
+        });
+        const erg = listeEinlegen(box, aufgeloest, heuteIso());
+        erg.box.id = box.id;
+        if (erg.hinzu.length || erg.erhoeht.length) {
+            if (!(await schreiben(erg.box))) return;
+        }
+        letzteListe = { id: box.id, hinzu: erg.hinzu, erhoeht: erg.erhoeht, schon: erg.schon,
+            unbekannt: unbekannt, unlesbar: gelesen.unlesbar, abweichend: abweichend };
         zeichnen();
     }
 
@@ -2567,6 +2786,8 @@
         proxysDrucken: proxysDrucken,
         suchen: suchen,
         hinzufuegen: hinzufuegen,
+        eigeneAnlegen: eigeneAnlegen,
+        listeEinfuegen: listeEinfuegen,
         _eintragAusUebersicht: eintragAusUebersicht
     });
 })();

@@ -29,6 +29,32 @@
 
 // On reload we intentionally start fresh for temporary deck-builder state.
 try { localStorage.removeItem('autosave_deck'); } catch (_) {}
+
+/* UI-82 (03.10.2026, Tiefenanalyse N-12): Neuladen verwirft das Deck im
+   Baukasten (Absicht, s. o.) — bisher ohne jede Warnung. Wer nach
+   „Max Consistency" und eigenen Aenderungen F5 drueckt oder den Tab
+   schliesst, verlor das Deck still. Gewarnt wird nur, wenn ein Deck
+   Karten hat UND nicht genau so gespeichert wurde
+   (window.__deckZuletztGespeichert setzt saveCurrentDeckToProfile). */
+function _ungespeicherteDecks(w) {
+    const gespeichert = (w && w.__deckZuletztGespeichert) || {};
+    const quellen = [['cityLeague', 'cityLeagueDeck'], ['currentMeta', 'currentMetaDeck'], ['pastMeta', 'pastMetaDeck']];
+    return quellen.filter(function (q) {
+        const deck = w && w[q[1]];
+        if (!deck || typeof deck !== 'object') return false;
+        const karten = Object.keys(deck).reduce(function (n, k) { return n + (Number(deck[k]) || 0); }, 0);
+        if (karten <= 0) return false;
+        return gespeichert[q[0]] !== JSON.stringify(deck);
+    }).map(function (q) { return q[0]; });
+}
+window._ungespeicherteDecks = _ungespeicherteDecks;
+if (typeof window.addEventListener === 'function') {
+    window.addEventListener('beforeunload', function (e) {
+        if (!_ungespeicherteDecks(window).length) return;
+        e.preventDefault();
+        e.returnValue = '';
+    });
+}
         localStorage.removeItem('cityLeagueDeck');
         localStorage.removeItem('currentMetaDeck');
         localStorage.removeItem('pastMetaDeck');

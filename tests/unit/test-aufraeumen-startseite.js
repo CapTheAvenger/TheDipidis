@@ -187,8 +187,12 @@ describe('Der EV-Rechner rechnet über ein echtes Turnier', () => {
         const siege = (ev, runden) => (ev / 100) * runden;
         assert.equal(siege(54, STD).toFixed(2), '4.32');
         assert.notEqual(siege(54, STD).toFixed(2), '4.86');
-        assert.match(MC, /const siege\s*=\s*\(r\.ev \/ 100\) \* runden;/,
-            'die Rechnung im Meta Call ist nicht mehr Quote mal Runden');
+        /* FE-33 (03.10.2026): Quote mal Runden zaehlte Unentschieden als
+           halbe Siege mit. Jetzt: Quote mal ENTSCHIEDENE Runden — die
+           Rundenzahl bleibt der Startwert oben (geprueft in
+           tests/unit/test-fe33-erwartete-siege.js, dort ausgefuehrt). */
+        assert.match(MC, /const siege\s*=\s*_erwarteteSiege\(r\.ev,\s*runden,\s*_uq\.quote\);/,
+            'die Rechnung im Meta Call nimmt nicht mehr die Rundenzahl aus _settings');
         assert.match(MC, /const runden = _settings\.rounds;/,
             'die Rundenzahl kommt nicht aus den Turniereinstellungen — dann zeigt der '
             + 'Block eine andere Zahl als die Kachel darüber');

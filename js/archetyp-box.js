@@ -519,6 +519,10 @@
      * Ueberschriften ("Pokémon: 12", "Total Cards: 60") und Leerzeilen
      * zaehlen nicht; jede andere Zeile ohne Set + Nummer kommt in `unlesbar`.
      * Liefert { zeilen: [{ n, name, set, number, roh }], unlesbar: [roh] }.
+     * FE-30 (03.10.2026): Setkuerzel duerfen mit einer Ziffer beginnen
+     * ("30C", das aktuelle Set) — vorher fiel "4 Poké Pad 30C 126" still
+     * weg, auch aus der eigenen Kopier-Ausgabe der Box. Mindestens ein
+     * Buchstabe bleibt Pflicht, damit eine Zahl nie als Set gilt.
      */
     function deckzeilenLesen(text) {
         const zeilen = [];
@@ -528,7 +532,7 @@
             if (!roh || /^[#/]/.test(roh)) return;
             if (/^(pok[eé]mon|trainers?|energy|energies|total cards|deck|cards)\b[^0-9]*:?\s*\(?\d*\)?\s*$/i.test(roh)
                 && !/^\d/.test(roh)) return;
-            const m = roh.match(/^(\d{1,2})\s*[x×]?\s+(.+?)\s+\(?([A-Za-z][A-Za-z0-9-]{1,5})\s+([A-Za-z]{0,3}\d+[A-Za-z]?)\)?$/);
+            const m = roh.match(/^(\d{1,2})\s*[x×]?\s+(.+?)\s+\(?((?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9-]{1,5})\s+([A-Za-z]{0,3}\d+[A-Za-z]?)\)?$/);
             if (!m) { unlesbar.push(roh); return; }
             const n = parseInt(m[1], 10);
             if (!(n >= 1)) { unlesbar.push(roh); return; }
@@ -2826,7 +2830,7 @@
             if (r.unbekannt.length) html += '<p class="abx-ergebnis-zeile abx-warn">' + esc(tx('abx.listeUnbekannt', null,
                 'Nicht in der Kartendatenbank (Set + Nummer unbekannt), nicht übernommen:')) + ' ' + esc(r.unbekannt.join('; ')) + '</p>';
             if (r.unlesbar.length) html += '<p class="abx-ergebnis-zeile abx-warn">' + esc(tx('abx.listeUnlesbar', null,
-                'Zeilen ohne Anzahl, Set und Nummer, nicht gelesen:')) + ' ' + esc(r.unlesbar.join('; ')) + '</p>';
+                'Nicht gelesen (erwartet: Anzahl, Name, Set, Nummer):')) + ' ' + esc(r.unlesbar.join('; ')) + '</p>';
             if (r.abweichend.length) html += '<p class="abx-ergebnis-zeile abx-warn">' + esc(tx('abx.listeAbweichend', null,
                 'Name in der Liste weicht von der Datenbankkarte ab (zugeordnet wurde über Set + Nummer):')) + ' ' + esc(r.abweichend.join('; ')) + '</p>';
             erg = html;

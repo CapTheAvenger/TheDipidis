@@ -2180,8 +2180,9 @@
                 + rubrik('original', tx('abx.rubrikOriginal', null, 'Schon drin (Original)'), r.original, mitBoxName)
                 + rubrik('proxy', tx('abx.rubrikProxy', null, 'Als Proxy drin'), r.proxy, mitBoxName);
         }
-        wurzel.innerHTML = kopf + hinweis + aktionen + erg + liste + suche + wiederBereich(gewaehlt, mitBoxName)
-            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + hauptteil + eigeneBoxBlock();
+        // Eigene Box oben (nicht ans Ende): bei "Alle Boxen" liegen darunter ueber tausend Karten.
+        wurzel.innerHTML = kopf + hinweis + aktionen + eigeneBoxBlock() + erg + liste + suche + wiederBereich(gewaehlt, mitBoxName)
+            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + hauptteil;
     }
 
     function boxVon(boxId) { return boxen.find(function (b) { return b.id === boxId; }) || null; }

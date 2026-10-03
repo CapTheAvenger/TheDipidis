@@ -1,0 +1,16 @@
+{
+ "patch_bytes": 36275,
+ "patch_sha256": "2ac570a30b2b71932f1f0ee4071447c6a9bf1ac9a89bf9daa044cefff3ecf1f0",
+ "teile": {
+  "teil-01.txt": "ff16b1ce90ee7b6d1eb2f0e4bc1d7b6266017f2af792f51b66d92eedeb2a5695",
+  "teil-02.txt": "fa68536b8c2b5c0417639f2c56dc46c2895cda0ef42072f25dfc3769c5c3ca9b",
+  "teil-03.txt": "98addfb11e6754b11c546e9f5da7d35f7928a7518d83cde0b546fef327c132a2",
+  "teil-04.txt": "1d845f9755311cebd9eed027b467679e227bbb4e72f6f81d94dbc4b6e0790357",
+  "teil-05.txt": "3f59e56a214777a1e71dd5bd0a9767196dbcd71a67bf51bdc23def69b19bd202",
+  "teil-06.txt": "adfcfc09dba20d72f16f29003da5504516d86bedfa14a5dd6e94b15961867f94",
+  "teil-07.txt": "0697feeaf3b5a937c4a344e1d9863f291f8977c0cbe11c7cd4e40b4a58602eeb",
+  "teil-08.txt": "46212d376bab9eed9d8ffd2354dee4f3ef289756e1e8dfdb3495be416fa33c5e",
+  "teil-09.txt": "6563aa6941b3436b463632e8b86c58a2daf7211f665696923cc6e9ab4c5a44ad",
+  "teil-10.txt": "661be0beefda6e875369405f870071eb4415184e71eb4ce91f0690afaaa9cc6c"
+ }
+}

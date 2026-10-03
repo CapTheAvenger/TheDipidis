@@ -12251,6 +12251,13 @@ window.MetaCall = (function () {
                 + 'by the share the table above works with (forecast or your estimate).');
   }
 
+  /* FE-33: erwartete Siege aus einer Quote OHNE Unentschieden (S/(S+N), in
+     Prozent): nur die entschiedenen Runden zaehlen. */
+  function _erwarteteSiege(quoteProzent, runden, unentschiedenQuote) {
+    const u = Math.min(Math.max(Number(unentschiedenQuote) || 0, 0), 1);
+    return (quoteProzent / 100) * runden * (1 - u);
+  }
+
   function renderDeckGegenMetaPanel(field) {
     if (_inFrozenPastMode()) return '';
     const titel = _evL('Dein Ergebnis', 'Your result');
@@ -12278,9 +12285,6 @@ window.MetaCall = (function () {
     }
 
     const runden = _settings.rounds;
-    const siege  = (r.ev / 100) * runden;
-    const sUnten = (r.unten / 100) * runden;
-    const sOben  = (r.oben / 100) * runden;
 
     /* Auswahlliste für „Nur ein Deck": dieselben Gegner, die auch
        gerechnet werden — sonst steht in der Liste ein Deck, das nach
@@ -12337,6 +12341,14 @@ window.MetaCall = (function () {
           .replace('{meta}', esc(_uq.meta))
       : t('mc.day2UnentschiedenLeer')
           .replace('{q}', _mcNum(_uq.quote * 100, 1) + _mcPz());
+    /* FE-33 (03.10.2026): r.ev ist S/(S+N) — eine Quote ohne Unentschieden.
+       Mal Runden genommen zaehlte sie jedes Unentschieden als halben Sieg
+       mit: „Erwartete Siege 4,2" neben der Bilanz 3,6–3,2–1,2 (Dragapult,
+       8 Runden, 14,4 % Unentschieden). Erst die entschiedenen Runden, dann
+       die Quote — dieselbe Annahme wie die Bilanz daneben. */
+    const siege  = _erwarteteSiege(r.ev, runden, _uq.quote);
+    const sUnten = _erwarteteSiege(r.unten, runden, _uq.quote);
+    const sOben  = _erwarteteSiege(r.oben, runden, _uq.quote);
     const d2pct = _mcNum(d2.day2Prob * 100, 1);
     const d2cls = d2.day2Prob >= 0.6 ? '' : d2.day2Prob >= 0.4 ? ' pct-mid' : ' pct-low';
     const kacheln = `
@@ -12363,7 +12375,7 @@ window.MetaCall = (function () {
     <div class="mc-ev-kachel mc-ev-kachel-bilanz">
       <span class="mc-ev-label">${esc(_evL('Erwartete Bilanz W–L–T', 'Expected record W–L–T'))}</span>
       <span class="mc-ev-wert mc-ev-bilanz"><span style="color:var(--tint-ok-ink)">${_mcNum(d2.expWin, 1)}</span>–<span style="color:var(--tint-bad-ink)">${_mcNum(d2.expLoss, 1)}</span>–<span style="color:#f39c12">${_mcNum(d2.expTie, 1)}</span></span>
-      <span class="mc-ev-kontext">${esc('Wins – Losses – Ties')}</span>
+      <span class="mc-ev-kontext">${esc(_evL('Siege – Niederlagen – Unentschieden', 'Wins – Losses – Ties'))}</span>
     </div>
   </div>`;
 

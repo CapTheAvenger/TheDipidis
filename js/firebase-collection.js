@@ -579,13 +579,14 @@ async function saveCurrentDeckToProfile(source) {
   }
   
   // Ask for deck name
-  const deckName = await showInputModal({ title: 'Save Deck', message: 'Enter a name for your deck:', defaultValue: archetype || 'My Deck' });
+  // UI-75 (03.10.2026): die beiden Dialoge waren fest englisch.
+  const deckName = await showInputModal({ title: fcText('deck.saveTitle', 'Save deck'), message: fcText('deck.saveMessage', 'Name of the deck:'), defaultValue: archetype || fcText('deck.saveDefaultName', 'My deck') });
   if (!deckName || deckName.trim() === '') {
     return; // User cancelled
   }
 
   const selectedFolder = await chooseDeckFolderWithCreate({
-    title: 'Save Deck Folder',
+    title: fcText('deck.saveFolderTitle', 'Folder for the deck'),
     currentFolder: '',
     includeNoFolder: true
   });
@@ -626,6 +627,9 @@ async function saveCurrentDeckToProfile(source) {
   if (!Array.isArray(window.userDecks)) window.userDecks = [];
   window.userDecks.unshift(deckData);
   if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
+  // UI-82: dieser Stand ist gespeichert — die Warnung beim Verlassen schweigt dafuer.
+  window.__deckZuletztGespeichert = window.__deckZuletztGespeichert || {};
+  window.__deckZuletztGespeichert[source] = JSON.stringify(deck);
 
   showNotification(fcText('notif.deckSavedNamed', 'Deck "{name}" saved successfully!').replace('{name}', trimmedName), 'success');
   if (typeof updateDecksUI === 'function') updateDecksUI();
@@ -839,7 +843,10 @@ function deleteDeck(deckId) {
   const user = auth.currentUser;
   if (!user) return;
 
-  if (!confirm(t('deck.deleteConfirm'))) return;
+  // UI-83: die Rueckfrage nennt das Deck — „Dieses Deck loeschen?" sagte nicht, welches.
+  const _zuLoeschen = (window.userDecks || []).find(d => d && d.id === deckId);
+  const _deckName = (_zuLoeschen && _zuLoeschen.name) || deckId;
+  if (!confirm(t('deck.deleteConfirm').replace('{name}', _deckName))) return;
 
   // Update mirror + in-memory immediately so the UI doesn't show
   // the deck again on the next reload (it would, otherwise — the

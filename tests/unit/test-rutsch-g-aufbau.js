@@ -77,7 +77,8 @@ describe('UI-60/62: Reihenfolge', () => {
     });
 });
 
-const ABHAENGIG = ['function renderDeckGegenMetaPanel('];
+// FE-33 (03.10.2026): das Panel rechnet die Siege ueber _erwarteteSiege.
+const ABHAENGIG = ['function _erwarteteSiege(', 'function renderDeckGegenMetaPanel('];
 function uebersicht(o) {
     return baue(MC, ABHAENGIG, Object.assign({
         _inFrozenPastMode: () => false, _evL: (d) => d, _evQuotenName: () => 'Siegquote',

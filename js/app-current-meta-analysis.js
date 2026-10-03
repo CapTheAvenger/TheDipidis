@@ -2242,7 +2242,27 @@
         }
 
         // Load deck data with format filtering
+        /* UI-81 (03.10.2026, Tiefenanalyse F-10): Der Tieflink
+           #current-analysis?deck=… wurde gelesen, aber nie geschrieben —
+           nach einem Deckwechsel im Auswahlfeld stand weiter das alte Deck
+           in der Adresse, Neuladen und Teilen zeigten das FALSCHE Deck.
+           replaceState loest kein hashchange aus (keine Schleife mit
+           applyHash) und legt keinen neuen Verlaufseintrag an. */
+        function _deckInAdresse(archetype, loc, hist) {
+            loc = loc || window.location; hist = hist || window.history;
+            const hash = String(loc.hash || '');
+            if (!/^#current-analysis(\?|$)/.test(hash)) return null;
+            const ziel = archetype
+                ? '#current-analysis?deck=' + encodeURIComponent(archetype)
+                : '#current-analysis';
+            if (hash === ziel) return ziel;
+            try { hist.replaceState(hist.state, '', ziel); } catch (e) { return null; }
+            return ziel;
+        }
+        window._deckInAdresse = _deckInAdresse;
+
         async function loadCurrentMetaDeckData(archetype) {
+            _deckInAdresse(archetype);
             // First user interaction with this tab — hide the empty-state guidance
             // shown by default. The empty state stays in the DOM so it can flash
             // back if the deck-select is reset to "" (handled below at the

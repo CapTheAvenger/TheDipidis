@@ -2900,7 +2900,10 @@
     }
 
     async function deleteJournalEntry(entryId) {
-        if (!confirm(battleJournalText('bj.deleteEntryConfirm', 'Delete this match entry?'))) return;
+        // UI-83: die Rueckfrage nennt den Eintrag (eigenes Deck gegen Gegner).
+        const _eintrag = (Array.isArray(journalHistoryCache) && journalHistoryCache.find(e => e && e.id === entryId)) || {};
+        const _eintragName = (_eintrag.ownDeck || '—') + ' vs ' + (_eintrag.opponentArchetype || '—');
+        if (!confirm(battleJournalText('bj.deleteEntryConfirm', 'Delete the match {name}?').replace('{name}', _eintragName))) return;
 
         // Remove from outbox
         const outbox = getBattleJournalOutbox().filter(e => e.id !== entryId);

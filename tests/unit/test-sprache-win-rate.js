@@ -128,7 +128,10 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {
            den der Konvention, die sie wirklich rechnet — S/(S+N+U) aus
            data/limitless_online_decks.csv. Geholt wird er zur Laufzeit. */
         assert.match(read('js/app-archetype-card.js'),
-            /mitQuote\(L\('arc\.wrLabel', '\{quote\}'\), 'mitUnentschieden'\)/,
+            /* DA-34 (03.10.2026, Entscheidung Hausi): die Kachel rechnet
+               S/(S+N) auf Online- und Major-Seite — der Name kommt weiter
+               aus der Konvention, die sie wirklich rechnet. */
+            /mitQuote\(L\('arc\.wrLabel', '\{quote\}'\), 'ohneUnentschieden'\)/,
             'die Quoten-Kachel holt ihren Namen nicht mehr aus '
             + 'js/win-rate-konvention.js');
         /* NACHTRAG 02.09.2026 — die Regel ist jetzt schaerfer, nicht loser.

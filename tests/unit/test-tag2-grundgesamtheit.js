@@ -550,17 +550,18 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {
 
     it('nennt Listen, Piloten und Feld — und das Wort Tag 2', () => {
         const s = MCB.datenbasisSatz(VOLL, 'de');
-        assert.equal(s, '8 Day-2-Listen von 32 Piloten (Feld 797)');
+        // UI-85 (03.10.2026): nie „Feld" auf der Seite (Hausregel) — die Feldgroesse heisst jetzt „797 Spieler".
+        assert.equal(s, '8 Day-2-Listen von 32 Piloten (797 Spieler)');
     });
 
     it('englisch dieselbe Aussage', () => {
         assert.equal(MCB.datenbasisSatz(VOLL, 'en'),
-            '8 Day 2 lists from 32 pilots (field 797)');
+            '8 Day 2 lists from 32 pilots (797 players)');
     });
 
     it('ohne Pilotenzahl faellt nur dieser Halbsatz weg', () => {
         const s = MCB.datenbasisSatz(OHNE_P, 'de');
-        assert.equal(s, '8 Day-2-Listen (Feld 797)');
+        assert.equal(s, '8 Day-2-Listen (797 Spieler)');
         assert.ok(!/Piloten/.test(s), 'erfundene Pilotenzahl im Satz');
     });
 
@@ -578,7 +579,7 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {
 
     it('grosse Zahlen bekommen im Deutschen den Punkt', () => {
         assert.equal(MCB.datenbasisSatz({ n_lists: 675, feldgroesse: 3743 }, 'de'),
-            '675 Day-2-Listen (Feld 3.743)');
+            '675 Day-2-Listen (3.743 Spieler)');
     });
 
     it('der Hinweistext erklaert die Quelle und erfindet nichts', () => {
@@ -648,7 +649,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
         f({ MostConsistencyBuilder: MCB }, { dataQuality: DQ, coreThreshold: 0.9 },
           'Mega Excadrill', 60, (t) => { gezeigt = t; });
         assert.equal(gezeigt,
-            '✓ Mega Excadrill: 60/60 Karten · Core @ 90 % · 8 Day-2-Listen von 32 Piloten (Feld 797)');
+            '✓ Mega Excadrill: 60/60 Karten · Core @ 90 % · 8 Day-2-Listen von 32 Piloten (797 Spieler)');
         assert.ok(!/\b8 Listen ausgewertet\b/.test(gezeigt),
             'die alte, nackte Formulierung steht wieder da');
     });
@@ -675,7 +676,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
                     { n_lists: 8, decision: 'data_ok' }, null,
                     { dataQuality: DQ, coreThreshold: 0.9 });
         assert.ok(r, 'die Qualitaetszeile entsteht gar nicht');
-        assert.ok(r.message.startsWith('Datenbasis: 8 Day-2-Listen von 32 Piloten (Feld 797)'),
+        assert.ok(r.message.startsWith('Datenbasis: 8 Day-2-Listen von 32 Piloten (797 Spieler)'),
             'die Zeile nennt den Nenner nicht: ' + r.message);
         assert.ok(/Day 2/.test(r.hint) && /797/.test(r.hint),
             'der Hinweis erklaert die Quelle nicht: ' + r.hint);
@@ -689,7 +690,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
             'return ' + ausdruck.replace(/,\s*$/, '') + ';');
         const txt = f({ MostConsistencyBuilder: MCB },
                       { dataQuality: DQ, coreThreshold: 0.9 });
-        assert.ok(/8 Day 2 lists from 32 pilots \(field 797\) analyzed\./.test(txt), txt);
+        assert.ok(/8 Day 2 lists from 32 pilots \(797 players\) analyzed\./.test(txt), txt);
         assert.ok(!/\b8 lists analyzed\b/.test(txt), 'die alte Formulierung steht wieder da');
     });
 });

@@ -513,7 +513,7 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
 
     it('B3 — die Win-Rate-Kachel nennt ihre Konvention und die des Nachbarreiters', () => {
         /* Aus DERSELBEN Major-Datei rechnen zwei Reiter verschieden:
-           diese Karte S/(S+N+U), js/app-past-meta.js die Spalte win_pct
+           diese Karte S/(S+N) (seit DA-34), js/app-past-meta.js die Spalte win_pct
            (Matchpunkte). Die Kachel muss beide Namen tragen, sonst
            stehen zwei Zahlen fuer ein Deck ohne Erklaerung nebeneinander. */
         const sb = ladeKarte('de');
@@ -522,12 +522,15 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
         const decks = {};
         for (const r of DECKS) decks[r.deck_name] = {
             share: zahl(r.share_numeric), winRate: zahl(r.win_rate_numeric),
-            count: zahl(r.count), partien: zahl(r.wins) + zahl(r.losses) + zahl(r.ties) };
+            count: zahl(r.count), partien: zahl(r.wins) + zahl(r.losses) + zahl(r.ties),
+            siege: zahl(r.wins), niederlagen: zahl(r.losses), unentschieden: zahl(r.ties) };
         api.setData(decks, null);
         const html = api.tilesHtml(DECKS[0].deck_name, 'embed');
-        assert.ok(html.includes(WK.kurz('mitUnentschieden')),
+        /* DA-34 (03.10.2026, Entscheidung Hausi): die Kachel rechnet jetzt
+           S/(S+N) auf beiden Seiten. */
+        assert.ok(html.includes(WK.kurz('ohneUnentschieden')),
             'die Kachel nennt die Konvention nicht, die sie wirklich rechnet');
-        assert.ok(html.includes(WK.KONVENTIONEN.mitUnentschieden.formel),
+        assert.ok(html.includes(WK.KONVENTIONEN.ohneUnentschieden.formel),
             'die Formel fehlt an der Kachel');
         assert.ok(html.includes('win_pct'),
             'die Kachel sagt nicht, dass der Past-Meta-Reiter aus derselben Datei '

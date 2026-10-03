@@ -237,7 +237,8 @@ describe('A-F4.7 — die Kacheln sagen, welchen Zeitraum sie zeigen', () => {
         /* Der Weg 2 verlangt: keine erfundene gefilterte Zahl. Also muss
            jede Zahl auf der Kachel aus den gesetzten Zeilen folgen.
              Anteil online   = share_numeric          -> 7,6 %
-             Win % online    = win_rate_numeric       -> 50,0 %
+             Win-Rate online = S/(S+N) = 100/190      -> 52,6 %  (DA-34, 03.10.2026;
+                               vorher win_rate_numeric = S/(S+N+U) -> 50,0 %)
              Nenner online   = wins+losses+ties = 200
              Top-8-Quote     = 10 / 100               -> 10,0 %
              Anteil Major    = (178+50) / (178/0,2233 + 50/0,10) -> 17,6 %
@@ -250,7 +251,11 @@ describe('A-F4.7 — die Kacheln sagen, welchen Zeitraum sie zeigen', () => {
         await w.renderArchetypeCardInto(wirt, 'Dragapult');
         const h = wirt.innerHTML;
         assert.match(h, /7,6 %/, 'Anteil online');
-        assert.match(h, /50,0 %/, 'Win % online');
+        assert.match(h, /52,6 %/, 'Win-Rate online, S/(S+N)');
+        // DA-34: Major ebenso S/(S+N) = (553+100)/(553+601+100+100) = 48,2 %,
+        // nicht mehr S/(S+N+U) = 653/1526 = 42,8 %.
+        assert.match(h, /48,2 %/, 'Win-Rate Major, S/(S+N)');
+        assert.doesNotMatch(h, /42,8 %/, 'Major wieder mit Unentschieden im Nenner');
         assert.match(h, /200/, 'Nenner der Online-Win-%');
         assert.match(h, /10,0 %/, 'Top-8-Quote');
         assert.match(h, /17,6 %/, 'Anteil Major (Antritte durch Feld ueber beide Turniere)');

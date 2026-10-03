@@ -669,8 +669,8 @@
       }
       if (_feldM.feldgroesse !== null) {
         _tag2M += deM
-          ? `, Feld ${_zahlM(_feldM.feldgroesse)}`
-          : `, field ${_zahlM(_feldM.feldgroesse)}`;
+          ? `, ${_zahlM(_feldM.feldgroesse)} Spieler`
+          : `, ${_zahlM(_feldM.feldgroesse)} players`;
       }
       const _titelM = deM
         ? 'Limitless veroeffentlicht Decklisten erst ab Day 2. Diese Liste stammt '

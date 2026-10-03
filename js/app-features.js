@@ -1341,44 +1341,15 @@
                 cardsBySetNumber[key] = card;
             });
 
-            const newDeck = {};
-            const lines = ptcglText.split('\n');
-            let importCount = 0;
-            let errorCount = 0;
-
-            for (const line of lines) {
-                const trimmed = line.trim();
-                
-                // Skip empty lines and section headers
-                if (!trimmed || /^(Pokémon|Trainer|Energy|Total Cards):/i.test(trimmed)) continue;
-
-                // Parse format: "Count CardName SetCode SetNumber"
-                const match = trimmed.match(/^(\d+)\s+(.+?)\s+([A-Z0-9-]{2,5})\s+([A-Z0-9]+)$/);
-                if (!match) {
-                    console.warn('[PTCGL Import] Could not parse line:', trimmed);
-                    errorCount++;
-                    continue;
-                }
-
-                const [, countStr, cardName, setCode, setNumber] = match;
-                const count = parseInt(countStr);
-
-                // Look up card in database
-                const lookupKey = `${setCode}_${setNumber}`;
-                const card = cardsBySetNumber[lookupKey];
-
-                if (card) {
-                    const deckKey = `${cardName} (${setCode} ${setNumber})`;
-                    newDeck[deckKey] = count;
-                    importCount++;
-                } else {
-                    // Fallback: add without validation
-                    const deckKey = `${cardName} (${setCode} ${setNumber})`;
-                    newDeck[deckKey] = count;
-                    importCount++;
-                    console.warn('[PTCGL Import] Card not found in database:', lookupKey, '- adding anyway');
-                }
-            }
+            // FE-41 (03.10.2026, Tiefenanalyse F-03): unbekannte Karten wurden
+            // still uebernommen (unsichtbar im Raster, aber mitgezaehlt und
+            // mit exportiert), nicht erkannte Zeilen nur gezaehlt. Jetzt kommt
+            // nur ins Deck, was es (Set, Nummer) in der Datenbank gibt; beide
+            // Listen werden woertlich gezeigt.
+            const gelesen = ptcglZeilenLesen(ptcglText, cardsBySetNumber);
+            const newDeck = gelesen.deck;
+            const importCount = gelesen.zeilen;
+            const errorCount = gelesen.nichtErkannt.length + gelesen.nichtGefunden.length;
 
             if (importCount === 0) {
                 showDeckShareToast(t('deck.importPTCGLNone'));
@@ -1401,7 +1372,39 @@
             const totalCards = Object.values(newDeck).reduce((s, c) => s + c, 0);
             showDeckShareToast(t('deck.importPTCGLDone', { n: importCount, total: totalCards })
                 + (errorCount > 0 ? ' | ' + t('deck.importPTCGLErrors', { n: errorCount }) : ''));
+            if (errorCount > 0) {
+                const bericht = []
+                    .concat(gelesen.nichtGefunden.length ? [t('deck.importNichtGefunden')].concat(gelesen.nichtGefunden) : [])
+                    .concat(gelesen.nichtGefunden.length && gelesen.nichtErkannt.length ? [''] : [])
+                    .concat(gelesen.nichtErkannt.length ? [t('deck.importNichtErkannt')].concat(gelesen.nichtErkannt) : [])
+                    .join('\n');
+                showInputModal({ title: t('deck.importBerichtTitel'), message: t('deck.importBerichtText'),
+                    defaultValue: bericht, readonly: true, textarea: true });
+            }
         }
+
+        /** FE-41: Liest eine PTCGL-Liste. Nur Zeilen mit (Set, Nummer), die es
+         *  in der Datenbank gibt, kommen ins Deck; nie ueber den Namen. */
+        function ptcglZeilenLesen(text, cardsBySetNumber) {
+            const deck = {};
+            const nichtErkannt = [];
+            const nichtGefunden = [];
+            let zeilen = 0;
+            for (const line of String(text || '').split('\n')) {
+                const trimmed = line.trim();
+                if (!trimmed || /^(Pokémon|Pokemon|Trainer|Energy|Energie|Total Cards)\b[^0-9]*:?\s*\d*\s*$/i.test(trimmed)) continue;
+                const match = trimmed.match(/^(\d+)\s+(.+?)\s+([A-Za-z0-9-]{2,5})\s+([A-Za-z0-9]+)$/);
+                if (!match) { nichtErkannt.push(trimmed); continue; }
+                const [, countStr, cardName, setRoh, setNumber] = match;
+                const setCode = setRoh.toUpperCase();
+                if (!cardsBySetNumber[`${setCode}_${setNumber}`]) { nichtGefunden.push(trimmed); continue; }
+                const deckKey = `${cardName} (${setCode} ${setNumber})`;
+                deck[deckKey] = (deck[deckKey] || 0) + parseInt(countStr, 10);
+                zeilen++;
+            }
+            return { deck, zeilen, nichtErkannt, nichtGefunden };
+        }
+        window.ptcglZeilenLesen = ptcglZeilenLesen;
 
         // ================================================================
         // PHASE 2: OPENING HAND PROBABILITY (HYPERGEOMETRIC DISTRIBUTION)

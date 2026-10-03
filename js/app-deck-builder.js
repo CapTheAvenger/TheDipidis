@@ -48,6 +48,34 @@ function _ungespeicherteDecks(w) {
     }).map(function (q) { return q[0]; });
 }
 window._ungespeicherteDecks = _ungespeicherteDecks;
+
+/* UI-74 (03.10.2026, Tiefenanalyse N-03/F-04): „Speichern" erschien erst
+   nach „Max Consistency", rund 6.000 px unter der Archetyp-Auswahl — 8 bis 9
+   Klicks. Ein Knopf direkt unter der Auswahl baut die typische Liste
+   (dieselbe Funktion wie „Max Consistency") und oeffnet sofort den
+   Speichern-Dialog. Ein schon gebautes Deck wird nicht neu generiert. */
+async function deckUebernehmen(source) {
+    const deckVar = { cityLeague: 'cityLeagueDeck', currentMeta: 'currentMetaDeck', pastMeta: 'pastMetaDeck' }[source];
+    const archVar = { cityLeague: 'currentCityLeagueArchetype', currentMeta: 'currentMetaArchetype', pastMeta: 'pastMetaCurrentArchetype' }[source];
+    if (!deckVar) return { ok: false, grund: 'quelle' };
+    if (!window[archVar]) {
+        if (typeof showNotification === 'function') {
+            showNotification((typeof t === 'function' && t('deck.uebernehmenErst')) || 'Pick an archetype first.', 'info');
+        }
+        return { ok: false, grund: 'kein-archetyp' };
+    }
+    const deck = window[deckVar] || {};
+    const karten = Object.keys(deck).reduce(function (n, k) { return n + (Number(deck[k]) || 0); }, 0);
+    if (karten === 0 && typeof window.autoCompleteConsistency === 'function') {
+        await window.autoCompleteConsistency(source, 'min');
+    }
+    if (typeof window.saveCurrentDeckToProfile === 'function') {
+        await window.saveCurrentDeckToProfile(source);
+        return { ok: true, generiert: karten === 0 };
+    }
+    return { ok: false, grund: 'kein-speichern' };
+}
+window.deckUebernehmen = deckUebernehmen;
 if (typeof window.addEventListener === 'function') {
     window.addEventListener('beforeunload', function (e) {
         if (!_ungespeicherteDecks(window).length) return;

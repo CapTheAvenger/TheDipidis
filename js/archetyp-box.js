@@ -1167,10 +1167,44 @@
         return { karten: zeilen.length, stueck: stueck };
     }
 
+    /** Hoechstens so viele Kopien einer Karte (ausser Basis-Energien) zaehlen in der Alle-Karten-Box. */
+    const KOPIEN_MAX = 4;
+    /** Virtuelle Box "Alle Karten" (Hausi, 03.10.2026): kein gespeicherter Eintrag, nur eine Ansicht. */
+    const ALLE_KARTEN = '__alle_karten__';
+
+    /**
+     * Alle-Karten-Box: je Karte (Set, Nummer) EINE Zeile ueber alle Boxen mit
+     * der GROESSTEN gespielten Anzahl, gedeckelt auf KOPIEN_MAX (Basis-Energien
+     * ohne Deckel). Eingabe: Eintraege {box, k}; Reihenfolge = erstes Auftreten.
+     * Die Karte in `k` ist eine Kopie mit der gedeckelten Anzahl in `gefordert`.
+     */
+    function groessteAnzahl(eintraege) {
+        const nachId = new Map();
+        const aus = [];
+        (eintraege || []).forEach(function (e) {
+            if (!e || !e.k) return;
+            const k = e.k;
+            const id = kartenId(k.set, k.number) || k.id;
+            const n = Math.max(1, Number(k.gefordert) || 0);
+            let g = nachId.get(id);
+            if (!g) {
+                g = { id: id, k: k, max: n, boxen: new Set() };
+                nachId.set(id, g);
+                aus.push(g);
+            }
+            if (n > g.max) g.max = n;
+            g.boxen.add(e.box && e.box.id);
+        });
+        return aus.map(function (g) {
+            const gedeckelt = istBasisEnergie(g.k) ? g.max : Math.min(KOPIEN_MAX, g.max);
+            return { id: g.id, k: Object.assign({}, g.k, { gefordert: gedeckelt }), max: g.max, boxen: g.boxen.size };
+        });
+    }
+
     const Logik = {
         auswahlUmfang: auswahlUmfang,
         deckzeilenAus: deckzeilenAus,
-        istBasisEnergie: istBasisEnergie,
+        istBasisEnergie: istBasisEnergie, groessteAnzahl: groessteAnzahl, KOPIEN_MAX: KOPIEN_MAX, ALLE_KARTEN: ALLE_KARTEN,
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, verschiedeneKarten, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, neueEigeneBox, istEigen, deckzeilenLesen, listeEinlegen, namenVertragen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
@@ -1248,6 +1282,7 @@
     let aktiveId = null;
     let letztesErgebnis = null; // {id, neu:[], nichtMehr:[]}
     let sichtbareKarten = [];   // Karten der aktuellen (gefilterten) Ansicht, fuer "Gefilterte kopieren"
+    const offeneGruppen = new Set();  // aufgeklappte Gruppen der Boxliste (nur diese Sitzung)
     let ansichtKontext = null;  // Formatkontext der aktuellen Ansicht, fuer die Standard-Marke an der Kachel
     let manifestDatum = null;
 
@@ -1869,7 +1904,7 @@
         }, { karten: 0, stueck: 0, fehlen: 0, offen: 0 });
         alle.verschieden = verschiedeneKarten(boxen);
         alle.boxen = boxen.length;
-        const chip = function (id, name, u, stufe, rang) {
+        const chip = function (id, name, u, stufe, rang, texte) {
             const aktiv = boxen.length === 1 || (id || null) === (aktiveId || null);
             const stufeText = stufe ? tx('abx.stufe.' + stufe, { fmt: (kontext && kontext.aktuell) || '' }, stufe) : '';
             return '<button type="button" class="abx-chip' + (aktiv ? ' is-active' : '')
@@ -1879,27 +1914,50 @@
                 + ' onclick="ArchetypBox.waehlen(' + (id ? '\'' + esc(id) + '\'' : 'null') + ')">'
                 + '<span class="abx-chip-name">' + (stufe ? '<span class="abx-stufe-punkt" aria-hidden="true"></span>' : '')
                 + esc(name) + (stufeText ? '<span class="visually-hidden"> (' + esc(stufeText) + ')</span>' : '') + '</span>'
-                + '<span class="abx-chip-zahl">' + esc(u.verschieden != null
+                + '<span class="abx-chip-zahl">' + esc(texte ? texte[0] : (u.verschieden != null
                     ? tx('abx.chipUmfangAlle', { boxen: u.boxen, karten: u.verschieden, stueck: u.stueck }, '{boxen} Boxen · {karten} verschiedene Karten · {stueck} Stück')
-                    : tx('abx.chipUmfang', { karten: u.karten, stueck: u.stueck }, '{karten} Karten · {stueck} Stück')) + '</span>'
-                + '<span class="abx-chip-zahl">' + esc(u.verschieden != null
+                    : tx('abx.chipUmfang', { karten: u.karten, stueck: u.stueck }, '{karten} Karten · {stueck} Stück'))) + '</span>'
+                + '<span class="abx-chip-zahl">' + esc(texte ? texte[1] : (u.verschieden != null
                     ? tx('abx.chipOffenAlle', { offen: u.offen }, '{offen} Stück offen')
-                    : tx('abx.chipFehlen', { n: u.fehlen, offen: u.offen }, '{n} fehlen · {offen} Stück offen')) + '</span></button>';
+                    : tx('abx.chipFehlen', { n: u.fehlen, offen: u.offen }, '{n} fehlen · {offen} Stück offen'))) + '</span></button>';
         };
         const kontext = manifestDaten ? formatKontext() : null;
         const reihe = chipReihe(boxen, kontext, familieVonArchetyp);
-        const stufen = {};
-        reihe.forEach(function (r) { if (r.stufe) stufen[r.stufe] = (stufen[r.stufe] || 0) + 1; });
-        const legende = Object.keys(stufen).length
-            ? '<p class="abx-stufen-legende">' + ['gespielt', 'legal', 'raus', 'eigen'].filter(function (s) { return stufen[s]; })
-                .map(function (s) {
-                    return '<span class="abx-stufe-' + s + '"><span class="abx-stufe-punkt" aria-hidden="true"></span>'
-                        + esc(tx('abx.stufe.' + s, { fmt: (kontext && kontext.aktuell) || '' }, s)) + '</span>';
-                }).join('') + '</p>'
-            : '';
-        leiste.innerHTML = (boxen.length > 1 ? chip(null, tx('abx.alleBoxen', null, 'Alle Boxen'), alle) : '')
-            + reihe.map(function (r) { return chip(r.box.id, nameVon(r.box), umfang(r.box), r.stufe, r.rang); }).join('')
-            + legende;
+        // FE-32 (Hausi, 03.10.2026): bei vielen Boxen nur die beiden Sammel-Chips fest, die Boxen je Stufe zum Aufklappen.
+        const gruppen = {};
+        let aktuelleStufe = 'sonst';
+        reihe.forEach(function (r) {
+            if (r.rang !== 'mitglied') aktuelleStufe = r.stufe || 'sonst';
+            (gruppen[aktuelleStufe] = gruppen[aktuelleStufe] || []).push(r);
+        });
+        const gruppenHtml = ['gespielt', 'legal', 'raus', 'eigen', 'sonst'].filter(function (g) { return gruppen[g]; }).map(function (g) {
+            const eintraege = gruppen[g];
+            const mitAktiv = eintraege.some(function (r) { return boxen.length === 1 || r.box.id === aktiveId; });
+            const name = tx('abx.stufe.' + g, { fmt: (kontext && kontext.aktuell) || '' }, g);
+            return '<details class="abx-gruppe abx-stufe-' + g + '"' + (mitAktiv || offeneGruppen.has(g) ? ' open' : '') + '>'
+                + '<summary onclick="ArchetypBox.gruppeKlappen(\'' + g + '\', this.parentNode)"><span class="abx-stufe-punkt" aria-hidden="true"></span>'
+                + '<span class="abx-gruppe-name">' + esc(name) + '</span> <span class="abx-gruppe-zahl">' + eintraege.length + '</span></summary>'
+                + '<div class="abx-gruppe-chips">'
+                + eintraege.map(function (r) { return chip(r.box.id, nameVon(r.box), umfang(r.box), r.stufe, r.rang); }).join('')
+                + '</div></details>';
+        }).join('');
+        let alleKartenChip = '';
+        if (boxen.length > 1) {
+            const alleEintraege = [];
+            boxen.forEach(function (b) { (b.karten || []).forEach(function (roh) { alleEintraege.push({ box: b, k: normiert(roh) }); }); });
+            const ak = groessteAnzahl(alleEintraege);
+            const au = auswahlUmfang(ak.map(function (g) { return g.k; }));
+            alleKartenChip = chip(ALLE_KARTEN, tx('abx.alleKarten', null, 'Alle Karten'), { karten: au.karten, stueck: au.stueck }, null, null, [
+                tx('abx.chipAlleKarten', { karten: au.karten, stueck: au.stueck, max: KOPIEN_MAX }, '{karten} Karten · {stueck} Stück'),
+                tx('abx.chipAlleKartenZeile', { max: KOPIEN_MAX }, 'höchstens {max} je Karte, ohne Basis-Energien')]);
+        }
+        leiste.innerHTML = '<div class="abx-leiste-fest">' + (boxen.length > 1 ? chip(null, tx('abx.alleBoxen', null, 'Alle Boxen'), alle) : '')
+            + alleKartenChip + '</div>' + gruppenHtml;
+    }
+
+    function gruppeKlappen(g, details) {
+        // Der Klick kommt vor dem Umschalten: ist sie jetzt offen, wird sie gleich zu.
+        if (details && details.open) offeneGruppen.delete(g); else offeneGruppen.add(g);
     }
 
     /** Standard-Marke an der Karte: Standard-legal (mindestens ein Druck) oder nur Expanded; unbekannt -> keine. */
@@ -2012,6 +2070,23 @@
             + '<div class="abx-offen-zeile">' + esc(tx('abx.drinOffen', { drin: g.drin, offen: g.offen }, '{drin} drin · {offen} offen')) + '</div></div>'
             + '<button type="button" class="abx-mini abx-vert-btn" onclick="ArchetypBox.verteilung(' + arg + ')">' + esc(titel) + '</button>'
             + '</div>';
+    }
+
+    /** Alle-Karten-Box: eine Kachel je Karte, nur zum Ansehen (Anzahl = gedeckelte groesste Anzahl). */
+    function alleKartenKachel(g) {
+        const k = g.k;
+        const bild = k.bild
+            ? '<img src="' + esc(k.bild) + '" alt="' + esc(k.name) + '" loading="lazy" referrerpolicy="no-referrer">'
+            : '<div class="abx-kein-bild">' + esc(k.set + ' ' + k.number) + '</div>';
+        const titel = g.max > k.gefordert
+            ? tx('abx.alleKartenSollTitelGedeckelt', { n: k.gefordert, max: g.max }, 'Höchstens {n} (in einer Liste bis zu {max} gespielt)')
+            : tx('abx.alleKartenSollTitel', { n: k.gefordert }, 'Höchstens {n} je Liste gespielt');
+        return '<div class="abx-karte abx-karte-alle" data-karte="' + esc(g.id) + '">'
+            + '<div class="abx-bild">' + bild + '<span class="abx-soll abx-soll-zusammen" title="' + esc(titel) + '">' + esc(k.gefordert) + '</span></div>'
+            + '<div class="abx-text"><div class="abx-boxname">' + esc(g.boxen === 1 ? tx('abx.inEinerBox', null, 'in 1 Box')
+                : tx('abx.inBoxen', { n: g.boxen }, 'in {n} Boxen')) + '</div>'
+            + '<div class="abx-name" title="' + esc(k.name) + '">' + esc(k.name) + '</div>'
+            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + '</span>' + legalMarke(k) + '</div></div></div>';
     }
 
     function gruppenRubrik(schluessel, titel, gruppen) {
@@ -2152,6 +2227,7 @@
         const eine = aktiveId ? boxen.find(function (b) { return b.id === aktiveId; }) : (boxen.length === 1 ? boxen[0] : null);
         const gewaehlt = eine ? [eine] : boxen.slice();
         const mitBoxName = !eine;
+        const alleKarten = aktiveId === ALLE_KARTEN && !eine && boxen.length > 1;  // virtuelle Box, nur Ansicht
 
         let eintraege = [];
         gewaehlt.forEach(function (b) {
@@ -2170,9 +2246,10 @@
         }
         const ohneFormate = gewaehlt.some(function (b) { return !b.mitFormaten && !istEigen(b); });
         eintraege = sortieren(eintraege, ansicht.sort, !!eine);
-        sichtbareKarten = eintraege.map(function (e) { return e.k; });
+        const groesste = alleKarten ? groessteAnzahl(eintraege) : null;
+        sichtbareKarten = groesste ? groesste.map(function (g) { return g.k; }) : eintraege.map(function (e) { return e.k; });
         ansichtKontext = kontext;
-        const zusammen = mitBoxName && ansicht.gruppe === 'zusammen';
+        const zusammen = mitBoxName && !alleKarten && ansicht.gruppe === 'zusammen';
         const r = { fehlt: [], original: [], proxy: [] };
         eintraege.forEach(function (e) { r[STATUS.indexOf(e.k.status) >= 0 ? e.k.status : 'fehlt'].push(e); });
         const proxyKopien = r.proxy.reduce(function (a, e) { return a + drin(e.k); }, 0);
@@ -2188,6 +2265,10 @@
                         daten: datumLesbar(eine.datenStand),
                         datum: datumLesbar(eine.aktualisiert)
                     }, 'Alle Formate · {schwelle} · Turnierdaten bis {daten} · abgeglichen am {datum}')) + '</p></div>';
+        } else if (alleKarten) {
+            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleKarten', null, 'Alle Karten')) + '</h3>'
+                + '<p class="abx-meta">' + esc(tx('abx.alleKartenText', { n: boxen.length, max: KOPIEN_MAX },
+                    'Die größte gespielte Anzahl je Karte über alle {n} Archetyp-Boxen, höchstens {max} Kopien (Basis-Energien ohne Grenze). Nur eine Ansicht: „drin“ und „fehlt“ pflegst du in den Archetyp-Boxen.')) + '</p></div>';
         } else {
             // Keine Namensliste mehr (Hausi, 03.10.2026: "viel zu viel Text"): die Chips oben nennen jede Box.
             kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleBoxen', null, 'Alle Boxen')) + '</h3></div>';
@@ -2204,7 +2285,11 @@
             ? '<p class="abx-ergebnis" role="status">' + esc(ergebnisSatz(letztesErgebnis)) + '</p>' : '';
         const druckId = eine ? '\'' + esc(eine.id) + '\'' : 'null';
         const mitDaten = boxen.filter(function (b) { return !istEigen(b); }).length;
-        const aktionen = '<div class="abx-aktionen">'
+        const aktionen = alleKarten ? '<div class="abx-aktionen">' + (sichtbareKarten.length
+            ? '<button type="button" class="btn btn-outline abx-kopieren-btn" onclick="ArchetypBox.kopieren()">'
+                + esc(tx('abx.kopieren', { n: deckzeilenAus(sichtbareKarten).length }, 'Gefilterte Karten kopieren ({n})')) + '</button>' : '')
+            + '</div><p id="abxFortschritt" class="abx-fortschritt d-none" role="status" aria-live="polite"></p>'
+            : '<div class="abx-aktionen">'
             + (eine ? (istEigen(eine) ? '' : '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(\''
                 + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>')
                 : (mitDaten ? '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(null)">'
@@ -2239,7 +2324,13 @@
                 '{karten} verschiedene Karten · {stueck} Stück mit Kopien (ohne Basis-Energien)')) + '</p>'
             : '';
         let hauptteil;
-        if (zusammen) {
+        if (alleKarten) {
+            hauptteil = '<section class="abx-rubrik abx-rubrik-alle-karten"><div class="abx-rubrik-kopf"><h3>'
+                + esc(tx('abx.alleKartenRubrik', null, 'Größte Anzahl je Karte')) + ' <span class="abx-rubrik-zahl">' + groesste.length + '</span></h3></div>'
+                + (groesste.length ? '<div class="abx-gitter">' + groesste.map(alleKartenKachel).join('') + '</div>'
+                    : '<p class="abx-leer">' + esc(tx('abx.rubrikLeer', null, 'Keine Karten.')) + '</p>')
+                + '</section>';
+        } else if (zusammen) {
             const gruppen = zusammenfassen(eintraege);
             const raus = gruppen.filter(function (g) { return g.offen > 0; });
             const fertig = gruppen.filter(function (g) { return g.offen === 0; });
@@ -2257,8 +2348,8 @@
                 + rubrik('proxy', tx('abx.rubrikProxy', null, 'Als Proxy drin'), r.proxy, mitBoxName);
         }
         // Eigene Box oben (nicht ans Ende): bei "Alle Boxen" liegen darunter ueber tausend Karten.
-        wurzel.innerHTML = kopf + hinweis + aktionen + eigeneBoxBlock() + erg + liste + suche + wiederBereich(gewaehlt, mitBoxName)
-            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + umfangZeile + hauptteil;
+        wurzel.innerHTML = kopf + hinweis + aktionen + eigeneBoxBlock() + erg + liste + suche + (alleKarten ? '' : wiederBereich(gewaehlt, mitBoxName))
+            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName && !alleKarten) + umfangZeile + hauptteil;
     }
 
     function boxVon(boxId) { return boxen.find(function (b) { return b.id === boxId; }) || null; }
@@ -2875,6 +2966,7 @@
         wieder: wieder,
         wiederAlle: wiederAlle,
         ansicht: ansichtSetzen,
+        gruppeKlappen: gruppeKlappen,
         druckeOeffnen: druckeOeffnen,
         verteilung: verteilungOeffnen,
         verteilungSchliessen: verteilungSchliessen,

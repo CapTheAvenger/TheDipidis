@@ -54,10 +54,24 @@
 .abx-chip.abx-chip-mitglied { border-style: dashed; }
 .abx-chip.abx-chip-mitglied .abx-chip-name { font-weight: 600; color: var(--ink-2); }
 .abx-chip.abx-chip-mitglied .abx-chip-name::before { content: "\21B3\00A0"; }
-.abx-stufen-legende {
-    flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: var(--s-3);
-    margin: 0; color: var(--ink-2); font-size: var(--fs-xs);
+/* FE-32 (03.10.2026): die beiden Sammel-Chips stehen fest oben, die Boxen je Stufe darunter zum Aufklappen. */
+.abx-leiste-fest { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.abx-gruppe { flex: 1 1 100%; }
+.abx-gruppe > summary {
+    display: flex; align-items: center; gap: var(--s-2);
+    min-height: 44px; padding: var(--s-2) var(--s-3);
+    border: 1.5px solid var(--line); border-radius: var(--r-md);
+    background: var(--surface-1); color: var(--ink); cursor: pointer; font-weight: 700;
 }
+.abx-gruppe[open] > summary { border-color: var(--brand); }
+.abx-gruppe > summary::marker { content: ""; }
+.abx-gruppe > summary::before { content: "\25B8"; color: var(--ink-3); }
+.abx-gruppe[open] > summary::before { content: "\25BE"; }
+.abx-gruppe-zahl { color: var(--ink-3); font-weight: 600; font-size: var(--fs-xs); }
+.abx-gruppe-chips { display: flex; flex-wrap: wrap; gap: var(--s-2); padding-top: var(--s-2); }
+.abx-gruppe.abx-stufe-gespielt .abx-stufe-punkt { background: var(--tint-ok-ink); }
+.abx-gruppe.abx-stufe-legal .abx-stufe-punkt { background: var(--tint-warn-ink); }
+.abx-gruppe.abx-stufe-eigen .abx-stufe-punkt { background: var(--umschalter-ink); }
 
 /* ── Kopf der geoeffneten Box ── */
 .abx-kopf { margin-bottom: var(--s-2); }

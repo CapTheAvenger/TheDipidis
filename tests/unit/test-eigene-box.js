@@ -206,10 +206,10 @@ describe('Rutsch Q: Umfang der Auswahl mit Kopien (Hausi, 03.10.2026)', () => {
     '4 Lightning Energy MEE 4', '7 Psychic Energy SVE 5', '1 Water Energy MEE 3'];
   const karten = LISTE.map((z, i) => {
     const m = z.match(/^(\d+) (.+) ([A-Z0-9]+) (\w+)$/);
-    return { id: 'k' + i, name: m[2], set: m[3], number: m[4], gefordert: Number(m[1]) };
+    return { id: 'k' + i, name: m[2], set: m[3], number: m[4], gefordert: Number(m[1]), typ: / Energy$/.test(m[2]) ? 'Energy' : 'Pokemon' };
   });
-  it('Umfang: 36 verschiedene Karten, 81 Stueck mit Kopien', () => {
-    assert.deepEqual(L.auswahlUmfang(karten), { karten: 36, stueck: 81 });
+  it('Umfang: 36 verschiedene Karten, 65 Stueck mit Kopien (81 minus 16 Basis-Energien)', () => {
+    assert.deepEqual(L.auswahlUmfang(karten), { karten: 36, stueck: 65 });
   });
   it('Umfang zaehlt wie das Kopieren (gleiche Karte nur einmal, Menge mind. 1)', () => {
     const u = L.auswahlUmfang([karten[1], karten[1], { id: 'z', name: 'X', set: 'TWM', number: '1', gefordert: 0 }]);
@@ -219,5 +219,27 @@ describe('Rutsch Q: Umfang der Auswahl mit Kopien (Hausi, 03.10.2026)', () => {
   it('Die Zeile steht ueber der Kartenliste und nutzt die sichtbare Auswahl', () => {
     assert.match(code, /auswahlUmfang\(sichtbareKarten\)/);
     assert.match(code, /filterLeiste\(kontext, ohneFormate, gewaehlt, mitBoxName\) \+ umfangZeile \+ hauptteil/);
+  });
+});
+
+describe('Rutsch R: Umfang ueber mehrere Boxen und ohne Basis-Energien (Hausi, 03.10.2026)', () => {
+  const code = QUELLE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const K = (id, n, extra) => Object.assign({ id: id, name: 'Karte ' + id, set: 'TWM', number: id, gefordert: n, typ: 'Item' }, extra || {});
+  it('dieselbe Karte in zwei Boxen: die groesste Anzahl gilt, nicht die der ersten', () => {
+    const u = L.auswahlUmfang([K('1', 1), K('1', 4), K('1', 2)]);
+    assert.deepEqual(u, { karten: 1, stueck: 4 });
+    assert.deepEqual(L.deckzeilenAus([K('1', 1), K('1', 4)]), ['4 Karte 1 TWM 1']);
+  });
+  it('Basis-Energien stehen in der Kopie, zaehlen aber nicht zum Stueck-Umfang', () => {
+    const e = K('e', 12, { name: 'Fire Energy', typ: 'Energy' });
+    const sp = K('s', 3, { name: 'Enriching Energy', typ: 'Energy' });
+    assert.deepEqual(L.deckzeilenAus([e, sp]), ['12 Fire Energy TWM e', '3 Enriching Energy TWM s']);
+    assert.deepEqual(L.auswahlUmfang([e, sp, K('1', 2)]), { karten: 3, stueck: 5 });
+    assert.equal(L.istBasisEnergie(sp), false);
+    assert.equal(L.istBasisEnergie(K('x', 1, { name: 'Fire Energy', typ: 'Item' })), false);
+  });
+  it('Der Kopierknopf zeigt die Zahl der Zeilen, nicht die der Eintraege', () => {
+    assert.match(code, /tx\('abx\.kopieren', \{ n: deckzeilenAus\(sichtbareKarten\)\.length \}/);
+    assert.doesNotMatch(code, /abx\.kopieren', \{ n: sichtbareKarten\.length/);
   });
 });

@@ -1129,27 +1129,48 @@
      * hoechstens gespielt wird (gefordert), mindestens einmal.
      */
     function deckzeilenAus(karten) {
-        const gesehen = new Set();
-        const zeilen = [];
+        /* Je Karte-ID eine Zeile; kommt dieselbe Karte in mehreren Boxen vor,
+           gilt die GROESSTE Anzahl (nicht die der ersten Box). */
+        const nachId = new Map();
+        const reihe = [];
         (karten || []).forEach(function (k) {
-            if (!k || gesehen.has(k.id)) return;
-            gesehen.add(k.id);
-            zeilen.push(Math.max(1, Number(k.gefordert) || 0) + ' ' + k.name + ' ' + k.set + ' ' + k.number);
+            if (!k) return;
+            const n = Math.max(1, Number(k.gefordert) || 0);
+            const alt = nachId.get(k.id);
+            if (alt) { if (n > alt.n) alt.n = n; return; }
+            const z = { n: n, text: k.name + ' ' + k.set + ' ' + k.number, basis: istBasisEnergie(k) };
+            nachId.set(k.id, z);
+            reihe.push(z);
         });
-        return zeilen;
+        return reihe.map(function (z) { return z.n + ' ' + z.text; });
     }
 
-    /** Umfang der Auswahl in Karten (verschieden) und Stueck (mit Kopien); gleiche Zahlen wie beim Kopieren. */
+    /** Basis-Energie (Gras bis Fee): zaehlt beim Stueck-Umfang nicht mit, steht aber in der Kopie. */
+    function istBasisEnergie(k) {
+        return !!k && k.typ === 'Energy'
+            && /^(basic )?(grass|fire|water|lightning|psychic|fighting|darkness|metal|fairy)( basic)? energy$/i.test(String(k.name || '').trim());
+    }
+
+    /**
+     * Umfang der Auswahl: verschiedene Karten und Stueck mit Kopien, ohne
+     * Basis-Energien (Hausi, 03.10.2026). Gleiche Zeilen wie beim Kopieren.
+     */
     function auswahlUmfang(karten) {
         const zeilen = deckzeilenAus(karten);
+        const basis = new Set();
+        (karten || []).forEach(function (k) { if (k && istBasisEnergie(k)) basis.add(k.name + ' ' + k.set + ' ' + k.number); });
         let stueck = 0;
-        zeilen.forEach(function (z) { stueck += parseInt(z, 10) || 0; });
+        zeilen.forEach(function (z) {
+            if (basis.has(z.replace(/^\d+ /, ''))) return;
+            stueck += parseInt(z, 10) || 0;
+        });
         return { karten: zeilen.length, stueck: stueck };
     }
 
     const Logik = {
         auswahlUmfang: auswahlUmfang,
         deckzeilenAus: deckzeilenAus,
+        istBasisEnergie: istBasisEnergie,
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, verschiedeneKarten, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, neueEigeneBox, istEigen, deckzeilenLesen, listeEinlegen, namenVertragen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
@@ -2192,9 +2213,9 @@
                 ? '<button type="button" class="btn btn-outline abx-druck-btn" onclick="ArchetypBox.proxysDrucken(' + druckId + ')">'
                     + esc(tx('abx.proxysDrucken', { n: proxyKopien }, 'Proxys drucken ({n})')) + '</button>'
                 : '')
-            + (sichtbareKarten.length
+            + (deckzeilenAus(sichtbareKarten).length
                 ? '<button type="button" class="btn btn-outline abx-kopieren-btn" onclick="ArchetypBox.kopieren()">'
-                    + esc(tx('abx.kopieren', { n: sichtbareKarten.length }, 'Gefilterte Karten kopieren ({n})')) + '</button>'
+                    + esc(tx('abx.kopieren', { n: deckzeilenAus(sichtbareKarten).length }, 'Gefilterte Karten kopieren ({n})')) + '</button>'
                 : '')
             + (eine ? '<button type="button" class="btn btn-outline" onclick="ArchetypBox.loeschen(\'' + esc(eine.id) + '\')">'
                 + esc(tx('abx.loeschen', null, 'Box löschen')) + '</button>' : '')
@@ -2215,7 +2236,7 @@
         const au = auswahlUmfang(sichtbareKarten);
         const umfangZeile = au.karten
             ? '<p class="abx-umfang">' + esc(tx('abx.auswahlUmfang', { karten: au.karten, stueck: au.stueck },
-                '{karten} verschiedene Karten · {stueck} Stück mit Kopien')) + '</p>'
+                '{karten} verschiedene Karten · {stueck} Stück mit Kopien (ohne Basis-Energien)')) + '</p>'
             : '';
         let hauptteil;
         if (zusammen) {

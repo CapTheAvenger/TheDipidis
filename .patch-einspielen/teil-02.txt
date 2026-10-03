@@ -1,0 +1,350 @@
+ |
+@@ -4015,3 +4018,3 @@|
+                         <select id="battleJournalMeta" class="battle-journal-input" data-i18n-aria="aria.metaFormat" aria-label="Meta format" data-meta-format-options>|
+-                            <option value="">— Select —</option>|
++                            <option value="" data-i18n="bj.formatWaehlen">— Format wählen —</option>|
+                         </select>|
+@@ -4150,10 +4153,10 @@|
+     <!-- Utilities first (provides escapeHtml globally) -->|
+-    <script src="js/app-utils.js?v=202610032310" defer></script>|
+-    <script src="js/i18n.js?v=202610032310" defer></script>|
++    <script src="js/app-utils.js?v=202610032338" defer></script>|
++    <script src="js/i18n.js?v=202610032338" defer></script>|
+     <!-- Firebase: credentials ? config ? globals ? auth ? collection -->|
+-    <script src="js/firebase-credentials.js?v=202610032310" defer></script>|
+-    <script src="js/firebase-config.js?v=202610032310" defer></script>|
+-    <script src="js/firebase-globals.js?v=202610032310" defer></script>|
+-    <script src="js/firebase-auth.js?v=202610032310" defer></script>|
+-    <script src="js/auth-ui-helpers.js?v=202610032310" defer></script>|
++    <script src="js/firebase-credentials.js?v=202610032338" defer></script>|
++    <script src="js/firebase-config.js?v=202610032338" defer></script>|
++    <script src="js/firebase-globals.js?v=202610032338" defer></script>|
++    <script src="js/firebase-auth.js?v=202610032338" defer></script>|
++    <script src="js/auth-ui-helpers.js?v=202610032338" defer></script>|
+     <!-- Zwei Decklisten nebeneinander. Muss VOR firebase-collection.js|
+@@ -4161,9 +4164,9 @@|
+          auf, sobald die Ansicht "Nebeneinander" gewaehlt wird. -->|
+-    <script src="js/deck-vergleich-nebeneinander.js?v=202610032310" defer></script>|
+-    <script src="js/firebase-collection.js?v=202610032310" defer></script>|
++    <script src="js/deck-vergleich-nebeneinander.js?v=202610032338" defer></script>|
++    <script src="js/firebase-collection.js?v=202610032338" defer></script>|
+     <!-- Wishlist import for the Telegram bot's card lists (paste, not upload). -->|
+-    <script src="js/wishlist-bot-import.js?v=202610032310" defer></script>|
++    <script src="js/wishlist-bot-import.js?v=202610032338" defer></script>|
+     <!-- TCG Showdown handoff — replaces the in-app Playtester.|
+          Standalone helper, no deps; only uses globals from other scripts. -->|
+-    <script src="js/tcg-showdown-link.js?v=202610032310" defer></script>|
++    <script src="js/tcg-showdown-link.js?v=202610032338" defer></script>|
+     <!-- Chart.js, PapaParse and localForage (IndexedDB wrapper) — self-hosted -->|
+@@ -4173,3 +4176,3 @@|
+     <!-- Card data cache layer (IndexedDB) -->|
+-    <script src="js/card-data-cache.js?v=202610032310" defer></script>|
++    <script src="js/card-data-cache.js?v=202610032338" defer></script>|
+     <!-- Offline prefetcher — warms the SW cache with every data file|
+@@ -4177,7 +4180,7 @@|
+          has the full dataset locally without per-tab warm-up. -->|
+-    <script src="js/offline-prefetch.js?v=202610032310" defer></script>|
++    <script src="js/offline-prefetch.js?v=202610032338" defer></script>|
+     <!-- App modules -->|
+-    <script src="js/deck-analysis-shared.js?v=202610032310" defer></script>|
+-    <script src="js/app-core.js?v=202610032310" defer></script>|
+-    <script src="js/app-price.js?v=202610032310" defer></script>|
++    <script src="js/deck-analysis-shared.js?v=202610032338" defer></script>|
++    <script src="js/app-core.js?v=202610032338" defer></script>|
++    <script src="js/app-price.js?v=202610032338" defer></script>|
+     <!-- Die Glaettung muss vor jedem Leser der Matchup-Zahlen stehen:|
+@@ -4188,18 +4191,18 @@|
+          Quote anzeigt — app-tier-meta, app-past-meta, ds-share. -->|
+-    <script src="js/win-rate-konvention.js?v=202610032310" defer></script>|
+-    <script src="js/journal-zuordnung.js?v=202610032310" defer></script>|
+-    <script src="js/matchup-glaettung.js?v=202610032310" defer></script>|
+-    <script src="js/rangliste-sortieren.js?v=202610032310" defer></script>|
+-    <script src="js/ds-bildvorschau.js?v=202610032310" defer></script>|
+-    <script src="js/app-tier-meta.js?v=202610032310" defer></script>|
+-    <script src="js/app-city-league.js?v=202610032310" defer></script>|
+-    <script src="js/app-deck-builder.js?v=202610032310" defer></script>|
+-    <script src="js/card-capability-engine.js?v=202610032310" defer></script>|
+-    <script src="js/tech-ideen.js?v=202610032310" defer></script>|
+-    <script src="js/app-tech-lab.js?v=202610032310" defer></script>|
+-    <script src="js/app-anti-tech.js?v=202610032310" defer></script>|
+-    <script src="js/app-meta-cards.js?v=202610032310" defer></script>|
+-    <script src="js/app-current-meta.js?v=202610032310" defer></script>|
+-    <script src="js/app-past-meta.js?v=202610032310" defer></script>|
+-    <script src="js/app-cards-db.js?v=202610032310" defer></script>|
++    <script src="js/win-rate-konvention.js?v=202610032338" defer></script>|
++    <script src="js/journal-zuordnung.js?v=202610032338" defer></script>|
++    <script src="js/matchup-glaettung.js?v=202610032338" defer></script>|
++    <script src="js/rangliste-sortieren.js?v=202610032338" defer></script>|
++    <script src="js/ds-bildvorschau.js?v=202610032338" defer></script>|
++    <script src="js/app-tier-meta.js?v=202610032338" defer></script>|
++    <script src="js/app-city-league.js?v=202610032338" defer></script>|
++    <script src="js/app-deck-builder.js?v=202610032338" defer></script>|
++    <script src="js/card-capability-engine.js?v=202610032338" defer></script>|
++    <script src="js/tech-ideen.js?v=202610032338" defer></script>|
++    <script src="js/app-tech-lab.js?v=202610032338" defer></script>|
++    <script src="js/app-anti-tech.js?v=202610032338" defer></script>|
++    <script src="js/app-meta-cards.js?v=202610032338" defer></script>|
++    <script src="js/app-current-meta.js?v=202610032338" defer></script>|
++    <script src="js/app-past-meta.js?v=202610032338" defer></script>|
++    <script src="js/app-cards-db.js?v=202610032338" defer></script>|
+     <!-- Fuellt die Frische-Chips aus data/data_stand.json, dem im Wochenlauf|
+@@ -4207,43 +4210,43 @@|
+          das die Fusszeile setzt. -->|
+-    <script src="js/ds-datenstand.js?v=202610032310" defer></script>|
+-    <script src="js/app-init.js?v=202610032310" defer></script>|
+-    <script src="js/app-current-meta-analysis.js?v=202610032310" defer></script>|
+-    <script src="js/app-features.js?v=202610032310" defer></script>|
+-    <script src="js/archetype-icons.js?v=202610032310" defer></script>|
+-    <script src="js/app-archetype-card.js?v=202610032310" defer></script>|
+-    <script src="js/app-meta-call.js?v=202610032310" defer></script>|
+-    <script src="js/app-deckempfehlung.js?v=202610032310" defer></script>|
+-    <script src="js/meta-analysis-hub.js?v=202610032310" defer></script>|
+-    <script src="js/app-testing-groups.js?v=202610032310" defer></script>|
+-    <script src="js/battle-journal.js?v=202610032310" defer></script>|
+-    <script src="js/meta-binder.js?v=202610032310" defer></script>|
+-    <script src="js/custom-binder.js?v=202610032310" defer></script>|
+-    <script src="js/archetyp-box.js?v=202610032310" defer></script>|
+-    <script src="js/draw-simulator.js?v=202610032310" defer></script>|
+-    <script src="js/app-calculator.js?v=202610032310" defer></script>|
+-    <script src="js/champions-namen.js?v=202610032310" defer></script>|
+-    <script src="js/qr-svg.js?v=202610032310" defer></script>|
+-    <script src="js/pocket-deckcode.js?v=202610032310" defer></script>|
+-    <script src="js/ds-pocket.js?v=202610032310" defer></script>|
+-    <script src="js/app-side-quest.js?v=202610032310" defer></script>|
+-    <script src="js/app-side-quest-play.js?v=202610032310" defer></script>|
+-    <script src="js/champions-shiny.js?v=202610032310" defer></script>|
+-    <script src="js/app-side-quest-pokedex.js?v=202610032310" defer></script>|
+-    <script src="js/app-side-quest-items.js?v=202610032310" defer></script>|
++    <script src="js/ds-datenstand.js?v=202610032338" defer></script>|
++    <script src="js/app-init.js?v=202610032338" defer></script>|
++    <script src="js/app-current-meta-analysis.js?v=202610032338" defer></script>|
++    <script src="js/app-features.js?v=202610032338" defer></script>|
++    <script src="js/archetype-icons.js?v=202610032338" defer></script>|
++    <script src="js/app-archetype-card.js?v=202610032338" defer></script>|
++    <script src="js/app-meta-call.js?v=202610032338" defer></script>|
++    <script src="js/app-deckempfehlung.js?v=202610032338" defer></script>|
++    <script src="js/meta-analysis-hub.js?v=202610032338" defer></script>|
++    <script src="js/app-testing-groups.js?v=202610032338" defer></script>|
++    <script src="js/battle-journal.js?v=202610032338" defer></script>|
++    <script src="js/meta-binder.js?v=202610032338" defer></script>|
++    <script src="js/custom-binder.js?v=202610032338" defer></script>|
++    <script src="js/archetyp-box.js?v=202610032338" defer></script>|
++    <script src="js/draw-simulator.js?v=202610032338" defer></script>|
++    <script src="js/app-calculator.js?v=202610032338" defer></script>|
++    <script src="js/champions-namen.js?v=202610032338" defer></script>|
++    <script src="js/qr-svg.js?v=202610032338" defer></script>|
++    <script src="js/pocket-deckcode.js?v=202610032338" defer></script>|
++    <script src="js/ds-pocket.js?v=202610032338" defer></script>|
++    <script src="js/app-side-quest.js?v=202610032338" defer></script>|
++    <script src="js/app-side-quest-play.js?v=202610032338" defer></script>|
++    <script src="js/champions-shiny.js?v=202610032338" defer></script>|
++    <script src="js/app-side-quest-pokedex.js?v=202610032338" defer></script>|
++    <script src="js/app-side-quest-items.js?v=202610032338" defer></script>|
+     <!-- Der Datenumfang wird in app-tier-meta.js gerechnet und in|
+          app-quellen.js angezeigt. Muss vor beiden stehen. -->|
+-    <script src="js/ds-datenumfang.js?v=202610032310" defer></script>|
+-    <script src="js/app-quellen.js?v=202610032310" defer></script>|
+-    <script src="js/app-admin.js?v=202610032310" defer></script>|
++    <script src="js/ds-datenumfang.js?v=202610032338" defer></script>|
++    <script src="js/app-quellen.js?v=202610032338" defer></script>|
++    <script src="js/app-admin.js?v=202610032338" defer></script>|
+     <!-- Die Bruecke zwischen Nutzungs-Slug, Anzeigename und Showdown-Name.|
+          Muss VOR allem stehen, was ein gebautes Team weiterverarbeitet. -->|
+-    <script src="js/champions-set.js?v=202610032310" defer></script>|
+-    <script src="js/champions-names.js?v=202610032310" defer></script>|
+-    <script src="js/app-side-quest-builder.js?v=202610032310" defer></script>|
+-    <script src="js/app-side-quest-status.js?v=202610032310" defer></script>|
+-    <script src="js/app-side-quest-resources.js?v=202610032310" defer></script>|
+-    <script src="js/champions-damage.js?v=202610032310" defer></script>|
+-    <script src="js/champions-schwaechen.js?v=202610032310" defer></script>|
+-    <script src="js/app-side-quest-usage.js?v=202610032310" defer></script>|
+-    <script src="js/app-side-quest-matchups.js?v=202610032310" defer></script>|
++    <script src="js/champions-set.js?v=202610032338" defer></script>|
++    <script src="js/champions-names.js?v=202610032338" defer></script>|
++    <script src="js/app-side-quest-builder.js?v=202610032338" defer></script>|
++    <script src="js/app-side-quest-status.js?v=202610032338" defer></script>|
++    <script src="js/app-side-quest-resources.js?v=202610032338" defer></script>|
++    <script src="js/champions-damage.js?v=202610032338" defer></script>|
++    <script src="js/champions-schwaechen.js?v=202610032338" defer></script>|
++    <script src="js/app-side-quest-usage.js?v=202610032338" defer></script>|
++    <script src="js/app-side-quest-matchups.js?v=202610032338" defer></script>|
+     <!-- Kennzeichnung "Kartentext auf Englisch". MUSS vor jeder Datei stehen,|
+@@ -4251,7 +4254,7 @@|
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202610032310" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202610032310" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202610032310" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202610032310" defer></script>|
+-    <script src="js/ds-nav.js?v=202610032310" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202610032338" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202610032338" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202610032338" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202610032338" defer></script>|
++    <script src="js/ds-nav.js?v=202610032338" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4261,6 +4264,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202610032310" defer></script>|
+-    <script src="js/ds-sections.js?v=202610032310" defer></script>|
+-    <script src="js/ds-filter.js?v=202610032310" defer></script>|
+-    <script src="js/ds-share.js?v=202610032310" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202610032338" defer></script>|
++    <script src="js/ds-sections.js?v=202610032338" defer></script>|
++    <script src="js/ds-filter.js?v=202610032338" defer></script>|
++    <script src="js/ds-share.js?v=202610032338" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4269,5 +4272,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202610032310" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202610032310" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202610032310" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202610032338" defer></script>|
++    <script src="js/ds-tutorial.js?v=202610032338" defer></script>|
++    <script src="js/ds-masterclass.js?v=202610032338" defer></script>|
+ |
+diff --git a/js/app-cards-db.js b/js/app-cards-db.js|
+index 1d336ca1..35c2d172 100644|
+--- a/js/app-cards-db.js|
++++ b/js/app-cards-db.js|
+@@ -3644,3 +3644,3 @@|
+             const limitlessButton = (card.set && card.number)|
+-                ? `<button type="button" onclick="openLimitlessCard('${escapeHtmlAttr(escapeJsStr(card.set))}', '${escapeHtmlAttr(escapeJsStr(card.number))}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless" aria-label="Open ${displayName} on Limitless">Limitless</button>`|
++                ? `<button type="button" onclick="openLimitlessCard('${escapeHtmlAttr(escapeJsStr(card.set))}', '${escapeHtmlAttr(escapeJsStr(card.number))}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="${getLang()==='de' ? 'Bei Limitless ansehen' : 'View on Limitless'}" aria-label="Open ${displayName} on Limitless">Limitless</button>`|
+                 : '<div class="card-database-limitless-placeholder"></div>';|
+diff --git a/js/app-current-meta-analysis.js b/js/app-current-meta-analysis.js|
+index 251ff422..7580f1df 100644|
+--- a/js/app-current-meta-analysis.js|
++++ b/js/app-current-meta-analysis.js|
+@@ -2815,2 +2815,14 @@|
+                   + `The “data from” window does not apply to this list.`;|
++            /* UI-77 (03.10.2026, Tiefenanalyse N-05): Spaltenname und|
++               Dateipfad standen sichtbar unter der Liste — Entwicklertext.|
++               Sichtbar bleibt, was der Leser braucht (was die Zahl ist,|
++               Zeitraum, Vorbehalt); die Herkunft samt Datei steht weiter|
++               vollstaendig im Titel/aria-label der Ueberschrift. */|
++            const _hinweisSichtbar256 = _de256|
++                ? `Zahl vor dem Turniernamen = Day-2-Listen dieses Archetyps in diesem Turnier. `|
++                  + `${tourList.length} ${tourList.length === 1 ? 'Turnier' : 'Turniere'} im aktuellen Meta-Fenster, zusammen ${_summe256} Listen. `|
++                  + `Das Datenfenster „Daten ab“ wirkt auf diese Liste nicht.`|
++                : `The number before each event = Day 2 lists of this archetype in that event. `|
++                  + `${tourList.length} ${tourList.length === 1 ? 'event' : 'events'} in the current meta window, ${_summe256} lists in total. `|
++                  + `The “data from” window does not apply to this list.`;|
+             listEl.innerHTML = tourList.map(t =>|
+@@ -2823,3 +2835,3 @@|
+             + `<div class="top256-herkunft" style="margin-top:8px;font-size:0.72em;line-height:1.35;color:var(--ink-2, #555);">`|
+-            + escapeHtml(_hinweis256) + `</div>`;|
++            + escapeHtml(_hinweisSichtbar256) + `</div>`;|
+             const _titel256 = document.querySelector('.current-meta-top256-title');|
+diff --git a/js/app-quellen.js b/js/app-quellen.js|
+index 8188a5f3..3e45e725 100644|
+--- a/js/app-quellen.js|
++++ b/js/app-quellen.js|
+@@ -105,3 +105,3 @@|
+                          'limitlesstcg.com/jp — gemeldete City-League-Ergebnisse.'],|
+-                        ['📦 Past · eingefrorene Formate',|
++                        ['📦 Vergangene Formate',|
+                          'Limitless Labs — abgeschlossene Formate, Stand eingefroren.'],|
+@@ -231,3 +231,3 @@|
+                          'Es ist der Vorschlag mit der besten Day-2-Aussicht im aktuellen ' +|
+-                         'Feld — keine Zusage, sondern die beste Wette, die die Daten hergeben.'],|
++                         'Meta — keine Zusage, sondern die beste Wette, die die Daten hergeben.'],|
+                         ['„schafft Day 2“',|
+@@ -246,3 +246,3 @@|
+                         ['„% vom Meta sind neu“',|
+-                         'Der Anteil des Feldes, für den es noch keine Präsenzdaten gibt — ' +|
++                         'Der Anteil des Metas, für den es noch keine Präsenzdaten gibt — ' +|
+                          'meist frisch gebaute Decks aus dem Online-Fenster. Gegen sie ist der ' +|
+@@ -312,3 +312,3 @@|
+                          'limitlesstcg.com/jp — reported City League results.'],|
+-                        ['📦 Past · frozen formats',|
++                        ['📦 Past formats',|
+                          'Limitless Labs — completed formats, frozen as they ended.'],|
+diff --git a/js/app-tier-meta.js b/js/app-tier-meta.js|
+index a30cbda4..73afbee5 100644|
+--- a/js/app-tier-meta.js|
++++ b/js/app-tier-meta.js|
+@@ -2473,4 +2473,3 @@|
+                               + nichtZugeordnet.join(', ')|
+-                              + '. Die gepflegte Namensbrücke in data/archetype_aliases.json nimmt nur Paare auf, '|
+-                              + 'die einzeln nachgerechnet wurden — ein ähnlicher Name genügt nicht.'|
++                              + '. Zugeordnet wird nur, was einzeln nachgerechnet wurde — ein ähnlicher Name genügt nicht.'|
+                             : `${nichtZugeordnet.length} tournament name${nichtZugeordnet.length === 1 ? '' : 's'} `|
+@@ -2479,4 +2478,3 @@|
+                               + nichtZugeordnet.join(', ')|
+-                              + '. The curated name bridge in data/archetype_aliases.json only takes pairs that were '|
+-                              + 'checked one by one — a similar name is not enough.')}</p>`|
++                              + '. Only pairs checked one by one are matched — a similar name is not enough.')}</p>`|
+                         : '';|
+diff --git a/js/custom-binder.js b/js/custom-binder.js|
+index 3b50053b..7e5691f2 100644|
+--- a/js/custom-binder.js|
++++ b/js/custom-binder.js|
+@@ -740,3 +740,3 @@|
+         if (cbSelectedArchetypes.length === 0) {|
+-            el.innerHTML = '<span class="color-grey fs-85">No archetypes selected.</span>';|
++            el.innerHTML = '<span class="color-grey fs-85">' + cbText('cb.noArchetypesSelected', 'No archetypes selected.') + '</span>';|
+         } else {|
+diff --git a/js/ds-filter.js b/js/ds-filter.js|
+index 0ff9d692..6d65bf6a 100644|
+--- a/js/ds-filter.js|
++++ b/js/ds-filter.js|
+@@ -63,3 +63,3 @@|
+            was ihn unterscheidet. */|
+-        { key: 'past', tab: 'past-meta',   de: '📦 Rotationen', en: '📦 Rotations',|
++        { key: 'past', tab: 'past-meta',   de: '📦 Vergangene Formate', en: '📦 Past formats',|
+           quelle: 'pastMetaFormatFilter', zweiteDe: 'Format', zweiteEn: 'Format',|
+diff --git a/js/ds-masterclass.js b/js/ds-masterclass.js|
+index 12748522..a30afc73 100644|
+--- a/js/ds-masterclass.js|
++++ b/js/ds-masterclass.js|
+@@ -67,3 +67,3 @@|
+             platz: 'Platz für die nächste Masterclass',|
+-            platzFein: 'Format, Namen und Prüfungen sind schon gebaut',|
++            platzFein: 'Erscheint hier, sobald sie aufbereitet ist',|
+             laden: 'Masterclass wird geladen …',|
+@@ -148,3 +148,3 @@|
+             platz: 'Room for the next masterclass',|
+-            platzFein: 'Format, names and checks are already built',|
++            platzFein: 'Appears here once it is prepared',|
+             laden: 'Loading the masterclass …',|
+diff --git a/js/ds-nav.js b/js/ds-nav.js|
+index 20661643..e72045c5 100644|
+--- a/js/ds-nav.js|
++++ b/js/ds-nav.js|
+@@ -115,5 +115,5 @@|
+     var LABELS = {|
+-        de: { meta: 'Meta', decks: 'Decks', turnier: 'Meta Call',|
++        de: { meta: 'Meta', decks: 'Deck-Analyse', turnier: 'Meta Call',|
+               champions: 'Champions', pocket: 'Pocket' },|
+-        en: { meta: 'Meta', decks: 'Decks', turnier: 'Meta Call',|
++        en: { meta: 'Meta', decks: 'Deck analysis', turnier: 'Meta Call',|
+               champions: 'Champions', pocket: 'Pocket' }|
+@@ -149,4 +149,4 @@|
+         past: {|
+-            de: { region: '📦 Past · eingefrorene Formate', source: 'Limitless Labs' },|
+-            en: { region: '📦 Past · frozen formats', source: 'Limitless Labs' }|
++            de: { region: '📦 Vergangene Formate', source: 'Limitless Labs' },|
++            en: { region: '📦 Past formats', source: 'Limitless Labs' }|
+         }|
+diff --git a/js/ds-pocket.js b/js/ds-pocket.js|
+index 33366866..fc1339cd 100644|
+--- a/js/ds-pocket.js|
++++ b/js/ds-pocket.js|
+@@ -272,8 +272,12 @@|
+                             'Side Quest · Pokémon TCG Pocket')) + '</h2>';|
+-        s += '<p>' + esc(t('Die meistgespielten Decks der Online-Turniere auf Limitless, ' +|
+-                           'letzte ' + (f.tage || '?') + ' Tage. Deck antippen, Muster zeigen, ' +|
+-                           'zweites Gerät scannt.',|
+-                           'The most played decks of the online tournaments on Limitless, last ' +|
+-                           (f.tage || '?') + ' days. Tap a deck, show the pattern, scan it with ' +|
+-                           'a second device.')) + '</p>';|
++        /* UI-90 (03.10.2026, Tiefenanalyse N-18): ein Satz Einordnung —|
++           Pocket ist ein eigenes Handyspiel, und der Musterweg war unklar. */|
++        s += '<p>' + esc(t('Pokémon TCG Pocket ist ein eigenes Handyspiel mit eigenen Karten und Regeln. ' +|
++                           'Hier stehen die meistgespielten Decks der Online-Turniere auf Limitless, ' +|
++                           'letzte ' + (f.tage || '?') + ' Tage. Tippe ein Deck an: es zeigt ein Muster, ' +|
++                           'das du mit dem Handy, auf dem Pocket läuft, scannst.',|
++                           'Pokémon TCG Pocket is a separate mobile game with its own cards and rules. ' +|
++                           'These are the most played decks of the online tournaments on Limitless, last ' +|
++                           (f.tage || '?') + ' days. Tap a deck: it shows a pattern you scan with the ' +|
++                           'phone that runs Pocket.')) + '</p>';|

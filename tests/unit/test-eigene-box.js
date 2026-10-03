@@ -192,3 +192,32 @@ describe('Rutsch P: Box-Ansicht (Hausi, 03.10.2026)', () => {
     assert.match(code, /abx-legal-expanded/);
   });
 });
+
+describe('Rutsch Q: Umfang der Auswahl mit Kopien (Hausi, 03.10.2026)', () => {
+  const code = QUELLE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  // Hausis eigene Rotom-Auswahl (Standard-legal) vom 03.10.2026: 36 verschiedene Karten, 81 Stueck.
+  const LISTE = ['1 Budew PRE 4', '3 Mow Rotom DRI 9', '1 Heat Rotom DRI 43', '1 Psyduck MEP 7', '1 Wash Rotom DRI 61', '1 Rotom DRI 77',
+    '2 Rotom ex PFL 29', '1 Flutter Mane PRE 43', "1 Lillie's Clefairy ex JTG 56", '4 Rotom ASC 92', '1 Fezandipiti ex SFA 38',
+    '1 Tatsugiri TWM 131', "2 Boss's Orders MEG 114", '2 Carmine PRE 103', "4 Lillie's Determination MEG 119",
+    "3 Team Rocket's Petrel ASC 207", '4 Buddy-Buddy Poffin TEF 144', '2 Night Stretcher SFA 61', '3 Poké Pad ASC 198',
+    '4 Ultra Ball ASC 213', '3 Wondrous Patch PFL 94', '4 Air Balloon BLK 79', '4 Brave Bangle WHT 80', '4 Counter Gain SSP 169',
+    "1 Lillie's Pearl JTG 151", '1 Powerglass SFA 63', '1 Rescue Board TEF 159', '1 Sacred Charm PFL 93', '2 Battle Cage PFL 85',
+    "1 Team Rocket's Watchtower ASC 210", '1 Treasure Tracker PRE 131', '1 Fire Energy MEE 2', '3 Grass Energy SVE 1',
+    '4 Lightning Energy MEE 4', '7 Psychic Energy SVE 5', '1 Water Energy MEE 3'];
+  const karten = LISTE.map((z, i) => {
+    const m = z.match(/^(\d+) (.+) ([A-Z0-9]+) (\w+)$/);
+    return { id: 'k' + i, name: m[2], set: m[3], number: m[4], gefordert: Number(m[1]) };
+  });
+  it('Umfang: 36 verschiedene Karten, 81 Stueck mit Kopien', () => {
+    assert.deepEqual(L.auswahlUmfang(karten), { karten: 36, stueck: 81 });
+  });
+  it('Umfang zaehlt wie das Kopieren (gleiche Karte nur einmal, Menge mind. 1)', () => {
+    const u = L.auswahlUmfang([karten[1], karten[1], { id: 'z', name: 'X', set: 'TWM', number: '1', gefordert: 0 }]);
+    assert.deepEqual(u, { karten: 2, stueck: 4 });
+    assert.deepEqual(L.auswahlUmfang([]), { karten: 0, stueck: 0 });
+  });
+  it('Die Zeile steht ueber der Kartenliste und nutzt die sichtbare Auswahl', () => {
+    assert.match(code, /auswahlUmfang\(sichtbareKarten\)/);
+    assert.match(code, /filterLeiste\(kontext, ohneFormate, gewaehlt, mitBoxName\) \+ umfangZeile \+ hauptteil/);
+  });
+});

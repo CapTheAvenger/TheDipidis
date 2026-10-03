@@ -1,0 +1,308 @@
+         s += '</div>';|
+diff --git a/js/ds-tutorial.js b/js/ds-tutorial.js|
+index 19d3667e..8a6fb2b3 100644|
+--- a/js/ds-tutorial.js|
++++ b/js/ds-tutorial.js|
+@@ -158,2 +158,33 @@|
+ |
++    /* UI-78 (03.10.2026, Tiefenanalyse N-04/N-19): Glossar. Erklaerungen|
++     * standen fast nur in title-Tooltips, die es auf dem Handy nicht gibt.|
++     * Jeder Begriff in tutorial/tutorial.<sprache>.html hat die Adresse|
++     * #glossar-<begriff>; ein antippbares Element mit data-glossar="<begriff>"|
++     * (die ⓘ-Knoepfe der Seite und die Verweise in der Anleitung) oeffnet|
++     * die Anleitung und springt zum Eintrag. Der Hash wird dabei NICHT|
++     * gesetzt — die Adresszeile steuert die Reiter (js/inline-init.js). */|
++    function glossarOeffnen(begriff) {|
++        var id = 'glossar-' + String(begriff || '').replace(/[^a-z0-9-]/gi, '').toLowerCase();|
++        if (typeof window.switchTabAndUpdateMenu === 'function') window.switchTabAndUpdateMenu('tutorial');|
++        else if (typeof window.switchTab === 'function') window.switchTab('tutorial');|
++        return render(lang()).then(function () {|
++            var ziel = document.getElementById(id) || document.getElementById('glossar');|
++            if (!ziel) return false;|
++            if (ziel.scrollIntoView) ziel.scrollIntoView({ block: 'start' });|
++            if (ziel.classList) {|
++                ziel.classList.add('glossar-markiert');|
++                setTimeout(function () { ziel.classList.remove('glossar-markiert'); }, 2400);|
++            }|
++            return ziel.id;|
++        });|
++    }|
++|
++    document.addEventListener('click', function (e) {|
++        var el = e.target.closest && e.target.closest('[data-glossar]');|
++        if (!el) return;|
++        e.preventDefault();|
++        e.stopPropagation();|
++        glossarOeffnen(el.getAttribute('data-glossar'));|
++    });|
++|
+     /* switchTab wird umschlossen statt in app-core.js angefasst —|
+@@ -192,2 +223,3 @@|
+         show: function () { return render(lang()); },|
++        glossarOeffnen: glossarOeffnen,|
+         hydrateImages: hydrateImages,|
+@@ -200,2 +232,3 @@|
+     window.hydrateTutorialImages = hydrateImages;|
++    window.glossarOeffnen = glossarOeffnen;|
+ |
+diff --git a/js/firebase-collection.js b/js/firebase-collection.js|
+index c8083d03..e76d0c63 100644|
+--- a/js/firebase-collection.js|
++++ b/js/firebase-collection.js|
+@@ -1431,3 +1431,3 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {|
+               <button onclick="addToCollection('${safeCardIdJs}')" style="background: var(--solid-ok); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${ownedCount}/4)">+</button>|
+-              <button onclick="removeFromCollection('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>|
++              <button onclick="removeFromCollection('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Eine Kopie entfernen' : 'Remove copy'}">−</button>|
+             </div>|
+@@ -1887,6 +1887,6 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {|
+           <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}', '${escapeJsSingleQuoted(card.cardmarket_url || '')}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}')">|
+-          <div style="position: absolute; top: 5px; left: 5px; background: #aa5a13; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${wantedCount}x wanted">${wantedCount}x</div>|
++          <div style="position: absolute; top: 5px; left: 5px; background: #aa5a13; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${wantedCount}× ${getLang()==='de' ? 'gesucht' : 'wanted'}">${wantedCount}x</div>|
+           <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">|
+-            <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #aa5a13; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Need more (${wantedCount}/4)">+</button>|
+-            <button onclick="removeFromWishlist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>|
++            <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #aa5a13; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Noch eine gesucht' : 'Need more'} (${wantedCount}/4)">+</button>|
++            <button onclick="removeFromWishlist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Eine Kopie entfernen' : 'Remove copy'}">−</button>|
+           </div>|
+@@ -2398,3 +2398,3 @@ function updateDecksUI(offenHalten) {|
+             <p style="color: #34495e; margin: 10px 0; font-weight: 600;">|
+-              ${totalCards} Cards (${uniqueCards} Unique)|
++              ${totalCards} ${getLang()==='de' ? 'Karten' : 'Cards'} (${uniqueCards} ${getLang()==='de' ? 'verschiedene' : 'unique'})|
+             </p>|
+@@ -2853,3 +2853,3 @@ function updateDecksUI(offenHalten) {|
+             <div style="font-size: 0.85em; opacity: 0.9;">|
+-              ${safeDeckArchetypeHtml} • ${totalCards} Cards (${uniqueCards} Unique)|
++              ${safeDeckArchetypeHtml} • ${totalCards} ${getLang()==='de' ? 'Karten' : 'Cards'} (${uniqueCards} ${getLang()==='de' ? 'verschiedene' : 'unique'})|
+             </div>|
+@@ -2867,6 +2867,6 @@ function updateDecksUI(offenHalten) {|
+             </button>|
+-            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="Copy in PTCGL format (Pokémon TCG Live)">|
++            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="${getLang()==='de' ? 'Für Pokémon TCG Live (PTCGL) kopieren' : 'Copy in PTCGL format (Pokémon TCG Live)'}">|
+               PTCGL|
+             </button>|
+-            <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="Copy &amp; open Limitless Builder">|
++            <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="${getLang()==='de' ? 'Kopieren und Limitless-Deckbuilder öffnen' : 'Copy &amp; open Limitless Builder'}">|
+               ${getLang()==='de' ? 'Decklist' : 'Print Decklist'}|
+@@ -5943,6 +5943,6 @@ async function clearTradelist() {|
+   if (!window.userTradelist || window.userTradelist.size === 0) {|
+-    showNotification(getLang()==='de' ? 'Trade List ist bereits leer' : 'Trade list is already empty', 'info');|
++    showNotification(getLang()==='de' ? 'Die Tauschliste ist bereits leer' : 'Trade list is already empty', 'info');|
+     return;|
+   }|
+-  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Trade List leeren?' : 'Really clear the entire trade list?');|
++  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Tauschliste leeren?' : 'Really clear the entire trade list?');|
+   if (!ok) return;|
+@@ -5961,3 +5961,3 @@ async function clearTradelist() {|
+       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, tradelistUpdate: true });|
+-    showNotification(getLang()==='de' ? 'Trade List wurde geleert' : 'Trade list cleared', 'success');|
++    showNotification(getLang()==='de' ? 'Tauschliste geleert' : 'Trade list cleared', 'success');|
+   } catch (error) {|
+@@ -6078,3 +6078,3 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {|
+             <button onclick="addToTradelist('${safeCardIdJs}')" style="background: #117d68; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${tradeCount}/4)">+</button>|
+-            <button onclick="removeFromTradelist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">¤u2212</button>|
++            <button onclick="removeFromTradelist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Eine Kopie entfernen' : 'Remove copy'}">¤u2212</button>|
+           </div>|
+diff --git a/js/firebase-globals.js b/js/firebase-globals.js|
+index 41851908..4d467793 100644|
+--- a/js/firebase-globals.js|
++++ b/js/firebase-globals.js|
+@@ -62,3 +62,3 @@ function _getPersistErrLabel(code) {|
+     'unimplemented':       _csT('cloudSync.errUnimplemented', 'browser does not support offline cache'),|
+-    'api-removed':         _csT('cloudSync.errApiRemoved', 'SDK version without offline cache'),|
++    'api-removed':         _csT('cloudSync.errApiRemoved', 'offline storage not available in this browser'),|
+     'init-threw':          _csT('cloudSync.errInitThrew', 'cache init failed'),|
+diff --git a/js/i18n.js b/js/i18n.js|
+index 51ae8bf9..8772f141 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -40,3 +40,5 @@ const translations = {|
+     // ── Main title & header ──────────────────────────────────|
+-    'app.title':              'Pokémon TCG Hub',|
++    'app.title':              'The Dipidis',|
++    'menu.labelBtn':          '☰ Menu',|
++    'glossar.nachlesen':      'Look up in the glossary',|
+     'app.subtitle':           'Your Portal for Meta Analysis & Deck Building',|
+@@ -53,7 +55,7 @@ const translations = {|
+     'menu.title':             'Main Menu',|
+-    'menu.cityLeague':        'City League Meta',|
+-    'menu.cityLeagueAnalysis':'Deck Analysis (Japan)',|
++    'menu.cityLeague':        'Japan (City League)',|
++    'menu.cityLeagueAnalysis':'Deck analysis (Japan)',|
+     'menu.currentMeta':       'Current Meta (Global)',|
+     'menu.currentMetaAnalysis':'Deck Analysis (Global)',|
+-    'menu.pastMeta':          'Past Meta',|
++    'menu.pastMeta':          'Past formats',|
+     'menu.hub':               'Home',|
+@@ -63,3 +65,3 @@ const translations = {|
+     'menu.hubTitle':          'Back to home',|
+-    'menu.deckBuilderTitle':  'Deck Builder — build, save and analyse decks',|
++    'menu.deckBuilderTitle':  'Build a deck — build, save and analyse decks',|
+     'menu.cardDatabase':      'Card Database',|
+@@ -67,3 +69,3 @@ const translations = {|
+     'menu.metaCallTitle':     'Meta Call ¤u2014 predicted field for your next tournament',|
+-    'menu.deckBuilder':       'Deck Builder',|
++    'menu.deckBuilder':       'Build a deck',|
+     'menu.proxyPrinter':      'Proxy Printer',|
+@@ -91,3 +93,3 @@ const translations = {|
+     'tab.currentMetaAnalysis':'Current Meta Deck Analysis',|
+-    'tab.pastMeta':           'Past Meta',|
++    'tab.pastMeta':           'Past formats',|
+     'tab.cards':              'Cards',|
+@@ -118,3 +120,3 @@ const translations = {|
+     ],|
+-    'metaHub.tile.pastMeta.title':              'Past Meta',|
++    'metaHub.tile.pastMeta.title':              'Past formats',|
+     'metaHub.tile.pastMeta.bullets':            [|
+@@ -848,3 +850,3 @@ const translations = {|
+     'abx.keinTreffer': 'No card found.',|
+-    'abx.keineBox': 'No archetype box yet. Open Rotations, choose “All formats” and an archetype, then tap “Add to archetype box” in the card overview.',|
++    'abx.keineBox': 'No archetype box yet. Open Past formats, choose “All formats” and an archetype, then tap “Add to archetype box” in the card overview.',|
+     'abx.keineKarten': 'No cards with set and number found.',|
+@@ -909,3 +911,3 @@ const translations = {|
+     'abx.wenigerAria': 'One copy less',|
+-    'abx.zuRotationen': 'Go to Rotations',|
++    'abx.zuRotationen': 'Go to past formats',|
+     'abx.alleBoxen': 'All boxes',|
+@@ -1018,3 +1020,3 @@ const translations = {|
+     'profile.compareDecklists':  'Compare Decklists',|
+-    'profile.deckBuilder':       'Deck Builder',|
++    'profile.deckBuilder':       'Build a deck',|
+     'profile.compareNote':       'Paste two decklists to compare them side by side',|
+@@ -1080,2 +1082,5 @@ const translations = {|
+     'cb.noArchetypesSelected':  'No archetypes selected.',|
++    'bj.formatWaehlen':         '— Choose format —',|
++    'mb.emptyText':             'Generate the binder to compare current meta staples with your collection.',|
++    'mb.loadSaved':             '📂 Load saved binder',|
+     'cb.promptPresetName':      'Name for this binder:',|
+@@ -1214,3 +1219,3 @@ const translations = {|
+     'mc.badgeOptional':         'Optional',|
+-    'mc.sourcePastMeta':        'Past Meta',|
++    'mc.sourcePastMeta':        'Past formats',|
+     'mc.sourceCurrentCityLeague': 'Current City League',|
+@@ -1962,3 +1967,3 @@ const translations = {|
+     'format.m4current':         'Current Meta',|
+-    'format.m3archive':         'Past Meta',|
++    'format.m3archive':         'Past formats',|
+ |
+@@ -2630,3 +2635,3 @@ const translations = {|
+     'cloudSync.errUnimplemented':     'browser does not support offline cache',|
+-    'cloudSync.errApiRemoved':        'SDK version without offline cache',|
++    'cloudSync.errApiRemoved':        'offline storage not available in this browser',|
+     'cloudSync.errInitThrew':         'cache init failed',|
+@@ -2642,3 +2647,3 @@ const translations = {|
+     'proxy.addCMDeck':          'Add Current Meta Deck',|
+-    'proxy.addPMDeck':          'Add Past Meta Deck',|
++    'proxy.addPMDeck':          'Add deck from past formats',|
+     'proxy.printQueue':         'Print Queue',|
+@@ -2858,3 +2863,3 @@ const translations = {|
+     // ── Side Quest header (Befund F) ─────────────────────────|
+-    'sideQuest.subtitle':       'Top current doubles teams from op.gg / victoryroad — tap a replica code to copy it.',|
++    'sideQuest.subtitle':       'Pokémon Champions is a video game, not the card game. Top current doubles teams from op.gg / victoryroad — tap a replica code to copy it.',|
+     'sideQuest.lastUpdated':    'Last updated:',|
+@@ -2937,3 +2942,5 @@ const translations = {|
+     // ── Main title & header ──────────────────────────────────|
+-    'app.title':              'Pokémon TCG Hub',|
++    'app.title':              'The Dipidis',|
++    'menu.labelBtn':          '☰ Menü',|
++    'glossar.nachlesen':      'Im Glossar nachlesen',|
+     'app.subtitle':           'Dein Portal für Meta-Analyse & Deckbau',|
+@@ -2950,3 +2957,3 @@ const translations = {|
+     'menu.title':             'Hauptmenü',|
+-    'menu.cityLeague':        'City League Meta',|
++    'menu.cityLeague':        'Japan (City League)',|
+     'menu.cityLeagueAnalysis':'Deck-Analyse (Japan)',|
+@@ -2954,3 +2961,3 @@ const translations = {|
+     'menu.currentMetaAnalysis':'Deck-Analyse (Global)',|
+-    'menu.pastMeta':          'Vergangenes Meta',|
++    'menu.pastMeta':          'Vergangene Formate',|
+     'menu.hub':               'Startseite',|
+@@ -2960,3 +2967,3 @@ const translations = {|
+     'menu.hubTitle':          'Zur Startseite',|
+-    'menu.deckBuilderTitle':  'Deck Builder — Decks bauen, speichern und analysieren',|
++    'menu.deckBuilderTitle':  'Deck bauen — Decks zusammenstellen, speichern und analysieren',|
+     'menu.cardDatabase':      'Kartendatenbank',|
+@@ -2964,3 +2971,3 @@ const translations = {|
+     'menu.metaCallTitle':     'Meta Call ¤u2014 vorhergesagtes Meta f¤u00fcr dein n¤u00e4chstes Turnier',|
+-    'menu.deckBuilder':       'Deck Builder',|
++    'menu.deckBuilder':       'Deck bauen',|
+     'menu.proxyPrinter':      'Proxy-Drucker',|
+@@ -2980,3 +2987,3 @@ const translations = {|
+     'tab.currentMetaAnalysis':'Aktuelle Meta Deck-Analyse',|
+-    'tab.pastMeta':           'Vergangenes Meta',|
++    'tab.pastMeta':           'Vergangene Formate',|
+     'tab.cards':              'Karten',|
+@@ -3007,3 +3014,3 @@ const translations = {|
+     ],|
+-    'metaHub.tile.pastMeta.title':              'Vergangenes Meta',|
++    'metaHub.tile.pastMeta.title':              'Vergangene Formate',|
+     'metaHub.tile.pastMeta.bullets':            [|
+@@ -3739,3 +3746,3 @@ const translations = {|
+     'abx.keinTreffer': 'Keine Karte gefunden.',|
+-    'abx.keineBox': 'Noch keine Archetyp-Box. Öffne Rotationen, wähle „Alle Formate“ und einen Archetyp und tippe in der Kartenübersicht auf „Zu Archetyp-Box hinzufügen“.',|
++    'abx.keineBox': 'Noch keine Archetyp-Box. Öffne Vergangene Formate, wähle „Alle Formate“ und einen Archetyp und tippe in der Kartenübersicht auf „Zu Archetyp-Box hinzufügen“.',|
+     'abx.keineKarten': 'Keine Karten mit Set und Nummer gefunden.',|
+@@ -3800,3 +3807,3 @@ const translations = {|
+     'abx.wenigerAria': 'Eine Kopie weniger',|
+-    'abx.zuRotationen': 'Zu Rotationen',|
++    'abx.zuRotationen': 'Zu Vergangene Formate',|
+     'abx.alleBoxen': 'Alle Boxen',|
+@@ -3909,3 +3916,3 @@ const translations = {|
+     'profile.compareDecklists':  'Decklisten vergleichen',|
+-    'profile.deckBuilder':       'Deck Builder',|
++    'profile.deckBuilder':       'Deck bauen',|
+     'profile.compareNote':       'Füge zwei Decklisten ein, um sie nebeneinander zu vergleichen',|
+@@ -3971,2 +3978,5 @@ const translations = {|
+     'cb.noArchetypesSelected':  'Keine Archetypen ausgew¤u00e4hlt.',|
++    'bj.formatWaehlen':         '— Format wählen —',|
++    'mb.emptyText':             'Erstelle den Binder, um die aktuellen Meta-Staples mit deiner Sammlung zu vergleichen.',|
++    'mb.loadSaved':             '📂 Gespeicherten Binder laden',|
+     'cb.promptPresetName':      'Name f¤u00fcr diesen Binder:',|
+@@ -4105,3 +4115,3 @@ const translations = {|
+     'mc.badgeOptional':         'Optional',|
+-    'mc.sourcePastMeta':        'Vergangenes Meta',|
++    'mc.sourcePastMeta':        'Vergangene Formate',|
+     'mc.sourceCurrentCityLeague': 'Aktuelle City League',|
+@@ -4855,3 +4865,3 @@ const translations = {|
+     'format.m4current':         'Aktuelles Meta',|
+-    'format.m3archive':         'Vergangenes Meta',|
++    'format.m3archive':         'Vergangene Formate',|
+ |
+@@ -5284,4 +5294,4 @@ const translations = {|
+     'pm.familieKeineBilanz':    'Für eine Sammelauswahl gibt es keine Turnierbilanz: Limitless führt Ergebnisse je Archetyp, und „Alle {name}-Decks“ ist keiner. Wähle eine einzelne Variante, um ihre Bilanz und ihre Matchups zu sehen.',|
+-    'pm.toastLoading':          'Vergangenes Meta wird geladen …',|
+-    'pm.toastLoaded':           'Vergangenes Meta: {n} Decks geladen',|
++    'pm.toastLoading':          'Vergangene Formate werden geladen …',|
++    'pm.toastLoaded':           'Vergangene Formate: {n} Decks geladen',|
+     'stats.tournament':         'Turnier',|
+@@ -5343,3 +5353,3 @@ const translations = {|
+     'toast.noPastDataFor':         'Keine Turnierdaten für ',|
+-    'toast.pastMetaLoadError':     'Vergangenes Meta ließ sich nicht laden: ',|
++    'toast.pastMetaLoadError':     'Vergangene Formate ließen sich nicht laden: ',|
+     'toast.deckLoadError':         'Deck ließ sich nicht laden: ',|
+@@ -5509,3 +5519,3 @@ const translations = {|
+     'cloudSync.errUnimplemented':     'Browser unterstützt keinen Offline-Cache',|
+-    'cloudSync.errApiRemoved':        'SDK-Version ohne Offline-Cache',|
++    'cloudSync.errApiRemoved':        'Offline-Speicher in diesem Browser nicht verfügbar',|
+     'cloudSync.errInitThrew':         'Cache-Init fehlgeschlagen',|
+@@ -5521,3 +5531,3 @@ const translations = {|
+     'proxy.addCMDeck':          'Aktuelles Meta Deck hinzufügen',|
+-    'proxy.addPMDeck':          'Vergangenes Meta Deck hinzufügen',|
++    'proxy.addPMDeck':          'Deck aus vergangenen Formaten hinzufügen',|
+     'proxy.printQueue':         'Warteschlange drucken',|
+@@ -5562,3 +5572,3 @@ const translations = {|
+     'profile.priceAlerts.title':          'Telegram-Preisalarme',|
+-    'profile.priceAlerts.intro':          'Bekomme eine Telegram-Nachricht, wenn der Marktpreis einer Wishlist-Karte auf oder unter deinen Maximalwert sinkt — oder wenn der Marktpreis einer Trade-Karte über deinem Mindestpreis liegt. So bist du immer auf dem aktuellen Stand.',|
++    'profile.priceAlerts.intro':          'Bekomme eine Telegram-Nachricht, wenn der Marktpreis einer Karte auf deiner Wunschliste auf oder unter deinen Maximalwert sinkt — oder wenn der Marktpreis einer Karte auf deiner Tauschliste über deinem Mindestpreis liegt. So bist du immer auf dem aktuellen Stand.',|
+     'profile.priceAlerts.toggle':         'Telegram-Preisalarme aktivieren',|
+@@ -5725,3 +5735,3 @@ const translations = {|
+     // ── Side-Quest-Kopfbereich (Befund F) ────────────────────|
+-    'sideQuest.subtitle':       'Aktuelle Top-Doubles-Teams von op.gg / victoryroad — tippe auf einen Replica-Code, um ihn zu kopieren.',|
++    'sideQuest.subtitle':       'Pokémon Champions ist ein Videospiel, nicht das Kartenspiel. Aktuelle Top-Teams für Doppelkämpfe von op.gg / victoryroad — tippe auf einen Replica-Code, um ihn zu kopieren.',|
+     'sideQuest.lastUpdated':    'Stand:',|
+diff --git a/js/inline-init.js b/js/inline-init.js|
+index 06b952e3..72234b1d 100644|
+--- a/js/inline-init.js|
++++ b/js/inline-init.js|
+@@ -484,3 +484,4 @@ document.addEventListener('click', function(e) {|
+     if (menu && trigger && menu.classList.contains('show')) {|
+-        if (!menu.contains(e.target) && !trigger.contains(e.target)) {|

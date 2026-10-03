@@ -781,7 +781,7 @@ describe('Alle Boxen „Zusammen“ (30.09.2026): Summe je Karte, Verteilung, Re
         const drinAlle = boxen.map(b => M3.reinlegen(b, 'ASC-16'));
         assert.equal(M3.sammlungsBedarf(M3.zusammenfassen(eintraege(drinAlle))[0].teile, () => 1)[0].ziel, 8, 'Probe ohne Playset-Grenze beisst nicht');
         const code = ohneKommentare(QUELLE);
-        assert.match(code, /const zusammen = mitBoxName && ansicht\.gruppe === 'zusammen';/);
+        assert.match(code, /const zusammen = mitBoxName && !alleKarten && ansicht\.gruppe === 'zusammen';/);
         assert.match(code, /filterLeiste\(kontext, ohneFormate, gewaehlt, mitBoxName\)/);
         assert.match(code, /addToCollection\(x\.schluessel\)/);
         for (const k of ['abx.gruppeZusammen', 'abx.verteilungZeile', 'abx.sammlungSetzen', 'abx.alleReingelegt']) {

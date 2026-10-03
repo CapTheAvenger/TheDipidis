@@ -170,7 +170,7 @@ describe('Rutsch P: Box-Ansicht (Hausi, 03.10.2026)', () => {
     L.deckzeilenAus([mk('a', 'DRI', '9', 'Mow Rotom', 3), mk('c', 'MEE', '4', 'Basic Lightning Energy', 4)]).forEach((zeile) => assert.match(zeile, re));
   });
   it('Kopierknopf haengt an der gefilterten Ansicht und ist verdrahtet', () => {
-    assert.match(code, /sichtbareKarten = eintraege\.map\(/);
+    assert.match(code, /: eintraege\.map\(function \(e\) \{ return e\.k; \}\)/);
     assert.match(code, /onclick="ArchetypBox\.kopieren\(\)"/);
     assert.match(code, /kopieren: kopieren,/);
     assert.match(code, /navigator\.clipboard\.writeText\(text\)/);
@@ -180,14 +180,14 @@ describe('Rutsch P: Box-Ansicht (Hausi, 03.10.2026)', () => {
     assert.equal(L.boxStufe(b, null), 'eigen');
     assert.equal(L.boxStufe(b, { aktuell: 'X' }), 'eigen');
     assert.equal(L.chipReihe([b], null, null)[0].stufe, 'eigen');
-    assert.match(code, /\['gespielt', 'legal', 'raus', 'eigen'\]/);
+    assert.match(code, /\['gespielt', 'legal', 'raus', 'eigen', 'sonst'\]/);
   });
   it('Keine Namensliste mehr ueber der Kartenansicht', () => {
     assert.ok(!/boxen\.map\(nameVon\)\.join\(', '\)/.test(code), 'Namensliste "Alle Boxen" ist zurueck');
     assert.ok(!/liste: alt\.map\(nameVon\)/.test(code), 'Namensliste "noch nicht abgeglichen" ist zurueck');
   });
   it('Standard-Marke steht an der Einzel- und an der Zusammen-Kachel', () => {
-    assert.equal((code.match(/\+ legalMarke\(k\)/g) || []).length, 2);
+    assert.equal((code.match(/\+ legalMarke\(k\)/g) || []).length, 3); // Einzel-, Zusammen- und Alle-Karten-Kachel
     assert.match(code, /abx-legal-standard/);
     assert.match(code, /abx-legal-expanded/);
   });
@@ -218,7 +218,7 @@ describe('Rutsch Q: Umfang der Auswahl mit Kopien (Hausi, 03.10.2026)', () => {
   });
   it('Die Zeile steht ueber der Kartenliste und nutzt die sichtbare Auswahl', () => {
     assert.match(code, /auswahlUmfang\(sichtbareKarten\)/);
-    assert.match(code, /filterLeiste\(kontext, ohneFormate, gewaehlt, mitBoxName\) \+ umfangZeile \+ hauptteil/);
+    assert.match(code, /filterLeiste\(kontext, ohneFormate, gewaehlt, mitBoxName && !alleKarten\) \+ umfangZeile \+ hauptteil/);
   });
 });
 
@@ -241,5 +241,48 @@ describe('Rutsch R: Umfang ueber mehrere Boxen und ohne Basis-Energien (Hausi, 0
   it('Der Kopierknopf zeigt die Zahl der Zeilen, nicht die der Eintraege', () => {
     assert.match(code, /tx\('abx\.kopieren', \{ n: deckzeilenAus\(sichtbareKarten\)\.length \}/);
     assert.doesNotMatch(code, /abx\.kopieren', \{ n: sichtbareKarten\.length/);
+  });
+});
+
+describe('Rutsch S: Alle-Karten-Box und aufklappbare Boxliste (Hausi, 03.10.2026)', () => {
+  const code = QUELLE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const kk = (set, nr, n, extra) => Object.assign({ id: set + '-' + nr, name: 'Karte ' + nr, set: set, number: nr, gefordert: n, typ: 'Item' }, extra || {});
+  const E = (box, k) => ({ box: { id: box }, k: k });
+  it('groesste Anzahl ueber alle Boxen, nie die der ersten', () => {
+    const g = L.groessteAnzahl([E('a', kk('TWM', '1', 1)), E('b', kk('TWM', '1', 3)), E('c', kk('TWM', '1', 2))]);
+    assert.equal(g.length, 1);
+    assert.equal(g[0].k.gefordert, 3);
+    assert.equal(g[0].boxen, 3);
+  });
+  it('mehr als 4 wird auf 4 gedeckelt, Basis-Energien nicht', () => {
+    const g = L.groessteAnzahl([E('a', kk('SVE', '1', 12, { name: 'Fire Energy', typ: 'Energy' })), E('a', kk('TWM', '2', 9))]);
+    assert.equal(g[0].k.gefordert, 12);
+    assert.equal(g[1].k.gefordert, 4);
+    assert.equal(g[1].max, 9);
+    assert.equal(L.KOPIEN_MAX, 4);
+  });
+  it('verbunden wird ueber (Set, Nummer), nie ueber den Namen', () => {
+    const a = kk('TWM', '1', 2, { name: 'Gleicher Name' });
+    const b = kk('SFA', '9', 3, { name: 'Gleicher Name' });
+    assert.equal(L.groessteAnzahl([E('a', a), E('b', b)]).length, 2);
+  });
+  it('Umfang der Alle-Karten-Box: Stueck ohne Basis-Energien', () => {
+    const g = L.groessteAnzahl([E('a', kk('TWM', '1', 1)), E('b', kk('TWM', '1', 4)), E('a', kk('SVE', '2', 15, { name: 'Water Energy', typ: 'Energy' }))]);
+    assert.deepEqual(L.auswahlUmfang(g.map((x) => x.k)), { karten: 2, stueck: 4 });
+    assert.equal(L.ALLE_KARTEN, '__alle_karten__');
+  });
+  it('Die Ansicht rechnet die Kopie und die Zahlen aus der Alle-Karten-Box', () => {
+    assert.match(code, /const alleKarten = aktiveId === ALLE_KARTEN/);
+    assert.match(code, /sichtbareKarten = groesste \? groesste\.map\(function \(g\) \{ return g\.k; \}\)/);
+    assert.match(code, /alleKartenChip = chip\(ALLE_KARTEN/);
+  });
+  it('Die Boxliste: zwei feste Chips, die Boxen je Stufe in aufklappbaren Gruppen', () => {
+    assert.match(code, /<div class="abx-leiste-fest">/);
+    assert.match(code, /'<details class="abx-gruppe abx-stufe-' \+ g/);
+    assert.match(code, /offeneGruppen\.has\(g\)/);
+    assert.match(code, /function gruppeKlappen\(g, details\)/);
+    assert.match(code, /gruppeKlappen: gruppeKlappen/);
+    // eine Variante bleibt in der Gruppe ihrer Familienbox
+    assert.match(code, /if \(r\.rang !== 'mitglied'\) aktuelleStufe = r\.stufe \|\| 'sonst'/);
   });
 });

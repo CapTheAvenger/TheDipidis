@@ -56,7 +56,7 @@ index 46cb4b1d..f8e29328 100644|
  |
 -const DATEIEN = ['js/app-meta-call.js', 'js/win-rate-konvention.js', 'js/i18n.js'];|
 +const DATEIEN = ['js/app-meta-call.js', 'js/win-rate-konvention.js', 'js/i18n.js', 'js/ds-share.js', 'js/app-deckempfehlung.js'];|
- 
+ |
 diff --git a/tests/unit/test-wording-startseite.js b/tests/unit/test-wording-startseite.js|
 index 46b4310a..fa4b794a 100644|
 --- a/tests/unit/test-wording-startseite.js|

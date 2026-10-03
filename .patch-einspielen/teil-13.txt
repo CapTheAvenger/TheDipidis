@@ -11,7 +11,7 @@
 -        ['„% vom Feld sind neu“', '“% of the field is new”'],|
 +        ['„% vom Meta sind neu“', '“% of the meta is new”'],|
      ];|
- diff --git a/version.json b/version.json|
+diff --git a/version.json b/version.json|
 index cfff6c6a..b131dfce 100644|
 --- a/version.json|
 +++ b/version.json|

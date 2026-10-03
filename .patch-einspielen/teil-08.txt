@@ -1,0 +1,77 @@
++    <script src="js/champions-damage.js?v=202610031439" defer></script>|
++    <script src="js/champions-schwaechen.js?v=202610031439" defer></script>|
++    <script src="js/app-side-quest-usage.js?v=202610031439" defer></script>|
++    <script src="js/app-side-quest-matchups.js?v=202610031439" defer></script>|
+     <!-- Kennzeichnung "Kartentext auf Englisch". MUSS vor jeder Datei stehen,|
+@@ -4220,7 +4249,7 @@|
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202610031039" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202610031039" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202610031039" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202610031039" defer></script>|
+-    <script src="js/ds-nav.js?v=202610031039" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202610031439" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202610031439" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202610031439" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202610031439" defer></script>|
++    <script src="js/ds-nav.js?v=202610031439" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4230,6 +4259,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202610031039" defer></script>|
+-    <script src="js/ds-sections.js?v=202610031039" defer></script>|
+-    <script src="js/ds-filter.js?v=202610031039" defer></script>|
+-    <script src="js/ds-share.js?v=202610031039" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202610031439" defer></script>|
++    <script src="js/ds-sections.js?v=202610031439" defer></script>|
++    <script src="js/ds-filter.js?v=202610031439" defer></script>|
++    <script src="js/ds-share.js?v=202610031439" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4238,5 +4267,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202610031039" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202610031039" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202610031039" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202610031439" defer></script>|
++    <script src="js/ds-tutorial.js?v=202610031439" defer></script>|
++    <script src="js/ds-masterclass.js?v=202610031439" defer></script>|
+ |
+diff --git a/js/i18n.js b/js/i18n.js|
+index 76a7748c..1051c896 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -325,2 +325,3 @@ const translations = {|
+     'footer.impressum':       'Legal notice',|
++    'footer.stand':           'Site version:',|
+     'footer.datenschutz':     'Privacy policy',|
+@@ -3168,2 +3169,3 @@ const translations = {|
+     'footer.impressum':       'Impressum',|
++    'footer.stand':           'Stand der Seite:',|
+     'footer.datenschutz':     'Datenschutz',|
+diff --git a/service-worker.js b/service-worker.js|
+index 6026bc18..193dea02 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202610031039|
++// v202610031439|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202610031039';|
++const CACHE_NAME = 'tcg-analysis-v202610031439';|
+ |
+diff --git a/tests/unit/test-start-neu-laden.js b/tests/unit/test-start-neu-laden.js|
+new file mode 100644|
+index 00000000..848ea7d5|
+--- /dev/null|
++++ b/tests/unit/test-start-neu-laden.js|
+@@ -0,0 +1,97 @@|
++/**|
++ * START-NEULADEN — beim Oeffnen der Seite wird die neueste Version erzwungen.|
++ *|
++ * ANLASS (Hausi, 03.10.2026): Auf dem Handy fehlte die neue Archetyp-Box,|
++ * obwohl live laengst ausgeliefert. Die Zusage lautet: beim Start (Pokeball)|
++ * wird der Cache geleert und neu geladen, sobald version.json eine andere|
++ * Version nennt — und NUR dann nicht, wenn die Seite gerade erst neu|

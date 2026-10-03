@@ -1,0 +1,425 @@
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const Q = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'firebase-collection.js'), 'utf8')|
++  .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++|
++function laden(jetzt) {|
++  const a = Q.indexOf('const PRICE_TRUST_CASES');|
++  const b = Q.indexOf('if (typeof window !== \'undefined\') window.priceTrustBadge', a);|
++  assert.ok(a > -1 && b > a);|
++  const T = { 'preis.ohneZuordnung': 'ohne Zuordnung', 'preis.ohneZuordnungTitel': 'x', 'preis.vom': 'Preis vom {datum}',|
++    'preis.unverifiziert': 'ungeprueft', 'preis.unverifiziertTitel': 'y', 'preis.nummerDoppelt': 'doppelt', 'preis.nummerDoppeltTitel': 'z' };|
++  const RealDate = Date;|
++  class FestesDatum extends RealDate { constructor(...a) { super(...(a.length ? a : [jetzt])); } }|
++  // eslint-disable-next-line no-new-func|
++  return Function('window', 't', 'escapeHtml', 'Date',|
++    Q.slice(a, b) + '\nreturn { priceTrustBadge };')(|
++    { cardDBHasMappingStatus: true }, (k) => T[k] || k, (s) => String(s), FestesDatum);|
++}|
++|
++describe('DA-37: alter Preis nennt sein Datum', () => {|
++  const { priceTrustBadge } = laden('2026-10-03T12:00:00Z');|
++  const datum = (stand) => (priceTrustBadge({ mapping_status: 'unmapped', price_last_updated: stand }).match(/Preis vom ([0-9.]+)/) || [])[1] || '';|
++  it('Preis vom 01.04.2026 ohne Zuordnung: Datum steht in der Plakette', () => {|
++    const h = priceTrustBadge({ mapping_status: 'unmapped', price_last_updated: '2026-04-01T06:00:00' });|
++    assert.match(h, /ohne Zuordnung · Preis vom 01\.04\.2026/);|
++  });|
++  it('frischer Preis: kein Datum', () => {|
++    assert.equal(datum('2026-10-02'), '');|
++    const h = priceTrustBadge({ mapping_status: 'unverified', price_last_updated: '2026-10-03' });|
++    assert.doesNotMatch(h, /Preis vom/);|
++  });|
++  it('ohne Datum oder Unsinn: kein Datum', () => {|
++    assert.equal(datum(''), '');|
++    assert.equal(datum('gestern'), '');|
++  });|
++});|
+diff --git a/tests/unit/test-fe41-import-meldet.js b/tests/unit/test-fe41-import-meldet.js|
+new file mode 100644|
+index 00000000..06f3a536|
+--- /dev/null|
++++ b/tests/unit/test-fe41-import-meldet.js|
+@@ -0,0 +1,45 @@|
++/**|
++ * FE-41 (03.10.2026, Tiefenanalyse F-03): Der PTCGL-Import uebernahm die|
++ * erfundene Karte „Fakemon XYZ 999" still (zaehlte mit, unsichtbar im|
++ * Raster, ging in den Export) und meldete nicht erkannte Zeilen nur als|
++ * Zahl. ptcglZeilenLesen wird AUSGEFUEHRT (Kommentare entfernt).|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const Q = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'app-features.js'), 'utf8')|
++  .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++|
++function laden() {|
++  const a = Q.indexOf('function ptcglZeilenLesen(');|
++  const b = Q.indexOf('window.ptcglZeilenLesen = ptcglZeilenLesen;', a);|
++  assert.ok(a > -1 && b > a);|
++  // eslint-disable-next-line no-new-func|
++  return Function(Q.slice(a, b) + '\nreturn ptcglZeilenLesen;')();|
++}|
++const DB = { TWM_128: {}, SVI_196: {}, '30C_126': {} };|
++|
++describe('FE-41: Import nennt, was nicht uebernommen wurde', () => {|
++  const f = laden();|
++  const r = f('Pokémon: 5\n4 Dreepy TWM 128\n1 Fakemon XYZ 999\n\nTrainer: 8\n4 Ultra Ball SVI 196\n3 Ultra Ball\n4 Poké Pad 30C 126\nTotal Cards: 13', DB);|
++  it('unbekannte Karte kommt NICHT ins Deck, sondern in die Liste', () => {|
++    assert.deepEqual(r.nichtGefunden, ['1 Fakemon XYZ 999']);|
++    assert.ok(!Object.keys(r.deck).some((k) => /Fakemon/.test(k)));|
++  });|
++  it('nicht lesbare Zeile wird woertlich genannt', () => {|
++    assert.deepEqual(r.nichtErkannt, ['3 Ultra Ball']);|
++  });|
++  it('gueltige Zeilen inkl. 30C kommen an, Kopfzeilen zaehlen nicht', () => {|
++    assert.deepEqual(r.deck, { 'Dreepy (TWM 128)': 4, 'Ultra Ball (SVI 196)': 4, 'Poké Pad (30C 126)': 4 });|
++    assert.equal(r.zeilen, 3);|
++  });|
++  it('der Import nutzt die Funktion und zeigt einen Bericht', () => {|
++    const a = Q.indexOf('async function importFromPTCGL(');|
++    const teil = Q.slice(a, Q.indexOf('function ptcglZeilenLesen(', a));|
++    assert.match(teil, /ptcglZeilenLesen\(ptcglText, cardsBySetNumber\)/);|
++    assert.match(teil, /deck\.importBerichtTitel/);|
++    assert.doesNotMatch(teil, /adding anyway/);|
++  });|
++});|
+diff --git a/tests/unit/test-fe42-ptcgl-export.js b/tests/unit/test-fe42-ptcgl-export.js|
+new file mode 100644|
+index 00000000..ce776a57|
+--- /dev/null|
++++ b/tests/unit/test-fe42-ptcgl-export.js|
+@@ -0,0 +1,58 @@|
++/**|
++ * FE-42 (03.10.2026, Tiefenanalyse F-05/F-06): „Meine Decks › PTCGL" schrieb|
++ * Zeilen- statt Kartenzahlen, Basis-Energien unter Trainer, kein „Total|
++ * Cards", und suchte Karten ueber den Namen. meinDeckAlsPtcgl wird|
++ * AUSGEFUEHRT (Kommentare entfernt): Summen = Karten, Art nur ueber|
++ * (Set, Nummer), beide Knoepfe nutzen sie.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const Q = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'firebase-collection.js'), 'utf8')|
++  .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++|
++function laden() {|
++  const a = Q.indexOf('function meinDeckAlsPtcgl(');|
++  const b = Q.indexOf('if (typeof window !== \'undefined\') window.meinDeckAlsPtcgl', a);|
++  assert.ok(a > -1 && b > a);|
++  // Zur Laufzeit gilt die Fassung aus js/app-deck-builder.js (live gemessen).|
++  const DBQ = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'app-deck-builder.js'), 'utf8')|
++    .replace(/\/\*[\s\S]*?\*\//g, '');|
++  const g = DBQ.indexOf('function getCardTypeCategory(');|
++  const ge = DBQ.indexOf('\n        }\n', g);|
++  assert.ok(g > -1 && ge > g);|
++  // eslint-disable-next-line no-new-func|
++  return Function(DBQ.slice(g, ge + 10) + Q.slice(a, b) + '\nreturn meinDeckAlsPtcgl;')();|
++}|
++const DB = [|
++  { name: 'Dreepy', set: 'TWM', number: '128', type: 'PBasic' },|
++  { name: 'Ultra Ball', set: 'SVI', number: '196', type: 'Item' },|
++  { name: 'Fire Energy', set: 'SVE', number: '2', type: 'Energy' },|
++  { name: 'Dreepy', set: 'XXX', number: '1', type: 'Supporter' },|
++];|
++|
++describe('FE-42: ein PTCGL-Export mit richtigen Summen', () => {|
++  const f = laden();|
++  const deck = { cards: { 'Dreepy (TWM 128)': 4, 'Ultra Ball (SVI 196)': 4, 'Basic {R} Energy (SVE 2)': 3, 'Unbekannt': 1 } };|
++  const text = f(deck, DB);|
++  it('Kopfzahlen sind Karten, nicht Zeilen; Total Cards stimmt', () => {|
++    assert.match(text, /^Pokémon: 4\n4 Dreepy TWM 128/m);|
++    assert.match(text, /^Trainer: 5\n/m);|
++    assert.match(text, /^Energy: 3\n3 Basic \{R\} Energy SVE 2/m);|
++    assert.match(text, /Total Cards: 12$/);|
++  });|
++  it('die Kartenart kommt ueber Set und Nummer, nicht ueber den Namen', () => {|
++    // „Dreepy" heisst in der Datenbank auch eine Unterstuetzerkarte (XXX 1) —|
++    // trotzdem bleibt TWM 128 Pokémon; die Energie trotz anderem Namen Energie.|
++    assert.ok(!/Trainer:[\s\S]*Dreepy/.test(text.split('Energy:')[0].split('Trainer:')[1] || ''));|
++  });|
++  it('beide Kopier-Knoepfe nutzen dieselbe Funktion, keine Namenssuche mehr', () => {|
++    for (const fn of ['function copyMyDeck(', 'function copyDeckAndOpenLimitless(']) {|
++      const a = Q.indexOf(fn); const teil = Q.slice(a, Q.indexOf('\n}\n', a));|
++      assert.match(teil, /meinDeckAlsPtcgl\(deck, window\.allCardsDatabase\)/);|
++      assert.doesNotMatch(teil, /find\(c => c\.name === cardName\)/);|
++    }|
++  });|
++});|
+diff --git a/tests/unit/test-hub-gezaehlte-antritte.js b/tests/unit/test-hub-gezaehlte-antritte.js|
+index 32903225..2c724dba 100644|
+--- a/tests/unit/test-hub-gezaehlte-antritte.js|
++++ b/tests/unit/test-hub-gezaehlte-antritte.js|
+@@ -266,4 +266,6 @@ describe('Gezaehlte Antritte — der Satz, den man liest', () => {|
+             const mm = nackt.match(lang === 'de'|
+-                ? /([\d.,]+) ?% Top-8-Quote gegen ([\d.,]+) ?% im Schnitt — rund ([\d.,]+)-mal/|
+-                : /([\d.,]+) ?% top-8 rate against ([\d.,]+) ?% on average — about ([\d.,]+)×/);|
++                /* DA-35 (03.10.2026): der Satz nennt die hoechste Top-8-Quote|
++                   statt „das staerkste Deck"; die drei Zahlen bleiben. */|
++                ? /Top-8-Quote: ([\d.,]+) ?% gegen ([\d.,]+) ?% im Schnitt — rund ([\d.,]+)-mal/|
++                : /top-8 rate right now: ([\d.,]+) ?% against ([\d.,]+) ?% on average — about ([\d.,]+)×/);|
+             assert.ok(mm, `${lang}: Satz nicht lesbar: ${nackt}`);|
+diff --git a/tests/unit/test-kacheln-zeitraum-und-typfilter.js b/tests/unit/test-kacheln-zeitraum-und-typfilter.js|
+index 58ec14ba..bc80f960 100644|
+--- a/tests/unit/test-kacheln-zeitraum-und-typfilter.js|
++++ b/tests/unit/test-kacheln-zeitraum-und-typfilter.js|
+@@ -239,3 +239,4 @@ describe('A-F4.7 — die Kacheln sagen, welchen Zeitraum sie zeigen', () => {|
+              Anteil online   = share_numeric          -> 7,6 %|
+-             Win % online    = win_rate_numeric       -> 50,0 %|
++             Win-Rate online = S/(S+N) = 100/190      -> 52,6 %  (DA-34, 03.10.2026;|
++                               vorher win_rate_numeric = S/(S+N+U) -> 50,0 %)|
+              Nenner online   = wins+losses+ties = 200|
+@@ -252,3 +253,7 @@ describe('A-F4.7 — die Kacheln sagen, welchen Zeitraum sie zeigen', () => {|
+         assert.match(h, /7,6 %/, 'Anteil online');|
+-        assert.match(h, /50,0 %/, 'Win % online');|
++        assert.match(h, /52,6 %/, 'Win-Rate online, S/(S+N)');|
++        // DA-34: Major ebenso S/(S+N) = (553+100)/(553+601+100+100) = 48,2 %,|
++        // nicht mehr S/(S+N+U) = 653/1526 = 42,8 %.|
++        assert.match(h, /48,2 %/, 'Win-Rate Major, S/(S+N)');|
++        assert.doesNotMatch(h, /42,8 %/, 'Major wieder mit Unentschieden im Nenner');|
+         assert.match(h, /200/, 'Nenner der Online-Win-%');|
+diff --git a/tests/unit/test-online-major-kacheln.js b/tests/unit/test-online-major-kacheln.js|
+index 9eb13bca..6292e44b 100644|
+--- a/tests/unit/test-online-major-kacheln.js|
++++ b/tests/unit/test-online-major-kacheln.js|
+@@ -484,3 +484,5 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {|
+             + 'bei praktisch gleicher Unsicherheit)');|
+-        assert.ok(/wrMajor = \(m && m\.winRate != null && m\.partien > 0\)/.test(ohneKomm),|
++        // DA-34 (03.10.2026): die Kachel zeigt S/(S+N) (mWr aus winRateOhneU);|
++        // die Bedingung bleibt „es gibt ueberhaupt Partien".|
++        assert.ok(/wrMajor = \(mWr != null && m\.partien > 0\)/.test(ohneKomm),|
+             'die Major-Win-Rate haengt wieder an einer anderen Bedingung als '|
+diff --git a/tests/unit/test-sprache-win-rate.js b/tests/unit/test-sprache-win-rate.js|
+index 79af123f..4a7b9fbf 100644|
+--- a/tests/unit/test-sprache-win-rate.js|
++++ b/tests/unit/test-sprache-win-rate.js|
+@@ -130,3 +130,6 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {|
+         assert.match(read('js/app-archetype-card.js'),|
+-            /mitQuote\(L\('arc\.wrLabel', '\{quote\}'\), 'mitUnentschieden'\)/,|
++            /* DA-34 (03.10.2026, Entscheidung Hausi): die Kachel rechnet|
++               S/(S+N) auf Online- und Major-Seite — der Name kommt weiter|
++               aus der Konvention, die sie wirklich rechnet. */|
++            /mitQuote\(L\('arc\.wrLabel', '\{quote\}'\), 'ohneUnentschieden'\)/,|
+             'die Quoten-Kachel holt ihren Namen nicht mehr aus '|
+diff --git a/tests/unit/test-tag2-grundgesamtheit.js b/tests/unit/test-tag2-grundgesamtheit.js|
+index 2839406e..c0ceeb79 100644|
+--- a/tests/unit/test-tag2-grundgesamtheit.js|
++++ b/tests/unit/test-tag2-grundgesamtheit.js|
+@@ -552,3 +552,4 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {|
+         const s = MCB.datenbasisSatz(VOLL, 'de');|
+-        assert.equal(s, '8 Day-2-Listen von 32 Piloten (Feld 797)');|
++        // UI-85 (03.10.2026): nie „Feld" auf der Seite (Hausregel) — die Feldgroesse heisst jetzt „797 Spieler".|
++        assert.equal(s, '8 Day-2-Listen von 32 Piloten (797 Spieler)');|
+     });|
+@@ -557,3 +558,3 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {|
+         assert.equal(MCB.datenbasisSatz(VOLL, 'en'),|
+-            '8 Day 2 lists from 32 pilots (field 797)');|
++            '8 Day 2 lists from 32 pilots (797 players)');|
+     });|
+@@ -562,3 +563,3 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {|
+         const s = MCB.datenbasisSatz(OHNE_P, 'de');|
+-        assert.equal(s, '8 Day-2-Listen (Feld 797)');|
++        assert.equal(s, '8 Day-2-Listen (797 Spieler)');|
+         assert.ok(!/Piloten/.test(s), 'erfundene Pilotenzahl im Satz');|
+@@ -580,3 +581,3 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {|
+         assert.equal(MCB.datenbasisSatz({ n_lists: 675, feldgroesse: 3743 }, 'de'),|
+-            '675 Day-2-Listen (Feld 3.743)');|
++            '675 Day-2-Listen (3.743 Spieler)');|
+     });|
+@@ -650,3 +651,3 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {|
+         assert.equal(gezeigt,|
+-            '✓ Mega Excadrill: 60/60 Karten · Core @ 90 % · 8 Day-2-Listen von 32 Piloten (Feld 797)');|
++            '✓ Mega Excadrill: 60/60 Karten · Core @ 90 % · 8 Day-2-Listen von 32 Piloten (797 Spieler)');|
+         assert.ok(!/\b8 Listen ausgewertet\b/.test(gezeigt),|
+@@ -677,3 +678,3 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {|
+         assert.ok(r, 'die Qualitaetszeile entsteht gar nicht');|
+-        assert.ok(r.message.startsWith('Datenbasis: 8 Day-2-Listen von 32 Piloten (Feld 797)'),|
++        assert.ok(r.message.startsWith('Datenbasis: 8 Day-2-Listen von 32 Piloten (797 Spieler)'),|
+             'die Zeile nennt den Nenner nicht: ' + r.message);|
+@@ -691,3 +692,3 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {|
+                       { dataQuality: DQ, coreThreshold: 0.9 });|
+-        assert.ok(/8 Day 2 lists from 32 pilots \(field 797\) analyzed\./.test(txt), txt);|
++        assert.ok(/8 Day 2 lists from 32 pilots \(797 players\) analyzed\./.test(txt), txt);|
+         assert.ok(!/\b8 lists analyzed\b/.test(txt), 'die alte Formulierung steht wieder da');|
+diff --git a/tests/unit/test-ui73-builder-speichert.js b/tests/unit/test-ui73-builder-speichert.js|
+new file mode 100644|
+index 00000000..97d39329|
+--- /dev/null|
++++ b/tests/unit/test-ui73-builder-speichert.js|
+@@ -0,0 +1,68 @@|
++/**|
++ * UI-73 (03.10.2026, Tiefenanalyse N-02; Entscheidung Hausi: Speichern-Knopf|
++ * rein): Der Profil-„Deck Builder" speicherte nur im Browser — kein Weg nach|
++ * „Meine Decks". Jetzt gibt es „In Meine Decks speichern". Ausgefuehrt im|
++ * Modul: der Knopf-Weg legt ein NEUES Deck an (saveDeck ohne id), fragt den|
++ * Namen, tut nichts bei leerem Deck, Abbruch oder ohne Anmeldung.|
++ * Gelesen: der Knopf steht im Deck-Bereich und ruft speichernInsKonto.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const vm = require('node:vm');|
++const SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'app-profile-deck-builder.js'), 'utf-8');|
++|
++function laden() {|
++  const prev = { window: global.window, document: global.document, localStorage: global.localStorage, fetch: global.fetch };|
++  global.window = {};|
++  global.document = { addEventListener: () => {}, getElementById: () => null, querySelectorAll: () => [] };|
++  global.localStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };|
++  global.fetch = async () => ({ ok: false });|
++  try { vm.runInThisContext(SRC); } finally {|
++    const P = global.window.ProfileDeckBuilder;|
++    Object.assign(global, { fetch: prev.fetch });|
++    global.__pdbFenster = global.window; global.window = prev.window;|
++    return P;|
++  }|
++}|
++const dreepy = { name_en: 'Dreepy', set: 'TWM', number: '128', type: 'Basic', energy_type: 'Dragon' };|
++|
++describe('UI-73: Profil-Builder speichert in Meine Decks', () => {|
++  it('angemeldet: fragt den Namen und legt ein neues Deck an', async () => {|
++    const P = laden(); const w = global.__pdbFenster;|
++    const gespeichert = [];|
++    w.saveDeck = (d) => gespeichert.push(d);|
++    w.auth = { currentUser: { uid: 'x' } };|
++    w.showInputModal = async (o) => { assert.match(o.message, /Name|name/); return 'ZZ Probe'; };|
++    P.addCopies(dreepy, 4);|
++    const prevW = global.window; global.window = w;|
++    try {|
++      const r = await P.speichernInsKonto();|
++      assert.equal(r.ok, true);|
++    } finally { global.window = prevW; }|
++    assert.equal(gespeichert.length, 1);|
++    assert.equal(gespeichert[0].id, undefined, 'ein bestehendes Deck darf nie ueberschrieben werden');|
++    assert.equal(gespeichert[0].name, 'ZZ Probe');|
++    assert.deepEqual(gespeichert[0].cards, { 'Dreepy (TWM 128)': 4 });|
++  });|
++  it('ohne Anmeldung, leer oder abgebrochen: kein Speichern', async () => {|
++    const P = laden(); const w = global.__pdbFenster;|
++    let n = 0; w.saveDeck = () => { n++; };|
++    const prevW = global.window; global.window = w;|
++    try {|
++      assert.equal((await P.speichernInsKonto()).grund, 'leer');|
++      P.addCopies(dreepy, 2);|
++      assert.equal((await P.speichernInsKonto()).grund, 'kein-konto');|
++      w.auth = { currentUser: { uid: 'x' } };|
++      w.showInputModal = async () => null;|
++      assert.equal((await P.speichernInsKonto()).grund, 'abgebrochen');|
++    } finally { global.window = prevW; }|
++    assert.equal(n, 0);|
++  });|
++  it('der Knopf steht im Deck-Bereich und ist verdrahtet', () => {|
++    assert.match(SRC, /id="pdb-save-account"/);|
++    assert.match(SRC, /getElementById\('pdb-save-account'\)\.addEventListener\('click',[\s\S]{0,80}speichernInsKonto\(\)/);|
++  });|
++});|
+diff --git a/tests/unit/test-ui74-deck-uebernehmen.js b/tests/unit/test-ui74-deck-uebernehmen.js|
+new file mode 100644|
+index 00000000..1c927e1a|
+--- /dev/null|
++++ b/tests/unit/test-ui74-deck-uebernehmen.js|
+@@ -0,0 +1,55 @@|
++/**|
++ * UI-74 (03.10.2026, Tiefenanalyse N-03/F-04): Ein Deck zu speichern kostete|
++ * 8–9 Klicks; „Speichern" erschien erst nach „Max Consistency" ~6.000 px|
++ * tiefer. Jetzt: „Als mein Deck speichern" direkt unter der Archetyp-Auswahl|
++ * und „+ Neues Deck" in Meine Decks (fuehrt zum Profil-Builder, UI-73).|
++ * deckUebernehmen wird AUSGEFUEHRT (Kommentare entfernt), die Knoepfe gelesen.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const W = path.join(__dirname, '..', '..');|
++const DB = fs.readFileSync(path.join(W, 'js', 'app-deck-builder.js'), 'utf8')|
++  .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++const HTML = fs.readFileSync(path.join(W, 'index.html'), 'utf8');|
++|
++function laden(w) {|
++  const a = DB.indexOf('async function deckUebernehmen(');|
++  const b = DB.indexOf('window.deckUebernehmen = deckUebernehmen;', a);|
++  assert.ok(a > -1 && b > a);|
++  // eslint-disable-next-line no-new-func|
++  return Function('window', 'showNotification', 't', DB.slice(a, b) + '\nreturn deckUebernehmen;')(w, () => {}, (k) => k);|
++}|
++|
++describe('UI-74: Deck direkt aus der Analyse speichern', () => {|
++  it('leeres Deck: erst generieren, dann der Speichern-Dialog', async () => {|
++    const ruf = [];|
++    const w = { currentMetaArchetype: 'Dragapult', currentMetaDeck: {},|
++      autoCompleteConsistency: async (s, m) => { ruf.push(['gen', s, m]); w.currentMetaDeck = { 'Dreepy (TWM 128)': 4 }; },|
++      saveCurrentDeckToProfile: async (s) => { ruf.push(['save', s]); } };|
++    const r = await laden(w)('currentMeta');|
++    assert.deepEqual(ruf, [['gen', 'currentMeta', 'min'], ['save', 'currentMeta']]);|
++    assert.equal(r.generiert, true);|
++  });|
++  it('gebautes Deck wird nicht neu generiert', async () => {|
++    const ruf = [];|
++    const w = { currentMetaArchetype: 'Dragapult', currentMetaDeck: { 'X (A 1)': 2 },|
++      autoCompleteConsistency: async () => ruf.push('gen'), saveCurrentDeckToProfile: async () => ruf.push('save') };|
++    await laden(w)('currentMeta');|
++    assert.deepEqual(ruf, ['save']);|
++  });|
++  it('ohne Archetyp passiert nichts', async () => {|
++    const ruf = [];|
++    const w = { currentMetaDeck: {}, autoCompleteConsistency: async () => ruf.push('gen'), saveCurrentDeckToProfile: async () => ruf.push('save') };|
++    assert.equal((await laden(w)('currentMeta')).grund, 'kein-archetyp');|
++    assert.deepEqual(ruf, []);|
++  });|
++  it('Knoepfe stehen unter der Archetyp-Auswahl und in Meine Decks', () => {|
++    const sel = HTML.indexOf('id="currentMetaDeckSelect"');|
++    const knopf = HTML.indexOf("onclick=\"deckUebernehmen('currentMeta')\"");|
++    assert.ok(knopf > sel && knopf - sel < 600, 'Knopf steht nicht direkt unter der Auswahl');|
++    assert.match(HTML, /onclick="switchProfileTab\('deckbuilder'\)"[^>]*data-i18n="profile\.newDeck"/);|
++  });|
++});|
+diff --git a/tests/unit/test-w1-konvention-passt.js b/tests/unit/test-w1-konvention-passt.js|
+index b0559d6c..6a235683 100644|
+--- a/tests/unit/test-w1-konvention-passt.js|
++++ b/tests/unit/test-w1-konvention-passt.js|
+@@ -149,2 +149,18 @@ function probenOnlineDecks() {|
+ |
++/* DA-34 (03.10.2026): die Quoten-Kachel liest win_rate_numeric nicht mehr,|
++   sie rechnet selbst aus wins/losses. Gemessen wird deshalb die Formel, die|
++   im Quelltext der Kachel steht (`const _ohneU = ...`), ausgefuehrt auf den|
++   Zeilen der Datei — nicht eine Annahme darueber. */|
++function probenOnlineKachel() {|
++    const q = lies('js', 'app-archetype-card.js');|
++    const m = q.match(/const _ohneU = (\(x\) => [^;]+);/);|
++    assert.ok(m, 'die Formel der Kachel (_ohneU) steht nicht mehr in js/app-archetype-card.js');|
++    // eslint-disable-next-line no-new-func|
++    const formel = Function('return ' + m[1])();|
++    return csv('data/limitless_online_decks.csv', ';').map(r => {|
++        const s = zahl(r.wins), n = zahl(r.losses), u = zahl(r.ties);|
++        return { wert: formel({ siege: s, niederlagen: n }), s, n, u };|
++    }).filter(p => [p.wert, p.s, p.n, p.u].every(Number.isFinite) && (p.s + p.n) > 0);|
++}|
++|
+ function probenMatchups() {|
+@@ -233,4 +249,4 @@ const STELLEN = [|
+         schluessel: 'arc.wrLabel',|
+-        proben: probenOnlineDecks,|
+-        quelle: 'data/limitless_online_decks.csv, Spalte win_rate_numeric',|
++        proben: probenOnlineKachel,|
++        quelle: 'data/limitless_online_decks.csv, wins/losses durch die Formel der Kachel (DA-34)',|
+     },|
+diff --git a/version.json b/version.json|
+index 9a2fb612..1b6098be 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610032232"}|
+\ No newline at end of file|
++{"version":"202610032310"}|
+\ No newline at end of file|
+-- |
+2.34.1|
+|
+|

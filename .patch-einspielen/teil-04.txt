@@ -50,7 +50,7 @@ index e2b6c8ca..8188a5f3 100644|
 -                        ['“% of the field is new”',|
 +                        ['“% of the meta is new”',|
                           'The share of the field with no in-person data yet — mostly freshly ' +|
- diff --git a/js/archetyp-box.js b/js/archetyp-box.js|
+diff --git a/js/archetyp-box.js b/js/archetyp-box.js|
 index c06bb623..65992798 100644|
 --- a/js/archetyp-box.js|
 +++ b/js/archetyp-box.js|

@@ -1,0 +1,82 @@
+From c923b557098114809d122b4d49055b7cfbfb616e Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sat, 3 Oct 2026 16:48:18 +0200|
+Subject: [PATCH] Start-Neuladen: Pruefung bei jedem Start, Schleifenschutz nur|
+ 2 Minuten, Adresszusatz bleibt, Stand im Fussbereich|
+|
+Anlass: Hausi sah auf dem Handy die neue Archetyp-Box nicht (03.10.2026).|
+|
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01GJRPmzWKvVLov74GZFLXL7|
+---|
+ index.html                         | 325 ++++++++++++++++-------------|
+ js/i18n.js                         |   2 +|
+ service-worker.js                  |   4 +-|
+ tests/unit/test-start-neu-laden.js |  97 +++++++++|
+ version.json                       |   2 +-|
+ 5 files changed, 279 insertions(+), 151 deletions(-)|
+ create mode 100644 tests/unit/test-start-neu-laden.js|
+|
+diff --git a/index.html b/index.html|
+index cff42f16..45fb2a13 100644|
+--- a/index.html|
++++ b/index.html|
+@@ -105,12 +105,21 @@|
+     // If the server has a newer version, we purge caches + SW and hard-reload.|
+-    window.APP_VERSION = '202610031039';|
++    // START-NEULADEN (03.10.2026): gilt bei JEDEM Start, nicht nur im offenen|
++    // Tab. Der Schleifenschutz zaehlt nur noch einen Neustart von vor weniger|
++    // als zwei Minuten; ein Rest aus einem abgebrochenen Start sperrt die|
++    // Pruefung nicht mehr. Adresszusatz (#...) und Parameter bleiben erhalten.|
++    // Das Ergebnis jeder Pruefung steht in localStorage (__tcg_version_check)|
++    // und im Fussbereich der Seite.|
++    window.APP_VERSION = '202610031439';|
+     (function() {|
++      var KEY = '__tcg_version_refresh', LOG = '__tcg_version_check';|
++      function merke(status, server) {|
++        try { localStorage.setItem(LOG, JSON.stringify({ t: Date.now(), local: window.APP_VERSION, server: server || '', status: status })); } catch (e) { /* kein Speicher */ }|
++      }|
+       try {|
+-        // Prevent infinite reload: if we just refreshed, skip for this page load|
+-        var refreshKey = '__tcg_version_refresh';|
+-        if (sessionStorage.getItem(refreshKey)) {|
+-          sessionStorage.removeItem(refreshKey);|
+-          console.info('[VersionCheck] Post-refresh load — skipping check');|
+-          return;|
+-        }|
++        var gerade = false;|
++        try {|
++          var letzter = parseInt(sessionStorage.getItem(KEY) || '0', 10) || 0;|
++          sessionStorage.removeItem(KEY);|
++          gerade = letzter > 1e12 && (Date.now() - letzter) < 120000;|
++        } catch (e) { /* kein sessionStorage */ }|
+ |
+@@ -119,11 +128,15 @@|
+           .then(function(data) {|
+-            if (!data || !data.version) return;|
+-            if (data.version === window.APP_VERSION) return;|
++            if (!data || !data.version) { merke('keine-antwort'); return; }|
++            if (data.version === window.APP_VERSION) { merke('aktuell', data.version); return; }|
++            if (gerade) {|
++              console.warn('[VersionCheck] nach Neustart weiter abweichend: Local=' + window.APP_VERSION + ' Server=' + data.version);|
++              merke('abweichend', data.version);|
++              return;|
++            }|
+             // Server has a newer version → purge everything and reload|
+             console.info('[VersionCheck] Local=' + window.APP_VERSION + ' Server=' + data.version + ' → purging & reloading');|
+-|
+-            sessionStorage.setItem(refreshKey, '1');|
++            merke('neu-laden', data.version);|
++            try { sessionStorage.setItem(KEY, String(Date.now())); } catch (e) { /* egal */ }|
+ |
+             var cleanupPromises = [];|
+-|
+             if ('caches' in window) {|
+@@ -142,11 +155,10 @@|
+             }|
+-|
+-            Promise.all(cleanupPromises).then(function() {|
+-              // Hard reload bypassing cache|
+-              window.location.href = window.location.pathname + '?_v=' + data.version;|
+-            }).catch(function() {|
+-              window.location.href = window.location.pathname + '?_v=' + data.version;|

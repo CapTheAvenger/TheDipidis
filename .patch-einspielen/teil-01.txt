@@ -1,0 +1,71 @@
+From 0ce195dbf426a67bd1ec3c0a9903c408319652fd Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sat, 3 Oct 2026 12:01:22 +0200|
+Subject: [PATCH] Eigene Archetyp-Box: Box mit Namen anlegen, Decklisten|
+ einfuegen, nur Fehlendes ergaenzen (Rutsch O)|
+|
+Zuordnung nur ueber Set + Nummer, Namen nur als Gegenprobe; unlesbare und|
+unbekannte Zeilen werden benannt. Aktualisieren fasst eigene Boxen nicht an.|
+|
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01GJRPmzWKvVLov74GZFLXL7|
+---|
+ css/archetyp-box.css            |  10 ++|
+ index.html                      | Bin 365299 -> 365299 bytes|
+ js/archetyp-box.js              | 267 +++++++++++++++++++++++++++++---|
+ js/i18n.js                      |  42 +++++|
+ service-worker.js               | Bin 15813 -> 15813 bytes|
+ tests/unit/test-archetyp-box.js |   2 +-|
+ tests/unit/test-eigene-box.js   | 131 ++++++++++++++++|
+ version.json                    |   2 +-|
+ 8 files changed, 429 insertions(+), 25 deletions(-)|
+ create mode 100644 tests/unit/test-eigene-box.js|
+|
+diff --git a/css/archetyp-box.css b/css/archetyp-box.css|
+index 27ef042e..2bc8456a 100644|
+--- a/css/archetyp-box.css|
++++ b/css/archetyp-box.css|
+@@ -336 +336,11 @@|
+ .abx-karte .abx-wieder-knoepfe .abx-seg { font-size: var(--fs-xs); }|
++|
++/* ── Eigene Box und Deckliste (Rutsch O) ── */|
++.abx-eigen, .abx-liste { margin: var(--s-3) 0; max-width: 560px; }|
++.abx-eigen summary, .abx-liste summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }|
++.abx-eigen label, .abx-liste label { display: block; font-weight: 700; font-size: var(--fs-sm); color: var(--ink-2); margin: var(--s-2) 0 var(--s-1); }|
++.abx-eigen input, .abx-liste textarea { width: 100%; box-sizing: border-box; }|
++.abx-eigen input { min-height: 44px; }|
++.abx-eigen .btn, .abx-liste .btn { min-height: 44px; margin-top: var(--s-2); }|
++.abx-ergebnis-zeile { margin: var(--s-1) 0; font-size: var(--fs-sm); overflow-wrap: anywhere; }|
++.abx-ergebnis-zeile.abx-warn { font-weight: 700; }|
+diff --git a/index.html b/index.html|
+index f8801f176333e9099c029c7520a50a52e4593c14..e0467ed34c3e7d5b3914314ac04838d63b7fc742 100644|
+GIT binary patch|
+delta 1773|
+zcmZWpTS!zv7{>H>(-q1xySSNdrK_u}>vh$PqCiBlvedO$+;w%=b#1-0Sx^vBk%Sd;|
+zsCg2J@}+vvgbqYR_z;9Bl|(&+5Mop$81~kM=KM2f=2Q=d^IyLIGT;Bttc<0ujHQm(|
+zSz;?nizn+XGiFUt(rpd=?^5pDQc=##w<%w_oNjX|)j3-Q=4Q?&fq7@J7v^q5yQ9*g|
+zL~>7~+*j^Z>ht22dOORj>ofLrgMW*Vr}NT;T$^td@@)Q2AvZZT3;DH!^`hlHP+-hs|
+zR^Ak32%Ni6%Ja_E%0i*UdY!W7ymN<$=_r!*zZA)ufnpiEP%Q1OB}lBI^)g?wQRH!#|
+zZV>XzQpS;nX(*Givt^QxgXKEr437&cM_kE5o;Ap|6}o+oGE#9JF^<Y}_}AvPSh=0s|
+zER)$)X|^~za4Xr{0~t!dkFJYD{wqWN82YWEU#vRhkF!42V#q`$RH2aB3uz?L3U@V4|
+zov?yhgm&Li$RfjyuwJ638UdRo=o@!~nM9g6KsP0j$tJ*c5U2$5Lq{by!+w!ZJ=qK?|
+zF|rs<h%+JB(y|*a2q?MH0#AgdhK@mi1tN6mIQ$e&V)8%@YKJ{gjl!@8b_>6{<bgRu|
+z)z7Vf+r!!|@*1_XUfz)}3OVG37jTydO`J=TeSq7kX?D`=1DrSWjrcecS^3}t+;3K)|
+zpv{Op)dsjr<aRgB@>tif!fzev?0_<I$Pa7u)7Z&1KaYFW33+7B54eSlx%hVYgvf90|
+zoB*1j9xa&nK?jee)5s=~PB4-09eifkhARNL?CdbK4HFp*0PZ3)Jr4lB80<tzLCzUw|
+zZwVTGqkn0OLBQL^;%uF~jNS+LMQK+Lbss(7K5QMS^!7j^Sv~=Aq%H(&rTtQf6M(3x|
+z5a5L)IJTrN?!)%RwG8eq&ZTZLlhH2YBGWo%@=-TQlrzkElBV-vNWn&M6(_=QPcl8&|
+zEoqe-NPcz0GugX-CYD7e-WB<;*44;AM=_JP5x$0!A8U`144NLF0ya5%e0+a|W+tXy|
+zwhpRx0Cq8kJ#?wUeUQnz)CTgX53*#>&=2^OGKL%bVIBIk4C>{6xW(_6c57;)eB0<S|
+j7za3&>8OD=^;Z<i4KdyU8Iwcq4DhX?kCR1xPkoj@BDDDn|
+|
+delta 1773|
+zcmZWpTS!zv7{>J1bcM3aE^g*-rK{_0*W0QYMS+O4m8Gu5;;!qiuG)HOv!EcNA_*(x|
+zQ1c`b<xBOT2_1-t@F56MDv5dsA;hRiFzl@h&G~1}%&8s@=f8aaWxoHPSs6=P8A}_l|
+zGsl)X$|v3C8IvX`8Mb=<cPaO6X((IrZOT_JXV_dyb<S3SxtX&`VBQ(*MY-G1UQlUP|
+zBDtqg?ko2x?!0)#ZD)CPea4<)@NW_FbY8lUYxAu_p3UDW<i>){LVjJqdeQP8C^Y6V|
+zDQ^lh1<q3><$1?yWuZu7eGXZ3-myc(1f8<}7pJTlDweSe#nRqVg2XCXFY_fEMIKM-|
+z1|h#JWgKak`Z5_iTPFE9SgvEv@VIv6h$}_Nvj(}gLbvZxMk=l&rl9g1{<XO+R&M7u|
+z^JI2ax-E_l+)DQLK&BE3pzGpL;L1=ShJLH)7po2h;;c`#7&2jjDikcekWP}Ua97jR|
+z2`i{hwEK@j78!1U^%6DJ0N6A^-?#@%B+|$Mx+#%NHUh4LKqZnNIx3|J_KSS#$tFmR|
+zk;Q02oC(2}mOXGmK*^0}cp@}4d<;S?5TQ%Q;iqtt1TWN}cGwHmC=7dHxA3b=UYIjf|

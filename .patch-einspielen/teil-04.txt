@@ -1,0 +1,62 @@
+          ?v=NNNN in dieser Datei, also zieht der Stempel jetzt mit. -->|
+-    <script src="js/pokemon-loading-screen.js?v=202610031523"></script>|
+-    <script src="js/csv-cache-interceptor.js?v=202610031523"></script>|
++    <script src="js/pokemon-loading-screen.js?v=202610031607"></script>|
++    <script src="js/csv-cache-interceptor.js?v=202610031607"></script>|
+     <a href="#main-content" class="skip-to-content">Skip to content</a>|
+@@ -3964,8 +3964,8 @@|
+     <!-- Error tracking (must load before all other JS) -->|
+-    <script src="js/error-tracking.js?v=202610031523"></script>|
++    <script src="js/error-tracking.js?v=202610031607"></script>|
+ |
+-    <script src="js/inline-init.js?v=202610031523" defer></script>|
++    <script src="js/inline-init.js?v=202610031607" defer></script>|
+     <!-- Haelt die Seite hinter einem Vollbild an. Muss vor allen Modulen|
+          stehen, die ein Overlay oeffnen. -->|
+-    <script src="js/hintergrund-sperre.js?v=202610031523" defer></script>|
++    <script src="js/hintergrund-sperre.js?v=202610031607" defer></script>|
+ |
+@@ -4148,10 +4148,10 @@|
+     <!-- Utilities first (provides escapeHtml globally) -->|
+-    <script src="js/app-utils.js?v=202610031523" defer></script>|
+-    <script src="js/i18n.js?v=202610031523" defer></script>|
++    <script src="js/app-utils.js?v=202610031607" defer></script>|
++    <script src="js/i18n.js?v=202610031607" defer></script>|
+     <!-- Firebase: credentials ? config ? globals ? auth ? collection -->|
+-    <script src="js/firebase-credentials.js?v=202610031523" defer></script>|
+-    <script src="js/firebase-config.js?v=202610031523" defer></script>|
+-    <script src="js/firebase-globals.js?v=202610031523" defer></script>|
+-    <script src="js/firebase-auth.js?v=202610031523" defer></script>|
+-    <script src="js/auth-ui-helpers.js?v=202610031523" defer></script>|
++    <script src="js/firebase-credentials.js?v=202610031607" defer></script>|
++    <script src="js/firebase-config.js?v=202610031607" defer></script>|
++    <script src="js/firebase-globals.js?v=202610031607" defer></script>|
++    <script src="js/firebase-auth.js?v=202610031607" defer></script>|
++    <script src="js/auth-ui-helpers.js?v=202610031607" defer></script>|
+     <!-- Zwei Decklisten nebeneinander. Muss VOR firebase-collection.js|
+@@ -4159,9 +4159,9 @@|
+          auf, sobald die Ansicht "Nebeneinander" gewaehlt wird. -->|
+-    <script src="js/deck-vergleich-nebeneinander.js?v=202610031523" defer></script>|
+-    <script src="js/firebase-collection.js?v=202610031523" defer></script>|
++    <script src="js/deck-vergleich-nebeneinander.js?v=202610031607" defer></script>|
++    <script src="js/firebase-collection.js?v=202610031607" defer></script>|
+     <!-- Wishlist import for the Telegram bot's card lists (paste, not upload). -->|
+-    <script src="js/wishlist-bot-import.js?v=202610031523" defer></script>|
++    <script src="js/wishlist-bot-import.js?v=202610031607" defer></script>|
+     <!-- TCG Showdown handoff — replaces the in-app Playtester.|
+          Standalone helper, no deps; only uses globals from other scripts. -->|
+-    <script src="js/tcg-showdown-link.js?v=202610031523" defer></script>|
++    <script src="js/tcg-showdown-link.js?v=202610031607" defer></script>|
+     <!-- Chart.js, PapaParse and localForage (IndexedDB wrapper) — self-hosted -->|
+@@ -4171,3 +4171,3 @@|
+     <!-- Card data cache layer (IndexedDB) -->|
+-    <script src="js/card-data-cache.js?v=202610031523" defer></script>|
++    <script src="js/card-data-cache.js?v=202610031607" defer></script>|
+     <!-- Offline prefetcher — warms the SW cache with every data file|
+@@ -4175,7 +4175,7 @@|
+          has the full dataset locally without per-tab warm-up. -->|
+-    <script src="js/offline-prefetch.js?v=202610031523" defer></script>|
++    <script src="js/offline-prefetch.js?v=202610031607" defer></script>|
+     <!-- App modules -->|
+-    <script src="js/deck-analysis-shared.js?v=202610031523" defer></script>|
+-    <script src="js/app-core.js?v=202610031523" defer></script>|

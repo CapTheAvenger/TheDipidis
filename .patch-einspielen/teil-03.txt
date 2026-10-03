@@ -1,0 +1,319 @@
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++|
++const ROOT = path.join(__dirname, '..', '..');|
++const CSS_DIR = path.join(ROOT, 'css');|
++const ohneKommentare = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '');|
++const DATEIEN = fs.readdirSync(CSS_DIR).filter((f) => f.endsWith('.css'))|
++    .map((f) => ({ f, css: ohneKommentare(fs.readFileSync(path.join(CSS_DIR, f), 'utf8')) }));|
++|
++const TOKENS = {};|
++for (const { css } of DATEIEN) {|
++    for (const m of css.matchAll(/(--z-[a-z-]+)\s*:\s*(\d+)\s*;/g)) TOKENS[m[1]] = Number(m[2]);|
++}|
++|
++function wert(roh) {|
++    let s = String(roh).replace('!important', '').trim();|
++    s = s.replace(/var\((--z-[a-z-]+)\)/g, (_, t) => {|
++        assert.ok(t in TOKENS, `Token ${t} ist nirgends definiert`);|
++        return String(TOKENS[t]);|
++    });|
++    const calc = s.match(/^calc\((.+)\)$/);|
++    if (calc) s = calc[1];|
++    assert.match(s, /^[\d\s+\-*]+$/, `z-index nicht auswertbar: ${roh}`);|
++    // eslint-disable-next-line no-new-func|
++    return Function(`return (${s});`)();|
++}|
++|
++/** Alle Regeln (Selektor, Rumpf) — Medienabfragen werden flach mitgelesen. */|
++function regeln(css) {|
++    const out = [];|
++    const re = /([^{}]+)\{([^{}]*)\}/g;|
++    let m;|
++    while ((m = re.exec(css))) out.push({ sel: m[1].trim(), body: m[2] });|
++    return out;|
++}|
++|
++const ALLE = DATEIEN.flatMap(({ f, css }) => regeln(css).map((r) => ({ ...r, f })));|
++|
++function menueZeileZ() {|
++    // Nur Regeln, die die Menuezeile im Kopf treffen. Die spezifischste|
++    // (letzte bei Gleichstand) gewinnt — wie im Browser.|
++    const spez = (sel) => (sel.match(/[.#][\w-]+/g) || []).length;|
++    const treffer = ALLE.filter((r) => /z-index/.test(r.body)).flatMap((r) =>|
++        r.sel.split(',').map((s) => s.trim())|
++            .filter((s) => s === '.cards-header > *' || /^\.cards-header\s*>\s*\.header-flex-row$/.test(s)|
++                || s === '.header-flex-row' || s === '.cards-header .header-flex-row')|
++            .map((s) => ({ s, spez: spez(s), z: r.body.match(/z-index\s*:\s*([^;]+)/)[1] })));|
++    assert.ok(treffer.length > 0, 'keine z-index-Regel fuer die Menuezeile gefunden');|
++    treffer.sort((a, b) => a.spez - b.spez);|
++    return wert(treffer[treffer.length - 1].z);|
++}|
++|
++describe('UI-72: das Hauptmenue liegt ueber dem Seiteninhalt', () => {|
++    const z = menueZeileZ();|
++|
++    it('hoeher als jedes klebende Element der Seite (Playtester-Overlay ausgenommen)', () => {|
++        const kleben = ALLE.filter((r) => /position\s*:\s*sticky/.test(r.body) && /z-index/.test(r.body)|
++            && !/^\.pt-/.test(r.sel));|
++        assert.ok(kleben.length >= 10, `zu wenige klebende Regeln gefunden (${kleben.length}) — Leser kaputt?`);|
++        for (const r of kleben) {|
++            const zr = wert(r.body.match(/z-index\s*:\s*([^;]+)/)[1]);|
++            assert.ok(z > zr, `${r.f}: „${r.sel}" (z ${zr}) liegt ueber der Menuezeile (z ${z})`);|
++        }|
++    });|
++|
++    it('hoeher als die Handy-Reiterleiste', () => {|
++        const leiste = ALLE.find((r) => r.sel === '.ds-tabbar' && /z-index/.test(r.body));|
++        assert.ok(leiste, 'Regel .ds-tabbar mit z-index fehlt');|
++        assert.ok(z > wert(leiste.body.match(/z-index\s*:\s*([^;]+)/)[1]));|
++    });|
++|
++    it('unter dem Modal-Hintergrund, damit Dialoge darueber bleiben', () => {|
++        assert.ok(z < TOKENS['--z-modal-backdrop'], `Menuezeile z ${z} >= Modal ${TOKENS['--z-modal-backdrop']}`);|
++    });|
++});|
+diff --git a/tests/unit/test-ui75-speichern-deutsch.js b/tests/unit/test-ui75-speichern-deutsch.js|
+new file mode 100644|
+index 00000000..419939f1|
+--- /dev/null|
++++ b/tests/unit/test-ui75-speichern-deutsch.js|
+@@ -0,0 +1,44 @@|
++/**|
++ * UI-75 (03.10.2026, Tiefenanalyse N-06): Die beiden Dialoge beim Speichern|
++ * eines Decks waren fest englisch — „Save Deck", „Enter a name for your|
++ * deck:", „Save Deck Folder", Vorgabe „My Deck" — auf einer deutschen Seite.|
++ * Ausgefuehrt: die Texte stehen in beiden Sprachen; gelesen: der Aufrufer|
++ * holt sie ueber fcText und traegt keinen englischen Festtext mehr.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const vm = require('node:vm');|
++const W = path.join(__dirname, '..', '..');|
++const lies = (p) => fs.readFileSync(path.join(W, p), 'utf8');|
++|
++function texte() {|
++  const q = lies('js/i18n.js');|
++  const a = q.indexOf('const translations = {');|
++  const b = q.indexOf('\n};', a);|
++  const ctx = vm.createContext({});|
++  vm.runInContext(q.slice(a, b + 3) + '\nthis.T = translations;', ctx);|
++  return ctx.T;|
++}|
++|
++describe('UI-75: Deck-Speichern auf Deutsch', () => {|
++  const T = texte();|
++  const KEYS = ['deck.saveTitle', 'deck.saveMessage', 'deck.saveDefaultName', 'deck.saveFolderTitle'];|
++  it('alle Texte in de und en, de nicht englisch', () => {|
++    for (const k of KEYS) {|
++      assert.ok(T.de[k] && T.en[k], `${k} fehlt`);|
++      assert.notEqual(T.de[k], T.en[k], `${k}: de = en`);|
++    }|
++  });|
++  it('der Speichern-Weg nutzt die Schluessel, kein englischer Festtext', () => {|
++    const q = lies('js/firebase-collection.js').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++    const a = q.indexOf('const deckName = await showInputModal(');|
++    assert.ok(a > -1);|
++    const block = q.slice(a, q.indexOf('if (selectedFolder === null)', a));|
++    for (const k of KEYS) assert.ok(block.includes(`fcText('${k}'`), `${k} wird nicht benutzt`);|
++    assert.doesNotMatch(block, /title:\s*'Save Deck/);|
++    assert.doesNotMatch(block, /message:\s*'Enter a name/);|
++  });|
++});|
+diff --git a/tests/unit/test-ui81-deck-in-adresse.js b/tests/unit/test-ui81-deck-in-adresse.js|
+new file mode 100644|
+index 00000000..0821c791|
+--- /dev/null|
++++ b/tests/unit/test-ui81-deck-in-adresse.js|
+@@ -0,0 +1,59 @@|
++/**|
++ * UI-81 (03.10.2026, Tiefenanalyse F-10, von D bestaetigt): Die Deck-Analyse|
++ * schrieb den Archetyp nie in die Adresse. Nach einem Wechsel von|
++ * „Mega Excadrill" auf „Dragapult" stand weiter deck=Mega Excadrill in der|
++ * URL — Neuladen und Teilen zeigten das falsche Deck. Die Funktion wird aus|
++ * dem Quelltext geschnitten und AUSGEFUEHRT (Kommentare entfernt); gelesen|
++ * wird, dass loadCurrentMetaDeckData sie als Erstes aufruft.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const Q = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'app-current-meta-analysis.js'), 'utf8')|
++  .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++|
++function fn() {|
++  const a = Q.indexOf('function _deckInAdresse(');|
++  assert.ok(a > -1, '_deckInAdresse fehlt');|
++  const b = Q.indexOf('\n        }', a);|
++  // eslint-disable-next-line no-new-func|
++  return Function('window', Q.slice(a, b + 10) + '\nreturn _deckInAdresse;')({});|
++}|
++const stub = (hash) => {|
++  const loc = { hash };|
++  const hist = { state: null, calls: [], replaceState(s, t, u) { this.calls.push(u); loc.hash = u; } };|
++  return { loc, hist };|
++};|
++|
++describe('UI-81: die Adresse nennt das gewaehlte Deck', () => {|
++  const f = fn();|
++  it('Deckwechsel ersetzt das alte Deck in der Adresse', () => {|
++    const { loc, hist } = stub('#current-analysis?deck=Mega%20Excadrill');|
++    f('Dragapult', loc, hist);|
++    assert.equal(loc.hash, '#current-analysis?deck=Dragapult');|
++    assert.equal(hist.calls.length, 1);|
++    assert.equal(new URLSearchParams(loc.hash.split('?')[1]).get('deck'), 'Dragapult');|
++  });|
++  it('Namen mit Apostroph und Leerzeichen kommen unveraendert zurueck', () => {|
++    const { loc, hist } = stub('#current-analysis');|
++    f("N's Zoroark", loc, hist);|
++    assert.equal(new URLSearchParams(loc.hash.split('?')[1]).get('deck'), "N's Zoroark");|
++  });|
++  it('leere Auswahl entfernt den Parameter', () => {|
++    const { loc, hist } = stub('#current-analysis?deck=Dragapult');|
++    f('', loc, hist);|
++    assert.equal(loc.hash, '#current-analysis');|
++  });|
++  it('auf anderen Reitern wird nichts geschrieben', () => {|
++    const { loc, hist } = stub('#meta-call');|
++    assert.equal(f('Dragapult', loc, hist), null);|
++    assert.equal(hist.calls.length, 0);|
++  });|
++  it('loadCurrentMetaDeckData ruft es als Erstes auf', () => {|
++    const a = Q.indexOf('async function loadCurrentMetaDeckData(archetype) {');|
++    assert.ok(a > -1);|
++    assert.match(Q.slice(a, a + 120), /\{\s*_deckInAdresse\(archetype\);/);|
++  });|
++});|
+diff --git a/tests/unit/test-ui82-warnung-ungespeichert.js b/tests/unit/test-ui82-warnung-ungespeichert.js|
+new file mode 100644|
+index 00000000..84f089f3|
+--- /dev/null|
++++ b/tests/unit/test-ui82-warnung-ungespeichert.js|
+@@ -0,0 +1,57 @@|
++/**|
++ * UI-82 (03.10.2026, Tiefenanalyse N-12): Neuladen verwarf das gebaute Deck|
++ * ohne Warnung. Ausgefuehrt: _ungespeicherteDecks nennt genau die Quellen|
++ * mit Karten, deren Stand nicht so gespeichert wurde; der beforeunload-|
++ * Zuhoerer haelt an, solange eine da ist. Gelesen: das Speichern setzt den|
++ * Vergleichsstand.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const W = path.join(__dirname, '..', '..');|
++const ohne = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++const DB = ohne(fs.readFileSync(path.join(W, 'js', 'app-deck-builder.js'), 'utf8'));|
++|
++function laden(w) {|
++  const a = DB.indexOf('function _ungespeicherteDecks(');|
++  const b = DB.indexOf('\n}\n', DB.indexOf("addEventListener('beforeunload'", a));|
++  assert.ok(a > -1 && b > a, 'Block fehlt');|
++  // eslint-disable-next-line no-new-func|
++  return Function('window', DB.slice(a, b + 2) + '\nreturn _ungespeicherteDecks;')(w);|
++}|
++function fenster() {|
++  const w = { cityLeagueDeck: {}, currentMetaDeck: {}, pastMetaDeck: {}, h: [] };|
++  w.addEventListener = (typ, f) => w.h.push([typ, f]);|
++  return w;|
++}|
++const ereignis = () => ({ abgebrochen: false, returnValue: undefined, preventDefault() { this.abgebrochen = true; } });|
++|
++describe('UI-82: Warnung vor ungespeichertem Deck', () => {|
++  it('leeres Deck: keine Warnung', () => {|
++    const w = fenster(); const f = laden(w);|
++    assert.deepEqual(f(w), []);|
++    const e = ereignis(); w.h.find((x) => x[0] === 'beforeunload')[1](e);|
++    assert.equal(e.abgebrochen, false);|
++  });|
++  it('gebautes, nicht gespeichertes Deck: Warnung', () => {|
++    const w = fenster(); const f = laden(w);|
++    w.currentMetaDeck = { 'Dreepy (TWM 128)': 4 };|
++    assert.deepEqual(f(w), ['currentMeta']);|
++    const e = ereignis(); w.h.find((x) => x[0] === 'beforeunload')[1](e);|
++    assert.equal(e.abgebrochen, true);|
++  });|
++  it('genau so gespeichert: keine Warnung — danach geaendert: wieder Warnung', () => {|
++    const w = fenster(); const f = laden(w);|
++    w.currentMetaDeck = { 'Dreepy (TWM 128)': 4 };|
++    w.__deckZuletztGespeichert = { currentMeta: JSON.stringify(w.currentMetaDeck) };|
++    assert.deepEqual(f(w), []);|
++    w.currentMetaDeck['Dreepy (TWM 128)'] = 3;|
++    assert.deepEqual(f(w), ['currentMeta']);|
++  });|
++  it('das Speichern setzt den Vergleichsstand', () => {|
++    const q = ohne(fs.readFileSync(path.join(W, 'js', 'firebase-collection.js'), 'utf8'));|
++    assert.match(q, /window\.__deckZuletztGespeichert\[source\]\s*=\s*JSON\.stringify\(deck\)/);|
++  });|
++});|
+diff --git a/tests/unit/test-ui83-loeschen-mit-namen.js b/tests/unit/test-ui83-loeschen-mit-namen.js|
+new file mode 100644|
+index 00000000..3ecfbc56|
+--- /dev/null|
++++ b/tests/unit/test-ui83-loeschen-mit-namen.js|
+@@ -0,0 +1,46 @@|
++/**|
++ * UI-83 (03.10.2026, Tiefenanalyse N-21/F-26): „Dieses Deck löschen?" und|
++ * „Diesen Match-Eintrag löschen?" nannten nicht, WAS geloescht wird — bei|
++ * 14 Knoepfen je Deckzeile die einzige Bremse vor einem Fehlklick. Die|
++ * Box-Loeschung nannte ihren Namen schon. Ausgefuehrt: die Texte in beiden|
++ * Sprachen tragen {name}; gelesen: beide Aufrufer ersetzen {name}.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const vm = require('node:vm');|
++const W = path.join(__dirname, '..', '..');|
++const lies = (p) => fs.readFileSync(path.join(W, p), 'utf8');|
++const ohneKommentare = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++|
++function texte() {|
++  const q = lies('js/i18n.js');|
++  const a = q.indexOf('const translations = {');|
++  assert.ok(a > -1, 'const translations fehlt in js/i18n.js');|
++  // Nur die Tabelle ausfuehren: bis zur ersten Zeile, die mit "};" schliesst.|
++  const b = q.indexOf('\n};', a);|
++  const ctx = vm.createContext({});|
++  vm.runInContext(q.slice(a, b + 3) + '\nthis.T = translations;', ctx);|
++  assert.ok(ctx.T && ctx.T.de && ctx.T.en, 'Uebersetzungstabelle nicht gefunden');|
++  return ctx.T;|
++}|
++|
++describe('UI-83: Loeschen nennt, was geloescht wird', () => {|
++  const T = texte();|
++  for (const k of ['deck.deleteConfirm', 'bj.deleteEntryConfirm']) {|
++    it(`${k} traegt {name} (de und en)`, () => {|
++      assert.match(T.de[k], /\{name\}/);|
++      assert.match(T.en[k], /\{name\}/);|
++    });|
++  }|
++  it('Deck-Loeschen setzt den Decknamen ein', () => {|
++    const q = ohneKommentare(lies('js/firebase-collection.js'));|
++    assert.match(q, /confirm\(t\('deck\.deleteConfirm'\)\.replace\('\{name\}',\s*_deckName\)\)/);|
++  });|
++  it('Journal-Loeschen setzt den Eintrag ein', () => {|
++    const q = ohneKommentare(lies('js/battle-journal.js'));|
++    assert.match(q, /bj\.deleteEntryConfirm'[^)]*\)\.replace\('\{name\}',\s*_eintragName\)/);|
++  });|
++});|
+diff --git a/version.json b/version.json|
+index caa4ee31..9a2fb612 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610032108"}|
+\ No newline at end of file|
++{"version":"202610032232"}|
+\ No newline at end of file|
+-- |
+2.34.1|
+|
+|

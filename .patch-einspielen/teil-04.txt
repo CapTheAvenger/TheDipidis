@@ -1,0 +1,53 @@
+                 + '</p><button type="button" class="btn btn-primary" onclick="switchTabAndUpdateMenu(\'past-meta\')">'|
+-                + esc(tx('abx.zuRotationen', null, 'Zu Rotationen')) + '</button></div>';|
++                + esc(tx('abx.zuRotationen', null, 'Zu Rotationen')) + '</button></div>' + eigeneBoxBlock();|
+             return;|
+@@ -1998,3 +2105,3 @@|
+         }|
+-        const ohneFormate = gewaehlt.some(function (b) { return !b.mitFormaten; });|
++        const ohneFormate = gewaehlt.some(function (b) { return !b.mitFormaten && !istEigen(b); });|
+         eintraege = sortieren(eintraege, ansicht.sort, !!eine);|
+@@ -2008,7 +2115,10 @@|
+             kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(nameVon(eine)) + '</h3>'|
+-                + '<p class="abx-meta">' + esc(tx('abx.metaZeile', {|
+-                    schwelle: schwelleText(eine.schwelle || 'all'),|
+-                    daten: datumLesbar(eine.datenStand),|
+-                    datum: datumLesbar(eine.aktualisiert)|
+-                }, 'Alle Formate · {schwelle} · Turnierdaten bis {daten} · abgeglichen am {datum}')) + '</p></div>';|
++                + '<p class="abx-meta">' + esc(istEigen(eine)|
++                    ? tx('abx.metaEigen', { erstellt: datumLesbar(eine.erstellt), datum: datumLesbar(eine.aktualisiert) },|
++                        'Eigene Box · angelegt am {erstellt} · zuletzt ergänzt am {datum}')|
++                    : tx('abx.metaZeile', {|
++                        schwelle: schwelleText(eine.schwelle || 'all'),|
++                        daten: datumLesbar(eine.datenStand),|
++                        datum: datumLesbar(eine.aktualisiert)|
++                    }, 'Alle Formate · {schwelle} · Turnierdaten bis {daten} · abgeglichen am {datum}')) + '</p></div>';|
+         } else {|
+@@ -2018,3 +2128,3 @@|
+         }|
+-        const alt = gewaehlt.filter(function (b) { return neueDatenDa(b, manifestDatum); });|
++        const alt = gewaehlt.filter(function (b) { return !istEigen(b) && neueDatenDa(b, manifestDatum); });|
+         const hinweis = alt.length|
+@@ -2029,7 +2139,8 @@|
+         const druckId = eine ? '\'' + esc(eine.id) + '\'' : 'null';|
++        const mitDaten = boxen.filter(function (b) { return !istEigen(b); }).length;|
+         const aktionen = '<div class="abx-aktionen">'|
+-            + (eine ? '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(\''|
+-                + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>'|
+-                : '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(null)">'|
+-                + esc(tx('abx.alleAktualisieren', { n: boxen.length }, 'Alle {n} Boxen aktualisieren')) + '</button>')|
++            + (eine ? (istEigen(eine) ? '' : '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(\''|
++                + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>')|
++                : (mitDaten ? '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(null)">'|
++                + esc(tx('abx.alleAktualisieren', { n: mitDaten }, 'Alle {n} Boxen aktualisieren')) + '</button>' : ''))|
+             + (r.proxy.length|
+@@ -2047,2 +2158,3 @@|
+             : '';|
++        const liste = eine ? listeBlock(eine) : '';|
+         const summe = '<p class="abx-summe">' + esc(tx('abx.summe', {|
+@@ -2070,4 +2182,4 @@|
+         }|
+-        wurzel.innerHTML = kopf + hinweis + aktionen + erg + suche + wiederBereich(gewaehlt, mitBoxName)|
+-            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + hauptteil;|
++        wurzel.innerHTML = kopf + hinweis + aktionen + erg + liste + suche + wiederBereich(gewaehlt, mitBoxName)|
++            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName) + hauptteil + eigeneBoxBlock();|

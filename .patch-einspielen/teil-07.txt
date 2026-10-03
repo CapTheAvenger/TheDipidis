@@ -39,5 +39,5 @@
 +    'mc.journalZuordnenLabel': '„{name}“ einem Deck zuordnen',|
 +    'mc.journalNichtZugeordnet': 'nicht zugeordnet',|
      'mc.inclBricks':            'Inkl. Bricks',|
-@@ -4288,11 +4298,2 @@
-     'mc.swissNote':             '<strong>Swiss-Hinweis:</strong> Ab Runde 4–5 trifft Swiss-Pairing Spieler mit ähnlichem Ergebnis. Starke Spieler treffen dann tendenziell stärkere Gegner — das Modell geht von Random-Pairing aus und kann die Wahrscheinlichkeit daher leicht übereschätzen.',|
+@@ -4288,11 +4298,2 @@ const translations = {|
+     'mc.swissNote':             '<strong>Swiss-Hinweis:</strong> Ab Runde 4–5 trifft Swiss-Pairing Spieler mit ähnlichem Ergebnis. Starke Spieler treffen dann tendenziell stärkere Gegner — das Modell geht von Random-Pairing aus und kann die Wahrscheinlichkeit daher leicht überschätzen.',|

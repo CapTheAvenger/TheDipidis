@@ -1,0 +1,69 @@
+-    'mc.selectDeckFirst':       'Erst Deck auswählen.',|
+-    'mc.overrideHint':          'Manuelle WR überschreibt alles. Leer = Meta + Journal werden automatisch gemischt.',|
+-    'mc.colOpponent':           'Gegner',|
+-    'mc.colWrBlended':          'WR (gemischt)',|
+-    'mc.colIndicator':          'Indikator',|
+-    'mc.colManualWr':           'Manuelle WR',|
+-    'mc.favorable':             'Favored',|
+-    'mc.unfavorable':           'Unfavored',|
+-    'mc.even':                  'Even',|
+     'mc.noDeckMsg':             'Wähle dein Deck oben aus, um die Day-2-Chance zu berechnen.',|
+@@ -4324,3 +4325,2 @@ const translations = {|
+     'mc.thresholdTag':          '{n} Pkt.',|
+-    'mc.personalGames':         '{n} pers. Matches · Bayesian Blending',|
+     'mc.wrManuell':             'von Hand gesetzt',|
+@@ -4997,3 +4997,3 @@ const translations = {|
+     'matchup.uvTag2Siege':  '{n} erwartete Punkte',|
+-    'matchup.uvTag2Titel':  'Neun Runden, je Runde ein Gegner nach seinem Feldanteil gezogen. Sieg 3 Punkte, Unentschieden 1, Niederlage 0 — dieselbe Regel, mit der Meta Call rechnet. Die Unentschiedenquote ist aus denselben Matchup-Bilanzen gemessen, die dieser Block liest, gewichtet nach Feldanteil.',|
++    'matchup.uvTag2Titel':  'Neun Runden, je Runde ein Gegner nach seinem Meta-Anteil gezogen. Sieg 3 Punkte, Unentschieden 1, Niederlage 0 — dieselbe Regel, mit der Meta Call rechnet. Die Unentschiedenquote ist aus denselben Matchup-Bilanzen gemessen, die dieser Block liest, gewichtet nach Meta-Anteil.',|
+     'matchup.uvTag2Fuss':   'Gerechnet mit der gemessenen Online-Unentschiedenquote von {u} %. Auf Präsenzturnieren wird viel öfter unentschieden gespielt (Worlds SF 11 %, alle Majors zusammen 15 %) — und weil ein Unentschieden einen Punkt bringt, ist die Zahl oben das vorsichtige Ende. Meta Call rechnet dieselbe Frage mit den Runden und der Schwelle, die du dort einstellst.',|
+@@ -5281,3 +5281,3 @@ const translations = {|
+     'aria.filterTournamentType':   'Nach Turnierart filtern',|
+-    'aria.fullSpread':             'Alle Matchups gegen das prognostizierte Feld',|
++    'aria.fullSpread':             'Alle Matchups gegen das prognostizierte Meta',|
+     'aria.fullscreenCard':         'Karte im Vollbild',|
+diff --git a/js/journal-zuordnung.js b/js/journal-zuordnung.js|
+new file mode 100644|
+index 00000000..fab622ce|
+--- /dev/null|
++++ b/js/journal-zuordnung.js|
+@@ -0,0 +1,142 @@|
++/**|
++ * FE-20 — Journal <-> Meta: wer ist wer?|
++ *|
++ * Das Journal speichert Gegner und eigenes Deck als freien Text|
++ * („Excadrill v2", „Excadrill Frankfurt", „Frankfurt", „Test 1"). Der Meta|
++ * Call kennt Archetypen („Mega Excadrill"). Diese Datei ordnet zu — und zwar|
++ * nur, wenn es SICHER ist. Was nicht sicher passt, bleibt „nicht zugeordnet"|
++ * und laesst sich von Hand zuordnen. Geraten wird nie.|
++ *|
++ * Reine Funktionen, kein DOM. Browser: window.JournalZuordnung; Test: require.|
++ */|
++(function (wurzel) {|
++    'use strict';|
++|
++    function woerter(s) {|
++        return String(s || '').toLowerCase()|
++            .replace(/['‘’‛`´ʼ\-]/g, '')|
++            .split(/\s+/).filter(Boolean);|
++    }|
++    function norm(s) { return woerter(s).join(''); }|
++|
++    /* Zusatzwoerter, die den Archetyp nicht aendern: v1, 2, ex, (Ort), [..] */|
++    const ZUSATZ = /^(?:v\d+|\d+|ex|\(.*\)|\[.*\])$/;|
++|
++    function beginntMit(w, p) {|
++        if (!p.length || w.length < p.length) return false;|
++        for (let i = 0; i < p.length; i++) if (w[i] !== p[i]) return false;|
++        return true;|
++    }|
++    function endetMit(w, p) {|
++        if (!p.length || w.length < p.length) return false;|
++        const off = w.length - p.length;|
++        for (let i = 0; i < p.length; i++) if (w[off + i] !== p[i]) return false;|
++        return true;|
++    }|
++|
++    /**|
++     * Ordnet einen Journal-Namen einem bekannten Deck zu.|
++     * @returns {{deck:(string|null), art:'manuell'|'exakt'|'zusatz'|'offen'|'mehrdeutig'}}|

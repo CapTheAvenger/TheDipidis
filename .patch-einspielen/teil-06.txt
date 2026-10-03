@@ -24,7 +24,7 @@ index c2e37f28..4276dedb 100644|
 +    'mc.journalOffenHinweis': 'These names do not safely match a meta deck and are not counted. Assign them if you are sure — the journal itself stays unchanged.',|
 +    'mc.journalPartienKurz': '{n} match(es)',|
 +    'mc.journalZuordnenLabel': 'Assign “{name}” to a deck',|
-+    'mc.journalNichtZugeordnet': 'not matched',
++    'mc.journalNichtZugeordnet': 'not matched',|
      'mc.inclBricks':            'Incl. Bricks',|
 @@ -1443,11 +1453,2 @@ const translations = {|
      'mc.swissNote':             '<strong>Swiss note:</strong> From rounds 4–5, Swiss pairing matches players with similar records. Strong players tend to face stronger opponents — the model assumes random pairing and may slightly overestimate the probability.',|

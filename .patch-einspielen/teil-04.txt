@@ -1,0 +1,415 @@
++        const _beschriftung = e.target && e.target.closest ? e.target.closest('.menu-label-btn') : null;|
++        if (!menu.contains(e.target) && !trigger.contains(e.target) && !_beschriftung) {|
+             menu.classList.remove('show');|
+diff --git a/service-worker.js b/service-worker.js|
+index 01dcba6c..27bee007 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202610032310|
++// v202610032338|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202610032310';|
++const CACHE_NAME = 'tcg-analysis-v202610032338';|
+ |
+diff --git a/tests/unit/test-anleitung-abfang-greift-07-09.js b/tests/unit/test-anleitung-abfang-greift-07-09.js|
+index 38383ed2..0974798c 100644|
+--- a/tests/unit/test-anleitung-abfang-greift-07-09.js|
++++ b/tests/unit/test-anleitung-abfang-greift-07-09.js|
+@@ -133,3 +133,7 @@ describe('B5/F8.5b — der Abfang greift wirklich, nicht nur im Stub', () => {|
+ |
+-    it('die neun Verweise stehen unveraendert in beiden Anleitungen', () => {|
++    it('die neue Anleitung hat keine toten Verweise mehr', () => {|
++        /* UI-78 (03.10.2026): die alte Anleitung mit ihren neun|
++           href="#"-Verweisen ist durch „Erste Schritte + Glossar" ersetzt.|
++           Der Abfang oben bleibt — er greift, falls je wieder einer|
++           hineinkommt; die neue Fassung hat keinen. */|
+         for (const datei of ['tutorial/tutorial.de.html', 'tutorial/tutorial.en.html']) {|
+@@ -137,3 +141,3 @@ describe('B5/F8.5b — der Abfang greift wirklich, nicht nur im Stub', () => {|
+             const tote = [...txt.matchAll(/<a href="#">([^<]*)<\/a>/g)].map(m => m[1]);|
+-            assert.equal(tote.length, 9, datei + ': ' + JSON.stringify(tote));|
++            assert.equal(tote.length, 0, datei + ': ' + JSON.stringify(tote));|
+         }|
+diff --git a/tests/unit/test-kacheln-zeitraum-und-typfilter.js b/tests/unit/test-kacheln-zeitraum-und-typfilter.js|
+index bc80f960..52c28e8f 100644|
+--- a/tests/unit/test-kacheln-zeitraum-und-typfilter.js|
++++ b/tests/unit/test-kacheln-zeitraum-und-typfilter.js|
+@@ -610,3 +610,7 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {|
+         assert.match(h, /11¤u00d7|11×/, 'die Zahl der Listen steht nicht vorn');|
+-        assert.match(h, /total_decks_in_archetype/, 'das Feld fehlt in der Liste');|
++        /* UI-77 (03.10.2026): Spaltenname und Datei stehen nicht mehr|
++           sichtbar in der Liste (Entwicklertext, N-05), sondern im Titel|
++           der Ueberschrift — dort wird die Herkunft weiter geprueft. */|
++        assert.doesNotMatch(h, /total_decks_in_archetype/, 'der Spaltenname steht wieder sichtbar in der Liste');|
++        assert.match(s.titelEl._attr.title || '', /total_decks_in_archetype/, 'das Feld fehlt im Titel der Ueberschrift');|
+         assert.match(h, /1 Turnier im aktuellen Meta-Fenster/, 'die Zahl der Turniere im Zeitraum fehlt');|
+@@ -631,3 +635,4 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {|
+         await s.kontext.renderCurrentMetaTop256('Dragapult');|
+-        const h = s.listEl.innerHTML;|
++        // UI-77 (03.10.2026): die Herkunft steht im Titel der Ueberschrift, nicht mehr sichtbar in der Liste.|
++        const h = s.titelEl._attr.title || '';|
+         assert.match(h, /data\/tournament_cards_data_cards_TEF-PBL\.csv/,|
+@@ -652,3 +657,4 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {|
+         await s.kontext.renderCurrentMetaTop256('Dragapult');|
+-        const h = s.listEl.innerHTML;|
++        // UI-77 (03.10.2026): die Herkunft steht im Titel der Ueberschrift, nicht mehr sichtbar in der Liste.|
++        const h = s.titelEl._attr.title || '';|
+         assert.doesNotMatch(h, /data\/tournament_cards_data_cards/,|
+diff --git a/tests/unit/test-sprachbefunde-2026-08-30.js b/tests/unit/test-sprachbefunde-2026-08-30.js|
+index fbb10dbe..b7a4fde1 100644|
+--- a/tests/unit/test-sprachbefunde-2026-08-30.js|
++++ b/tests/unit/test-sprachbefunde-2026-08-30.js|
+@@ -574,32 +574,6 @@ describe('Befund K — showNotification sprach 31x englisch und 3x deutsch', ()|
+ |
+-describe('Befund L — die Anleitungen nannten fremdsprachige Beschriftungen', () => {|
+-    it('die englische Anleitung nennt den englischen Menuepfad', () => {|
+-        assert.ok(!TUT_EN.includes('open <strong>Mein Profil → Account → Einstellungen'),|
+-            'tutorial.en.html: der deutsche Menuepfad ist zurueck — in der englischen '|
+-            + 'Oberflaeche heissen die Punkte anders, die Anweisung fuehrt ins Leere');|
+-        assert.ok(TUT_EN.includes('My Profile → Account → Settings'),|
+-            'tutorial.en.html: der englische Menuepfad fehlt');|
+-        // Gegenprobe an der Oberflaeche selbst.|
+-        assert.equal(EN['menu.profile'], 'My Profile');|
+-        assert.equal(EN['profile.groupMisc'], 'Account');|
+-        assert.equal(EN['profile.settings'], 'Settings');|
+-        assert.equal(EN['profile.priceAlerts.title'], 'Telegram price alerts');|
+-    });|
+-|
+-    it('die deutsche Anleitung nennt die deutschen Schaltflaechen', () => {|
+-        assert.ok(!TUT_DE.includes('<strong>Save</strong>'),|
+-            'tutorial.de.html: "Save" ist zurueck — die deutsche Oberflaeche zeigt "Speichern"');|
+-        assert.ok(!TUT_DE.includes('Main Cards'),|
+-            'tutorial.de.html: "Main Cards" ist zurueck — die deutsche Oberflaeche zeigt "Kernkarten"');|
+-        assert.ok(!TUT_DE.includes('Tech Cards (forced into next Generate)'),|
+-            'tutorial.de.html: der englische Slot-Reihen-Titel ist zurueck');|
+-        // Gegenprobe an der Oberflaeche selbst.|
+-        assert.equal(DE['btn.save'], 'Speichern');|
+-        assert.equal(DE['cl.skelMain'], 'Kernkarten');|
+-        assert.equal(DE['techSlots.label'], 'Tech-Karten');|
+-        assert.equal(DE['techSlots.hint'], '(werden beim nächsten Generate fest ins Deck)');|
+-        assert.ok(TUT_DE.includes('Tech-Karten (werden beim nächsten Generate fest ins Deck)'),|
+-            'tutorial.de.html: die tatsaechliche deutsche Beschriftung fehlt');|
+-    });|
+-});|
++/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand|
++   „Befund L — die Anleitungen nannten fremdsprachige Beschriftungen". Der Block pruefte Inhalte der alten Langfassung der Anleitung,|
++   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js|
++   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */|
+ |
+diff --git a/tests/unit/test-sprache-abnahme-2026-08-30.js b/tests/unit/test-sprache-abnahme-2026-08-30.js|
+index 4dd10d77..8373f283 100644|
+--- a/tests/unit/test-sprache-abnahme-2026-08-30.js|
++++ b/tests/unit/test-sprache-abnahme-2026-08-30.js|
+@@ -285,66 +285,11 @@ function mockupBloecke(html) {|
+ |
+-describe('C — die deutsche Anleitung zeigt die deutschen Beschriftungen', () => {|
+-    const bloecke = mockupBloecke(ohneHtmlKommentar(TUT_DE));|
+-    const quelle = bloecke.join('\n');|
+-    // ">Text<" statt blossem Vorkommen: ein GANZER Textknoten. Sonst|
+-    // wuerde "Save" in "Save as image" und "Test Draw" in|
+-    // "Test Draw · Eröffnung 7" mitzaehlen — genau die Falle, an der|
+-    // heute schon eine Zusage vorbeigelaufen ist.|
+-    const knoten = (t) => `>${t}<`;|
++/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand|
++   „C — die deutsche Anleitung zeigt die deutschen Beschriftungen". Der Block pruefte Inhalte der alten Langfassung der Anleitung,|
++   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js|
++   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */|
+ |
+-    it('die Nachbau-Bildschirme sind ueberhaupt gefunden worden', () => {|
+-        // Ohne diese Zusage wuerde ein kaputter Schnitt alle Pruefungen|
+-        // unten still bestehen lassen: in einer leeren Zeichenkette|
+-        // steht keine englische Beschriftung.|
+-        assert.equal(bloecke.length, 41,|
+-            `${bloecke.length} Nachbau-Bildschirme gefunden statt 41`);|
+-    });|
+-|
+-    const zaehle = (t) => quelle.split(knoten(t)).length - 1;|
+-|
+-    for (const [englisch, deutsch, , anzahl] of ANLEITUNG_DE) {|
+-        it(`"${englisch}" heisst ${anzahl}x "${deutsch}"`, () => {|
+-            assert.equal(zaehle(englisch), 0,|
+-                `die englische Beschriftung "${englisch}" steht wieder in einem Nachbau-Bildschirm`);|
+-            assert.equal(zaehle(deutsch), anzahl,|
+-                `"${deutsch}" steht ${zaehle(deutsch)}x statt ${anzahl}x in den Nachbau-Bildschirmen`);|
+-        });|
+-    }|
+-|
+-    for (const [, deutsch, schluessel] of ANLEITUNG_DE.filter((r) => r[2])) {|
+-        it(`"${deutsch}" ist woertlich die Zeile aus js/i18n.js`, () => {|
+-            assert.equal(TABELLE.de[schluessel], deutsch,|
+-                `${schluessel} lautet in der Sprachtabelle anders — die Anleitung ist damit wieder falsch`);|
+-        });|
+-    }|
+-|
+-    it('was die Oberflaeche selbst englisch schreibt, bleibt englisch', () => {|
+-        // Gegenprobe zur Uebersetzungswut: der Knopf "Grid" der|
+-        // Wunschliste und der Knopf "Save" ihres Uebersichts-Fensters|
+-        // tragen in index.html KEIN data-i18n. Die deutsche Oberflaeche|
+-        // zeigt dort englische Woerter, also muss die Anleitung sie auch|
+-        // englisch nennen. Ebenso "Wishlist-Karte" im Preisalarm-Text,|
+-        // der woertlich so in der deutschen Sprachtabelle steht.|
+-        assert.match(ohneHtmlKommentar(TUT_DE), /<em>Grid<\/em>-Button der Wishlist/,|
+-            'der Grid-Knopf wurde uebersetzt, obwohl die deutsche Oberflaeche "Grid" zeigt');|
+-        assert.match(ohneHtmlKommentar(TUT_DE), /<em>Save<\/em> ein teilbares PNG/,|
+-            'der Save-Knopf wurde uebersetzt, obwohl die deutsche Oberflaeche "Save" zeigt');|
+-        assert.ok(TABELLE.de['profile.priceAlerts.intro'].includes('Wishlist-Karte'),|
+-            'die Sprachtabelle sagt nicht mehr "Wishlist-Karte" — dann darf die Anleitung nachziehen');|
+-    });|
+-});|
+-|
+-describe('C — der gespiegelte Fehler in der englischen Anleitung', () => {|
+-    const quelle = ohneHtmlKommentar(TUT_EN);|
+-    it('die Preis-Pille steht englisch da', () => {|
+-        assert.ok(!quelle.includes('Preis Check'),|
+-            'die deutsche Pille "⚠ Preis Check" steht wieder in der englischen Anleitung');|
+-        assert.ok(quelle.includes(`>${TABELLE.en['preis.checkPill']}<`),|
+-            'die englische Pille fehlt in den Nachbau-Bildschirmen');|
+-    });|
+-    it('und sie ist woertlich die Zeile aus js/i18n.js', () => {|
+-        assert.equal(TABELLE.en['preis.checkPill'], '⚠ Price check');|
+-        assert.equal(TABELLE.de['preis.checkPill'], '⚠ Preis Check');|
+-    });|
+-});|
++/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand|
++   „C — der gespiegelte Fehler in der englischen Anleitung". Der Block pruefte Inhalte der alten Langfassung der Anleitung,|
++   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js|
++   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */|
+ |
+diff --git a/tests/unit/test-sprache-abzeichen-und-preise.js b/tests/unit/test-sprache-abzeichen-und-preise.js|
+index 9ed1a493..d09c3151 100644|
+--- a/tests/unit/test-sprache-abzeichen-und-preise.js|
++++ b/tests/unit/test-sprache-abzeichen-und-preise.js|
+@@ -109,17 +109,6 @@ describe('Preis-Pillen und Vertrauens-Abzeichen kommen aus der Tabelle', () => {|
+ |
+-describe('Das englische Tutorial', () => {|
+-    it('zeigt die Pille der Webseite auf Englisch', () => {|
+-        assert.ok(!/mockup-wt-card-trigger">🎯 Unter deinem Ziel/.test(TUT_EN),|
+-            'die Pille ist die Anzeige DER WEBSEITE und muss mit der Sprache wandern');|
+-        assert.match(TUT_EN, /mockup-wt-card-trigger">🎯 Below your target/);|
+-    });|
+-|
+-    it('sagt dazu, dass der Bot Deutsch schreibt — statt seine Texte zu erfinden', () => {|
+-        // Die Telegram-Blasen geben wieder, was der Bot WIRKLICH schickt|
+-        // (bot/src/commands/start.js schreibt Deutsch). Sie zu uebersetzen|
+-        // waere eine Luege ueber das, was beim Nutzer ankommt.|
+-        assert.match(TUT_EN, /bot itself writes in German/i,|
+-            'ohne diesen Hinweis liest sich der deutsche Bot-Text wie ein Uebersetzungsfehler');|
+-    });|
+-});|
++/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand|
++   „Das englische Tutorial". Der Block pruefte Inhalte der alten Langfassung der Anleitung,|
++   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js|
++   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */|
+ |
+diff --git a/tests/unit/test-tieflink-nachabnahme-07-09.js b/tests/unit/test-tieflink-nachabnahme-07-09.js|
+index 400c5ac7..c3b78666 100644|
+--- a/tests/unit/test-tieflink-nachabnahme-07-09.js|
++++ b/tests/unit/test-tieflink-nachabnahme-07-09.js|
+@@ -341,28 +341,6 @@ describe('Zusatz — ein Tieflink, der nicht ankommt, sagt es', () => {|
+ |
+-describe('B6 — beide Anleitungen verlinken den externen Playtester', () => {|
+-    const zaehle = (s, re) => (s.match(re) || []).length;|
+-    const SHOWDOWN = /href="https:\/\/tcg-showdown\.com\/"/g;|
+-|
+-    it('die englische Fassung verlinkt tcg-showdown.com ueberhaupt', () => {|
+-        assert.ok(zaehle(TUT_EN, SHOWDOWN) >= 2,|
+-            'gemessen: zweimal genannt, null mal verlinkt — wer den externen '|
+-            + 'Playtester sucht, muss die Adresse abtippen');|
+-    });|
+-|
+-    it('und zwar gleich oft wie die deutsche', () => {|
+-        assert.equal(zaehle(TUT_EN, SHOWDOWN), zaehle(TUT_DE, SHOWDOWN));|
+-    });|
+-|
+-    it('beide Fassungen tragen gleich viele Verweise insgesamt', () => {|
+-        // Die Zahl, an der die Abnahme den Unterschied gemessen hat: 10 gegen 12.|
+-        assert.equal(zaehle(TUT_EN, /<a /g), zaehle(TUT_DE, /<a /g));|
+-    });|
+-|
+-    it('die neuen Verweise oeffnen extern und ohne Rueckkanal', () => {|
+-        for (const m of TUT_EN.matchAll(/<a href="https:\/\/tcg-showdown\.com\/"[^>]*>/g)) {|
+-            assert.match(m[0], /target="_blank"/);|
+-            assert.match(m[0], /rel="noopener"/);|
+-        }|
+-    });|
+-});|
++/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand|
++   „B6 — beide Anleitungen verlinken den externen Playtester". Der Block pruefte Inhalte der alten Langfassung der Anleitung,|
++   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js|
++   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */|
+ |
+diff --git a/tests/unit/test-tutorial.js b/tests/unit/test-tutorial.js|
+index 0f8e225e..5a88f97d 100644|
+--- a/tests/unit/test-tutorial.js|
++++ b/tests/unit/test-tutorial.js|
+@@ -65,3 +65,5 @@ describe('Anleitung: ausgelagert', () => {|
+                 `tutorial.${lg}.html hat keinen Hero — vermutlich beim Schneiden verloren`);|
+-            assert.ok(txt.length > 100000,|
++            // UI-78 (03.10.2026): die Anleitung ist jetzt „Erste Schritte +|
++            // Glossar" — kurz, aber nicht leer.|
++            assert.ok(txt.length > 5000,|
+                 `tutorial.${lg}.html ist nur ${txt.length} Zeichen gross`);|
+@@ -175,210 +177,134 @@ describe('Sprache: die Seite startet deutsch', () => {|
+ |
+-/* ══ Die drei fehlenden Kapitel (03.09.2026) ═══════════════════|
+-|
+-   BEFUND: die Anleitung nannte "Champions" null Mal, "Team-Builder"|
+-   null Mal, "Rechner" null Mal — und enthielt insgesamt NULL Bilder.|
+-   Die drei groessten Bereiche, die seit August dazugekommen sind,|
+-   standen nirgends drin, und der Bildmechanismus|
+-   (js/ds-tutorial.js, data-tutorial-img) war gebaut, aber unbenutzt.|
+-|
+-   Geprueft wird hier nicht, dass die Woerter irgendwo vorkommen —|
+-   das waere mit einem Satz im Fliesstext erfuellt —, sondern dass|
+-   jedes Kapitel eine eigene Ueberschrift UND ein eigenes Bild hat,|
+-   und dass die Bilddateien wirklich auf der Platte liegen. */|
+-|
+-const { describe: beschreibe2, it: es2 } = require('node:test');|
+-const behaupte2 = require('node:assert');|
+-const fs2 = require('node:fs');|
+-const pfad2 = require('node:path');|
+-|
+-const WURZEL2 = pfad2.join(__dirname, '..', '..');|
+-const DE2 = fs2.readFileSync(pfad2.join(WURZEL2, 'tutorial', 'tutorial.de.html'), 'utf8');|
+-const EN2 = fs2.readFileSync(pfad2.join(WURZEL2, 'tutorial', 'tutorial.en.html'), 'utf8');|
+-|
+-beschreibe2('Die Anleitung deckt Champions, Team-Builder, Rechner und Startseite ab', () => {|
+-|
+-    const KAPITEL = [|
+-        ['Champions · Teams',   /Replica-Code/,        /replica code/i],|
+-        ['Champions · Nutzung', /In-Game-Analyse/,     /in-game analysis/i],|
+-        ['Team-Builder',        /Team setzen/,         /Set team/i],|
+-        ['Team-Rechner',        /K\.-o\.-Zahl/,        /hits to KO/i],|
+-        ['Startseite',          /Ansicht zurücksetzen/, /Reset view/i],|
+-    ];|
+-|
+-    for (const [name, reDe, reEn] of KAPITEL) {|
+-        es2(`${name}: steht in der deutschen Fassung`, () => {|
+-            behaupte2.ok(reDe.test(DE2),|
+-                `Das Kapitel "${name}" fehlt in tutorial.de.html`);|
+-        });|
+-        es2(`${name}: steht in der englischen Fassung`, () => {|
+-            behaupte2.ok(reEn.test(EN2),|
+-                `Das Kapitel "${name}" fehlt in tutorial.en.html`);|
+-        });|
+-    }|
++/* ══ Erste Schritte + Glossar (UI-78, 03.10.2026) ══════════════════|
+ |
+-    es2('jede Fassung bindet ihre eigenen Bilder ein', () => {|
+-        // Die deutsche Anleitung mit englischen Screenshots waere|
+-        // schlechter als gar keine: der Leser sucht Knoepfe, die auf|
+-        // dem Bild anders heissen.|
+-        const deBilder = [...DE2.matchAll(/data-tutorial-img="([^"]+)"/g)].map(m => m[1]);|
+-        const enBilder = [...EN2.matchAll(/data-tutorial-img="([^"]+)"/g)].map(m => m[1]);|
+-        behaupte2.ok(deBilder.length >= 5,|
+-            `nur ${deBilder.length} Bilder in der deutschen Anleitung`);|
+-        behaupte2.ok(enBilder.length >= 5,|
+-            `nur ${enBilder.length} Bilder in der englischen Anleitung`);|
+-        for (const b of deBilder) {|
+-            behaupte2.ok(b.startsWith('images/tutorials/de/'),|
+-                `die deutsche Anleitung bindet ein nicht-deutsches Bild ein: ${b}`);|
+-        }|
+-        for (const b of enBilder) {|
+-            behaupte2.ok(!b.startsWith('images/tutorials/de/'),|
+-                `die englische Anleitung bindet ein deutsches Bild ein: ${b}`);|
+-        }|
+-    });|
++   Entscheidung Hausi 03.10.2026: die lange Anleitung (325.716 Zeichen,|
++   Kopf „v48 · August 2026", 31-mal „Cooking", ohne Archetyp-Box,|
++   Masterclass, Posts) faellt weg. An ihre Stelle tritt eine Seite|
++   „Erste Schritte" und ein Glossar aller Begriffe aus der|
++   Tiefenanalyse (N-04), erreichbar per antippbarem ⓘ (data-glossar).|
+ |
+-    es2('jedes eingebundene Bild liegt auch auf der Platte', () => {|
+-        // Der Rueckfall von ds-tutorial.js ist ein Farbverlauf mit|
+-        // Beschriftung — sichtbar kaputt genug, dass es niemandem|
+-        // auffaellt, und genau deshalb wird es hier gezaehlt.|
+-        const alle = [...DE2.matchAll(/data-tutorial-img="([^"]+)"/g),|
+-                      ...EN2.matchAll(/data-tutorial-img="([^"]+)"/g)].map(m => m[1]);|
+-        const fehlend = alle.filter(b => !fs2.existsSync(pfad2.join(WURZEL2, b)));|
+-        behaupte2.deepStrictEqual(fehlend, [],|
+-            'diese Bilder sind eingebunden, liegen aber nicht im Repo: ' + fehlend.join(', '));|
+-    });|
++   Die Zusicherungen der alten Kurzfassung (04.09.2026) gelten weiter|
++   fuer den Einstieg: kein Bild, keine veraltende Datenzahl, die Quellen|
++   werden genannt. Die Kapitel-Zusicherungen (Champions, Team-Builder,|
++   Rechner, Bilder) entfallen mit der Langfassung. */|
+ |
+-    es2('die Querformat-Aufnahmen bekommen auch einen Querformat-Rahmen', () => {|
+-        // 1280x720 in einem 9:16-Rahmen schrumpft auf ein Drittel der|
+-        // Hoehe; die Schrift ist dann nicht mehr zu lesen.|
+-        const css = fs2.readFileSync(pfad2.join(WURZEL2, 'css', 'city-league.css'), 'utf8');|
+-        behaupte2.ok(/\.tutorial-screenshot-frame--breit\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9/.test(css),|
+-            'die Klasse tutorial-screenshot-frame--breit fehlt oder ist nicht 16/9');|
+-        for (const [name, quelle] of [['de', DE2], ['en', EN2]]) {|
+-            const rahmen = [...quelle.matchAll(/tutorial-screenshot-frame([^"]*)"[\s\S]{0,120}?data-tutorial-img/g)];|
+-            behaupte2.ok(rahmen.length >= 5, `${name}: nur ${rahmen.length} Rahmen`);|
+-            for (const r of rahmen) {|
+-                behaupte2.ok(r[1].includes('--breit'),|
+-                    `${name}: ein Bildrahmen ohne --breit — die Querformat-Aufnahme `|
+-                    + 'wird darin unlesbar klein');|
+-            }|
+-        }|
+-    });|
+-});|
++const behaupte2 = require('node:assert/strict');|
++const vm2 = require('node:vm');|
+ |
+-/* ══════════════════════════════════════════════════════════════════════|
+- * DIE KURZFASSUNG AM ANFANG (04.09.2026)|
+- * ══════════════════════════════════════════════════════════════════════|
+- *|
+- * Aufgabe #121 nannte zwei Teile: die Langfassung bebildern (erledigt in|
+- * PR #652) und "eine Kurzfassung als Einstieg". Der zweite Teil hing|
+- * bisher an Aufgabe #120, weil er "dieselben Kacheln wie Instagram"|
+- * verwenden sollte. Auf Nachfrage am 04.09.2026: "was halt sinnvoll ist|
+- * um den Leuten die Seite gut zu erklären und schmackhaft zu machen" —|
+- * die Bindung an die Kacheln war damit gelöst.|
+- *|
+- * Gebaut wurde eine Textkurzfassung ganz oben, aus drei Gründen, die|
+- * hier als Zusicherungen stehen, damit sie nicht stillschweigend|
+- * rückgängig gemacht werden:|
+- *|
+- *   1. Sie steht VOR der Langfassung. Ein Einstieg hinter 3.200 Zeilen|
+- *      ist kein Einstieg.|
+- *   2. Sie trägt KEIN Bild. Bilder machen einen Einstieg länger, nicht|
+- *      kürzer; die Aufnahmen stehen unten bei ihren Kapiteln.|
+- *   3. Sie trägt KEINE Datenzahl. Eine Zahl in einem festen|
+- *      HTML-Fragment veraltet still — und diese Seite hat sich gerade|
+- *      erst von Zahlen ohne Nenner freigearbeitet.|
+- */|
++const DE2 = R('tutorial/tutorial.de.html');|
++const EN2 = R('tutorial/tutorial.en.html');|
+ |
+-const behaupte3 = require('node:assert');|
+-const fs3 = require('node:fs');|
+-const pfad3 = require('node:path');|
+-|
+-const WURZEL3 = pfad3.join(__dirname, '..', '..');|
+-const DE3 = fs3.readFileSync(pfad3.join(WURZEL3, 'tutorial', 'tutorial.de.html'), 'utf8');|
+-const EN3 = fs3.readFileSync(pfad3.join(WURZEL3, 'tutorial', 'tutorial.en.html'), 'utf8');|
+-|
+-/* Der Block: vom Trenner bis zum Ende seines <article>. */|
+-function kurzfassung(quelle, trenner) {|
+-    const i = quelle.indexOf(`<div class="feature-section-divider">${trenner}</div>`);|
+-    if (i < 0) return null;|
+-    const ende = quelle.indexOf('</article>', i);|
+-    return ende < 0 ? null : quelle.slice(i, ende);|
+-}|
+-|
+-const FASSUNGEN = [|
+-    ['deutsch',  DE3, 'Worum es hier geht', 'Erste Schritte',|
+-     /Kostenlos, ohne Anmeldung/],|
+-    ['englisch', EN3, 'What this is',       'Get Started',|
+-     /Free, no sign-up needed/],|
+-];|
+-|
+-beschreibe2('Die Anleitung hat eine Kurzfassung als Einstieg', () => {|
+-|
+-    for (const [name, quelle, trenner, langTrenner, kern] of FASSUNGEN) {|
+-|
+-        es2(`${name}: die Kurzfassung steht da`, () => {|
+-            const block = kurzfassung(quelle, trenner);|

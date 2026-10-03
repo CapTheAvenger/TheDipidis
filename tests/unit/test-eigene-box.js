@@ -134,3 +134,21 @@ describe('Rutsch O: Verdrahtung', () => {
     assert.match(QUELLE, /eigeneAnlegen: eigeneAnlegen,\s*listeEinfuegen: listeEinfuegen/);
   });
 });
+
+describe('Eigene Box anlegen sieht aus wie ein Knopf (Hausi, 03.10.2026)', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const QUELLE2 = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'archetyp-box.js'), 'utf8');
+  const CSS = fs.readFileSync(path.join(__dirname, '..', '..', 'css', 'archetyp-box.css'), 'utf8');
+  it('summary traegt btn btn-primary', () => {
+    assert.match(QUELLE2, /<details class="abx-eigen"><summary class="btn btn-primary abx-eigen-knopf">/);
+  });
+  it('auch das Einfuegefeld (Deckliste einfuegen) ist ein Knopf und das Feld gross genug', () => {
+    assert.match(QUELLE2, /<details class="abx-liste"[^>]*><summary class="btn btn-primary abx-eigen-knopf">/);
+    assert.match(CSS, /\.abx-liste textarea \{[^}]*min-height: 16em[^}]*font-size: 16px/);
+  });
+  it('CSS blendet den Pfeil aus und setzt ein Plus davor', () => {
+    assert.match(CSS, /summary\.abx-eigen-knopf \{[^}]*list-style: none/);
+    assert.match(CSS, /abx-eigen-knopf::before \{ content: '\+'/);
+  });
+});

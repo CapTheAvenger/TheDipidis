@@ -31,7 +31,7 @@
     <meta name="twitter:title" content="Pokémon TCG Analysis">
     <meta name="twitter:description" content="Meta-Analyse zum Pokémon-Sammelkartenspiel: Deck-Archetypen mit Win Rate, Turnierdaten und Kartenpreise — täglich aktualisiert.">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.firebaseio.com https://*.googleapis.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https://cdn.jsdelivr.net https://*.googleapis.com https://googleapis.com https://www.googleapis.com https://www.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebase.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://limitlesstcg.com https://www.limitlesstcg.com https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com https://r2.limitlesstcg.net https://images.pokemontcg.io https://pokeapi.co https://pokemonproxies.com https://www.pokemonproxies.com http://localhost:8001 wss://*.firebaseio.com https://*.ingest.sentry.io; frame-src https://*.firebaseapp.com https://accounts.google.com;">
-    <title>Pokémon TCG Analysis</title>
+    <title>The Dipidis</title>
     <link rel="icon" href="data:,">
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="images/pokeball-icon.png">
@@ -109,7 +109,7 @@
     // Pruefung nicht mehr. Adresszusatz (#...) und Parameter bleiben erhalten.
     // Das Ergebnis jeder Pruefung steht in localStorage (__tcg_version_check)
     // und im Fussbereich der Seite.
-    window.APP_VERSION = '202610032310';
+    window.APP_VERSION = '202610032338';
     (function() {
       var KEY = '__tcg_version_refresh', LOG = '__tcg_version_check';
       function merke(status, server) {
@@ -185,50 +185,50 @@
     </script>
     <!-- tokens.css MUSS als erste CSS-Datei geladen werden: alles danach
          darf sich auf die Variablen verlassen. -->
-    <link rel="stylesheet" href="css/tokens.css?v=202610032310" type="text/css">
-    <link rel="stylesheet" href="css/components.css?v=202610032310" type="text/css">
-    <link rel="stylesheet" href="css/ds-nav.css?v=202610032310">
-    <link rel="stylesheet" href="css/styles.css?v=202610032310" type="text/css">
-    <link rel="stylesheet" href="css/ui-components.css?v=202610032310" type="text/css">
-    <link rel="stylesheet" href="css/ds-share.css?v=202610032310">
-    <link rel="stylesheet" href="css/pokeball-menu.css?v=202610032310" type="text/css">
-    <link rel="stylesheet" href="css/dashboard-theme.css?v=202610032310" type="text/css">
+    <link rel="stylesheet" href="css/tokens.css?v=202610032338" type="text/css">
+    <link rel="stylesheet" href="css/components.css?v=202610032338" type="text/css">
+    <link rel="stylesheet" href="css/ds-nav.css?v=202610032338">
+    <link rel="stylesheet" href="css/styles.css?v=202610032338" type="text/css">
+    <link rel="stylesheet" href="css/ui-components.css?v=202610032338" type="text/css">
+    <link rel="stylesheet" href="css/ds-share.css?v=202610032338">
+    <link rel="stylesheet" href="css/pokeball-menu.css?v=202610032338" type="text/css">
+    <link rel="stylesheet" href="css/dashboard-theme.css?v=202610032338" type="text/css">
     <!-- Non-critical CSS: async load (tab-specific styles) -->
-    <link rel="stylesheet" href="css/auth-styles.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/cards-header.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/cards-filter-section.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/cards-tabs.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/city-league.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/anti-tech.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/tech-lab.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/tech-slots.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/profile-howto-info.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/masterclass.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/meta-call.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/side-quest.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/ds-pocket.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/archetyp-box.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/quellen.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/admin.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/statuszustaende.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/tippziele.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/testing-groups.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/archetype-icons.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/ux-step1.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/ux-step2.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/ux-step3.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/ux-step4.css?v=202610032310" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/auth-styles.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/cards-header.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/cards-filter-section.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/cards-tabs.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/city-league.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/anti-tech.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/tech-lab.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/tech-slots.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/profile-howto-info.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/masterclass.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/meta-call.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/side-quest.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/ds-pocket.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/archetyp-box.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/quellen.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/admin.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/statuszustaende.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/tippziele.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/testing-groups.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/archetype-icons.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/ux-step1.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/ux-step2.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/ux-step3.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/ux-step4.css?v=202610032338" type="text/css" media="print" onload="this.media='all'">
     <!-- Mobile Responsive Optimization — SCHRITT 1 (Layout Umbrüche) -->
-    <link rel="stylesheet" href="css/mobile-responsive.css?v=202610032310" type="text/css">
+    <link rel="stylesheet" href="css/mobile-responsive.css?v=202610032338" type="text/css">
     <!-- Escape Rope Close Buttons -->
-    <link rel="stylesheet" href="css/close-buttons.css?v=202610032310" type="text/css">
-    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202610032310" type="text/css">
+    <link rel="stylesheet" href="css/close-buttons.css?v=202610032338" type="text/css">
+    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202610032338" type="text/css">
     <!-- Mobile Drag & Drop polyfill for touch devices -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@3.0.0-rc.0/default.css" type="text/css" crossorigin="anonymous">
     <!-- Mobile Drag & Drop polyfill JS -->
@@ -470,8 +470,8 @@
          an ihnen (zuletzt 28.08.2026) haette einen wiederkehrenden
          Besucher nicht sicher erreicht. bump-version.sh ersetzt jedes
          ?v=NNNN in dieser Datei, also zieht der Stempel jetzt mit. -->
-    <script src="js/pokemon-loading-screen.js?v=202610032310"></script>
-    <script src="js/csv-cache-interceptor.js?v=202610032310"></script>
+    <script src="js/pokemon-loading-screen.js?v=202610032338"></script>
+    <script src="js/csv-cache-interceptor.js?v=202610032338"></script>
     <a href="#main-content" class="skip-to-content">Skip to content</a>
     <div class="container" id="main-content">
         <div id="header-container"></div>
@@ -487,6 +487,9 @@
                             <div class="pokeball-bottom"></div>
                             <div class="pokeball-center"></div>
                         </div>
+                        <!-- UI-79 (03.10.2026, Tiefenanalyse N-13): das Menue war nur
+                             ueber das unbeschriftete Logo zu finden. -->
+                        <button type="button" class="menu-label-btn" onclick="toggleMainMenu()" data-i18n="menu.labelBtn">☰ Menü</button>
                         <div id="mainMenuDropdown" class="main-menu-dropdown" role="menu" data-i18n-aria="aria.navMenu" aria-label="Navigation menu">
                             <div class="menu-header" data-i18n="menu.title">Main Menu</div>
 
@@ -654,7 +657,7 @@
 
                     <div>
                         <h1 class="header-title">
-                            <span data-i18n="app.title">Pokémon TCG Hub</span>
+                            <span data-i18n="app.title">The Dipidis</span>
                             <span id="current-tab-title" class="current-tab-badge">City League Meta</span>
                         </h1>
                         <p class="header-subtitle" data-i18n="app.subtitle">Your Portal for Meta Analysis &amp; Deck Building</p>
@@ -834,7 +837,7 @@
                         </div>
                         <div class="control-row">
                             <div class="control-group">
-                                <label for="cityLeagueDeckSelect" data-i18n="filter.selectArchetype">Select Deck Archetype:</label>
+                                <label for="cityLeagueDeckSelect" data-i18n="filter.selectArchetype">Select Deck Archetype:</label><button type="button" class="glossar-i" data-glossar="city-league" data-i18n-title="glossar.nachlesen" data-i18n-aria="glossar.nachlesen" title="Im Glossar nachlesen" aria-label="Im Glossar nachlesen">ⓘ</button>
                                 <select id="cityLeagueDeckSelect" autocomplete="off" class="control-input modern-select">
                                     <option value="" data-i18n="cl.pleaseSelectDeck">-- Please Select Deck --</option>
                                 </select>
@@ -1377,7 +1380,7 @@
                         </div>
                         <div class="control-row">
                             <div class="control-group">
-                                <label for="currentMetaDeckSelect" data-i18n="cl.selectArchetype">Select Deck Archetype:</label>
+                                <label for="currentMetaDeckSelect" data-i18n="cl.selectArchetype">Select Deck Archetype:</label><button type="button" class="glossar-i" data-glossar="archetyp" data-i18n-title="glossar.nachlesen" data-i18n-aria="glossar.nachlesen" title="Im Glossar nachlesen" aria-label="Im Glossar nachlesen">ⓘ</button>
                                 <select id="currentMetaDeckSelect" autocomplete="off" class="control-input modern-select">
                                     <option value="" data-i18n="cl.selectDeckOption">-- Please Select Deck --</option>
                                 </select>
@@ -2033,7 +2036,7 @@
                         </div>
                         <div class="control-row">
                             <div class="control-group">
-                                <label for="pastMetaDeckSelect" data-i18n="cl.selectArchetype">Select Deck Archetype:</label>
+                                <label for="pastMetaDeckSelect" data-i18n="cl.selectArchetype">Select Deck Archetype:</label><button type="button" class="glossar-i" data-glossar="rotation" data-i18n-title="glossar.nachlesen" data-i18n-aria="glossar.nachlesen" title="Im Glossar nachlesen" aria-label="Im Glossar nachlesen">ⓘ</button>
                                 <select id="pastMetaDeckSelect" autocomplete="off" class="control-input modern-select">
                                     <option value="" data-i18n="cl.selectDeckOption">-- Please Select Deck --</option>
                                 </select>
@@ -2612,7 +2615,7 @@
                     </nav>
                     <div class="header">
                         <h2 data-i18n="sideQuest.title">Side Quest · Pokémon Champions</h2>
-                        <p data-i18n="sideQuest.subtitle">Top current doubles teams from op.gg / victoryroad — tap a replica code to copy it.</p>
+                        <p data-i18n="sideQuest.subtitle">Pokémon Champions is a video game, not the card game. Top current doubles teams from op.gg / victoryroad — tap a replica code to copy it.</p>
                     </div>
                     <div id="sideQuestStatus" class="side-quest-status" aria-live="polite"></div>
                     <div class="side-quest-subtabs" role="tablist" data-i18n-aria="aria.sideQuestViews" aria-label="Side Quest views">
@@ -3122,10 +3125,10 @@
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
                                     </div>
                                     <h4 class="deck-builder-empty-title" data-i18n="emptyState.metaBinder">Meta Binder not generated yet</h4>
-                                    <p class="deck-builder-empty-text">Generate the binder to compare current meta staples with your collection.</p>
+                                    <p class="deck-builder-empty-text" data-i18n="mb.emptyText">Erstelle den Binder, um die aktuellen Meta-Staples mit deiner Sammlung zu vergleichen.</p>
                                     <div class="deck-builder-empty-actions">
                                         <button class="btn btn-primary" onclick="buildMetaBinder()" data-i18n="mb.generate">Generate Binder</button>
-                                        <button class="btn btn-outline" onclick="loadSavedMetaBinder()">📂 Load Saved Binder</button>
+                                        <button class="btn btn-outline" onclick="loadSavedMetaBinder()" data-i18n="mb.loadSaved">📂 Gespeicherten Binder laden</button>
                                     </div>
                                 </div>
                             </div>
@@ -3201,7 +3204,7 @@
                              js/archetyp-box.js; gespeichert unter users/{uid}/archetypBoxen. -->
                         <div id="profile-archetypbox" class="profile-tab-content d-none">
                             <div class="meta-binder-header">
-                                <h2 data-i18n="profile.archetypBox">Archetyp-Boxen</h2>
+                                <h2><span data-i18n="profile.archetypBox">Archetyp-Boxen</span><button type="button" class="glossar-i" data-glossar="archetyp-box" data-i18n-title="glossar.nachlesen" data-i18n-aria="glossar.nachlesen" title="Im Glossar nachlesen" aria-label="Im Glossar nachlesen">ⓘ</button></h2>
                                 <p class="color-grey mb-15" data-i18n="abx.untertitel">Eine Box je Archetyp: welche Karten fehlen noch, welche liegen als Original drin und welche als Proxy.</p>
                             </div>
                             <div id="abxLeiste" class="abx-leiste mb-15"></div>
@@ -3319,7 +3322,7 @@
                                         🔔 <span data-i18n="profile.priceAlerts.title">Telegram-Preisalarme</span>
                                     </label>
                                     <p class="color-grey fs-13 mb-10" data-i18n="profile.priceAlerts.intro">
-                                        Bekomme eine Telegram-Nachricht, wenn der Marktpreis einer Wishlist-Karte auf oder unter deinen Maximalwert sinkt — oder wenn der Marktpreis einer Trade-Karte über deinem Mindestpreis liegt. So bist du immer auf dem aktuellen Stand.
+                                        Bekomme eine Telegram-Nachricht, wenn der Marktpreis einer Karte auf deiner Wunschliste auf oder unter deinen Maximalwert sinkt — oder wenn der Marktpreis einer Karte auf deiner Tauschliste über deinem Mindestpreis liegt. So bist du immer auf dem aktuellen Stand.
                                     </p>
                                     <div class="flex gap-10 align-center mb-10" style="flex-wrap: wrap;">
                                         <input type="checkbox" id="settings-price-alerts-enabled" class="w-20 h-20" data-i18n-aria="aria.telegramAlerts" aria-label="Enable Telegram price alerts">
@@ -3964,12 +3967,12 @@
     </div>
 
     <!-- Error tracking (must load before all other JS) -->
-    <script src="js/error-tracking.js?v=202610032310"></script>
+    <script src="js/error-tracking.js?v=202610032338"></script>
 
-    <script src="js/inline-init.js?v=202610032310" defer></script>
+    <script src="js/inline-init.js?v=202610032338" defer></script>
     <!-- Haelt die Seite hinter einem Vollbild an. Muss vor allen Modulen
          stehen, die ein Overlay oeffnen. -->
-    <script src="js/hintergrund-sperre.js?v=202610032310" defer></script>
+    <script src="js/hintergrund-sperre.js?v=202610032338" defer></script>
 
     <!-- My Decks Playtest Modal — removed 2026-06-12 with the in-app
          sandbox retirement (AUDIT_GITHUB.md F-01). The "Playtest" button
@@ -4013,7 +4016,7 @@
                     <div>
                         <span class="battle-journal-label" data-i18n="bj.metaFormat">Meta Format</span>
                         <select id="battleJournalMeta" class="battle-journal-input" data-i18n-aria="aria.metaFormat" aria-label="Meta format" data-meta-format-options>
-                            <option value="">— Select —</option>
+                            <option value="" data-i18n="bj.formatWaehlen">— Format wählen —</option>
                         </select>
                     </div>
                     <div>
@@ -4148,128 +4151,128 @@
     <script src="js/vendor/firebase-auth-compat.js" defer></script>
     <script src="js/vendor/firebase-firestore-compat.js" defer></script>
     <!-- Utilities first (provides escapeHtml globally) -->
-    <script src="js/app-utils.js?v=202610032310" defer></script>
-    <script src="js/i18n.js?v=202610032310" defer></script>
+    <script src="js/app-utils.js?v=202610032338" defer></script>
+    <script src="js/i18n.js?v=202610032338" defer></script>
     <!-- Firebase: credentials ? config ? globals ? auth ? collection -->
-    <script src="js/firebase-credentials.js?v=202610032310" defer></script>
-    <script src="js/firebase-config.js?v=202610032310" defer></script>
-    <script src="js/firebase-globals.js?v=202610032310" defer></script>
-    <script src="js/firebase-auth.js?v=202610032310" defer></script>
-    <script src="js/auth-ui-helpers.js?v=202610032310" defer></script>
+    <script src="js/firebase-credentials.js?v=202610032338" defer></script>
+    <script src="js/firebase-config.js?v=202610032338" defer></script>
+    <script src="js/firebase-globals.js?v=202610032338" defer></script>
+    <script src="js/firebase-auth.js?v=202610032338" defer></script>
+    <script src="js/auth-ui-helpers.js?v=202610032338" defer></script>
     <!-- Zwei Decklisten nebeneinander. Muss VOR firebase-collection.js
          stehen: showDeckComparison() dort ruft window.DeckVergleichNebeneinander
          auf, sobald die Ansicht "Nebeneinander" gewaehlt wird. -->
-    <script src="js/deck-vergleich-nebeneinander.js?v=202610032310" defer></script>
-    <script src="js/firebase-collection.js?v=202610032310" defer></script>
+    <script src="js/deck-vergleich-nebeneinander.js?v=202610032338" defer></script>
+    <script src="js/firebase-collection.js?v=202610032338" defer></script>
     <!-- Wishlist import for the Telegram bot's card lists (paste, not upload). -->
-    <script src="js/wishlist-bot-import.js?v=202610032310" defer></script>
+    <script src="js/wishlist-bot-import.js?v=202610032338" defer></script>
     <!-- TCG Showdown handoff — replaces the in-app Playtester.
          Standalone helper, no deps; only uses globals from other scripts. -->
-    <script src="js/tcg-showdown-link.js?v=202610032310" defer></script>
+    <script src="js/tcg-showdown-link.js?v=202610032338" defer></script>
     <!-- Chart.js, PapaParse and localForage (IndexedDB wrapper) — self-hosted -->
     <script src="js/vendor/chart.umd.min.js" defer></script>
     <script src="js/vendor/papaparse.min.js" defer></script>
     <script src="js/vendor/localforage.min.js" defer></script>
     <!-- Card data cache layer (IndexedDB) -->
-    <script src="js/card-data-cache.js?v=202610032310" defer></script>
+    <script src="js/card-data-cache.js?v=202610032338" defer></script>
     <!-- Offline prefetcher — warms the SW cache with every data file
          listed in data/offline-manifest.json so the next offline boot
          has the full dataset locally without per-tab warm-up. -->
-    <script src="js/offline-prefetch.js?v=202610032310" defer></script>
+    <script src="js/offline-prefetch.js?v=202610032338" defer></script>
     <!-- App modules -->
-    <script src="js/deck-analysis-shared.js?v=202610032310" defer></script>
-    <script src="js/app-core.js?v=202610032310" defer></script>
-    <script src="js/app-price.js?v=202610032310" defer></script>
+    <script src="js/deck-analysis-shared.js?v=202610032338" defer></script>
+    <script src="js/app-core.js?v=202610032338" defer></script>
+    <script src="js/app-price.js?v=202610032338" defer></script>
     <!-- Die Glaettung muss vor jedem Leser der Matchup-Zahlen stehen:
          app-meta-cards.js baut damit das Register, app-current-meta.js
          die Heatmap, app-archetype-card.js die Karte. -->
     <!-- Was "Win Rate" in diesem Haus heisst: drei Konventionen, jede mit
          ihrer Formel und ihrem Wortlaut. Muss vor allem stehen, was eine
          Quote anzeigt — app-tier-meta, app-past-meta, ds-share. -->
-    <script src="js/win-rate-konvention.js?v=202610032310" defer></script>
-    <script src="js/journal-zuordnung.js?v=202610032310" defer></script>
-    <script src="js/matchup-glaettung.js?v=202610032310" defer></script>
-    <script src="js/rangliste-sortieren.js?v=202610032310" defer></script>
-    <script src="js/ds-bildvorschau.js?v=202610032310" defer></script>
-    <script src="js/app-tier-meta.js?v=202610032310" defer></script>
-    <script src="js/app-city-league.js?v=202610032310" defer></script>
-    <script src="js/app-deck-builder.js?v=202610032310" defer></script>
-    <script src="js/card-capability-engine.js?v=202610032310" defer></script>
-    <script src="js/tech-ideen.js?v=202610032310" defer></script>
-    <script src="js/app-tech-lab.js?v=202610032310" defer></script>
-    <script src="js/app-anti-tech.js?v=202610032310" defer></script>
-    <script src="js/app-meta-cards.js?v=202610032310" defer></script>
-    <script src="js/app-current-meta.js?v=202610032310" defer></script>
-    <script src="js/app-past-meta.js?v=202610032310" defer></script>
-    <script src="js/app-cards-db.js?v=202610032310" defer></script>
+    <script src="js/win-rate-konvention.js?v=202610032338" defer></script>
+    <script src="js/journal-zuordnung.js?v=202610032338" defer></script>
+    <script src="js/matchup-glaettung.js?v=202610032338" defer></script>
+    <script src="js/rangliste-sortieren.js?v=202610032338" defer></script>
+    <script src="js/ds-bildvorschau.js?v=202610032338" defer></script>
+    <script src="js/app-tier-meta.js?v=202610032338" defer></script>
+    <script src="js/app-city-league.js?v=202610032338" defer></script>
+    <script src="js/app-deck-builder.js?v=202610032338" defer></script>
+    <script src="js/card-capability-engine.js?v=202610032338" defer></script>
+    <script src="js/tech-ideen.js?v=202610032338" defer></script>
+    <script src="js/app-tech-lab.js?v=202610032338" defer></script>
+    <script src="js/app-anti-tech.js?v=202610032338" defer></script>
+    <script src="js/app-meta-cards.js?v=202610032338" defer></script>
+    <script src="js/app-current-meta.js?v=202610032338" defer></script>
+    <script src="js/app-past-meta.js?v=202610032338" defer></script>
+    <script src="js/app-cards-db.js?v=202610032338" defer></script>
     <!-- Fuellt die Frische-Chips aus data/data_stand.json, dem im Wochenlauf
          fortgeschriebenen Stand je Datendatei. Muss vor app-init.js stehen,
          das die Fusszeile setzt. -->
-    <script src="js/ds-datenstand.js?v=202610032310" defer></script>
-    <script src="js/app-init.js?v=202610032310" defer></script>
-    <script src="js/app-current-meta-analysis.js?v=202610032310" defer></script>
-    <script src="js/app-features.js?v=202610032310" defer></script>
-    <script src="js/archetype-icons.js?v=202610032310" defer></script>
-    <script src="js/app-archetype-card.js?v=202610032310" defer></script>
-    <script src="js/app-meta-call.js?v=202610032310" defer></script>
-    <script src="js/app-deckempfehlung.js?v=202610032310" defer></script>
-    <script src="js/meta-analysis-hub.js?v=202610032310" defer></script>
-    <script src="js/app-testing-groups.js?v=202610032310" defer></script>
-    <script src="js/battle-journal.js?v=202610032310" defer></script>
-    <script src="js/meta-binder.js?v=202610032310" defer></script>
-    <script src="js/custom-binder.js?v=202610032310" defer></script>
-    <script src="js/archetyp-box.js?v=202610032310" defer></script>
-    <script src="js/draw-simulator.js?v=202610032310" defer></script>
-    <script src="js/app-calculator.js?v=202610032310" defer></script>
-    <script src="js/champions-namen.js?v=202610032310" defer></script>
-    <script src="js/qr-svg.js?v=202610032310" defer></script>
-    <script src="js/pocket-deckcode.js?v=202610032310" defer></script>
-    <script src="js/ds-pocket.js?v=202610032310" defer></script>
-    <script src="js/app-side-quest.js?v=202610032310" defer></script>
-    <script src="js/app-side-quest-play.js?v=202610032310" defer></script>
-    <script src="js/champions-shiny.js?v=202610032310" defer></script>
-    <script src="js/app-side-quest-pokedex.js?v=202610032310" defer></script>
-    <script src="js/app-side-quest-items.js?v=202610032310" defer></script>
+    <script src="js/ds-datenstand.js?v=202610032338" defer></script>
+    <script src="js/app-init.js?v=202610032338" defer></script>
+    <script src="js/app-current-meta-analysis.js?v=202610032338" defer></script>
+    <script src="js/app-features.js?v=202610032338" defer></script>
+    <script src="js/archetype-icons.js?v=202610032338" defer></script>
+    <script src="js/app-archetype-card.js?v=202610032338" defer></script>
+    <script src="js/app-meta-call.js?v=202610032338" defer></script>
+    <script src="js/app-deckempfehlung.js?v=202610032338" defer></script>
+    <script src="js/meta-analysis-hub.js?v=202610032338" defer></script>
+    <script src="js/app-testing-groups.js?v=202610032338" defer></script>
+    <script src="js/battle-journal.js?v=202610032338" defer></script>
+    <script src="js/meta-binder.js?v=202610032338" defer></script>
+    <script src="js/custom-binder.js?v=202610032338" defer></script>
+    <script src="js/archetyp-box.js?v=202610032338" defer></script>
+    <script src="js/draw-simulator.js?v=202610032338" defer></script>
+    <script src="js/app-calculator.js?v=202610032338" defer></script>
+    <script src="js/champions-namen.js?v=202610032338" defer></script>
+    <script src="js/qr-svg.js?v=202610032338" defer></script>
+    <script src="js/pocket-deckcode.js?v=202610032338" defer></script>
+    <script src="js/ds-pocket.js?v=202610032338" defer></script>
+    <script src="js/app-side-quest.js?v=202610032338" defer></script>
+    <script src="js/app-side-quest-play.js?v=202610032338" defer></script>
+    <script src="js/champions-shiny.js?v=202610032338" defer></script>
+    <script src="js/app-side-quest-pokedex.js?v=202610032338" defer></script>
+    <script src="js/app-side-quest-items.js?v=202610032338" defer></script>
     <!-- Der Datenumfang wird in app-tier-meta.js gerechnet und in
          app-quellen.js angezeigt. Muss vor beiden stehen. -->
-    <script src="js/ds-datenumfang.js?v=202610032310" defer></script>
-    <script src="js/app-quellen.js?v=202610032310" defer></script>
-    <script src="js/app-admin.js?v=202610032310" defer></script>
+    <script src="js/ds-datenumfang.js?v=202610032338" defer></script>
+    <script src="js/app-quellen.js?v=202610032338" defer></script>
+    <script src="js/app-admin.js?v=202610032338" defer></script>
     <!-- Die Bruecke zwischen Nutzungs-Slug, Anzeigename und Showdown-Name.
          Muss VOR allem stehen, was ein gebautes Team weiterverarbeitet. -->
-    <script src="js/champions-set.js?v=202610032310" defer></script>
-    <script src="js/champions-names.js?v=202610032310" defer></script>
-    <script src="js/app-side-quest-builder.js?v=202610032310" defer></script>
-    <script src="js/app-side-quest-status.js?v=202610032310" defer></script>
-    <script src="js/app-side-quest-resources.js?v=202610032310" defer></script>
-    <script src="js/champions-damage.js?v=202610032310" defer></script>
-    <script src="js/champions-schwaechen.js?v=202610032310" defer></script>
-    <script src="js/app-side-quest-usage.js?v=202610032310" defer></script>
-    <script src="js/app-side-quest-matchups.js?v=202610032310" defer></script>
+    <script src="js/champions-set.js?v=202610032338" defer></script>
+    <script src="js/champions-names.js?v=202610032338" defer></script>
+    <script src="js/app-side-quest-builder.js?v=202610032338" defer></script>
+    <script src="js/app-side-quest-status.js?v=202610032338" defer></script>
+    <script src="js/app-side-quest-resources.js?v=202610032338" defer></script>
+    <script src="js/champions-damage.js?v=202610032338" defer></script>
+    <script src="js/champions-schwaechen.js?v=202610032338" defer></script>
+    <script src="js/app-side-quest-usage.js?v=202610032338" defer></script>
+    <script src="js/app-side-quest-matchups.js?v=202610032338" defer></script>
     <!-- Kennzeichnung "Kartentext auf Englisch". MUSS vor jeder Datei stehen,
          die einen Kartentext anzeigt — app-profile-deck-builder.js ruft
          window.KartentextHinweis ohne Rueckfall auf. -->
-    <script src="js/kartentext-hinweis.js?v=202610032310" defer></script>
-    <script src="js/app-profile-deck-builder.js?v=202610032310" defer></script>
-    <script src="js/deck-builder-consistency.js?v=202610032310" defer></script>
-    <script src="js/current-meta-quickref.js?v=202610032310" defer></script>
-    <script src="js/ds-nav.js?v=202610032310" defer></script>
+    <script src="js/kartentext-hinweis.js?v=202610032338" defer></script>
+    <script src="js/app-profile-deck-builder.js?v=202610032338" defer></script>
+    <script src="js/deck-builder-consistency.js?v=202610032338" defer></script>
+    <script src="js/current-meta-quickref.js?v=202610032338" defer></script>
+    <script src="js/ds-nav.js?v=202610032338" defer></script>
     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das
          Matchup-Register aus app-meta-cards.js; beide stehen weiter oben.
          Vor ds-sections.js, damit der Block da ist, wenn sektioniert wird. -->
     <!-- Das Register fuer die Abschnittserklaerungen. MUSS vor
          ds-sections.js stehen: das meldet sich dort in start() an. -->
-    <script src="js/ds-abschnitt-info.js?v=202610032310" defer></script>
-    <script src="js/ds-sections.js?v=202610032310" defer></script>
-    <script src="js/ds-filter.js?v=202610032310" defer></script>
-    <script src="js/ds-share.js?v=202610032310" defer></script>
+    <script src="js/ds-abschnitt-info.js?v=202610032338" defer></script>
+    <script src="js/ds-sections.js?v=202610032338" defer></script>
+    <script src="js/ds-filter.js?v=202610032338" defer></script>
+    <script src="js/ds-share.js?v=202610032338" defer></script>
     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne
          Abhaengigkeit: sie legt ein Deck oder ein Turnier in den lokalen
          Speicher, die Post-Seite nimmt es dort auf. Eine Deckliste in der
          Adresse stuende in jedem Verlauf. -->
-    <script src="js/ds-post-uebergabe.js?v=202610032310" defer></script>
-    <script src="js/ds-tutorial.js?v=202610032310" defer></script>
-    <script src="js/ds-masterclass.js?v=202610032310" defer></script>
+    <script src="js/ds-post-uebergabe.js?v=202610032338" defer></script>
+    <script src="js/ds-tutorial.js?v=202610032338" defer></script>
+    <script src="js/ds-masterclass.js?v=202610032338" defer></script>
 
     <!-- Draw Simulator Modal -->
     <div id="drawSimulatorModal" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" data-i18n-aria="aria.startingHand" aria-label="Starting hand simulator">

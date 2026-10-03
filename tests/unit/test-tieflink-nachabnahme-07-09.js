@@ -339,32 +339,10 @@ describe('Zusatz — ein Tieflink, der nicht ankommt, sagt es', () => {
 
 // ── B6 ───────────────────────────────────────────────────────────────
 
-describe('B6 — beide Anleitungen verlinken den externen Playtester', () => {
-    const zaehle = (s, re) => (s.match(re) || []).length;
-    const SHOWDOWN = /href="https:\/\/tcg-showdown\.com\/"/g;
-
-    it('die englische Fassung verlinkt tcg-showdown.com ueberhaupt', () => {
-        assert.ok(zaehle(TUT_EN, SHOWDOWN) >= 2,
-            'gemessen: zweimal genannt, null mal verlinkt — wer den externen '
-            + 'Playtester sucht, muss die Adresse abtippen');
-    });
-
-    it('und zwar gleich oft wie die deutsche', () => {
-        assert.equal(zaehle(TUT_EN, SHOWDOWN), zaehle(TUT_DE, SHOWDOWN));
-    });
-
-    it('beide Fassungen tragen gleich viele Verweise insgesamt', () => {
-        // Die Zahl, an der die Abnahme den Unterschied gemessen hat: 10 gegen 12.
-        assert.equal(zaehle(TUT_EN, /<a /g), zaehle(TUT_DE, /<a /g));
-    });
-
-    it('die neuen Verweise oeffnen extern und ohne Rueckkanal', () => {
-        for (const m of TUT_EN.matchAll(/<a href="https:\/\/tcg-showdown\.com\/"[^>]*>/g)) {
-            assert.match(m[0], /target="_blank"/);
-            assert.match(m[0], /rel="noopener"/);
-        }
-    });
-});
+/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand
+   „B6 — beide Anleitungen verlinken den externen Playtester". Der Block pruefte Inhalte der alten Langfassung der Anleitung,
+   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js
+   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */
 
 // ── M17 / M18 ────────────────────────────────────────────────────────
 

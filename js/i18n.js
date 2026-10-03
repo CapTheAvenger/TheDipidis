@@ -38,7 +38,9 @@ function i18nPreferredLang() {
 const translations = {
   en: {
     // ── Main title & header ──────────────────────────────────
-    'app.title':              'Pokémon TCG Hub',
+    'app.title':              'The Dipidis',
+    'menu.labelBtn':          '☰ Menu',
+    'glossar.nachlesen':      'Look up in the glossary',
     'app.subtitle':           'Your Portal for Meta Analysis & Deck Building',
     'header.signIn':          'Sign In',
     'header.myProfile':       'My Profile',
@@ -51,21 +53,21 @@ const translations = {
 
     // ── Sidebar / Main Menu ──────────────────────────────────
     'menu.title':             'Main Menu',
-    'menu.cityLeague':        'City League Meta',
-    'menu.cityLeagueAnalysis':'Deck Analysis (Japan)',
+    'menu.cityLeague':        'Japan (City League)',
+    'menu.cityLeagueAnalysis':'Deck analysis (Japan)',
     'menu.currentMeta':       'Current Meta (Global)',
     'menu.currentMetaAnalysis':'Deck Analysis (Global)',
-    'menu.pastMeta':          'Past Meta',
+    'menu.pastMeta':          'Past formats',
     'menu.hub':               'Home',
     'profile.botImport':      '📋 Paste list',
     'profile.botImportHint':  'Paste a card list from the Telegram bot — the whole message is fine',
     'menu.toolsGroup':        'Tools',
     'menu.hubTitle':          'Back to home',
-    'menu.deckBuilderTitle':  'Deck Builder — build, save and analyse decks',
+    'menu.deckBuilderTitle':  'Build a deck — build, save and analyse decks',
     'menu.cardDatabase':      'Card Database',
     'menu.metaCall':          'Meta Call',
     'menu.metaCallTitle':     'Meta Call \u2014 predicted field for your next tournament',
-    'menu.deckBuilder':       'Deck Builder',
+    'menu.deckBuilder':       'Build a deck',
     'menu.proxyPrinter':      'Proxy Printer',
     'menu.calculator':        'Calculator',
     'menu.playtester':        'Playtester',
@@ -89,7 +91,7 @@ const translations = {
     'tab.cityLeagueAnalysis': 'City League Deck Analysis',
     'tab.currentMeta':        'Current Meta',
     'tab.currentMetaAnalysis':'Current Meta Deck Analysis',
-    'tab.pastMeta':           'Past Meta',
+    'tab.pastMeta':           'Past formats',
     'tab.cards':              'Cards',
     'tab.proxyPrinter':       'Proxy Printer',
     'tab.playtester':         'Playtester',
@@ -116,7 +118,7 @@ const translations = {
     'metaHub.tile.currentMetaAnalysis.bullets': [
         'One global deck from the inside: cards, shares, matchups.'
     ],
-    'metaHub.tile.pastMeta.title':              'Past Meta',
+    'metaHub.tile.pastMeta.title':              'Past formats',
     'metaHub.tile.pastMeta.bullets':            [
         'Completed formats, frozen — for comparison.'
     ],
@@ -846,7 +848,7 @@ const translations = {
     'abx.entfernenTitel': 'Remove from the box',
     'abx.hinzugefuegt': '“{name}” added.',
     'abx.keinTreffer': 'No card found.',
-    'abx.keineBox': 'No archetype box yet. Open Rotations, choose “All formats” and an archetype, then tap “Add to archetype box” in the card overview.',
+    'abx.keineBox': 'No archetype box yet. Open Past formats, choose “All formats” and an archetype, then tap “Add to archetype box” in the card overview.',
     'abx.keineKarten': 'No cards with set and number found.',
     'abx.keineNeuen': 'No new cards — the box already knows every card in the tournament data.',
     'abx.knopfAktualisieren': 'Update archetype box',
@@ -907,7 +909,7 @@ const translations = {
     'abx.summe': '{fehlt} missing · {original} in as original · {proxy} in as proxy',
     'abx.undWeitere': 'and {n} more',
     'abx.wenigerAria': 'One copy less',
-    'abx.zuRotationen': 'Go to Rotations',
+    'abx.zuRotationen': 'Go to past formats',
     'abx.alleBoxen': 'All boxes',
     'abx.alleMeta': '{n} boxes together: {liste}',
     'abx.fAlle': 'All',
@@ -1016,7 +1018,7 @@ const translations = {
     'abx.uebernehmen': 'Apply',
     'abx.wunschTitel': 'Put the missing copies on the wishlist',
     'profile.compareDecklists':  'Compare Decklists',
-    'profile.deckBuilder':       'Deck Builder',
+    'profile.deckBuilder':       'Build a deck',
     'profile.compareNote':       'Paste two decklists to compare them side by side',
     'profile.deckA':             'Deck A (Old)',
     'profile.deckB':             'Deck B (New)',
@@ -1078,6 +1080,9 @@ const translations = {
     'cb.presetSaved':           'Binder "{name}" saved.',
     'cb.load':                  'Load',
     'cb.noArchetypesSelected':  'No archetypes selected.',
+    'bj.formatWaehlen':         '— Choose format —',
+    'mb.emptyText':             'Generate the binder to compare current meta staples with your collection.',
+    'mb.loadSaved':             '📂 Load saved binder',
     'cb.promptPresetName':      'Name for this binder:',
     'cb.filterNew':             'New',
     'cb.maxArchetypes':         'Maximum 30 archetypes.',
@@ -1212,7 +1217,7 @@ const translations = {
     'mc.panelSource':           'Source',
     'mc.panelDataSources':      'Data Sources',
     'mc.badgeOptional':         'Optional',
-    'mc.sourcePastMeta':        'Past Meta',
+    'mc.sourcePastMeta':        'Past formats',
     'mc.sourceCurrentCityLeague': 'Current City League',
     'mc.sourcePastCityLeague':  'Past City League',
     'mc.sourceNoData':          'no data',
@@ -1960,7 +1965,7 @@ const translations = {
 
     // ── Format select ────────────────────────────────────────
     'format.m4current':         'Current Meta',
-    'format.m3archive':         'Past Meta',
+    'format.m3archive':         'Past formats',
 
     // ── Sort & Profile ───────────────────────────────────────
     'sort.pokedex':             'By Pokédex No.',
@@ -2628,7 +2633,7 @@ const translations = {
     'cloudSync.deckPlural':           'decks',
     'cloudSync.errPrecondition':      'another tab is using the cache',
     'cloudSync.errUnimplemented':     'browser does not support offline cache',
-    'cloudSync.errApiRemoved':        'SDK version without offline cache',
+    'cloudSync.errApiRemoved':        'offline storage not available in this browser',
     'cloudSync.errInitThrew':         'cache init failed',
     'cloudSync.errUnknown':           'unknown reason',
 
@@ -2640,7 +2645,7 @@ const translations = {
     'proxy.numberPlaceholder':  'No.',
     'proxy.addCLDeck':          'Add City League Deck',
     'proxy.addCMDeck':          'Add Current Meta Deck',
-    'proxy.addPMDeck':          'Add Past Meta Deck',
+    'proxy.addPMDeck':          'Add deck from past formats',
     'proxy.printQueue':         'Print Queue',
 
     // ── Tab 8: Sandbox Playtester ────────────────────────────
@@ -2856,7 +2861,7 @@ const translations = {
     'cdb.nextAria':             'Next page',
 
     // ── Side Quest header (Befund F) ─────────────────────────
-    'sideQuest.subtitle':       'Top current doubles teams from op.gg / victoryroad — tap a replica code to copy it.',
+    'sideQuest.subtitle':       'Pokémon Champions is a video game, not the card game. Top current doubles teams from op.gg / victoryroad — tap a replica code to copy it.',
     'sideQuest.lastUpdated':    'Last updated:',
     'sideQuest.loading':        'Loading…',
 
@@ -2935,7 +2940,9 @@ const translations = {
 
   de: {
     // ── Main title & header ──────────────────────────────────
-    'app.title':              'Pokémon TCG Hub',
+    'app.title':              'The Dipidis',
+    'menu.labelBtn':          '☰ Menü',
+    'glossar.nachlesen':      'Im Glossar nachlesen',
     'app.subtitle':           'Dein Portal für Meta-Analyse & Deckbau',
     'header.signIn':          'Anmelden',
     'header.myProfile':       'Mein Profil',
@@ -2948,21 +2955,21 @@ const translations = {
 
     // ── Sidebar / Main Menu ──────────────────────────────────
     'menu.title':             'Hauptmenü',
-    'menu.cityLeague':        'City League Meta',
+    'menu.cityLeague':        'Japan (City League)',
     'menu.cityLeagueAnalysis':'Deck-Analyse (Japan)',
     'menu.currentMeta':       'Aktuelles Meta (Global)',
     'menu.currentMetaAnalysis':'Deck-Analyse (Global)',
-    'menu.pastMeta':          'Vergangenes Meta',
+    'menu.pastMeta':          'Vergangene Formate',
     'menu.hub':               'Startseite',
     'profile.botImport':      '📋 Liste einfügen',
     'profile.botImportHint':  'Kartenliste aus dem Telegram-Bot einfügen — die komplette Nachricht reicht',
     'menu.toolsGroup':        'Werkzeuge',
     'menu.hubTitle':          'Zur Startseite',
-    'menu.deckBuilderTitle':  'Deck Builder — Decks bauen, speichern und analysieren',
+    'menu.deckBuilderTitle':  'Deck bauen — Decks zusammenstellen, speichern und analysieren',
     'menu.cardDatabase':      'Kartendatenbank',
     'menu.metaCall':          'Meta Call',
     'menu.metaCallTitle':     'Meta Call \u2014 vorhergesagtes Meta f\u00fcr dein n\u00e4chstes Turnier',
-    'menu.deckBuilder':       'Deck Builder',
+    'menu.deckBuilder':       'Deck bauen',
     'menu.proxyPrinter':      'Proxy-Drucker',
     'menu.calculator':        'Rechner',
     'menu.playtester':        'Playtester',
@@ -2978,7 +2985,7 @@ const translations = {
     'tab.cityLeagueAnalysis': 'City League Deck-Analyse',
     'tab.currentMeta':        'Aktuelles Meta',
     'tab.currentMetaAnalysis':'Aktuelle Meta Deck-Analyse',
-    'tab.pastMeta':           'Vergangenes Meta',
+    'tab.pastMeta':           'Vergangene Formate',
     'tab.cards':              'Karten',
     'tab.proxyPrinter':       'Proxy-Drucker',
     'tab.playtester':         'Playtester',
@@ -3005,7 +3012,7 @@ const translations = {
     'metaHub.tile.currentMetaAnalysis.bullets': [
         'Ein globales Deck von innen: Karten, Anteile, Matchups.'
     ],
-    'metaHub.tile.pastMeta.title':              'Vergangenes Meta',
+    'metaHub.tile.pastMeta.title':              'Vergangene Formate',
     'metaHub.tile.pastMeta.bullets':            [
         'Abgeschlossene Formate, eingefroren — zum Vergleichen.'
     ],
@@ -3737,7 +3744,7 @@ const translations = {
     'abx.entfernenTitel': 'Aus der Box entfernen',
     'abx.hinzugefuegt': '„{name}“ hinzugefügt.',
     'abx.keinTreffer': 'Keine Karte gefunden.',
-    'abx.keineBox': 'Noch keine Archetyp-Box. Öffne Rotationen, wähle „Alle Formate“ und einen Archetyp und tippe in der Kartenübersicht auf „Zu Archetyp-Box hinzufügen“.',
+    'abx.keineBox': 'Noch keine Archetyp-Box. Öffne Vergangene Formate, wähle „Alle Formate“ und einen Archetyp und tippe in der Kartenübersicht auf „Zu Archetyp-Box hinzufügen“.',
     'abx.keineKarten': 'Keine Karten mit Set und Nummer gefunden.',
     'abx.keineNeuen': 'Keine neuen Karten — die Box kennt alle Karten der Turnierdaten.',
     'abx.knopfAktualisieren': 'Archetyp-Box aktualisieren',
@@ -3798,7 +3805,7 @@ const translations = {
     'abx.summe': '{fehlt} fehlen · {original} als Original drin · {proxy} als Proxy drin',
     'abx.undWeitere': 'und {n} weitere',
     'abx.wenigerAria': 'Eine Kopie weniger',
-    'abx.zuRotationen': 'Zu Rotationen',
+    'abx.zuRotationen': 'Zu Vergangene Formate',
     'abx.alleBoxen': 'Alle Boxen',
     'abx.alleMeta': '{n} Boxen zusammen: {liste}',
     'abx.fAlle': 'Alle',
@@ -3907,7 +3914,7 @@ const translations = {
     'abx.uebernehmen': 'Übernehmen',
     'abx.wunschTitel': 'Fehlende auf die Wunschliste',
     'profile.compareDecklists':  'Decklisten vergleichen',
-    'profile.deckBuilder':       'Deck Builder',
+    'profile.deckBuilder':       'Deck bauen',
     'profile.compareNote':       'Füge zwei Decklisten ein, um sie nebeneinander zu vergleichen',
     'profile.deckA':             'Deck A (Alt)',
     'profile.deckB':             'Deck B (Neu)',
@@ -3969,6 +3976,9 @@ const translations = {
     'cb.presetSaved':           'Binder "{name}" gespeichert.',
     'cb.load':                  'Laden',
     'cb.noArchetypesSelected':  'Keine Archetypen ausgew\u00e4hlt.',
+    'bj.formatWaehlen':         '— Format wählen —',
+    'mb.emptyText':             'Erstelle den Binder, um die aktuellen Meta-Staples mit deiner Sammlung zu vergleichen.',
+    'mb.loadSaved':             '📂 Gespeicherten Binder laden',
     'cb.promptPresetName':      'Name f\u00fcr diesen Binder:',
     'cb.filterNew':             'Neu',
     'cb.maxArchetypes':         'Maximal 30 Archetypen.',
@@ -4103,7 +4113,7 @@ const translations = {
     'mc.panelSource':           'Quelle',
     'mc.panelDataSources':      'Datenquellen',
     'mc.badgeOptional':         'Optional',
-    'mc.sourcePastMeta':        'Vergangenes Meta',
+    'mc.sourcePastMeta':        'Vergangene Formate',
     'mc.sourceCurrentCityLeague': 'Aktuelle City League',
     'mc.sourcePastCityLeague':  'Vergangene City League',
     'mc.sourceNoData':          'keine Daten',
@@ -4853,7 +4863,7 @@ const translations = {
 
     // ── Format select ────────────────────────────────────────
     'format.m4current':         'Aktuelles Meta',
-    'format.m3archive':         'Vergangenes Meta',
+    'format.m3archive':         'Vergangene Formate',
 
     // ── Sort & Profile ───────────────────────────────────────
     'sort.pokedex':             'Nach Pokédex-Nr.',
@@ -5282,8 +5292,8 @@ const translations = {
     'pm.familieTitel':          'Alle {name}-Decks',
     'pm.familieHinweis':        'Sammelbox über {n} Varianten mit {name} als Hauptpokémon: {liste}. Die Prozentzahlen unten stehen auf den Listen ALLER dieser Varianten zusammen — eine Karte, die in einer Variante Pflicht ist und in den anderen fehlt, sieht dadurch selten aus. Für eine Box zum Nachbauen ist das gewollt; willst du wissen, was genau eine Variante spielt, wähle sie einzeln.',
     'pm.familieKeineBilanz':    'Für eine Sammelauswahl gibt es keine Turnierbilanz: Limitless führt Ergebnisse je Archetyp, und „Alle {name}-Decks“ ist keiner. Wähle eine einzelne Variante, um ihre Bilanz und ihre Matchups zu sehen.',
-    'pm.toastLoading':          'Vergangenes Meta wird geladen …',
-    'pm.toastLoaded':           'Vergangenes Meta: {n} Decks geladen',
+    'pm.toastLoading':          'Vergangene Formate werden geladen …',
+    'pm.toastLoaded':           'Vergangene Formate: {n} Decks geladen',
     'stats.tournament':         'Turnier',
     'stats.format':             'Format',
 
@@ -5341,7 +5351,7 @@ const translations = {
     'toast.deckEmpty':             'Das Deck ist leer.',
     'toast.pasteOldList':          'Füg zuerst die alte Deckliste ein.',
     'toast.noPastDataFor':         'Keine Turnierdaten für ',
-    'toast.pastMetaLoadError':     'Vergangenes Meta ließ sich nicht laden: ',
+    'toast.pastMetaLoadError':     'Vergangene Formate ließen sich nicht laden: ',
     'toast.deckLoadError':         'Deck ließ sich nicht laden: ',
     'toast.nothingToCopy':         'Da ist nichts zum Kopieren.',
     'toast.deckListCopied':        'Deckliste kopiert.',
@@ -5507,7 +5517,7 @@ const translations = {
     'cloudSync.deckPlural':           'Decks',
     'cloudSync.errPrecondition':      'anderer Tab nutzt den Cache',
     'cloudSync.errUnimplemented':     'Browser unterstützt keinen Offline-Cache',
-    'cloudSync.errApiRemoved':        'SDK-Version ohne Offline-Cache',
+    'cloudSync.errApiRemoved':        'Offline-Speicher in diesem Browser nicht verfügbar',
     'cloudSync.errInitThrew':         'Cache-Init fehlgeschlagen',
     'cloudSync.errUnknown':           'unbekannter Grund',
 
@@ -5519,7 +5529,7 @@ const translations = {
     'proxy.numberPlaceholder':  'Nr.',
     'proxy.addCLDeck':          'City League Deck hinzufügen',
     'proxy.addCMDeck':          'Aktuelles Meta Deck hinzufügen',
-    'proxy.addPMDeck':          'Vergangenes Meta Deck hinzufügen',
+    'proxy.addPMDeck':          'Deck aus vergangenen Formaten hinzufügen',
     'proxy.printQueue':         'Warteschlange drucken',
 
     // ── Tab 8: Sandbox-Playtester ────────────────────────────
@@ -5560,7 +5570,7 @@ const translations = {
 
     // ── Telegram Preisalarme (Einstellungen Unter-Sektion) ───
     'profile.priceAlerts.title':          'Telegram-Preisalarme',
-    'profile.priceAlerts.intro':          'Bekomme eine Telegram-Nachricht, wenn der Marktpreis einer Wishlist-Karte auf oder unter deinen Maximalwert sinkt — oder wenn der Marktpreis einer Trade-Karte über deinem Mindestpreis liegt. So bist du immer auf dem aktuellen Stand.',
+    'profile.priceAlerts.intro':          'Bekomme eine Telegram-Nachricht, wenn der Marktpreis einer Karte auf deiner Wunschliste auf oder unter deinen Maximalwert sinkt — oder wenn der Marktpreis einer Karte auf deiner Tauschliste über deinem Mindestpreis liegt. So bist du immer auf dem aktuellen Stand.',
     'profile.priceAlerts.toggle':         'Telegram-Preisalarme aktivieren',
     'profile.priceAlerts.chatIdLabel':    'Telegram-Chat-ID',
     'audit.energyRange':       'Energie-Economy: {n} (Modern: 7–11)',
@@ -5723,7 +5733,7 @@ const translations = {
     'cdb.nextAria':             'Nächste Seite',
 
     // ── Side-Quest-Kopfbereich (Befund F) ────────────────────
-    'sideQuest.subtitle':       'Aktuelle Top-Doubles-Teams von op.gg / victoryroad — tippe auf einen Replica-Code, um ihn zu kopieren.',
+    'sideQuest.subtitle':       'Pokémon Champions ist ein Videospiel, nicht das Kartenspiel. Aktuelle Top-Teams für Doppelkämpfe von op.gg / victoryroad — tippe auf einen Replica-Code, um ihn zu kopieren.',
     'sideQuest.lastUpdated':    'Stand:',
     'sideQuest.loading':        'Wird geladen…',
 

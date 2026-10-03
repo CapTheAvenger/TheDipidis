@@ -2471,14 +2471,12 @@
                               + `${nichtZugeordnet.length === 1 ? 'findet' : 'finden'} keine Entsprechung in der Deck-Übersicht und `
                               + `${nichtZugeordnet.length === 1 ? 'steht' : 'stehen'} deshalb als eigene Zeile: `
                               + nichtZugeordnet.join(', ')
-                              + '. Die gepflegte Namensbrücke in data/archetype_aliases.json nimmt nur Paare auf, '
-                              + 'die einzeln nachgerechnet wurden — ein ähnlicher Name genügt nicht.'
+                              + '. Zugeordnet wird nur, was einzeln nachgerechnet wurde — ein ähnlicher Name genügt nicht.'
                             : `${nichtZugeordnet.length} tournament name${nichtZugeordnet.length === 1 ? '' : 's'} `
                               + `${nichtZugeordnet.length === 1 ? 'has' : 'have'} no counterpart in the deck breakdown and therefore `
                               + `${nichtZugeordnet.length === 1 ? 'appears' : 'appear'} as separate rows: `
                               + nichtZugeordnet.join(', ')
-                              + '. The curated name bridge in data/archetype_aliases.json only takes pairs that were '
-                              + 'checked one by one — a similar name is not enough.')}</p>`
+                              + '. Only pairs checked one by one are matched — a similar name is not enough.')}</p>`
                         : '';
 
                     overallTop8Html = `

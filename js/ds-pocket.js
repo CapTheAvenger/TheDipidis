@@ -270,12 +270,16 @@
         s += '<div class="header">';
         s += '<h2>' + esc(t('Side Quest · Pokémon TCG Pocket',
                             'Side Quest · Pokémon TCG Pocket')) + '</h2>';
-        s += '<p>' + esc(t('Die meistgespielten Decks der Online-Turniere auf Limitless, ' +
-                           'letzte ' + (f.tage || '?') + ' Tage. Deck antippen, Muster zeigen, ' +
-                           'zweites Gerät scannt.',
-                           'The most played decks of the online tournaments on Limitless, last ' +
-                           (f.tage || '?') + ' days. Tap a deck, show the pattern, scan it with ' +
-                           'a second device.')) + '</p>';
+        /* UI-90 (03.10.2026, Tiefenanalyse N-18): ein Satz Einordnung —
+           Pocket ist ein eigenes Handyspiel, und der Musterweg war unklar. */
+        s += '<p>' + esc(t('Pokémon TCG Pocket ist ein eigenes Handyspiel mit eigenen Karten und Regeln. ' +
+                           'Hier stehen die meistgespielten Decks der Online-Turniere auf Limitless, ' +
+                           'letzte ' + (f.tage || '?') + ' Tage. Tippe ein Deck an: es zeigt ein Muster, ' +
+                           'das du mit dem Handy, auf dem Pocket läuft, scannst.',
+                           'Pokémon TCG Pocket is a separate mobile game with its own cards and rules. ' +
+                           'These are the most played decks of the online tournaments on Limitless, last ' +
+                           (f.tage || '?') + ' days. Tap a deck: it shows a pattern you scan with the ' +
+                           'phone that runs Pocket.')) + '</p>';
         s += '</div>';
 
         var w = wr();

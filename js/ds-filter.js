@@ -61,7 +61,7 @@
            (abgeschlossene Rotationen), "Vergangenes Meta" ein anderer
            ZEITRAUM innerhalb Japans. Der Raum heisst jetzt nach dem,
            was ihn unterscheidet. */
-        { key: 'past', tab: 'past-meta',   de: '📦 Rotationen', en: '📦 Rotations',
+        { key: 'past', tab: 'past-meta',   de: '📦 Vergangene Formate', en: '📦 Past formats',
           quelle: 'pastMetaFormatFilter', zweiteDe: 'Format', zweiteEn: 'Format',
           /* UI-33 (27.09.2026, Hausi): in Rotationen gehoert das Format
              zu Turnier-Filter, Archetyp und Karten-Share — dort steht

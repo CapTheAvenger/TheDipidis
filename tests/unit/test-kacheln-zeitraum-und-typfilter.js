@@ -608,7 +608,11 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {
         await s.kontext.renderCurrentMetaTop256('Dragapult');
         const h = s.listEl.innerHTML;
         assert.match(h, /11\u00d7|11×/, 'die Zahl der Listen steht nicht vorn');
-        assert.match(h, /total_decks_in_archetype/, 'das Feld fehlt in der Liste');
+        /* UI-77 (03.10.2026): Spaltenname und Datei stehen nicht mehr
+           sichtbar in der Liste (Entwicklertext, N-05), sondern im Titel
+           der Ueberschrift — dort wird die Herkunft weiter geprueft. */
+        assert.doesNotMatch(h, /total_decks_in_archetype/, 'der Spaltenname steht wieder sichtbar in der Liste');
+        assert.match(s.titelEl._attr.title || '', /total_decks_in_archetype/, 'das Feld fehlt im Titel der Ueberschrift');
         assert.match(h, /1 Turnier im aktuellen Meta-Fenster/, 'die Zahl der Turniere im Zeitraum fehlt');
         assert.match(h, /11 Listen/, 'die Gesamtzahl der Listen fehlt');
         assert.match(h, /Datenfenster/, 'der Vorbehalt zum Datenfenster fehlt');
@@ -629,7 +633,8 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {
             { archetype: 'Dragapult', tournament_name: 'Worlds', tournament_date: '2026-08-28', total_decks_in_archetype: '11' },
         ];
         await s.kontext.renderCurrentMetaTop256('Dragapult');
-        const h = s.listEl.innerHTML;
+        // UI-77 (03.10.2026): die Herkunft steht im Titel der Ueberschrift, nicht mehr sichtbar in der Liste.
+        const h = s.titelEl._attr.title || '';
         assert.match(h, /data\/tournament_cards_data_cards_TEF-PBL\.csv/,
             'die aufgeloeste Formatdatei steht nicht in der Liste');
         assert.doesNotMatch(h, /data\/tournament_cards_data_cards\.csv/,
@@ -650,7 +655,8 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {
             { archetype: 'Dragapult', tournament_name: 'Worlds', tournament_date: '2026-08-28', total_decks_in_archetype: '11' },
         ];
         await s.kontext.renderCurrentMetaTop256('Dragapult');
-        const h = s.listEl.innerHTML;
+        // UI-77 (03.10.2026): die Herkunft steht im Titel der Ueberschrift, nicht mehr sichtbar in der Liste.
+        const h = s.titelEl._attr.title || '';
         assert.doesNotMatch(h, /data\/tournament_cards_data_cards/,
             'ohne Manifest wird ein Dateiname geraten');
         assert.match(h, /nicht auflösen|nicht aufl&#246;sen/,

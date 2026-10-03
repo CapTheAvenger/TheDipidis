@@ -1,3 +1,19 @@
+/* UI-78 (03.10.2026): Erste Schritte + Glossar (tutorial/tutorial.*.html)
+   und die antippbaren ⓘ-Knoepfe (data-glossar), die dorthin springen. */
+.tutorial-schritte, .tutorial-liste { margin: 0 0 16px; padding-left: 1.4em; line-height: 1.55; }
+.tutorial-schritte li, .tutorial-liste li { margin-bottom: 8px; }
+.glossar { margin: 0; }
+.glossar dt { font-weight: 700; margin-top: 14px; scroll-margin-top: 90px; border-radius: 4px; }
+.glossar dd { margin: 4px 0 0; line-height: 1.55; color: var(--text-main); }
+.glossar dt.glossar-markiert { background: color-mix(in srgb, var(--pokemon-red, #E3350D) 18%, transparent); }
+.glossar-i {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 24px; min-height: 24px; margin-left: 4px; padding: 0 4px;
+    border: none; background: none; color: var(--text-muted); cursor: pointer;
+    font: inherit; font-size: 0.95em; line-height: 1; vertical-align: middle;
+}
+.glossar-i:hover, .glossar-i:focus-visible { color: var(--pokemon-red, #E3350D); }
+
 /* ── Feste dunkle Textfarben -> Token (29.08.2026) ────────────────
  *
  * Gemessen im Dunkelmodus: 569 Textstellen allein in der Anleitung unter
@@ -1168,7 +1184,6 @@
     height: 130%;
     background-size: cover;
     background-position: top center;
-    background-image: var(--bg);
     opacity: 0.2;
     -webkit-mask-image: linear-gradient(to right, transparent 0%, black 60%);
             mask-image: linear-gradient(to right, transparent 0%, black 60%);
@@ -3382,6 +3397,7 @@
  * Damit der Kasten im Dunkeln nicht blendet, sitzt er auf einem Rahmen
  * und ist leicht heruntergedimmt — er soll als Abbildung lesbar sein,
  * nicht als Scheinwerfer. */
+
 [data-theme="dark"] .tutorial-mockup {
     --surface-1: #ffffff;
     --surface-2: #f1f3f7;
@@ -3414,3 +3430,4 @@
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 10px 30px rgba(0, 0, 0, 0.45);
     filter: brightness(0.9);
 }
+

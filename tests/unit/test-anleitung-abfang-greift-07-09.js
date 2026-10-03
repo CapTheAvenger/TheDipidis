@@ -131,11 +131,15 @@ describe('B5/F8.5b — der Abfang greift wirklich, nicht nur im Stub', () => {
             + 'eine einzige Zusicherung dieses Projekts es merkt.');
     });
 
-    it('die neun Verweise stehen unveraendert in beiden Anleitungen', () => {
+    it('die neue Anleitung hat keine toten Verweise mehr', () => {
+        /* UI-78 (03.10.2026): die alte Anleitung mit ihren neun
+           href="#"-Verweisen ist durch „Erste Schritte + Glossar" ersetzt.
+           Der Abfang oben bleibt — er greift, falls je wieder einer
+           hineinkommt; die neue Fassung hat keinen. */
         for (const datei of ['tutorial/tutorial.de.html', 'tutorial/tutorial.en.html']) {
             const txt = fs.readFileSync(path.join(WURZEL, datei), 'utf8');
             const tote = [...txt.matchAll(/<a href="#">([^<]*)<\/a>/g)].map(m => m[1]);
-            assert.equal(tote.length, 9, datei + ': ' + JSON.stringify(tote));
+            assert.equal(tote.length, 0, datei + ': ' + JSON.stringify(tote));
         }
     });
 

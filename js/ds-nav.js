@@ -113,9 +113,9 @@
     ];
 
     var LABELS = {
-        de: { meta: 'Meta', decks: 'Decks', turnier: 'Meta Call',
+        de: { meta: 'Meta', decks: 'Deck-Analyse', turnier: 'Meta Call',
               champions: 'Champions', pocket: 'Pocket' },
-        en: { meta: 'Meta', decks: 'Decks', turnier: 'Meta Call',
+        en: { meta: 'Meta', decks: 'Deck analysis', turnier: 'Meta Call',
               champions: 'Champions', pocket: 'Pocket' }
     };
 
@@ -147,8 +147,8 @@
             en: { region: '🌐 Global · Online + Majors', source: 'Limitless Online' }
         },
         past: {
-            de: { region: '📦 Past · eingefrorene Formate', source: 'Limitless Labs' },
-            en: { region: '📦 Past · frozen formats', source: 'Limitless Labs' }
+            de: { region: '📦 Vergangene Formate', source: 'Limitless Labs' },
+            en: { region: '📦 Past formats', source: 'Limitless Labs' }
         }
     };
 

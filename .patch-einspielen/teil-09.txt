@@ -1,0 +1,70 @@
+-                : tx('abx.neueDatenAlle', { datum: datumLesbar(manifestDatum), liste: alt.map(nameVon).join(', ') },|
+-                    'Turnierdaten bis {datum} — noch nicht abgeglichen: {liste}. Box antippen und aktualisieren.')) + '</p>'|
++                : tx('abx.neueDatenAlle', { datum: datumLesbar(manifestDatum), n: alt.length },|
++                    'Turnierdaten bis {datum} — bei {n} Boxen noch nicht abgeglichen. „Alle Boxen aktualisieren“ holt sie nach.')) + '</p>'|
+             : '';|
+@@ -2149,2 +2185,6 @@|
+                 : '')|
++            + (sichtbareKarten.length|
++                ? '<button type="button" class="btn btn-outline abx-kopieren-btn" onclick="ArchetypBox.kopieren()">'|
++                    + esc(tx('abx.kopieren', { n: sichtbareKarten.length }, 'Gefilterte Karten kopieren ({n})')) + '</button>'|
++                : '')|
+             + (eine ? '<button type="button" class="btn btn-outline" onclick="ArchetypBox.loeschen(\'' + esc(eine.id) + '\')">'|
+@@ -2674,2 +2714,27 @@|
+ |
++    /** Legt die gerade sichtbaren (gefilterten) Karten als Deckliste in die Zwischenablage. */|
++    async function kopieren() {|
++        const zeilen = deckzeilenAus(sichtbareKarten);|
++        if (!zeilen.length) {|
++            toast(tx('abx.kopierenLeer', null, 'Keine Karten zum Kopieren.'), 'warning');|
++            return;|
++        }|
++        const text = zeilen.join('\n');|
++        let ok = false;|
++        try {|
++            if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); ok = true; }|
++        } catch (_) { ok = false; }|
++        if (!ok) {|
++            try {|
++                const ta = document.createElement('textarea');|
++                ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';|
++                document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length);|
++                ok = document.execCommand('copy');|
++                document.body.removeChild(ta);|
++            } catch (_) { ok = false; }|
++        }|
++        toast(ok ? tx('abx.kopiert', { n: zeilen.length }, '{n} Karten kopiert — im Deckbuilder einfügen.')|
++                 : tx('abx.kopierenFehler', null, 'Kopieren hat nicht geklappt.'), ok ? 'success' : 'error');|
++    }|
++|
+     async function eigeneAnlegen() {|
+@@ -2772,2 +2837,3 @@|
+         wunsch: wunsch,|
++        kopieren: kopieren,|
+         wieder: wieder,|
+diff --git a/js/i18n.js b/js/i18n.js|
+index 1051c896..ce69e59e 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -937,3 +937,3 @@ const translations = {|
+     'abx.gefiltert': '({n} of {g} after filter)',|
+-    'abx.neueDatenAlle': 'Tournament data up to {datum} — not synced yet: {liste}. Tap a box and update it.',|
++    'abx.neueDatenAlle': 'Tournament data up to {datum} — {n} boxes not synced yet. "Update all boxes" catches them up.',|
+     'abx.wiederTitel': 'Removed before — played more again',|
+@@ -966,2 +966,11 @@ const translations = {|
+     'abx.stufe.raus': 'No longer legal',|
++    'abx.stufe.eigen': 'Own box',|
++    'abx.kopieren': 'Copy filtered cards ({n})',|
++    'abx.kopiert': '{n} cards copied — paste them into the deck builder.',|
++    'abx.kopierenLeer': 'No cards to copy.',|
++    'abx.kopierenFehler': 'Copying did not work.',|
++    'abx.legalStandard': 'Standard',|
++    'abx.legalExpanded': 'Expanded',|
++    'abx.legalStandardTitel': 'At least one print is legal in {fmt}.',|
++    'abx.legalExpandedTitel': 'Not Standard-legal, Expanded only.',|
+     'abx.fAnsicht': 'View',|
+@@ -3797,3 +3806,3 @@ const translations = {|
+     'abx.gefiltert': '({n} von {g} nach Filter)',|
+-    'abx.neueDatenAlle': 'Turnierdaten bis {datum} — noch nicht abgeglichen: {liste}. Box antippen und aktualisieren.',|
++    'abx.neueDatenAlle': 'Turnierdaten bis {datum} — bei {n} Boxen noch nicht abgeglichen. „Alle Boxen aktualisieren“ holt sie nach.',|
+     'abx.wiederTitel': 'Schon mal entfernt — wieder öfter gespielt',|

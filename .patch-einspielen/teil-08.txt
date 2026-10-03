@@ -1,0 +1,59 @@
++            gesehen.add(k.id);|
++            zeilen.push(Math.max(1, Number(k.gefordert) || 0) + ' ' + k.name + ' ' + k.set + ' ' + k.number);|
++        });|
++        return zeilen;|
++    }|
++|
+     const Logik = {|
++        deckzeilenAus: deckzeilenAus,|
+         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,|
+@@ -1198,2 +1219,4 @@|
+     let letztesErgebnis = null; // {id, neu:[], nichtMehr:[]}|
++    let sichtbareKarten = [];   // Karten der aktuellen (gefilterten) Ansicht, fuer "Gefilterte kopieren"|
++    let ansichtKontext = null;  // Formatkontext der aktuellen Ansicht, fuer die Standard-Marke an der Kachel|
+     let manifestDatum = null;|
+@@ -1840,3 +1863,3 @@|
+         const legende = Object.keys(stufen).length|
+-            ? '<p class="abx-stufen-legende">' + ['gespielt', 'legal', 'raus'].filter(function (s) { return stufen[s]; })|
++            ? '<p class="abx-stufen-legende">' + ['gespielt', 'legal', 'raus', 'eigen'].filter(function (s) { return stufen[s]; })|
+                 .map(function (s) {|
+@@ -1851,2 +1874,14 @@|
+ |
++    /** Standard-Marke an der Karte: Standard-legal (mindestens ein Druck) oder nur Expanded; unbekannt -> keine. */|
++    function legalMarke(k) {|
++        const c = ansichtKontext;|
++        if (!c || typeof c.legal !== 'function' || !c.legalBekannt) return '';|
++        const l = c.legal(k);|
++        if (l === true) return '<span class="abx-legal abx-legal-standard" title="' + esc(tx('abx.legalStandardTitel', { fmt: c.standard || '' },|
++            'Mindestens ein Druck ist in {fmt} legal.')) + '">' + esc(tx('abx.legalStandard', null, 'Standard')) + '</span>';|
++        if (l === false) return '<span class="abx-legal abx-legal-expanded" title="' + esc(tx('abx.legalExpandedTitel', null,|
++            'Nicht Standard-legal, nur Expanded.')) + '">' + esc(tx('abx.legalExpanded', null, 'Expanded')) + '</span>';|
++        return '';|
++    }|
++|
+     function kachel(eintrag, mitBoxName) {|
+@@ -1900,3 +1935,3 @@|
+             + '<div class="abx-text">' + boxZeile + '<div class="abx-name" title="' + esc(k.name) + '">' + esc(k.name) + '</div>'|
+-            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + druckZusatz + '</span>' + anteil + '</div>'|
++            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + druckZusatz + '</span>' + legalMarke(k) + anteil + '</div>'|
+             + (eintrag.formatZeile ? '<div class="abx-formatzeile">' + esc(eintrag.formatZeile) + '</div>' : '') + '</div>'|
+@@ -1945,3 +1980,3 @@|
+             + '<div class="abx-name" title="' + esc(k.name) + '">' + esc(k.name) + '</div>'|
+-            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + '</span></div>'|
++            + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + '</span>' + legalMarke(k) + '</div>'|
+             + '<div class="abx-offen-zeile">' + esc(tx('abx.drinOffen', { drin: g.drin, offen: g.offen }, '{drin} drin · {offen} offen')) + '</div></div>'|
+@@ -2107,2 +2142,4 @@|
+         eintraege = sortieren(eintraege, ansicht.sort, !!eine);|
++        sichtbareKarten = eintraege.map(function (e) { return e.k; });|
++        ansichtKontext = kontext;|
+         const zusammen = mitBoxName && ansicht.gruppe === 'zusammen';|
+@@ -2124,5 +2161,4 @@|
+         } else {|
+-            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleBoxen', null, 'Alle Boxen')) + '</h3>'|
+-                + '<p class="abx-meta">' + esc(tx('abx.alleMeta', { n: boxen.length, liste: boxen.map(nameVon).join(', ') },|
+-                    '{n} Boxen zusammen: {liste}')) + '</p></div>';|
++            // Keine Namensliste mehr (Hausi, 03.10.2026: "viel zu viel Text"): die Chips oben nennen jede Box.|
++            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleBoxen', null, 'Alle Boxen')) + '</h3></div>';|
+         }|
+@@ -2133,4 +2169,4 @@|
+                     'Es gibt Turnierdaten bis {datum}, die diese Box noch nicht kennt — „Archetyp-Box aktualisieren“ übernimmt neue Karten.')|

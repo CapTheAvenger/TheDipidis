@@ -40,7 +40,7 @@ index 73afbee5..72bd9d31 100644|
 --- a/js/app-tier-meta.js|
 +++ b/js/app-tier-meta.js|
 @@ -3238,3 +3238,10 @@|
-           Der Test hatte recht, und er hat den Fehler gefunden, bevor|
+            Der Test hatte recht, und er hat den Fehler gefunden, bevor|
 -           ihn jemand auf der Seite lesen musste. */|
 +           ihn jemand auf der Seite lesen musste.|
 +|

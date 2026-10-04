@@ -196,7 +196,7 @@
 
     const html = `
       <div class="loader-ball">${POKEBALL_SVG}</div>
-      <div class="loader-title">Pokémon TCG Hub</div>
+      <div class="loader-title">The Dipidis</div>
       <div class="loader-subtitle">Meta Analysis &amp; Deck Building</div>
       <div class="loader-progress-wrap">
         <div class="loader-progress-bar">

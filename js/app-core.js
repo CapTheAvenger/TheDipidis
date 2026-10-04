@@ -1774,7 +1774,7 @@ const BASE_PATH = './data/';
                 : (ueberschriftEl ? ueberschriftEl.textContent.trim()
                     : (activeBtn ? activeBtn.textContent.trim() : ''));
             if (titleText) {
-                document.title = titleText + ' – Pokémon TCG Hub';
+                document.title = titleText + ' – The Dipidis';  // UI-79 (03.10.2026): ein Seitenname
                 const badge = document.getElementById('current-tab-title');
                 if (badge) {
                     badge.textContent = titleText;
@@ -1796,7 +1796,7 @@ const BASE_PATH = './data/';
                  * und Abzeichen, gegen die der Zweig gebaut wurde, nur eine
                  * Stelle weiter. Ein Abzeichen ohne bekannten Namen zeigt
                  * gar nichts, statt einen falschen Namen zu zeigen. */
-                document.title = 'Pokémon TCG Hub';
+                document.title = 'The Dipidis';
                 const badge = document.getElementById('current-tab-title');
                 if (badge) {
                     badge.textContent = '';

@@ -749,7 +749,7 @@
         if (pendingCount === 0) {
             els.pendingList.innerHTML = getEmptyStateBoxHtml({
                 title: escapeHtml(battleJournalText('bj.emptyState', 'No pending entries.')),
-                description: escapeHtml(battleJournalText('bj.emptyStateDesc', 'Record your first match by tapping the button below!')),
+                description: escapeHtml(battleJournalText('bj.emptyStateDesc', 'Everything is synced. Log a new match with the button below.')),
                 icon: 'professor'
             });
             return;
@@ -1238,11 +1238,26 @@
         closeBattleJournalSheet();
     }
 
+    /* UI-89 (03.10.2026, Tiefenanalyse N-16/F-15): das Format blieb leer,
+       der Eintrag landete unter „Kein Meta". Vorbelegt wird das laufende
+       Format, wenn es in der Liste steht; eine Wahl bleibt unangetastet. */
+    function formatVorbelegen(sel) {
+        if (!sel || sel.value) return sel ? sel.value : '';
+        let live = '';
+        try { live = (typeof window.getCurrentMetaFormat === 'function') ? String(window.getCurrentMetaFormat() || '') : ''; } catch (_e) { live = ''; }
+        if (!live && Array.isArray(window.KNOWN_META_FORMAT_CODES)) live = window.KNOWN_META_FORMAT_CODES[0] || '';
+        const da = Array.prototype.some.call(sel.options || [], (o) => o.value === live);
+        if (live && da) sel.value = live;
+        return sel.value;
+    }
+    window._journalFormatVorbelegen = formatVorbelegen;
+
     function openBattleJournalSheet() {
         const els = battleJournalElements();
         if (!els.overlay) return;
         // Always start with a blank form
         resetBattleJournalForm();
+        formatVorbelegen(document.getElementById('battleJournalMeta'));
         // Load history (incl. Firestore) so getLastTournament works after sync
         loadJournalHistory().then(() => renderLastTournamentButton()).catch(() => {});
         renderLastTournamentButton();

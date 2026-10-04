@@ -768,6 +768,49 @@
         });
     }
 
+    /* UI-87 (03.10.2026, Tiefenanalyse N-14): der Leerzustand sagte
+       „Meta-Binder noch nicht generiert", obwohl im Konto 215 gespeicherte
+       Binder-Karten lagen. Jetzt: liegt ein gespeicherter Binder vor, nennt
+       der Leerzustand Datum und Kartenzahl, und „Gespeicherten Binder
+       laden" ist der Hauptknopf. Ein schon gezeichneter Binder bleibt
+       unangetastet. */
+    function leerzustandSetzen(grid, gespeichert) {
+        if (!grid || !gespeichert || !(gespeichert.anzahl > 0)) return false;
+        const leer = grid.querySelector('.deck-builder-empty-state');
+        if (!leer) return false;
+        const titel = leer.querySelector('.deck-builder-empty-title');
+        const text = leer.querySelector('.deck-builder-empty-text');
+        const laden = leer.querySelector('[onclick^="loadSavedMetaBinder"]');
+        const bauen = leer.querySelector('[onclick^="buildMetaBinder"]');
+        const de = typeof getLang === 'function' ? getLang() === 'de' : true;
+        const datum = gespeichert.datum
+            ? new Date(gespeichert.datum).toLocaleDateString(de ? 'de-DE' : 'en-US') : null;
+        if (titel) titel.textContent = mbText('mb.savedTitle', 'Saved binder available');
+        if (text) text.textContent = mbText('mb.savedText', '{n} cards, saved on {datum}.')
+            .replace('{n}', String(gespeichert.anzahl)).replace('{datum}', datum || '?');
+        if (laden) { laden.classList.add('btn-primary'); laden.classList.remove('btn-outline'); }
+        if (bauen) { bauen.classList.add('btn-outline'); bauen.classList.remove('btn-primary'); }
+        if (laden && bauen && laden.parentNode === bauen.parentNode) bauen.parentNode.insertBefore(laden, bauen);
+        leer.dataset.gespeichert = String(gespeichert.anzahl);
+        return true;
+    }
+
+    async function metaBinderLeerzustand() {
+        const grid = document.getElementById('metaBinderGrid');
+        if (!grid || !grid.querySelector('.deck-builder-empty-state')) return false;
+        const user = window.auth?.currentUser;
+        if (!user || !window.db) return false;
+        try {
+            const doc = await window.db.collection('users').doc(user.uid).get();
+            const data = doc.exists ? doc.data() : {};
+            const karten = Array.isArray(data.metaBinderCards) ? data.metaBinderCards : [];
+            return leerzustandSetzen(grid, { anzahl: karten.length, datum: data.metaBinderSnapshotDate || null });
+        } catch (e) {
+            console.warn('[MetaBinder] gespeicherter Binder nicht lesbar:', e);
+            return false;
+        }
+    }
+
     /**
      * Load the last saved Meta Binder from Firestore and render it.
      * Ownership is recalculated from the current collection.
@@ -2448,6 +2491,8 @@
 
     window.buildMetaBinder = buildMetaBinderWithChunkWatch;
     window.loadSavedMetaBinder = loadSavedMetaBinder;
+    window.metaBinderLeerzustand = metaBinderLeerzustand;
+    window.metaBinderLeerzustandSetzen = leerzustandSetzen;
     window.refreshMetaBinderOwnership = refreshMetaBinderOwnership;
     window.metaBinderAddMissingToWishlist = metaBinderAddMissingToWishlist;
     window.metaBinderSendMissingToProxy = metaBinderSendMissingToProxy;

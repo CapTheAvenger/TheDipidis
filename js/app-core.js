@@ -2257,8 +2257,12 @@ const BASE_PATH = './data/';
         // lookups. The CURRENT meta is appended dynamically below from
         // window._formatWindow so the list doesn't need a code edit each
         // rotation. Order matters: front of the array is "most recent".
+        /* UI-89 (03.10.2026, Tiefenanalyse F-15): TEF-PBL und TEF-CRI fehlten
+           (Vergangene Formate fuehrt beide). Reihenfolge nach Turnierdatum in
+           data/labs_tournament_decks.csv: PBL 28.08.–18.09., CRI 06.–12.06.,
+           POR 25.04.–30.05.2026. */
         const KNOWN_META_FORMAT_CODES = [
-            'TEF-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
+            'TEF-PBL', 'TEF-CRI', 'TEF-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
             'BRS-PRE', 'BRS-SSP', 'BRS-SCR', 'BRS-SFA', 'BRS-TWM', 'BRS-TEF',
             'BST-PAR', 'SVI-PAF'
         ];

@@ -2891,6 +2891,25 @@
         letzteListe = null;
         toast(tx('abx.eigenAngelegt', { name: name }, 'Box „{name}“ angelegt — füge jetzt eine Deckliste ein.'), 'success');
         zeichnen();
+        zurNeuenBox();
+    }
+
+    /* UI-93 (03.10.2026, Tiefenanalyse F-17): nach „Box anlegen" blieb die
+       Seite oben (scrollY 0), die neue Box stand bei y≈3.230 px — einzige
+       Rueckmeldung war die Kopfzahl. Jetzt: das Feld „Deckliste einfuegen"
+       der neuen Box aufklappen, hinscrollen, Fokus hinein. */
+    function zurNeuenBox() {
+        const los = function () {
+            const liste = el('abxListe');
+            if (!liste) return false;
+            const d = liste.closest ? liste.closest('details') : null;
+            if (d) d.open = true;
+            if (liste.scrollIntoView) liste.scrollIntoView({ block: 'center' });
+            try { liste.focus({ preventScroll: true }); } catch (_) { /* egal */ }
+            return true;
+        };
+        if (typeof setTimeout === 'function') setTimeout(los, 0); else los();
+        return true;
     }
 
     async function listeEinfuegen() {
@@ -2987,6 +3006,7 @@
         hinzufuegen: hinzufuegen,
         eigeneAnlegen: eigeneAnlegen,
         listeEinfuegen: listeEinfuegen,
+        zurNeuenBox: zurNeuenBox,
         _eintragAusUebersicht: eintragAusUebersicht
     });
 })();

@@ -1274,6 +1274,21 @@ window.MetaCall = (function () {
      Browser. Der alte Merkzettel wird einmal weggeraeumt. */
   try { localStorage.removeItem(TOURNAMENT_NAME_KEY); } catch (_e) { /* privater Modus */ }
 
+  /* FE-44 (03.10.2026, Tiefenanalyse F-08): Turniertyp und Spielerzahl
+     wurden gemerkt, „Mein Deck" nicht — nach Neuladen war es weg. Jetzt
+     wird es wie der Turniertyp im Browser gemerkt. */
+  const MEIN_DECK_KEY = 'metacall_mydeck_v1';
+  function _meinDeckMerken(val) {
+    try {
+      if (val) localStorage.setItem(MEIN_DECK_KEY, String(val));
+      else localStorage.removeItem(MEIN_DECK_KEY);
+    } catch (_e) { /* privater Modus */ }
+  }
+  try {
+    const gemerkt = localStorage.getItem(MEIN_DECK_KEY);
+    if (gemerkt) _settings.myDeck = gemerkt;
+  } catch (_e) { /* privater Modus */ }
+
   // Whether the user has explicitly typed into the Players input.
   // Calculations always use _settings.totalPlayers (default 2000), but
   // the input itself shows blank until touched so the user is invited
@@ -15905,6 +15920,7 @@ window.MetaCall = (function () {
 
   function _onMyDeck(val) {
     _settings.myDeck = val;
+    _meinDeckMerken(val);
     _winRateOverrides = {};
     _ladeJournal(val);
     // Preserve scroll so the user stays where they were picking the deck
@@ -16680,6 +16696,13 @@ window.MetaCall = (function () {
       </div>`;
       return;
     }
+    // FE-44: ein gemerktes Deck bringt seine Journal-Zahlen gleich mit.
+    // Steht es nicht mehr in der Deckliste (Formatwechsel), wird es vergessen.
+    if (_settings.myDeck && _bekannteDeckNamen().indexOf(_settings.myDeck) === -1) {
+      _settings.myDeck = '';
+      _meinDeckMerken('');
+    }
+    if (_settings.myDeck) { try { _ladeJournal(_settings.myDeck); } catch (_e) { /* ohne Journal weiter */ } }
     renderAll();
   }
 

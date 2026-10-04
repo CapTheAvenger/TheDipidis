@@ -360,3 +360,92 @@ describe('Rutsch T: Alle Standard-Karten, ein Energie-Druck, ACE-SPEC-Stadien (H
     } finally { delete global.window; }
   });
 });
+
+describe('Rutsch U: Spielbox, Regulation Mark, Preise in der Druckwahl (Hausi, 04.10.2026)', () => {
+  const code = QUELLE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const kk = (set, nr, n, extra) => Object.assign({ id: set + '-' + nr, name: 'Karte ' + nr, set: set, number: nr, gefordert: n, typ: 'Item', refs: [] }, extra || {});
+  const idx = L.markenIndex({ marks: { H: { TEF: '1-5,9' }, I: { DRI: '10' }, G: { PAL: '7' } } });
+
+  it('Regulation Mark: nur ueber (Set, Nummer), Nullen vorn egal, unbekannt = leer', () => {
+    assert.deepEqual(L.markenVonKarte(kk('TEF', '3', 1), idx), ['H']);
+    assert.deepEqual(L.markenVonKarte(kk('TEF', '003', 1), idx), ['H']);
+    assert.deepEqual(L.markenVonKarte(kk('TEF', '9', 1), idx), ['H']);
+    assert.deepEqual(L.markenVonKarte(kk('TEF', '6', 1), idx), []);
+    assert.deepEqual(L.markenVonKarte(kk('XYZ', '1', 1), idx), []);
+    assert.deepEqual(L.markenVonKarte(kk('TEF', '3', 1), null), []);
+  });
+  it('Liegt ein getauschter Druck in der Box, zaehlt dessen Marke, nicht die der Hauptkarte', () => {
+    const k = kk('TEF', '3', 1, { drucke: [{ id: 'DRI-10', set: 'DRI', number: '10', n: 1 }, { id: 'TEF-3', set: 'TEF', number: '3', n: 0 }] });
+    assert.deepEqual(L.markenVonKarte(k, idx), ['I']);
+  });
+  it('Filter nach Marke: H zeigt nur H, "keine" nur Karten ohne bekannte Marke', () => {
+    const m = (k) => L.markenVonKarte(k, idx);
+    assert.equal(L.filterPasst(kk('TEF', '3', 1), { marke: 'H' }, '', m), true);
+    assert.equal(L.filterPasst(kk('DRI', '10', 1), { marke: 'H' }, '', m), false);
+    assert.equal(L.filterPasst(kk('XYZ', '1', 1), { marke: 'keine' }, '', m), true);
+    assert.equal(L.filterPasst(kk('TEF', '3', 1), { marke: 'keine' }, '', m), false);
+    assert.equal(L.filterPasst(kk('TEF', '3', 1), { marke: 'alle' }, '', m), true);
+    assert.equal(L.filterPasst(kk('TEF', '3', 1), { marke: 'H' }, ''), false);
+  });
+  it('Preis: Trend ist die Hauptzahl, "ab" nur wenn darunter, nichts geschaetzt', () => {
+    assert.deepEqual(L.preisVon({ eur_price: '12,50€', eur_low: '8,00€', price_last_updated: '2026-10-03T08:11:22' }), { trend: 12.5, ab: 8, stand: '2026-10-03' });
+    assert.equal(L.preisVon({ eur_price: '1,00€', eur_low: '3,00€' }).ab, null);
+    assert.equal(L.preisVon({ eur_price: '', eur_low: '0,40€' }).trend, 0.4);
+    assert.equal(L.preisVon({ eur_price: '1.234,50 €' }).trend, 1234.5);
+    assert.equal(L.preisVon({ eur_price: 'N/A', eur_low: '' }), null);
+    assert.equal(L.preisVon({ eur_price: '0,00€' }), null);
+    assert.equal(L.preisVon(null), null);
+  });
+  const ak = (liste) => liste.map((k) => ({ id: k.id, k: k, max: k.gefordert, boxen: 1 }));
+  it('Spielbox anlegen: eigene Box mit Kennzeichen, alle Karten mit ihrer Anzahl, Status fehlt', () => {
+    const r = L.spielboxBefuellen(ak([kk('TEF', '3', 4), kk('DRI', '10', 2, { name: 'Dwebble' })]), null, '2026-10-04');
+    assert.equal(r.box.eigen, true);
+    assert.equal(r.box.spielbox, true);
+    assert.equal(r.hinzu.length, 2);
+    assert.deepEqual(r.box.karten.map((k) => [k.id, k.gefordert, k.status]), [['TEF-3', 4, 'fehlt'], ['DRI-10', 2, 'fehlt']]);
+    assert.equal(L.istSpielbox(r.box), true);
+    assert.equal(L.istSpielbox({ eigen: true }), false);
+  });
+  it('Spielbox ergaenzen: legt nur Fehlendes an; Druck-Tausch, Original-Status und Anzahl bleiben', () => {
+    const erst = L.spielboxBefuellen(ak([kk('TEF', '3', 4)]), null, '2026-10-04').box;
+    erst.karten[0].status = 'original';
+    erst.karten[0].gefordert = 2;
+    erst.karten[0].drucke = [{ id: 'MEP-3', set: 'MEP', number: '3', n: 1 }];
+    const r = L.spielboxBefuellen(ak([kk('TEF', '3', 4), kk('TEF', '4', 3), kk('SFA', '9', 1, { refs: ['TEF-3'] })]), erst, '2026-10-05');
+    assert.deepEqual(r.hinzu.map((k) => k.id), ['TEF-4']);
+    assert.equal(r.schon, 2);
+    assert.equal(r.box.karten[0].status, 'original');
+    assert.equal(r.box.karten[0].gefordert, 2);
+    assert.equal(r.box.karten[0].drucke[0].id, 'MEP-3');
+    assert.equal(r.box.karten.length, 2);
+  });
+  it('Spielbox ergaenzen entfernt nichts: eine von Hand gelegte Karte ausserhalb der Standard-Liste bleibt', () => {
+    const erst = L.spielboxBefuellen(ak([kk('TEF', '3', 4), kk('OBF', '1', 2)]), null, '2026-10-04').box;
+    const r = L.spielboxBefuellen(ak([kk('TEF', '3', 4)]), erst, '2026-10-05');
+    assert.deepEqual(r.box.karten.map((k) => k.id), ['TEF-3', 'OBF-1']);
+    assert.equal(r.hinzu.length, 0);
+  });
+  it('Zu gross fuer ein Konto-Dokument: nichts aendern, melden', () => {
+    const viele = [];
+    for (let i = 0; i < 4000; i++) viele.push(kk('TEF', String(i + 1), 1, { name: 'x'.repeat(200), bild: 'https://b/' + 'y'.repeat(100) }));
+    const r = L.spielboxBefuellen(ak(viele), null, '2026-10-04');
+    assert.equal(r.zuGross, true);
+    assert.equal(r.hinzu.length, 0);
+    assert.equal(r.box.karten.length, 0);
+  });
+  it('Die Spielbox ist nie Quelle der Standard-Karten (sonst doppelte Drucke)', () => {
+    const sb = Object.assign(L.neueEigeneBox('Spielbox', '2026-10-04'), { spielbox: true, id: 's' });
+    const eig = Object.assign(L.neueEigeneBox('Meine', '2026-10-04'), { id: 'e' });
+    const kontext = { aktuell: 'TEF-30C', legalBekannt: true, legal: () => true };
+    const r = L.standardEintraege([{ box: sb, k: kk('MEP', '3', 1) }, { box: eig, k: kk('TEF', '3', 1) }], kontext);
+    assert.deepEqual(r.eintraege.map((e) => e.k.id), ['TEF-3']);
+  });
+  it('Verdrahtung: Filter geben die Marke mit, die Druckwahl zeigt den Preis, die Aktion schreibt ueber schreiben()', () => {
+    assert.match(code, /filterPasst\(e\.k, ansicht, e\.element, markenVonEintrag\)/);
+    assert.match(code, /filterPasst\(k, ansicht, elementVon\(k\), markenVonEintrag\)/);
+    assert.match(code, /preisVon\(rec\)/);
+    assert.match(code, /ArchetypBox\.spielboxEinspielen\(\)/);
+    assert.match(code, /await schreiben\(erg\.box\)/);
+    assert.match(code, /knopf\('marke', 'alle'/);
+  });
+});

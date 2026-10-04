@@ -245,6 +245,10 @@
 .abx-dialog-druck img, .abx-dialog-ohne { width: 52px; aspect-ratio: 63 / 88; object-fit: cover; border-radius: 4px; background: var(--bg-muted); }
 .abx-dialog-text { display: flex; flex-direction: column; min-width: 0; font-size: var(--fs-sm); }
 .abx-dialog-text span { color: var(--ink-3); font-size: var(--fs-xs); }
+.abx-dialog-text .abx-dialog-preis { color: inherit; font-weight: 600; }
+.abx-dialog-text .abx-dialog-preis small { color: var(--ink-3); font-weight: 400; }
+.abx-dialog-text .abx-dialog-preis-fehlt { color: var(--ink-3); font-weight: 400; }
+.abx-dialog-preisstand { margin: 0 0 8px; color: var(--ink-3); font-size: var(--fs-xs); }
 .abx-dialog-zahl { display: flex; align-items: center; gap: 6px; }
 .abx-dialog-zahl .abx-mini { width: 40px; min-height: 40px; flex: 0 0 auto; }
 .abx-dialog-zahl span { min-width: 24px; text-align: center; font-weight: 800; font-size: var(--fs-md); }

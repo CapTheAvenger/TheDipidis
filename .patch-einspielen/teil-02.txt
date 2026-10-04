@@ -1,0 +1,358 @@
++    <script src="js/app-side-quest-matchups.js?v=202610040723" defer></script>|
+     <!-- Kennzeichnung "Kartentext auf Englisch". MUSS vor jeder Datei stehen,|
+@@ -4254,7 +4254,7 @@|
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202610040242" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202610040242" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202610040242" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202610040242" defer></script>|
+-    <script src="js/ds-nav.js?v=202610040242" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202610040723" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202610040723" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202610040723" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202610040723" defer></script>|
++    <script src="js/ds-nav.js?v=202610040723" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4264,6 +4264,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202610040242" defer></script>|
+-    <script src="js/ds-sections.js?v=202610040242" defer></script>|
+-    <script src="js/ds-filter.js?v=202610040242" defer></script>|
+-    <script src="js/ds-share.js?v=202610040242" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202610040723" defer></script>|
++    <script src="js/ds-sections.js?v=202610040723" defer></script>|
++    <script src="js/ds-filter.js?v=202610040723" defer></script>|
++    <script src="js/ds-share.js?v=202610040723" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4272,5 +4272,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202610040242" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202610040242" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202610040242" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202610040723" defer></script>|
++    <script src="js/ds-tutorial.js?v=202610040723" defer></script>|
++    <script src="js/ds-masterclass.js?v=202610040723" defer></script>|
+ |
+diff --git a/js/archetyp-box.js b/js/archetyp-box.js|
+index 49253f40..9eca09f5 100644|
+--- a/js/archetyp-box.js|
++++ b/js/archetyp-box.js|
+@@ -235,2 +235,28 @@|
+ |
++    /**|
++     * Kartenart fuer Sortierung und Filter. getCardType kennt eine ACE SPEC nur|
++     * bei Item und Tool; die beiden ACE-SPEC-Stadien (Grand Tree, Neutralization|
++     * Zone) kommen dort als 'Stadium' an und standen bei den Stadien statt bei|
++     * den ACE SPECs (Hausi, 04.10.2026). Gespeichert wird weiter die alte Art —|
++     * die Boxen der Nutzer bleiben unberuehrt, nur die Anzeige folgt dem Namen.|
++     * istAce(k) -> boolean; ohne Angabe die Namensliste der Seite (data/ace_specs.json).|
++     */|
++    function istAceSpecKarte(k) {|
++        if (typeof window === 'undefined' || typeof window.isAceSpec !== 'function') return false;|
++        const namen = [k.name];|
++        if (typeof getCanonicalCardRecord === 'function') {|
++            try {|
++                const rec = getCanonicalCardRecord(k.set, k.number);|
++                if (rec) namen.push(rec.name_en, rec.name);|
++            } catch (_) { /* nur der Name der Box */ }|
++        }|
++        return namen.some(function (n) { return !!n && window.isAceSpec(String(n)); });|
++    }|
++|
++    function artVon(k, istAce) {|
++        const typ = String((k && k.typ) || '');|
++        if (typ !== 'Stadium') return typ;|
++        return (istAce || istAceSpecKarte)(k) ? 'Ace Spec' : typ;|
++    }|
++|
+     /** Die drei Rubriken der Box, in der Reihenfolge, in der sie gezeigt werden. */|
+@@ -247,3 +273,3 @@|
+             return reihe(a) - reihe(b)|
+-                || typRang(a.typ) - typRang(b.typ)|
++                || typRang(artVon(a)) - typRang(artVon(b))|
+                 || (Number(b.anteil) || 0) - (Number(a.anteil) || 0)|
+@@ -660,3 +686,3 @@|
+         }|
+-        if (f.art && f.art !== 'alle' && String(k.typ || '') !== f.art) return false;|
++        if (f.art && f.art !== 'alle' && artVon(k) !== f.art) return false;|
+         if (f.art === 'Pokemon' && f.element && f.element !== 'alle' && element !== f.element) return false;|
+@@ -1067,3 +1093,3 @@|
+             if (art === 'art') {|
+-                return typRang(a.k.typ) - typRang(b.k.typ)|
++                return typRang(artVon(a.k)) - typRang(artVon(b.k))|
+                     || (a.k.typ === 'Pokemon' ? elementRang(a.element) - elementRang(b.element) : 0)|
+@@ -1075,3 +1101,3 @@|
+                 return reihe(a.k) - reihe(b.k)|
+-                    || typRang(a.k.typ) - typRang(b.k.typ)|
++                    || typRang(artVon(a.k)) - typRang(artVon(b.k))|
+                     || (Number(b.k.anteil) || 0) - (Number(a.k.anteil) || 0)|
+@@ -1080,3 +1106,3 @@|
+             return (Number(b.k.anteil) || 0) - (Number(a.k.anteil) || 0)|
+-                || typRang(a.k.typ) - typRang(b.k.typ)|
++                || typRang(artVon(a.k)) - typRang(artVon(b.k))|
+                 || name(a).localeCompare(name(b))|
+@@ -1179,8 +1205,24 @@|
+     /**|
+-     * Alle-Karten-Box: je Karte (Set, Nummer) EINE Zeile ueber alle Boxen mit|
++     * Basis-Energien haben viele Drucke (SVE, MEE, Jubilaeums-Drucke ...); in der|
++     * Sammelbox zaehlt je Typ EIN Druck: der SVE-Druck, den die Seite ueberall als|
++     * Standard fuer Basis-Energien nimmt (js/app-utils.js, getPreferredVersionForCard:|
++     * Grass 17 ... Metal 24). Fairy hat keinen (Hausi, 04.10.2026).|
++     */|
++    const BASIS_ENERGIE_SVE = { grass: '17', fire: '18', water: '19', lightning: '20',|
++        psychic: '21', fighting: '22', darkness: '23', metal: '24' };|
++|
++    function basisEnergieNummer(k) {|
++        if (!istBasisEnergie(k)) return null;|
++        const m = String(k.name || '').trim().toLowerCase().match(/(grass|fire|water|lightning|psychic|fighting|darkness|metal|fairy)/);|
++        return (m && BASIS_ENERGIE_SVE[m[1]]) || null;|
++    }|
++|
++    /**|
++     * Alle-Karten-Box: je Karte (Set, Nummer) EINE Zeile ueber alle Eintraege mit|
+      * der GROESSTEN gespielten Anzahl, gedeckelt auf KOPIEN_MAX (Basis-Energien|
+-     * ohne Deckel). Eingabe: Eintraege {box, k}; Reihenfolge = erstes Auftreten.|
+-     * Die Karte in `k` ist eine Kopie mit der gedeckelten Anzahl in `gefordert`.|
++     * ohne Deckel, je Typ ein Druck). Eingabe: Eintraege {box, k}; Reihenfolge =|
++     * erstes Auftreten. `ersatz(k)` darf fuer eine Basis-Energie die Karte des|
++     * Einheitsdrucks liefern (mit Bild); ohne sie bleibt nur der Schluessel einheitlich.|
+      */|
+-    function groessteAnzahl(eintraege) {|
++    function groessteAnzahl(eintraege, ersatz) {|
+         const nachId = new Map();|
+@@ -1189,8 +1231,14 @@|
+             if (!e || !e.k) return;|
+-            const k = e.k;|
+-            const id = kartenId(k.set, k.number) || k.id;|
+-            const n = Math.max(1, Number(k.gefordert) || 0);|
++            let k = e.k;|
++            const sve = basisEnergieNummer(k);|
++            let id = kartenId(k.set, k.number) || k.id;|
++            if (sve) {|
++                id = 'SVE-' + sve;|
++                const neu = typeof ersatz === 'function' ? ersatz(k, sve) : null;|
++                if (neu) k = neu;|
++            }|
++            const n = Math.max(1, Number(e.k.gefordert) || 0);|
+             let g = nachId.get(id);|
+             if (!g) {|
+-                g = { id: id, k: k, max: n, boxen: new Set() };|
++                g = { id: id, k: k, max: n, boxen: new Set(), basis: !!sve };|
+                 nachId.set(id, g);|
+@@ -1202,3 +1250,3 @@|
+         return aus.map(function (g) {|
+-            const gedeckelt = istBasisEnergie(g.k) ? g.max : Math.min(KOPIEN_MAX, g.max);|
++            const gedeckelt = g.basis ? g.max : Math.min(KOPIEN_MAX, g.max);|
+             return { id: g.id, k: Object.assign({}, g.k, { gefordert: gedeckelt }), max: g.max, boxen: g.boxen.size };|
+@@ -1207,2 +1255,27 @@|
+ |
++    /**|
++     * Nur das, was im Standard gebraucht wird (Hausi, 04.10.2026): Karten der Boxen,|
++     * deren Archetyp im neuesten Meta gespielt wird (gruen) oder dessen Hauptkarte|
++     * noch legal ist (gelb), dazu die eigenen Boxen — und davon nur Karten, die|
++     * Standard-legal sind. Unbekannte Legalitaet zaehlt NICHT dazu (keine Karte|
++     * raten). Ohne Formatdaten bleibt die Liste leer. Liefert die Eintraege und|
++     * die Zahl der beteiligten Boxen.|
++     */|
++    function standardEintraege(eintraege, kontext) {|
++        const c = kontext || {};|
++        const stufen = new Map();|
++        const boxen = new Set();|
++        const aus = (eintraege || []).filter(function (e) {|
++            if (!e || !e.box || !e.k) return false;|
++            if (!stufen.has(e.box)) stufen.set(e.box, boxStufe(e.box, c));|
++            const st = stufen.get(e.box);|
++            if (st !== 'gespielt' && st !== 'legal' && st !== 'eigen') return false;|
++            if (!c.legalBekannt || typeof c.legal !== 'function') return false;|
++            if (c.legal(e.k) !== true) return false;|
++            boxen.add(e.box.id);|
++            return true;|
++        });|
++        return { eintraege: aus, boxen: boxen.size };|
++    }|
++|
+     const Logik = {|
+@@ -1210,3 +1283,3 @@|
+         deckzeilenAus: deckzeilenAus,|
+-        istBasisEnergie: istBasisEnergie, groessteAnzahl: groessteAnzahl, KOPIEN_MAX: KOPIEN_MAX, ALLE_KARTEN: ALLE_KARTEN,|
++        istBasisEnergie: istBasisEnergie, groessteAnzahl: groessteAnzahl, standardEintraege: standardEintraege, basisEnergieNummer: basisEnergieNummer, BASIS_ENERGIE_SVE: BASIS_ENERGIE_SVE, artVon: artVon, KOPIEN_MAX: KOPIEN_MAX, ALLE_KARTEN: ALLE_KARTEN,|
+         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,|
+@@ -1948,8 +2021,8 @@|
+         let alleKartenChip = '';|
+-        if (boxen.length > 1) {|
++        if (boxen.length > 1 && kontext && kontext.legalBekannt) {|
+             const alleEintraege = [];|
+             boxen.forEach(function (b) { (b.karten || []).forEach(function (roh) { alleEintraege.push({ box: b, k: normiert(roh) }); }); });|
+-            const ak = groessteAnzahl(alleEintraege);|
++            const ak = groessteAnzahl(standardEintraege(alleEintraege, kontext).eintraege, einheitsEnergie);|
+             const au = auswahlUmfang(ak.map(function (g) { return g.k; }));|
+-            alleKartenChip = chip(ALLE_KARTEN, tx('abx.alleKarten', null, 'Alle Karten'), { karten: au.karten, stueck: au.stueck }, null, null, [|
++            alleKartenChip = chip(ALLE_KARTEN, tx('abx.alleKarten', null, 'Alle Standard-Karten'), { karten: au.karten, stueck: au.stueck }, null, null, [|
+                 tx('abx.chipAlleKarten', { karten: au.karten, stueck: au.stueck, max: KOPIEN_MAX }, '{karten} Karten · {stueck} Stück'),|
+@@ -1961,2 +2034,9 @@|
+ |
++    /** Einheitsdruck einer Basis-Energie als Box-Eintrag (SVE, siehe BASIS_ENERGIE_SVE), sonst null. */|
++    function einheitsEnergie(k, nummer) {|
++        if (typeof getCanonicalCardRecord !== 'function') return null;|
++        const rec = getCanonicalCardRecord('SVE', nummer);|
++        return rec ? normiert(eintragAusKarte(rec)) : null;|
++    }|
++|
+     function gruppeKlappen(g, details) {|
+@@ -2242,4 +2322,10 @@|
+         });|
+-        const gesamt = eintraege.length;|
+         const kontext = formatKontext();|
++        let standardBoxen = 0;|
++        if (alleKarten) {|
++            const st = standardEintraege(eintraege, kontext);|
++            eintraege = st.eintraege;|
++            standardBoxen = st.boxen;|
++        }|
++        const gesamt = eintraege.length;|
+         eintraege = eintraege.filter(function (e) {|
+@@ -2252,3 +2338,3 @@|
+         eintraege = sortieren(eintraege, ansicht.sort, !!eine);|
+-        const groesste = alleKarten ? groessteAnzahl(eintraege) : null;|
++        const groesste = alleKarten ? groessteAnzahl(eintraege, einheitsEnergie) : null;|
+         sichtbareKarten = groesste ? groesste.map(function (g) { return g.k; }) : eintraege.map(function (e) { return e.k; });|
+@@ -2272,5 +2358,5 @@|
+         } else if (alleKarten) {|
+-            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleKarten', null, 'Alle Karten')) + '</h3>'|
+-                + '<p class="abx-meta">' + esc(tx('abx.alleKartenText', { n: boxen.length, max: KOPIEN_MAX },|
+-                    'Die größte gespielte Anzahl je Karte über alle {n} Archetyp-Boxen, höchstens {max} Kopien (Basis-Energien ohne Grenze). Nur eine Ansicht: „drin“ und „fehlt“ pflegst du in den Archetyp-Boxen.')) + '</p></div>';|
++            kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleKarten', null, 'Alle Standard-Karten')) + '</h3>'|
++                + '<p class="abx-meta">' + esc(tx('abx.alleKartenText', { n: standardBoxen, max: KOPIEN_MAX },|
++                    'Die größte gespielte Anzahl je Karte aus den {n} Boxen, die im Standard gespielt werden oder noch legal sind (dazu deine eigenen Boxen). Nur Standard-legale Karten, höchstens {max} Kopien; Basis-Energien ohne Grenze, je Typ ein Druck (SVE). Nur eine Ansicht: „drin“ und „fehlt“ pflegst du in den Archetyp-Boxen.')) + '</p></div>';|
+         } else {|
+diff --git a/js/i18n.js b/js/i18n.js|
+index e5dcdf3c..41d8dbfb 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -977,6 +977,6 @@ const translations = {|
+     'abx.stufe.sonst': 'Other boxes',|
+-    'abx.alleKarten': 'All cards',|
++    'abx.alleKarten': 'All Standard cards',|
+     'abx.chipAlleKarten': '{karten} cards · {stueck} copies',|
+-    'abx.chipAlleKartenZeile': 'at most {max} per card, no basic energy',|
+-    'abx.alleKartenText': 'The highest played count per card across all {n} archetype boxes, at most {max} copies (basic energy without a limit). A view only: you keep "in the box" and "missing" in the archetype boxes.',|
++    'abx.chipAlleKartenZeile': 'played or legal boxes, at most {max} per card, no basic energy',|
++    'abx.alleKartenText': 'The highest played count per card from the {n} boxes that are played in Standard or still legal (plus your own boxes). Standard-legal cards only, at most {max} copies; basic energy without a limit, one print per type (SVE). A view only: you keep "in the box" and "missing" in the archetype boxes.',|
+     'abx.alleKartenRubrik': 'Highest count per card',|
+@@ -3877,6 +3877,6 @@ const translations = {|
+     'abx.stufe.sonst': 'Weitere Boxen',|
+-    'abx.alleKarten': 'Alle Karten',|
++    'abx.alleKarten': 'Alle Standard-Karten',|
+     'abx.chipAlleKarten': '{karten} Karten · {stueck} Stück',|
+-    'abx.chipAlleKartenZeile': 'höchstens {max} je Karte, ohne Basis-Energien',|
+-    'abx.alleKartenText': 'Die größte gespielte Anzahl je Karte über alle {n} Archetyp-Boxen, höchstens {max} Kopien (Basis-Energien ohne Grenze). Nur eine Ansicht: „drin“ und „fehlt“ pflegst du in den Archetyp-Boxen.',|
++    'abx.chipAlleKartenZeile': 'gespielte und legale Boxen, höchstens {max} je Karte, ohne Basis-Energien',|
++    'abx.alleKartenText': 'Die größte gespielte Anzahl je Karte aus den {n} Boxen, die im Standard gespielt werden oder noch legal sind (dazu deine eigenen Boxen). Nur Standard-legale Karten, höchstens {max} Kopien; Basis-Energien ohne Grenze, je Typ ein Druck (SVE). Nur eine Ansicht: „drin“ und „fehlt“ pflegst du in den Archetyp-Boxen.',|
+     'abx.alleKartenRubrik': 'Größte Anzahl je Karte',|
+diff --git a/service-worker.js b/service-worker.js|
+index 0b2933b1..583a16ce 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202610040242|
++// v202610040723|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202610040242';|
++const CACHE_NAME = 'tcg-analysis-v202610040723';|
+ |
+diff --git a/tests/unit/test-eigene-box.js b/tests/unit/test-eigene-box.js|
+index 81d728a7..c4b70af3 100644|
+--- a/tests/unit/test-eigene-box.js|
++++ b/tests/unit/test-eigene-box.js|
+@@ -288 +288,75 @@ describe('Rutsch S: Alle-Karten-Box und aufklappbare Boxliste (Hausi, 03.10.2026|
+ });|
++|
++describe('Rutsch T: Alle Standard-Karten, ein Energie-Druck, ACE-SPEC-Stadien (Hausi, 04.10.2026)', () => {|
++  const code = QUELLE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++  const kk = (set, nr, n, extra) => Object.assign({ id: set + '-' + nr, name: 'Karte ' + nr, set: set, number: nr, gefordert: n, typ: 'Item' }, extra || {});|
++  const E = (box, k) => ({ box: box, k: k });|
++  const gespielt = { id: 'g', karten: [kk('TWM', '1', 2, { formate: { 'TEF-30C': 40 } })] };|
++  const legalBox = { id: 'l', archetyp: 'Zacian', karten: [kk('TWM', '2', 2, { typ: 'Pokemon', name: 'Zacian ex', anteil: 90, formate: { 'TEF-30C': 0 } })] };|
++  const rausBox = { id: 'r', archetyp: 'Charizard', karten: [kk('OBF', '3', 2, { typ: 'Pokemon', name: 'Charizard ex', anteil: 90, formate: { 'TEF-30C': 0 } }), kk('TWM', '9', 2)] };|
++  const eigen = L.neueEigeneBox('Meine', '2026-10-04'); eigen.id = 'e';|
++  const kontext = (nichtLegal) => ({|
++    aktuell: 'TEF-30C', legalBekannt: true,|
++    legal: (k) => (nichtLegal || []).indexOf(k.id) >= 0 ? false : (k.id === 'XXX-0' ? null : true)|
++  });|
++  it('nur Boxen, die im Standard gespielt werden oder legal sind, dazu eigene Boxen', () => {|
++    const k = kontext(['OBF-3']);|
++    const alle = [E(gespielt, gespielt.karten[0]), E(legalBox, legalBox.karten[0]), E(rausBox, rausBox.karten[0]), E(rausBox, rausBox.karten[1]), E(eigen, kk('SFA', '4', 1))];|
++    const r = L.standardEintraege(alle, k);|
++    assert.deepEqual(r.eintraege.map((e) => e.k.id), ['TWM-1', 'TWM-2', 'SFA-4']);|
++    assert.equal(r.boxen, 3);|
++  });|
++  it('innerhalb einer Standard-Box faellt eine rotierte Karte heraus, eine mit unbekannter Legalitaet auch', () => {|
++    const k = kontext(['SVI-9']);|
++    const box = { id: 'g2', karten: [kk('TWM', '1', 2, { formate: { 'TEF-30C': 40 } }), kk('SVI', '9', 2), kk('XXX', '0', 2)] };|
++    const r = L.standardEintraege(box.karten.map((x) => E(box, x)), k);|
++    assert.deepEqual(r.eintraege.map((e) => e.k.id), ['TWM-1']);|
++  });|
++  it('ohne Formatdaten bleibt die Liste leer statt zu raten', () => {|
++    assert.equal(L.standardEintraege([E(eigen, kk('SFA', '4', 1))], { aktuell: 'TEF-30C', legalBekannt: false, legal: () => true }).eintraege.length, 0);|
++    assert.equal(L.standardEintraege([E(eigen, kk('SFA', '4', 1))], null).eintraege.length, 0);|
++  });|
++  it('Basis-Energie: je Typ EIN Druck (SVE), egal welche Drucke in den Boxen liegen', () => {|
++    const w = (set, nr, n) => kk(set, nr, n, { name: 'Water Energy', typ: 'Energy' });|
++    const g = L.groessteAnzahl([E({ id: 'a' }, w('MEE', '11', 2)), E({ id: 'b' }, w('SVE', '19', 9)), E({ id: 'c' }, w('MEE', '3', 1)),|
++      E({ id: 'd' }, kk('SVE', '18', 4, { name: 'Fire Energy', typ: 'Energy' })), E({ id: 'e' }, kk('TEF', '161', 3, { name: 'Mist Energy', typ: 'Energy' }))]);|
++    assert.deepEqual(g.map((x) => x.id), ['SVE-19', 'SVE-18', 'TEF-161']);|
++    assert.equal(g[0].k.gefordert, 9);|
++    assert.equal(g[0].boxen, 3);|
++    assert.equal(L.basisEnergieNummer(kk('X', '1', 1, { name: 'Fairy Energy', typ: 'Energy' })), null);|
++    assert.equal(L.basisEnergieNummer(kk('X', '1', 1, { name: 'Mist Energy', typ: 'Energy' })), null);|
++    assert.equal(L.BASIS_ENERGIE_SVE.metal, '24');|
++  });|
++  it('der Einheitsdruck ersetzt die Karte (Bild, Set, Nummer), die Anzahl bleibt die groesste', () => {|
++    const w = kk('MEE', '11', 6, { name: 'Water Energy', typ: 'Energy', bild: 'mee.png' });|
++    const g = L.groessteAnzahl([E({ id: 'a' }, w)], (k, nr) => ({ id: 'SVE-' + nr, name: 'Water Energy', set: 'SVE', number: nr, bild: 'sve.png', typ: 'Energy' }));|
++    assert.equal(g[0].k.set + ' ' + g[0].k.number + ' ' + g[0].k.bild, 'SVE 19 sve.png');|
++    assert.equal(g[0].k.gefordert, 6);|
++  });|
++  it('ACE-SPEC-Stadien stehen bei den ACE SPECs, gewoehnliche Stadien nicht, gespeichert wird nichts', () => {|
++    const ace = (k) => k.name === 'Grand Tree';|
++    const grand = kk('SCR', '136', 1, { name: 'Grand Tree', typ: 'Stadium' });|
++    const gewoehnlich = kk('TWM', '5', 1, { name: 'Artazon', typ: 'Stadium' });|
++    assert.equal(L.artVon(grand, ace), 'Ace Spec');|
++    assert.equal(L.artVon(gewoehnlich, ace), 'Stadium');|
++    assert.equal(L.artVon(kk('X', '1', 1, { typ: 'Item' }), ace), 'Item');|
++    assert.equal(grand.typ, 'Stadium');|
++  });|
++  it('Sortierung und Filter rufen artVon, nicht k.typ', () => {|
++    assert.doesNotMatch(code, /typRang\(a\.k\.typ\)/);|
++    assert.match(code, /artVon\(k\) !== f\.art/);|
++    assert.match(code, /groessteAnzahl\(eintraege, einheitsEnergie\)/);|
++    assert.match(code, /standardEintraege\(eintraege, kontext\)/);|
++  });|
++  it('Sortierung nach Art: das ACE-SPEC-Stadion rueckt zu den ACE SPECs (ausgefuehrt)', () => {|
++    global.window = { isAceSpec: (n) => n === 'Grand Tree' };|
++    try {|
++      const mk = (id, name, typ) => E({ id: 'b', name: 'b' }, kk('SCR', id, 1, { name: name, typ: typ, id: 'SCR-' + id }));|
++      const rein = [mk('1', 'Zebra Energy', 'Energy'), mk('2', 'Grand Tree', 'Stadium'), mk('3', 'Artazon', 'Stadium'), mk('4', 'Secret Box', 'Ace Spec')];|
++      const namen = L.sortieren(rein, 'art', true).map((e) => e.k.name);|
++      assert.deepEqual(namen, ['Artazon', 'Grand Tree', 'Secret Box', 'Zebra Energy']);|
++      assert.equal(L.filterPasst(rein[1].k, { art: 'Ace Spec' }, ''), true);|
++      assert.equal(L.filterPasst(rein[1].k, { art: 'Stadium' }, ''), false);|
++    } finally { delete global.window; }|
++  });|
++});|
+diff --git a/version.json b/version.json|
+index dbd6416d..649a4a1b 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610040242"}|
+\ No newline at end of file|
++{"version":"202610040723"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

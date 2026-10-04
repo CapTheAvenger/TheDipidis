@@ -1,0 +1,28 @@
+From 9624ac34d5467c6be055698c51fa3dc0dc3f91bc Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sun, 4 Oct 2026 00:05:16 +0000|
+Subject: [PATCH] R5: Sprachreinheit-Pruefung kennt den neuen Menuenamen Japan|
+ (City League)|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01Rd9hd6gtug38D1ctG5LKsu|
+---|
+ tests/e2e_i18n_language_purity.py | 5 +++--|
+ 1 file changed, 3 insertions(+), 2 deletions(-)|
+|
+diff --git a/tests/e2e_i18n_language_purity.py b/tests/e2e_i18n_language_purity.py|
+index 37cfd81f..1dcec9f9 100644|
+--- a/tests/e2e_i18n_language_purity.py|
++++ b/tests/e2e_i18n_language_purity.py|
+@@ -713,4 +713,5 @@ def run():|
+         if 'menu.cityLeague' in rt_checks:|
+-            check("RT.2 menu.cityLeague = 'City League Meta'",|
+-                  rt_checks['menu.cityLeague'] == 'City League Meta',|
++            # UI-79 (03.10.2026, Entscheidung Hausi): einheitlicher Name.|
++            check("RT.2 menu.cityLeague = 'Japan (City League)'",|
++                  rt_checks['menu.cityLeague'] == 'Japan (City League)',|
+                   f"got '{rt_checks['menu.cityLeague']}'")|
+-- |
+2.34.1|
+|
+|

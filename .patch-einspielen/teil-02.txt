@@ -1,117 +1,118 @@
-          window.KartentextHinweis ohne Rueckfall auf. -->
--    <script src="js/kartentext-hinweis.js?v=202610040859" defer></script>
--    <script src="js/app-profile-deck-builder.js?v=202610040859" defer></script>
--    <script src="js/deck-builder-consistency.js?v=202610040859" defer></script>
--    <script src="js/current-meta-quickref.js?v=202610040859" defer></script>
--    <script src="js/ds-nav.js?v=202610040859" defer></script>
-+    <script src="js/kartentext-hinweis.js?v=202610041031" defer></script>
-+    <script src="js/app-profile-deck-builder.js?v=202610041031" defer></script>
-+    <script src="js/deck-builder-consistency.js?v=202610041031" defer></script>
-+    <script src="js/current-meta-quickref.js?v=202610041031" defer></script>
-+    <script src="js/ds-nav.js?v=202610041031" defer></script>
-     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das
-@@ -4264,6 +4264,6 @@
-          ds-sections.js stehen: das meldet sich dort in start() an. -->
--    <script src="js/ds-abschnitt-info.js?v=202610040859" defer></script>
--    <script src="js/ds-sections.js?v=202610040859" defer></script>
--    <script src="js/ds-filter.js?v=202610040859" defer></script>
--    <script src="js/ds-share.js?v=202610040859" defer></script>
-+    <script src="js/ds-abschnitt-info.js?v=202610041031" defer></script>
-+    <script src="js/ds-sections.js?v=202610041031" defer></script>
-+    <script src="js/ds-filter.js?v=202610041031" defer></script>
-+    <script src="js/ds-share.js?v=202610041031" defer></script>
-     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne
-@@ -4272,5 +4272,5 @@
-          Adresse stuende in jedem Verlauf. -->
--    <script src="js/ds-post-uebergabe.js?v=202610040859" defer></script>
--    <script src="js/ds-tutorial.js?v=202610040859" defer></script>
--    <script src="js/ds-masterclass.js?v=202610040859" defer></script>
-+    <script src="js/ds-post-uebergabe.js?v=202610041031" defer></script>
-+    <script src="js/ds-tutorial.js?v=202610041031" defer></script>
-+    <script src="js/ds-masterclass.js?v=202610041031" defer></script>
- 
-diff --git a/js/app-utils.js b/js/app-utils.js
-index e529a2b8..003849ea 100644
---- a/js/app-utils.js
-+++ b/js/app-utils.js
-@@ -1067,2 +1067,3 @@ function showTableSkeleton(containerOrId, opts) {
- 
-+            const _niedrigeStufe = (p) => (p === 2 ? 1 : p);
-             if (globalPref && (globalPref === 'max' || globalPref === 'min')) {
-@@ -1072,4 +1073,7 @@ function showTableSkeleton(containerOrId, opts) {
-                 const sorted = versions.slice().sort((a, b) => {
--                    const priorityA = getRarityPriority(a.rarity, a.set);
--                    const priorityB = getRarityPriority(b.rarity, b.set);
-+                    // Common (1) und Uncommon (2) sind EINE niedrige Stufe (Hausi, 04.10.2026):
-+                    // "aktuellster Low-Rarity-Print". Vorher gewann das alte Common (SVI 171,
-+                    // Regulation G, nicht mehr Standard) gegen das neuere Uncommon (WHT 82).
-+                    const priorityA = _niedrigeStufe(getRarityPriority(a.rarity, a.set));
-+                    const priorityB = _niedrigeStufe(getRarityPriority(b.rarity, b.set));
-                     
-@@ -1135,4 +1139,4 @@ function showTableSkeleton(containerOrId, opts) {
-                 const sorted = versions.slice().sort((a, b) => {
--                    const priorityA = getRarityPriority(a.rarity, a.set);
--                    const priorityB = getRarityPriority(b.rarity, b.set);
-+                    const priorityA = _niedrigeStufe(getRarityPriority(a.rarity, a.set));
-+                    const priorityB = _niedrigeStufe(getRarityPriority(b.rarity, b.set));
-                     if (priorityA !== priorityB) return priorityA - priorityB;
-diff --git a/service-worker.js b/service-worker.js
-index 8eb0e2f9..33c789ac 100644
---- a/service-worker.js
-+++ b/service-worker.js
-@@ -1,3 +1,3 @@
- // Service Worker for Pokemon TCG Analysis PWA
--// v202610040859
-+// v202610041031
- // Strategies:
-@@ -8,3 +8,3 @@
- 
--const CACHE_NAME = 'tcg-analysis-v202610040859';
-+const CACHE_NAME = 'tcg-analysis-v202610041031';
- 
-diff --git a/tests/unit/test-getPreferredVersionForCard.js b/tests/unit/test-getPreferredVersionForCard.js
-index c71160e1..46f355d5 100644
---- a/tests/unit/test-getPreferredVersionForCard.js
-+++ b/tests/unit/test-getPreferredVersionForCard.js
-@@ -168,2 +168,20 @@ describe('getPreferredVersionForCard — die vier Sortierstufen', () => {
- 
-+    it('Common und Uncommon sind EINE niedrige Stufe: das neuere Uncommon schlaegt das aeltere Common', () => {
-+        // Befund 04.10.2026: Energy Retrieval ergab SVI 171 (Common, Regulation G,
-+        // nicht mehr Standard) statt WHT 82 (Uncommon, neuer).
-+        const a = baueAuswahl({
-+            setOrderMap: { SVI: 134, WHT: 149 },
-+            eng: () => [druck('SVI', '171', 'Common'), druck('WHT', '82', 'Uncommon')],
-+        });
-+        assert.equal(a.waehle('Energy Retrieval').set, 'WHT');
-+    });
-+
-+    it('die niedrige Stufe schlaegt trotzdem jede hoehere Seltenheit', () => {
-+        const a = baueAuswahl({
-+            setOrderMap: { SVI: 134, WHT: 149, CRI: 157 },
-+            eng: () => [druck('SVI', '171', 'Common'), druck('CRI', '108', 'Rare'), druck('WHT', '82', 'Uncommon')],
-+        });
-+        assert.equal(a.waehle('Energy Retrieval').set, 'WHT');
-+    });
-+
-     it('Stufe 3: ohne Set-Reihenfolge entscheidet die Regelmarke', () => {
-diff --git a/tests/unit/test-version-selection-mutation-guards.js b/tests/unit/test-version-selection-mutation-guards.js
-index 15216d1c..7c5f7d75 100644
---- a/tests/unit/test-version-selection-mutation-guards.js
-+++ b/tests/unit/test-version-selection-mutation-guards.js
-@@ -123,3 +123,3 @@ describe('getPreferredVersionForCard — mutation guards', () => {
-             { set: 'JP1', number: '001', rarity: 'Common', type: 'Trainer' },
--            { set: 'SVI', number: '100', rarity: 'Uncommon', type: 'Trainer' },
-+            { set: 'SVI', number: '100', rarity: 'Rare', type: 'Trainer' },
-             { set: 'PAL', number: '200', rarity: 'Common', type: 'Trainer' },
-diff --git a/version.json b/version.json
-index d6df53bb..82c0f3e8 100644
---- a/version.json
-+++ b/version.json
-@@ -1 +1 @@
--{"version":"202610040859"}
-\ No newline at end of file
-+{"version":"202610041031"}
-\ No newline at end of file
--- 
-2.43.0
-
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202610040859" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202610040859" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202610040859" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202610040859" defer></script>|
+-    <script src="js/ds-nav.js?v=202610040859" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202610041031" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202610041031" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202610041031" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202610041031" defer></script>|
++    <script src="js/ds-nav.js?v=202610041031" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4264,6 +4264,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202610040859" defer></script>|
+-    <script src="js/ds-sections.js?v=202610040859" defer></script>|
+-    <script src="js/ds-filter.js?v=202610040859" defer></script>|
+-    <script src="js/ds-share.js?v=202610040859" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202610041031" defer></script>|
++    <script src="js/ds-sections.js?v=202610041031" defer></script>|
++    <script src="js/ds-filter.js?v=202610041031" defer></script>|
++    <script src="js/ds-share.js?v=202610041031" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4272,5 +4272,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202610040859" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202610040859" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202610040859" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202610041031" defer></script>|
++    <script src="js/ds-tutorial.js?v=202610041031" defer></script>|
++    <script src="js/ds-masterclass.js?v=202610041031" defer></script>|
+ |
+diff --git a/js/app-utils.js b/js/app-utils.js|
+index e529a2b8..003849ea 100644|
+--- a/js/app-utils.js|
++++ b/js/app-utils.js|
+@@ -1067,2 +1067,3 @@ function showTableSkeleton(containerOrId, opts) {|
+ |
++            const _niedrigeStufe = (p) => (p === 2 ? 1 : p);|
+             if (globalPref && (globalPref === 'max' || globalPref === 'min')) {|
+@@ -1072,4 +1073,7 @@ function showTableSkeleton(containerOrId, opts) {|
+                 const sorted = versions.slice().sort((a, b) => {|
+-                    const priorityA = getRarityPriority(a.rarity, a.set);|
+-                    const priorityB = getRarityPriority(b.rarity, b.set);|
++                    // Common (1) und Uncommon (2) sind EINE niedrige Stufe (Hausi, 04.10.2026):|
++                    // "aktuellster Low-Rarity-Print". Vorher gewann das alte Common (SVI 171,|
++                    // Regulation G, nicht mehr Standard) gegen das neuere Uncommon (WHT 82).|
++                    const priorityA = _niedrigeStufe(getRarityPriority(a.rarity, a.set));|
++                    const priorityB = _niedrigeStufe(getRarityPriority(b.rarity, b.set));|
+                     |
+@@ -1135,4 +1139,4 @@ function showTableSkeleton(containerOrId, opts) {|
+                 const sorted = versions.slice().sort((a, b) => {|
+-                    const priorityA = getRarityPriority(a.rarity, a.set);|
+-                    const priorityB = getRarityPriority(b.rarity, b.set);|
++                    const priorityA = _niedrigeStufe(getRarityPriority(a.rarity, a.set));|
++                    const priorityB = _niedrigeStufe(getRarityPriority(b.rarity, b.set));|
+                     if (priorityA !== priorityB) return priorityA - priorityB;|
+diff --git a/service-worker.js b/service-worker.js|
+index 8eb0e2f9..33c789ac 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202610040859|
++// v202610041031|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202610040859';|
++const CACHE_NAME = 'tcg-analysis-v202610041031';|
+ |
+diff --git a/tests/unit/test-getPreferredVersionForCard.js b/tests/unit/test-getPreferredVersionForCard.js|
+index c71160e1..46f355d5 100644|
+--- a/tests/unit/test-getPreferredVersionForCard.js|
++++ b/tests/unit/test-getPreferredVersionForCard.js|
+@@ -168,2 +168,20 @@ describe('getPreferredVersionForCard — die vier Sortierstufen', () => {|
+ |
++    it('Common und Uncommon sind EINE niedrige Stufe: das neuere Uncommon schlaegt das aeltere Common', () => {|
++        // Befund 04.10.2026: Energy Retrieval ergab SVI 171 (Common, Regulation G,|
++        // nicht mehr Standard) statt WHT 82 (Uncommon, neuer).|
++        const a = baueAuswahl({|
++            setOrderMap: { SVI: 134, WHT: 149 },|
++            eng: () => [druck('SVI', '171', 'Common'), druck('WHT', '82', 'Uncommon')],|
++        });|
++        assert.equal(a.waehle('Energy Retrieval').set, 'WHT');|
++    });|
++|
++    it('die niedrige Stufe schlaegt trotzdem jede hoehere Seltenheit', () => {|
++        const a = baueAuswahl({|
++            setOrderMap: { SVI: 134, WHT: 149, CRI: 157 },|
++            eng: () => [druck('SVI', '171', 'Common'), druck('CRI', '108', 'Rare'), druck('WHT', '82', 'Uncommon')],|
++        });|
++        assert.equal(a.waehle('Energy Retrieval').set, 'WHT');|
++    });|
++|
+     it('Stufe 3: ohne Set-Reihenfolge entscheidet die Regelmarke', () => {|
+diff --git a/tests/unit/test-version-selection-mutation-guards.js b/tests/unit/test-version-selection-mutation-guards.js|
+index 15216d1c..7c5f7d75 100644|
+--- a/tests/unit/test-version-selection-mutation-guards.js|
++++ b/tests/unit/test-version-selection-mutation-guards.js|
+@@ -123,3 +123,3 @@ describe('getPreferredVersionForCard — mutation guards', () => {|
+             { set: 'JP1', number: '001', rarity: 'Common', type: 'Trainer' },|
+-            { set: 'SVI', number: '100', rarity: 'Uncommon', type: 'Trainer' },|
++            { set: 'SVI', number: '100', rarity: 'Rare', type: 'Trainer' },|
+             { set: 'PAL', number: '200', rarity: 'Common', type: 'Trainer' },|
+diff --git a/version.json b/version.json|
+index d6df53bb..82c0f3e8 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610040859"}|
+\ No newline at end of file|
++{"version":"202610041031"}|
+\ No newline at end of file|
+-- |
+2.43.0|
+|
+|

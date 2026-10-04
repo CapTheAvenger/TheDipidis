@@ -1,0 +1,452 @@
++    'draw.preisHinweis':        '6 Preiskarten liegen beiseite.',|
+     'draw.comboTitle':          'Combo-Wahrscheinlichkeit',|
+diff --git a/js/meta-binder.js b/js/meta-binder.js|
+index 3c63cc1c..f8e49e1a 100644|
+--- a/js/meta-binder.js|
++++ b/js/meta-binder.js|
+@@ -770,2 +770,45 @@|
+ |
++    /* UI-87 (03.10.2026, Tiefenanalyse N-14): der Leerzustand sagte|
++       „Meta-Binder noch nicht generiert", obwohl im Konto 215 gespeicherte|
++       Binder-Karten lagen. Jetzt: liegt ein gespeicherter Binder vor, nennt|
++       der Leerzustand Datum und Kartenzahl, und „Gespeicherten Binder|
++       laden" ist der Hauptknopf. Ein schon gezeichneter Binder bleibt|
++       unangetastet. */|
++    function leerzustandSetzen(grid, gespeichert) {|
++        if (!grid || !gespeichert || !(gespeichert.anzahl > 0)) return false;|
++        const leer = grid.querySelector('.deck-builder-empty-state');|
++        if (!leer) return false;|
++        const titel = leer.querySelector('.deck-builder-empty-title');|
++        const text = leer.querySelector('.deck-builder-empty-text');|
++        const laden = leer.querySelector('[onclick^="loadSavedMetaBinder"]');|
++        const bauen = leer.querySelector('[onclick^="buildMetaBinder"]');|
++        const de = typeof getLang === 'function' ? getLang() === 'de' : true;|
++        const datum = gespeichert.datum|
++            ? new Date(gespeichert.datum).toLocaleDateString(de ? 'de-DE' : 'en-US') : null;|
++        if (titel) titel.textContent = mbText('mb.savedTitle', 'Saved binder available');|
++        if (text) text.textContent = mbText('mb.savedText', '{n} cards, saved on {datum}.')|
++            .replace('{n}', String(gespeichert.anzahl)).replace('{datum}', datum || '?');|
++        if (laden) { laden.classList.add('btn-primary'); laden.classList.remove('btn-outline'); }|
++        if (bauen) { bauen.classList.add('btn-outline'); bauen.classList.remove('btn-primary'); }|
++        if (laden && bauen && laden.parentNode === bauen.parentNode) bauen.parentNode.insertBefore(laden, bauen);|
++        leer.dataset.gespeichert = String(gespeichert.anzahl);|
++        return true;|
++    }|
++|
++    async function metaBinderLeerzustand() {|
++        const grid = document.getElementById('metaBinderGrid');|
++        if (!grid || !grid.querySelector('.deck-builder-empty-state')) return false;|
++        const user = window.auth?.currentUser;|
++        if (!user || !window.db) return false;|
++        try {|
++            const doc = await window.db.collection('users').doc(user.uid).get();|
++            const data = doc.exists ? doc.data() : {};|
++            const karten = Array.isArray(data.metaBinderCards) ? data.metaBinderCards : [];|
++            return leerzustandSetzen(grid, { anzahl: karten.length, datum: data.metaBinderSnapshotDate || null });|
++        } catch (e) {|
++            console.warn('[MetaBinder] gespeicherter Binder nicht lesbar:', e);|
++            return false;|
++        }|
++    }|
++|
+     /**|
+@@ -2450,2 +2493,4 @@|
+     window.loadSavedMetaBinder = loadSavedMetaBinder;|
++    window.metaBinderLeerzustand = metaBinderLeerzustand;|
++    window.metaBinderLeerzustandSetzen = leerzustandSetzen;|
+     window.refreshMetaBinderOwnership = refreshMetaBinderOwnership;|
+diff --git a/service-worker.js b/service-worker.js|
+index 27bee007..b2562de1 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202610032338|
++// v202610040038|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202610032338';|
++const CACHE_NAME = 'tcg-analysis-v202610040038';|
+ |
+diff --git a/tests/unit/test-da36-geteilte-abrufe.js b/tests/unit/test-da36-geteilte-abrufe.js|
+new file mode 100644|
+index 00000000..076b703f|
+--- /dev/null|
++++ b/tests/unit/test-da36-geteilte-abrufe.js|
+@@ -0,0 +1,79 @@|
++/**|
++ * DA-36 (03.10.2026, Tiefenanalyse F-14/D-10): Mehrfachladungen. Live|
++ * gemessen am 04.10.2026 auf der Startseite: labs_tournament_decks.csv 5x,|
++ * online_tournament_top8_decks.csv 5x, format_window.json 4x — jedes Modul|
++ * holt mit eigenem ?t=Date.now(). js/csv-cache-interceptor.js teilt jetzt|
++ * innerhalb eines Seitenaufrufs eine Antwort je /data/-Datei.|
++ *|
++ * AUSGEFUEHRT: das echte Modul laeuft mit einer gezaehlten fetch-Attrappe.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const vm = require('node:vm');|
++|
++const SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'csv-cache-interceptor.js'), 'utf8');|
++|
++function laden(antwort) {|
++    const abrufe = [];|
++    const ctx = {|
++        console: { log() {}, warn() {}, error() {}, info() {} },|
++        Response, Promise, Map, Object, Array, String, performance, setTimeout: () => 0, setInterval: () => 0,|
++        document: { addEventListener() {}, readyState: 'complete' },|
++        addEventListener() {},|
++    };|
++    ctx.fetch = async (url, init) => {|
++        abrufe.push([String(url), init || null]);|
++        const a = antwort ? antwort(String(url)) : { ok: true, text: 'a;b\n1;2' };|
++        return new Response(a.text, { status: a.ok ? 200 : 404, headers: { 'Content-Type': 'text/csv' } });|
++    };|
++    ctx.window = ctx;|
++    vm.createContext(ctx);|
++    vm.runInContext(SRC, ctx, { filename: 'csv-cache-interceptor.js' });|
++    return { ctx, abrufe };|
++}|
++|
++describe('DA-36: dieselbe /data/-Datei wird je Seitenaufruf einmal geholt', () => {|
++    it('fuenf Abrufe mit verschiedenem ?t= — ein Netzabruf, fuenf volle Antworten', async () => {|
++        const s = laden();|
++        const texte = await Promise.all([1, 2, 3, 4, 5].map((i) =>|
++            s.ctx.window.fetch('./data/labs_tournament_decks.csv?t=' + i).then((r) => r.text())));|
++        assert.equal(s.abrufe.length, 1);|
++        assert.deepEqual(texte, Array(5).fill('a;b\n1;2'));|
++    });|
++|
++    it('verschiedene Dateien bleiben getrennt', async () => {|
++        const s = laden((u) => ({ ok: true, text: u.split('?')[0] }));|
++        const a = await s.ctx.window.fetch('data/format_window.json?t=1').then((r) => r.text());|
++        const b = await s.ctx.window.fetch('data/sets_x.json?t=2').then((r) => r.text());|
++        assert.equal(a, 'data/format_window.json');|
++        assert.equal(b, 'data/sets_x.json');|
++        assert.equal(s.abrufe.length, 2);|
++    });|
++|
++    it('ausgenommen: no-store, POST, version.json, Dateien ausserhalb von data/', async () => {|
++        const s = laden();|
++        await s.ctx.window.fetch('data/data_stand.json?t=1', { cache: 'no-store' });|
++        await s.ctx.window.fetch('data/data_stand.json?t=2', { cache: 'no-store' });|
++        await s.ctx.window.fetch('data/x.json', { method: 'POST' });|
++        await s.ctx.window.fetch('data/x.json', { method: 'POST' });|
++        await s.ctx.window.fetch('/version.json?x=1');|
++        await s.ctx.window.fetch('/version.json?x=2');|
++        await s.ctx.window.fetch('tutorial/tutorial.de.html?v=1');|
++        await s.ctx.window.fetch('tutorial/tutorial.de.html?v=1');|
++        assert.equal(s.abrufe.length, 8);|
++    });|
++|
++    it('ein Fehlschlag wird nicht festgehalten: der naechste Abruf versucht es neu', async () => {|
++        let n = 0;|
++        const s = laden(() => (++n === 1 ? { ok: false, text: '' } : { ok: true, text: 'da' }));|
++        const r1 = await s.ctx.window.fetch('data/a.csv?t=1');|
++        assert.equal(r1.ok, false);|
++        const r2 = await s.ctx.window.fetch('data/a.csv?t=2');|
++        assert.equal(r2.ok, true);|
++        assert.equal(await r2.text(), 'da');|
++        assert.equal(s.abrufe.length, 2);|
++    });|
++});|
+diff --git a/tests/unit/test-da36-spielerdatei-erst-bei-bedarf.js b/tests/unit/test-da36-spielerdatei-erst-bei-bedarf.js|
+new file mode 100644|
+index 00000000..b77e9131|
+--- /dev/null|
++++ b/tests/unit/test-da36-spielerdatei-erst-bei-bedarf.js|
+@@ -0,0 +1,72 @@|
++/**|
++ * DA-36 (03.10.2026, Tiefenanalyse F-14/D-10): js/deck-builder-consistency.js|
++ * lud data/tournament_decklists_per_player.csv (61,8 MB, live gemessen am|
++ * 04.10.2026) beim Seitenstart — auf jeder Seite, auch der Startseite, die|
++ * sie nicht braucht. Jetzt erst, wenn ein Reiter sie braucht (Deck-Analyse|
++ * Global/Japan, Vergangene Formate) oder beim ersten Aufruf.|
++ *|
++ * AUSGEFUEHRT: das echte Modul laeuft in einer Attrappe; gezaehlt wird,|
++ * wie oft Papa.parse die Datei anfordert.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const vm = require('node:vm');|
++|
++const SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'deck-builder-consistency.js'), 'utf8');|
++const DATEI = 'data/tournament_decklists_per_player.csv';|
++|
++function laden(aktiverReiter) {|
++    const abrufe = [];|
++    const zeitgeber = [];|
++    const reiter = [];|
++    const ctx = {|
++        console: { log() {}, warn() {}, error() {}, info() {} },|
++        document: {|
++            readyState: 'complete',|
++            addEventListener() {},|
++            querySelector: (sel) => (sel === '.tab-content.active' ? { id: aktiverReiter } : null),|
++        },|
++        setTimeout: (fn) => { zeitgeber.push(fn); return 0; },|
++        Papa: { parse: (url, o) => { abrufe.push(String(url).split('?')[0]); o.complete({ data: [] }); } },|
++        fetch: async () => ({ ok: false, json: async () => null, text: async () => '' }),|
++        switchTab: (t) => { reiter.push(t); return true; },|
++    };|
++    ctx.window = ctx;|
++    vm.createContext(ctx);|
++    vm.runInContext(SRC, ctx, { filename: 'deck-builder-consistency.js' });|
++    zeitgeber.splice(0).forEach((fn) => fn());|
++    const spielerdatei = () => abrufe.filter((u) => u === DATEI).length;|
++    return { ctx, spielerdatei, reiter };|
++}|
++|
++describe('DA-36: die Spielerdatei wird erst geladen, wenn sie gebraucht wird', () => {|
++    it('Startseite: kein Abruf', () => {|
++        const s = laden('current-meta');|
++        assert.equal(s.spielerdatei(), 0, 'die 61,8-MB-Datei wird wieder beim Seitenstart geladen');|
++    });|
++|
++    it('Wechsel in die Deck-Analyse: genau ein Abruf, auch beim zweiten Wechsel', () => {|
++        const s = laden('current-meta');|
++        s.ctx.switchTab('current-analysis');|
++        assert.equal(s.spielerdatei(), 1);|
++        s.ctx.switchTab('meta-call');|
++        s.ctx.switchTab('current-analysis');|
++        assert.equal(s.spielerdatei(), 1, 'doppelt geladen');|
++        assert.deepEqual(s.reiter, ['current-analysis', 'meta-call', 'current-analysis'],|
++            'der Reiterwechsel selbst muss weiterlaufen');|
++    });|
++|
++    it('Direkteinstieg in Vergangene Formate laedt sofort', () => {|
++        const s = laden('past-meta');|
++        assert.equal(s.spielerdatei(), 1);|
++    });|
++|
++    it('ohne Reiterwechsel laedt der erste Aufruf von loadData()', async () => {|
++        const s = laden('current-meta');|
++        await s.ctx.MostConsistencyBuilder.loadData();|
++        assert.equal(s.spielerdatei(), 1);|
++    });|
++});|
+diff --git a/tests/unit/test-r7-politur.js b/tests/unit/test-r7-politur.js|
+new file mode 100644|
+index 00000000..e10e4568|
+--- /dev/null|
++++ b/tests/unit/test-r7-politur.js|
+@@ -0,0 +1,199 @@|
++/**|
++ * Rutsch R6/R7 (03.10.2026, Tiefenanalyse UI/UX): Politur-Punkte, jeder|
++ * AUSGEFUEHRT, wo es eine Funktion gibt (Kommentare vorher entfernt).|
++ *   UI-87  Meta Binder: Leerzustand nennt den gespeicherten Binder|
++ *   UI-89  Journal: Format vorbelegt, TEF-PBL/TEF-CRI in der Liste|
++ *   UI-88  Profil-Builder: Set-Knoepfe mit Setnamen|
++ *   UI-93  Archetyp-Box: nach „Box anlegen" zur neuen Box|
++ *   FE-46  Testhand: 6 Preiskarten beiseite, Mulligan wird benannt|
++ *   FE-44  Meta Call: „Mein Deck" wird gemerkt|
++ *   FE-48  Meine Decks: Sammlungsknopf sieht anders aus als „+ Anzahl"|
++ *   UI-86  Heatmap-Legende: 45 steht in genau einer Stufe|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const vm = require('node:vm');|
++|
++const W = path.join(__dirname, '..', '..');|
++const roh = (p) => fs.readFileSync(path.join(W, p), 'utf8');|
++const ohne = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++const schnitt = (q, von, bis) => {|
++    const a = q.indexOf(von);|
++    const b = q.indexOf(bis, a + von.length);|
++    assert.ok(a > -1 && b > a, `nicht gefunden: ${von}`);|
++    return q.slice(a, b);|
++};|
++|
++function knoten(attrs) {|
++    const k = Object.assign({ textContent: '', dataset: {}, parentNode: null, kinder: [] }, attrs || {});|
++    const klassen = new Set((k.klasse || '').split(' ').filter(Boolean));|
++    k.classList = { add: (c) => klassen.add(c), remove: (c) => klassen.delete(c), contains: (c) => klassen.has(c) };|
++    k.klassen = klassen;|
++    return k;|
++}|
++|
++describe('UI-87: Meta Binder nennt den gespeicherten Binder', () => {|
++    const Q = ohne(roh('js/meta-binder.js'));|
++    const f = Function('getLang', 'mbText',|
++        schnitt(Q, 'function leerzustandSetzen(', 'async function metaBinderLeerzustand(') + '\nreturn leerzustandSetzen;')(|
++        () => 'de', (k, fb) => ({ 'mb.savedTitle': 'Gespeicherter Binder vorhanden', 'mb.savedText': '{n} Karten, gespeichert am {datum}.' })[k] || fb);|
++    function grid() {|
++        const eltern = { reihe: [], insertBefore(a, b) { this.reihe = this.reihe.filter((x) => x !== a); this.reihe.splice(this.reihe.indexOf(b), 0, a); } };|
++        const bauen = knoten({ klasse: 'btn btn-primary', parentNode: eltern });|
++        const laden = knoten({ klasse: 'btn btn-outline', parentNode: eltern });|
++        eltern.reihe = [bauen, laden];|
++        const titel = knoten(); const text = knoten();|
++        const leer = knoten({ querySelector: (s) => ({ '.deck-builder-empty-title': titel, '.deck-builder-empty-text': text,|
++            '[onclick^="loadSavedMetaBinder"]': laden, '[onclick^="buildMetaBinder"]': bauen })[s] || null });|
++        return { g: { querySelector: (s) => (s === '.deck-builder-empty-state' ? leer : null) }, titel, text, laden, bauen, eltern, leer };|
++    }|
++    it('mit gespeichertem Binder: Titel, Datum, Kartenzahl, Laden ist Hauptknopf und steht vorn', () => {|
++        const x = grid();|
++        assert.equal(f(x.g, { anzahl: 215, datum: '2026-09-30T10:00:00Z' }), true);|
++        assert.equal(x.titel.textContent, 'Gespeicherter Binder vorhanden');|
++        assert.equal(x.text.textContent, '215 Karten, gespeichert am 30.9.2026.');|
++        assert.ok(x.laden.klassen.has('btn-primary') && !x.laden.klassen.has('btn-outline'));|
++        assert.ok(x.bauen.klassen.has('btn-outline') && !x.bauen.klassen.has('btn-primary'));|
++        assert.equal(x.eltern.reihe[0], x.laden);|
++    });|
++    it('ohne gespeicherten Binder bleibt alles, wie es ist', () => {|
++        const x = grid();|
++        assert.equal(f(x.g, { anzahl: 0 }), false);|
++        assert.equal(x.titel.textContent, '');|
++    });|
++    it('der Profil-Unterreiter ruft es beim Oeffnen auf', () => {|
++        assert.match(ohne(roh('js/firebase-collection.js')),|
++            /tabName === 'metabinder' && typeof window\.metaBinderLeerzustand === 'function'\) \{\s*window\.metaBinderLeerzustand\(\);/);|
++    });|
++});|
++|
++describe('UI-89: Journal', () => {|
++    const Q = ohne(roh('js/battle-journal.js'));|
++    const vorbelegen = (live, liste, wert) => {|
++        const w = { getCurrentMetaFormat: () => live, KNOWN_META_FORMAT_CODES: liste };|
++        const sel = { value: wert || '', options: liste.map((v) => ({ value: v })) };|
++        Function('window', schnitt(Q, 'function formatVorbelegen(', 'window._journalFormatVorbelegen') + '\nreturn formatVorbelegen;')(w)(sel);|
++        return sel.value;|
++    };|
++    it('leeres Format wird mit dem laufenden vorbelegt', () => {|
++        assert.equal(vorbelegen('TEF-30C', ['TEF-30C', 'TEF-PBL']), 'TEF-30C');|
++    });|
++    it('eine Wahl bleibt; ein unbekanntes Format wird nicht gesetzt', () => {|
++        assert.equal(vorbelegen('TEF-30C', ['TEF-30C', 'TEF-PBL'], 'TEF-PBL'), 'TEF-PBL');|
++        assert.equal(vorbelegen('XYZ', ['TEF-30C']), '');|
++    });|
++    it('das Eintragen-Fenster ruft es nach dem Leeren auf', () => {|
++        assert.match(Q, /resetBattleJournalForm\(\);\s*formatVorbelegen\(document\.getElementById\('battleJournalMeta'\)\);/);|
++    });|
++    it('TEF-PBL und TEF-CRI stehen in der Formatliste, nach Datum geordnet', () => {|
++        const m = roh('js/app-core.js').match(/const KNOWN_META_FORMAT_CODES = \[([\s\S]*?)\];/);|
++        const liste = m[1].match(/'[^']+'/g).map((x) => x.slice(1, -1));|
++        assert.deepEqual(liste.slice(0, 3), ['TEF-PBL', 'TEF-CRI', 'TEF-POR']);|
++    });|
++    it('der Leerzustand der Warteschlange behauptet kein „erstes Match"', () => {|
++        const de = roh('js/i18n.js').match(/'bj\.emptyStateDesc':\s*'([^']*)'/g);|
++        assert.ok(de.every((z) => !/erstes Match|first match/.test(z)), de.join(' | '));|
++    });|
++});|
++|
++describe('UI-88: Set-Knoepfe tragen den Setnamen', () => {|
++    const SRC = roh('js/app-profile-deck-builder.js');|
++    const f = Function(schnitt(ohne(SRC), 'function setNamenAusCsv(', 'function _setNamenLaden(') + '\nreturn setNamenAusCsv;')();|
++    it('liest set_code,set_name', () => {|
++        assert.deepEqual(f('¤uFEFFset_code,set_name\nCRI,Chaos Rising\npor,Perfect Order\n\n'), { CRI: 'Chaos Rising', POR: 'Perfect Order' });|
++    });|
++    it('der Knopf bekommt den Namen als Titel', () => {|
++        assert.match(SRC, /data-set-code="\$\{escapeHtml\(s\)\}"\$\{_setNamen && _setNamen\[s\] \? ` title="\$\{escapeHtml\(_setNamen\[s\]\)\}"` : ''\}/);|
++    });|
++    it('die Zuordnungsdatei hat die Spalten, die gelesen werden', () => {|
++        assert.equal(roh('data/pokemon_sets_mapping.csv').split(/\r?\n/)[0].replace(/^¤uFEFF/, ''), 'set_code,set_name');|
++    });|
++});|
++|
++describe('UI-93: nach „Box anlegen" zur neuen Box', () => {|
++    const Q = ohne(roh('js/archetyp-box.js'));|
++    it('klappt das Listenfeld auf, scrollt hin und setzt den Fokus', () => {|
++        const d = { open: false };|
++        const ruf = [];|
++        const liste = { closest: () => d, scrollIntoView: (o) => ruf.push(['scroll', o.block]), focus: () => ruf.push(['fokus']) };|
++        const f = Function('el', 'setTimeout', schnitt(Q, 'function zurNeuenBox(', 'async function listeEinfuegen(') + '\nreturn zurNeuenBox;')(|
++            (id) => (id === 'abxListe' ? liste : null), (fn) => fn());|
++        assert.equal(f(), true);|
++        assert.equal(d.open, true);|
++        assert.deepEqual(ruf, [['scroll', 'center'], ['fokus']]);|
++    });|
++    it('eigeneAnlegen ruft es nach dem Zeichnen auf', () => {|
++        assert.match(Q, /zeichnen\(\);\s*zurNeuenBox\(\);/);|
++    });|
++});|
++|
++describe('FE-46: Testhand wie am Tisch', () => {|
++    function sim() {|
++        const els = {};|
++        const grid = { innerHTML: '', appendChild() {}, parentNode: { insertBefore(n) { els.simulatorMulligan = n; } }, nextSibling: null };|
++        els.simulatorHandGrid = grid;|
++        els.simulatorDeckCount = { innerText: '' };|
++        const ctx = {|
++            console, Math,|
++            document: { getElementById: (id) => els[id] || null, createElement: () => ({ textContent: '', style: {} }) },|
++            t: (k) => ({ 'draw.mulliganHinweis': 'MULLIGAN', 'draw.preisHinweis': 'PREIS' })[k] || k,|
++            showToast() {},|
++        };|
++        ctx.window = ctx;|
++        vm.createContext(ctx);|
++        vm.runInContext(roh('js/draw-simulator.js'), ctx);|
++        return { ctx, els };|
++    }|
++    it('60 Karten: 7 auf der Hand, 6 Preiskarten, 47 im Deck; gezogen wird Karte 14', () => {|
++        const s = sim();|
++        vm.runInContext(`_simulatorDeck = Array.from({ length: 60 }, (_, i) => ({ name: 'K' + i, basis: true }));|
++            _shuffleFisherYates = () => {}; drawNewHand();`, s.ctx);|
++        assert.equal(s.els.simulatorDeckCount.innerText, 47);|
++        vm.runInContext('drawExtraCard();', s.ctx);|
++        assert.equal(vm.runInContext('_simulatorHand[7].name', s.ctx), 'K13');|
++        assert.equal(s.els.simulatorDeckCount.innerText, 46);|
++        assert.equal(s.els.simulatorMulligan.textContent, 'PREIS');|
++    });|
++    it('Hand ohne Basis-Pokemon wird als Mulligan benannt; unbekannt bleibt unbenannt', () => {|
++        const s = sim();|
++        assert.equal(s.ctx._simMulliganLage(Array(7).fill({ basis: false })), 'mulligan');|
++        assert.equal(s.ctx._simMulliganLage([{ basis: true }].concat(Array(6).fill({ basis: false }))), 'ok');|
++        assert.equal(s.ctx._simMulliganLage(Array(7).fill({ basis: null })), null);|
++        vm.runInContext(`_simulatorDeck = Array.from({ length: 60 }, (_, i) => ({ name: 'K' + i, basis: false }));|
++            _shuffleFisherYates = () => {}; drawNewHand();`, s.ctx);|
++        assert.equal(s.els.simulatorMulligan.textContent, 'MULLIGAN PREIS');|
++    });|
++});|
++|
++describe('FE-44: Meta Call merkt „Mein Deck"', () => {|
++    const Q = ohne(roh('js/app-meta-call.js'));|
++    it('gemerkt wird beim Waehlen, geholt beim Start, vergessen wenn das Deck fehlt', () => {|
++        const speicher = {};|
++        const ls = { setItem: (k, v) => { speicher[k] = v; }, removeItem: (k) => { delete speicher[k]; }, getItem: (k) => speicher[k] || null };|
++        const merken = Function('localStorage', schnitt(Q, "const MEIN_DECK_KEY = 'metacall_mydeck_v1';", 'try {\n    const gemerkt')|
++            + '\nreturn { merken: _meinDeckMerken, KEY: MEIN_DECK_KEY };')(ls);|
++        merken.merken('Dragapult');|
++        assert.equal(speicher[merken.KEY], 'Dragapult');|
++        merken.merken('');|
++        assert.equal(speicher[merken.KEY], undefined);|
++        assert.match(Q, /function _onMyDeck\(val\) \{\s*_settings\.myDeck = val;\s*_meinDeckMerken\(val\);/);|
++        assert.match(Q, /const gemerkt = localStorage\.getItem\(MEIN_DECK_KEY\);\s*if \(gemerkt\) _settings\.myDeck = gemerkt;/);|
++        assert.match(Q, /_bekannteDeckNamen\(\)\.indexOf\(_settings\.myDeck\) === -1\) \{\s*_settings\.myDeck = '';\s*_meinDeckMerken\(''\);/);|
++    });|
++});|
++|
++describe('FE-48 und UI-86', () => {|
++    it('der Sammlungsknopf traegt das Kistensymbol, der Deckknopf nicht', () => {|
++        const Q = ohne(roh('js/firebase-collection.js'));|
++        assert.match(Q, /const collLabel\s*= ownedCount > 0 \? `\¤u\{1F4E6\} \$\{ownedCount\}\/4` : '\¤u\{1F4E6\}\+';/);|
++    });|
++    it('die Heatmap-Legende ordnet 45 genau einer Stufe zu, wie die Zelle', () => {|
++        const Q = roh('js/app-current-meta.js');|
++        assert.match(Q, /\$\{t\('heatmap\.even'\)\} \(45,1–54,9 %\)/);|
++        assert.match(Q, /\$\{t\('heatmap\.unfavorable'\)\} \(≤ 45 %\)/);|
++        assert.match(Q, /\} else if \(winRate <= 45\.0\) \{/);|
++    });|
++});|
+diff --git a/tests/unit/test-rutsch-h-straffen.js b/tests/unit/test-rutsch-h-straffen.js|
+index b29551fc..95463a32 100644|
+--- a/tests/unit/test-rutsch-h-straffen.js|
++++ b/tests/unit/test-rutsch-h-straffen.js|
+@@ -61,3 +61,4 @@ describe('UI-63: Journal-Abgleich mit Namenszusatz', () => {|
+         assert.match(QUELLE, /function _journalOptionen\(\)[\s\S]{0,200}bekannteDecks: _bekannteDeckNamen\(\)/);|
+-        assert.equal((QUELLE.match(/_ladeJournal\(/g) || []).length, 3, 'Definition + zwei Aufrufer');|
++        // FE-44 (03.10.2026): dritter Aufrufer — der Start mit gemerktem „Mein Deck".|
++        assert.equal((QUELLE.match(/_ladeJournal\(/g) || []).length, 4, 'Definition + drei Aufrufer');|
+     });|
+diff --git a/tests/unit/test-testdaten-wachhund.js b/tests/unit/test-testdaten-wachhund.js|
+index fe02bcab..955d2899 100644|
+--- a/tests/unit/test-testdaten-wachhund.js|

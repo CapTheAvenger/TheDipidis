@@ -1,0 +1,20 @@
++++ b/tests/unit/test-testdaten-wachhund.js|
+@@ -159,2 +159,5 @@ function gleichheiten(datei) { return zeilenMit(datei, GLEICHHEIT); }|
+ const REGISTER = {|
++    'test-da36-geteilte-abrufe.js': 'DA-36 (03.10.2026): nennt data/-Pfade nur als Abrufadressen fuer eine fetch-Attrappe; gelesen wird keine Datei aus data/, keine Zahl aus Daten. Ausgefuehrt wird js/csv-cache-interceptor.js. Keine Ungleichung an Live-Daten.',|
++    'test-da36-spielerdatei-erst-bei-bedarf.js': 'DA-36 (03.10.2026): nennt data/tournament_decklists_per_player.csv nur als Adresse, die eine Papa-Attrappe zaehlt; die Datei selbst wird nicht gelesen. Ausgefuehrt wird js/deck-builder-consistency.js. Keine Ungleichung an Live-Daten.',|
++    'test-r7-politur.js': 'Rutsch R6/R7 (03.10.2026): liest aus data/ nur die KOPFZEILE von pokemon_sets_mapping.csv (set_code,set_name), weil der Profil-Builder genau diese Spalten liest. Keine Zahl, keine Zeilenzahl, kein Wochenwert. Keine Ungleichung an Live-Daten.',|
+     'test-box-stufe-marke-alle-drucke.js': 'Box-Stufe nach Regulierungsmarke fuer jeden Druck (01.10.2026, Hausi: Gholdengo, Iron Valiant, Roaring Moon standen gelb): liest data/regulation_marks.json, behauptet aber keinen Wochenwert. Die Marke eines Drucks aendert sich nie (Gholdengo ex PRE 164 und PAR 139 sind und bleiben G), deshalb stehen einzelne feste Drucke als Belege — keine Zaehlwerte, keine Mengenaussage. Die Regel wird AUSGEFUEHRT (archetyp-box.js im vm-Kontext), nicht im Quelltext gesucht. Keine Ungleichung an Live-Daten.',|
+diff --git a/version.json b/version.json|
+index be000468..a6cf77b6 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610032338"}|
+\ No newline at end of file|
++{"version":"202610040038"}|
+\ No newline at end of file|
+-- |
+2.34.1|
+|
+|

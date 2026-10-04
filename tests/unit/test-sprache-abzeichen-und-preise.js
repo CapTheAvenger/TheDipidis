@@ -107,21 +107,10 @@ describe('Preis-Pillen und Vertrauens-Abzeichen kommen aus der Tabelle', () => {
     });
 });
 
-describe('Das englische Tutorial', () => {
-    it('zeigt die Pille der Webseite auf Englisch', () => {
-        assert.ok(!/mockup-wt-card-trigger">🎯 Unter deinem Ziel/.test(TUT_EN),
-            'die Pille ist die Anzeige DER WEBSEITE und muss mit der Sprache wandern');
-        assert.match(TUT_EN, /mockup-wt-card-trigger">🎯 Below your target/);
-    });
-
-    it('sagt dazu, dass der Bot Deutsch schreibt — statt seine Texte zu erfinden', () => {
-        // Die Telegram-Blasen geben wieder, was der Bot WIRKLICH schickt
-        // (bot/src/commands/start.js schreibt Deutsch). Sie zu uebersetzen
-        // waere eine Luege ueber das, was beim Nutzer ankommt.
-        assert.match(TUT_EN, /bot itself writes in German/i,
-            'ohne diesen Hinweis liest sich der deutsche Bot-Text wie ein Uebersetzungsfehler');
-    });
-});
+/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand
+   „Das englische Tutorial". Der Block pruefte Inhalte der alten Langfassung der Anleitung,
+   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js
+   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */
 
 describe('Sprachwechsel zeichnet die Preisflaechen neu', () => {
     // Am 29.08.2026 im angemeldeten Konto des Betreibers gemessen: nach

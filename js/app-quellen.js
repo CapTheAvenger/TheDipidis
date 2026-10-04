@@ -103,7 +103,7 @@
                          'Präsenzturniere ab Regional-Größe.'],
                         ['🇯🇵 Japan · City League',
                          'limitlesstcg.com/jp — gemeldete City-League-Ergebnisse.'],
-                        ['📦 Past · eingefrorene Formate',
+                        ['📦 Vergangene Formate',
                          'Limitless Labs — abgeschlossene Formate, Stand eingefroren.'],
                         ['Preise',
                          'Cardmarket. Verknüpft wird über Set und Kartennummer oder die ' +
@@ -229,7 +229,7 @@
                         ['Unser Pick',
                          'Das Deck, das die Empfehlung für das nächste Turnier ausgibt. ' +
                          'Es ist der Vorschlag mit der besten Day-2-Aussicht im aktuellen ' +
-                         'Feld — keine Zusage, sondern die beste Wette, die die Daten hergeben.'],
+                         'Meta — keine Zusage, sondern die beste Wette, die die Daten hergeben.'],
                         ['„schafft Day 2“',
                          'Wie oft ein Spieler mit diesem Deck über den ersten Tag hinauskommt, ' +
                          'gerechnet über die ausgewerteten Präsenzturniere. Daneben steht ' +
@@ -244,7 +244,7 @@
                          'Spieler es gespielt haben. Darunter ist die Quote Rauschen. Die ' +
                          'Schwelle hängt am Format und steht deshalb bei der Empfehlung selbst.'],
                         ['„% vom Meta sind neu“',
-                         'Der Anteil des Feldes, für den es noch keine Präsenzdaten gibt — ' +
+                         'Der Anteil des Metas, für den es noch keine Präsenzdaten gibt — ' +
                          'meist frisch gebaute Decks aus dem Online-Fenster. Gegen sie ist der ' +
                          'Pick ungetestet, weil sie in keinem ausgewerteten Turnier vorkamen.'],
                     ],
@@ -310,7 +310,7 @@
                          'and in-person events from regional size upwards.'],
                         ['🇯🇵 Japan · City League',
                          'limitlesstcg.com/jp — reported City League results.'],
-                        ['📦 Past · frozen formats',
+                        ['📦 Past formats',
                          'Limitless Labs — completed formats, frozen as they ended.'],
                         ['Prices',
                          'Cardmarket. Joined on set and card number or the Cardmarket product ' +

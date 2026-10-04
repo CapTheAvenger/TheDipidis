@@ -3642,7 +3642,7 @@
                 </div>`;
             }
             const limitlessButton = (card.set && card.number)
-                ? `<button type="button" onclick="openLimitlessCard('${escapeHtmlAttr(escapeJsStr(card.set))}', '${escapeHtmlAttr(escapeJsStr(card.number))}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless" aria-label="Open ${displayName} on Limitless">Limitless</button>`
+                ? `<button type="button" onclick="openLimitlessCard('${escapeHtmlAttr(escapeJsStr(card.set))}', '${escapeHtmlAttr(escapeJsStr(card.number))}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="${getLang()==='de' ? 'Bei Limitless ansehen' : 'View on Limitless'}" aria-label="Open ${displayName} on Limitless">Limitless</button>`
                 : '<div class="card-database-limitless-placeholder"></div>';
             
             item.innerHTML = `

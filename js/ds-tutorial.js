@@ -156,6 +156,37 @@
         render(lang());
     });
 
+    /* UI-78 (03.10.2026, Tiefenanalyse N-04/N-19): Glossar. Erklaerungen
+     * standen fast nur in title-Tooltips, die es auf dem Handy nicht gibt.
+     * Jeder Begriff in tutorial/tutorial.<sprache>.html hat die Adresse
+     * #glossar-<begriff>; ein antippbares Element mit data-glossar="<begriff>"
+     * (die ⓘ-Knoepfe der Seite und die Verweise in der Anleitung) oeffnet
+     * die Anleitung und springt zum Eintrag. Der Hash wird dabei NICHT
+     * gesetzt — die Adresszeile steuert die Reiter (js/inline-init.js). */
+    function glossarOeffnen(begriff) {
+        var id = 'glossar-' + String(begriff || '').replace(/[^a-z0-9-]/gi, '').toLowerCase();
+        if (typeof window.switchTabAndUpdateMenu === 'function') window.switchTabAndUpdateMenu('tutorial');
+        else if (typeof window.switchTab === 'function') window.switchTab('tutorial');
+        return render(lang()).then(function () {
+            var ziel = document.getElementById(id) || document.getElementById('glossar');
+            if (!ziel) return false;
+            if (ziel.scrollIntoView) ziel.scrollIntoView({ block: 'start' });
+            if (ziel.classList) {
+                ziel.classList.add('glossar-markiert');
+                setTimeout(function () { ziel.classList.remove('glossar-markiert'); }, 2400);
+            }
+            return ziel.id;
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        var el = e.target.closest && e.target.closest('[data-glossar]');
+        if (!el) return;
+        e.preventDefault();
+        e.stopPropagation();
+        glossarOeffnen(el.getAttribute('data-glossar'));
+    });
+
     /* switchTab wird umschlossen statt in app-core.js angefasst —
      * dieselbe Technik wie in js/ds-nav.js, aus demselben Grund. */
     function wire() {
@@ -190,6 +221,7 @@
 
     window.DsTutorial = {
         show: function () { return render(lang()); },
+        glossarOeffnen: glossarOeffnen,
         hydrateImages: hydrateImages,
         /* Fuer Tests und fuer alles, was wissen will, ob schon geladen wurde. */
         state: function () {
@@ -198,6 +230,7 @@
         }
     };
     window.hydrateTutorialImages = hydrateImages;
+    window.glossarOeffnen = glossarOeffnen;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', boot);

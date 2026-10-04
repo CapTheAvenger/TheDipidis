@@ -2813,6 +2813,18 @@
                   + _quelle256
                   + `Period: ${tourList.length} ${tourList.length === 1 ? 'event' : 'events'} in the current meta window, ${_summe256} lists in total. `
                   + `The “data from” window does not apply to this list.`;
+            /* UI-77 (03.10.2026, Tiefenanalyse N-05): Spaltenname und
+               Dateipfad standen sichtbar unter der Liste — Entwicklertext.
+               Sichtbar bleibt, was der Leser braucht (was die Zahl ist,
+               Zeitraum, Vorbehalt); die Herkunft samt Datei steht weiter
+               vollstaendig im Titel/aria-label der Ueberschrift. */
+            const _hinweisSichtbar256 = _de256
+                ? `Zahl vor dem Turniernamen = Day-2-Listen dieses Archetyps in diesem Turnier. `
+                  + `${tourList.length} ${tourList.length === 1 ? 'Turnier' : 'Turniere'} im aktuellen Meta-Fenster, zusammen ${_summe256} Listen. `
+                  + `Das Datenfenster „Daten ab“ wirkt auf diese Liste nicht.`
+                : `The number before each event = Day 2 lists of this archetype in that event. `
+                  + `${tourList.length} ${tourList.length === 1 ? 'event' : 'events'} in the current meta window, ${_summe256} lists in total. `
+                  + `The “data from” window does not apply to this list.`;
             listEl.innerHTML = tourList.map(t =>
                 `<div class="top256-entry">` +
                 `<span class="top256-count">${t.count}\u00d7</span>` +
@@ -2821,7 +2833,7 @@
                 `</div>`
             ).join('')
             + `<div class="top256-herkunft" style="margin-top:8px;font-size:0.72em;line-height:1.35;color:var(--ink-2, #555);">`
-            + escapeHtml(_hinweis256) + `</div>`;
+            + escapeHtml(_hinweisSichtbar256) + `</div>`;
             const _titel256 = document.querySelector('.current-meta-top256-title');
             if (_titel256) {
                 _titel256.setAttribute('title', _hinweis256);

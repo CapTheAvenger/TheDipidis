@@ -482,7 +482,8 @@ document.addEventListener('click', function(e) {
     const menu    = document.getElementById('mainMenuDropdown');
     const trigger = document.getElementById('mainMenuTrigger');
     if (menu && trigger && menu.classList.contains('show')) {
-        if (!menu.contains(e.target) && !trigger.contains(e.target)) {
+        const _beschriftung = e.target && e.target.closest ? e.target.closest('.menu-label-btn') : null;
+        if (!menu.contains(e.target) && !trigger.contains(e.target) && !_beschriftung) {
             menu.classList.remove('show');
             trigger.classList.remove('open');
             menueBeobachtungBeenden();

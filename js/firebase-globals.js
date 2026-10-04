@@ -60,7 +60,7 @@ function _getPersistErrLabel(code) {
   var map = {
     'failed-precondition': _csT('cloudSync.errPrecondition', 'another tab is using the cache'),
     'unimplemented':       _csT('cloudSync.errUnimplemented', 'browser does not support offline cache'),
-    'api-removed':         _csT('cloudSync.errApiRemoved', 'SDK version without offline cache'),
+    'api-removed':         _csT('cloudSync.errApiRemoved', 'offline storage not available in this browser'),
     'init-threw':          _csT('cloudSync.errInitThrew', 'cache init failed'),
     'unknown':             _csT('cloudSync.errUnknown', 'unknown reason'),
   };

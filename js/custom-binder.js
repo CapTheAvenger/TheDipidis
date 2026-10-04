@@ -738,7 +738,7 @@
         if (!el) return;
 
         if (cbSelectedArchetypes.length === 0) {
-            el.innerHTML = '<span class="color-grey fs-85">No archetypes selected.</span>';
+            el.innerHTML = '<span class="color-grey fs-85">' + cbText('cb.noArchetypesSelected', 'No archetypes selected.') + '</span>';
         } else {
             el.innerHTML = cbSelectedArchetypes.map((a, i) => {
                 const safeName = escapeHtml(a.name);

@@ -572,36 +572,10 @@ describe('Befund K — showNotification sprach 31x englisch und 3x deutsch', () 
 
 /* ── L · Anleitungen zitieren die echten Beschriftungen ────── */
 
-describe('Befund L — die Anleitungen nannten fremdsprachige Beschriftungen', () => {
-    it('die englische Anleitung nennt den englischen Menuepfad', () => {
-        assert.ok(!TUT_EN.includes('open <strong>Mein Profil → Account → Einstellungen'),
-            'tutorial.en.html: der deutsche Menuepfad ist zurueck — in der englischen '
-            + 'Oberflaeche heissen die Punkte anders, die Anweisung fuehrt ins Leere');
-        assert.ok(TUT_EN.includes('My Profile → Account → Settings'),
-            'tutorial.en.html: der englische Menuepfad fehlt');
-        // Gegenprobe an der Oberflaeche selbst.
-        assert.equal(EN['menu.profile'], 'My Profile');
-        assert.equal(EN['profile.groupMisc'], 'Account');
-        assert.equal(EN['profile.settings'], 'Settings');
-        assert.equal(EN['profile.priceAlerts.title'], 'Telegram price alerts');
-    });
-
-    it('die deutsche Anleitung nennt die deutschen Schaltflaechen', () => {
-        assert.ok(!TUT_DE.includes('<strong>Save</strong>'),
-            'tutorial.de.html: "Save" ist zurueck — die deutsche Oberflaeche zeigt "Speichern"');
-        assert.ok(!TUT_DE.includes('Main Cards'),
-            'tutorial.de.html: "Main Cards" ist zurueck — die deutsche Oberflaeche zeigt "Kernkarten"');
-        assert.ok(!TUT_DE.includes('Tech Cards (forced into next Generate)'),
-            'tutorial.de.html: der englische Slot-Reihen-Titel ist zurueck');
-        // Gegenprobe an der Oberflaeche selbst.
-        assert.equal(DE['btn.save'], 'Speichern');
-        assert.equal(DE['cl.skelMain'], 'Kernkarten');
-        assert.equal(DE['techSlots.label'], 'Tech-Karten');
-        assert.equal(DE['techSlots.hint'], '(werden beim nächsten Generate fest ins Deck)');
-        assert.ok(TUT_DE.includes('Tech-Karten (werden beim nächsten Generate fest ins Deck)'),
-            'tutorial.de.html: die tatsaechliche deutsche Beschriftung fehlt');
-    });
-});
+/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand
+   „Befund L — die Anleitungen nannten fremdsprachige Beschriftungen". Der Block pruefte Inhalte der alten Langfassung der Anleitung,
+   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js
+   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */
 
 /* ── N · das Pokedex-Versprechen ───────────────────────────── */
 

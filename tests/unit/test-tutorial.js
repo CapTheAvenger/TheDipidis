@@ -63,7 +63,9 @@ describe('Anleitung: ausgelagert', () => {
             const txt = fs.readFileSync(p, 'utf8');
             assert.match(txt, /tutorial-hero-eyebrow/,
                 `tutorial.${lg}.html hat keinen Hero — vermutlich beim Schneiden verloren`);
-            assert.ok(txt.length > 100000,
+            // UI-78 (03.10.2026): die Anleitung ist jetzt „Erste Schritte +
+            // Glossar" — kurz, aber nicht leer.
+            assert.ok(txt.length > 5000,
                 `tutorial.${lg}.html ist nur ${txt.length} Zeichen gross`);
             // Kommentare zaehlen nicht mit: der Kopf der Datei erklaert
             // gerade, dass sie KEIN <html>/<head>/<body> hat.
@@ -173,213 +175,137 @@ describe('Sprache: die Seite startet deutsch', () => {
     });
 });
 
-/* ══ Die drei fehlenden Kapitel (03.09.2026) ═══════════════════
+/* ══ Erste Schritte + Glossar (UI-78, 03.10.2026) ══════════════════
 
-   BEFUND: die Anleitung nannte "Champions" null Mal, "Team-Builder"
-   null Mal, "Rechner" null Mal — und enthielt insgesamt NULL Bilder.
-   Die drei groessten Bereiche, die seit August dazugekommen sind,
-   standen nirgends drin, und der Bildmechanismus
-   (js/ds-tutorial.js, data-tutorial-img) war gebaut, aber unbenutzt.
+   Entscheidung Hausi 03.10.2026: die lange Anleitung (325.716 Zeichen,
+   Kopf „v48 · August 2026", 31-mal „Cooking", ohne Archetyp-Box,
+   Masterclass, Posts) faellt weg. An ihre Stelle tritt eine Seite
+   „Erste Schritte" und ein Glossar aller Begriffe aus der
+   Tiefenanalyse (N-04), erreichbar per antippbarem ⓘ (data-glossar).
 
-   Geprueft wird hier nicht, dass die Woerter irgendwo vorkommen —
-   das waere mit einem Satz im Fliesstext erfuellt —, sondern dass
-   jedes Kapitel eine eigene Ueberschrift UND ein eigenes Bild hat,
-   und dass die Bilddateien wirklich auf der Platte liegen. */
+   Die Zusicherungen der alten Kurzfassung (04.09.2026) gelten weiter
+   fuer den Einstieg: kein Bild, keine veraltende Datenzahl, die Quellen
+   werden genannt. Die Kapitel-Zusicherungen (Champions, Team-Builder,
+   Rechner, Bilder) entfallen mit der Langfassung. */
 
-const { describe: beschreibe2, it: es2 } = require('node:test');
-const behaupte2 = require('node:assert');
-const fs2 = require('node:fs');
-const pfad2 = require('node:path');
+const behaupte2 = require('node:assert/strict');
+const vm2 = require('node:vm');
 
-const WURZEL2 = pfad2.join(__dirname, '..', '..');
-const DE2 = fs2.readFileSync(pfad2.join(WURZEL2, 'tutorial', 'tutorial.de.html'), 'utf8');
-const EN2 = fs2.readFileSync(pfad2.join(WURZEL2, 'tutorial', 'tutorial.en.html'), 'utf8');
+const DE2 = R('tutorial/tutorial.de.html');
+const EN2 = R('tutorial/tutorial.en.html');
 
-beschreibe2('Die Anleitung deckt Champions, Team-Builder, Rechner und Startseite ab', () => {
+/* Die Begriffe aus der Begriffstabelle der Tiefenanalyse (N-04) plus
+   die Bereiche, die in der alten Anleitung fehlten. */
+const BEGRIFFE = ['meta', 'archetyp', 'variante', 'format', 'rotation', 'standard',
+    'online-major', 'anteil', 'win-rate', 'matchup', 'top-8', 'day2', 'tier', 'bilanz',
+    'turniertypen', 'city-league', 'ace-spec', 'tech', 'proxy', 'ptcgl', 'irl', 'set-code',
+    'journal', 'meta-call', 'archetyp-box', 'masterclass', 'champions'];
 
-    const KAPITEL = [
-        ['Champions · Teams',   /Replica-Code/,        /replica code/i],
-        ['Champions · Nutzung', /In-Game-Analyse/,     /in-game analysis/i],
-        ['Team-Builder',        /Team setzen/,         /Set team/i],
-        ['Team-Rechner',        /K\.-o\.-Zahl/,        /hits to KO/i],
-        ['Startseite',          /Ansicht zurücksetzen/, /Reset view/i],
-    ];
+const ids = (q) => [...q.matchAll(/\bid="(glossar-[a-z0-9-]+)"/g)].map(m => m[1]);
+const einstieg = (q) => q.slice(q.indexOf('<section class="tutorial-hero">'), q.indexOf('id="glossar"'));
 
-    for (const [name, reDe, reEn] of KAPITEL) {
-        es2(`${name}: steht in der deutschen Fassung`, () => {
-            behaupte2.ok(reDe.test(DE2),
-                `Das Kapitel "${name}" fehlt in tutorial.de.html`);
+describe('Anleitung: Erste Schritte + Glossar', () => {
+    for (const [name, q, kopf] of [['deutsch', DE2, 'Erste Schritte'], ['englisch', EN2, 'Getting started']]) {
+        it(`${name}: beginnt mit „${kopf}" und ist kurz`, () => {
+            behaupte2.match(q, new RegExp(`tutorial-hero-eyebrow">${kopf}<`));
+            behaupte2.ok(q.length < 40000, `${q.length} Zeichen — die Kurzfassung waechst wieder zur Langfassung`);
         });
-        es2(`${name}: steht in der englischen Fassung`, () => {
-            behaupte2.ok(reEn.test(EN2),
-                `Das Kapitel "${name}" fehlt in tutorial.en.html`);
+        it(`${name}: der Einstieg traegt kein Bild und keine veraltende Datenzahl`, () => {
+            const block = einstieg(q);
+            behaupte2.ok(block.length > 500, 'Einstieg nicht gefunden');
+            behaupte2.ok(!/data-tutorial-img|<img/.test(block), 'Bild im Einstieg');
+            const text = block.replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]+>/g, ' ');
+            const zahlen = text.match(/\d[\d.,]*\s*%|\d{1,3}[.,]\d{3}\b|\b\d{4,}\b/g) || [];
+            behaupte2.deepEqual(zahlen, [], 'feste Zahlen im Einstieg veralten still');
+        });
+        it(`${name}: der Einstieg nennt, woher die Zahlen kommen`, () => {
+            const block = einstieg(q);
+            for (const quelle of ['Limitless', 'City League', 'Cardmarket']) {
+                behaupte2.ok(block.includes(quelle), `${quelle} fehlt im Einstieg`);
+            }
+        });
+        it(`${name}: jeder Begriff hat einen Glossareintrag mit Erklaerung`, () => {
+            const da = ids(q);
+            const fehlt = BEGRIFFE.filter(b => !da.includes('glossar-' + b));
+            behaupte2.deepEqual(fehlt, [], 'ohne Eintrag: ' + fehlt.join(', '));
+            for (const b of BEGRIFFE) {
+                const m = q.match(new RegExp(`id="glossar-${b}">[^<]+</dt>\\s*<dd>([\\s\\S]*?)</dd>`));
+                behaupte2.ok(m && m[1].replace(/<[^>]+>/g, '').trim().length > 30, `glossar-${b}: keine Erklaerung`);
+            }
+        });
+        it(`${name}: jeder Verweis data-glossar zeigt auf einen Eintrag`, () => {
+            const da = new Set(ids(q));
+            const ziele = [...q.matchAll(/data-glossar="([a-z0-9-]+)"/g)].map(m => m[1]);
+            behaupte2.ok(ziele.length >= 5, 'kaum Verweise');
+            for (const z of ziele) behaupte2.ok(da.has('glossar-' + z), `Verweis ins Leere: ${z}`);
         });
     }
 
-    es2('jede Fassung bindet ihre eigenen Bilder ein', () => {
-        // Die deutsche Anleitung mit englischen Screenshots waere
-        // schlechter als gar keine: der Leser sucht Knoepfe, die auf
-        // dem Bild anders heissen.
-        const deBilder = [...DE2.matchAll(/data-tutorial-img="([^"]+)"/g)].map(m => m[1]);
-        const enBilder = [...EN2.matchAll(/data-tutorial-img="([^"]+)"/g)].map(m => m[1]);
-        behaupte2.ok(deBilder.length >= 5,
-            `nur ${deBilder.length} Bilder in der deutschen Anleitung`);
-        behaupte2.ok(enBilder.length >= 5,
-            `nur ${enBilder.length} Bilder in der englischen Anleitung`);
-        for (const b of deBilder) {
-            behaupte2.ok(b.startsWith('images/tutorials/de/'),
-                `die deutsche Anleitung bindet ein nicht-deutsches Bild ein: ${b}`);
-        }
-        for (const b of enBilder) {
-            behaupte2.ok(!b.startsWith('images/tutorials/de/'),
-                `die englische Anleitung bindet ein deutsches Bild ein: ${b}`);
-        }
+    it('beide Sprachen fuehren dieselben Eintraege', () => {
+        behaupte2.deepEqual(ids(DE2).sort(), ids(EN2).sort());
     });
 
-    es2('jedes eingebundene Bild liegt auch auf der Platte', () => {
-        // Der Rueckfall von ds-tutorial.js ist ein Farbverlauf mit
-        // Beschriftung — sichtbar kaputt genug, dass es niemandem
-        // auffaellt, und genau deshalb wird es hier gezaehlt.
-        const alle = [...DE2.matchAll(/data-tutorial-img="([^"]+)"/g),
-                      ...EN2.matchAll(/data-tutorial-img="([^"]+)"/g)].map(m => m[1]);
-        const fehlend = alle.filter(b => !fs2.existsSync(pfad2.join(WURZEL2, b)));
-        behaupte2.deepStrictEqual(fehlend, [],
-            'diese Bilder sind eingebunden, liegen aber nicht im Repo: ' + fehlend.join(', '));
+    it('die ⓘ-Knoepfe der Seite zeigen auf vorhandene Eintraege', () => {
+        const da = new Set(ids(DE2));
+        const knoepfe = [...HTML.matchAll(/class="glossar-i" data-glossar="([a-z0-9-]+)"/g)].map(m => m[1]);
+        behaupte2.ok(knoepfe.length >= 4, `nur ${knoepfe.length} ⓘ-Knoepfe`);
+        for (const k of knoepfe) behaupte2.ok(da.has('glossar-' + k), `ⓘ ins Leere: ${k}`);
     });
 
-    es2('die Querformat-Aufnahmen bekommen auch einen Querformat-Rahmen', () => {
-        // 1280x720 in einem 9:16-Rahmen schrumpft auf ein Drittel der
-        // Hoehe; die Schrift ist dann nicht mehr zu lesen.
-        const css = fs2.readFileSync(pfad2.join(WURZEL2, 'css', 'city-league.css'), 'utf8');
-        behaupte2.ok(/\.tutorial-screenshot-frame--breit\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9/.test(css),
-            'die Klasse tutorial-screenshot-frame--breit fehlt oder ist nicht 16/9');
-        for (const [name, quelle] of [['de', DE2], ['en', EN2]]) {
-            const rahmen = [...quelle.matchAll(/tutorial-screenshot-frame([^"]*)"[\s\S]{0,120}?data-tutorial-img/g)];
-            behaupte2.ok(rahmen.length >= 5, `${name}: nur ${rahmen.length} Rahmen`);
-            for (const r of rahmen) {
-                behaupte2.ok(r[1].includes('--breit'),
-                    `${name}: ein Bildrahmen ohne --breit — die Querformat-Aufnahme `
-                    + 'wird darin unlesbar klein');
-            }
-        }
+    it('die deutsche Fassung sagt nie „Feld", „Cooking" oder eine alte Version', () => {
+        const text = DE2.replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]+>/g, ' ');
+        behaupte2.doesNotMatch(text, /\bFeld/);
+        behaupte2.doesNotMatch(text, /Cooking/);
+        behaupte2.doesNotMatch(text, /\bv\d{2}\b/i);
     });
 });
 
-/* ══════════════════════════════════════════════════════════════════════
- * DIE KURZFASSUNG AM ANFANG (04.09.2026)
- * ══════════════════════════════════════════════════════════════════════
- *
- * Aufgabe #121 nannte zwei Teile: die Langfassung bebildern (erledigt in
- * PR #652) und "eine Kurzfassung als Einstieg". Der zweite Teil hing
- * bisher an Aufgabe #120, weil er "dieselben Kacheln wie Instagram"
- * verwenden sollte. Auf Nachfrage am 04.09.2026: "was halt sinnvoll ist
- * um den Leuten die Seite gut zu erklären und schmackhaft zu machen" —
- * die Bindung an die Kacheln war damit gelöst.
- *
- * Gebaut wurde eine Textkurzfassung ganz oben, aus drei Gründen, die
- * hier als Zusicherungen stehen, damit sie nicht stillschweigend
- * rückgängig gemacht werden:
- *
- *   1. Sie steht VOR der Langfassung. Ein Einstieg hinter 3.200 Zeilen
- *      ist kein Einstieg.
- *   2. Sie trägt KEIN Bild. Bilder machen einen Einstieg länger, nicht
- *      kürzer; die Aufnahmen stehen unten bei ihren Kapiteln.
- *   3. Sie trägt KEINE Datenzahl. Eine Zahl in einem festen
- *      HTML-Fragment veraltet still — und diese Seite hat sich gerade
- *      erst von Zahlen ohne Nenner freigearbeitet.
- */
-
-const behaupte3 = require('node:assert');
-const fs3 = require('node:fs');
-const pfad3 = require('node:path');
-
-const WURZEL3 = pfad3.join(__dirname, '..', '..');
-const DE3 = fs3.readFileSync(pfad3.join(WURZEL3, 'tutorial', 'tutorial.de.html'), 'utf8');
-const EN3 = fs3.readFileSync(pfad3.join(WURZEL3, 'tutorial', 'tutorial.en.html'), 'utf8');
-
-/* Der Block: vom Trenner bis zum Ende seines <article>. */
-function kurzfassung(quelle, trenner) {
-    const i = quelle.indexOf(`<div class="feature-section-divider">${trenner}</div>`);
-    if (i < 0) return null;
-    const ende = quelle.indexOf('</article>', i);
-    return ende < 0 ? null : quelle.slice(i, ende);
-}
-
-const FASSUNGEN = [
-    ['deutsch',  DE3, 'Worum es hier geht', 'Erste Schritte',
-     /Kostenlos, ohne Anmeldung/],
-    ['englisch', EN3, 'What this is',       'Get Started',
-     /Free, no sign-up needed/],
-];
-
-beschreibe2('Die Anleitung hat eine Kurzfassung als Einstieg', () => {
-
-    for (const [name, quelle, trenner, langTrenner, kern] of FASSUNGEN) {
-
-        es2(`${name}: die Kurzfassung steht da`, () => {
-            const block = kurzfassung(quelle, trenner);
-            behaupte2.ok(block,
-                `der Abschnitt "${trenner}" fehlt — die Anleitung beginnt `
-                + 'wieder mit der Langfassung');
-            behaupte2.match(block, kern,
-                'die Kurzfassung sagt nicht mehr, dass die Seite kostenlos '
-                + 'und ohne Anmeldung nutzbar ist — das ist der Satz, der '
-                + 'jemanden zum Weiterlesen bringt');
-        });
-
-        es2(`${name}: sie steht VOR der Langfassung`, () => {
-            const kurz = quelle.indexOf(`>${trenner}</div>`);
-            const lang = quelle.indexOf(`>${langTrenner}</div>`);
-            behaupte2.ok(kurz > 0 && lang > 0, 'einer der beiden Trenner fehlt');
-            behaupte2.ok(kurz < lang,
-                `die Kurzfassung steht hinter "${langTrenner}". Ein Einstieg `
-                + 'hinter dreitausend Zeilen ist kein Einstieg');
-        });
-
-        es2(`${name}: sie trägt kein Bild`, () => {
-            const block = kurzfassung(quelle, trenner);
-            behaupte2.ok(!/data-tutorial-img|<img/.test(block),
-                'in der Kurzfassung steht ein Bild. Bilder machen einen '
-                + 'Einstieg länger, nicht kürzer — die Aufnahmen gehören '
-                + 'zu den Kapiteln unten');
-        });
-
-        es2(`${name}: sie trägt keine Datenzahl, die veralten kann`, () => {
-            const block = kurzfassung(quelle, trenner);
-            const text = block.replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]+>/g, ' ');
-            const zahlen = text.match(/\d[\d.,]*\s*%|\d{1,3}[.,]\d{3}\b|\b\d{4,}\b/g) || [];
-            behaupte2.deepStrictEqual(zahlen, [],
-                `in der Kurzfassung stehen Zahlen: ${zahlen.join(', ')}. Ein `
-                + 'fester Wert in einem statischen Fragment veraltet still — '
-                + 'und diese Seite hat sich gerade erst von Zahlen ohne '
-                + 'Nenner freigearbeitet');
-        });
-
-        es2(`${name}: sie nennt, woher die Zahlen kommen`, () => {
-            const block = kurzfassung(quelle, trenner);
-            for (const quellName of ['Limitless', 'City League', 'Cardmarket']) {
-                behaupte2.ok(block.includes(quellName),
-                    `die Kurzfassung nennt ${quellName} nicht mehr. Wer neu `
-                    + 'hier ist, will zuerst wissen, woher die Zahlen kommen');
-            }
-        });
+/* AUSGEFUEHRT: glossarOeffnen laedt die Anleitung, sucht den Eintrag
+   und scrollt hin — ohne den Hash zu setzen (die Adresszeile steuert
+   die Reiter). Die Funktion laeuft im echten Loader mit einer kleinen
+   Attrappe von document. */
+describe('Anleitung: glossarOeffnen springt zum Eintrag', () => {
+    function sandkasten() {
+        const gescrollt = [];
+        const host = { dataset: { state: 'idle' }, _html: '', querySelectorAll: () => [], set innerHTML(v) { this._html = v; }, get innerHTML() { return this._html; } };
+        const elemente = {};
+        const document = {
+            readyState: 'complete',
+            addEventListener() {},
+            getElementById(id) {
+                if (id === 'tutorialHost') return host;
+                if (!host._html.includes(`id="${id}"`)) return null;
+                return elemente[id] || (elemente[id] = { id, classList: { add() {}, remove() {} }, scrollIntoView() { gescrollt.push(id); } });
+            },
+            querySelector() { return null; },
+            querySelectorAll() { return []; },
+        };
+        const reiter = [];
+        const ctx = {
+            document, console, setTimeout: () => 0,
+            fetch: async () => ({ ok: true, text: async () => DE2 }),
+            location: { hash: '#current-meta' },
+        };
+        ctx.window = ctx;
+        ctx.getLang = () => 'de';
+        ctx.switchTabAndUpdateMenu = (t) => reiter.push(t);
+        ctx.addEventListener = () => {};
+        vm2.createContext(ctx);
+        vm2.runInContext(LOADER, ctx, { filename: 'ds-tutorial.js' });
+        return { ctx, gescrollt, reiter };
     }
 
-    es2('sie kollidiert nicht mit den "ersten 60 Sekunden" weiter unten', () => {
-        /* Beide Abschnitte hießen im ersten Entwurf fast gleich. Der eine
-           sagt, worum es geht; der andere gibt drei Schritte zum
-           Mitmachen. Zwei Namen, die sich nur in einem Wort
-           unterscheiden, sind einer zu viel. */
-        // Den TRENNER prüfen, nicht den Namen irgendwo im Text: der
-        // Kommentar der Kurzfassung nennt ihn selbst, und damit wäre die
-        // Zusicherung auch dann grün, wenn der Abschnitt weg ist.
-        behaupte2.ok(DE3.includes('<div class="feature-section-divider">Die ersten 60 Sekunden</div>'),
-            'der Schnellstart-Abschnitt ist verschwunden');
-        behaupte2.ok(!DE3.includes('>In 60 Sekunden<'),
-            'die Kurzfassung heißt wieder fast wie der Schnellstart darunter');
-        behaupte2.ok(EN3.includes('<div class="feature-section-divider">First 60 seconds</div>'),
-            'the quick-start section is gone');
-        behaupte2.ok(!EN3.includes('>In 60 seconds<'),
-            'the short version is named almost like the quick start below it again');
+    it('oeffnet die Anleitung und scrollt zum Begriff', async () => {
+        const s = sandkasten();
+        const r = await s.ctx.glossarOeffnen('win-rate');
+        behaupte2.equal(r, 'glossar-win-rate');
+        behaupte2.deepEqual(s.reiter, ['tutorial']);
+        behaupte2.deepEqual(s.gescrollt, ['glossar-win-rate']);
+        behaupte2.equal(s.ctx.location.hash, '#current-meta', 'der Hash darf sich nicht aendern');
+    });
+
+    it('unbekannter Begriff: springt an den Anfang des Glossars statt ins Leere', async () => {
+        const s = sandkasten();
+        behaupte2.equal(await s.ctx.glossarOeffnen('gibtsnicht'), 'glossar');
     });
 });

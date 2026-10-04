@@ -1429,7 +1429,7 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
             <div style="position: absolute; top: 5px; left: 5px; background: #377e39; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${ownedCount}x owned">${ownedCount}x</div>
             <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
               <button onclick="addToCollection('${safeCardIdJs}')" style="background: var(--solid-ok); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${ownedCount}/4)">+</button>
-              <button onclick="removeFromCollection('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
+              <button onclick="removeFromCollection('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Eine Kopie entfernen' : 'Remove copy'}">−</button>
             </div>
             <div style="padding: 8px; background: var(--surface-1);">
               <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
@@ -1885,10 +1885,10 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       wishlistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
           <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}', '${escapeJsSingleQuoted(card.cardmarket_url || '')}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}')">
-          <div style="position: absolute; top: 5px; left: 5px; background: #aa5a13; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${wantedCount}x wanted">${wantedCount}x</div>
+          <div style="position: absolute; top: 5px; left: 5px; background: #aa5a13; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${wantedCount}× ${getLang()==='de' ? 'gesucht' : 'wanted'}">${wantedCount}x</div>
           <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
-            <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #aa5a13; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Need more (${wantedCount}/4)">+</button>
-            <button onclick="removeFromWishlist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
+            <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #aa5a13; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Noch eine gesucht' : 'Need more'} (${wantedCount}/4)">+</button>
+            <button onclick="removeFromWishlist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Eine Kopie entfernen' : 'Remove copy'}">−</button>
           </div>
           <div style="padding: 8px; background: var(--surface-1);">
             <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
@@ -2396,7 +2396,7 @@ function updateDecksUI(offenHalten) {
               <strong>Archetype:</strong> ${safeArchetypeHtml}
             </p>
             <p style="color: #34495e; margin: 10px 0; font-weight: 600;">
-              ${totalCards} Cards (${uniqueCards} Unique)
+              ${totalCards} ${getLang()==='de' ? 'Karten' : 'Cards'} (${uniqueCards} ${getLang()==='de' ? 'verschiedene' : 'unique'})
             </p>
             <button onclick="deleteDeck('${safeDeckIdJs}')" style="padding: 10px 20px; background: var(--solid-bad); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
               Delete
@@ -2851,7 +2851,7 @@ function updateDecksUI(offenHalten) {
           <div class="deck-name-col" style="flex: 1; min-width: 0;">
             <h3 style="margin: 0 0 3px 0; font-size: 1.1em; font-weight: 600;">${safeDeckNameHtml}${activeLabel}</h3>
             <div style="font-size: 0.85em; opacity: 0.9;">
-              ${safeDeckArchetypeHtml} • ${totalCards} Cards (${uniqueCards} Unique)
+              ${safeDeckArchetypeHtml} • ${totalCards} ${getLang()==='de' ? 'Karten' : 'Cards'} (${uniqueCards} ${getLang()==='de' ? 'verschiedene' : 'unique'})
             </div>
             <div style="font-size: 0.75em; opacity: 0.7; margin-top: 2px;">
               ${deck.folder ? safeFolderHtml + ' • ' : ''}${safeCreatedHtml}
@@ -2865,10 +2865,10 @@ function updateDecksUI(offenHalten) {
             <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-irl${isActive ? ' deck-btn-irl--active' : ''}" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
               IRL ${isActive ? '✓' : ''}
             </button>
-            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="Copy in PTCGL format (Pokémon TCG Live)">
+            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="${getLang()==='de' ? 'Für Pokémon TCG Live (PTCGL) kopieren' : 'Copy in PTCGL format (Pokémon TCG Live)'}">
               PTCGL
             </button>
-            <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="Copy &amp; open Limitless Builder">
+            <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="${getLang()==='de' ? 'Kopieren und Limitless-Deckbuilder öffnen' : 'Copy &amp; open Limitless Builder'}">
               ${getLang()==='de' ? 'Decklist' : 'Print Decklist'}
             </button>
             <button onclick="event.stopPropagation(); copyDeckAndOpenShowdown(${deckIndex})" class="deck-action-btn deck-btn-showdown" data-i18n-title="showdown.buttonTitle" title="${t('showdown.buttonTitle')}">
@@ -5941,10 +5941,10 @@ async function clearTradelist() {
   const user = auth.currentUser;
   if (!requireSignIn()) return;
   if (!window.userTradelist || window.userTradelist.size === 0) {
-    showNotification(getLang()==='de' ? 'Trade List ist bereits leer' : 'Trade list is already empty', 'info');
+    showNotification(getLang()==='de' ? 'Die Tauschliste ist bereits leer' : 'Trade list is already empty', 'info');
     return;
   }
-  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Trade List leeren?' : 'Really clear the entire trade list?');
+  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Tauschliste leeren?' : 'Really clear the entire trade list?');
   if (!ok) return;
   try {
     // update(), not set({merge:true}) — see clearCollection.
@@ -5959,7 +5959,7 @@ async function clearTradelist() {
     updateTradelistUI();
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData)
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, tradelistUpdate: true });
-    showNotification(getLang()==='de' ? 'Trade List wurde geleert' : 'Trade list cleared', 'success');
+    showNotification(getLang()==='de' ? 'Tauschliste geleert' : 'Trade list cleared', 'success');
   } catch (error) {
     console.error('Error clearing tradelist:', error);
     showNotification(getLang()==='de' ? 'Fehler beim Leeren der Trade List' : 'Error clearing the trade list', 'error');
@@ -6076,7 +6076,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
           <div style="position: absolute; top: 5px; left: 5px; background: #117d68; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${tradeCount}x for trade">${tradeCount}x</div>
           <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
             <button onclick="addToTradelist('${safeCardIdJs}')" style="background: #117d68; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${tradeCount}/4)">+</button>
-            <button onclick="removeFromTradelist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">\u2212</button>
+            <button onclick="removeFromTradelist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Eine Kopie entfernen' : 'Remove copy'}">\u2212</button>
           </div>
           <div style="padding: 8px; background: var(--surface-1);">
             <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>

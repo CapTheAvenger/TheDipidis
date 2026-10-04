@@ -283,70 +283,15 @@ function mockupBloecke(html) {
     return bloecke;
 }
 
-describe('C — die deutsche Anleitung zeigt die deutschen Beschriftungen', () => {
-    const bloecke = mockupBloecke(ohneHtmlKommentar(TUT_DE));
-    const quelle = bloecke.join('\n');
-    // ">Text<" statt blossem Vorkommen: ein GANZER Textknoten. Sonst
-    // wuerde "Save" in "Save as image" und "Test Draw" in
-    // "Test Draw · Eröffnung 7" mitzaehlen — genau die Falle, an der
-    // heute schon eine Zusage vorbeigelaufen ist.
-    const knoten = (t) => `>${t}<`;
+/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand
+   „C — die deutsche Anleitung zeigt die deutschen Beschriftungen". Der Block pruefte Inhalte der alten Langfassung der Anleitung,
+   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js
+   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */
 
-    it('die Nachbau-Bildschirme sind ueberhaupt gefunden worden', () => {
-        // Ohne diese Zusage wuerde ein kaputter Schnitt alle Pruefungen
-        // unten still bestehen lassen: in einer leeren Zeichenkette
-        // steht keine englische Beschriftung.
-        assert.equal(bloecke.length, 41,
-            `${bloecke.length} Nachbau-Bildschirme gefunden statt 41`);
-    });
-
-    const zaehle = (t) => quelle.split(knoten(t)).length - 1;
-
-    for (const [englisch, deutsch, , anzahl] of ANLEITUNG_DE) {
-        it(`"${englisch}" heisst ${anzahl}x "${deutsch}"`, () => {
-            assert.equal(zaehle(englisch), 0,
-                `die englische Beschriftung "${englisch}" steht wieder in einem Nachbau-Bildschirm`);
-            assert.equal(zaehle(deutsch), anzahl,
-                `"${deutsch}" steht ${zaehle(deutsch)}x statt ${anzahl}x in den Nachbau-Bildschirmen`);
-        });
-    }
-
-    for (const [, deutsch, schluessel] of ANLEITUNG_DE.filter((r) => r[2])) {
-        it(`"${deutsch}" ist woertlich die Zeile aus js/i18n.js`, () => {
-            assert.equal(TABELLE.de[schluessel], deutsch,
-                `${schluessel} lautet in der Sprachtabelle anders — die Anleitung ist damit wieder falsch`);
-        });
-    }
-
-    it('was die Oberflaeche selbst englisch schreibt, bleibt englisch', () => {
-        // Gegenprobe zur Uebersetzungswut: der Knopf "Grid" der
-        // Wunschliste und der Knopf "Save" ihres Uebersichts-Fensters
-        // tragen in index.html KEIN data-i18n. Die deutsche Oberflaeche
-        // zeigt dort englische Woerter, also muss die Anleitung sie auch
-        // englisch nennen. Ebenso "Wishlist-Karte" im Preisalarm-Text,
-        // der woertlich so in der deutschen Sprachtabelle steht.
-        assert.match(ohneHtmlKommentar(TUT_DE), /<em>Grid<\/em>-Button der Wishlist/,
-            'der Grid-Knopf wurde uebersetzt, obwohl die deutsche Oberflaeche "Grid" zeigt');
-        assert.match(ohneHtmlKommentar(TUT_DE), /<em>Save<\/em> ein teilbares PNG/,
-            'der Save-Knopf wurde uebersetzt, obwohl die deutsche Oberflaeche "Save" zeigt');
-        assert.ok(TABELLE.de['profile.priceAlerts.intro'].includes('Wishlist-Karte'),
-            'die Sprachtabelle sagt nicht mehr "Wishlist-Karte" — dann darf die Anleitung nachziehen');
-    });
-});
-
-describe('C — der gespiegelte Fehler in der englischen Anleitung', () => {
-    const quelle = ohneHtmlKommentar(TUT_EN);
-    it('die Preis-Pille steht englisch da', () => {
-        assert.ok(!quelle.includes('Preis Check'),
-            'die deutsche Pille "⚠ Preis Check" steht wieder in der englischen Anleitung');
-        assert.ok(quelle.includes(`>${TABELLE.en['preis.checkPill']}<`),
-            'die englische Pille fehlt in den Nachbau-Bildschirmen');
-    });
-    it('und sie ist woertlich die Zeile aus js/i18n.js', () => {
-        assert.equal(TABELLE.en['preis.checkPill'], '⚠ Price check');
-        assert.equal(TABELLE.de['preis.checkPill'], '⚠ Preis Check');
-    });
-});
+/* UI-78 (03.10.2026, Entscheidung Hausi „kurz neu + Glossar"): hier stand
+   „C — der gespiegelte Fehler in der englischen Anleitung". Der Block pruefte Inhalte der alten Langfassung der Anleitung,
+   die es nicht mehr gibt. Die neue Seite pruefen tests/unit/test-tutorial.js
+   (Erste Schritte + Glossar) und tests/unit/test-day2-schreibweise.js. */
 
 describe('jeder Schluessel steht genau zweimal in js/i18n.js', () => {
     const geprueft = new Set(ANLEITUNG_DE.map((r) => r[2]).filter(Boolean)

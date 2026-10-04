@@ -103,7 +103,7 @@ def _majors_meta():
     sonst ab. Das hielt genau so lange, bis das erste Major des neuen
     Formats kam: Brisbane und Frankfurt (26.09.2026) brachten TEF-30C-Zeilen
     neben die TEF-PBL-Zeilen, das Skript brach ab, die Masterclass blieb
-    stehen und das Tor fand ihre Feldanteile veraltet.
+    stehen und das Tor fand ihre Meta-Anteile veraltet.
 
     Bestellt sind "die letzten Majors". Das ist das Format, dessen Zeilen
     das juengste Turnier enthalten \u2014 labs vergibt die Turniernummern
@@ -380,7 +380,7 @@ MU_DETAILS = re.compile(r'<details class="mcl-mu"[\s\S]*?</details>')
 
 
 def _feldanteile():
-    """deck_name -> Feldanteil als Text ("8,54"). Quelle ist die Datei,
+    """deck_name -> Meta-Anteil als Text ("8,54"). Quelle ist die Datei,
     aus der auch die Meta-Seite ihre Anteile nimmt."""
     csv.field_size_limit(10 ** 7)
     aus = {}
@@ -396,7 +396,7 @@ def _feldanteile():
 
 
 def feld_nachziehen(roh, anteile):
-    """Der Feldanteil je Matchup-Zeile. Die zweite Angabe in derselben
+    """Der Meta-Anteil je Matchup-Zeile. Die zweite Angabe in derselben
     Zeile (die Spielzeit) stammt aus Tims Ausarbeitung, nicht aus den
     Daten — sie wird NICHT angefasst."""
     aenderungen = []
@@ -406,18 +406,18 @@ def feld_nachziehen(roh, anteile):
         neu_anteil = anteile.get(html.unescape(en).strip().lower())
         if not neu_anteil:
             return m.group(0)
-        t = re.sub(r"^\s*[\d.,]+\s*%\s*Feldanteil", "%s %% Feldanteil" % neu_anteil, text)
+        t = re.sub(r"^\s*[\d.,]+\s*%\s*Meta-Anteil", "%s %% Meta-Anteil" % neu_anteil, text)
         if t == text:
             return m.group(0)
-        aenderungen.append("%s / Feldanteil: %s -> %s %%"
-                           % (html.unescape(en), text.split(" Feldanteil")[0], neu_anteil))
+        aenderungen.append("%s / Meta-Anteil: %s -> %s %%"
+                           % (html.unescape(en), text.split(" Meta-Anteil")[0], neu_anteil))
         return vorn + t + hinten
 
     return SUB.sub(ersetzen, roh), aenderungen
 
 
 def sortieren(roh, anteile):
-    """"Sortiert nach Feldanteil" steht als Versprechen ueber der Liste.
+    """"Sortiert nach Meta-Anteil" steht als Versprechen ueber der Liste.
     Aendern sich die Anteile, muss die Reihenfolge mit — sonst ist der
     Satz falsch. Decks ohne Anteil behalten ihre Stelle am Ende."""
     bloecke = MU_DETAILS.findall(roh)
@@ -447,7 +447,7 @@ def sortieren(roh, anteile):
     verschoben = [f"{a} -> {n}" for a, n in zip(vorher, nachher) if a != n]
     kette = iter(sortiert)
     return MU_DETAILS.sub(lambda _m: next(kette), roh), [
-        "Reihenfolge nach Feldanteil: " + "; ".join(verschoben[:4])
+        "Reihenfolge nach Meta-Anteil: " + "; ".join(verschoben[:4])
         + (" …" if len(verschoben) > 4 else "")]
 
 

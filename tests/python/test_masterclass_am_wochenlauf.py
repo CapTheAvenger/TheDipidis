@@ -11,7 +11,7 @@ Drei Dinge muessen dafuer stimmen, und alle drei stehen hier:
      weggeworfen (die Falle, die data/champions_move_flags.json sieben
      Tage lang erwischt hat).
   2. Die Zahlen, die dabei nachgezogen werden, stehen im Stueck so da
-     wie in den Dateien: Feldanteile und die Reihenfolge, die die
+     wie in den Dateien: Meta-Anteile und die Reihenfolge, die die
      Einleitung verspricht.
   3. Die Druckregel liegt im Repo, nicht im Scratchpad, und liefert
      genau die Drucke, die im Stueck stehen — sonst bekaeme eine
@@ -93,7 +93,7 @@ def test_der_scraper_schreibt_die_listendatei():
         'json.dump({"archetyp"')
 
 
-# ------------------------------------------- 2. Feldanteile und Reihenfolge
+# ------------------------------------------- 2. Meta-Anteile und Reihenfolge
 
 def _anteile():
     aus = {}
@@ -107,7 +107,7 @@ def _anteile():
 
 
 def _zeilen():
-    """(englischer Name, Feldanteil als Text) je Matchup-Zeile."""
+    """(englischer Name, Meta-Anteil als Text) je Matchup-Zeile."""
     return [(html.unescape(a).strip(), b) for a, b in re.findall(
         r'<span class="mcl-nm">[^<]*<em>([^<]*)</em></span>\s*'
         r'<span class="mcl-sub">([\d.,]+) %', _stueck())]
@@ -121,7 +121,7 @@ def test_die_feldanteile_stehen_so_da_wie_in_der_datei():
               for n, steht in _zeilen()
               if anteile.get(n.lower()) and steht != anteile[n.lower()]]
     assert falsch == [], (
-        "diese Feldanteile stehen anders im Stueck als in "
+        "diese Meta-Anteile stehen anders im Stueck als in "
         "data/limitless_online_decks.csv: " + str(falsch))
     geprueft = [n for n, _s in _zeilen() if anteile.get(n.lower())]
     assert len(geprueft) >= 15, (
@@ -131,15 +131,15 @@ def test_die_feldanteile_stehen_so_da_wie_in_der_datei():
 
 @pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
 def test_die_reihenfolge_haelt_was_die_einleitung_verspricht():
-    """Ueber der Liste steht "Sortiert nach Feldanteil". Zieht der Lauf
+    """Ueber der Liste steht "Sortiert nach Meta-Anteil". Zieht der Lauf
     die Anteile nach, ohne die Reihenfolge mitzuziehen, wird der Satz
     falsch."""
     roh = _stueck()
-    assert "Sortiert nach Feldanteil" in roh, "das Versprechen steht nicht mehr da"
+    assert "Sortiert nach Meta-Anteil" in roh, "das Versprechen steht nicht mehr da"
     werte = [float(b.replace(",", ".")) for _a, b in _zeilen()]
     assert len(werte) >= 15
     absteigend = all(werte[i] >= werte[i + 1] for i in range(len(werte) - 1))
-    assert absteigend, "die Matchups stehen nicht nach Feldanteil sortiert: %s" % werte
+    assert absteigend, "die Matchups stehen nicht nach Meta-Anteil sortiert: %s" % werte
 
 
 # ---------------------------------------------------- 3. Die Druckregel
@@ -183,3 +183,34 @@ def test_die_grundenergie_bleibt_die_billige():
     assert d.neuester_billiger_druck("MEE-8")[0] == "MEE-8"
     assert d.rang("", "MEE") < d.rang("Common", "MEE")
     assert d.rang("Secret Rare", "SFA") > d.rang("Double Rare", "PBL")
+
+
+# ------------------------------------------- W5: nie "Feld", immer "Meta"
+def _sichtbarer_text(roh):
+    """Nur der Text, den Leser sehen: ohne Tags und ohne <code>-Pfade."""
+    roh = re.sub(r"<code>.*?</code>", "", roh, flags=re.S)
+    return html.unescape(re.sub(r"<[^>]+>", " ", roh))
+
+
+def _feld_woerter(text):
+    """"Feld" als Teil eines Wortes, ausser "Regelfeld" (Pokemon-Begriff,
+    die Regelbox der Karte) — die Anordnung W5 (03.10.2026) meint die
+    Zusammensetzung der Teilnehmer."""
+    ohne = re.sub(r"[Rr]egelfeld(?:er)?", "", text)
+    return re.findall(r"\w*[Ff]eld\w*", ohne)
+
+
+def test_das_stueck_sagt_meta_statt_feld():
+    """Hausi, 04.10.2026: "Feldanteil" heisst im Stueck "Meta-Anteil"."""
+    with open(STUECK, encoding="utf-8") as f:
+        roh = f.read()
+    assert _feld_woerter(_sichtbarer_text(roh)) == [], (
+        "das Stueck sagt noch \"Feld\": "
+        + str(sorted(set(_feld_woerter(_sichtbarer_text(roh))))))
+
+
+def test_feld_probe_schlaegt_an():
+    """Verfaelschungsprobe: die Pruefung muss ein "Feldanteil" finden und
+    "Regelfeld" durchlassen."""
+    assert _feld_woerter("10 % Feldanteil") == ["Feldanteil"]
+    assert _feld_woerter("das Regelfeld und die Regelfelder") == []

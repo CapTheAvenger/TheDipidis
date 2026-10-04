@@ -228,7 +228,7 @@ def test_zweimal_nachziehen_aendert_nichts_mehr():
 #
 # Brisbane und Frankfurt brachten TEF-30C-Zeilen neben die TEF-PBL-Zeilen.
 # Der Erzeuger verlangte "genau ein Format" und brach ab, das Stueck blieb
-# stehen, und das Tor fand seine Feldanteile veraltet — der ganze
+# stehen, und das Tor fand seine Meta-Anteile veraltet — der ganze
 # Wochenlauf wurde nicht gepusht. Beide Zusicherungen fuehren die
 # Funktionen aus, an gesetzten Dateien.
 

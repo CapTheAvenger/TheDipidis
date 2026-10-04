@@ -121,7 +121,7 @@ describe('getPreferredVersionForCard — mutation guards', () => {
     it('filters international pool to English prints when original set is non-English', () => {
         const intl = [
             { set: 'JP1', number: '001', rarity: 'Common', type: 'Trainer' },
-            { set: 'SVI', number: '100', rarity: 'Uncommon', type: 'Trainer' },
+            { set: 'SVI', number: '100', rarity: 'Rare', type: 'Trainer' },
             { set: 'PAL', number: '200', rarity: 'Common', type: 'Trainer' },
         ];
         const fns = freshEnv({

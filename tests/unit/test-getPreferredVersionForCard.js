@@ -166,6 +166,24 @@ describe('getPreferredVersionForCard — die vier Sortierstufen', () => {
             'SSP hat die hoehere Set-Nummer und muss vorne stehen');
     });
 
+    it('Common und Uncommon sind EINE niedrige Stufe: das neuere Uncommon schlaegt das aeltere Common', () => {
+        // Befund 04.10.2026: Energy Retrieval ergab SVI 171 (Common, Regulation G,
+        // nicht mehr Standard) statt WHT 82 (Uncommon, neuer).
+        const a = baueAuswahl({
+            setOrderMap: { SVI: 134, WHT: 149 },
+            eng: () => [druck('SVI', '171', 'Common'), druck('WHT', '82', 'Uncommon')],
+        });
+        assert.equal(a.waehle('Energy Retrieval').set, 'WHT');
+    });
+
+    it('die niedrige Stufe schlaegt trotzdem jede hoehere Seltenheit', () => {
+        const a = baueAuswahl({
+            setOrderMap: { SVI: 134, WHT: 149, CRI: 157 },
+            eng: () => [druck('SVI', '171', 'Common'), druck('CRI', '108', 'Rare'), druck('WHT', '82', 'Uncommon')],
+        });
+        assert.equal(a.waehle('Energy Retrieval').set, 'WHT');
+    });
+
     it('Stufe 3: ohne Set-Reihenfolge entscheidet die Regelmarke', () => {
         // BLK gehoert keiner Marke an (Wert 0), TEF traegt G (Wert 5).
         // Der Kommentar im Quelltext nennt genau dieses Paar.

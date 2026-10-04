@@ -286,3 +286,77 @@ describe('Rutsch S: Alle-Karten-Box und aufklappbare Boxliste (Hausi, 03.10.2026
     assert.match(code, /if \(r\.rang !== 'mitglied'\) aktuelleStufe = r\.stufe \|\| 'sonst'/);
   });
 });
+
+describe('Rutsch T: Alle Standard-Karten, ein Energie-Druck, ACE-SPEC-Stadien (Hausi, 04.10.2026)', () => {
+  const code = QUELLE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const kk = (set, nr, n, extra) => Object.assign({ id: set + '-' + nr, name: 'Karte ' + nr, set: set, number: nr, gefordert: n, typ: 'Item' }, extra || {});
+  const E = (box, k) => ({ box: box, k: k });
+  const gespielt = { id: 'g', karten: [kk('TWM', '1', 2, { formate: { 'TEF-30C': 40 } })] };
+  const legalBox = { id: 'l', archetyp: 'Zacian', karten: [kk('TWM', '2', 2, { typ: 'Pokemon', name: 'Zacian ex', anteil: 90, formate: { 'TEF-30C': 0 } })] };
+  const rausBox = { id: 'r', archetyp: 'Charizard', karten: [kk('OBF', '3', 2, { typ: 'Pokemon', name: 'Charizard ex', anteil: 90, formate: { 'TEF-30C': 0 } }), kk('TWM', '9', 2)] };
+  const eigen = L.neueEigeneBox('Meine', '2026-10-04'); eigen.id = 'e';
+  const kontext = (nichtLegal) => ({
+    aktuell: 'TEF-30C', legalBekannt: true,
+    legal: (k) => (nichtLegal || []).indexOf(k.id) >= 0 ? false : (k.id === 'XXX-0' ? null : true)
+  });
+  it('nur Boxen, die im Standard gespielt werden oder legal sind, dazu eigene Boxen', () => {
+    const k = kontext(['OBF-3']);
+    const alle = [E(gespielt, gespielt.karten[0]), E(legalBox, legalBox.karten[0]), E(rausBox, rausBox.karten[0]), E(rausBox, rausBox.karten[1]), E(eigen, kk('SFA', '4', 1))];
+    const r = L.standardEintraege(alle, k);
+    assert.deepEqual(r.eintraege.map((e) => e.k.id), ['TWM-1', 'TWM-2', 'SFA-4']);
+    assert.equal(r.boxen, 3);
+  });
+  it('innerhalb einer Standard-Box faellt eine rotierte Karte heraus, eine mit unbekannter Legalitaet auch', () => {
+    const k = kontext(['SVI-9']);
+    const box = { id: 'g2', karten: [kk('TWM', '1', 2, { formate: { 'TEF-30C': 40 } }), kk('SVI', '9', 2), kk('XXX', '0', 2)] };
+    const r = L.standardEintraege(box.karten.map((x) => E(box, x)), k);
+    assert.deepEqual(r.eintraege.map((e) => e.k.id), ['TWM-1']);
+  });
+  it('ohne Formatdaten bleibt die Liste leer statt zu raten', () => {
+    assert.equal(L.standardEintraege([E(eigen, kk('SFA', '4', 1))], { aktuell: 'TEF-30C', legalBekannt: false, legal: () => true }).eintraege.length, 0);
+    assert.equal(L.standardEintraege([E(eigen, kk('SFA', '4', 1))], null).eintraege.length, 0);
+  });
+  it('Basis-Energie: je Typ EIN Druck (SVE), egal welche Drucke in den Boxen liegen', () => {
+    const w = (set, nr, n) => kk(set, nr, n, { name: 'Water Energy', typ: 'Energy' });
+    const g = L.groessteAnzahl([E({ id: 'a' }, w('MEE', '11', 2)), E({ id: 'b' }, w('SVE', '19', 9)), E({ id: 'c' }, w('MEE', '3', 1)),
+      E({ id: 'd' }, kk('SVE', '18', 4, { name: 'Fire Energy', typ: 'Energy' })), E({ id: 'e' }, kk('TEF', '161', 3, { name: 'Mist Energy', typ: 'Energy' }))]);
+    assert.deepEqual(g.map((x) => x.id), ['SVE-19', 'SVE-18', 'TEF-161']);
+    assert.equal(g[0].k.gefordert, 9);
+    assert.equal(g[0].boxen, 3);
+    assert.equal(L.basisEnergieNummer(kk('X', '1', 1, { name: 'Fairy Energy', typ: 'Energy' })), null);
+    assert.equal(L.basisEnergieNummer(kk('X', '1', 1, { name: 'Mist Energy', typ: 'Energy' })), null);
+    assert.equal(L.BASIS_ENERGIE_SVE.metal, '24');
+  });
+  it('der Einheitsdruck ersetzt die Karte (Bild, Set, Nummer), die Anzahl bleibt die groesste', () => {
+    const w = kk('MEE', '11', 6, { name: 'Water Energy', typ: 'Energy', bild: 'mee.png' });
+    const g = L.groessteAnzahl([E({ id: 'a' }, w)], (k, nr) => ({ id: 'SVE-' + nr, name: 'Water Energy', set: 'SVE', number: nr, bild: 'sve.png', typ: 'Energy' }));
+    assert.equal(g[0].k.set + ' ' + g[0].k.number + ' ' + g[0].k.bild, 'SVE 19 sve.png');
+    assert.equal(g[0].k.gefordert, 6);
+  });
+  it('ACE-SPEC-Stadien stehen bei den ACE SPECs, gewoehnliche Stadien nicht, gespeichert wird nichts', () => {
+    const ace = (k) => k.name === 'Grand Tree';
+    const grand = kk('SCR', '136', 1, { name: 'Grand Tree', typ: 'Stadium' });
+    const gewoehnlich = kk('TWM', '5', 1, { name: 'Artazon', typ: 'Stadium' });
+    assert.equal(L.artVon(grand, ace), 'Ace Spec');
+    assert.equal(L.artVon(gewoehnlich, ace), 'Stadium');
+    assert.equal(L.artVon(kk('X', '1', 1, { typ: 'Item' }), ace), 'Item');
+    assert.equal(grand.typ, 'Stadium');
+  });
+  it('Sortierung und Filter rufen artVon, nicht k.typ', () => {
+    assert.doesNotMatch(code, /typRang\(a\.k\.typ\)/);
+    assert.match(code, /artVon\(k\) !== f\.art/);
+    assert.match(code, /groessteAnzahl\(eintraege, einheitsEnergie\)/);
+    assert.match(code, /standardEintraege\(eintraege, kontext\)/);
+  });
+  it('Sortierung nach Art: das ACE-SPEC-Stadion rueckt zu den ACE SPECs (ausgefuehrt)', () => {
+    global.window = { isAceSpec: (n) => n === 'Grand Tree' };
+    try {
+      const mk = (id, name, typ) => E({ id: 'b', name: 'b' }, kk('SCR', id, 1, { name: name, typ: typ, id: 'SCR-' + id }));
+      const rein = [mk('1', 'Zebra Energy', 'Energy'), mk('2', 'Grand Tree', 'Stadium'), mk('3', 'Artazon', 'Stadium'), mk('4', 'Secret Box', 'Ace Spec')];
+      const namen = L.sortieren(rein, 'art', true).map((e) => e.k.name);
+      assert.deepEqual(namen, ['Artazon', 'Grand Tree', 'Secret Box', 'Zebra Energy']);
+      assert.equal(L.filterPasst(rein[1].k, { art: 'Ace Spec' }, ''), true);
+      assert.equal(L.filterPasst(rein[1].k, { art: 'Stadium' }, ''), false);
+    } finally { delete global.window; }
+  });
+});

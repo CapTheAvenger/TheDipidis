@@ -1,0 +1,446 @@
++    <script src="js/app-side-quest-play.js?v=202610040038" defer></script>|
++    <script src="js/champions-shiny.js?v=202610040038" defer></script>|
++    <script src="js/app-side-quest-pokedex.js?v=202610040038" defer></script>|
++    <script src="js/app-side-quest-items.js?v=202610040038" defer></script>|
+     <!-- Der Datenumfang wird in app-tier-meta.js gerechnet und in|
+          app-quellen.js angezeigt. Muss vor beiden stehen. -->|
+-    <script src="js/ds-datenumfang.js?v=202610032338" defer></script>|
+-    <script src="js/app-quellen.js?v=202610032338" defer></script>|
+-    <script src="js/app-admin.js?v=202610032338" defer></script>|
++    <script src="js/ds-datenumfang.js?v=202610040038" defer></script>|
++    <script src="js/app-quellen.js?v=202610040038" defer></script>|
++    <script src="js/app-admin.js?v=202610040038" defer></script>|
+     <!-- Die Bruecke zwischen Nutzungs-Slug, Anzeigename und Showdown-Name.|
+          Muss VOR allem stehen, was ein gebautes Team weiterverarbeitet. -->|
+-    <script src="js/champions-set.js?v=202610032338" defer></script>|
+-    <script src="js/champions-names.js?v=202610032338" defer></script>|
+-    <script src="js/app-side-quest-builder.js?v=202610032338" defer></script>|
+-    <script src="js/app-side-quest-status.js?v=202610032338" defer></script>|
+-    <script src="js/app-side-quest-resources.js?v=202610032338" defer></script>|
+-    <script src="js/champions-damage.js?v=202610032338" defer></script>|
+-    <script src="js/champions-schwaechen.js?v=202610032338" defer></script>|
+-    <script src="js/app-side-quest-usage.js?v=202610032338" defer></script>|
+-    <script src="js/app-side-quest-matchups.js?v=202610032338" defer></script>|
++    <script src="js/champions-set.js?v=202610040038" defer></script>|
++    <script src="js/champions-names.js?v=202610040038" defer></script>|
++    <script src="js/app-side-quest-builder.js?v=202610040038" defer></script>|
++    <script src="js/app-side-quest-status.js?v=202610040038" defer></script>|
++    <script src="js/app-side-quest-resources.js?v=202610040038" defer></script>|
++    <script src="js/champions-damage.js?v=202610040038" defer></script>|
++    <script src="js/champions-schwaechen.js?v=202610040038" defer></script>|
++    <script src="js/app-side-quest-usage.js?v=202610040038" defer></script>|
++    <script src="js/app-side-quest-matchups.js?v=202610040038" defer></script>|
+     <!-- Kennzeichnung "Kartentext auf Englisch". MUSS vor jeder Datei stehen,|
+@@ -4254,7 +4254,7 @@|
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202610032338" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202610032338" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202610032338" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202610032338" defer></script>|
+-    <script src="js/ds-nav.js?v=202610032338" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202610040038" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202610040038" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202610040038" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202610040038" defer></script>|
++    <script src="js/ds-nav.js?v=202610040038" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4264,6 +4264,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202610032338" defer></script>|
+-    <script src="js/ds-sections.js?v=202610032338" defer></script>|
+-    <script src="js/ds-filter.js?v=202610032338" defer></script>|
+-    <script src="js/ds-share.js?v=202610032338" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202610040038" defer></script>|
++    <script src="js/ds-sections.js?v=202610040038" defer></script>|
++    <script src="js/ds-filter.js?v=202610040038" defer></script>|
++    <script src="js/ds-share.js?v=202610040038" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4272,5 +4272,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202610032338" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202610032338" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202610032338" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202610040038" defer></script>|
++    <script src="js/ds-tutorial.js?v=202610040038" defer></script>|
++    <script src="js/ds-masterclass.js?v=202610040038" defer></script>|
+ |
+diff --git a/js/app-core.js b/js/app-core.js|
+index 90098df9..62d12e29 100644|
+--- a/js/app-core.js|
++++ b/js/app-core.js|
+@@ -2259,4 +2259,8 @@ const BASE_PATH = './data/';|
+         // rotation. Order matters: front of the array is "most recent".|
++        /* UI-89 (03.10.2026, Tiefenanalyse F-15): TEF-PBL und TEF-CRI fehlten|
++           (Vergangene Formate fuehrt beide). Reihenfolge nach Turnierdatum in|
++           data/labs_tournament_decks.csv: PBL 28.08.–18.09., CRI 06.–12.06.,|
++           POR 25.04.–30.05.2026. */|
+         const KNOWN_META_FORMAT_CODES = [|
+-            'TEF-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',|
++            'TEF-PBL', 'TEF-CRI', 'TEF-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',|
+             'BRS-PRE', 'BRS-SSP', 'BRS-SCR', 'BRS-SFA', 'BRS-TWM', 'BRS-TEF',|
+diff --git a/js/app-current-meta.js b/js/app-current-meta.js|
+index bade7e89..316bbcb3 100644|
+--- a/js/app-current-meta.js|
++++ b/js/app-current-meta.js|
+@@ -1005,3 +1005,3 @@|
+                                     <span class="heatmap-key heatmap-key-fav"></span> ${t('heatmap.favorable')} (≥ 55 %),|
+-                                    <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45–54,9 %),|
++                                    <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45,1–54,9 %),${/* UI-86 (03.10.2026, Tiefenanalyse F-09): 45 stand in zwei Stufen; die Zelle rechnet <= 45 als schlecht. */ ''}|
+                                     <span class="heatmap-key heatmap-key-unfav"></span> ${t('heatmap.unfavorable')} (≤ 45 %)|
+diff --git a/js/app-meta-call.js b/js/app-meta-call.js|
+index fde87a29..fb3a8676 100644|
+--- a/js/app-meta-call.js|
++++ b/js/app-meta-call.js|
+@@ -1276,2 +1276,17 @@ window.MetaCall = (function () {|
+ |
++  /* FE-44 (03.10.2026, Tiefenanalyse F-08): Turniertyp und Spielerzahl|
++     wurden gemerkt, „Mein Deck" nicht — nach Neuladen war es weg. Jetzt|
++     wird es wie der Turniertyp im Browser gemerkt. */|
++  const MEIN_DECK_KEY = 'metacall_mydeck_v1';|
++  function _meinDeckMerken(val) {|
++    try {|
++      if (val) localStorage.setItem(MEIN_DECK_KEY, String(val));|
++      else localStorage.removeItem(MEIN_DECK_KEY);|
++    } catch (_e) { /* privater Modus */ }|
++  }|
++  try {|
++    const gemerkt = localStorage.getItem(MEIN_DECK_KEY);|
++    if (gemerkt) _settings.myDeck = gemerkt;|
++  } catch (_e) { /* privater Modus */ }|
++|
+   // Whether the user has explicitly typed into the Players input.|
+@@ -15907,2 +15922,3 @@ window.MetaCall = (function () {|
+     _settings.myDeck = val;|
++    _meinDeckMerken(val);|
+     _winRateOverrides = {};|
+@@ -16682,2 +16698,9 @@ window.MetaCall = (function () {|
+     }|
++    // FE-44: ein gemerktes Deck bringt seine Journal-Zahlen gleich mit.|
++    // Steht es nicht mehr in der Deckliste (Formatwechsel), wird es vergessen.|
++    if (_settings.myDeck && _bekannteDeckNamen().indexOf(_settings.myDeck) === -1) {|
++      _settings.myDeck = '';|
++      _meinDeckMerken('');|
++    }|
++    if (_settings.myDeck) { try { _ladeJournal(_settings.myDeck); } catch (_e) { /* ohne Journal weiter */ } }|
+     renderAll();|
+diff --git a/js/app-profile-deck-builder.js b/js/app-profile-deck-builder.js|
+index 0617268c..46fc4fd7 100644|
+--- a/js/app-profile-deck-builder.js|
++++ b/js/app-profile-deck-builder.js|
+@@ -1360,2 +1360,27 @@|
+ |
++    /* UI-88 (03.10.2026, Tiefenanalyse N-15): 158 Set-Kuerzel-Knoepfe ohne|
++       Titel. Der Name kommt aus data/pokemon_sets_mapping.csv (set_code,|
++       set_name); fehlt er, bleibt das Kuerzel allein stehen. */|
++    let _setNamen = null;|
++    let _setNamenLaeuft = null;|
++    function setNamenAusCsv(text) {|
++        const m = {};|
++        String(text || '').replace(/^¤uFEFF/, '').split(/\r?\n/).slice(1).forEach(function (z) {|
++            const i = z.indexOf(',');|
++            if (i <= 0) return;|
++            const code = z.slice(0, i).trim().toUpperCase();|
++            const name = z.slice(i + 1).trim();|
++            if (code && name) m[code] = name;|
++        });|
++        return m;|
++    }|
++    function _setNamenLaden() {|
++        if (_setNamen || _setNamenLaeuft || typeof fetch !== 'function') return _setNamenLaeuft;|
++        _setNamenLaeuft = fetch('data/pokemon_sets_mapping.csv')|
++            .then(function (r) { return r.ok ? r.text() : ''; })|
++            .then(function (t) { _setNamen = setNamenAusCsv(t); renderSetChips(); })|
++            .catch(function () { _setNamen = {}; });|
++        return _setNamenLaeuft;|
++    }|
++|
+     function renderSetChips() {|
+@@ -1363,2 +1388,3 @@|
+         if (!host) return;|
++        if (!_setNamen) _setNamenLaden();|
+         const term = (_setSearchTerm || '').toUpperCase().trim();|
+@@ -1373,3 +1399,3 @@|
+                     class="pdb-chip pdb-set-chip${_activeFilters.set.has(s) ? ' is-active' : ''}"|
+-                    data-set-code="${escapeHtml(s)}">${escapeHtml(s)}</button>|
++                    data-set-code="${escapeHtml(s)}"${_setNamen && _setNamen[s] ? ` title="${escapeHtml(_setNamen[s])}"` : ''}>${escapeHtml(s)}</button>|
+         `).join('');|
+@@ -1648,2 +1674,3 @@|
+         speichernInsKonto,|
++        setNamenAusCsv,|
+     };|
+diff --git a/js/archetyp-box.js b/js/archetyp-box.js|
+index 52c2aa3e..49253f40 100644|
+--- a/js/archetyp-box.js|
++++ b/js/archetyp-box.js|
+@@ -2893,2 +2893,21 @@|
+         zeichnen();|
++        zurNeuenBox();|
++    }|
++|
++    /* UI-93 (03.10.2026, Tiefenanalyse F-17): nach „Box anlegen" blieb die|
++       Seite oben (scrollY 0), die neue Box stand bei y≈3.230 px — einzige|
++       Rueckmeldung war die Kopfzahl. Jetzt: das Feld „Deckliste einfuegen"|
++       der neuen Box aufklappen, hinscrollen, Fokus hinein. */|
++    function zurNeuenBox() {|
++        const los = function () {|
++            const liste = el('abxListe');|
++            if (!liste) return false;|
++            const d = liste.closest ? liste.closest('details') : null;|
++            if (d) d.open = true;|
++            if (liste.scrollIntoView) liste.scrollIntoView({ block: 'center' });|
++            try { liste.focus({ preventScroll: true }); } catch (_) { /* egal */ }|
++            return true;|
++        };|
++        if (typeof setTimeout === 'function') setTimeout(los, 0); else los();|
++        return true;|
+     }|
+@@ -2989,2 +3008,3 @@|
+         listeEinfuegen: listeEinfuegen,|
++        zurNeuenBox: zurNeuenBox,|
+         _eintragAusUebersicht: eintragAusUebersicht|
+diff --git a/js/battle-journal.js b/js/battle-journal.js|
+index 7127fd62..1807d7a7 100644|
+--- a/js/battle-journal.js|
++++ b/js/battle-journal.js|
+@@ -751,3 +751,3 @@|
+                 title: escapeHtml(battleJournalText('bj.emptyState', 'No pending entries.')),|
+-                description: escapeHtml(battleJournalText('bj.emptyStateDesc', 'Record your first match by tapping the button below!')),|
++                description: escapeHtml(battleJournalText('bj.emptyStateDesc', 'Everything is synced. Log a new match with the button below.')),|
+                 icon: 'professor'|
+@@ -1240,2 +1240,16 @@|
+ |
++    /* UI-89 (03.10.2026, Tiefenanalyse N-16/F-15): das Format blieb leer,|
++       der Eintrag landete unter „Kein Meta". Vorbelegt wird das laufende|
++       Format, wenn es in der Liste steht; eine Wahl bleibt unangetastet. */|
++    function formatVorbelegen(sel) {|
++        if (!sel || sel.value) return sel ? sel.value : '';|
++        let live = '';|
++        try { live = (typeof window.getCurrentMetaFormat === 'function') ? String(window.getCurrentMetaFormat() || '') : ''; } catch (_e) { live = ''; }|
++        if (!live && Array.isArray(window.KNOWN_META_FORMAT_CODES)) live = window.KNOWN_META_FORMAT_CODES[0] || '';|
++        const da = Array.prototype.some.call(sel.options || [], (o) => o.value === live);|
++        if (live && da) sel.value = live;|
++        return sel.value;|
++    }|
++    window._journalFormatVorbelegen = formatVorbelegen;|
++|
+     function openBattleJournalSheet() {|
+@@ -1245,2 +1259,3 @@|
+         resetBattleJournalForm();|
++        formatVorbelegen(document.getElementById('battleJournalMeta'));|
+         // Load history (incl. Firestore) so getLastTournament works after sync|
+diff --git a/js/csv-cache-interceptor.js b/js/csv-cache-interceptor.js|
+index b85625ca..57e6d883 100644|
+--- a/js/csv-cache-interceptor.js|
++++ b/js/csv-cache-interceptor.js|
+@@ -50,2 +50,14 @@|
+ |
++    /* DA-36 (03.10.2026, Tiefenanalyse F-14/D-10): Mehrfachladungen.|
++       Gemessen live am 04.10.2026 auf der Startseite: dieselbe Datei bis|
++       zu 5x geholt und geparst (labs_tournament_decks.csv 5x = 27 MB|
++       dekodiert, online_tournament_top8_decks.csv 5x, format_window.json|
++       4x). Jedes Modul haengt ?t=Date.now() an und holt fuer sich.|
++       Innerhalb EINES Seitenaufrufs teilen sich jetzt alle GET-Abrufe|
++       derselben /data/-Datei eine Antwort — gleich welches ?t=. Neu|
++       geladen wird beim naechsten Seitenaufruf wie bisher. Ausgenommen:|
++       cache:'no-store' (dort ist Frische ausdruecklich gewollt), andere|
++       Methoden als GET, version.json und Antworten ohne ok. */|
++    const geteilt = _geteilterAbruf(url, init);|
++    if (geteilt) return geteilt;|
+     return _origFetch.apply(this, arguments);|
+@@ -53,2 +65,33 @@|
+ |
++  const _abrufe = new Map();|
++  function _datenSchluessel(url) {|
++    const pfad = String(url || '').split('?')[0].split('#')[0];|
++    const i = pfad.indexOf('data/');|
++    if (i === -1) return null;|
++    const rest = pfad.slice(i);|
++    if (!/\.(csv|json)$/i.test(rest) || /version\.json$/i.test(rest)) return null;|
++    return rest;|
++  }|
++  function _geteilterAbruf(url, init) {|
++    const methode = String((init && init.method) || 'GET').toUpperCase();|
++    if (methode !== 'GET') return null;|
++    if (init && (init.cache === 'no-store' || init.cache === 'reload')) return null;|
++    const key = _datenSchluessel(url);|
++    if (!key) return null;|
++    let p = _abrufe.get(key);|
++    if (!p) {|
++      p = _origFetch.call(window, url, init).then(function (r) {|
++        if (!r || !r.ok) { _abrufe.delete(key); return { roh: r }; }|
++        const typ = r.headers && r.headers.get ? r.headers.get('Content-Type') : null;|
++        return r.text().then(function (text) { return { text: text, status: r.status, typ: typ }; });|
++      }, function (err) { _abrufe.delete(key); throw err; });|
++      _abrufe.set(key, p);|
++    }|
++    return p.then(function (e) {|
++      if (e.roh) return e.roh.clone();|
++      return new Response(e.text, { status: e.status, headers: e.typ ? { 'Content-Type': e.typ } : {} });|
++    });|
++  }|
++  window.__datenAbrufe = { anzahl: function () { return _abrufe.size; }, schluessel: _datenSchluessel };|
++|
+   // ─── INDEX BUILDER ──────────────────────────────────────────────────────────|
+diff --git a/js/deck-builder-consistency.js b/js/deck-builder-consistency.js|
+index 5924e196..35aa098a 100644|
+--- a/js/deck-builder-consistency.js|
++++ b/js/deck-builder-consistency.js|
+@@ -2299,7 +2299,36 @@|
+ |
++  /* DA-36 (03.10.2026, Tiefenanalyse F-14/D-10): hier wurde die Datei|
++     beim Seitenstart geladen — auf JEDER Seite, auch der Startseite, die|
++     sie gar nicht braucht. Gemessen live am 04.10.2026 auf der Startseite:|
++     93,6 MB /data/ dekodiert, davon 61,8 MB diese eine Datei. Alle|
++     Aufrufer warten ohnehin auf loadData() bzw. build(); geladen wird|
++     jetzt erst, wenn ein Reiter sie braucht (Deck-Analyse Global/Japan,|
++     Vergangene Formate) — oder beim ersten Aufruf. */|
++  const BRAUCHT_DATEN = ['current-analysis', 'city-league-analysis', 'past-meta'];|
++  function _vorwaermen(tab) {|
++    if (BRAUCHT_DATEN.indexOf(tab) !== -1) _loadAll().catch(() => {});|
++  }|
++  function _anReiterwechselHaengen() {|
++    const orig = global.switchTab;|
++    if (typeof orig !== 'function' || orig.__mcbWrapped) return false;|
++    const wrapped = function (tabName) {|
++      const r = orig.apply(this, arguments);|
++      try { _vorwaermen(tabName); } catch (e) { /* Navigation bleibt heil */ }|
++      return r;|
++    };|
++    wrapped.__mcbWrapped = true;|
++    global.switchTab = wrapped;|
++    return true;|
++  }|
++  global.MostConsistencyBuilder._vorwaermen = _vorwaermen;|
+   if (typeof document !== 'undefined') {|
++    const start = () => {|
++      _anReiterwechselHaengen();|
++      const aktiv = document.querySelector && document.querySelector('.tab-content.active');|
++      if (aktiv) _vorwaermen(aktiv.id);|
++    };|
+     if (document.readyState === 'loading') {|
+-      document.addEventListener('DOMContentLoaded', () => { _loadAll().catch(()=>{}); });|
++      document.addEventListener('DOMContentLoaded', start);|
+     } else {|
+-      setTimeout(() => _loadAll().catch(()=>{}), 100);|
++      setTimeout(start, 100);|
+     }|
+diff --git a/js/draw-simulator.js b/js/draw-simulator.js|
+index 6aa5f41e..64710027 100644|
+--- a/js/draw-simulator.js|
++++ b/js/draw-simulator.js|
+@@ -6,2 +6,9 @@ let _simulatorDeck = [];   // flattened + shuffled deck|
+ let _simulatorHand = [];   // cards currently on hand|
++/* FE-46 (03.10.2026, Tiefenanalyse F-19): wie am Tisch — 7 Karten Starthand,|
++   dann 6 Preiskarten beiseite; gezogen wird danach von Karte 14 an. Vorher|
++   stand „Deck: 53 verbleibend" statt 47, und Haende ohne Basis-Pokemon|
++   kamen kommentarlos. */|
++const SIM_PREISKARTEN = 6;|
++let _simulatorNaechste = 0; // Index der naechsten Karte im Stapel|
++let _simulatorPreisBeiseite = false;|
+ let _comboTargets  = [];   // selected target card names for combo calc|
+@@ -118,2 +125,5 @@ function drawNewHand() {|
+     _simulatorHand = _simulatorDeck.slice(0, 7);|
++    // Preiskarten nur, wenn das Deck dafuer reicht (7 + 6).|
++    _simulatorPreisBeiseite = _simulatorDeck.length >= 7 + SIM_PREISKARTEN;|
++    _simulatorNaechste = _simulatorPreisBeiseite ? 7 + SIM_PREISKARTEN : _simulatorHand.length;|
+     _renderSimulatorHand();|
+@@ -122,3 +132,3 @@ function drawNewHand() {|
+ function drawExtraCard() {|
+-    if (_simulatorHand.length >= _simulatorDeck.length) {|
++    if (_simulatorNaechste >= _simulatorDeck.length) {|
+         showToast(t('draw.noCardsLeft'), 'warning');|
+@@ -126,3 +136,4 @@ function drawExtraCard() {|
+     }|
+-    _simulatorHand.push(_simulatorDeck[_simulatorHand.length]);|
++    _simulatorHand.push(_simulatorDeck[_simulatorNaechste]);|
++    _simulatorNaechste += 1;|
+     _renderSimulatorHand();|
+@@ -130,3 +141,14 @@ function drawExtraCard() {|
+ |
++/** Mulligan-Lage der Starthand: 'mulligan' (sicher kein Basis-Pokemon),|
++ *  'ok' (mind. eines), null (unbekannt — Kartendatenbank fehlt). */|
++function _simMulliganLage(hand) {|
++    const sieben = (hand || []).slice(0, 7);|
++    if (sieben.some(c => c && c.basis === true)) return 'ok';|
++    if (sieben.length && sieben.every(c => c && c.basis === false)) return 'mulligan';|
++    return null;|
++}|
++|
+ // Fisher-Yates shuffle (in-place)|
++if (typeof window !== 'undefined') window._simMulliganLage = _simMulliganLage;|
++|
+ function _shuffleFisherYates(arr) {|
+@@ -157,5 +179,19 @@ function _renderSimulatorHand() {|
+ |
+-    const remaining = _simulatorDeck.length - _simulatorHand.length;|
++    const remaining = Math.max(0, _simulatorDeck.length - _simulatorNaechste);|
+     const el = document.getElementById('simulatorDeckCount');|
+     if (el) el.innerText = remaining;|
++|
++    let hinweis = document.getElementById('simulatorMulligan');|
++    if (!hinweis && grid.parentNode) {|
++        hinweis = document.createElement('p');|
++        hinweis.id = 'simulatorMulligan';|
++        hinweis.className = 'simulator-mulligan';|
++        grid.parentNode.insertBefore(hinweis, grid.nextSibling);|
++    }|
++    if (hinweis) {|
++        const lage = _simMulliganLage(_simulatorHand);|
++        const preis = _simulatorPreisBeiseite;|
++        hinweis.textContent = (lage === 'mulligan' ? t('draw.mulliganHinweis') + ' ' : '')|
++            + (preis ? t('draw.preisHinweis') : '');|
++    }|
+ }|
+diff --git a/js/firebase-collection.js b/js/firebase-collection.js|
+index e76d0c63..9917cccd 100644|
+--- a/js/firebase-collection.js|
++++ b/js/firebase-collection.js|
+@@ -2792,3 +2792,6 @@ function updateDecksUI(offenHalten) {|
+         |
+-        const collLabel       = ownedCount > 0 ? `${ownedCount}/4` : '+';|
++        // FE-48 (03.10.2026, Tiefenanalyse F-16): zwei gleich aussehende „+"|
++        // nebeneinander (Deck-Anzahl und Sammlung). Der Sammlungsknopf traegt|
++        // jetzt das Kistensymbol, auch solange noch keine Kopie da ist.|
++        const collLabel       = ownedCount > 0 ? `¤u{1F4E6} ${ownedCount}/4` : '¤u{1F4E6}+';|
+         const collOwnedClass  = isOwned ? ' my-deck-card-btn--coll-owned' : '';|
+@@ -3736,2 +3739,8 @@ function switchProfileTab(tabName) {|
+ |
++  // UI-87 (03.10.2026): gibt es einen gespeicherten Meta-Binder, sagt der|
++  // Leerzustand das und bietet ihn zuerst an.|
++  if (tabName === 'metabinder' && typeof window.metaBinderLeerzustand === 'function') {|
++    window.metaBinderLeerzustand();|
++  }|
++|
+   // Archetyp-Boxen (FE-13): Liste aus dem Konto holen und zeichnen.|
+diff --git a/js/i18n.js b/js/i18n.js|
+index 8772f141..db03ef83 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -1085,2 +1085,4 @@ const translations = {|
+     'mb.loadSaved':             '📂 Load saved binder',|
++    'mb.savedTitle':           'Saved binder available',|
++    'mb.savedText':            '{n} cards, saved on {datum}. Load it or generate a new one.',|
+     'cb.promptPresetName':      'Name for this binder:',|
+@@ -1713,3 +1715,3 @@ const translations = {|
+     'bj.emptyState':            'No pending entries.',|
+-    'bj.emptyStateDesc':         'Record your first match by tapping the button below!',|
++    'bj.emptyStateDesc':         'Everything is synced. Log a new match with the button below.',|
+     'bj.savedAndSyncing':       'Entry saved. Sync starting...',|
+@@ -1927,2 +1929,4 @@ const translations = {|
+     'draw.remaining':           'remaining',|
++    'draw.mulliganHinweis':     'No Basic Pokémon in hand — that is a mulligan: draw a new hand.',|
++    'draw.preisHinweis':        '6 prize cards are set aside.',|
+     'draw.comboTitle':          'Combo Probability',|
+@@ -3981,2 +3985,4 @@ const translations = {|
+     'mb.loadSaved':             '📂 Gespeicherten Binder laden',|
++    'mb.savedTitle':           'Gespeicherter Binder vorhanden',|
++    'mb.savedText':            '{n} Karten, gespeichert am {datum}. Laden oder neu erstellen.',|
+     'cb.promptPresetName':      'Name f¤u00fcr diesen Binder:',|
+@@ -4617,3 +4623,3 @@ const translations = {|
+     'bj.emptyState':            'Keine wartenden Einträge.',|
+-    'bj.emptyStateDesc':         'Trage dein erstes Match ein, indem du auf den Button unten tippst!',|
++    'bj.emptyStateDesc':         'Alles ist synchronisiert. Ein neues Match trägst du über den Knopf unten ein.',|
+     'bj.savedAndSyncing':       'Eintrag gespeichert. Synchronisierung startet...',|
+@@ -4829,2 +4835,4 @@ const translations = {|
+     'draw.remaining':           'verbleibend',|
++    'draw.mulliganHinweis':     'Kein Basis-Pokémon auf der Hand — das ist ein Mulligan: neue Hand ziehen.',|

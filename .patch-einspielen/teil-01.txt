@@ -290,6 +290,7 @@ index 0e8335be..db183369 100644|
 -    <script src="js/champions-damage.js?v=202610040242" defer></script>|
 -    <script src="js/champions-schwaechen.js?v=202610040242" defer></script>|
 -    <script src="js/app-side-quest-usage.js?v=202610040242" defer></script>|
+-    <script src="js/app-side-quest-matchups.js?v=202610040242" defer></script>|
 +    <script src="js/champions-set.js?v=202610040723" defer></script>|
 +    <script src="js/champions-names.js?v=202610040723" defer></script>|
 +    <script src="js/app-side-quest-builder.js?v=202610040723" defer></script>|

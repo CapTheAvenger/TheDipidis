@@ -6006,6 +6006,16 @@ function updateTranslationsInDOM() {
 
   // Update CSS custom property for close-button tooltips
   document.documentElement.style.setProperty('--close-tooltip', `'${t('btn.close')}'`);
+
+  // F2-02 (04.10.2026, Nachpruefung): vier Beschriftungen tragen in der
+  // Uebersetzung den Platzhalter {quote}; die Module fuellen ihn nur nach
+  // 'languageChanged'. Andere Aufrufer dieser Funktion (z. B. die
+  // Kartendatenbank) liessen „{QUOTE}“ sichtbar stehen. Darum hier nachfuellen.
+  ['cmaQuotenNamenImDom', 'antiTechQuotenNamenImDom'].forEach(function (fn) {
+    if (typeof window !== 'undefined' && typeof window[fn] === 'function') {
+      try { window[fn](); } catch (_) { /* Beschriftung bleibt, Seite laeuft weiter */ }
+    }
+  });
 }
 
 /* Der Hinweis zur einmaligen Sprachumstellung.

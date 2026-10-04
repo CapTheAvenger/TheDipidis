@@ -63,7 +63,8 @@
 
     const T = {
         de: {
-            heading:       'Deck Builder',
+            // N2-09 (04.10.2026): wie Menue und Profil-Reiter (UI-79).
+            heading:       'Deck bauen',
             subtitle:      'Bau dir aus allen Karten der Datenbank ein eigenes Deck — Suche in Deutsch, Englisch, Set oder Kartentext.',
             searchPh:      'Suchen: Name, Set, Kartentext, Fähigkeit …',
             filterMeta:    'Meta',
@@ -120,7 +121,7 @@
             zoomNoText:    'Kein Kartentext verfügbar.',
         },
         en: {
-            heading:       'Deck Builder',
+            heading:       'Build a deck',
             subtitle:      'Build a deck from every card in the database — search by German name, English name, set code or card text.',
             searchPh:      'Search: name, set, card text, ability …',
             filterMeta:    'Meta',

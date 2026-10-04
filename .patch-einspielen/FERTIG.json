@@ -1,0 +1,8 @@
+{
+ "patch_bytes": 45441,
+ "patch_sha256": "654b1b96e053d587d8a2d65a5400d60e590cb98a14d88832a393ee543a9f3955",
+ "teile": {
+  "teil-01.txt": "cb736f1a0d65e424b8c9ddf05a47f37da5c3fd1f17d7135283c71806c5aa34a1",
+  "teil-02.txt": "0c81d4b3478a57e317f62fd95a4c06fe961e5e511fb3ca55846ccac26418e5cb"
+ }
+}

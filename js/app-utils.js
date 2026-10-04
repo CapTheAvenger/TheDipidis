@@ -1065,13 +1065,17 @@ function showTableSkeleton(containerOrId, opts) {
             };
             // ─────────────────────────────────────────────────────────────────────────────
 
+            const _niedrigeStufe = (p) => (p === 2 ? 1 : p);
             if (globalPref && (globalPref === 'max' || globalPref === 'min')) {
                 // Set order loaded from sets.json at startup (higher = newer)
                 const SET_ORDER = window.setOrderMap || {};
                 
                 const sorted = versions.slice().sort((a, b) => {
-                    const priorityA = getRarityPriority(a.rarity, a.set);
-                    const priorityB = getRarityPriority(b.rarity, b.set);
+                    // Common (1) und Uncommon (2) sind EINE niedrige Stufe (Hausi, 04.10.2026):
+                    // "aktuellster Low-Rarity-Print". Vorher gewann das alte Common (SVI 171,
+                    // Regulation G, nicht mehr Standard) gegen das neuere Uncommon (WHT 82).
+                    const priorityA = _niedrigeStufe(getRarityPriority(a.rarity, a.set));
+                    const priorityB = _niedrigeStufe(getRarityPriority(b.rarity, b.set));
                     
                     // Primary sort: by rarity priority
                     if (priorityA !== priorityB) {
@@ -1133,8 +1137,8 @@ function showTableSkeleton(containerOrId, opts) {
             if (pref.mode === 'max' || pref.mode === 'min') {
                 const SET_ORDER = window.setOrderMap || {};
                 const sorted = versions.slice().sort((a, b) => {
-                    const priorityA = getRarityPriority(a.rarity, a.set);
-                    const priorityB = getRarityPriority(b.rarity, b.set);
+                    const priorityA = _niedrigeStufe(getRarityPriority(a.rarity, a.set));
+                    const priorityB = _niedrigeStufe(getRarityPriority(b.rarity, b.set));
                     if (priorityA !== priorityB) return priorityA - priorityB;
                     const setOrderA = SET_ORDER[a.set] || 0;
                     const setOrderB = SET_ORDER[b.set] || 0;

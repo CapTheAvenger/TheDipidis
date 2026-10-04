@@ -617,8 +617,8 @@ describe('FE-13 Nachtrag: Hauptfilter Format (aktuelles Meta, Standard, Expanded
     it('Filterzeile, Anwendung und Proxydruck sind verdrahtet; Texte in beiden Sprachen', () => {
         const code = ohneKommentare(QUELLE);
         assert.ok(code.length > QUELLE.length * 0.3, 'das Ausschneiden hat zu viel entfernt');
-        assert.match(code, /filterPasst\(e\.k, ansicht, e\.element\) && formatPasst\(e\.k, ansicht\.format, kontext, e\.box\)/);
-        assert.match(code, /filterPasst\(k, ansicht, elementVon\(k\)\) && formatPasst\(k, ansicht\.format, kontext, b\)/);
+        assert.match(code, /filterPasst\(e\.k, ansicht, e\.element, markenVonEintrag\) && formatPasst\(e\.k, ansicht\.format, kontext, e\.box\)/);
+        assert.match(code, /filterPasst\(k, ansicht, elementVon\(k\), markenVonEintrag\) && formatPasst\(k, ansicht\.format, kontext, b\)/);
         assert.match(code, /formateZuordnen\(eintraegeAus\(karten, summe\.totalDecklists\), jeFormatAus\(auswahl\.matchingDecks\)\)/);
         assert.match(code, /formateZuordnen\(eintraegeAus\(gefilterteKarten\(z\.karten, schwelle\)/);
         // Ohne gewaehlte Box: ein Knopf gleicht alle Boxen ab (sonst bleiben die Meta-Filter bei alten Boxen leer).

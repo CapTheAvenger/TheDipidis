@@ -259,6 +259,34 @@
         return (istAce || istAceSpecKarte)(k) ? 'Ace Spec' : typ;
     }
 
+    /**
+     * FE-56 (Hausi, 04.10.2026): Cardmarket-Preis eines Drucks fuer die Druckwahl.
+     * Wie ueberall auf der Seite ist die Hauptzahl der TREND (eur_price), "ab" der
+     * guenstigste Preis (eur_low) — nur wenn er darunter liegt. Quelle: die Preisdatei
+     * der Seite am Datensatz des Drucks (Set, Nummer); fehlt der Preis, gibt es keinen
+     * (nie geschaetzt). Rueckgabe { trend, ab, stand } oder null.
+     */
+    function preisZahl(v) {
+        if (typeof v === 'number') return Number.isFinite(v) && v > 0 ? v : null;
+        let t = String(v == null ? '' : v).replace(/[€\s]/g, '');
+        if (!t) return null;
+        if (t.indexOf(',') >= 0) t = t.replace(/\./g, '').replace(',', '.');
+        const n = parseFloat(t);
+        return Number.isFinite(n) && n > 0 ? n : null;
+    }
+
+    function preisVon(rec) {
+        if (!rec) return null;
+        const trend = preisZahl(rec.eur_price);
+        const tief = preisZahl(rec.eur_low);
+        const haupt = trend != null ? trend : tief;
+        if (haupt == null) return null;
+        const stand = String(rec.price_last_updated || rec.last_updated || '').slice(0, 10);
+        return { trend: haupt, ab: (trend != null && tief != null && tief < trend) ? tief : null, stand: /^\d{4}-\d{2}-\d{2}$/.test(stand) ? stand : null };
+    }
+
+    function euro(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
+
     /** Die drei Rubriken der Box, in der Reihenfolge, in der sie gezeigt werden. */
     function rubriken(box) {
         const r = { fehlt: [], original: [], proxy: [] };
@@ -677,7 +705,7 @@
         'Darkness', 'Metal', 'Fairy', 'Dragon', 'Colorless'];
 
     /** Passt eine Karte zu den Filtern? filter = {anteil, art, element}. */
-    function filterPasst(k, filter, element) {
+    function filterPasst(k, filter, element, markenVon) {
         const f = filter || {};
         const a = k.anteil == null ? null : Number(k.anteil);
         if (f.anteil && f.anteil !== 'alle') {
@@ -686,6 +714,11 @@
         }
         if (f.art && f.art !== 'alle' && artVon(k) !== f.art) return false;
         if (f.art === 'Pokemon' && f.element && f.element !== 'alle' && element !== f.element) return false;
+        if (f.marke && f.marke !== 'alle') {
+            // FE-55: Regulation Mark. 'keine' = die Daten kennen keine Marke fuer den Druck.
+            const ms = typeof markenVon === 'function' ? (markenVon(k) || []) : [];
+            if (f.marke === 'keine' ? ms.length > 0 : ms.indexOf(f.marke) < 0) return false;
+        }
         return true;
     }
 
@@ -1002,6 +1035,28 @@
         return ks[0] || null;
     }
 
+    /**
+     * FE-55 (Hausi, 04.10.2026): Regulation Mark je Karte aus data/regulation_marks.json,
+     * nur ueber (Set, Nummer), nie ueber den Namen. Liegen Drucke in der Box (Sonderdruck
+     * getauscht), zaehlen deren Marken, sonst der Druck der Karte. Leere Liste = unbekannt.
+     * index = markenIndex(daten); Rueckgabe z. B. ['H'].
+     */
+    function markenVonKarte(k, index) {
+        if (!index || !k) return [];
+        const marke = function (set, nr) {
+            const s = index[String(set || '').toUpperCase()];
+            if (!s) return null;
+            const n = /^\d+$/.test(String(nr)) ? String(nr).replace(/^0+/, '') || '0' : String(nr);
+            return s[n] || null;
+        };
+        const aus = [];
+        const dazu = function (set, nr) { const m = marke(set, nr); if (m && aus.indexOf(m) < 0) aus.push(m); };
+        const gewaehlt = (k.drucke || []).filter(function (d) { return d && d.n > 0; });
+        if (gewaehlt.length) gewaehlt.forEach(function (d) { dazu(d.set, d.number); });
+        else dazu(k.set, k.number);
+        return aus;
+    }
+
     /** Kontext { index, legal:Set } fuer ein Format, dessen aeltestes legales Set bekannt ist. */
     function markenKontext(daten, aeltestesSet) {
         const index = markenIndex(daten);
@@ -1267,6 +1322,7 @@
         const boxen = new Set();
         const aus = (eintraege || []).filter(function (e) {
             if (!e || !e.box || !e.k) return false;
+            if (istSpielbox(e.box)) return false;   // FE-54: die Spielbox ist das Ziel, nie die Quelle
             if (!stufen.has(e.box)) stufen.set(e.box, boxStufe(e.box, c));
             const st = stufen.get(e.box);
             if (st !== 'gespielt' && st !== 'legal' && st !== 'eigen') return false;
@@ -1278,10 +1334,41 @@
         return { eintraege: aus, boxen: boxen.size };
     }
 
+    /**
+     * FE-54 (Hausi, 04.10.2026): die Spielbox. Eine EIGENE Box (gespeichert im Konto,
+     * Fehlt/Original/Proxy, Wunschliste, Sammlung, Karten von Hand — alles wie bei den
+     * anderen), die einmal aus "Alle Standard-Karten" befuellt wird und danach Hausi
+     * gehoert: Sonderdrucke tauschen, Karten von Hand zu- und wegnehmen. Das Befuellen
+     * legt NUR an, was fehlt (auch ein anderer Druck derselben Karte zaehlt als da);
+     * es entfernt nichts, hebt keine Anzahl an und tauscht keinen Druck zurueck.
+     * ak = groessteAnzahl(...) der Standard-Karten; vorhanden = die Spielbox oder null.
+     * Eine Box passt nur bis ~1 MB in ein Firestore-Dokument: wird es mehr, kommt
+     * { zuGross: true } und nichts wird geaendert (keine Karte still weglassen).
+     */
+    const SPIELBOX_NAME = 'Spielbox Standard';
+    const BOX_BYTES_MAX = 900000;
+
+    function istSpielbox(box) { return !!(box && box.spielbox === true); }
+
+    function spielboxBefuellen(ak, vorhanden, heute) {
+        const basis = vorhanden || Object.assign(neueEigeneBox(SPIELBOX_NAME, heute), { spielbox: true });
+        const karten = basis.karten || [];
+        const liste = ak || [];
+        const neu = liste.filter(function (g) { return !karten.some(function (k) { return gleicheKarte(k, g.k); }); });
+        const aufgeloest = neu.map(function (g) {
+            const k = g.k;
+            return { eintrag: { id: k.id, name: k.name, set: k.set, number: k.number, bild: k.bild || '', typ: k.typ || '',
+                element: k.element || '', anzahl: 1, maxAnzahl: 0, anteil: null, refs: k.refs || [] }, n: k.gefordert };
+        });
+        const erg = listeEinlegen(basis, aufgeloest, heute);
+        if (JSON.stringify(erg.box).length > BOX_BYTES_MAX) return { box: basis, hinzu: [], schon: liste.length - neu.length, zuGross: true };
+        return { box: erg.box, hinzu: erg.hinzu, schon: liste.length - neu.length, zuGross: false };
+    }
+
     const Logik = {
         auswahlUmfang: auswahlUmfang,
         deckzeilenAus: deckzeilenAus,
-        istBasisEnergie: istBasisEnergie, groessteAnzahl: groessteAnzahl, standardEintraege: standardEintraege, basisEnergieNummer: basisEnergieNummer, BASIS_ENERGIE_SVE: BASIS_ENERGIE_SVE, artVon: artVon, KOPIEN_MAX: KOPIEN_MAX, ALLE_KARTEN: ALLE_KARTEN,
+        istBasisEnergie: istBasisEnergie, groessteAnzahl: groessteAnzahl, standardEintraege: standardEintraege, basisEnergieNummer: basisEnergieNummer, BASIS_ENERGIE_SVE: BASIS_ENERGIE_SVE, artVon: artVon, markenVonKarte: markenVonKarte, istSpielbox: istSpielbox, spielboxBefuellen: spielboxBefuellen, SPIELBOX_NAME: SPIELBOX_NAME, preisVon: preisVon, markenIndex: markenIndex, KOPIEN_MAX: KOPIEN_MAX, ALLE_KARTEN: ALLE_KARTEN,
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
         statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, verschiedeneKarten, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, neueEigeneBox, istEigen, deckzeilenLesen, listeEinlegen, namenVertragen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
@@ -1930,11 +2017,19 @@
     // ── Filter (je Betrachter gemerkt) ──
 
     const ANSICHT_SCHLUESSEL = 'archetypBoxAnsichtV1';
-    let ansicht = { gruppe: 'getrennt', format: 'alle', anteil: 'alle', art: 'alle', element: 'alle', sort: 'anteil' };
+    let ansicht = { gruppe: 'getrennt', format: 'alle', anteil: 'alle', art: 'alle', element: 'alle', marke: 'alle', sort: 'anteil' };
     try {
         const g = JSON.parse(localStorage.getItem(ANSICHT_SCHLUESSEL) || 'null');
         if (g && typeof g === 'object') ansicht = Object.assign(ansicht, g);
     } catch (_) { /* ohne Speicher */ }
+
+    let markenIdx = null;
+    let markenIdxVon = null;
+    /** Marken je Karte fuer den Filter; der Index wird je Datei einmal gebaut. */
+    function markenVonEintrag(k) {
+        if (markenDaten !== markenIdxVon) { markenIdx = markenIndex(markenDaten); markenIdxVon = markenDaten; }
+        return markenVonKarte(k, markenIdx);
+    }
 
     function ansichtSetzen(feld, wert) {
         ansicht[feld] = wert;
@@ -2287,6 +2382,12 @@
             + (fmtZeile ? '<p class="abx-filter-hinweis">' + esc(fmtZeile) + '</p>' : '')
             + reihe(tx('abx.fAnteil', null, 'Anteil'), anteil.map(function (a) { return knopf('anteil', a[0], a[1]); }).join(''))
             + reihe(tx('abx.fArt', null, 'Kartenart'), arten.map(function (a) { return knopf('art', a[0], a[1]); }).join(''));
+        if (markenDaten && markenDaten.marks) {
+            const vorhanden = MARKEN_REIHE.filter(function (m) { return markenDaten.marks[m]; });
+            html += reihe(tx('abx.fMarke', null, 'Regulation Mark'), [knopf('marke', 'alle', tx('abx.fAlle', null, 'Alle'))]
+                .concat(vorhanden.map(function (m) { return knopf('marke', m, m); }))
+                .concat([knopf('marke', 'keine', tx('abx.fMarkeKeine', null, 'Ohne Marke'))]).join(''));
+        }
         if (ansicht.art === 'Pokemon') {
             html += reihe(tx('abx.fTyp', null, 'Typ'), [knopf('element', 'alle', tx('abx.fAlle', null, 'Alle'))].concat(
                 ELEMENTE.map(function (e) { return knopf('element', e, tx('abx.el.' + e, null, e)); })).join(''));
@@ -2322,14 +2423,16 @@
         });
         const kontext = formatKontext();
         let standardBoxen = 0;
+        let standardGruppen = [];
         if (alleKarten) {
             const st = standardEintraege(eintraege, kontext);
             eintraege = st.eintraege;
             standardBoxen = st.boxen;
+            standardGruppen = groessteAnzahl(st.eintraege, einheitsEnergie);   // ungefiltert: Grundlage der Spielbox
         }
         const gesamt = eintraege.length;
         eintraege = eintraege.filter(function (e) {
-            return filterPasst(e.k, ansicht, e.element) && formatPasst(e.k, ansicht.format, kontext, e.box);
+            return filterPasst(e.k, ansicht, e.element, markenVonEintrag) && formatPasst(e.k, ansicht.format, kontext, e.box);
         });
         if (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu') {
             eintraege.forEach(function (e) { e.formatZeile = formatZeileVon(e.k, ansicht.format, kontext); });
@@ -2375,7 +2478,19 @@
             ? '<p class="abx-ergebnis" role="status">' + esc(ergebnisSatz(letztesErgebnis)) + '</p>' : '';
         const druckId = eine ? '\'' + esc(eine.id) + '\'' : 'null';
         const mitDaten = boxen.filter(function (b) { return !istEigen(b); }).length;
-        const aktionen = alleKarten ? '<div class="abx-aktionen">' + (sichtbareKarten.length
+        const spielbox = boxen.find(istSpielbox) || null;
+        const spielboxFehlt = alleKarten
+            ? standardGruppen.filter(function (g) { return !spielbox || !(spielbox.karten || []).some(function (k) { return gleicheKarte(k, g.k); }); }).length : 0;
+        const spielboxKnopf = !alleKarten ? '' : (!spielbox
+            ? '<button type="button" class="btn btn-primary" onclick="ArchetypBox.spielboxEinspielen()">'
+                + esc(tx('abx.spielboxAnlegen', { n: standardGruppen.length }, 'Als Spielbox anlegen ({n} Karten)')) + '</button>'
+            : (spielboxFehlt
+                ? '<button type="button" class="btn btn-primary" onclick="ArchetypBox.spielboxEinspielen()">'
+                    + esc(tx('abx.spielboxErgaenzen', { n: spielboxFehlt }, 'Neue Karten in die Spielbox ergänzen ({n})')) + '</button>'
+                : '<span class="abx-rein-ok">' + esc(tx('abx.spielboxVollstaendig', null, 'Spielbox enthält alle Standard-Karten ✓')) + '</span>')
+                + '<button type="button" class="btn btn-outline" onclick="ArchetypBox.waehlen(\'' + esc(spielbox.id) + '\')">'
+                + esc(tx('abx.zurSpielbox', null, 'Zur Spielbox')) + '</button>');
+        const aktionen = alleKarten ? '<div class="abx-aktionen">' + spielboxKnopf + (sichtbareKarten.length
             ? '<button type="button" class="btn btn-outline abx-kopieren-btn" onclick="ArchetypBox.kopieren()">'
                 + esc(tx('abx.kopieren', { n: deckzeilenAus(sichtbareKarten).length }, 'Gefilterte Karten kopieren ({n})')) + '</button>' : '')
             + '</div><p id="abxFortschritt" class="abx-fortschritt d-none" role="status" aria-live="polite"></p>'
@@ -2550,16 +2665,28 @@
         const k = box && normiert((box.karten || []).find(function (x) { return x.id === dialogZustand.id; }) || null);
         if (!k) return;
         const summe = dialogZustand.liste.reduce(function (a, x) { return a + x.n; }, 0);
+        const preise = dialogZustand.liste.map(function (x) {
+            const rec = (typeof getCanonicalCardRecord === 'function') ? getCanonicalCardRecord(x.set, x.number) : null;
+            return preisVon(rec);
+        });
+        const staende = preise.filter(function (p) { return p && p.stand; }).map(function (p) { return p.stand; }).sort();
+        const preisKopf = staende.length
+            ? '<p class="abx-dialog-preisstand">' + esc(tx('abx.preisStand', { datum: datumLesbar(staende[staende.length - 1]) },
+                'Cardmarket-Trend, Stand {datum} · „ab“ = günstigstes Angebot')) + '</p>' : '';
         d.querySelector('.abx-dialog-inhalt').innerHTML =
             '<h3 id="abxDruckTitel">' + esc(k.name) + '</h3>'
             + '<p class="abx-dialog-zeile">' + esc(k.gefordert > 0
                 ? tx('abx.druckeSumme', { n: summe, soll: k.gefordert }, 'In der Box: {n} · höchstens gespielt: {soll}')
-                : tx('abx.druckeSummeOhne', { n: summe }, 'In der Box: {n}')) + '</p>'
+                : tx('abx.druckeSummeOhne', { n: summe }, 'In der Box: {n}')) + '</p>' + preisKopf
             + '<div class="abx-dialog-liste">' + dialogZustand.liste.map(function (x, i) {
                 return '<div class="abx-dialog-druck' + (x.n > 0 ? ' is-drin' : '') + '">'
                     + (x.bild ? '<img src="' + esc(x.bild) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<div class="abx-dialog-ohne"></div>')
                     + '<div class="abx-dialog-text"><strong>' + esc(x.set + ' ' + x.number) + '</strong>'
-                    + (x.rarity ? '<span>' + esc(x.rarity) + '</span>' : '') + '</div>'
+                    + (x.rarity ? '<span>' + esc(x.rarity) + '</span>' : '')
+                    + (preise[i]
+                        ? '<span class="abx-dialog-preis">' + esc(euro(preise[i].trend)) + (preise[i].ab != null ? ' <small>' + esc(tx('abx.preisAb', { p: euro(preise[i].ab) }, 'ab {p}')) + '</small>' : '') + '</span>'
+                        : '<span class="abx-dialog-preis abx-dialog-preis-fehlt">' + esc(tx('abx.preisKein', null, 'kein Preis')) + '</span>')
+                    + '</div>'
                     + '<div class="abx-dialog-zahl">'
                     + '<button type="button" class="abx-mini" onclick="ArchetypBox._druck(' + i + ',-1)" aria-label="'
                     + esc(tx('abx.wenigerAria', null, 'Eine Kopie weniger')) + '">−</button>'
@@ -2774,7 +2901,7 @@
         const liste = [];
         quelle.forEach(function (b) {
             const sichtbar = Object.assign({}, b, { karten: (b.karten || []).filter(function (roh) {
-                const k = normiert(roh); return filterPasst(k, ansicht, elementVon(k)) && formatPasst(k, ansicht.format, kontext, b);
+                const k = normiert(roh); return filterPasst(k, ansicht, elementVon(k), markenVonEintrag) && formatPasst(k, ansicht.format, kontext, b);
             }) });
             proxyListe(sichtbar).forEach(function (p) { liste.push(p); });
         });
@@ -2954,6 +3081,39 @@
                  : tx('abx.kopierenFehler', null, 'Kopieren hat nicht geklappt.'), ok ? 'success' : 'error');
     }
 
+    /** FE-54: Spielbox anlegen oder um neue Standard-Karten ergaenzen. Entfernt und aendert nie etwas. */
+    async function spielboxEinspielen() {
+        if (!nutzer()) {
+            toast(tx('abx.anmelden', null, 'Bitte melde dich an — die Archetyp-Box liegt in deinem Konto.'), 'warning');
+            return;
+        }
+        await laden();
+        const kontext = formatKontext();
+        if (!kontext.legalBekannt) {
+            toast(tx('abx.spielboxOhneFormat', null, 'Die Formatdaten fehlen noch — bitte gleich noch einmal versuchen.'), 'warning');
+            return;
+        }
+        const alle = [];
+        boxen.forEach(function (b) { (b.karten || []).forEach(function (roh) { alle.push({ box: b, k: normiert(roh) }); }); });
+        const ak = groessteAnzahl(standardEintraege(alle, kontext).eintraege, einheitsEnergie);
+        const vorhanden = boxen.find(istSpielbox) || null;
+        const erg = spielboxBefuellen(ak, vorhanden, heuteIso());
+        if (erg.zuGross) {
+            toast(tx('abx.spielboxZuGross', null, 'Die Spielbox würde zu groß für ein Konto-Dokument — nichts wurde geändert.'), 'error');
+            return;
+        }
+        if (!erg.hinzu.length) {
+            toast(tx('abx.spielboxNichtsNeu', null, 'Die Spielbox enthält schon alle Standard-Karten.'), 'info');
+            return;
+        }
+        erg.box.id = vorhanden ? vorhanden.id : neueId();
+        if (!(await schreiben(erg.box))) return;
+        aktiveId = erg.box.id;
+        toast(tx(vorhanden ? 'abx.spielboxErgaenzt' : 'abx.spielboxAngelegt', { n: erg.hinzu.length },
+            vorhanden ? '{n} neue Karten in die Spielbox gelegt.' : 'Spielbox angelegt: {n} Karten.'), 'success');
+        zeichnen();
+    }
+
     async function eigeneAnlegen() {
         if (!nutzer()) {
             toast(tx('abx.anmelden', null, 'Bitte melde dich an — die Archetyp-Box liegt in deinem Konto.'), 'warning');
@@ -3092,6 +3252,7 @@
         hinzufuegen: hinzufuegen,
         eigeneAnlegen: eigeneAnlegen,
         listeEinfuegen: listeEinfuegen,
+        spielboxEinspielen: spielboxEinspielen,
         zurNeuenBox: zurNeuenBox,
         _eintragAusUebersicht: eintragAusUebersicht
     });

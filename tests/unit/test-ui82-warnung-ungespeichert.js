@@ -15,7 +15,8 @@ const ohne = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, 
 const DB = ohne(fs.readFileSync(path.join(W, 'js', 'app-deck-builder.js'), 'utf8'));
 
 function laden(w) {
-  const a = DB.indexOf('function _ungespeicherteDecks(');
+  // F2-04 (04.10.2026): der Fingerabdruck steht direkt davor und gehoert dazu.
+  const a = DB.indexOf('function _deckFingerabdruck(');
   const b = DB.indexOf('\n}\n', DB.indexOf("addEventListener('beforeunload'", a));
   assert.ok(a > -1 && b > a, 'Block fehlt');
   // eslint-disable-next-line no-new-func
@@ -45,13 +46,14 @@ describe('UI-82: Warnung vor ungespeichertem Deck', () => {
   it('genau so gespeichert: keine Warnung — danach geaendert: wieder Warnung', () => {
     const w = fenster(); const f = laden(w);
     w.currentMetaDeck = { 'Dreepy (TWM 128)': 4 };
-    w.__deckZuletztGespeichert = { currentMeta: JSON.stringify(w.currentMetaDeck) };
+    w.__deckZuletztGespeichert = { currentMeta: w._deckFingerabdruck(w.currentMetaDeck) };
     assert.deepEqual(f(w), []);
     w.currentMetaDeck['Dreepy (TWM 128)'] = 3;
     assert.deepEqual(f(w), ['currentMeta']);
   });
   it('das Speichern setzt den Vergleichsstand', () => {
     const q = ohne(fs.readFileSync(path.join(W, 'js', 'firebase-collection.js'), 'utf8'));
-    assert.match(q, /window\.__deckZuletztGespeichert\[source\]\s*=\s*JSON\.stringify\(deck\)/);
+    // F2-04 (04.10.2026): Vergleichsstand ist der Fingerabdruck der gespeicherten Kopie.
+    assert.match(q, /window\.__deckZuletztGespeichert\[source\]\s*=\s*\(typeof window\._deckFingerabdruck === 'function'\)\s*\?\s*window\._deckFingerabdruck\(gespeicherteKarten\)/);
   });
 });

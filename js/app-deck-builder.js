@@ -36,15 +36,30 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
    schliesst, verlor das Deck still. Gewarnt wird nur, wenn ein Deck
    Karten hat UND nicht genau so gespeichert wurde
    (window.__deckZuletztGespeichert setzt saveCurrentDeckToProfile). */
+/* F2-04 (04.10.2026, Nachpruefung): die Warnung blieb nach dem Speichern
+   an, weil der Vergleich an der Reihenfolge der Schluessel und am geteilten
+   Objekt (F2-01) hing. Verglichen wird jetzt ein Fingerabdruck (sortierte
+   Schluessel, nur Anzahl > 0) — gegen den zuletzt gespeicherten Stand UND
+   gegen jedes Deck in Meine Decks. */
+function _deckFingerabdruck(deck) {
+    if (!deck || typeof deck !== 'object') return '';
+    return Object.keys(deck).filter(function (k) { return (Number(deck[k]) || 0) > 0; })
+        .sort().map(function (k) { return k + '=' + Number(deck[k]); }).join('|');
+}
+window._deckFingerabdruck = _deckFingerabdruck;
 function _ungespeicherteDecks(w) {
     const gespeichert = (w && w.__deckZuletztGespeichert) || {};
+    const meine = new Set(((w && Array.isArray(w.userDecks)) ? w.userDecks : [])
+        .map(function (d) { return _deckFingerabdruck(d && d.cards); }));
     const quellen = [['cityLeague', 'cityLeagueDeck'], ['currentMeta', 'currentMetaDeck'], ['pastMeta', 'pastMetaDeck']];
     return quellen.filter(function (q) {
         const deck = w && w[q[1]];
         if (!deck || typeof deck !== 'object') return false;
         const karten = Object.keys(deck).reduce(function (n, k) { return n + (Number(deck[k]) || 0); }, 0);
         if (karten <= 0) return false;
-        return gespeichert[q[0]] !== JSON.stringify(deck);
+        const abdruck = _deckFingerabdruck(deck);
+        if (meine.has(abdruck)) return false;
+        return gespeichert[q[0]] !== abdruck;
     }).map(function (q) { return q[0]; });
 }
 window._ungespeicherteDecks = _ungespeicherteDecks;

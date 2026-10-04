@@ -610,11 +610,16 @@ async function saveCurrentDeckToProfile(source) {
   const deckCol = db.collection('users').doc(user.uid).collection('decks');
   const newId = deckCol.doc().id;
   const nowMs = Date.now();
+  // F2-01 (04.10.2026, Nachpruefung): gespeichert wird eine KOPIE. Vorher
+  // war userDecks[i].cards dasselbe Objekt wie der Baukasten — jedes
+  // Weiterprobieren in der Deck-Analyse aenderte still das gespeicherte Deck
+  // (und die naechste Bearbeitung in Meine Decks schrieb es auf den Server).
+  const gespeicherteKarten = Object.assign({}, deck);
   const deckData = {
     id: newId,
     name: trimmedName,
     archetype: archetype || 'Custom',
-    cards: deck, // Exact prints: "CardName (SET NUMBER)" format
+    cards: gespeicherteKarten, // Exact prints: "CardName (SET NUMBER)" format
     totalCards: totalCards,
     folder: selectedFolder,
     source: source,
@@ -629,7 +634,8 @@ async function saveCurrentDeckToProfile(source) {
   if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
   // UI-82: dieser Stand ist gespeichert — die Warnung beim Verlassen schweigt dafuer.
   window.__deckZuletztGespeichert = window.__deckZuletztGespeichert || {};
-  window.__deckZuletztGespeichert[source] = JSON.stringify(deck);
+  window.__deckZuletztGespeichert[source] = (typeof window._deckFingerabdruck === 'function')
+    ? window._deckFingerabdruck(gespeicherteKarten) : JSON.stringify(gespeicherteKarten);
 
   showNotification(fcText('notif.deckSavedNamed', 'Deck "{name}" saved successfully!').replace('{name}', trimmedName), 'success');
   if (typeof updateDecksUI === 'function') updateDecksUI();
@@ -643,7 +649,7 @@ async function saveCurrentDeckToProfile(source) {
   const firestorePayload = {
     name: trimmedName,
     archetype: archetype || 'Custom',
-    cards: deck,
+    cards: Object.assign({}, gespeicherteKarten),
     totalCards: totalCards,
     folder: selectedFolder,
     source: source,

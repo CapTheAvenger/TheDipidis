@@ -145,6 +145,16 @@
         return d.toLocaleDateString(de() ? 'de-DE' : 'en-GB');
     }
 
+    /* D2-11 (04.10.2026, Nachpruefung): der Titel sagte „vor 1 Tagen" fuer
+       1,8 Tage (abgerundet, falsche Einzahl). Gerundet, Einzahl richtig. */
+    function tageText(tage) {
+        const n = Math.round(Number(tage) || 0);
+        if (n <= 0) return de() ? 'heute' : 'today';
+        if (n === 1) return de() ? 'vor 1 Tag' : '1 day ago';
+        return de() ? ('vor ' + n + ' Tagen') : (n + ' days ago');
+    }
+    window.__dsTageText = tageText;
+
     /** Wie alt ist der Stand in Tagen? null, wenn unbekannt. */
     function alterTage(d) {
         if (!d) return null;
@@ -213,17 +223,17 @@
                            "wann wurde zuletzt nachgesehen". */
                         titel = de()
                             ? 'Juengster Eintrag in ' + datei + ': ' + alsText(dInhalt)
-                              + ' — vor ' + Math.floor(tage) + ' Tagen.'
+                              + ' — ' + tageText(tage) + '.'
                               + ' Zuletzt nachgesehen am ' + alsText(dDatei) + '.'
                             : 'newest entry in ' + datei + ': ' + alsText(dInhalt)
-                              + ' — ' + Math.floor(tage) + ' days ago.'
+                              + ' — ' + tageText(tage) + '.'
                               + ' Last checked ' + alsText(dDatei) + '.';
                     } else {
                         titel = de()
-                            ? 'Letzte Aenderung von ' + datei
-                              + (tage !== null ? ' — vor ' + Math.floor(tage) + ' Tagen' : '')
+                            ? 'Letzte Änderung von ' + datei
+                              + (tage !== null ? ' — ' + tageText(tage) : '')
                             : 'last change to ' + datei
-                              + (tage !== null ? ' — ' + Math.floor(tage) + ' days ago' : '');
+                              + (tage !== null ? ' — ' + tageText(tage) : '');
                     }
                     eltern.setAttribute('title', titel);
                 }

@@ -65,7 +65,7 @@ ENGLISH_ONLY_WORDS = [
     'Main Menu', 'Card Database', 'Archetype Overview', 'Card Overview',
     'Deck Builder', 'Create Account',
     'Switch language', 'Your Deck', 'My Profile', 'Calculator',
-    'Test Draw', 'Supporter',
+    'Test Draw',
     'Stadium', 'Deck Statistics',
     'Import Decklist',
     'Add Single Card', 'Last Update',
@@ -105,6 +105,10 @@ BILINGUAL_ALLOWED = {
     'complete', 'missing', 'generate', 'continue',
     'result', 'field', 'discard', 'ready', 'grid',
     'remaining', 'multiplayer', 'settings',
+    # 04.10.2026, Entscheidung Hausi: Typnamen wie die Szene,
+    # Supporter / Item / Tool auch in der deutschen Oberflaeche
+    # (Profil-Builder und Staples-Kacheln gleich).
+    'supporter',
 }
 
 # JS helper: collect ONLY visible text (skip display:none ancestors)

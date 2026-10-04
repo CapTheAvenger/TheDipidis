@@ -3236,16 +3236,23 @@
            Spiel nennt sie Ausruestung.
 
            Der Test hatte recht, und er hat den Fehler gefunden, bevor
-           ihn jemand auf der Seite lesen musste. */
+           ihn jemand auf der Seite lesen musste.
+
+           ENTSCHEIDUNG HAUSI (04.10.2026, Tiefenanalyse UI-76/UI-88): die
+           Typnamen folgen der Szenesprache wie im Profil-Builder:
+           Supporter / Item / Tool, nicht Unterstuetzer / Items /
+           Ausruestung. Vorher standen auf der Seite beide Fassungen.
+           Die Sperrliste in tests/e2e_i18n_language_purity.py ist
+           entsprechend angepasst. */
         const STAPLES_ARTEN = [
             { id: 'pokemon', typen: ['Basic', 'Stage 1', 'Stage 2', 'V-UNION', 'VMAX', 'VSTAR', 'Level Up'],
               de: 'Pokémon',         en: 'Pokémon' },
             { id: 'supporter', typen: ['Supporter'],
-              de: 'Unterstützer',    en: 'Supporters' },
+              de: 'Supporter',       en: 'Supporters' },
             { id: 'item', typen: ['Item'],
-              de: 'Items',           en: 'Items' },
+              de: 'Item',            en: 'Items' },
             { id: 'tool', typen: ['Tool'],
-              de: 'Ausrüstung',      en: 'Tools' },
+              de: 'Tool',            en: 'Tools' },
             { id: 'stadion', typen: ['Stadium'],
               de: 'Stadion',         en: 'Stadiums' },
             { id: 'energie', typen: ['Special Energy'],
@@ -3755,7 +3762,7 @@
                            + 'geteilte Karten behaupten, wo es zwei gibt.</p>'
                            + '<p><strong>ACE SPEC</strong> ist keine Kartenart, sondern ein '
                            + 'Kennzeichen: eine ACE SPEC darf nur einmal je Deck liegen. Diese '
-                           + 'Karten stehen deshalb doppelt — in ihrer Art (Item, Ausrüstung, '
+                           + 'Karten stehen deshalb doppelt — in ihrer Art (Item, Tool, '
                            + 'Stadion, Spezial-Energie) <em>und</em> in der eigenen Liste. Gezählt '
                            + 'wird nur, was ausdrücklich als ACE SPEC belegt ist; wo die Regel '
                            + 'nichts belegen kann, bleibt die Karte draußen statt geraten '

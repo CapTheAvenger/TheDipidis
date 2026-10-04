@@ -48,8 +48,51 @@
       }));
     }
 
+    /* DA-36 (03.10.2026, Tiefenanalyse F-14/D-10): Mehrfachladungen.
+       Gemessen live am 04.10.2026 auf der Startseite: dieselbe Datei bis
+       zu 5x geholt und geparst (labs_tournament_decks.csv 5x = 27 MB
+       dekodiert, online_tournament_top8_decks.csv 5x, format_window.json
+       4x). Jedes Modul haengt ?t=Date.now() an und holt fuer sich.
+       Innerhalb EINES Seitenaufrufs teilen sich jetzt alle GET-Abrufe
+       derselben /data/-Datei eine Antwort — gleich welches ?t=. Neu
+       geladen wird beim naechsten Seitenaufruf wie bisher. Ausgenommen:
+       cache:'no-store' (dort ist Frische ausdruecklich gewollt), andere
+       Methoden als GET, version.json und Antworten ohne ok. */
+    const geteilt = _geteilterAbruf(url, init);
+    if (geteilt) return geteilt;
     return _origFetch.apply(this, arguments);
   };
+
+  const _abrufe = new Map();
+  function _datenSchluessel(url) {
+    const pfad = String(url || '').split('?')[0].split('#')[0];
+    const i = pfad.indexOf('data/');
+    if (i === -1) return null;
+    const rest = pfad.slice(i);
+    if (!/\.(csv|json)$/i.test(rest) || /version\.json$/i.test(rest)) return null;
+    return rest;
+  }
+  function _geteilterAbruf(url, init) {
+    const methode = String((init && init.method) || 'GET').toUpperCase();
+    if (methode !== 'GET') return null;
+    if (init && (init.cache === 'no-store' || init.cache === 'reload')) return null;
+    const key = _datenSchluessel(url);
+    if (!key) return null;
+    let p = _abrufe.get(key);
+    if (!p) {
+      p = _origFetch.call(window, url, init).then(function (r) {
+        if (!r || !r.ok) { _abrufe.delete(key); return { roh: r }; }
+        const typ = r.headers && r.headers.get ? r.headers.get('Content-Type') : null;
+        return r.text().then(function (text) { return { text: text, status: r.status, typ: typ }; });
+      }, function (err) { _abrufe.delete(key); throw err; });
+      _abrufe.set(key, p);
+    }
+    return p.then(function (e) {
+      if (e.roh) return e.roh.clone();
+      return new Response(e.text, { status: e.status, headers: e.typ ? { 'Content-Type': e.typ } : {} });
+    });
+  }
+  window.__datenAbrufe = { anzahl: function () { return _abrufe.size; }, schluessel: _datenSchluessel };
 
   // ─── INDEX BUILDER ──────────────────────────────────────────────────────────
   function buildAnalysisIndexes(data) {

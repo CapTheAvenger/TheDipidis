@@ -2297,11 +2297,40 @@
     },
   };
 
+  /* DA-36 (03.10.2026, Tiefenanalyse F-14/D-10): hier wurde die Datei
+     beim Seitenstart geladen — auf JEDER Seite, auch der Startseite, die
+     sie gar nicht braucht. Gemessen live am 04.10.2026 auf der Startseite:
+     93,6 MB /data/ dekodiert, davon 61,8 MB diese eine Datei. Alle
+     Aufrufer warten ohnehin auf loadData() bzw. build(); geladen wird
+     jetzt erst, wenn ein Reiter sie braucht (Deck-Analyse Global/Japan,
+     Vergangene Formate) — oder beim ersten Aufruf. */
+  const BRAUCHT_DATEN = ['current-analysis', 'city-league-analysis', 'past-meta'];
+  function _vorwaermen(tab) {
+    if (BRAUCHT_DATEN.indexOf(tab) !== -1) _loadAll().catch(() => {});
+  }
+  function _anReiterwechselHaengen() {
+    const orig = global.switchTab;
+    if (typeof orig !== 'function' || orig.__mcbWrapped) return false;
+    const wrapped = function (tabName) {
+      const r = orig.apply(this, arguments);
+      try { _vorwaermen(tabName); } catch (e) { /* Navigation bleibt heil */ }
+      return r;
+    };
+    wrapped.__mcbWrapped = true;
+    global.switchTab = wrapped;
+    return true;
+  }
+  global.MostConsistencyBuilder._vorwaermen = _vorwaermen;
   if (typeof document !== 'undefined') {
+    const start = () => {
+      _anReiterwechselHaengen();
+      const aktiv = document.querySelector && document.querySelector('.tab-content.active');
+      if (aktiv) _vorwaermen(aktiv.id);
+    };
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => { _loadAll().catch(()=>{}); });
+      document.addEventListener('DOMContentLoaded', start);
     } else {
-      setTimeout(() => _loadAll().catch(()=>{}), 100);
+      setTimeout(start, 100);
     }
   }
 })(typeof window !== 'undefined' ? window : globalThis);

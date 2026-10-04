@@ -1774,7 +1774,7 @@ const BASE_PATH = './data/';
                 : (ueberschriftEl ? ueberschriftEl.textContent.trim()
                     : (activeBtn ? activeBtn.textContent.trim() : ''));
             if (titleText) {
-                document.title = titleText + ' – Pokémon TCG Hub';
+                document.title = titleText + ' – The Dipidis';  // UI-79 (03.10.2026): ein Seitenname
                 const badge = document.getElementById('current-tab-title');
                 if (badge) {
                     badge.textContent = titleText;
@@ -1796,7 +1796,7 @@ const BASE_PATH = './data/';
                  * und Abzeichen, gegen die der Zweig gebaut wurde, nur eine
                  * Stelle weiter. Ein Abzeichen ohne bekannten Namen zeigt
                  * gar nichts, statt einen falschen Namen zu zeigen. */
-                document.title = 'Pokémon TCG Hub';
+                document.title = 'The Dipidis';
                 const badge = document.getElementById('current-tab-title');
                 if (badge) {
                     badge.textContent = '';
@@ -2257,8 +2257,12 @@ const BASE_PATH = './data/';
         // lookups. The CURRENT meta is appended dynamically below from
         // window._formatWindow so the list doesn't need a code edit each
         // rotation. Order matters: front of the array is "most recent".
+        /* UI-89 (03.10.2026, Tiefenanalyse F-15): TEF-PBL und TEF-CRI fehlten
+           (Vergangene Formate fuehrt beide). Reihenfolge nach Turnierdatum in
+           data/labs_tournament_decks.csv: PBL 28.08.–18.09., CRI 06.–12.06.,
+           POR 25.04.–30.05.2026. */
         const KNOWN_META_FORMAT_CODES = [
-            'TEF-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
+            'TEF-PBL', 'TEF-CRI', 'TEF-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
             'BRS-PRE', 'BRS-SSP', 'BRS-SCR', 'BRS-SFA', 'BRS-TWM', 'BRS-TEF',
             'BST-PAR', 'SVI-PAF'
         ];

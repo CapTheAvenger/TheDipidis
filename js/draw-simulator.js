@@ -4,6 +4,13 @@
 
 let _simulatorDeck = [];   // flattened + shuffled deck
 let _simulatorHand = [];   // cards currently on hand
+/* FE-46 (03.10.2026, Tiefenanalyse F-19): wie am Tisch — 7 Karten Starthand,
+   dann 6 Preiskarten beiseite; gezogen wird danach von Karte 14 an. Vorher
+   stand „Deck: 53 verbleibend" statt 47, und Haende ohne Basis-Pokemon
+   kamen kommentarlos. */
+const SIM_PREISKARTEN = 6;
+let _simulatorNaechste = 0; // Index der naechsten Karte im Stapel
+let _simulatorPreisBeiseite = false;
 let _comboTargets  = [];   // selected target card names for combo calc
 
 // -------------------------------------------------------
@@ -116,19 +123,34 @@ function _simFindCard(setCode, setNumber) {
 function drawNewHand() {
     _shuffleFisherYates(_simulatorDeck);
     _simulatorHand = _simulatorDeck.slice(0, 7);
+    // Preiskarten nur, wenn das Deck dafuer reicht (7 + 6).
+    _simulatorPreisBeiseite = _simulatorDeck.length >= 7 + SIM_PREISKARTEN;
+    _simulatorNaechste = _simulatorPreisBeiseite ? 7 + SIM_PREISKARTEN : _simulatorHand.length;
     _renderSimulatorHand();
 }
 
 function drawExtraCard() {
-    if (_simulatorHand.length >= _simulatorDeck.length) {
+    if (_simulatorNaechste >= _simulatorDeck.length) {
         showToast(t('draw.noCardsLeft'), 'warning');
         return;
     }
-    _simulatorHand.push(_simulatorDeck[_simulatorHand.length]);
+    _simulatorHand.push(_simulatorDeck[_simulatorNaechste]);
+    _simulatorNaechste += 1;
     _renderSimulatorHand();
 }
 
+/** Mulligan-Lage der Starthand: 'mulligan' (sicher kein Basis-Pokemon),
+ *  'ok' (mind. eines), null (unbekannt — Kartendatenbank fehlt). */
+function _simMulliganLage(hand) {
+    const sieben = (hand || []).slice(0, 7);
+    if (sieben.some(c => c && c.basis === true)) return 'ok';
+    if (sieben.length && sieben.every(c => c && c.basis === false)) return 'mulligan';
+    return null;
+}
+
 // Fisher-Yates shuffle (in-place)
+if (typeof window !== 'undefined') window._simMulliganLage = _simMulliganLage;
+
 function _shuffleFisherYates(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -155,9 +177,23 @@ function _renderSimulatorHand() {
         grid.appendChild(img);
     });
 
-    const remaining = _simulatorDeck.length - _simulatorHand.length;
+    const remaining = Math.max(0, _simulatorDeck.length - _simulatorNaechste);
     const el = document.getElementById('simulatorDeckCount');
     if (el) el.innerText = remaining;
+
+    let hinweis = document.getElementById('simulatorMulligan');
+    if (!hinweis && grid.parentNode) {
+        hinweis = document.createElement('p');
+        hinweis.id = 'simulatorMulligan';
+        hinweis.className = 'simulator-mulligan';
+        grid.parentNode.insertBefore(hinweis, grid.nextSibling);
+    }
+    if (hinweis) {
+        const lage = _simMulliganLage(_simulatorHand);
+        const preis = _simulatorPreisBeiseite;
+        hinweis.textContent = (lage === 'mulligan' ? t('draw.mulliganHinweis') + ' ' : '')
+            + (preis ? t('draw.preisHinweis') : '');
+    }
 }
 
 // -------------------------------------------------------

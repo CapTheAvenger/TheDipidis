@@ -2790,7 +2790,10 @@ function updateDecksUI(offenHalten) {
           ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Owned other INT prints: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));"></span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:var(--ink);font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
           : '';
         
-        const collLabel       = ownedCount > 0 ? `${ownedCount}/4` : '+';
+        // FE-48 (03.10.2026, Tiefenanalyse F-16): zwei gleich aussehende „+"
+        // nebeneinander (Deck-Anzahl und Sammlung). Der Sammlungsknopf traegt
+        // jetzt das Kistensymbol, auch solange noch keine Kopie da ist.
+        const collLabel       = ownedCount > 0 ? `\u{1F4E6} ${ownedCount}/4` : '\u{1F4E6}+';
         const collOwnedClass  = isOwned ? ' my-deck-card-btn--coll-owned' : '';
         const collTinyClass   = ownedCount > 0 ? ' my-deck-card-btn--coll-tiny' : '';
         const wishOnClass     = isWishlisted ? ' my-deck-card-btn--wish-on' : '';
@@ -3732,6 +3735,12 @@ function switchProfileTab(tabName) {
   // erst geholt, wenn jemand sie oeffnet — siehe js/ds-masterclass.js.
   if (tabName === 'masterclass' && window.DsMasterclass) {
     window.DsMasterclass.oeffnen();
+  }
+
+  // UI-87 (03.10.2026): gibt es einen gespeicherten Meta-Binder, sagt der
+  // Leerzustand das und bietet ihn zuerst an.
+  if (tabName === 'metabinder' && typeof window.metaBinderLeerzustand === 'function') {
+    window.metaBinderLeerzustand();
   }
 
   // Archetyp-Boxen (FE-13): Liste aus dem Konto holen und zeichnen.

@@ -202,7 +202,7 @@ describe('C7/B13/F19.1 — der Hilfe-Dialog laesst sich verlassen', () => {
 const TITELBLOCK = (() => {
     const a = CORE.indexOf('const menuKnopfEl = document.getElementById');
     assert.ok(a >= 0, 'der Titelblock sieht anders aus als erwartet');
-    const marke = "document.title = 'Pokémon TCG Hub';";
+    const marke = "document.title = 'The Dipidis';";  // UI-79 (03.10.2026): Seitenname
     const e = CORE.indexOf(marke, a);
     assert.ok(e > a, 'der Ersatztitel fehlt');
     let tiefe = 1; // wir stehen im else-Block
@@ -292,7 +292,7 @@ describe('B12/A-F0.2c — Fenstertitel und Abzeichen nennen dieselbe Ansicht', (
         assert.equal(r.abzeichen, ausAbzeichen,
             'js/inline-init.js beschriftet das Abzeichen ueber menu-btn-current-meta und '
             + 'ueberschreibt den hier gesetzten Wert. Zwei Wege, ein Bild, zwei Namen.');
-        assert.equal(r.titel, ausAbzeichen + ' – Pokémon TCG Hub',
+        assert.equal(r.titel, ausAbzeichen + ' – The Dipidis',
             'gemessen stand hier "Overview – Pokémon TCG Hub" neben dem Abzeichen '
             + '"Current Meta (Global)"');
     });
@@ -312,19 +312,19 @@ describe('B12/A-F0.2c — Fenstertitel und Abzeichen nennen dieselbe Ansicht', (
         const eigene = ueberschrift('admin', false);
         assert.ok(eigene, 'admin hat gar keine Ueberschrift mehr in index.html');
         const r = titelSetzen('admin', null);
-        assert.equal(r.titel, eigene.trim() + ' – Pokémon TCG Hub');
+        assert.equal(r.titel, eigene.trim() + ' – The Dipidis');
         assert.equal(r.abzeichen, eigene.trim());
     });
 
     it('ein Reiter mit genau einem Menuepunkt behaelt seine Beschriftung', () => {
         const r = titelSetzen('cards', 'Cards');
         assert.equal(r.abzeichen, abzeichenAusInlineInit('cards'));
-        assert.equal(r.titel, abzeichenAusInlineInit('cards') + ' – Pokémon TCG Hub');
+        assert.equal(r.titel, abzeichenAusInlineInit('cards') + ' – The Dipidis');
     });
 
     it('ohne jeden Anhaltspunkt steht der reine Seitenname da, nicht der alte', () => {
         const r = titelSetzen('gibt-es-nicht', null);
-        assert.equal(r.titel, 'Pokémon TCG Hub',
+        assert.equal(r.titel, 'The Dipidis',
             'den Titel der vorigen Ansicht stehen zu lassen ist die einzige Antwort, die '
             + 'sicher falsch ist — Lesezeichen und Verlauf trugen sonst einen fremden Namen');
     });

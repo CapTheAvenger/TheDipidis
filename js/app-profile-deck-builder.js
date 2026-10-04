@@ -1358,9 +1358,35 @@
 
     let _setSearchTerm = '';
 
+    /* UI-88 (03.10.2026, Tiefenanalyse N-15): 158 Set-Kuerzel-Knoepfe ohne
+       Titel. Der Name kommt aus data/pokemon_sets_mapping.csv (set_code,
+       set_name); fehlt er, bleibt das Kuerzel allein stehen. */
+    let _setNamen = null;
+    let _setNamenLaeuft = null;
+    function setNamenAusCsv(text) {
+        const m = {};
+        String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/).slice(1).forEach(function (z) {
+            const i = z.indexOf(',');
+            if (i <= 0) return;
+            const code = z.slice(0, i).trim().toUpperCase();
+            const name = z.slice(i + 1).trim();
+            if (code && name) m[code] = name;
+        });
+        return m;
+    }
+    function _setNamenLaden() {
+        if (_setNamen || _setNamenLaeuft || typeof fetch !== 'function') return _setNamenLaeuft;
+        _setNamenLaeuft = fetch('data/pokemon_sets_mapping.csv')
+            .then(function (r) { return r.ok ? r.text() : ''; })
+            .then(function (t) { _setNamen = setNamenAusCsv(t); renderSetChips(); })
+            .catch(function () { _setNamen = {}; });
+        return _setNamenLaeuft;
+    }
+
     function renderSetChips() {
         const host = document.getElementById('pdb-set-chips');
         if (!host) return;
+        if (!_setNamen) _setNamenLaden();
         const term = (_setSearchTerm || '').toUpperCase().trim();
         const sets = (_allSetsList.length ? _allSetsList : [])
             .filter(s => !term || s.includes(term));
@@ -1371,7 +1397,7 @@
         host.innerHTML = sets.map(s => `
             <button type="button"
                     class="pdb-chip pdb-set-chip${_activeFilters.set.has(s) ? ' is-active' : ''}"
-                    data-set-code="${escapeHtml(s)}">${escapeHtml(s)}</button>
+                    data-set-code="${escapeHtml(s)}"${_setNamen && _setNamen[s] ? ` title="${escapeHtml(_setNamen[s])}"` : ''}>${escapeHtml(s)}</button>
         `).join('');
         host.querySelectorAll('.pdb-set-chip').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1646,5 +1672,6 @@
         removeOne,
         saveToAccount,
         speichernInsKonto,
+        setNamenAusCsv,
     };
 })();

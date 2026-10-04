@@ -59,7 +59,8 @@ describe('UI-63: Journal-Abgleich mit Namenszusatz', () => {
         const aufrufe = QUELLE.match(/window\.getBattleJournalWinRates\(deck, 1, _journalOptionen\(\)\)/g) || [];
         assert.equal(aufrufe.length, 1);
         assert.match(QUELLE, /function _journalOptionen\(\)[\s\S]{0,200}bekannteDecks: _bekannteDeckNamen\(\)/);
-        assert.equal((QUELLE.match(/_ladeJournal\(/g) || []).length, 3, 'Definition + zwei Aufrufer');
+        // FE-44 (03.10.2026): dritter Aufrufer — der Start mit gemerktem „Mein Deck".
+        assert.equal((QUELLE.match(/_ladeJournal\(/g) || []).length, 4, 'Definition + drei Aufrufer');
     });
 });
 

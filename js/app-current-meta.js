@@ -1003,7 +1003,7 @@
                             <div class="heatmap-details-body">
                                 <p class="heatmap-desc heatmap-desc-kurz">
                                     <span class="heatmap-key heatmap-key-fav"></span> ${t('heatmap.favorable')} (≥ 55 %),
-                                    <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45–54,9 %),
+                                    <span class="heatmap-key heatmap-key-even"></span> ${t('heatmap.even')} (45,1–54,9 %),${/* UI-86 (03.10.2026, Tiefenanalyse F-09): 45 stand in zwei Stufen; die Zelle rechnet <= 45 als schlecht. */ ''}
                                     <span class="heatmap-key heatmap-key-unfav"></span> ${t('heatmap.unfavorable')} (≤ 45 %)
                                     <span class="heatmap-kuerzel"><b title="${escAttr(heatmapQuotenHinweis('ohneUnentschieden'))}" data-quote-konvention="ohneUnentschieden">${t('heatmap.wrLabel')}</b> ${heatmapMitQuote(t('heatmap.legendeWr'), 'ohneUnentschieden')} · <b>${t('heatmap.gamesShort')}</b> ${t('heatmap.legendeM')}</span>
                                 </p>

@@ -297,4 +297,5 @@ index cadec505..e6da5574 100644|
 +    <script src="js/app-side-quest-status.js?v=202610040832" defer></script>|
 +    <script src="js/app-side-quest-resources.js?v=202610040832" defer></script>|
 +    <script src="js/champions-damage.js?v=202610040832" defer></script>|
++    <script src="js/champions-schwaechen.js?v=202610040832" defer></script>|
 +    <script src="js/app-side-quest-usage.js?v=202610040832" defer></script>|

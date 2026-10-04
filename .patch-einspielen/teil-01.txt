@@ -1,0 +1,159 @@
+From 50eebac9a219caf527f9ac551859215731ef9757 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Sun, 4 Oct 2026 15:04:59 +0200|
+Subject: [PATCH] Masterclass: "Feldanteil" heisst "Meta-Anteil" (W5, Hausi|
+ 04.10.2026)|
+|
+Mega-Stalobor-Stueck, Nachzieh-Skript und die zwei Tests, die das Wort|
+woertlich lesen, auf "Meta-Anteil". Neue Zusicherung: das sichtbare|
+Stueck enthaelt kein "Feld"-Wort (Regelfeld ausgenommen), mit Probe.|
+|
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01GJRPmzWKvVLov74GZFLXL7|
+---|
+ masterclass/mega-stalobor.de.html             | Bin 598901 -> 598921 bytes|
+ scripts/masterclass_zahlen_nachziehen.py      |  16 +++----|
+ .../python/test_masterclass_am_wochenlauf.py  |  45 +++++++++++++++---|
+ .../test_masterclass_zahlen_nachziehen.py     |   2 +-|
+ 4 files changed, 47 insertions(+), 16 deletions(-)|
+|
+diff --git a/masterclass/mega-stalobor.de.html b/masterclass/mega-stalobor.de.html|
+index b117d899d16ea4077de5a76e3743661a56a31787..6cbdb4a0068a15c78fa0b5d4620d5a36bcb30991 100644|
+GIT binary patch|
+delta 278|
+zcmex*Or`U<$_8dpHs92eL|w<t9HO^bVeA)DX528gvYH?#jBTl33uo`P2;qQ<i#XcD|
+z*%6+FyfE=|VUyTl?9{k!xSFqNns9ODynZ&An(ZYU;BLsN@<Q0v%m-I<uJadM@7al}|
+zaQA;-wv`8F&c@9%VdBmHC)@o`G6FFZ5HkZY3lOscG23?klkA5tK=o`FpT!Z^2>>J=|
+BVxj;5|
+|
+delta 258|
+zcmeA?uJZMm$_8dpR=3ogl*G-PqPJP0%vVxo+)$>Pnjj~XX{%ogV;-;w;ed)tIoiXR|
+z@t%deP|<5)lh~omytr<dg8ylnFj2j{em1Cr!zCMF7FSkz!K^sh%m-6&xAPZF+uez(|
+zF!ypS-^v3sVe?F=XmirZ_N0@HK+FWh%s|Wn#H>Kfwms=2`{4@^9ow~Mal~~30Kx=d|
+A@&Et;|
+|
+diff --git a/scripts/masterclass_zahlen_nachziehen.py b/scripts/masterclass_zahlen_nachziehen.py|
+index 65d9584e..b9b919e7 100644|
+--- a/scripts/masterclass_zahlen_nachziehen.py|
++++ b/scripts/masterclass_zahlen_nachziehen.py|
+@@ -105,3 +105,3 @@ def _majors_meta():|
+     neben die TEF-PBL-Zeilen, das Skript brach ab, die Masterclass blieb|
+-    stehen und das Tor fand ihre Feldanteile veraltet.|
++    stehen und das Tor fand ihre Meta-Anteile veraltet.|
+ |
+@@ -382,3 +382,3 @@ MU_DETAILS = re.compile(r'<details class="mcl-mu"[\s\S]*?</details>')|
+ def _feldanteile():|
+-    """deck_name -> Feldanteil als Text ("8,54"). Quelle ist die Datei,|
++    """deck_name -> Meta-Anteil als Text ("8,54"). Quelle ist die Datei,|
+     aus der auch die Meta-Seite ihre Anteile nimmt."""|
+@@ -398,3 +398,3 @@ def _feldanteile():|
+ def feld_nachziehen(roh, anteile):|
+-    """Der Feldanteil je Matchup-Zeile. Die zweite Angabe in derselben|
++    """Der Meta-Anteil je Matchup-Zeile. Die zweite Angabe in derselben|
+     Zeile (die Spielzeit) stammt aus Tims Ausarbeitung, nicht aus den|
+@@ -408,7 +408,7 @@ def feld_nachziehen(roh, anteile):|
+             return m.group(0)|
+-        t = re.sub(r"^\s*[\d.,]+\s*%\s*Feldanteil", "%s %% Feldanteil" % neu_anteil, text)|
++        t = re.sub(r"^\s*[\d.,]+\s*%\s*Meta-Anteil", "%s %% Meta-Anteil" % neu_anteil, text)|
+         if t == text:|
+             return m.group(0)|
+-        aenderungen.append("%s / Feldanteil: %s -> %s %%"|
+-                           % (html.unescape(en), text.split(" Feldanteil")[0], neu_anteil))|
++        aenderungen.append("%s / Meta-Anteil: %s -> %s %%"|
++                           % (html.unescape(en), text.split(" Meta-Anteil")[0], neu_anteil))|
+         return vorn + t + hinten|
+@@ -419,3 +419,3 @@ def feld_nachziehen(roh, anteile):|
+ def sortieren(roh, anteile):|
+-    """"Sortiert nach Feldanteil" steht als Versprechen ueber der Liste.|
++    """"Sortiert nach Meta-Anteil" steht als Versprechen ueber der Liste.|
+     Aendern sich die Anteile, muss die Reihenfolge mit — sonst ist der|
+@@ -449,3 +449,3 @@ def sortieren(roh, anteile):|
+     return MU_DETAILS.sub(lambda _m: next(kette), roh), [|
+-        "Reihenfolge nach Feldanteil: " + "; ".join(verschoben[:4])|
++        "Reihenfolge nach Meta-Anteil: " + "; ".join(verschoben[:4])|
+         + (" …" if len(verschoben) > 4 else "")]|
+diff --git a/tests/python/test_masterclass_am_wochenlauf.py b/tests/python/test_masterclass_am_wochenlauf.py|
+index 24a18fce..3839e667 100644|
+--- a/tests/python/test_masterclass_am_wochenlauf.py|
++++ b/tests/python/test_masterclass_am_wochenlauf.py|
+@@ -13,3 +13,3 @@ Drei Dinge muessen dafuer stimmen, und alle drei stehen hier:|
+   2. Die Zahlen, die dabei nachgezogen werden, stehen im Stueck so da|
+-     wie in den Dateien: Feldanteile und die Reihenfolge, die die|
++     wie in den Dateien: Meta-Anteile und die Reihenfolge, die die|
+      Einleitung verspricht.|
+@@ -95,3 +95,3 @@ def test_der_scraper_schreibt_die_listendatei():|
+ |
+-# ------------------------------------------- 2. Feldanteile und Reihenfolge|
++# ------------------------------------------- 2. Meta-Anteile und Reihenfolge|
+ |
+@@ -109,3 +109,3 @@ def _anteile():|
+ def _zeilen():|
+-    """(englischer Name, Feldanteil als Text) je Matchup-Zeile."""|
++    """(englischer Name, Meta-Anteil als Text) je Matchup-Zeile."""|
+     return [(html.unescape(a).strip(), b) for a, b in re.findall(|
+@@ -123,3 +123,3 @@ def test_die_feldanteile_stehen_so_da_wie_in_der_datei():|
+     assert falsch == [], (|
+-        "diese Feldanteile stehen anders im Stueck als in "|
++        "diese Meta-Anteile stehen anders im Stueck als in "|
+         "data/limitless_online_decks.csv: " + str(falsch))|
+@@ -133,3 +133,3 @@ def test_die_feldanteile_stehen_so_da_wie_in_der_datei():|
+ def test_die_reihenfolge_haelt_was_die_einleitung_verspricht():|
+-    """Ueber der Liste steht "Sortiert nach Feldanteil". Zieht der Lauf|
++    """Ueber der Liste steht "Sortiert nach Meta-Anteil". Zieht der Lauf|
+     die Anteile nach, ohne die Reihenfolge mitzuziehen, wird der Satz|
+@@ -137,3 +137,3 @@ def test_die_reihenfolge_haelt_was_die_einleitung_verspricht():|
+     roh = _stueck()|
+-    assert "Sortiert nach Feldanteil" in roh, "das Versprechen steht nicht mehr da"|
++    assert "Sortiert nach Meta-Anteil" in roh, "das Versprechen steht nicht mehr da"|
+     werte = [float(b.replace(",", ".")) for _a, b in _zeilen()]|
+@@ -141,3 +141,3 @@ def test_die_reihenfolge_haelt_was_die_einleitung_verspricht():|
+     absteigend = all(werte[i] >= werte[i + 1] for i in range(len(werte) - 1))|
+-    assert absteigend, "die Matchups stehen nicht nach Feldanteil sortiert: %s" % werte|
++    assert absteigend, "die Matchups stehen nicht nach Meta-Anteil sortiert: %s" % werte|
+ |
+@@ -185 +185,32 @@ def test_die_grundenergie_bleibt_die_billige():|
+     assert d.rang("Secret Rare", "SFA") > d.rang("Double Rare", "PBL")|
++|
++|
++# ------------------------------------------- W5: nie "Feld", immer "Meta"|
++def _sichtbarer_text(roh):|
++    """Nur der Text, den Leser sehen: ohne Tags und ohne <code>-Pfade."""|
++    roh = re.sub(r"<code>.*?</code>", "", roh, flags=re.S)|
++    return html.unescape(re.sub(r"<[^>]+>", " ", roh))|
++|
++|
++def _feld_woerter(text):|
++    """"Feld" als Teil eines Wortes, ausser "Regelfeld" (Pokemon-Begriff,|
++    die Regelbox der Karte) — die Anordnung W5 (03.10.2026) meint die|
++    Zusammensetzung der Teilnehmer."""|
++    ohne = re.sub(r"[Rr]egelfeld(?:er)?", "", text)|
++    return re.findall(r"\w*[Ff]eld\w*", ohne)|
++|
++|
++def test_das_stueck_sagt_meta_statt_feld():|
++    """Hausi, 04.10.2026: "Feldanteil" heisst im Stueck "Meta-Anteil"."""|
++    with open(STUECK, encoding="utf-8") as f:|
++        roh = f.read()|
++    assert _feld_woerter(_sichtbarer_text(roh)) == [], (|
++        "das Stueck sagt noch \"Feld\": "|
++        + str(sorted(set(_feld_woerter(_sichtbarer_text(roh))))))|
++|
++|
++def test_feld_probe_schlaegt_an():|
++    """Verfaelschungsprobe: die Pruefung muss ein "Feldanteil" finden und|
++    "Regelfeld" durchlassen."""|
++    assert _feld_woerter("10 % Feldanteil") == ["Feldanteil"]|
++    assert _feld_woerter("das Regelfeld und die Regelfelder") == []|
+diff --git a/tests/python/test_masterclass_zahlen_nachziehen.py b/tests/python/test_masterclass_zahlen_nachziehen.py|
+index 72103ab7..c910efda 100644|
+--- a/tests/python/test_masterclass_zahlen_nachziehen.py|
++++ b/tests/python/test_masterclass_zahlen_nachziehen.py|
+@@ -230,3 +230,3 @@ def test_zweimal_nachziehen_aendert_nichts_mehr():|
+ # Der Erzeuger verlangte "genau ein Format" und brach ab, das Stueck blieb|
+-# stehen, und das Tor fand seine Feldanteile veraltet — der ganze|
++# stehen, und das Tor fand seine Meta-Anteile veraltet — der ganze|
+ # Wochenlauf wurde nicht gepusht. Beide Zusicherungen fuehren die|
+-- |
+2.43.0|
+|
+|

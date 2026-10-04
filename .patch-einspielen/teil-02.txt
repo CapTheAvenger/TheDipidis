@@ -1,0 +1,437 @@
+-    <script src="js/app-side-quest-resources.js?v=202610040038" defer></script>|
+-    <script src="js/champions-damage.js?v=202610040038" defer></script>|
+-    <script src="js/champions-schwaechen.js?v=202610040038" defer></script>|
+-    <script src="js/app-side-quest-usage.js?v=202610040038" defer></script>|
+-    <script src="js/app-side-quest-matchups.js?v=202610040038" defer></script>|
++    <script src="js/champions-set.js?v=202610040242" defer></script>|
++    <script src="js/champions-names.js?v=202610040242" defer></script>|
++    <script src="js/app-side-quest-builder.js?v=202610040242" defer></script>|
++    <script src="js/app-side-quest-status.js?v=202610040242" defer></script>|
++    <script src="js/app-side-quest-resources.js?v=202610040242" defer></script>|
++    <script src="js/champions-damage.js?v=202610040242" defer></script>|
++    <script src="js/champions-schwaechen.js?v=202610040242" defer></script>|
++    <script src="js/app-side-quest-usage.js?v=202610040242" defer></script>|
++    <script src="js/app-side-quest-matchups.js?v=202610040242" defer></script>|
+     <!-- Kennzeichnung "Kartentext auf Englisch". MUSS vor jeder Datei stehen,|
+@@ -4254,7 +4254,7 @@|
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202610040038" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202610040038" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202610040038" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202610040038" defer></script>|
+-    <script src="js/ds-nav.js?v=202610040038" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202610040242" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202610040242" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202610040242" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202610040242" defer></script>|
++    <script src="js/ds-nav.js?v=202610040242" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4264,6 +4264,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202610040038" defer></script>|
+-    <script src="js/ds-sections.js?v=202610040038" defer></script>|
+-    <script src="js/ds-filter.js?v=202610040038" defer></script>|
+-    <script src="js/ds-share.js?v=202610040038" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202610040242" defer></script>|
++    <script src="js/ds-sections.js?v=202610040242" defer></script>|
++    <script src="js/ds-filter.js?v=202610040242" defer></script>|
++    <script src="js/ds-share.js?v=202610040242" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4272,5 +4272,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202610040038" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202610040038" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202610040038" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202610040242" defer></script>|
++    <script src="js/ds-tutorial.js?v=202610040242" defer></script>|
++    <script src="js/ds-masterclass.js?v=202610040242" defer></script>|
+ |
+diff --git a/js/app-deck-builder.js b/js/app-deck-builder.js|
+index cb3071d3..baf4a437 100644|
+--- a/js/app-deck-builder.js|
++++ b/js/app-deck-builder.js|
+@@ -38,4 +38,17 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}|
+    (window.__deckZuletztGespeichert setzt saveCurrentDeckToProfile). */|
++/* F2-04 (04.10.2026, Nachpruefung): die Warnung blieb nach dem Speichern|
++   an, weil der Vergleich an der Reihenfolge der Schluessel und am geteilten|
++   Objekt (F2-01) hing. Verglichen wird jetzt ein Fingerabdruck (sortierte|
++   Schluessel, nur Anzahl > 0) — gegen den zuletzt gespeicherten Stand UND|
++   gegen jedes Deck in Meine Decks. */|
++function _deckFingerabdruck(deck) {|
++    if (!deck || typeof deck !== 'object') return '';|
++    return Object.keys(deck).filter(function (k) { return (Number(deck[k]) || 0) > 0; })|
++        .sort().map(function (k) { return k + '=' + Number(deck[k]); }).join('|');|
++}|
++window._deckFingerabdruck = _deckFingerabdruck;|
+ function _ungespeicherteDecks(w) {|
+     const gespeichert = (w && w.__deckZuletztGespeichert) || {};|
++    const meine = new Set(((w && Array.isArray(w.userDecks)) ? w.userDecks : [])|
++        .map(function (d) { return _deckFingerabdruck(d && d.cards); }));|
+     const quellen = [['cityLeague', 'cityLeagueDeck'], ['currentMeta', 'currentMetaDeck'], ['pastMeta', 'pastMetaDeck']];|
+@@ -46,3 +59,5 @@ function _ungespeicherteDecks(w) {|
+         if (karten <= 0) return false;|
+-        return gespeichert[q[0]] !== JSON.stringify(deck);|
++        const abdruck = _deckFingerabdruck(deck);|
++        if (meine.has(abdruck)) return false;|
++        return gespeichert[q[0]] !== abdruck;|
+     }).map(function (q) { return q[0]; });|
+diff --git a/js/app-profile-deck-builder.js b/js/app-profile-deck-builder.js|
+index 46fc4fd7..0734aa7e 100644|
+--- a/js/app-profile-deck-builder.js|
++++ b/js/app-profile-deck-builder.js|
+@@ -65,3 +65,4 @@|
+         de: {|
+-            heading:       'Deck Builder',|
++            // N2-09 (04.10.2026): wie Menue und Profil-Reiter (UI-79).|
++            heading:       'Deck bauen',|
+             subtitle:      'Bau dir aus allen Karten der Datenbank ein eigenes Deck — Suche in Deutsch, Englisch, Set oder Kartentext.',|
+@@ -122,3 +123,3 @@|
+         en: {|
+-            heading:       'Deck Builder',|
++            heading:       'Build a deck',|
+             subtitle:      'Build a deck from every card in the database — search by German name, English name, set code or card text.',|
+diff --git a/js/ds-datenstand.js b/js/ds-datenstand.js|
+index c3bea7db..163e2674 100644|
+--- a/js/ds-datenstand.js|
++++ b/js/ds-datenstand.js|
+@@ -147,2 +147,12 @@|
+ |
++    /* D2-11 (04.10.2026, Nachpruefung): der Titel sagte „vor 1 Tagen" fuer|
++       1,8 Tage (abgerundet, falsche Einzahl). Gerundet, Einzahl richtig. */|
++    function tageText(tage) {|
++        const n = Math.round(Number(tage) || 0);|
++        if (n <= 0) return de() ? 'heute' : 'today';|
++        if (n === 1) return de() ? 'vor 1 Tag' : '1 day ago';|
++        return de() ? ('vor ' + n + ' Tagen') : (n + ' days ago');|
++    }|
++    window.__dsTageText = tageText;|
++|
+     /** Wie alt ist der Stand in Tagen? null, wenn unbekannt. */|
+@@ -215,6 +225,6 @@|
+                             ? 'Juengster Eintrag in ' + datei + ': ' + alsText(dInhalt)|
+-                              + ' — vor ' + Math.floor(tage) + ' Tagen.'|
++                              + ' — ' + tageText(tage) + '.'|
+                               + ' Zuletzt nachgesehen am ' + alsText(dDatei) + '.'|
+                             : 'newest entry in ' + datei + ': ' + alsText(dInhalt)|
+-                              + ' — ' + Math.floor(tage) + ' days ago.'|
++                              + ' — ' + tageText(tage) + '.'|
+                               + ' Last checked ' + alsText(dDatei) + '.';|
+@@ -222,6 +232,6 @@|
+                         titel = de()|
+-                            ? 'Letzte Aenderung von ' + datei|
+-                              + (tage !== null ? ' — vor ' + Math.floor(tage) + ' Tagen' : '')|
++                            ? 'Letzte Änderung von ' + datei|
++                              + (tage !== null ? ' — ' + tageText(tage) : '')|
+                             : 'last change to ' + datei|
+-                              + (tage !== null ? ' — ' + Math.floor(tage) + ' days ago' : '');|
++                              + (tage !== null ? ' — ' + tageText(tage) : '');|
+                     }|
+diff --git a/js/firebase-collection.js b/js/firebase-collection.js|
+index 9917cccd..a7b6113b 100644|
+--- a/js/firebase-collection.js|
++++ b/js/firebase-collection.js|
+@@ -612,2 +612,7 @@ async function saveCurrentDeckToProfile(source) {|
+   const nowMs = Date.now();|
++  // F2-01 (04.10.2026, Nachpruefung): gespeichert wird eine KOPIE. Vorher|
++  // war userDecks[i].cards dasselbe Objekt wie der Baukasten — jedes|
++  // Weiterprobieren in der Deck-Analyse aenderte still das gespeicherte Deck|
++  // (und die naechste Bearbeitung in Meine Decks schrieb es auf den Server).|
++  const gespeicherteKarten = Object.assign({}, deck);|
+   const deckData = {|
+@@ -616,3 +621,3 @@ async function saveCurrentDeckToProfile(source) {|
+     archetype: archetype || 'Custom',|
+-    cards: deck, // Exact prints: "CardName (SET NUMBER)" format|
++    cards: gespeicherteKarten, // Exact prints: "CardName (SET NUMBER)" format|
+     totalCards: totalCards,|
+@@ -631,3 +636,4 @@ async function saveCurrentDeckToProfile(source) {|
+   window.__deckZuletztGespeichert = window.__deckZuletztGespeichert || {};|
+-  window.__deckZuletztGespeichert[source] = JSON.stringify(deck);|
++  window.__deckZuletztGespeichert[source] = (typeof window._deckFingerabdruck === 'function')|
++    ? window._deckFingerabdruck(gespeicherteKarten) : JSON.stringify(gespeicherteKarten);|
+ |
+@@ -645,3 +651,3 @@ async function saveCurrentDeckToProfile(source) {|
+     archetype: archetype || 'Custom',|
+-    cards: deck,|
++    cards: Object.assign({}, gespeicherteKarten),|
+     totalCards: totalCards,|
+diff --git a/js/i18n.js b/js/i18n.js|
+index db03ef83..e5dcdf3c 100644|
+--- a/js/i18n.js|
++++ b/js/i18n.js|
+@@ -6008,2 +6008,12 @@ function updateTranslationsInDOM() {|
+   document.documentElement.style.setProperty('--close-tooltip', `'${t('btn.close')}'`);|
++|
++  // F2-02 (04.10.2026, Nachpruefung): vier Beschriftungen tragen in der|
++  // Uebersetzung den Platzhalter {quote}; die Module fuellen ihn nur nach|
++  // 'languageChanged'. Andere Aufrufer dieser Funktion (z. B. die|
++  // Kartendatenbank) liessen „{QUOTE}“ sichtbar stehen. Darum hier nachfuellen.|
++  ['cmaQuotenNamenImDom', 'antiTechQuotenNamenImDom'].forEach(function (fn) {|
++    if (typeof window !== 'undefined' && typeof window[fn] === 'function') {|
++      try { window[fn](); } catch (_) { /* Beschriftung bleibt, Seite laeuft weiter */ }|
++    }|
++  });|
+ }|
+diff --git a/service-worker.js b/service-worker.js|
+index b2562de1..0b2933b1 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202610040038|
++// v202610040242|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202610040038';|
++const CACHE_NAME = 'tcg-analysis-v202610040242';|
+ |
+diff --git a/tests/unit/test-f2-gespeichert-ist-gespeichert.js b/tests/unit/test-f2-gespeichert-ist-gespeichert.js|
+new file mode 100644|
+index 00000000..be6a5a55|
+--- /dev/null|
++++ b/tests/unit/test-f2-gespeichert-ist-gespeichert.js|
+@@ -0,0 +1,94 @@|
++/**|
++ * F2-01 / F2-04 (04.10.2026, Nachpruefung der Tiefenanalyse):|
++ * - F2-01: „Als mein Deck speichern" legte das Baukasten-Objekt selbst in|
++ *   Meine Decks ab (userDecks[i].cards === window.currentMetaDeck). Jede|
++ *   spaetere Aenderung im Baukasten aenderte still das gespeicherte Deck.|
++ * - F2-04: danach blieb die Warnung beim Verlassen an, obwohl der Baukasten|
++ *   genau einem gespeicherten Deck entsprach.|
++ *|
++ * AUSGEFUEHRT: saveCurrentDeckToProfile laeuft mit Attrappen fuer Firebase|
++ * und Dialoge; _ungespeicherteDecks laeuft auf demselben Fenster.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const W = path.join(__dirname, '..', '..');|
++const ohne = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++const FC = ohne(fs.readFileSync(path.join(W, 'js', 'firebase-collection.js'), 'utf8'));|
++const DB = ohne(fs.readFileSync(path.join(W, 'js', 'app-deck-builder.js'), 'utf8'));|
++|
++function block(src, start, ende) {|
++  const a = src.indexOf(start);|
++  const b = src.indexOf(ende, a);|
++  assert.ok(a > -1 && b > a, 'Block fehlt: ' + start);|
++  return src.slice(a, b + ende.length);|
++}|
++|
++function aufbau() {|
++  const geschrieben = [];|
++  const w = {|
++    currentMetaDeck: { 'Dreepy (TWM 128)': 4, 'Ultra Ball (SVI 196)': 4 },|
++    currentMetaArchetype: 'Dragapult ex',|
++    userDecks: [],|
++    addEventListener() {},|
++  };|
++  const umgebung = {|
++    window: w,|
++    auth: { currentUser: { uid: 'ZZ-TEST' } },|
++    db: { collection: () => ({ doc: () => ({ collection: () => ({ doc: (id) => (id ? { set: (p) => { geschrieben.push(JSON.parse(JSON.stringify(p))); return Promise.resolve(); } } : { id: 'neu1' }) }) }) }) },|
++    firebase: { firestore: { FieldValue: { serverTimestamp: () => 'ts' } } },|
++    showNotification() {}, showAuthModal() {}, updateDecksUI() {}, _writeDeckBackup() {},|
++    fcText: (k, d) => d, t: (k) => k, confirm: () => true,|
++    showInputModal: async () => 'ZZ-TEST Deck',|
++    chooseDeckFolderWithCreate: async () => '',|
++  };|
++  const namen = Object.keys(umgebung);|
++  // eslint-disable-next-line no-new-func|
++  const speichern = Function(...namen, block(FC, 'async function saveCurrentDeckToProfile(', '\n}\n') + '\nreturn saveCurrentDeckToProfile;')(...namen.map((n) => umgebung[n]));|
++  // eslint-disable-next-line no-new-func|
++  const ungespeichert = Function('window', block(DB, 'function _deckFingerabdruck(', 'window._ungespeicherteDecks = _ungespeicherteDecks;') + '\nreturn _ungespeicherteDecks;')(w);|
++  return { w, speichern, ungespeichert, geschrieben };|
++}|
++|
++describe('F2-01: gespeichert ist gespeichert', () => {|
++  it('Aenderungen im Baukasten nach dem Speichern aendern das gespeicherte Deck nicht', async () => {|
++    const s = aufbau();|
++    await s.speichern('currentMeta');|
++    assert.equal(s.w.userDecks.length, 1);|
++    assert.notEqual(s.w.userDecks[0].cards, s.w.currentMetaDeck, 'gespeichertes Deck teilt das Objekt mit dem Baukasten');|
++    s.w.currentMetaDeck['Meowth ex (POR 59)'] = 1;|
++    s.w.currentMetaDeck['Dreepy (TWM 128)'] = 3;|
++    assert.deepEqual(s.w.userDecks[0].cards, { 'Dreepy (TWM 128)': 4, 'Ultra Ball (SVI 196)': 4 });|
++    assert.deepEqual(s.geschrieben[0].cards, { 'Dreepy (TWM 128)': 4, 'Ultra Ball (SVI 196)': 4 });|
++  });|
++  it('Aenderungen in Meine Decks aendern den Baukasten nicht', async () => {|
++    const s = aufbau();|
++    await s.speichern('currentMeta');|
++    delete s.w.userDecks[0].cards['Ultra Ball (SVI 196)'];|
++    assert.equal(s.w.currentMetaDeck['Ultra Ball (SVI 196)'], 4);|
++  });|
++});|
++|
++describe('F2-04: nach dem Speichern keine Warnung beim Verlassen', () => {|
++  it('direkt nach dem Speichern: keine Warnung', async () => {|
++    const s = aufbau();|
++    assert.deepEqual(s.ungespeichert(s.w), ['currentMeta']);|
++    await s.speichern('currentMeta');|
++    assert.deepEqual(s.ungespeichert(s.w), []);|
++  });|
++  it('gleiche Karten in anderer Reihenfolge: keine Warnung', async () => {|
++    const s = aufbau();|
++    await s.speichern('currentMeta');|
++    s.w.currentMetaDeck = { 'Ultra Ball (SVI 196)': 4, 'Dreepy (TWM 128)': 4, 'Leer (X 1)': 0 };|
++    assert.deepEqual(s.ungespeichert(s.w), []);|
++  });|
++  it('Baukasten entspricht einem Deck in Meine Decks: keine Warnung — danach geaendert: Warnung', () => {|
++    const s = aufbau();|
++    s.w.userDecks = [{ cards: { 'Ultra Ball (SVI 196)': 4, 'Dreepy (TWM 128)': 4 } }];|
++    assert.deepEqual(s.ungespeichert(s.w), []);|
++    s.w.currentMetaDeck['Dreepy (TWM 128)'] = 3;|
++    assert.deepEqual(s.ungespeichert(s.w), ['currentMeta']);|
++  });|
++});|
+diff --git a/tests/unit/test-f2-quote-platzhalter.js b/tests/unit/test-f2-quote-platzhalter.js|
+new file mode 100644|
+index 00000000..9bb534e7|
+--- /dev/null|
++++ b/tests/unit/test-f2-quote-platzhalter.js|
+@@ -0,0 +1,54 @@|
++/**|
++ * F2-02 (04.10.2026, Nachpruefung der Tiefenanalyse): nach einem Besuch der|
++ * Kartendatenbank stand in der Deck-Analyse „{QUOTE} — LIMITLESS ONLINE|
++ * TURNIERE". js/app-cards-db.js ruft updateTranslationsInDOM() ohne|
++ * 'languageChanged' auf; die Module fuellten {quote} nur nach dem Ereignis.|
++ *|
++ * AUSGEFUEHRT: die echte updateTranslationsInDOM laeuft auf einem DOM-Stub;|
++ * die Fuellfunktionen der Module sind am Fenster angemeldet.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const ohne = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++const I18N = ohne(fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'i18n.js'), 'utf8'));|
++|
++function element(key) {|
++  return {|
++    key, children: [], childNodes: [], innerHTML: '', textContent: '',|
++    getAttribute: (a) => (a === 'data-i18n' ? key : null),|
++    hasAttribute: () => false,|
++  };|
++}|
++|
++function lauf(mitFuellern) {|
++  const a = I18N.indexOf('function updateTranslationsInDOM(');|
++  const b = I18N.indexOf('\n}\n', a);|
++  assert.ok(a > -1 && b > a, 'updateTranslationsInDOM fehlt');|
++  const els = [element('stats.totalWinrate'), element('antiTech.legendWr')];|
++  const document = {|
++    querySelectorAll: (sel) => (sel === '[data-i18n]' ? els : []),|
++    getElementById: () => null,|
++    documentElement: { style: { setProperty() {} } },|
++  };|
++  const window = {};|
++  const fuellen = () => els.forEach((el) => { el.innerHTML = el.innerHTML.replace(/\{quote\}/g, 'Siegquote'); });|
++  if (mitFuellern) { window.cmaQuotenNamenImDom = fuellen; window.antiTechQuotenNamenImDom = fuellen; }|
++  const t = (k) => (k === 'stats.totalWinrate' ? '{quote} — Limitless Online Turniere' : k === 'antiTech.legendWr' ? 'WR = deine {quote}' : k);|
++  // eslint-disable-next-line no-new-func|
++  Function('document', 'window', 't', 'Node', 'currentLang', I18N.slice(a, b + 2) + '\nupdateTranslationsInDOM();')(document, window, t, { TEXT_NODE: 3 }, 'de');|
++  return els;|
++}|
++|
++describe('F2-02: kein roher {quote}-Platzhalter nach updateTranslationsInDOM', () => {|
++  it('die Fuellfunktionen der Module laufen am Ende mit', () => {|
++    const els = lauf(true);|
++    els.forEach((el) => assert.ok(!/\{quote\}/i.test(el.innerHTML), 'Platzhalter sichtbar: ' + el.innerHTML));|
++    assert.equal(els[0].innerHTML, 'Siegquote — Limitless Online Turniere');|
++  });|
++  it('ohne angemeldete Module laeuft die Funktion fehlerfrei durch', () => {|
++    assert.doesNotThrow(() => lauf(false));|
++  });|
++});|
+diff --git a/tests/unit/test-r8-politur.js b/tests/unit/test-r8-politur.js|
+new file mode 100644|
+index 00000000..292b94cc|
+--- /dev/null|
++++ b/tests/unit/test-r8-politur.js|
+@@ -0,0 +1,50 @@|
++/**|
++ * Rutsch R8 (04.10.2026, Nachpruefung der Tiefenanalyse), Politur:|
++ * - D2-11: Datenstand-Titel „vor 1 Tagen" (1,8 Tage abgerundet) und|
++ *   „Aenderung" ohne Umlaut. AUSGEFUEHRT: tageText aus js/ds-datenstand.js.|
++ * - N2-09: Profil-Builder hiess „Deck Builder", Menue und Reiter „Deck bauen".|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const W = path.join(__dirname, '..', '..');|
++const ohne = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');|
++const DS = ohne(fs.readFileSync(path.join(W, 'js', 'ds-datenstand.js'), 'utf8'));|
++const PDB = ohne(fs.readFileSync(path.join(W, 'js', 'app-profile-deck-builder.js'), 'utf8'));|
++|
++function tageText(sprache) {|
++  const a = DS.indexOf('function tageText(');|
++  const b = DS.indexOf('\n    }\n', a);|
++  assert.ok(a > -1 && b > a, 'tageText fehlt');|
++  // eslint-disable-next-line no-new-func|
++  return Function('de', DS.slice(a, b + 6) + '\nreturn tageText;')(() => sprache === 'de');|
++}|
++|
++describe('D2-11: Alter des Datenstands im Titel', () => {|
++  it('deutsch: gerundet, Einzahl richtig', () => {|
++    const f = tageText('de');|
++    assert.equal(f(0.2), 'heute');|
++    assert.equal(f(1.2), 'vor 1 Tag');|
++    assert.equal(f(1.8), 'vor 2 Tagen');|
++    assert.equal(f(5), 'vor 5 Tagen');|
++  });|
++  it('englisch', () => {|
++    const f = tageText('en');|
++    assert.equal(f(1), '1 day ago');|
++    assert.equal(f(3.4), '3 days ago');|
++  });|
++  it('kein „Aenderung" und kein „Tagen" mehr fest im Titel', () => {|
++    assert.ok(!/Letzte Aenderung/.test(DS));|
++    assert.ok(!/Math\.floor\(tage\) \+ ' Tagen/.test(DS));|
++  });|
++});|
++|
++describe('N2-09: Profil-Builder heisst wie Menue und Reiter', () => {|
++  it('deutsche Ueberschrift „Deck bauen", englische „Build a deck"', () => {|
++    const de = PDB.slice(PDB.indexOf('de: {'), PDB.indexOf('en: {'));|
++    assert.match(de, /heading:\s*'Deck bauen'/);|
++    assert.match(PDB.slice(PDB.indexOf('en: {')), /heading:\s*'Build a deck'/);|
++  });|
++});|
+diff --git a/tests/unit/test-ui82-warnung-ungespeichert.js b/tests/unit/test-ui82-warnung-ungespeichert.js|
+index 84f089f3..46d4ce70 100644|
+--- a/tests/unit/test-ui82-warnung-ungespeichert.js|
++++ b/tests/unit/test-ui82-warnung-ungespeichert.js|
+@@ -17,3 +17,4 @@ const DB = ohne(fs.readFileSync(path.join(W, 'js', 'app-deck-builder.js'), 'utf8|
+ function laden(w) {|
+-  const a = DB.indexOf('function _ungespeicherteDecks(');|
++  // F2-04 (04.10.2026): der Fingerabdruck steht direkt davor und gehoert dazu.|
++  const a = DB.indexOf('function _deckFingerabdruck(');|
+   const b = DB.indexOf('\n}\n', DB.indexOf("addEventListener('beforeunload'", a));|
+@@ -47,3 +48,3 @@ describe('UI-82: Warnung vor ungespeichertem Deck', () => {|
+     w.currentMetaDeck = { 'Dreepy (TWM 128)': 4 };|
+-    w.__deckZuletztGespeichert = { currentMeta: JSON.stringify(w.currentMetaDeck) };|
++    w.__deckZuletztGespeichert = { currentMeta: w._deckFingerabdruck(w.currentMetaDeck) };|
+     assert.deepEqual(f(w), []);|
+@@ -54,3 +55,4 @@ describe('UI-82: Warnung vor ungespeichertem Deck', () => {|
+     const q = ohne(fs.readFileSync(path.join(W, 'js', 'firebase-collection.js'), 'utf8'));|
+-    assert.match(q, /window\.__deckZuletztGespeichert\[source\]\s*=\s*JSON\.stringify\(deck\)/);|
++    // F2-04 (04.10.2026): Vergleichsstand ist der Fingerabdruck der gespeicherten Kopie.|
++    assert.match(q, /window\.__deckZuletztGespeichert\[source\]\s*=\s*\(typeof window\._deckFingerabdruck === 'function'\)\s*\?\s*window\._deckFingerabdruck\(gespeicherteKarten\)/);|
+   });|
+diff --git a/version.json b/version.json|
+index a6cf77b6..dbd6416d 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610040038"}|
+\ No newline at end of file|
++{"version":"202610040242"}|
+\ No newline at end of file|
+-- |
+2.34.1|
+|
+|

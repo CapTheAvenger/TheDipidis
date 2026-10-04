@@ -711,8 +711,9 @@ def run():
         })()""")
 
         if 'menu.cityLeague' in rt_checks:
-            check("RT.2 menu.cityLeague = 'City League Meta'",
-                  rt_checks['menu.cityLeague'] == 'City League Meta',
+            # UI-79 (03.10.2026, Entscheidung Hausi): einheitlicher Name.
+            check("RT.2 menu.cityLeague = 'Japan (City League)'",
+                  rt_checks['menu.cityLeague'] == 'Japan (City League)',
                   f"got '{rt_checks['menu.cityLeague']}'")
         if 'menu.cardDatabase' in rt_checks:
             check("RT.3 menu.cardDatabase = 'Card Database'",

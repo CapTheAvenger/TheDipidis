@@ -13776,9 +13776,10 @@ window.MetaCall = (function () {
       personals.push(_intelStatTile(
         t('mc.intelJournal'),
         `${jStats.wins}–${jStats.losses}–${jStats.ties}`,
-        `${jStats.winRate} %`,
+        jStats.winRate == null ? '\u2014' : `${jStats.winRate} %`,
         'mc-intel-tile-personal',
-        _titelPersoenlich
+        // DA-47: das Journal rechnet seit 05.10.2026 S / (S + N).
+        _wrKonventionsTitel('ohneUnentschieden')
       ));
     }
     const rawTgShare = _findByNormalized(_tgFieldShares, deckName) || 0;

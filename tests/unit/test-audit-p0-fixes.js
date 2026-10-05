@@ -237,7 +237,11 @@ pruefe('Journal: zeigt bei 0 Spielen "—" statt "0 %"', () => {
     // gespielte Partien nicht mehr dasselbe. Die Zusage bleibt dieselbe:
     // ohne gespielte Partie gibt es keine Quote, sondern einen Strich.
     const bj = read('js/battle-journal.js');
-    assert.ok(/const winRateLabel = gespielt\.length > 0 \?[^:]*: '—'/.test(bj),
+    // DA-47 (05.10.2026): die Quote kommt aus bjQuoteText, das ohne Sieg
+    // und Niederlage einen Strich liefert (ausgefuehrt in
+    // test-da47-journal-quote.js).
+    assert.ok(/const winRateLabel = bjQuoteText\(totalW, totalL\)/.test(bj)
+        && /return q == null \? '\\u2014'/.test(bj),
         '0/0 wird weiterhin als 0 % dargestellt');
 });
 

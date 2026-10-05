@@ -48,6 +48,7 @@ const translations = {
     'header.cardsShort':      'Database',
     'header.theme':            'Light / dark mode',
     'header.myDecks':         'My Decks',
+    'header.myDeck':          'Pick my deck — used by Meta Call, journal and deck analysis',
     'header.wishlist':        'Wishlist',
     'header.switchLanguageTitle':'Switch to German',
 
@@ -2972,6 +2973,7 @@ const translations = {
     'header.cardsShort':      'Datenbank',
     'header.theme':            'Heller / dunkler Modus',
     'header.myDecks':         'Meine Decks',
+    'header.myDeck':          'Mein Deck wählen — gilt für Meta Call, Journal und Deck-Analyse',
     'header.wishlist':        'Wunschliste',
     'header.switchLanguageTitle':'Auf Englisch umschalten',
 

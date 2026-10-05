@@ -1318,6 +1318,11 @@
         // Always start with a blank form
         resetBattleJournalForm();
         formatVorbelegen(document.getElementById('battleJournalMeta'));
+        // UI-110: das eigene Deck mit „Mein Deck" aus dem Kopf vorbelegen.
+        if (els.ownDeckValue && !els.ownDeckValue.value && window.MeinDeck) {
+            const _md = window.MeinDeck.lesen();
+            if (_md) els.ownDeckValue.value = _md;
+        }
         // FE-61: der Rundenhinweis gehoert nur zur Folgerunde.
         const _rh = document.getElementById('battleJournalRundenHinweis');
         if (_rh) _rh.textContent = '';

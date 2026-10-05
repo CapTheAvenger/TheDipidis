@@ -675,6 +675,9 @@
                         </svg>
                     </button>
                     <button id="langToggleBtn" onclick="switchLanguage(getLang() === 'en' ? 'de' : 'en')" class="lang-toggle-btn" title="Auf Englisch umschalten" data-i18n-title="header.switchLanguageTitle">EN</button>
+                    <!-- UI-110 (IA Etappe 1, 05.10.2026): „Mein Deck" app-weit — gilt fuer
+                         Meta Call, Journal-Vorbelegung und Deck-Analyse (js/mein-deck.js). -->
+                    <button id="meinDeckKnopf" class="mein-deck-knopf is-leer" type="button" onclick="MeinDeck.oeffnen()" aria-haspopup="dialog" aria-expanded="false" data-i18n-title="header.myDeck" data-i18n-aria="header.myDeck" title="Mein Deck wählen" aria-label="Mein Deck wählen"><span class="mein-deck-stern" aria-hidden="true">★</span><span class="mein-deck-name">Mein Deck</span></button>
                     <button id="battleJournalFab" class="header-icon-btn header-journal-btn" type="button" onclick="openBattleJournalSheet()" title="Battle Journal" aria-label="Battle Journal" data-i18n-title="bj.openShort" data-i18n-aria="bj.openShort">
                         <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                             <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v17a1 1 0 0 1-1 1H6.5A2.5 2.5 0 0 1 4 18.5v-14z"></path>
@@ -4190,6 +4193,7 @@
          ihrer Formel und ihrem Wortlaut. Muss vor allem stehen, was eine
          Quote anzeigt — app-tier-meta, app-past-meta, ds-share. -->
     <script src="js/win-rate-konvention.js?v=202610050646" defer></script>
+    <script src="js/mein-deck.js?v=202610050646" defer></script>
     <script src="js/journal-zuordnung.js?v=202610050646" defer></script>
     <script src="js/matchup-glaettung.js?v=202610050646" defer></script>
     <script src="js/rangliste-sortieren.js?v=202610050646" defer></script>

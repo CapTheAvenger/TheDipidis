@@ -74,6 +74,43 @@ document.addEventListener('click', function(e) {
   });
 });
 
+/* UI-114 (Hausi, 05.10.2026): "Post/Post-Seite nur fuer mein Konto". Nur Anzeige,
+ * keine Sicherheitsgrenze — die Firebase-Uid ist kein Geheimnis. */
+const DS_BETREIBER_UID = 'SUSCeMi8oSd7likomxIC6z3qAqf2';
+function dsIstBetreiber() {
+  try { return !!(window.auth && window.auth.currentUser && window.auth.currentUser.uid === DS_BETREIBER_UID); }
+  catch (_) { return false; }
+}
+window.dsIstBetreiber = dsIstBetreiber;
+
+/* "⋯ Mehr" der Deckzeile: immer nur ein Menue offen; Esc und Klick daneben schliessen. */
+function dsDeckMehrToggle(el) {
+  if (!el) return;
+  /* Die Deckkarte schneidet sonst das Menue ab (overflow: hidden fuer die runden Ecken). */
+  const karte = el.closest('.saved-deck-item');
+  if (karte) karte.style.overflow = el.open ? 'visible' : 'hidden';
+  if (!el.open) return;
+  document.querySelectorAll('details.deck-mehr[open]').forEach(d => { if (d !== el) d.open = false; });
+}
+window.dsDeckMehrToggle = dsDeckMehrToggle;
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('details.deck-mehr[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; });
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('details.deck-mehr[open]').forEach(d => {
+    d.open = false;
+    const s = d.querySelector('summary'); if (s) s.focus();
+  });
+});
+/* Ein Menuepunkt schliesst das Menue nach dem Klick. */
+document.addEventListener('click', (e) => {
+  const item = e.target && e.target.closest ? e.target.closest('.deck-mehr-item') : null;
+  if (!item) return;
+  const d = item.closest('details.deck-mehr');
+  if (d) setTimeout(() => { d.open = false; }, 0);
+}, true);
+
 function escapeJsSingleQuoted(value) {
   return String(value)
     .replace(/\\/g, '\\\\')
@@ -2872,52 +2909,58 @@ function updateDecksUI(offenHalten) {
             </div>
           </div>
           <div class="deck-action-buttons" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <!-- All deck actions inline. Per user request: drowning vs.
-                 scanable was a wash — they prefer one click instead of
-                 two. flex-wrap keeps narrow viewports happy when the
-                 row gets too long. -->
-            <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-irl${isActive ? ' deck-btn-irl--active' : ''}" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
-              IRL ${isActive ? '✓' : ''}
-            </button>
-            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="${getLang()==='de' ? 'Für Pokémon TCG Live (PTCGL) kopieren' : 'Copy in PTCGL format (Pokémon TCG Live)'}">
-              PTCGL
-            </button>
+            <!-- UI-114 (Hausi, 05.10.2026): drei Hauptaktionen sichtbar (Decklist, Bild,
+                 Proxy), alles andere unter "⋯ Mehr". Post/Post-Seite nur fuer das
+                 Betreiber-Konto (dsIstBetreiber). -->
             <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="${getLang()==='de' ? 'Kopieren und Limitless-Deckbuilder öffnen' : 'Copy &amp; open Limitless Builder'}">
               ${getLang()==='de' ? 'Decklist' : 'Print Decklist'}
-            </button>
-            <button onclick="event.stopPropagation(); copyDeckAndOpenShowdown(${deckIndex})" class="deck-action-btn deck-btn-showdown" data-i18n-title="showdown.buttonTitle" title="${t('showdown.buttonTitle')}">
-              <span data-i18n="showdown.buttonLabel">📋 TCG Showdown ↗</span>
-            </button>
-            <button onclick="event.stopPropagation(); printSavedDeckProxies(${deckIndex})" class="deck-action-btn deck-btn-proxy-all" title="${getLang()==='de' ? 'Alle Karten in den Proxy Printer' : 'Send full deck to Proxy Printer'}">
-              ${getLang()==='de' ? 'Proxy' : 'Print Proxy'}
-            </button>
-            <button onclick="event.stopPropagation(); printSavedDeckMissingProxies(${deckIndex})" class="deck-action-btn deck-btn-proxy-missing" title="${getLang()==='de' ? 'Nur fehlende Karten in den Proxy Printer' : 'Send only missing cards to Proxy Printer'}">
-              ${getLang()==='de' ? 'Fehlende Proxy' : 'Print Missing'}
-            </button>
-            <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="${getLang()==='de' ? 'Vergleichen' : 'Compare'}">
-              ${getLang()==='de' ? 'Vergleichen' : 'Compare'}
-            </button>
-            <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" class="deck-action-btn deck-btn-folder" title="${getLang()==='de' ? 'In Ordner verschieben' : 'Move to folder'}">
-              ${getLang()==='de' ? 'Ordner' : 'Folder'}
             </button>
             <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" class="deck-action-btn deck-btn-export" title="${getLang()==='de' ? 'Als Bild speichern' : 'Save as image'}">
               ${getLang()==='de' ? 'Bild' : 'Image'}
             </button>
-            <button onclick="event.stopPropagation(); postSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-post" title="${getLang()==='de' ? 'Post im Instagram-Format (1080\u00d71350) erzeugen und teilen' : 'Create the Instagram post (1080\u00d71350) and share it'}">
+            <button onclick="event.stopPropagation(); printSavedDeckProxies(${deckIndex})" class="deck-action-btn deck-btn-proxy-all" title="${getLang()==='de' ? 'Alle Karten in den Proxy Printer' : 'Send full deck to Proxy Printer'}">
+              ${getLang()==='de' ? 'Proxy' : 'Print Proxy'}
+            </button>
+            <details class="deck-mehr" onclick="event.stopPropagation()" ontoggle="dsDeckMehrToggle(this)">
+              <summary class="deck-action-btn deck-btn-mehr" aria-haspopup="menu">⋯ ${getLang()==='de' ? 'Mehr' : 'More'}</summary>
+              <div class="deck-mehr-menue" role="menu">
+                <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" role="menuitem" class="deck-mehr-item deck-btn-irl${isActive ? ' deck-btn-irl--active' : ''}" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
+              IRL ${isActive ? '✓' : ''}
+                </button>
+                <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-copy" title="${getLang()==='de' ? 'Für Pokémon TCG Live (PTCGL) kopieren' : 'Copy in PTCGL format (Pokémon TCG Live)'}">
+              PTCGL
+                </button>
+                <button onclick="event.stopPropagation(); copyDeckAndOpenShowdown(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-showdown" data-i18n-title="showdown.buttonTitle" title="${t('showdown.buttonTitle')}">
+              <span data-i18n="showdown.buttonLabel">📋 TCG Showdown ↗</span>
+                </button>
+                <button onclick="event.stopPropagation(); printSavedDeckMissingProxies(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-proxy-missing" title="${getLang()==='de' ? 'Nur fehlende Karten in den Proxy Printer' : 'Send only missing cards to Proxy Printer'}">
+              ${getLang()==='de' ? 'Fehlende Proxy' : 'Print Missing'}
+                </button>
+                <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-compare" title="${getLang()==='de' ? 'Vergleichen' : 'Compare'}">
+              ${getLang()==='de' ? 'Vergleichen' : 'Compare'}
+                </button>
+                <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-folder" title="${getLang()==='de' ? 'In Ordner verschieben' : 'Move to folder'}">
+              ${getLang()==='de' ? 'Ordner' : 'Folder'}
+                </button>
+                ${dsIstBetreiber() ? `
+                <button onclick="event.stopPropagation(); postSavedDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-post" title="${getLang()==='de' ? 'Post im Instagram-Format (1080\u00d71350) erzeugen und teilen' : 'Create the Instagram post (1080\u00d71350) and share it'}">
               ${getLang()==='de' ? 'Post' : 'Post'}
-            </button>
-            <button onclick="event.stopPropagation(); postSavedDeckAufPostSeite(${deckIndex})" class="deck-action-btn deck-btn-postseite" title="${getLang()==='de' ? 'Dieses Deck auf der Post-Seite \u00f6ffnen (\u00dcberschrift, Text und Hashtags dort)' : 'Open this deck on the posts page (headline, caption and hashtags there)'}">
+                </button>
+                <button onclick="event.stopPropagation(); postSavedDeckAufPostSeite(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-postseite" title="${getLang()==='de' ? 'Dieses Deck auf der Post-Seite \u00f6ffnen (\u00dcberschrift, Text und Hashtags dort)' : 'Open this deck on the posts page (headline, caption and hashtags there)'}">
               ${getLang()==='de' ? 'Post-Seite' : 'Posts page'}
-            </button>
-            <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" class="deck-action-btn deck-btn-rename" title="${getLang()==='de' ? 'Umbenennen' : 'Rename'}">
+                </button>
+                ` : ''}
+                <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-rename" title="${getLang()==='de' ? 'Umbenennen' : 'Rename'}">
               ${getLang()==='de' ? 'Umbenennen' : 'Rename'}
-            </button>
-            <button onclick="event.stopPropagation(); duplicateDeck(${deckIndex})" class="deck-action-btn deck-btn-duplicate" title="${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}">
+                </button>
+                <button onclick="event.stopPropagation(); duplicateDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-duplicate" title="${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}">
               ${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}
-            </button>
-            <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-delete" title="${getLang()==='de' ? 'Löschen' : 'Delete'}">
+                </button>
+                <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" role="menuitem" class="deck-mehr-item deck-btn-delete" title="${getLang()==='de' ? 'Löschen' : 'Delete'}">
               ${getLang()==='de' ? 'Löschen' : 'Delete'}
-            </button>
+                </button>
+              </div>
+            </details>
             <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg); margin-left: auto;">▼</div>
           </div>
         </div>

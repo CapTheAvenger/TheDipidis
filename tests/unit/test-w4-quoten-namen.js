@@ -315,7 +315,7 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
             helfer: ['_mcKartenQuotenFormel', '_mcKartenQuotenName'],
             konstanten: ['_MC_KARTEN_KONVENTION'],
             ausdruck: '_mcKartenQuotenName(_MC_KARTEN_KONVENTION)',
-            konvention: 'mitUnentschieden',
+            konvention: 'ohneUnentschieden', // DA-47: Bilanz S/(S+N)
             /* WO DAS ERGEBNIS WIRKLICH HINGESCHRIEBEN WIRD. Ohne diesen
                Anker bleibt der Test gruen, wenn jemand nur die
                innerHTML-Zeile auf „Top 3 by Win Rate" zurueckdreht und

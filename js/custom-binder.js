@@ -93,12 +93,13 @@
         try { localStorage.setItem(CB_PRESETS_KEY, JSON.stringify(cbPresets)); } catch (_) { /* ignore */ }
     }
 
-    function cbSaveCurrentAsPreset() {
+    async function cbSaveCurrentAsPreset() {
         if (cbSelectedArchetypes.length === 0) {
             if (typeof showToast === 'function') showToast(cbText('cb.noArchetypesSelected', 'No archetypes selected.'), 'warning');
             return;
         }
-        const name = prompt(cbText('cb.promptPresetName', 'Name for this binder:'));
+        const _titel = cbText('cb.promptPresetName', 'Name for this binder:');
+        const name = (typeof showInputModal === 'function' ? await showInputModal({ title: _titel, defaultValue: '' }) : prompt(_titel, ''));
         if (!name || !name.trim()) return;
         const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
         cbPresets.push({ id, name: name.trim(), archetypes: cbSelectedArchetypes.map(a => ({ name: a.name, source: a.source })) });
@@ -118,10 +119,11 @@
         if (typeof showToast === 'function') showToast(t('binder.loaded').replace('{name}', preset.name), 'info');
     }
 
-    function cbDeletePreset(id) {
+    async function cbDeletePreset(id) {
         const preset = cbPresets.find(p => p.id === id);
         if (!preset) return;
-        if (!confirm(t('binder.deleteConfirm').replace('{name}', preset.name))) return;
+        const _frage = t('binder.deleteConfirm').replace('{name}', preset.name);
+        if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frage, gefaehrlich: true }) : confirm(_frage)))) return;
         cbPresets = cbPresets.filter(p => p.id !== id);
         cbSavePresets();
         cbRenderPresetBar();
@@ -407,7 +409,7 @@
         }
         await cbLadeBinderListe();
         const vorhanden = alsNeu ? null : cbAktuellerBinder();
-        const name = vorhanden ? vorhanden.name : (cbFrageName(cbVorschlagName()) || '').trim();
+        const name = vorhanden ? vorhanden.name : ((await cbFrageName(cbVorschlagName())) || '').trim();
         if (!vorhanden && !name) return;
         const karten = (window._cbDelta && window._cbDelta.cards) || [];
         const binder = {
@@ -424,11 +426,12 @@
         if (typeof showToast === 'function') showToast(cbText('cb.binderSaved', 'Ordner gespeichert.'), 'success');
     }
 
-    function cbFrageName(vorschlag) {
-        // prompt() ist auf dem Telefon ein Systemdialog mitten im Screen —
-        // haesslich, aber ein eigenes Eingabefeld waere ein zweiter Dialog-
-        // Mechanismus fuer eine einzelne Zeile. Bewusst so belassen.
-        try { return window.prompt(cbText('cb.nameLabel', 'Name für diesen Ordner'), vorschlag); }
+    async function cbFrageName(vorschlag) {
+        // UI-104 (05.10.2026): der App-Eingabedialog (showInputModal) ist
+        // inzwischen DER eine Mechanismus fuer eine Zeile — prompt() hielt
+        // die Seite an und war auf dem Telefon ein Systemdialog.
+        const _titel = cbText('cb.nameLabel', 'Name für diesen Ordner');
+        try { return (typeof showInputModal === 'function' ? await showInputModal({ title: _titel, defaultValue: vorschlag }) : prompt(_titel, vorschlag)); }
         catch (_) { return vorschlag; }
     }
 
@@ -452,7 +455,8 @@
         const b = cbBinders.find(x => x.id === id);
         if (!b) return;
         const frage = cbText('cb.deleteConfirm', '„{name}" löschen? Deine Sammlung bleibt unberührt.').replace('{name}', b.name);
-        if (typeof window.confirm === 'function' && !window.confirm(frage)) return;
+        if (window.zeigeBestaetigung) { if (!(await window.zeigeBestaetigung({ text: frage, gefaehrlich: true }))) return; }
+        else if (typeof window.confirm === 'function' && !window.confirm(frage)) return;
         cbBinders = cbBinders.filter(x => x.id !== id);
         if (cbAktiverBinder === id) { cbAktiverBinder = null; _cbAbgleich = null; }
         cbBinderLocalSchreiben();
@@ -1951,7 +1955,7 @@
         }
     }
 
-    function cbMarkFilteredPrinted() {
+    async function cbMarkFilteredPrinted() {
         if (!_cbPrintedSet) return;
         // Uses the PRE-expansion filtered list: the All-Prints expansion
         // creates per-print ids that don't exist as binder entries.
@@ -1962,7 +1966,7 @@
             return;
         }
         const msg = cbText('cb.bulkMarkConfirm', 'Mark {n} shown cards as printed?').replace('{n}', String(toMark.length));
-        if (!window.confirm(msg)) return;
+        if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: msg }) : confirm(msg)))) return;
         toMark.forEach(c => _cbPrintedSet.add(c.cardId));
         cbPersistPrintedSet();
         cbApplyFilter();

@@ -1243,9 +1243,10 @@
             renderFilterRow();
             renderResults();
         });
-        document.getElementById('pdb-clear-deck').addEventListener('click', () => {
+        document.getElementById('pdb-clear-deck').addEventListener('click', async () => {
             if (countCards(_deck) === 0) return;
-            if (confirm(uiLang() === 'de' ? 'Wirklich das ganze Deck leeren?' : 'Clear the whole deck?')) {
+            const _frage = uiLang() === 'de' ? 'Wirklich das ganze Deck leeren?' : 'Clear the whole deck?';
+            if (await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frage, gefaehrlich: true }) : confirm(_frage))) {
                 clearDeck();
             }
         });

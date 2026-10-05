@@ -3038,3 +3038,37 @@
     top: calc(var(--plakette-rand) + 2 * (var(--plakette) + var(--plakette-abstand)));
     right: var(--plakette-rand);
 }
+
+/* UI-102 (M3-01, G3-04, UI/UX-Ueberpruefung v2, 05.10.2026)
+ * ---------------------------------------------------------
+ * Die Textzeilen unter den Kartenbildern der Deck-Analyse standen bei
+ * 390 px in 1,86-3,96 px und am Desktop in 7,84 px: eine Kaskade
+ * multiplizierender em (Fussleiste 0.55-0.65em -> Zeile 0.6em -> Kind
+ * 0.6-0.7em). Die Rettungsregel weiter oben traf nur die Meta-Raster,
+ * nicht das Raster der drei Analyse-Ansichten. Ab hier stehen die Zeilen
+ * auf festen Token-Groessen, unabhaengig von jeder Vorfahren-Groesse:
+ * Kartenname --fs-sm (12 px), alles darunter --fs-xs (11 px, Boden
+ * aus UI-4). Die Spezifitaet (ID + drei Klassen) schlaegt jede der
+ * em-Regeln ohne Vorrangmarke. Zusicherung: tests/unit/test-ui102-kartenzeilen.js */
+#city-league-analysis .city-league-card-info-bottom .city-league-card-title-mobile.city-league-card-title-mobile,
+#current-analysis .city-league-card-info-bottom .city-league-card-title-mobile.city-league-card-title-mobile,
+#past-meta .city-league-card-info-bottom .city-league-card-title-mobile.city-league-card-title-mobile {
+  font-size: var(--fs-sm);
+}
+#city-league-analysis .city-league-card-info-bottom .city-league-card-set-stats-row,
+#current-analysis .city-league-card-info-bottom .city-league-card-set-stats-row,
+#past-meta .city-league-card-info-bottom .city-league-card-set-stats-row,
+#city-league-analysis .city-league-card-info-bottom .city-league-card-set-stats-row .city-league-card-set-mobile,
+#current-analysis .city-league-card-info-bottom .city-league-card-set-stats-row .city-league-card-set-mobile,
+#past-meta .city-league-card-info-bottom .city-league-card-set-stats-row .city-league-card-set-mobile,
+#city-league-analysis .city-league-card-info-bottom .city-league-card-set-stats-row .city-league-card-stats-mobile,
+#current-analysis .city-league-card-info-bottom .city-league-card-set-stats-row .city-league-card-stats-mobile,
+#past-meta .city-league-card-info-bottom .city-league-card-set-stats-row .city-league-card-stats-mobile,
+#city-league-analysis .city-league-card-info-bottom .city-league-card-avg-mobile.city-league-card-avg-mobile,
+#current-analysis .city-league-card-info-bottom .city-league-card-avg-mobile.city-league-card-avg-mobile,
+#past-meta .city-league-card-info-bottom .city-league-card-avg-mobile.city-league-card-avg-mobile,
+#city-league-analysis .city-league-card-info-bottom .city-league-card-deck-stats-mobile.city-league-card-deck-stats-mobile,
+#current-analysis .city-league-card-info-bottom .city-league-card-deck-stats-mobile.city-league-card-deck-stats-mobile,
+#past-meta .city-league-card-info-bottom .city-league-card-deck-stats-mobile.city-league-card-deck-stats-mobile {
+  font-size: var(--fs-xs);
+}

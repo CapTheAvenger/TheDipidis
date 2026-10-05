@@ -199,16 +199,18 @@ pruefe('clearUserData: kennt jedes window.user*-Global aus dem Quellcode', () =>
 const collection = read('js/firebase-collection.js');
 
 pruefe('Dex-Import: bricht ab, solange die Nutzerdaten nicht geladen sind', () => {
-    const m = collection.match(/async function dexImportExecute\(mode\)[\s\S]{0,2000}?showNotification\([^)]*Importiere/);
+    const m = collection.match(/async function dexImportExecute\(mode\)[\s\S]{0,2600}?showNotification\([^)]*Importiere/);
     assert.ok(m, 'dexImportExecute nicht gefunden');
     assert.ok(/window\.userDataLoaded !== true/.test(m[0]),
         'kein userDataLoaded-Guard — ein Import vor dem Laden überschreibt die Sammlung serverseitig');
 });
 
 pruefe('Dex-Import: "Ersetzen" fragt vorher nach', () => {
-    const m = collection.match(/async function dexImportExecute\(mode\)[\s\S]{0,2500}?modal\.remove\(\)/);
+    // UI-104 (05.10.2026): die Rueckfrage laeuft ueber den App-Dialog
+    // zeigeBestaetigung (Rueckfall confirm) — der Ausschnitt ist dadurch laenger.
+    const m = collection.match(/async function dexImportExecute\(mode\)[\s\S]{0,3100}?modal\.remove\(\)/);
     assert.ok(m, 'dexImportExecute nicht gefunden');
-    assert.ok(/mode === 'replace'[\s\S]{0,600}?confirm\(/.test(m[0]),
+    assert.ok(/mode === 'replace'[\s\S]{0,700}?zeigeBestaetigung\(/.test(m[0]),
         'kein confirm() vor dem Ersetzen — clearCollection() fragt für denselben Effekt nach');
 });
 

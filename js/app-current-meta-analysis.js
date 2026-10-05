@@ -2261,6 +2261,32 @@
         }
         window._deckInAdresse = _deckInAdresse;
 
+        /* UI-109 (05.10.2026): #current-analysis?deck=X im offenen Tab (ohne
+           Neuladen) setzte nur den Wunsch — eingeloest wurde er nur beim
+           ersten Aufbau der Auswahl. Gemessen 04.10.: Auswahl leer, Ansicht
+           776 px; nach Neuladen Dragapult. Steht die Auswahl schon, waehlt
+           diese Funktion das Deck sofort. */
+        function pendingDeckEinloesen(doc) {
+            doc = doc || document;
+            const wunsch = String(window.pendingCurrentMetaDeckSelection || '').trim();
+            if (!wunsch) return false;
+            const select = doc.getElementById('currentMetaDeckSelect');
+            if (!select || !select.options || select.options.length < 2) return false;
+            const opt = Array.from(select.options).find(o => o.value && o.value.toLowerCase() === wunsch.toLowerCase());
+            if (!opt) return false;
+            window.pendingCurrentMetaDeckSelection = null;
+            window.currentMetaArchetype = opt.value;
+            if (select.value !== opt.value) {
+                select.value = opt.value;
+                if (typeof syncSearchableSelectDisplay === 'function') {
+                    try { syncSearchableSelectDisplay(select); } catch (_e) { /* Anzeige nachrangig */ }
+                }
+                loadCurrentMetaDeckData(opt.value);
+            }
+            return true;
+        }
+        window.pendingDeckEinloesen = pendingDeckEinloesen;
+
         async function loadCurrentMetaDeckData(archetype) {
             _deckInAdresse(archetype);
             // First user interaction with this tab — hide the empty-state guidance

@@ -105,7 +105,8 @@ img[src*="limitlesstcg"] {
     font-size: 14px;
     transition: background 0.1s;
 }
-.searchable-select-option:hover {
+.searchable-select-option:hover,
+.searchable-select-option.aktiv {
     background: #e0f2fe;
 }
 .searchable-select-option.selected {
@@ -169,7 +170,8 @@ img[src*="limitlesstcg"] {
 [data-theme="dark"] .searchable-select-option {
     color: #e2e8f0;
 }
-[data-theme="dark"] .searchable-select-option:hover {
+[data-theme="dark"] .searchable-select-option:hover,
+[data-theme="dark"] .searchable-select-option.aktiv {
     background: #334155;
 }
 [data-theme="dark"] .searchable-select-option.selected {
@@ -5621,4 +5623,8 @@ a.price-unverified-badge:hover { background: var(--vorbehalt); color: var(--surf
     --cl-table-row-hover: #1e2c58;
     --cl-table-border: #2a3560;
     --cl-table-title-ink: var(--ink);
+}
+/* UI-104: Bestaetigen-Knopf einer Loeschfrage (zeigeBestaetigung). */
+.modal-dialog .modal-btn-ok.modal-btn-gefahr {
+    background: var(--solid-bad);
 }

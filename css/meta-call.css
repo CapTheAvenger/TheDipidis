@@ -2040,6 +2040,19 @@
     .mc-rec-table td { padding: 6px 6px; }
     .mc-rec-wins,
     .mc-rec-players { display: none; }
+    /* UI-106 (M3-03, 05.10.2026): bei 390 px hatte die Spalte „Deck“ 0 px —
+     * table-layout:fixed mit 40 + 3 x 90 px festen Spalten passt nicht in
+     * 333 px, und der Kopf der ausgeblendeten Spalte stand weiter da (der
+     * Kopf nahm 6, die Zeilen 5 Spalten). Schmal rechnet die Tabelle jetzt
+     * selbst, der Name bricht um statt zu verschwinden. */
+    .mc-rec-table { table-layout: auto; }
+    .mc-rec-table th:nth-child(n),
+    .mc-rec-table td:nth-child(n) { width: auto; }
+    .mc-rec-table td.mc-rec-day2,
+    .mc-rec-table td:nth-child(4) { white-space: nowrap; }
+    .mc-rec-name,
+    .mc-rec-name-text,
+    .mc-rec-history-line { white-space: normal; overflow: visible; text-overflow: clip; }
     /* Stop the Counter-Pick badge from eating the deck name in
      * the narrow mobile recs column. On mobile we let the badge
      * wrap to its own line under the name rather than competing

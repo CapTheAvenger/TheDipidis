@@ -598,7 +598,8 @@ async function saveCurrentDeckToProfile(source) {
   // Check for duplicate deck name
   const trimmedName = deckName.trim();
   if (window.userDecks && window.userDecks.some(d => d.name === trimmedName)) {
-    const overwrite = confirm(t('deck.duplicateConfirm').replace('${name}', trimmedName));
+    const _frageDoppelt = t('deck.duplicateConfirm').replace('${name}', trimmedName);
+    const overwrite = await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frageDoppelt }) : confirm(_frageDoppelt));
     if (!overwrite) return;
   }
   
@@ -845,14 +846,16 @@ function saveDeck(deckData) {
 }
 
 // Delete deck
-function deleteDeck(deckId) {
+async function deleteDeck(deckId) {
   const user = auth.currentUser;
   if (!user) return;
 
   // UI-83: die Rueckfrage nennt das Deck — „Dieses Deck loeschen?" sagte nicht, welches.
   const _zuLoeschen = (window.userDecks || []).find(d => d && d.id === deckId);
   const _deckName = (_zuLoeschen && _zuLoeschen.name) || deckId;
-  if (!confirm(t('deck.deleteConfirm').replace('{name}', _deckName))) return;
+  // UI-104: App-Dialog statt confirm() — der native Dialog fror den Tab ein.
+  const _frage = t('deck.deleteConfirm').replace('{name}', _deckName);
+  if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frage, gefaehrlich: true }) : confirm(_frage)))) return;
 
   // Update mirror + in-memory immediately so the UI doesn't show
   // the deck again on the next reload (it would, otherwise — the
@@ -1520,7 +1523,8 @@ async function clearCollection() {
     return;
   }
 
-  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Sammlung zurücksetzen? Alle Karten werden auf „nicht im Besitz“ gesetzt.' : 'Really reset the entire collection? All cards will be set to "not owned".');
+  const _frageSammlung = getLang()==='de' ? 'Wirklich die gesamte Sammlung zurücksetzen? Alle Karten werden auf „nicht im Besitz“ gesetzt.' : 'Really reset the entire collection? All cards will be set to "not owned".';
+  const ok = await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frageSammlung, gefaehrlich: true }) : confirm(_frageSammlung));
   if (!ok) return;
 
   try {
@@ -1558,7 +1562,8 @@ async function clearWishlist() {
     return;
   }
 
-  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Wishlist leeren?' : 'Really clear the entire wishlist?');
+  const _frageWunsch = getLang()==='de' ? 'Wirklich die gesamte Wunschliste leeren?' : 'Really clear the entire wishlist?';
+  const ok = await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frageWunsch, gefaehrlich: true }) : confirm(_frageWunsch));
   if (!ok) return;
 
   try {
@@ -3332,10 +3337,11 @@ function myDeckTechHideAutocomplete(deckId) {
 // ============================================================
 // My Decks: Rename Deck
 // ============================================================
-function renameDeck(deckIndex) {
+async function renameDeck(deckIndex) {
   const deck = window.userDecks[deckIndex];
   if (!deck) return;
-  const newName = prompt(getLang() === 'de' ? 'Deck umbenennen:' : 'Rename deck:', deck.name);
+  const _titel = getLang() === 'de' ? 'Deck umbenennen:' : 'Rename deck:';
+  const newName = (typeof showInputModal === 'function' ? await showInputModal({ title: _titel, defaultValue: deck.name }) : prompt(_titel, deck.name));
   if (!newName || newName.trim() === '' || newName.trim() === deck.name) return;
   const trimmed = newName.trim();
   const user = auth.currentUser;
@@ -3993,7 +3999,7 @@ async function deleteDeckFolder(folderName) {
   const msg = decksInFolder.length > 0
     ? `Ordner "${folderName}" löschen?\n${decksInFolder.length} Deck(s) werden aus dem Ordner entfernt (nicht gelöscht).`
     : `Ordner "${folderName}" löschen?`;
-  if (!confirm(msg)) return;
+  if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: msg, gefaehrlich: true }) : confirm(msg)))) return;
 
   const user = auth.currentUser;
   if (!user) return;
@@ -5764,7 +5770,7 @@ async function dexImportExecute(mode) {
         const frage = de
             ? `Sammlung komplett ersetzen?\n\n${vorher} Karten in deiner Sammlung werden gelöscht.\n${nachher} Karten kommen aus der Datei.\n\nDas lässt sich nicht rückgängig machen.`
             : `Replace the entire collection?\n\n${vorher} cards in your collection will be deleted.\n${nachher} cards come from the file.\n\nThis cannot be undone.`;
-        if (!confirm(frage)) return;
+        if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: frage, gefaehrlich: true }) : confirm(frage)))) return;
     }
 
     modal.remove();
@@ -5959,7 +5965,8 @@ async function clearTradelist() {
     showNotification(getLang()==='de' ? 'Die Tauschliste ist bereits leer' : 'Trade list is already empty', 'info');
     return;
   }
-  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Tauschliste leeren?' : 'Really clear the entire trade list?');
+  const _frageTausch = getLang()==='de' ? 'Wirklich die gesamte Tauschliste leeren?' : 'Really clear the entire trade list?';
+  const ok = await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frageTausch, gefaehrlich: true }) : confirm(_frageTausch));
   if (!ok) return;
   try {
     // update(), not set({merge:true}) — see clearCollection.

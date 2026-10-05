@@ -179,7 +179,8 @@ describe('FE-44: Meta Call merkt „Mein Deck"', () => {
         assert.equal(speicher[merken.KEY], 'Dragapult');
         merken.merken('');
         assert.equal(speicher[merken.KEY], undefined);
-        assert.match(Q, /function _onMyDeck\(val\) \{\s*_settings\.myDeck = val;\s*_meinDeckMerken\(val\);/);
+        // FE-59 (05.10.2026): „Gegen das Meta“ waehlt als Vorschau und merkt nicht.
+        assert.match(Q, /function _onMyDeck\(val, opts\) \{\s*_settings\.myDeck = val;\s*if \(!\(opts && opts\.vorschau\)\) _meinDeckMerken\(val\);/);
         assert.match(Q, /const gemerkt = localStorage\.getItem\(MEIN_DECK_KEY\);\s*if \(gemerkt\) _settings\.myDeck = gemerkt;/);
         assert.match(Q, /_bekannteDeckNamen\(\)\.indexOf\(_settings\.myDeck\) === -1\) \{\s*_settings\.myDeck = '';\s*_meinDeckMerken\(''\);/);
     });

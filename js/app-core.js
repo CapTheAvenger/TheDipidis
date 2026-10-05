@@ -55,10 +55,17 @@ const BASE_PATH = './data/';
                 
                 const modal = document.createElement('div');
                 modal.className = 'modal-dialog';
+                // UI-104 / M3-11: als Dialog ansagen, Titel verknuepfen.
+                const _dlgId = 'dlg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                modal.setAttribute('role', 'dialog');
+                modal.setAttribute('aria-modal', 'true');
+                modal.setAttribute('aria-labelledby', _dlgId + '-t');
+                const _ausloeser = document.activeElement;
                 
                 const title = document.createElement('h3');
                 // Use .modal-dialog h3 for styling
                 title.textContent = opts.title || 'Input';
+                title.id = _dlgId + '-t';
                 modal.appendChild(title);
 
                 if (opts.message) {
@@ -79,6 +86,8 @@ const BASE_PATH = './data/';
                 }
                 if (opts.defaultValue != null) input.value = opts.defaultValue;
                 if (opts.placeholder) input.placeholder = opts.placeholder;
+                // Das Feld bekommt einen Namen: der Hinweistext, sonst der Titel.
+                input.setAttribute('aria-label', opts.message || opts.title || '');
                 if (opts.readonly) {
                     input.readOnly = true;
                     input.classList.add('cursor-text');
@@ -104,9 +113,14 @@ const BASE_PATH = './data/';
                     btnRow.appendChild(copyBtn);
                 }
 
+                let _zu = false;
                 function close(val) {
+                    if (_zu) return;
+                    _zu = true;
                     overlay.remove();
                     if (window.HintergrundSperre) window.HintergrundSperre.freigeben('eingabefenster');
+                    // Fokus zurueck dorthin, wo er vor dem Dialog war (M3-11).
+                    try { if (_ausloeser && _ausloeser.focus) _ausloeser.focus({ preventScroll: true }); } catch (_e) { /* egal */ }
                     resolve(val);
                 }
                 cancelBtn.onclick = () => close(null);
@@ -132,9 +146,93 @@ const BASE_PATH = './data/';
                     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus({ preventScroll: true }); }
                 });
                 
-                setTimeout(() => { input.focus({ preventScroll: true }); if (opts.readonly) input.select(); }, 50);
+                // Vorschlag markiert: wer tippt, ersetzt ihn (N3-12).
+                const _fokus = () => { input.focus({ preventScroll: true }); if (opts.readonly || opts.defaultValue) input.select(); };
+                _fokus();
+                setTimeout(_fokus, 50);
             });
         }
+
+        /**
+         * UI-104 (N3-02, T3-13, G3-08): App-eigene Rueckfrage statt confirm().
+         * Der native Dialog hielt den Seitenlauf an und fror im
+         * Hintergrund-Tab die Seite ein; er war ohne ARIA und ohne Namen.
+         * @param {Object} opts
+         * @param {string} [opts.titel]   Ueberschrift (Standard: "Bitte bestätigen")
+         * @param {string} opts.text      Frage, \n erlaubt
+         * @param {string} [opts.ok]      Beschriftung des Bestaetigen-Knopfs
+         * @param {boolean} [opts.gefaehrlich] Knopf als Loeschen kennzeichnen
+         * @returns {Promise<boolean>}
+         */
+        function zeigeBestaetigung(opts) {
+            opts = opts || {};
+            return new Promise(resolve => {
+                const de = (typeof getLang === 'function' ? getLang() : 'de') !== 'en';
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                const modal = document.createElement('div');
+                modal.className = 'modal-dialog';
+                const id = 'dlg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                modal.setAttribute('role', 'alertdialog');
+                modal.setAttribute('aria-modal', 'true');
+                modal.setAttribute('aria-labelledby', id + '-t');
+                modal.setAttribute('aria-describedby', id + '-d');
+                const ausloeser = document.activeElement;
+
+                const titel = document.createElement('h3');
+                titel.id = id + '-t';
+                titel.textContent = opts.titel || (de ? 'Bitte bestätigen' : 'Please confirm');
+                modal.appendChild(titel);
+                const text = document.createElement('p');
+                text.id = id + '-d';
+                text.style.whiteSpace = 'pre-line';
+                text.textContent = opts.text || '';
+                modal.appendChild(text);
+
+                const reihe = document.createElement('div');
+                reihe.className = 'modal-btn-row';
+                const nein = document.createElement('button');
+                nein.type = 'button';
+                nein.className = 'modal-btn-cancel';
+                nein.textContent = t('modal.cancel');
+                const ja = document.createElement('button');
+                ja.type = 'button';
+                ja.className = 'modal-btn-ok' + (opts.gefaehrlich ? ' modal-btn-gefahr' : '');
+                ja.textContent = opts.ok || (opts.gefaehrlich ? (de ? 'Löschen' : 'Delete') : t('modal.ok'));
+                reihe.appendChild(nein);
+                reihe.appendChild(ja);
+                modal.appendChild(reihe);
+                overlay.appendChild(modal);
+
+                let zu = false;
+                function schliessen(wert) {
+                    if (zu) return;
+                    zu = true;
+                    document.removeEventListener('keydown', taste, true);
+                    overlay.remove();
+                    if (window.HintergrundSperre) window.HintergrundSperre.freigeben('rueckfrage');
+                    try { if (ausloeser && ausloeser.focus) ausloeser.focus({ preventScroll: true }); } catch (_e) { /* egal */ }
+                    resolve(wert);
+                }
+                function taste(e) {
+                    if (e.key === 'Escape') { e.preventDefault(); schliessen(false); }
+                    else if (e.key === 'Tab') {
+                        // Fokus bleibt im Dialog.
+                        e.preventDefault();
+                        (document.activeElement === nein ? ja : nein).focus({ preventScroll: true });
+                    }
+                }
+                nein.onclick = () => schliessen(false);
+                ja.onclick = () => schliessen(true);
+                overlay.onclick = e => { if (e.target === overlay) schliessen(false); };
+                document.addEventListener('keydown', taste, true);
+                document.body.appendChild(overlay);
+                if (window.HintergrundSperre) window.HintergrundSperre.sperren('rueckfrage');
+                // Bei Loeschfragen steht der Fokus auf "Abbrechen" — Enter loescht nicht versehentlich.
+                (opts.gefaehrlich ? nein : ja).focus({ preventScroll: true });
+            });
+        }
+        window.zeigeBestaetigung = zeigeBestaetigung;
 
         function showToast(message, type = 'info', duration = 3000) {
             const container = document.getElementById('toast-container');
@@ -1047,9 +1145,10 @@ const BASE_PATH = './data/';
             renderProxyQueue();
         }
 
-        function clearProxyQueue() {
+        async function clearProxyQueue() {
             if (!window.proxyQueue || window.proxyQueue.length === 0) return;
-            if (!confirm(t('proxy.clearConfirm'))) return;
+            const _frage = t('proxy.clearConfirm');
+            if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frage, gefaehrlich: true }) : confirm(_frage)))) return;
             window.proxyQueue = [];
             window.proxyImportSkipped = [];
             renderProxyQueue();

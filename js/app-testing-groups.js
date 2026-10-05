@@ -246,7 +246,8 @@ window.TestingGroups = (function () {
   async function deleteGroup(groupId) {
     const db = _db();
     if (!db || !groupId) return;
-    if (!confirm(t('tg.confirmDelete'))) return;
+    const _f1 = t('tg.confirmDelete');
+    if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _f1, gefaehrlich: true }) : confirm(_f1)))) return;
     try {
       await db.collection('testingGroups').doc(groupId).delete();
       if (_currentGroupId === groupId) {
@@ -700,7 +701,8 @@ window.TestingGroups = (function () {
 
   async function removeDeck(deckName) {
     if (_currentRole !== 'owner') { alert(t('tg.errOwnerOnly')); return; }
-    if (!confirm(t('tg.confirmRemoveDeck').replace('{name}', deckName))) return;
+    const _f2 = t('tg.confirmRemoveDeck').replace('{name}', deckName);
+    if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _f2, gefaehrlich: true }) : confirm(_f2)))) return;
     const db = _db();
     if (!db || !_currentGroupId) return;
     const g = _currentGroup;
@@ -786,7 +788,8 @@ window.TestingGroups = (function () {
     const g = _currentGroup;
     if (!g) return;
     if (uid === g.ownerUid) { alert(t('tg.errCantRemoveOwner')); return; }
-    if (!confirm(t('tg.confirmRemoveMember'))) return;
+    const _f3 = t('tg.confirmRemoveMember');
+    if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _f3, gefaehrlich: true }) : confirm(_f3)))) return;
     const db = _db();
     if (!db || !_currentGroupId) return;
     try {
@@ -844,7 +847,8 @@ window.TestingGroups = (function () {
 
   async function revokeInviteLink() {
     if (_currentRole !== 'owner') return;
-    if (!confirm(t('tg.confirmRevokeInvite'))) return;
+    const _f4 = t('tg.confirmRevokeInvite');
+    if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _f4, gefaehrlich: true }) : confirm(_f4)))) return;
     const db = _db();
     if (!db || !_currentGroupId) return;
     try {
@@ -894,7 +898,7 @@ window.TestingGroups = (function () {
       const confirmMsg = t('tg.confirmRequestJoin')
         .replace('{group}', groupName)
         .replace('{role}', t('tg.role.' + role));
-      if (!confirm(confirmMsg)) return;
+      if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: confirmMsg }) : confirm(confirmMsg)))) return;
 
       // 4) Create the join-request doc. The Firestore rule allows this
       //    write iff the caller is authenticated, the doc id matches
@@ -950,7 +954,8 @@ window.TestingGroups = (function () {
 
   async function denyJoinRequest(uid) {
     if (_currentRole !== 'owner') return;
-    if (!confirm(t('tg.confirmDenyRequest'))) return;
+    const _f6 = t('tg.confirmDenyRequest');
+    if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _f6, gefaehrlich: true }) : confirm(_f6)))) return;
     const db = _db();
     if (!db || !_currentGroupId) return;
     try {
@@ -1036,7 +1041,8 @@ window.TestingGroups = (function () {
       alert(t('tg.errOwnerCantLeave'));
       return;
     }
-    if (!confirm(t('tg.confirmLeave'))) return;
+    const _f7 = t('tg.confirmLeave');
+    if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _f7, gefaehrlich: true }) : confirm(_f7)))) return;
     const db = _db();
     if (!db || !_currentGroupId) return;
     try {
@@ -1642,9 +1648,10 @@ window.TestingGroups = (function () {
   // clobber the value the user is actively editing.
   function _markEditing(key) { _editingKey = key || null; }
 
-  function _uiInvite() {
+  async function _uiInvite() {
     if (_currentRole !== 'owner') return;
-    const role = prompt(t('tg.invitePromptRole'), 'editor');
+    const _t1 = t('tg.invitePromptRole');
+    const role = (typeof showInputModal === 'function' ? await showInputModal({ title: _t1, defaultValue: 'editor' }) : prompt(_t1, 'editor'));
     if (!role) return;
     if (role !== 'editor' && role !== 'viewer') { alert(t('tg.errInviteRole')); return; }
     generateInviteLink(role).then(url => {
@@ -1657,16 +1664,18 @@ window.TestingGroups = (function () {
     });
   }
 
-  function _uiRenameGroup() {
+  async function _uiRenameGroup() {
     if (_currentRole !== 'owner') return;
     const cur = (_currentGroup && _currentGroup.name) || '';
-    const next = prompt(t('tg.renameGroupPrompt'), cur);
+    const _t2 = t('tg.renameGroupPrompt');
+    const next = (typeof showInputModal === 'function' ? await showInputModal({ title: _t2, defaultValue: cur }) : prompt(_t2, cur));
     if (next && next.trim() && next.trim() !== cur) renameGroup(next.trim());
   }
 
-  function _uiRenameDeck(oldName) {
+  async function _uiRenameDeck(oldName) {
     if (_currentRole !== 'owner') return;
-    const next = prompt(t('tg.renameDeckPrompt').replace('{name}', oldName), oldName);
+    const _t3 = t('tg.renameDeckPrompt').replace('{name}', oldName);
+    const next = (typeof showInputModal === 'function' ? await showInputModal({ title: _t3, defaultValue: oldName }) : prompt(_t3, oldName));
     if (next && next.trim() && next.trim() !== oldName) renameDeck(oldName, next.trim());
   }
 

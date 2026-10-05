@@ -1516,6 +1516,28 @@ if (typeof window.addEventListener === 'function') {
             return String(deckSchluessel).replace(/\s*\([^()]*\)\s*$/, '').trim();
         }
 
+        /* FE-58 (T3-01, 05.10.2026): „Max Consistency“/„Generieren“ hat hier
+         * `rarityPreferences = {}` gesetzt und gespeichert — EIN Speicher fuer
+         * ALLE Decks und Quellen. Gemessen: 25 -> 22 Eintraege, 19 Vorlieben
+         * anderer Decks (Dragapult ex ASC 160, Poke Pad 30C 126 …) still weg.
+         * Geleert wird jetzt nur, was das Generieren selbst neu waehlt: die
+         * Kartennamen des gewaehlten Archetyps. Alles andere bleibt. */
+        function _seltenheitFuerGenerierenLeeren(cards) {
+            if (typeof rarityPreferences !== 'object' || !rarityPreferences) return [];
+            const namen = new Set();
+            (cards || []).forEach(function (c) {
+                const n = c && (c.card_name || c.full_card_name || c.name);
+                if (n) namen.add(_deckLeerenBasisname(n));
+            });
+            const weg = [];
+            Object.keys(rarityPreferences).forEach(function (k) {
+                if (namen.has(_deckLeerenBasisname(k))) { delete rarityPreferences[k]; weg.push(k); }
+            });
+            if (weg.length && typeof saveRarityPreferences === 'function') saveRarityPreferences();
+            return weg;
+        }
+        window._seltenheitFuerGenerierenLeeren = _seltenheitFuerGenerierenLeeren;
+
         /* BEFUND B1 (Teil b): hier stand `rarityPreferences = {}` gefolgt
          * von saveRarityPreferences(). Das ist EIN Speicher fuer ALLE DREI
          * Quellen — wer sein Past-Meta-Deck leerte, verlor auch die
@@ -5440,11 +5462,6 @@ if (typeof window.addEventListener === 'function') {
         function autoComplete(source, rarityMode) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             
-            // CRITICAL: Clear all specific rarity preferences before generating deck
-            // This ensures the selected rarity mode (min/max) is applied correctly
-            rarityPreferences = {};
-            saveRarityPreferences();
-            
             // Set global rarity preference based on button clicked
             if (rarityMode) {
                 globalRarityPreference = rarityMode;
@@ -5460,6 +5477,9 @@ if (typeof window.addEventListener === 'function') {
             } else if (source === 'pastMeta') {
                 cards = pastMetaCurrentCards; // Use the currently selected deck cards
             }
+            // FE-58: nur die Vorlieben dieses Archetyps leeren, damit der
+            // gewaehlte Modus (min/max) greift — nie den ganzen Speicher.
+            _seltenheitFuerGenerierenLeeren(cards);
             
             if (!cards || cards.length === 0) {
                 showToast(t('deck.noCardsToAdd'), 'warning');
@@ -9391,10 +9411,6 @@ if (typeof window.addEventListener === 'function') {
                 return res.rows;
             };
 
-            // Clear specific rarity preferences before generating
-            rarityPreferences = {};
-            saveRarityPreferences();
-            
             // Set global rarity preference
             if (rarityMode) {
                 globalRarityPreference = rarityMode;
@@ -9410,6 +9426,8 @@ if (typeof window.addEventListener === 'function') {
             } else if (source === 'pastMeta') {
                 cards = pastMetaCurrentCards;
             }
+            // FE-58: nur die Vorlieben dieses Archetyps leeren (s. o.).
+            _seltenheitFuerGenerierenLeeren(cards);
 
             console.info('[autoCompleteConsistency] cards loaded', {
                 source: source,

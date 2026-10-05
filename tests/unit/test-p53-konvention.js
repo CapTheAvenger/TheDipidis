@@ -60,7 +60,7 @@ function schneideAnwendung() {
     const marke = '    const adjA = _deckWRAdjustment[a] || 0;';
     const anfang = MC.indexOf(marke);
     assert.ok(anfang >= 0, 'der Anwendungsteil von Predictor 5.3 ist verschwunden');
-    const ende = MC.indexOf('return { pWin, pTie, pLoss, partien: base.partien || 0 };', anfang);
+    const ende = MC.indexOf('return { pWin, pTie, pLoss, partien: base.partien || 0, schub };' /* DA-48: + schub */, anfang);
     assert.ok(ende > anfang, 'der Anwendungsteil hat kein return mehr');
     const stueck = MC.slice(anfang, MC.indexOf('\n', ende));
     return 'function anwenden(a, b, base, _deckWRAdjustment) {\n' + stueck + '\n}';

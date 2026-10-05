@@ -470,8 +470,13 @@ describe('M-11 — die gemischte Paarung wird mit den Quellgewichten nachgerechn
        Gewichten, die in der Quelle stehen. Ein geaendertes Gewicht
        aendert damit das Ergebnis, und die festgehaltene Zahl faellt. */
     function mische({ day2, day1, overall, online }) {
-        const block = schnittOhne('const sources = [];',
+        let block = schnittOhne('const sources = [];',
             '    // If sources.length === 0 → no labs data for this pair → leave');
+        if (typeof global.__mcSrcMutation === 'function') {
+            const vorher = block;
+            block = global.__mcSrcMutation(block);
+            assert.notEqual(block, vorher, 'die Mutation hat nichts geaendert');
+        }
         const clip = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
         const fn = new Function('_lookupPair', 'day2Map', 'day1Map', 'overallMap',
             'MATCHUP_BLEND_WEIGHT_DAY2', 'MATCHUP_BLEND_WEIGHT_DAY1', 'MATCHUP_BLEND_WEIGHT_ONLINE',
@@ -484,22 +489,43 @@ describe('M-11 — die gemischte Paarung wird mit den Quellgewichten nachgerechn
             { pWin: online, pTie: 0.02, pLoss: 1 - online - 0.02, partien: 100 });
     }
 
-    it('Day 2 60 %, Day 1 40 %, Online 50 % ergibt 51,0 % — 0,45/0,35/0,20', () => {
+    /* DA-48 (05.10.2026, Hausi: „Rechnung angleichen"): gemischt werden
+       QUOTEN S/(S+N) — Online geht als pWin/(pWin+pLoss) ein (0,50/0,98),
+       das Ergebnis wird danach mit dem Unentschieden-Anteil (0,02) zu
+       pWin. Vorher stand Online als pWin (mit U) in derselben Summe. */
+    const QON = 0.50 / 0.98, REST = 0.98;
+    it('Day 2 60 %, Day 1 40 %, Online 50 % — 0,45/0,35/0,20 auf Quoten', () => {
         const r = mische({ day2: { winPct: 60, games: 9 }, day1: { winPct: 40, games: 30 }, online: 0.50 });
-        assert.ok(Math.abs(r.pWin - 0.51) < 1e-12,
-            `erwartet 0,51 — gerechnet ${r.pWin}. Bei 0,55 statt 0,45 fuer Day 2 waeren es 0,57.`);
+        const soll = (0.45 * 0.60 + 0.35 * 0.40 + 0.20 * QON) * REST;
+        assert.ok(Math.abs(r.pWin - soll) < 1e-12,
+            `erwartet ${soll} — gerechnet ${r.pWin}.`);
     });
 
-    it('faellt Day 1 unter die Partienschwelle, wird auf 100 % hochgerechnet', () => {
-        // 0.45/0.65 * 0.60 + 0.20/0.65 * 0.50 = 0.569230…
+    it('ohne echte Day-1-Karte und ohne Overall traegt Day 2 die vollen 80 %', () => {
         const r = mische({ day2: { winPct: 60, games: 9 }, day1: { winPct: 40, games: 4 }, online: 0.50 });
-        assert.ok(Math.abs(r.pWin - (0.45 / 0.65 * 0.60 + 0.20 / 0.65 * 0.50)) < 1e-12);
+        assert.ok(Math.abs(r.pWin - (0.80 * 0.60 + 0.20 * QON) * REST) < 1e-12);
         assert.deepEqual(r._majorSources.map(s => s.kind), ['day2', 'online']);
+    });
+
+    it('DA-48: liegt Overall vor, faellt es NICHT mehr hinter Day 2 weg', () => {
+        // Excadrill–Dragapult: 21 Day-2-Matches verdraengten 222 Major-Matches.
+        const r = mische({ day2: { winPct: 48.6, games: 21 }, overall: { winPct: 47.2, games: 222 }, online: 0.546 });
+        assert.deepEqual(r._majorSources.map(s => s.kind), ['overall', 'online']);
+        assert.equal(r._majorSources[0].games, 222);
+    });
+
+    it('VERFAELSCHUNG: mit dem alten „Overall nur ohne Day 2" faellt es auf', () => {
+        const kaputt = s => s.replace("if (!sources.some(x => x.kind === 'day1')) {", 'if (sources.length === 0) {');
+        const alt = global.__mcSrcMutation = kaputt;
+        try {
+            const r = mische({ day2: { winPct: 48.6, games: 21 }, overall: { winPct: 47.2, games: 222 }, online: 0.546 });
+            assert.notDeepEqual(r._majorSources.map(s => s.kind), ['overall', 'online']);
+        } finally { global.__mcSrcMutation = null; void alt; }
     });
 
     it('ohne Tagesaufteilung traegt Overall die vollen 80 %', () => {
         const r = mische({ overall: { winPct: 60, games: 40 }, online: 0.50 });
-        assert.ok(Math.abs(r.pWin - (0.80 * 0.60 + 0.20 * 0.50)) < 1e-12);
+        assert.ok(Math.abs(r.pWin - (0.80 * 0.60 + 0.20 * QON) * REST) < 1e-12);
         assert.deepEqual(r._majorSources.map(s => s.kind), ['overall', 'online']);
         assert.ok(Math.abs(r._majorSources[0].weight - 0.80) < 1e-12);
     });

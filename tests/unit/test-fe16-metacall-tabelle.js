@@ -157,6 +157,7 @@ describe('FE-16 — die Meta-Call-Tabelle rechnet jede Zeile', () => {
             'function _mctWrKopf(L)',
             'function _mctQuotenName(id)',
             'function _mctOnline(name)',
+            'function _paarungTeile(m)',   // DA-48: Aufschluesselung im Tooltip
             'function _mctZeileRechne(name, field, istMein)',
             'function _wrHandWert(deckName)',
             'function _mctZelleWr(z, L, deckName)',
@@ -234,7 +235,9 @@ describe('FE-16 — die Meta-Call-Tabelle rechnet jede Zeile', () => {
         const alpha = z.find(x => x.includes('Alpha'));
         const beta = z.find(x => x.includes('>Beta<'));
         /* seit FE-23 (01.10.2026) ein Eingabefeld mit derselben Zahl */
-        assert.match(alpha, /class="[^"]*mc-mct-wr is-schlecht[^"]*"[^>]*value="40"/, 'Alpha zeigt nicht pWin 40 %');
+        /* DA-47 (05.10.2026): die Zelle zeigt S/(S+N) = 0,4/0,9 = 44,4 %,
+           nicht mehr pWin 40 %. */
+        assert.match(alpha, /class="[^"]*mc-mct-wr is-schlecht[^"]*"[^>]*value="44\.4"/, 'Alpha zeigt nicht S/(S+N) 44,4 %');
         assert.match(beta, /Spiegel/);
     });
 

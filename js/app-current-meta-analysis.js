@@ -82,7 +82,8 @@
          * einzige Weg, den Namen zur Laufzeit aus js/win-rate-konvention.js
          * zu holen, statt ihn ein zweites Mal hinzuschreiben. */
         const CMA_QUOTEN_SCHLUESSEL = {
-            'stats.totalWinrate': 'mitUnentschieden',
+            // DA-47 (05.10.2026): S/(S+N) aus der Bilanz, wie Tier-Karte und Heatmap.
+            'stats.totalWinrate': 'ohneUnentschieden',
             'matchup.winRate':    'ohneUnentschieden',
         };
 
@@ -1946,24 +1947,27 @@
             const WK = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
             /* KEIN ABGESCHRIEBENER NAME. Faellt das Modul aus, steht die
                FORMEL da — sie ist kein vierter Name und nie falsch. */
-            const kurzName = cmaQuotenName('mitUnentschieden');
-            const kurzFormel = (WK && WK.hol('mitUnentschieden') && WK.hol('mitUnentschieden').formel)
-                || 'S / (S + N + U)';
+            /* DA-47 (05.10.2026, Entscheidung Hausi „Rechnung angleichen"):
+               die Kachel zeigt jetzt S/(S+N) aus der Bilanz derselben Zeile —
+               dieselbe Zahl wie Tier-Karte und Heatmap. */
+            const kurzName = cmaQuotenName('ohneUnentschieden');
+            const kurzFormel = (WK && WK.hol('ohneUnentschieden') && WK.hol('ohneUnentschieden').formel)
+                || 'S / (S + N)';
             const winProzentName = (WK && WK.kurz('matchpunkte')) || 'Win %';
             const winProzentFormel = (WK && WK.hol('matchpunkte') && WK.hol('matchpunkte').formel)
                 || '(3S + U) / (3 · Matches)';
             return de
-                ? `${kurzName} = ${kurzFormel}: Siege ÷ alle Matches, Unentschieden stehen im `
-                  + `Nenner und zählen nicht als halber Sieg. NICHT „${winProzentName}“ — `
+                ? `${kurzName} = ${kurzFormel}: Siege ÷ entschiedene Matches, Unentschieden `
+                  + `zählen nicht mit. NICHT „${winProzentName}“ — `
                   + `so heißt bei Limitless die Matchpunkte-Konvention ${winProzentFormel}, `
                   + `und die wird hier nicht gerechnet. ${nenner} Quelle: data/limitless_online_decks.csv, `
-                  + `Spalte win_rate_numeric. Zeitraum: Gesamtstand des letzten Scraper-Laufs — `
+                  + `Spalten wins und losses. Zeitraum: Gesamtstand des letzten Scraper-Laufs — `
                   + `die Datei führt kein Turnierdatum, das Datenfenster „Daten ab“ wirkt hier nicht.`
-                : `${kurzName} = ${kurzFormel}: wins ÷ all games, ties sit in the denominator and `
-                  + `do not count as half a win. NOT “${winProzentName}” — that is the label Limitless `
+                : `${kurzName} = ${kurzFormel}: wins ÷ decided games, ties left out. `
+                  + `NOT “${winProzentName}” — that is the label Limitless `
                   + `uses for the match-points convention ${winProzentFormel}, which is not what is `
                   + `computed here. ${nenner} Source: data/limitless_online_decks.csv, `
-                  + `column win_rate_numeric. Period: cumulative for the latest scraper run — `
+                  + `columns wins and losses. Period: cumulative for the latest scraper run — `
                   + `the file carries no tournament date, so the “data from” window does not apply here.`;
         }
 
@@ -2633,7 +2637,13 @@
                    Datei fuehrt daneben `win_rate_numeric` ("54,05"),
                    genau fuer diesen Fall. Auf demselben Bildschirm
                    stand die Kachel darueber auf "54,0 %". */
-                if (deckStatEntry && (deckStatEntry.win_rate_numeric || deckStatEntry.win_rate)) {
+                // DA-47: S/(S+N) aus der Bilanz, wenn sie da ist.
+                const _s = deckStatEntry ? parseInt(deckStatEntry.wins, 10) : NaN;
+                const _n = deckStatEntry ? parseInt(deckStatEntry.losses, 10) : NaN;
+                if (Number.isFinite(_s) && Number.isFinite(_n) && (_s + _n) > 0) {
+                    const zahl = _s / (_s + _n) * 100;
+                    winrate = (typeof zahlLokal === 'function' ? zahlLokal(zahl, 2) : zahl.toFixed(2)) + ' %';
+                } else if (deckStatEntry && (deckStatEntry.win_rate_numeric || deckStatEntry.win_rate)) {
                     const roh = deckStatEntry.win_rate_numeric || deckStatEntry.win_rate;
                     const zahl = (typeof parseLocaleNumber === 'function')
                         ? parseLocaleNumber(roh, NaN) : parseFloat(String(roh).replace(',', '.'));

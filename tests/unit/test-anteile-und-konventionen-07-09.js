@@ -426,7 +426,7 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
         assert.notEqual(WK.kurz('ohneUnentschieden'), 'Win %');
     });
 
-    it('die Deck-Kachel: die Datei rechnet S/(S+N+U) — und der Text sagt das', () => {
+    it('die Deck-Kachel: die Datei rechnet S/(S+N+U), die Kachel S/(S+N) — und der Text sagt das', () => {
         const WK = konventionen('de');
         /* WELCHE Konvention wirklich gerechnet wird, kommt aus den DATEN:
            Zeilen, bei denen genau EINE der drei die Spalte trifft. */
@@ -452,12 +452,15 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
         const zeile = eindeutig[0];
         const text = vm.runInContext('_cmWinrateFussnote(z)',
             Object.assign(s.kontext, { z: zeile }));
-        assert.equal(behaupteterName(text), WK.kurz('mitUnentschieden'),
+        /* DA-47 (05.10.2026): die Kachel zeigt nicht mehr die Dateispalte,
+           sondern S/(S+N) aus der Bilanz derselben Zeile (Entscheidung Hausi
+           „Rechnung angleichen"). Der Text nennt deshalb diese Konvention. */
+        assert.equal(behaupteterName(text), WK.kurz('ohneUnentschieden'),
             'der Fussnotentext behauptet einen anderen Namen als die Konvention, '
             + 'die er wirklich rechnet — genau Befund B2.\nText: ' + text);
         assert.notEqual(behaupteterName(text), WK.kurz('matchpunkte'),
             'der reservierte Name steht wieder ueber einer anderen Formel');
-        assert.ok(text.includes(WK.KONVENTIONEN.mitUnentschieden.formel),
+        assert.ok(text.includes(WK.KONVENTIONEN.ohneUnentschieden.formel),
             'die Formel fehlt — dann ist der Kurzname allein wieder eine von dreien');
         /* Der Nenner steht weiter drin: er war der Grund fuer H6. */
         assert.ok(text.includes(String(zahl(zeile.wins) + zahl(zeile.losses) + zahl(zeile.ties))

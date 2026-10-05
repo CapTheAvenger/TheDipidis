@@ -196,7 +196,8 @@ test('der Abschnitt "Meta-Performance" fuellt den Namen erst beim Anzeigen', () 
     // Die Liste wird beim Laden einmal ausgewertet; kurz() haengt aber
     // an der Sprache. Ein dort schon eingesetzter Name bliebe beim
     // Sprachwechsel stehen - deshalb der Platzhalter.
-    assert.ok(SEKTION.includes('{quote:mitUnentschieden}'),
+    // DA-47 (05.10.2026): die Spalte rechnet S/(S+N).
+    assert.ok(SEKTION.includes('{quote:ohneUnentschieden}'),
         'der Platzhalter in der Abschnittsliste fehlt');
     assert.ok(/function fuelleQuoten/.test(SEKTION),
         'fuelleQuoten() fehlt - der Platzhalter wuerde roh angezeigt');

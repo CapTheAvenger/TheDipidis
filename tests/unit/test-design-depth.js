@@ -90,7 +90,9 @@ describe('die Vergleichsdatei wird gelesen, wie sie geschrieben ist', () => {
         assert.deepEqual(offenders, [], `noch abgeschnitten: ${offenders.join(', ')}`);
         assert.match(TIER, /share: parseLocaleNumber\(deck\.new_share, 0\)/);
         assert.match(TIER, /old_share: parseLocaleNumber\(deck\.old_share, 0\)/);
-        assert.match(TIER, /winrate: parseLocaleNumber\(deck\.new_winrate, 0\)/);
+        // DA-47: die Zahl der Vergleichsdatei wird weiter ungekuerzt gelesen;
+        // als Win-Rate gilt S/(S+N) aus der Bilanz, wo es sie gibt.
+        assert.match(TIER, /const _mit = parseLocaleNumber\(deck\.new_winrate, 0\)/);
     });
 
     it('die Tier-Einstufung hängt an der ungekürzten Zahl', () => {

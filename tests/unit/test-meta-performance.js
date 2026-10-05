@@ -74,7 +74,8 @@ describe('Meta-Performance — beide Zaehlungen in einer Tabelle', () => {
            gefordert ist nicht ein Wortlaut, sondern die Herkunft — und
            dass die richtige Konvention verlangt wird. Dass sie zu den
            Daten passt, prueft tests/unit/test-w1-konvention-passt.js. */
-        assert.match(TIER, /de: tierQuotenName\('mitUnentschieden'\)/,
+        // DA-47 (05.10.2026): die Spalte zeigt S/(S+N) aus der Bilanz.
+        assert.match(TIER, /de: tierQuotenName\('ohneUnentschieden'\)/,
             'der Kopf der Quotenspalte holt seinen Namen nicht mehr aus '
             + 'js/win-rate-konvention.js — dann steht dort wieder ein Hausname');
         /* "Antritte" heisst seit dem 01.09.2026 "Turnier-Antritte".

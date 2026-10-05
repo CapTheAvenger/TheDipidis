@@ -171,8 +171,10 @@ describe('Die vierte Konvention steht nirgends mehr in einer Anzeige', () => {
         assert.ok(!/\['Win Rate',|\['Win rate',/.test(q),
             'der Glossareintrag traegt wieder den Hausnamen als Ueberschrift');
         const eintrag = q.slice(i, i + 700);
-        assert.ok(/Nenner|denominator/.test(eintrag),
-            'der Eintrag sagt nicht, dass Unentschieden im Nenner stehen');
+        // DA-47 (05.10.2026): Win-Rate = S/(S+N) — der Eintrag sagt, dass
+        // Unentschieden NICHT mitzaehlen, und rechnet es vor.
+        assert.ok(/Unentschieden zählen nicht mit|Ties are ' \+\s*'left out|Ties are left out/.test(eintrag),
+            'der Eintrag sagt nicht, dass Unentschieden nicht mitzaehlen');
     });
 
     it('die Fun-Event-Spalte rechnet keine halben Siege', () => {

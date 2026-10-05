@@ -163,8 +163,13 @@
                Matchpunkten, „Win-Rate" ist diese hier (S/(S+N+U)). Die
                Formel steht weiter im Hinweis (langDe). Bis zum 27.09.2026:
                „Siegquote inkl. Unentschieden". */
-            kurzDe: 'Win-Rate',
-            kurzEn: 'Win rate',
+            /* DA-47 (05.10.2026, Entscheidung Hausi „Rechnung angleichen"):
+               „Win-Rate" heisst ab heute die Seiten-Quote S/(S+N) (siehe
+               ohneUnentschieden). Diese Konvention steht nur noch dort, wo
+               die Quelle keine Bilanz liefert (Pocket, Bildkarten) — mit
+               ihrem eigenen, unverwechselbaren Namen. */
+            kurzDe: 'Siegquote inkl. Unentschieden',
+            kurzEn: 'Win share incl. ties',
             langDe: 'Anteil gewonnener Matches an allen gespielten — Unentschieden '
                   + 'zaehlen im Nenner mit, aber nicht als halber Sieg. Die Zahl '
                   + 'sinkt, je haeufiger unentschieden gespielt wird; zwischen zwei '
@@ -206,8 +211,12 @@
             kuerzelDe: 'WR',
             kuerzelEn: 'WR',
             formel: 'S / (S + N)',
-            kurzDe: 'Siegquote ohne Unentschieden',
-            kurzEn: 'Win share excluding ties',
+            /* DA-47 (05.10.2026): die EINE Win-Rate der Seite. Bis heute
+               trug sie den langen Namen „Siegquote ohne Unentschieden" und
+               „Win-Rate" hiess S/(S+N+U) — fuer dieselbe Bilanz standen
+               45,9 / 39,2 / 44,0 % (Mega Excadrill, Major) auf einer Seite. */
+            kurzDe: 'Win-Rate',
+            kurzEn: 'Win rate',
             langDe: 'Anteil gewonnener an den entschiedenen Matches — Unentschieden '
                   + 'bleiben ganz aussen vor. Als einzige der drei Konventionen '
                   + 'haengt sie nicht davon ab, wie oft im Meta unentschieden '

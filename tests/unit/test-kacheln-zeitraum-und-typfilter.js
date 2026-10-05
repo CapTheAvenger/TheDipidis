@@ -388,7 +388,8 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {
         assert.match(text, /14\.?861 Matches|14861 Matches/, 'der Nenner fehlt');
         assert.match(text, /7\.?943–6\.?642–276|7943–6642–276/, 'die Bilanz fehlt');
         assert.match(text, /limitless_online_decks\.csv/, 'die Quelldatei fehlt');
-        assert.match(text, /win_rate_numeric/, 'das Feld fehlt');
+        // DA-47 (05.10.2026): die Kachel rechnet S/(S+N) aus wins und losses.
+        assert.match(text, /Spalten wins und losses/, 'das Feld fehlt');
         assert.match(text, /Zeitraum/, 'der Zeitraum fehlt');
         assert.match(text, /Win %/, 'die Limitless-Bezeichnung "Win %" fehlt');
     });

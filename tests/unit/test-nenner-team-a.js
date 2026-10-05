@@ -48,7 +48,13 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {
             'die Win Rate wird nicht mehr mit der Antrittszahl gewichtet');
         assert.match(TIER, /group\.totalCount \+= deckCount/,
             'totalCount summiert nicht mehr dieselbe Menge');
-        assert.match(TIER, /weightedWinrate: item\.totalCount > 0 \? \(item\.weightedWinrateSum \/ item\.totalCount\)/,
+        /* DA-47 (05.10.2026): liegen fuer alle Varianten Bilanzen vor, ist
+           die Familien-Win-Rate S/(S+N) ueber die summierten Bilanzen;
+           nur ohne Bilanz bleibt der gewichtete Mittelwert — mit totalCount
+           als Nenner wie bisher. */
+        assert.match(TIER, /item\.siege \/ \(item\.siege \+ item\.niederlagen\) \* 100/,
+            'die Familien-Win-Rate summiert nicht die Bilanzen');
+        assert.match(TIER, /\(item\.totalCount > 0 \? \(item\.weightedWinrateSum \/ item\.totalCount\) : 0\)/,
             'die Win Rate teilt nicht mehr durch totalCount');
         assert.match(TIER, /const antritte = Number\(item\.totalCount\) \|\| 0;/,
             'der angezeigte Nenner kommt nicht aus totalCount');

@@ -184,6 +184,16 @@ function probenComparison() {
     }).filter(p => p && [p.wert, p.s, p.n, p.u].every(Number.isFinite) && (p.s + p.n + p.u) > 0);
 }
 
+/* DA-47 (05.10.2026): die Tier-Liste zeigt nicht mehr new_winrate, sondern
+   S/(S+N) aus der Bilanz derselben Decks. Gemessen wird deshalb der Wert,
+   den app-tier-meta.js daraus rechnet (s / (s + n)), gegen die Bilanz. */
+function probenBilanzOnline() {
+    return csv('data/limitless_online_decks.csv', ';').map((b) => {
+        const s = zahl(b.wins), n = zahl(b.losses), u = zahl(b.ties);
+        return { wert: (s + n) > 0 ? s / (s + n) * 100 : NaN, s, n, u };
+    }).filter(p => [p.wert, p.s, p.n, p.u].every(Number.isFinite) && (p.s + p.n + p.u) > 0);
+}
+
 // ── die Hilfsfunktionen der Anzeigedateien, echt ausgefuehrt ─────────
 
 function helferAus(datei, praefix) {
@@ -229,8 +239,9 @@ const STELLEN = [
         praefix: 'cma',
         anker: /'stats\.totalWinrate':\s*'([A-Za-z]+)'/,
         schluessel: 'stats.totalWinrate',
-        proben: probenOnlineDecks,
-        quelle: 'data/limitless_online_decks.csv, Spalte win_rate_numeric',
+        // DA-47 (05.10.2026): die Kachel rechnet S/(S+N) aus der Bilanz.
+        proben: probenBilanzOnline,
+        quelle: 'data/limitless_online_decks.csv, S/(S+N) aus wins/losses (DA-47)',
     },
     {
         name: 'Deck-Analyse: Matchup-Feld (matchup.winRate)',
@@ -274,9 +285,8 @@ const STELLEN = [
         praefix: 'tier',
         anker: /\{ k: 'wr',\s+de: tierQuotenName\('([A-Za-z]+)'\)/,
         schluessel: null,   // der Kopf ist reiner Laufzeitname, kein i18n-Wert
-        proben: probenComparison,
-        quelle: 'data/limitless_online_decks_comparison.csv, Spalte new_winrate '
-              + '(Bilanz aus data/limitless_online_decks.csv)',
+        proben: probenBilanzOnline,
+        quelle: 'data/limitless_online_decks.csv, S/(S+N) aus wins/losses (DA-47)',
     },
     {
         name: 'Tier-Kachel: Plakette „… % WR" (tier.rogueThinTip)',
@@ -284,9 +294,8 @@ const STELLEN = [
         praefix: 'tier',
         anker: /const wrTitel = escapeHtml\(tierQuotenHinweis\('([A-Za-z]+)'\)/,
         schluessel: 'tier.rogueThinTip',
-        proben: probenComparison,
-        quelle: 'data/limitless_online_decks_comparison.csv, Spalte new_winrate '
-              + '(Bilanz aus data/limitless_online_decks.csv)',
+        proben: probenBilanzOnline,
+        quelle: 'data/limitless_online_decks.csv, S/(S+N) aus wins/losses (DA-47)',
     },
 ];
 
@@ -439,18 +448,19 @@ describe('W1 — der angezeigte Name passt zur gerechneten Konvention', () => {
             },
             {
                 name: 'Tier-Kachel, Plakette „… % WR"',
-                datei: 'js/app-tier-meta.js', praefix: 'tier', konvention: 'mitUnentschieden',
-                markup: /const wrTitel = escapeHtml\(tierQuotenHinweis\('mitUnentschieden'\)/,
+                datei: 'js/app-tier-meta.js', praefix: 'tier', konvention: 'ohneUnentschieden',
+                markup: /const wrTitel = escapeHtml\(tierQuotenHinweis\('ohneUnentschieden'\)/,
             },
             {
                 name: 'Startseite, Heldenplakette „WR …"',
-                datei: 'js/app-tier-meta.js', praefix: 'tier', konvention: 'mitUnentschieden',
-                markup: /const wrTitel = tierQuotenHinweis\('mitUnentschieden'\)/,
+                datei: 'js/app-tier-meta.js', praefix: 'tier', konvention: 'ohneUnentschieden',
+                // DA-47: mit Bilanz S/(S+N), ohne Bilanz die alte Zahl samt ihrem Namen.
+                markup: /const wrTitel = tierQuotenHinweis\(item\.mitBilanz \? 'ohneUnentschieden' : 'mitUnentschieden'\)/,
             },
             {
                 name: 'Labs-Plakette „🏆 … WR"',
-                datei: 'js/app-tier-meta.js', praefix: 'tier', konvention: 'mitUnentschieden',
-                markup: /const _labsTitle = tierQuotenHinweis\('mitUnentschieden'\)/,
+                datei: 'js/app-tier-meta.js', praefix: 'tier', konvention: 'ohneUnentschieden',
+                markup: /const _labsTitle = tierQuotenHinweis\('ohneUnentschieden'\)/,
             },
             {
                 name: 'Deck-Analyse, Titel „Ø WR"',

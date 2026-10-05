@@ -217,8 +217,12 @@
                     labsHit = true;
                     // Labs WR over 50, capped, weighted higher
                     // (tournament data is a stronger trust signal).
+                    // DA-47 (D3-05): die Schwelle 50 gilt fuer S/(S+N) — die
+                    // Zahl, die die Karte daneben zeigt. Vorher S/(S+N+U):
+                    // Dragapult, Basic Box, Excadrill bekamen 0 Punkte.
+                    const _labsWr = (ent.winPctOhneU != null) ? ent.winPctOhneU : (ent.winPct || 0);
                     const labsWRComp = Math.max(0,
-                        Math.min((ent.winPct || 0) - 50, TIER_SCORE.LABS_WR_DECKEL))
+                        Math.min(_labsWr - 50, TIER_SCORE.LABS_WR_DECKEL))
                         * TIER_SCORE.LABS_WR_GEWICHT;
                     // Day-2 conversion: "actually converts entries
                     // into a deep run". The cap covers the realistic
@@ -268,6 +272,10 @@
          */
         function cmTierGrundlageZeile(g) {
             const de = (typeof getLang === 'function' ? getLang() : 'de') === 'de';
+            /* DA-47 (05.10.2026): der Name der Quote kommt aus
+               js/win-rate-konvention.js — S/(S+N), die Zahl der Tier-Karte. */
+            const _WK = (typeof window !== 'undefined' && window.WinRateKonvention) || null;
+            const wrN = _WK ? _WK.kurz('ohneUnentschieden') : 'S/(S+N)';
             const z = (x, st) => {
                 const n = Number(x);
                 if (!Number.isFinite(n)) return '?';
@@ -281,16 +289,16 @@
              * so gar nicht gerechnet wurde. */
             const labsDe = g.labsAktiv
                 ? ('und, wo eine Turnierdatei vorliegt (ab ' + ganz(g.labsMinPartien)
-                   + ' Matches je Deck), dem Turnier-Win % über 50 (bis +' + z(g.labsWrDeckel, 0)
+                   + ' Matches je Deck), der Turnier-' + wrN + ' über 50 (bis +' + z(g.labsWrDeckel, 0)
                    + ' pp, Gewicht ' + z(g.labsWrGewicht, 1) + ') samt Day-2-Quote (bis '
                    + z(g.tag2Deckel, 2) + ', Gewicht ' + z(g.tag2Gewicht, 0) + ')')
-                : 'Für dieses Meta liegt KEINE Turnierdatei vor — der dritte Anteil (Turnier-Win % und Day-2-Quote) fehlt, gerechnet wurde nur aus Anteil und Win %';
+                : 'Für dieses Meta liegt KEINE Turnierdatei vor — der dritte Anteil (Turnier-' + wrN + ' und Day-2-Quote) fehlt, gerechnet wurde nur aus Anteil und ' + wrN;
             const labsEn = g.labsAktiv
                 ? ('and, where a tournament file exists (from ' + ganz(g.labsMinPartien)
-                   + ' matches per deck), tournament Win % above 50 (up to +' + z(g.labsWrDeckel, 0)
+                   + ' matches per deck), tournament ' + wrN + ' above 50 (up to +' + z(g.labsWrDeckel, 0)
                    + ' pp, weight ' + z(g.labsWrGewicht, 1) + ') plus Day 2 conversion (up to '
                    + z(g.tag2Deckel, 2) + ', weight ' + z(g.tag2Gewicht, 0) + ')')
-                : 'No tournament file exists for this meta — the third component (tournament Win % and Day 2 conversion) is missing; the score used share and Win % only';
+                : 'No tournament file exists for this meta — the third component (tournament ' + wrN + ' and Day 2 conversion) is missing; the score used share and ' + wrN + ' only';
 
             /* BEFUND B6 (07.09.2026): hier stand "der Listenzahl des
                Rang-1-Decks". Gerechnet wird aber mit dem Maximum ueber alle
@@ -312,19 +320,19 @@
             const text = de
                 ? ('Grundlage der Reihenfolge: nicht der Meta-Anteil allein, sondern ein '
                    + 'zusammengesetzter Wert aus Anteil (bis ' + z(g.anteilDeckel, 0) + ' %, Gewicht '
-                   + z(g.anteilGewicht, 1) + '), Win % über 50 (bis +' + z(g.wrDeckel, 0) + ' pp, Gewicht '
+                   + z(g.anteilGewicht, 1) + '), ' + wrN + ' über 50 (bis +' + z(g.wrDeckel, 0) + ' pp, Gewicht '
                    + z(g.wrGewicht, 1) + '; geglättet gegen einen Vorwert von ' + ganz(g.vorListen)
                    + ' Listen bei 50 %)' + (g.labsAktiv ? ' ' : '. ') + labsDe + '. '
                    + 'Tier 1 fasst höchstens ' + ganz(g.t1Max) + ' Decks und verlangt zusätzlich mindestens '
-                   + z(g.minShare, 1) + ' % Anteil und ' + z(g.minWR, 1) + ' % Win %; Tier 2 höchstens '
+                   + z(g.minShare, 1) + ' % Anteil und ' + z(g.minWR, 1) + ' % ' + wrN + '; Tier 2 höchstens '
                    + ganz(g.t2Max) + ', Tier 3 höchstens ' + ganz(g.t3Max) + '.' + listenDe
                    + ' Deshalb kann ein Deck mit höherem Anteil unter einem mit niedrigerem stehen.')
                 : ('Basis of this order: not meta share alone, but a composite score of share (up to '
-                   + z(g.anteilDeckel, 0) + ' %, weight ' + z(g.anteilGewicht, 1) + '), Win % above 50 (up to +'
+                   + z(g.anteilDeckel, 0) + ' %, weight ' + z(g.anteilGewicht, 1) + '), ' + wrN + ' above 50 (up to +'
                    + z(g.wrDeckel, 0) + ' pp, weight ' + z(g.wrGewicht, 1) + '; shrunk against a prior of '
                    + ganz(g.vorListen) + ' lists at 50 %)' + (g.labsAktiv ? ' ' : '. ') + labsEn + '. '
                    + 'Tier 1 holds at most ' + ganz(g.t1Max) + ' decks and additionally requires at least '
-                   + z(g.minShare, 1) + ' % share and ' + z(g.minWR, 1) + ' % Win %; Tier 2 at most '
+                   + z(g.minShare, 1) + ' % share and ' + z(g.minWR, 1) + ' % ' + wrN + '; Tier 2 at most '
                    + ganz(g.t2Max) + ', Tier 3 at most ' + ganz(g.t3Max) + '.' + listenEn
                    + ' That is why a deck with a higher share can sit below one with a lower share.');
 
@@ -498,8 +506,14 @@
                 // zwischen zwei Skalen laeuft (siehe die Tier-1-Schwelle unten).
                 const matchPointPct = games > 0 ? (3 * e.wins + e.ties) / (3 * games) * 100 : 0;
                 const winPct = games > 0 ? e.wins / games * 100 : 0;
+                // DA-47 (05.10.2026, Entscheidung Hausi: Rechnung angleichen):
+                // die Win-Rate der Seite ist S/(S+N). Auf Majors liegen ~15 %
+                // Unentschieden; S/(S+N+U) liess jedes Deck dort 6-9 Punkte
+                // schwaecher aussehen und unter jede 50-%-Schwelle fallen.
+                const entschieden = e.wins + e.losses;
+                const winPctOhneU = entschieden > 0 ? e.wins / entschieden * 100 : null;
                 const day2Conv = e.day1 > 0 ? e.day2 / e.day1 : 0;
-                out[name] = { games, winPct, matchPointPct, day2Conv,
+                out[name] = { games, winPct, winPctOhneU, matchPointPct, day2Conv,
                               players: e.players, tournaments: e.tournaments.size,
                               wins: e.wins, losses: e.losses, ties: e.ties };
             }
@@ -1586,6 +1600,24 @@
             }
             
             if (metaData.length === 0) return;
+
+            /* DA-47 (D3-01, 05.10.2026): die Vergleichsdatei fuehrt nur
+               new_winrate = S/(S+N+U). Die Bilanzen stehen in
+               limitless_online_decks.csv (derselbe Lauf); daraus wird die
+               Win-Rate der Seite S/(S+N). Fehlt die Bilanz, bleibt die
+               Zahl der Vergleichsdatei stehen und traegt ihre Konvention. */
+            const _onlineBilanz = {};
+            try {
+                const _rows = await fetchAndParseCSV(`${BASE_PATH}limitless_online_decks.csv`);
+                (_rows || []).forEach(r => {
+                    const k = String(r.deck_name || '').trim();
+                    if (k) _onlineBilanz[k] = { s: parseInt(r.wins, 10) || 0, n: parseInt(r.losses, 10) || 0, u: parseInt(r.ties, 10) || 0 };
+                });
+            } catch (_e) { /* ohne Bilanzen bleibt die alte Zahl */ }
+            const _wrOhneU = (name) => {
+                const b = _onlineBilanz[String(name || '').trim()];
+                return (b && (b.s + b.n) > 0) ? b.s / (b.s + b.n) * 100 : null;
+            };
             
             // Normalisiere alle Decks und sortiere nach Share (absteigend)
             // parseLocaleNumber, nicht parseFloat: die Vergleichsdatei
@@ -1595,16 +1627,25 @@
             // Rohdaten und als die ±1,0-Sprünge in Improvers/Decliners,
             // die aus der Differenz zweier abgeschnittener Ganzzahlen
             // entstanden.
-            const normalizedDecks = metaData.map(deck => ({
-                archetype: deck.deck_name || deck.archetype,
+            const normalizedDecks = metaData.map(deck => {
+                const _name = deck.deck_name || deck.archetype;
+                const _ohne = _wrOhneU(_name);
+                const _mit = parseLocaleNumber(deck.new_winrate, 0);
+                const _b = _onlineBilanz[String(_name || '').trim()] || null;
+                return {
+                archetype: _name,
                 share: parseLocaleNumber(deck.new_share, 0),
                 new_share: parseLocaleNumber(deck.new_share, 0),
                 old_share: parseLocaleNumber(deck.old_share, 0),
-                winrate: parseLocaleNumber(deck.new_winrate, 0),
-                new_winrate: parseLocaleNumber(deck.new_winrate, 0),
+                winrate: _ohne != null ? _ohne : _mit,
+                winrateKonvention: _ohne != null ? 'ohneUnentschieden' : 'mitUnentschieden',
+                winrateMitU: _mit,
+                bilanz: _b,
+                new_winrate: _ohne != null ? _ohne : _mit,
                 count_change: parseInt(deck.count_change || 0),
                 new_count: parseInt(deck.new_count || 0)
-            }));
+            };
+            });
             normalizedDecks.sort((a, b) => b.share - a.share);
 
             // ===================== HERO SECTION =====================
@@ -1627,6 +1668,7 @@
                         totalCount: 0,
                         totalShare: 0,
                         weightedWinrateSum: 0,
+                        siege: 0, niederlagen: 0, mitBilanz: true,
                         variants: [],
                         representativeVariant: archetypeName,
                         representativeDeckCount: 0
@@ -1637,6 +1679,8 @@
                 group.totalCount += deckCount;
                 group.totalShare += share;
                 group.weightedWinrateSum += winrate * Math.max(1, deckCount);
+                if (deck.bilanz) { group.siege += deck.bilanz.s; group.niederlagen += deck.bilanz.n; }
+                else group.mitBilanz = false;
                 group.variants.push(archetypeName);
 
                 if (deckCount > group.representativeDeckCount) {
@@ -1650,7 +1694,11 @@
                 .slice(0, 5)
                 .map(item => ({
                     ...item,
-                    weightedWinrate: item.totalCount > 0 ? (item.weightedWinrateSum / item.totalCount) : 0
+                    // DA-47: Familie = Summe der Bilanzen, S/(S+N) — nicht der
+                    // Mittelwert der Varianten-Quoten.
+                    weightedWinrate: (item.mitBilanz && (item.siege + item.niederlagen) > 0)
+                        ? item.siege / (item.siege + item.niederlagen) * 100
+                        : (item.totalCount > 0 ? (item.weightedWinrateSum / item.totalCount) : 0)
                 }));
 
             let heroHtml = '';
@@ -1725,13 +1773,13 @@
                        die Formel nennt; den liefert tierQuotenHinweis(). Die
                        Zahl ist der mit den Antritten gewichtete Mittelwert der
                        Spalte new_winrate, also MIT_UNENTSCHIEDEN. */
-                    const wrTitel = tierQuotenHinweis('mitUnentschieden') + '  ' + (getLang() === 'de'
-                        ? (antritte > 0
-                            ? `Gewichteter Durchschnitt über ${nZahl} Antritte.`
-                            : 'Gewichteter Durchschnitt.')
-                        : (antritte > 0
-                            ? `Weighted average across ${nZahl} entries.`
-                            : 'Weighted average.'));
+                    const wrTitel = tierQuotenHinweis(item.mitBilanz ? 'ohneUnentschieden' : 'mitUnentschieden') + '  ' + (getLang() === 'de'
+                        ? (item.mitBilanz
+                            ? `Siege und Niederlagen aller Varianten zusammen: ${item.siege.toLocaleString('de-DE')}–${item.niederlagen.toLocaleString('de-DE')}${antritte > 0 ? `, über ${nZahl} Antritte` : ''}.`
+                            : (antritte > 0 ? `Gewichteter Durchschnitt über ${nZahl} Antritte.` : 'Gewichteter Durchschnitt.'))
+                        : (item.mitBilanz
+                            ? `Wins and losses of all variants combined: ${item.siege.toLocaleString('en-US')}–${item.niederlagen.toLocaleString('en-US')}${antritte > 0 ? `, across ${nZahl} entries` : ''}.`
+                            : (antritte > 0 ? `Weighted average across ${nZahl} entries.` : 'Weighted average.')));
 
                     heroHtml += `
                         <div class="tier-hero-card" role="button" tabindex="0"
@@ -1751,7 +1799,7 @@
                                             : `Sum across ${variantCount} variants — the individual variant is smaller and listed in the table below.`)
                                         : (getLang() === 'de' ? 'Eine einzelne Variante' : 'Single variant')}">${
                                         fmtPct(parseFloat(shareText))}</span>
-                                    <span class="stat-badge" title="${escapeHtmlAttr(wrTitel)}" data-quote-konvention="mitUnentschieden">WR ${fmtPct(parseFloat(winrateText))}</span>
+                                    <span class="stat-badge" title="${escapeHtmlAttr(wrTitel)}" data-quote-konvention="${item.mitBilanz ? 'ohneUnentschieden' : 'mitUnentschieden'}">WR ${fmtPct(parseFloat(winrateText))}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -2234,7 +2282,7 @@
                         if (!labsByName || !(_majorSumme > 0)) return null;
                         const e = labsByName[name] || labsByName[kanon(name)] || null;
                         if (!e || !(e.games > 0)) return null;
-                        return { anteil: (e.players / _majorSumme) * 100, wr: e.winPct };
+                        return { anteil: (e.players / _majorSumme) * 100, wr: (e.winPctOhneU != null ? e.winPctOhneU : e.winPct) };
                     };
                     const reihen = [...alleNamen].map(name => {
                         const t = turnierVon.get(name) || null;
@@ -2303,19 +2351,19 @@
                            aus limitless_online_decks_comparison.csv, und das
                            ist S/(S+N+U) — nicht die Matchpunkte, die
                            Limitless „Win %" nennt. */
-                        { k: 'wr',       de: tierQuotenName('mitUnentschieden'),
-                                         en: tierQuotenName('mitUnentschieden'),    num: true,
-                          tip: { de: tierQuotenHinweis('mitUnentschieden'),
-                                 en: tierQuotenHinweis('mitUnentschieden') } },
+                        { k: 'wr',       de: tierQuotenName('ohneUnentschieden'),
+                                         en: tierQuotenName('ohneUnentschieden'),    num: true,
+                          tip: { de: tierQuotenHinweis('ohneUnentschieden'),
+                                 en: tierQuotenHinweis('ohneUnentschieden') } },
                         /* FE-6: die Major-Werte daneben — nur sichtbar, wenn der
                            Auszug des laufenden Formats Zeilen traegt. */
                         { k: 'majorAnteil', de: 'Major-Anteil', en: 'Major share', num: true,
                           tip: { de: 'Anteil an den Antritten der Präsenzturniere (Majors) im laufenden Format.',
                                  en: 'Share of entries at in-person events (majors) in the current format.' } },
-                        { k: 'majorWr', de: 'Major ' + tierQuotenName('mitUnentschieden'),
-                                        en: 'Major ' + tierQuotenName('mitUnentschieden'), num: true,
-                          tip: { de: tierQuotenHinweis('mitUnentschieden') + ' Gemessen auf den Präsenzturnieren des laufenden Formats.',
-                                 en: tierQuotenHinweis('mitUnentschieden') + ' Measured at the in-person events of the current format.' } },
+                        { k: 'majorWr', de: 'Major ' + tierQuotenName('ohneUnentschieden'),
+                                        en: 'Major ' + tierQuotenName('ohneUnentschieden'), num: true,
+                          tip: { de: tierQuotenHinweis('ohneUnentschieden') + ' Gemessen auf den Präsenzturnieren des laufenden Formats.',
+                                 en: tierQuotenHinweis('ohneUnentschieden') + ' Measured at the in-person events of the current format.' } },
                         /* DREI UEBERSCHRIFTEN NEU BENANNT AM 01.09.2026.
                            Gemeldet: "was sind denn bitte 618,5 Antritte?
                            Was ist das fuer eine Kennzahl? … 'davon Top 8,
@@ -2843,7 +2891,9 @@
                     const wrGlatt = (sc && isFinite(sc.adjWR)) ? ((getLang() === 'de'
                         ? `  Geglättet (k = 50) — roh ${winRate.toFixed(1)} % aus ${listenN} Listen.`
                         : `  Smoothed (k = 50) — raw ${winRate.toFixed(1)} % from ${listenN} lists.`)) : '';
-                    const wrTitel = escapeHtml(tierQuotenHinweis('mitUnentschieden') + wrGlatt);
+                    // DA-47: S/(S+N) aus der Bilanz (alle 114 Zeilen der Vergleichsdatei haben
+                    // eine, gemessen 05.10. in tests/unit/test-w1-konvention-passt.js).
+                    const wrTitel = escapeHtml(tierQuotenHinweis('ohneUnentschieden') + wrGlatt);
                     
                     // Get archetype image
                     const archetypeCards = fuzzyArchetypeLookup(archetypeName, cardDataByArchetype);
@@ -2905,7 +2955,7 @@
                             // Formel neben die Zahl.
                             const _wpName = tierQuotenName('matchpunkte');
                             const _wpFormel = tierQuotenFormel('matchpunkte');
-                            const _labsTitle = tierQuotenHinweis('mitUnentschieden') + '  ' + (getLang() === 'de'
+                            const _labsTitle = tierQuotenHinweis('ohneUnentschieden') + '  ' + (getLang() === 'de'
                                 ? `Turnierdaten aus Limitless Labs · ${ent.tournaments} Turniere, ${ent.games} Matches. Die Spalte, die Limitless „${_wpName}“ nennt ${_wpFormel}, steht bei denselben Zeilen auf ${fmtPct(ent.matchPointPct)} — angezeigt wird sie hier NICHT.`
                                 : `Limitless Labs tournament data · ${ent.tournaments} tournaments, ${ent.games} games. The column Limitless calls “${_wpName}” ${_wpFormel} sits at ${fmtPct(ent.matchPointPct)} for the same rows — it is NOT what is shown here.`);
                             /* DA-35 (03.10.2026, Tiefenanalyse D-09): die Quote kam
@@ -2916,8 +2966,8 @@
                             const _duennMajor = Number.isFinite(ent.players) && ent.players < RUTSCH_MIN_SPIELER;
                             const _wert = _duennMajor
                                 ? `${ent.wins}–${ent.losses}–${ent.ties} · ${ent.players} ${getLang() === 'de' ? 'Spieler' : 'players'}`
-                                : `${fmtPct(ent.winPct)} WR`;
-                            labsBadge = `<span class="stat-badge stat-labs" title="${escapeHtml(_labsTitle)}" data-quote-konvention="mitUnentschieden">🏆 ${_wert} · ${ent.tournaments}T</span>`;
+                                : `${fmtPct(ent.winPctOhneU != null ? ent.winPctOhneU : ent.winPct)} WR`;
+                            labsBadge = `<span class="stat-badge stat-labs" title="${escapeHtml(_labsTitle)}" data-quote-konvention="ohneUnentschieden">🏆 ${_wert} · ${ent.tournaments}T</span>`;
                         }
                     }
 
@@ -2935,7 +2985,7 @@
                             <div class="deck-banner-content">
                                 <div class="deck-banner-name">${archetypeName}</div>
                                 <div class="deck-banner-stats">
-                                    <span class="stat-badge" title="${wrTitel}" data-quote-konvention="mitUnentschieden">${fmtPct(share)} · ${fmtPct(zeigWR)} WR</span>
+                                    <span class="stat-badge" title="${wrTitel}" data-quote-konvention="ohneUnentschieden">${fmtPct(share)} · ${fmtPct(zeigWR)} WR</span>
                                     ${listenN > 0
                                       ? `<span class="stat-badge stat-sample-size${listenN < ROGUE_MIN_LISTEN ? ' tier-listen-duenn' : ''}" title="${escapeHtml(listenN < ROGUE_MIN_LISTEN ? tierMitQuote(t('tier.rogueThinTip'), 'mitUnentschieden').replace('{n}', String(ROGUE_MIN_LISTEN)) : t('tier.rogueSampleTip'))}">${
                                           getLang() === 'de'

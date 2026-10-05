@@ -58,7 +58,8 @@
      * noch nicht da, und die Sprache kann sich spaeter noch aendern.
      * Faellt das Modul aus, steht die FORMEL da; die ist kein vierter
      * Name und nie falsch. */
-    var QU_GLOSSAR_KONVENTION = 'mitUnentschieden';
+    // DA-47 (05.10.2026): die Win-Rate des Glossars ist S/(S+N).
+    var QU_GLOSSAR_KONVENTION = 'ohneUnentschieden';
 
     function quotenFormel(id) {
         var K = window.WinRateKonvention;
@@ -213,12 +214,13 @@
                         // 48,69 %. 6430 / 13.206 = 48,69. Unentschieden stehen
                         // im Nenner, nicht als halber Sieg im Zähler.
                         ['{quote} ({formel})',
-                         'Gewonnene Matches geteilt durch alle gespielten. ' +
-                         'Unentschieden zählen im Nenner mit, aber nicht als ' +
-                         'halber Sieg. Beispiel: eine Bilanz von 6.430 Siegen, ' +
-                         '6.666 Niederlagen und 110 Unentschieden sind 13.206 ' +
-                         'Matches und damit 48,7 % — dieselbe Rechnung wie bei ' +
-                         'Limitless.'],
+                         // DA-47 (05.10.2026, Entscheidung Hausi): S/(S+N).
+                         'Gewonnene Matches geteilt durch entschiedene (Siege + ' +
+                         'Niederlagen). Unentschieden zählen nicht mit — so ist die ' +
+                         'Zahl online und auf Majors vergleichbar, obwohl dort viel ' +
+                         'häufiger unentschieden gespielt wird. Beispiel: 6.430 Siege, ' +
+                         '6.666 Niederlagen und 110 Unentschieden ergeben ' +
+                         '6.430 / 13.096 = 49,1 %.'],
                         ['Tier',
                          'Gruppierung nach Anteil und Erfolg. Die Schwellen stehen in der ' +
                          'Tier-Liste selbst.'],
@@ -383,10 +385,10 @@
                            Haus verworfen hat. Jetzt woertlich dieselbe
                            Aussage samt Beleg. */
                         ['{quote} ({formel})',
-                         'Matches won divided by all matches played. Ties count in the ' +
-                         'denominator, not as half a win. Example: a record of 6,430 wins, ' +
-                         '6,666 losses and 110 ties is 13,206 matches and therefore 48.7 % — ' +
-                         'the same arithmetic Limitless uses.'],
+                         'Matches won divided by decided matches (wins + losses). Ties are ' +
+                         'left out — that keeps online and major figures comparable, although ' +
+                         'majors draw far more often. Example: 6,430 wins, 6,666 losses and ' +
+                         '110 ties give 6,430 / 13,096 = 49.1 %.'],
                         ['Tier',
                          'Grouping by share and success. The thresholds are stated in the ' +
                          'tier list itself.'],

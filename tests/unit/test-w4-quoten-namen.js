@@ -356,7 +356,7 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
             konstanten: ['QU_GLOSSAR_KONVENTION'],
             ausdruck: 'mitQuote(z[0], QU_GLOSSAR_KONVENTION)',
             schluessel: null,
-            konvention: 'mitUnentschieden',
+            konvention: 'ohneUnentschieden',   // DA-47 (05.10.2026)
             binder: 'z',
             schreibt: ["esc(mitQuote(z[0], QU_GLOSSAR_KONVENTION))"],
         },

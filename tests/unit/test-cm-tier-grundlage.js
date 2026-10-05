@@ -47,6 +47,8 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
+const fs = require('node:fs');
+const path = require('node:path');
 const { QUELLE, funktion, schnitt } = require('./lib-tier-sandkasten.js');
 
 // ───────────────────────────────────────────────────────────────────
@@ -172,6 +174,7 @@ function zeile(sprache, g) {
         getLang: () => sprache,
         escapeHtml: (x) => String(x),
         window: {
+            getLang: () => sprache,
             DsAbschnittInfo: {
                 melde: (id, inhalt) => {
                     if (id !== 'tiers') {
@@ -183,6 +186,8 @@ function zeile(sprache, g) {
         }
     };
     vm.createContext(kasten);
+    // DA-47: der Quotenname kommt aus dem echten Konventionsmodul.
+    vm.runInContext(fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'win-rate-konvention.js'), 'utf8'), kasten);
     vm.runInContext(funktion('cmTierGrundlageZeile'), kasten);
     const zurueck = kasten.cmTierGrundlageZeile(g);
     assert.equal(zurueck, '',
@@ -241,7 +246,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
             ['Tier 2 höchstens 112', 'T2_MAX'],
             ['Tier 3 höchstens 113', 'T3_MAX'],
             ['114,0 % Anteil', 'T1_MIN_SHARE'],
-            ['115,0 % Win %', 'T1_MIN_WR'],
+            ['115,0 % Win-Rate', 'T1_MIN_WR'],
             ['mindestens 116 % der Listenzahl', 'MINDEST_ANTEIL_GROESSTER'],
             ['Vorwert von 121 Listen', 'TIER_SCORE.PRIOR_LISTEN'],
             ['Anteil (bis 122 %', 'TIER_SCORE.ANTEIL_DECKEL'],
@@ -332,14 +337,18 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
         assert.ok(s.includes('Tier 2 höchstens ' + T.T2_MAX), s);
         assert.ok(s.includes('Tier 3 höchstens ' + T.T3_MAX), s);
         assert.ok(s.includes(de(T.T1_MIN_SHARE, 1) + ' % Anteil'), s);
-        assert.ok(s.includes(de(T.T1_MIN_WR, 1) + ' % Win %'), s);
+        assert.ok(s.includes(de(T.T1_MIN_WR, 1) + ' % Win-Rate'), s);
     });
 
-    it('Win-Raten heissen "Win %"', () => {
+    /* DA-47 (05.10.2026, Entscheidung Hausi „Rechnung angleichen"): die
+       Rangfolge rechnet mit S/(S+N) — der Zahl, die auf der Tier-Karte
+       steht —, und die heisst auf der ganzen Seite „Win-Rate". „Win %"
+       bleibt den Matchpunkten vorbehalten und darf hier NICHT stehen. */
+    it('Win-Raten heissen "Win-Rate" (S/(S+N)), nicht "Win %"', () => {
         const d = satz('de'), e = satz('en');
-        assert.ok(d.includes('Win %'), 'deutsche Fassung');
-        assert.ok(e.includes('Win %'), 'englische Fassung');
-        assert.ok(!/Siegquote|Gewinnrate|win ?rate/i.test(d + e),
+        assert.ok(d.includes('Win-Rate'), 'deutsche Fassung');
+        assert.ok(/win rate/i.test(e), 'englische Fassung');
+        assert.ok(!/Win %|Siegquote|Gewinnrate/.test(d + e),
             'keine zweite Bezeichnung fuer dieselbe Groesse');
     });
 

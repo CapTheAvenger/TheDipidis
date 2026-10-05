@@ -1666,7 +1666,7 @@ function buildWishlistTargetPill(cmPriceRaw, userMaxRaw) {
   const titel = t('preis.zielPillTitel')
     .replace('{cm}', `${cm.toFixed(2).replace('.', ',')} €`)
     .replace('{max}', `${max.toFixed(2).replace('.', ',')} €`);
-  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,var(--solid-ok),#15803d);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(22,163,74,0.35);" title="${escapeHtml(titel)}">${escapeHtml(t('preis.zielPill'))}</div>`;
+  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,var(--solid-ok),#15803d);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(22,163,74,0.35);" title="${escapeHtml(titel)}">${escapeHtml(t('preis.zielPill').replace('{cm}', `${cm.toFixed(2).replace('.', ',')} €`))}</div>`;
 }
 
 function buildTradelistUnderpricedPill(cmPriceRaw, userMinRaw) {
@@ -4018,7 +4018,7 @@ async function chooseDeckFolderWithCreate(options = {}) {
   }
 
   if (selected === '__NEW_FOLDER__') {
-    const newFolderName = await showInputModal({ title: 'New Folder', message: 'Enter folder name:', placeholder: 'Folder name' });
+    const newFolderName = await showInputModal({ title: getLang()==='de' ? 'Neuer Ordner' : 'New Folder', message: getLang()==='de' ? 'Name des Ordners:' : 'Enter folder name:', placeholder: getLang()==='de' ? 'Ordnername' : 'Folder name' });
     if (!newFolderName || !newFolderName.trim()) {
       return null;
     }
@@ -4616,7 +4616,7 @@ async function openCompareSavedDeck(deckIndex) {
   modal.innerHTML = `
     <div style="background: var(--surface-1);border-radius:12px;max-width:760px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.35);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <h2 style="margin:0;font-size:1.25em;">Compare Deck: ${safeBaseDeckName}</h2>
+        <h2 style="margin:0;font-size:1.25em;">${getLang()==='de' ? 'Deck vergleichen' : 'Compare deck'}: ${safeBaseDeckName}</h2>
         <button id="deck-compare-source-close" style="background:none;border:none;font-size:24px;cursor:pointer;line-height:1;">✕</button>
       </div>
       <p style="margin:0 0 14px 0;color: var(--ink-2);">${getLang()==='de' ? 'Wähle, womit du vergleichen möchtest:' : 'Choose what to compare with:'}</p>
@@ -4903,7 +4903,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
     const a = aggA.get(key) || { count: 0, label: '' };
     const b = aggB.get(key) || { count: 0, label: '' };
     const labelBase = a.label || b.label || key;
-    const label = `${escapeHtml(labelBase)}${(mode === 'functional' && (a.collapsedPrints || b.collapsedPrints)) ? ' <span title="Int-Prints zusammengefasst" style="color:var(--vorbehalt);">(prints merged)</span>' : ''}`;
+    const label = `${escapeHtml(labelBase)}${(mode === 'functional' && (a.collapsedPrints || b.collapsedPrints)) ? ' <span title="Int-Prints zusammengefasst" style="color:var(--vorbehalt);" aria-hidden="true">*</span>' : ''}`;  // UI-117: kurze Marke statt "(prints merged)" je Karte
 
     if (a.count > 0 && b.count === 0) {
       onlyA.push(`${label} x${a.count}`);
@@ -5132,8 +5132,8 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       </div>
       <div style="display:${view === 'side' ? 'none' : 'flex'};gap:8px;align-items:center;justify-content:flex-end;margin-bottom:12px;">
         <span style="font-size:12px;color: var(--ink-2);font-weight:700;margin-right:4px;">${de ? 'Vergleichsart:' : 'Compare mode:'}</span>
-        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Functional (prints merged)</button>
-        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Exact print</button>
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">${getLang()==='de' ? 'Drucke zusammengefasst (*)' : 'Prints merged (*)'}</button>
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">${getLang()==='de' ? 'Genauer Druck' : 'Exact print'}</button>
       </div>
       <div style="margin:-4px 0 12px 0;font-size:12px;color: var(--ink-2);">${view === 'side'
         ? (de ? 'Jeder Druck (Set + Nummer) steht als eigene Zeile — die Vergleichsart gilt hier nicht.' : 'Every print (set + number) is its own row — the compare mode does not apply here.')

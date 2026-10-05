@@ -1219,7 +1219,7 @@
 
             const total = Object.values(deck || {}).reduce((s, c) => s + c, 0);
             if (total === 0) {
-                showDeckShareToast('No cards in deck to export!');
+                showDeckShareToast((typeof getLang === 'function' && getLang() === 'en') ? 'No cards in deck to export!' : 'Keine Karten im Deck zum Exportieren.');
                 return;
             }
 
@@ -1309,7 +1309,7 @@
 
             // Copy to clipboard
             navigator.clipboard.writeText(ptcglText).then(() => {
-                showDeckShareToast(`PTCGL export copied! (${total} cards)`);
+                showDeckShareToast((typeof getLang === 'function' && getLang() === 'en') ? `PTCGL export copied! (${total} cards)` : `PTCGL-Liste kopiert (${total} Karten).`);
             }).catch(() => {
                 // Fallback: show in modal
                 showInputModal({ title: 'PTCGL Export', message: 'Copy this PTCGL deck list:', defaultValue: ptcglText, readonly: true, textarea: true });

@@ -521,7 +521,8 @@ describe('Karten im Deck: 60, nicht 124', () => {
 
     it('die Kachel heisst nicht mehr "Total"', () => {
         assert.match(lies('index.html'), /data-i18n="pm\.cardsInDeck"/);
-        assert.match(lies('js/i18n.js'), /'pm\.cardsInDeck':\s+'Karten im Deck \(verschiedene \/ Ø-Liste\)'/);
+        // UI-117 (05.10.2026, N3-07): neue Beschriftung, „Gesamt“/„Total“ bleibt weg.
+        assert.match(lies('js/i18n.js'), /'pm\.cardsInDeck':\s+'Verschiedene Karten gespielt \/ Karten je Liste'/);
     });
 });
 

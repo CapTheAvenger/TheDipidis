@@ -2155,8 +2155,8 @@
                     ? tx('abx.chipUmfangAlle', { boxen: u.boxen, karten: u.verschieden, stueck: u.stueck }, '{boxen} Boxen · {karten} verschiedene Karten · {stueck} Stück')
                     : tx('abx.chipUmfang', { karten: u.karten, stueck: u.stueck }, '{karten} Karten · {stueck} Stück'))) + '</span>'
                 + '<span class="abx-chip-zahl">' + esc(texte ? texte[1] : (u.verschieden != null
-                    ? tx('abx.chipOffenAlle', { offen: u.offen }, '{offen} Stück offen')
-                    : tx('abx.chipFehlen', { n: u.fehlen, offen: u.offen }, '{n} fehlen · {offen} Stück offen'))) + '</span></button>';
+                    ? tx('abx.chipOffenAlle', { offen: u.offen }, '{offen} Stück noch nicht drin')
+                    : tx('abx.chipFehlen', { n: u.fehlen, offen: u.offen }, '{n} fehlen · {offen} Stück noch nicht drin'))) + '</span></button>';
         };
         const kontext = manifestDaten ? formatKontext() : null;
         const reihe = chipReihe(boxen, kontext, familieVonArchetyp);
@@ -2576,10 +2576,10 @@
             + (eine ? (istEigen(eine) ? '' : '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(\''
                 + esc(eine.id) + '\')">' + esc(tx('abx.knopfAktualisieren', null, 'Archetyp-Box aktualisieren')) + '</button>')
                 : (mitDaten ? '<button type="button" id="abxAktualisierenBtn" class="btn btn-primary" onclick="ArchetypBox.aktualisieren(null)">'
-                + esc(tx('abx.alleAktualisieren', { n: mitDaten }, 'Alle {n} Boxen aktualisieren')) + '</button>' : ''))
+                + esc(tx('abx.alleAktualisieren', { n: mitDaten }, 'Alle {n} Boxen mit Turnierdaten aktualisieren')) + '</button>' : ''))
             + (r.proxy.length
                 ? '<button type="button" class="btn btn-outline abx-druck-btn" onclick="ArchetypBox.proxysDrucken(' + druckId + ')">'
-                    + esc(tx('abx.proxysDrucken', { n: proxyKopien }, 'Proxys drucken ({n})')) + '</button>'
+                    + esc(tx('abx.proxysDrucken', { n: proxyKopien }, 'In die Proxy-Liste ({n})')) + '</button>'
                 : '')
             + (deckzeilenAus(sichtbareKarten).length
                 ? '<button type="button" class="btn btn-outline abx-kopieren-btn" onclick="ArchetypBox.kopieren()">'

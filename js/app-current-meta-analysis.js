@@ -721,26 +721,13 @@
             if (deckStats) {
                 window.currentMetaDeckStats = deckStats;
                 devLog('Loaded deck stats:', deckStats.length, 'decks');
-                // Phase 1: render current meta chart
-                const chartData = deckStats.map(d => ({
-                    archetype: d.deck_name || d.archetype || '',
-                    new_count: parseInt(d.total_decks || d.count || d.new_count || 0)
-                })).filter(d => d.archetype && d.new_count > 0).sort((a, b) => b.new_count - a.new_count);
-                // Die gelisteten Anteile summieren sich auf 96,19 %, nicht auf
-                // 100: Limitless fuehrt rund 1.038 Listen (3,8 %) als "Other",
-                // und der Scraper laesst diese Zeile weg. Ohne den echten
-                // Nenner zeigte der Donut fuer Mega Excadrill 8,1 %, die
-                // Tabelle daneben 7,75 %. Die Herleitung steht im Kopf von
-                // feldGroesseAusAnteilen (js/app-utils.js).
-                const feldGesamt = (typeof window.feldGroesseAusAnteilen === 'function')
-                    ? window.feldGroesseAusAnteilen(deckStats.map(d => ({
-                        anteil: window.parseLocaleNumber
-                            ? window.parseLocaleNumber(d.share_numeric != null ? d.share_numeric : d.share, 0)
-                            : parseFloat(String(d.share_numeric || d.share || '0').replace(',', '.')),
-                        anzahl: parseInt(d.total_decks || d.count || d.new_count || 0) || 0,
-                    })))
-                    : 0;
-                setTimeout(() => renderMetaChart('currentMeta', chartData, feldGesamt), 400);
+                /* „Top-Archetypen nach Share" (Donut + Balken) ist WEG
+                   (Hausi 05.10.2026: „das habe ich doch schon mal gesagt,
+                   dass es weg soll" — dieselbe Entscheidung wie UI-45 fuer
+                   Japan). Der Block hing sich unten an die Meta-Seite,
+                   sobald die Deck-Analyse geladen war. Er wird nicht mehr
+                   gezeichnet; Anteile stehen in den Kacheln und der
+                   Meta-Performance. */
             }
             
             // Load matchup data
@@ -1109,22 +1096,6 @@
                         select.value = savedOption.value;
                         loadCurrentMetaDeckData(savedOption.value);
                     }
-                }
-            }
-
-            /* UI-110 (IA Etappe 1): ohne Adresse und ohne Wahl startet die
-               Deck-Analyse mit „Mein Deck" — einmal je Seitenaufruf, damit ein
-               bewusst geleertes Feld leer bleibt. */
-            if (!select.value && !pendingMeta && !window.__dsMeinDeckVorgewaehlt
-                && window.MeinDeck && typeof window.MeinDeck.lesen === 'function') {
-                const _md = window.MeinDeck.lesen();
-                const _opt = _md ? Array.from(select.options).find(o =>
-                    o.value && o.value.toLowerCase() === _md.toLowerCase()) : null;
-                window.__dsMeinDeckVorgewaehlt = true;
-                if (_opt) {
-                    select.value = _opt.value;
-                    window.currentMetaArchetype = _opt.value;
-                    loadCurrentMetaDeckData(_opt.value);
                 }
             }
 

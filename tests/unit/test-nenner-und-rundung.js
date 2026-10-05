@@ -71,8 +71,10 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
         // Der Scraper wirft die "Other"-Zeile weg; die gelisteten Anteile
         // summieren sich deshalb auf 96,19 %. Ohne den echten Nenner zeigte
         // der Donut 8,1 %, die Tabelle 7,75 %.
-        assert.match(CURRENT, /renderMetaChart\('currentMeta', chartData, feldGesamt\)/);
-        assert.match(CURRENT, /window\.feldGroesseAusAnteilen/);
+        // 05.10.2026: der Donut des globalen Metas ist weg (Hausi); die
+        // Feldgroesse bleibt Thema der Funktion unten.
+        assert.doesNotMatch(CURRENT, /renderMetaChart\(\s*'currentMeta'/,
+            '„Top-Archetypen nach Share" wird wieder gezeichnet — Hausi hat es entfernt');
     });
 
     it('feldGroesseAusAnteilen trifft den echten Nenner der Livedaten', () => {

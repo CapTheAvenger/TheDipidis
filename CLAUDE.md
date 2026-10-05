@@ -682,3 +682,16 @@ Aussagen ueber die eigene Umgebung.
   Hintergrund-Tab die Seite an. Seit UI-104 laufen Rueckfragen ueber
   `zeigeBestaetigung` (App-Dialog), Eingaben ueber `showInputModal`;
   `tests/unit/test-ui104-app-rueckfrage.js` verbietet neue native Aufrufe.
+
+## FESTLEGUNGEN — VOR JEDEM BAU LESEN (seit 05.10.2026)
+
+Hausis Festlegungen stehen im Projektwissen in `claude/festlegungen.md`:
+**A) was weg ist und nie wiederkommen darf**, **B) was so bleiben muss**.
+Jede Sitzung, jeder Rutsch und jeder Agentenauftrag liest sie vor dem Bau.
+Ein Vorschlag, der A widerspricht, wird nicht gebaut und nicht erneut
+vorgeschlagen; B wird nur auf ausdrueckliche neue Bestellung geaendert (dann
+die Datei im selben Zug anpassen). Neue sichtbare Elemente (Knoepfe, Baender,
+Kopf-Elemente) werden Hausi VOR dem Bau gezeigt. Anlass: 05.10.2026 —
+„Neu hier?“-Band und Kopf-„?“ aus einer Agentenempfehlung gebaut und sofort
+wieder entfernt; „Top-Archetypen nach Share“ tauchte auf der Meta-Seite wieder
+auf. Maschinelle Sicherung: `tests/unit/test-festlegungen-weg.js`.

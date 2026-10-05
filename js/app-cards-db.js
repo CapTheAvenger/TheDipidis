@@ -140,7 +140,7 @@
                             <span data-i18n="cdb.filterMainPokemon">Main Pokemon</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <input type="text" id="mainPokemonSearch" class="cards-filter-search-input" placeholder="Search main Pokemon..." data-i18n-placeholder="cards.searchPokemon" oninput="filterMainPokemonList()" aria-label="Search main Pokemon filter list" data-i18n-aria="cards.searchPokemonAria" style="display:none">
+                        <input type="text" id="mainPokemonSearch" class="cards-filter-search-input" placeholder="Search main Pokemon..." data-i18n-placeholder="cards.searchPokemon" oninput="filterMainPokemonList()" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Search main Pokemon filter list` : `Hauptpokémon-Filterliste durchsuchen`}" data-i18n-aria="cards.searchPokemonAria" style="display:none">
                         <div class="cards-filter-options collapsed" id="mainPokemonList"></div>
                     `
                 },
@@ -152,7 +152,7 @@
                             <span data-i18n="cdb.filterArchetype">Archetype</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <input type="text" id="archetypeSearch" class="cards-filter-search-input" placeholder="Search archetype..." data-i18n-placeholder="cards.searchArchetype" oninput="filterArchetypeList()" aria-label="Search archetype filter list" data-i18n-aria="cards.searchArchetypeAria" style="display:none">
+                        <input type="text" id="archetypeSearch" class="cards-filter-search-input" placeholder="Search archetype..." data-i18n-placeholder="cards.searchArchetype" oninput="filterArchetypeList()" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Search archetype filter list` : `Archetyp-Filterliste durchsuchen`}" data-i18n-aria="cards.searchArchetypeAria" style="display:none">
                         <div class="cards-filter-options collapsed" id="archetypeList"></div>
                     `
                 },
@@ -3447,11 +3447,11 @@
                     <img src="${escapeHtmlAttr(stamped)}" alt="${displayName} – Prize Pack" loading="lazy" decoding="async"
                          onclick="showImageView('${escapedImg}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(marketUrl))}', '${escapeHtmlAttr(escapeJsStr(ppsSet))}', '${escapeHtmlAttr(escapeJsStr(ppsNumber))}')" role="button" tabindex="0"
                          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImg}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(marketUrl))}', '${escapeHtmlAttr(escapeJsStr(ppsSet))}', '${escapeHtmlAttr(escapeJsStr(ppsNumber))}');}"
-                         aria-label="Open ${displayName} Prize Pack image in fullscreen">
+                         aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Open ${displayName} Prize Pack image in fullscreen` : `${displayName} (Prize Pack) im Vollbild öffnen`}">
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
-                        <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="Add ${displayName} Prize Pack to collection">+</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="Remove ${displayName} Prize Pack from collection">-</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Add ${displayName} Prize Pack to collection` : `${displayName} (Prize Pack) in die Sammlung`}">+</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Remove ${displayName} Prize Pack from collection` : `${displayName} (Prize Pack) aus der Sammlung`}">-</button>
                         <button type="button" data-card-id="${safeCardId}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#16233a; background: ${userWantsCard ? '#F06292' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#F06292' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t('akt.toggleWishlist').replace('{n}', displayName))}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                         <button type="button" data-card-id="${safeCardId}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#16233a; background: ${userTradesCard ? '#3fbfa4' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#3fbfa4' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t('akt.toggleTradelist').replace('{n}', displayName))}">&#8644;</button>
                     </div>
@@ -3468,7 +3468,7 @@
                         </div>
                     </div>
                     <div class="card-database-secondary-row">
-                        <button type="button" onclick="addCardToProxy('${escapedName}', '${escapeHtmlAttr(escapeJsStr(ppsSet))}', '${escapeHtmlAttr(escapeJsStr(ppsNumber))}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add stamped print to proxy queue" aria-label="Add ${displayName} Prize Pack to proxy queue">Proxy</button>
+                        <button type="button" onclick="addCardToProxy('${escapedName}', '${escapeHtmlAttr(escapeJsStr(ppsSet))}', '${escapeHtmlAttr(escapeJsStr(ppsNumber))}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add stamped print to proxy queue" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Add ${displayName} Prize Pack to proxy queue` : `${displayName} (Prize Pack) in die Proxy-Warteschlange`}">Proxy</button>
                         ${limitlessBtn}
                     </div>
                 </div>
@@ -3539,7 +3539,7 @@
                     // und 3.015 Zeilen ohne jede Zuordnung ohne ein Wort dazu.
                     const trust = (typeof window.priceTrustBadge === 'function')
                         ? window.priceTrustBadge(card, displayCardMarketUrl) : '';
-                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="View on CardMarket" aria-label="View ${displayName} on CardMarket (opens in new tab)">
+                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="View on CardMarket" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `View ${displayName} on CardMarket (opens in new tab)` : `${displayName} bei Cardmarket ansehen (neuer Tab)`}">
                         <span class="card-database-price-value">Ø ${price.toFixed(2).replace('.', ',')} €</span>
                     </a>${trust}`;
                 }
@@ -3642,17 +3642,17 @@
                 </div>`;
             }
             const limitlessButton = (card.set && card.number)
-                ? `<button type="button" onclick="openLimitlessCard('${escapeHtmlAttr(escapeJsStr(card.set))}', '${escapeHtmlAttr(escapeJsStr(card.number))}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="${getLang()==='de' ? 'Bei Limitless ansehen' : 'View on Limitless'}" aria-label="Open ${displayName} on Limitless">Limitless</button>`
+                ? `<button type="button" onclick="openLimitlessCard('${escapeHtmlAttr(escapeJsStr(card.set))}', '${escapeHtmlAttr(escapeJsStr(card.number))}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="${getLang()==='de' ? 'Bei Limitless ansehen' : 'View on Limitless'}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Open ${displayName} on Limitless` : `${displayName} bei Limitless ansehen`}">Limitless</button>`
                 : '<div class="card-database-limitless-placeholder"></div>';
             
             item.innerHTML = `
                 <div class="pos-rel card-database-image-wrap">
-                    <img src="${attrImageUrl}" alt="${displayName}" loading="lazy" decoding="async" onclick="showImageView('${escapedImageUrl}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(rawCardMarketUrl))}', '${escapeHtmlAttr(escapeJsStr(proxySetCode))}', '${escapeHtmlAttr(escapeJsStr(proxySetNumber))}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImageUrl}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(rawCardMarketUrl))}', '${escapeHtmlAttr(escapeJsStr(proxySetCode))}', '${escapeHtmlAttr(escapeJsStr(proxySetNumber))}');}" aria-label="Open ${displayName} image in fullscreen">
+                    <img src="${attrImageUrl}" alt="${displayName}" loading="lazy" decoding="async" onclick="showImageView('${escapedImageUrl}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(rawCardMarketUrl))}', '${escapeHtmlAttr(escapeJsStr(proxySetCode))}', '${escapeHtmlAttr(escapeJsStr(proxySetNumber))}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImageUrl}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(rawCardMarketUrl))}', '${escapeHtmlAttr(escapeJsStr(proxySetCode))}', '${escapeHtmlAttr(escapeJsStr(proxySetNumber))}');}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Open ${displayName} image in fullscreen` : `${displayName} im Vollbild öffnen`}">
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
                     ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="Owned other INT prints">${altPrintOwnedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="Add ${displayName} to collection">+</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="Remove ${displayName} from collection">-</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Add ${displayName} to collection` : `${displayName} in die Sammlung`}">+</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Remove ${displayName} from collection` : `${displayName} aus der Sammlung`}">-</button>
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#16233a; background: ${userWantsCard ? '#F06292' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#F06292' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist') + ' — ' + displayName)}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#16233a; background: ${userTradesCard ? '#3fbfa4' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#3fbfa4' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist') + ' — ' + displayName)}">${userTradesCard ? '&#8644;' : '&#8644;'}</button>
                     </div>
@@ -3665,12 +3665,12 @@
                     </div>
                     <div class="card-database-button-row">
                         ${priceButton}
-                        <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRarityFromCardDbButton(this);}" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}" role="button" tabindex="0" aria-label="Open print variants for ${displayName}">
+                        <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRarityFromCardDbButton(this);}" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}" role="button" tabindex="0" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Open print variants for ${displayName}` : `Drucke von ${displayName} zeigen`}">
                             ${displayRarity}
                         </div>
                     </div>
                     <div class="card-database-secondary-row">
-                        <button type="button" onclick="addCardToProxy('${escapedName}', '${escapeHtmlAttr(escapeJsStr(proxySetCode))}', '${escapeHtmlAttr(escapeJsStr(proxySetNumber))}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="${escapeHtml(t('akt.addProxyQueue'))}" aria-label="Add ${displayName} to proxy queue">Proxy</button>
+                        <button type="button" onclick="addCardToProxy('${escapedName}', '${escapeHtmlAttr(escapeJsStr(proxySetCode))}', '${escapeHtmlAttr(escapeJsStr(proxySetNumber))}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="${escapeHtml(t('akt.addProxyQueue'))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Add ${displayName} to proxy queue` : `${displayName} in die Proxy-Warteschlange`}">Proxy</button>
                         ${limitlessButton}
                     </div>
                     ${coverageDisplay}

@@ -647,7 +647,7 @@
                 : (tech.confidence || 'unknown');
             const safeNarr = _escapeHtml(tech.narrative || '');
             const thumb = imgUrl
-                ? `<button class="tech-lab-grid-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="Zoom ${safeName}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
+                ? `<button class="tech-lab-grid-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Zoom ${safeName}` : `${safeName} vergrößern`}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
                 : `<span class="tech-lab-grid-thumb tech-lab-thumb-fallback" aria-hidden="true">?</span>`;
             // Reject / remove action moved BELOW the card with
             // clear text — the previous overlay-X confused users
@@ -890,7 +890,7 @@
             const safeName = _escapeHtml(c.name);
             const safeImg = img ? _escapeHtml(img) : '';
             const thumb = img
-                ? `<button class="tech-lab-grid-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="Zoom ${safeName}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
+                ? `<button class="tech-lab-grid-thumb" data-card-img="${safeImg}" data-card-name="${safeName}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Zoom ${safeName}` : `${safeName} vergrößern`}"><img src="${safeImg}" alt="${safeName}" loading="lazy"></button>`
                 : `<span class="tech-lab-grid-thumb tech-lab-thumb-fallback">?</span>`;
             return `<li class="tech-lab-grid-tile tech-lab-grid-nonex">
                 ${thumb}

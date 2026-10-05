@@ -747,7 +747,7 @@
                             // unbenannt). Gemessen am 21.08.2026 in 423 von 1546
                             // Zellen (27 %) ist W+L != total_games. Mit U aufgeführt
                             // summieren sich die genannten Zahlen sichtbar auf.
-                            const tooltip = `${parsedWins}W - ${parsedLosses}L - ${parsedDraws}U (${totalGames} ${t('heatmap.games')}) · ${t('heatmap.raw')} ${winRateRoh.toFixed(1)} %`;
+                            const tooltip = `${parsedWins}W - ${parsedLosses}L - ${parsedDraws}U (${totalGames} ${t('heatmap.games')}) · ${t('heatmap.raw')} ${winRateRoh.toLocaleString((typeof getLang === 'function' && getLang() === 'en') ? 'en-US' : 'de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;  // UI-116: Dezimalkomma
                             const safeRow = escapeHtmlAttr(escapeJsStr(rowDeck));
                             const safeCol = escapeHtmlAttr(escapeJsStr(colDeck));
                             // Inline sample-size below the WR. Cells with n<10 get a

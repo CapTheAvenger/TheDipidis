@@ -1952,7 +1952,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: var(--profil-decks-ink); font-weight: 600;">Max:</span>
               <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
-                aria-label="Maximum price for ${safeNameHtml}"
+                aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Maximum price for ${safeNameHtml}` : `Höchstpreis für ${safeNameHtml}`}"
                 style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; background: var(--surface-1); color: var(--profil-decks-ink); text-align: right; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='var(--profil-decks-ink)'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
@@ -6171,7 +6171,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: var(--tint-ok-ink); font-weight: 600;">ca</span>
               <input type="text" inputmode="decimal" value="${minPriceVal}" placeholder="\u2014"
-                aria-label="Minimum price for ${safeNameHtml}"
+                aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Minimum price for ${safeNameHtml}` : `Mindestpreis für ${safeNameHtml}`}"
                 style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; color: var(--tint-ok-ink); text-align: right; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#16a085'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveTradelistMinPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">

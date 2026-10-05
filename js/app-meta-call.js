@@ -1279,12 +1279,6 @@ window.MetaCall = (function () {
      wird es wie der Turniertyp im Browser gemerkt. */
   const MEIN_DECK_KEY = 'metacall_mydeck_v1';
   function _meinDeckMerken(val) {
-    // UI-110: ein Ort fuer „Mein Deck" (js/mein-deck.js) — meldet die
-    // Wahl an Kopf, Journal und Deck-Analyse.
-    if (typeof window !== 'undefined' && window.MeinDeck && typeof window.MeinDeck.setzen === 'function') {
-      window.MeinDeck.setzen(val, 'metacall');
-      return;
-    }
     try {
       if (val) localStorage.setItem(MEIN_DECK_KEY, String(val));
       else localStorage.removeItem(MEIN_DECK_KEY);
@@ -16020,15 +16014,6 @@ window.MetaCall = (function () {
   function _bekannteDeckNamen() {
     return (_shareList || []).map(d => d.name);
   }
-
-  /* UI-110: im Kopf gewaehlt → der Meta Call folgt. Ist er noch nicht
-     gezeichnet, genuegt die Einstellung; er liest sie beim Oeffnen. */
-  document.addEventListener('meindeck:geaendert', function (e) {
-    const d = (e && e.detail) || {};
-    if (d.quelle === 'metacall' || d.name === (_settings.myDeck || '')) return;
-    if (document.querySelector('#meta-call .metacall-panel')) _onMyDeck(d.name);
-    else _settings.myDeck = d.name;
-  });
 
   function _onMyDeck(val, opts) {
     _settings.myDeck = val;

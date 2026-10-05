@@ -199,7 +199,9 @@ const EN2 = R('tutorial/tutorial.en.html');
 const BEGRIFFE = ['meta', 'archetyp', 'variante', 'format', 'rotation', 'standard',
     'online-major', 'anteil', 'win-rate', 'matchup', 'top-8', 'day2', 'tier', 'bilanz',
     'turniertypen', 'city-league', 'ace-spec', 'tech', 'proxy', 'ptcgl', 'irl', 'set-code',
-    'journal', 'meta-call', 'archetyp-box', 'masterclass', 'champions'];
+    'journal', 'meta-call', 'archetyp-box', 'masterclass', 'champions',
+    // UI-115 (05.10.2026): Glossar ergaenzt
+    'consistency', 'binder', 'spielbox', 'regulation-mark', 'side-quest'];
 
 const ids = (q) => [...q.matchAll(/\bid="(glossar-[a-z0-9-]+)"/g)].map(m => m[1]);
 const einstieg = (q) => q.slice(q.indexOf('<section class="tutorial-hero">'), q.indexOf('id="glossar"'));

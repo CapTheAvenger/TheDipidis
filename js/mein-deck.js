@@ -84,8 +84,13 @@
         var titel = n
             ? (de() ? 'Mein Deck: ' + n + ' — gilt für Meta Call, Journal und Deck-Analyse. Antippen zum Ändern.'
                     : 'My deck: ' + n + ' — used by Meta Call, journal and deck analysis. Tap to change.')
-            : (de() ? 'Mein Deck wählen — gilt für Meta Call, Journal und Deck-Analyse.'
-                    : 'Pick my deck — used by Meta Call, journal and deck analysis.');
+            /* Ohne Wahl genau der Text aus js/i18n.js ('header.myDeck') —
+               die Sprachreinheits-Pruefung vergleicht title/aria-label mit
+               dem Woerterbuch (CI #930 rot wegen eines Punkts). */
+            : ((typeof window.t === 'function' && window.t('header.myDeck') !== 'header.myDeck')
+                ? window.t('header.myDeck')
+                : (de() ? 'Mein Deck wählen — gilt für Meta Call, Journal und Deck-Analyse'
+                        : 'Pick my deck — used by Meta Call, journal and deck analysis'));
         k.title = titel;
         k.setAttribute('aria-label', titel);
     }

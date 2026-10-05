@@ -62,14 +62,16 @@ describe('FE-23: „Deine Win-Rate" ist ein Eingabefeld', () => {
             const ctx = wrBauen({});
             ctx._onWrZelle('Gegner', String(x));
             const m = matchupAusQuelle(ctx._winRateOverrides)('Mein Deck', 'Gegner');
-            assert.ok(Math.abs(m.pWin * 100 - x) < 1e-6, `${x} getippt, ${m.pWin * 100} gezeigt`);
+            // DA-47 (05.10.2026): gezeigt wird S/(S+N), nicht pWin.
+            const q = m.pWin / (m.pWin + m.pLoss) * 100;
+            assert.ok(Math.abs(q - x) < 1e-6, `${x} getippt, ${q} gezeigt`);
         }
     });
     it('deckelt zu hohe Eingaben und leeren gibt den Messwert zurueck', () => {
         const ctx = wrBauen({});
         ctx._onWrZelle('Gegner', '100');
         const m = matchupAusQuelle(ctx._winRateOverrides)('Mein Deck', 'Gegner');
-        assert.ok(m.pWin * 100 <= ctx.WR_EINGABE_MAX + 1e-9);
+        assert.ok(m.pWin / (m.pWin + m.pLoss) * 100 <= ctx.WR_EINGABE_MAX + 1e-9);
         ctx._onWrZelle('Gegner', '');
         assert.equal(Object.keys(ctx._winRateOverrides).length, 0);
     });
@@ -81,7 +83,7 @@ describe('FE-23: „Deine Win-Rate" ist ein Eingabefeld', () => {
         assert.match(a, /<input[^>]*data-feld="wr"[^>]*data-deck="Gegner"/);
         assert.doesNotMatch(a, /von Hand/);
         assert.match(b, /von Hand/);
-        assert.match(a, /value="54\.3"/);
+        assert.match(a, /value="55"/); // DA-47: die Zelle zeigt S/(S+N)
     });
     it('Spiegel und fehlendes Deck bekommen kein Feld; ohne Messung ein leeres', () => {
         const c = wrBauen({}), L = (de) => de;

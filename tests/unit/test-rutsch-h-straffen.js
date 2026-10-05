@@ -17,7 +17,8 @@ const INDEX = lies('index.html');
 const I18N = lies('js', 'i18n.js');
 
 function journal(eintraege) {
-    return baue('js/battle-journal.js', ['function getBattleJournalWinRates('], {
+    // DA-47: die Quote kommt aus bjQuote (S/(S+N)), mitgebaut aus der Datei.
+    return baue('js/battle-journal.js', ['function getBattleJournalWinRates(', 'function bjQuote('], {
         journalHistoryCache: eintraege, istNoShow: () => false,
     }).getBattleJournalWinRates;
 }
@@ -48,7 +49,8 @@ describe('UI-63: Journal-Abgleich mit Namenszusatz', () => {
         const q = lies('js', 'battle-journal.js');
         const kaputt = q.replace('if (kw.length > ownWorte.length && _beginntMit(ew, kw)) return false;', '');
         assert.notEqual(kaputt, q);
-        const ctx = require('node:vm').createContext({ journalHistoryCache: [e('Dragapult Dusknoir', 'X', 'win')], istNoShow: () => false });
+        const ctx = require('node:vm').createContext({ journalHistoryCache: [e('Dragapult Dusknoir', 'X', 'win')], istNoShow: () => false,
+            bjQuote: baue('js/battle-journal.js', ['function bjQuote('], {}).bjQuote });
         const a = kaputt.indexOf('function getBattleJournalWinRates(');
         const b = kaputt.indexOf('window.getBattleJournalWinRates', a);
         require('node:vm').runInContext(kaputt.slice(a, b) + ';globalThis.f=getBattleJournalWinRates;', ctx);

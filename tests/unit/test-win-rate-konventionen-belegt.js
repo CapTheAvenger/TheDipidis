@@ -424,11 +424,13 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
     it('der Predictor-5.3-Hinweis nennt die Konvention beider Seiten', () => {
         const anfang = MC.indexOf("const konv = (typeof window !== 'undefined' && window.WinRateKonvention)");
         assert.ok(anfang >= 0, 'der Konventionshinweis im Banner ist verschwunden');
-        const ende = MC.indexOf("in the same convention.';", anfang);
+        // DA-48 (05.10.2026): der englische Satz endet jetzt so.
+        const ende = MC.indexOf("it would count twice.';", anfang);
         assert.ok(ende > anfang, 'der Banner-Hinweis hat kein Ende mehr');
         const stueck = MC.slice(anfang, ende + 25);
-        for (const [sprache, muster] of [['de', /Siegquote ohne Unentschieden/],
-                                         ['en', /win share excluding ties/]]) {
+        // DA-47 (05.10.2026): S/(S+N) heisst jetzt „Win-Rate" / „win rate".
+        for (const [sprache, muster] of [['de', /\(Win Rate\)/],
+                                         ['en', /win rate/i]]) {
             const win = { getLang: () => sprache };
             new Function('window', lies('js', 'win-rate-konvention.js'))(win);
             const titel = new Function('window', '_mcIstDeutsch',
@@ -463,12 +465,12 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
             assert.strictEqual(M.kurz('matchpunkte'), 'Win %');
             assert.ok(!/Win %/.test(M.kurz('mitUnentschieden')), sprache);
             assert.ok(!/Win %/.test(M.kurz('ohneUnentschieden')), sprache);
-            // Und die beiden nennen ihren Unterschied im Namen.
-            assert.match(M.kurz('ohneUnentschieden'), /ohne Unentschieden|excluding ties/);
-            // UI-16 (27.09.2026, Hausi): die Kacheln-Konvention heisst kurz
-            // „Win-Rate" — der lange Name war auf der Kachel zu viel. Den
-            // Unterschied nennt der Hinweis (lang), nicht mehr der Name.
-            assert.match(M.kurz('mitUnentschieden'), /^(Win-Rate|Win rate)$/);
+            // DA-47 (05.10.2026, Entscheidung Hausi „Rechnung angleichen"):
+            // die eine Win-Rate der Seite ist S/(S+N) und traegt den kurzen
+            // Namen (UI-16). S/(S+N+U) steht nur noch, wo keine Bilanz da
+            // ist, und nennt ihren Unterschied im Namen.
+            assert.match(M.kurz('ohneUnentschieden'), /^(Win Rate|Win rate)$/);
+            assert.match(M.kurz('mitUnentschieden'), /inkl\. Unentschieden|incl\. ties/);
         }
     });
 });

@@ -9206,43 +9206,59 @@ window.MetaCall = (function () {
         games  : day1Hit.games,
       });
     }
-    if (sources.length === 0) {
-      // No day-split signal at all — try Overall as a single anchor at
-      // the combined Day-1 + Day-2 weight. Keeps coverage during the
-      // early-meta period when only weekly aggregates have populated.
+    /* DA-48 (05.10.2026, Hausi: „Rechnung angleichen"; Befund D3-02).
+       Die Day-1-Karte ist heute eine Kopie von Overall und wird oben
+       verworfen. Danach galt: liegt eine Day-2-Paarung mit >= 5 Matches
+       vor, rechnete die Mischung NUR mit diesen (Excadrill–Dragapult:
+       21 Day-2-Matches) — die 222 Major-Matches der Paarung fielen weg.
+       Jetzt: ohne echte Day-1-Karte ist die Major-Seite IMMER die
+       Gesamtpaarung (sie enthaelt die Day-2-Spiele, jedes Spiel zaehlt
+       genau einmal) mit dem kombinierten Gewicht. Day 2 allein nur, wenn
+       es fuer Overall noch zu wenige Matches gibt. */
+    if (!sources.some(x => x.kind === 'day1')) {
       const overallHit = _lookupPair(overallMap, a, b);
       if (overallHit && overallHit.games >= MAJOR_MATCHUP_MIN_GAMES) {
+        sources.length = 0;
         sources.push({
           kind   : 'overall',
           win    : overallHit.winPct / 100,
           weight : MATCHUP_BLEND_WEIGHT_OVERALL_FALLBACK,
           games  : overallHit.games,
         });
+      } else if (sources.length === 1 && sources[0].kind === 'day2') {
+        sources[0].weight = MATCHUP_BLEND_WEIGHT_OVERALL_FALLBACK;
       }
     }
     if (sources.length > 0) {
       // Major signal present → add Online as the static 20 % minority
       // and renormalise so the active weights sum to 1.
+      /* DA-48: die Major-Quoten sind S/(S+N); die Online-Seite war
+         pWin MIT Unentschieden — zwei Groessen in einer Summe. Jetzt
+         geht auch Online als S/(S+N) ein, und das Ergebnis wird erst
+         danach mit dem Unentschieden-Anteil in pWin umgerechnet. */
+      const _snOnline = (base.pWin || 0) + (base.pLoss || 0);
+      const _qOnline = _snOnline > 0 ? base.pWin / _snOnline : 0.5;
       sources.push({
         kind   : 'online',
-        win    : base.pWin,
+        win    : _qOnline,
         weight : MATCHUP_BLEND_WEIGHT_ONLINE,
-        games  : null,
+        games  : base.partien || 0,
       });
       const totalWeight = sources.reduce((s, x) => s + x.weight, 0);
-      let blendedWin = 0;
+      let blendedQuote = 0;
       for (const s of sources) {
-        blendedWin += s.win * (s.weight / totalWeight);
+        blendedQuote += s.win * (s.weight / totalWeight);
       }
-      blendedWin = _clip(blendedWin, 0.05, 0.95);
+      blendedQuote = _clip(blendedQuote, 0.05, 0.95);
       const pTie = base.pTie || MAJOR_MATCHUP_TIE_RATE;
+      const blendedWin = blendedQuote * (1 - pTie);
       base = {
         pWin : blendedWin,
         pTie ,
         pLoss: Math.max(0, 1 - blendedWin - pTie),
         // Der Nenner der gemischten Quote: Online-Partien plus die
         // Major-Partien, die wirklich eingeflossen sind.
-        partien: (base.partien || 0) + sources.reduce((a, x) => a + (x.games || 0), 0),
+        partien: sources.reduce((a, x) => a + (x.games || 0), 0),
         // Diagnostic — read by the matchup tooltip / debug overlay.
         // Carries the normalised weight per source so a future UI can
         // show "Day-2 45 % (8 games) + Day-1 35 % (24) + Online 20 %".
@@ -9250,6 +9266,7 @@ window.MetaCall = (function () {
           kind   : s.kind,
           games  : s.games,
           weight : s.weight / totalWeight,
+          quote  : s.win * 100,
         })),
       };
     }
@@ -9283,6 +9300,12 @@ window.MetaCall = (function () {
     // Auf einen Platzhalter wird nichts geschoben — sonst wird aus
     // "wir wissen es nicht" eine Zahl mit Nachkommastelle.
     if (base.ohneMessung) return base;
+    /* DA-48: kein Deck-Schub auf eine Paarung, die schon Major-Daten
+       traegt. Der Schub ist die Major-Abweichung des ganzen Decks; steht
+       die Major-Paarung schon in der Mischung, zaehlte die Schwaeche
+       doppelt (Excadrill–Alakazam Dusknoir: 34,3 % -> 17,1 %). */
+    if (Array.isArray(base._majorSources)
+        && base._majorSources.some(x => x.kind !== 'online')) return base;
     if (adjA === 0 && adjB === 0) return base;
     const pTie = base.pTie;
     const sn = (base.pWin || 0) + (base.pLoss || 0);
@@ -9292,7 +9315,9 @@ window.MetaCall = (function () {
     const rest = Math.max(0, 1 - pTie);
     const pWin = quoteNachher * rest;
     const pLoss = Math.max(0, rest - pWin);
-    return { pWin, pTie, pLoss, partien: base.partien || 0 };
+    // DA-48: der Schub in Punkten, fuer die Aufschluesselung im Tooltip.
+    const schub = Math.round(((quoteNachher - quoteVorher) * 100) * 10) / 10;
+    return { pWin, pTie, pLoss, partien: base.partien || 0, schub };
   }
 
   // Personal-blended matchup — folds in Testing Group win-rate overrides
@@ -9368,6 +9393,8 @@ window.MetaCall = (function () {
       const pTie        = metaBase.pTie;
       return { pWin: blendedWin, pTie, pLoss: Math.max(0, 1 - blendedWin - pTie),
                partien: (metaBase.partien || 0) + js.total, eigene: js.total,
+               // DA-48: die Aufschluesselung bleibt fuer den Tooltip erhalten.
+               _majorSources: metaBase._majorSources, schub: metaBase.schub,
                // Mit eigenen Partien ist es keine reine Behauptung mehr.
                ohneMessung: metaBase.ohneMessung && !(js.total > 0) };
     }
@@ -9798,7 +9825,8 @@ window.MetaCall = (function () {
         name,
         day2Prob: r.day2Prob,
         expWin: r.expWin,
-        avgWR: (r.expWin / _settings.rounds) * 100,
+        // DA-49: S / (S + N) wie jede Win-Rate der Seite.
+        avgWR: (r.expWin + r.expLoss) > 0 ? (r.expWin / (r.expWin + r.expLoss)) * 100 : 0,
       };
     });
     return results
@@ -10063,7 +10091,12 @@ window.MetaCall = (function () {
         p46RecoMult,
         underdogChampion: champ || null,
         expWin: r.expWin,
-        avgWR: (r.expWin / _settings.rounds) * 100,
+        // DA-49 (05.10.2026): „Ø Win-Rate" ist S / (S + N) der erwarteten
+        // Bilanz, nicht mehr Siege durch Runden (S/(S+N+U)).
+        avgWR: (r.expWin + r.expLoss) > 0 ? (r.expWin / (r.expWin + r.expLoss)) * 100 : 0,
+        // Die gezeigte Day-2-Zahl ist gemessen (geglaettet) oder, wenn die
+        // Schrumpfung das Deck nicht kennt, simuliert.
+        day2Gemessen: _rang !== adjustedDay2,
         topMatchups
       };
     }).sort((a, b) => {
@@ -10097,12 +10130,14 @@ window.MetaCall = (function () {
        * zaehlen nicht — sind aber transitiv, weil sie eine echte
        * Aequivalenzklasse bilden. Die Rasterweiten entsprechen den alten
        * Toleranzen: 0,02 und 0,05. */
-      const raster = (wert, weite) => Math.round((wert || 0) / weite);
-      const d = raster(b.day2Prob, 0.02) - raster(a.day2Prob, 0.02);
-      if (d !== 0) return d;
-      const c = raster(b.empConv, 0.05) - raster(a.empConv, 0.05);
-      if (c !== 0) return c;
-      return b.avgWR - a.avgWR;
+      /* DA-49 (05.10.2026, Befund D3-03): sortiert wird nach der GEZEIGTEN
+         Zahl. Das Raster liess 22,6 % vor 22,9 % stehen — fuer den Leser
+         ein Fehler. Exakte Vergleiche mit festen Folgeschluesseln sind
+         ebenfalls transitiv. */
+      return ((b.day2Prob || 0) - (a.day2Prob || 0))
+        || ((b.empConv || 0) - (a.empConv || 0))
+        || (b.avgWR - a.avgWR)
+        || String(a.name).localeCompare(String(b.name));
     });
 
     // Day-2 list — threshold then bounds.
@@ -11184,7 +11219,8 @@ window.MetaCall = (function () {
      mit), wie die Deck-Kacheln (UI-16); die Farbe folgt dem Verhaeltnis
      Sieg zu Niederlage, damit 13 % Unentschieden kein Deck rot faerben. */
   function _mctWrKopf(L) {
-    const n = _mctQuotenName('mitUnentschieden');
+    // DA-47: die Spalte zeigt S / (S + N), wie jede Win-Rate der Seite.
+    const n = _mctQuotenName('ohneUnentschieden');
     return L('Deine ' + n, 'Your ' + n.charAt(0).toLowerCase() + n.slice(1));
   }
 
@@ -11219,10 +11255,33 @@ window.MetaCall = (function () {
     };
   }
 
+  /* DA-48: woraus die Paarungszahl besteht, als ein Satz fuer den
+     Tooltip — „Online 54,6 % (256) · Major gesamt 47,2 % (222) ·
+     Gewichtung 20/80". Ohne Major-Messung: Online und ggf. der Schub. */
+  function _paarungTeile(m) {
+    if (!m) return '';
+    const de = (typeof getLang !== 'function') || getLang() === 'de';
+    const NAME = { online: 'Online', overall: de ? 'Major gesamt' : 'Major overall',
+                   day2: 'Major Day 2', day1: 'Major Day 1' };
+    const teile = [];
+    if (Array.isArray(m._majorSources) && m._majorSources.length) {
+      m._majorSources.forEach(x => {
+        teile.push((NAME[x.kind] || x.kind) + ' ' + _mcPct(x.quote, 1)
+          + (x.games ? ' (' + zahlLokal(x.games) + ')' : '')
+          + ' · ' + (de ? 'Gewicht ' : 'weight ') + _mcPct(x.weight * 100, 0));
+      });
+    } else if (Number.isFinite(m.schub) && m.schub !== 0) {
+      teile.push((de ? 'nur Online, Deck-Korrektur ' : 'online only, deck adjustment ')
+        + (m.schub > 0 ? '+' : '') + _mcNum(m.schub, 1) + (de ? ' Punkte' : ' pts'));
+    }
+    if (m.eigene) teile.push((de ? 'eigene Matches aus dem Journal: ' : 'own journal matches: ') + zahlLokal(m.eigene));
+    return teile.join(' · ');
+  }
+
   function _mctZeileRechne(name, field, istMein) {
     const r = istMein ? calcDay2(field) : calcDay2(field, name);
     const runden = _settings.rounds || 1;
-    let wr = null, wrOhneU = null, wrPartien = 0, wrOhne = false, spiegel = false;
+    let wr = null, wrOhneU = null, wrPartien = 0, wrOhne = false, spiegel = false, teile = '';
     const mein = _settings.myDeck;
     if (mein) {
       if (normalize(mein) === normalize(name)) spiegel = true;
@@ -11232,9 +11291,11 @@ window.MetaCall = (function () {
         wr = (wrOhne || !Number.isFinite(m.pWin)) ? null : m.pWin * 100;
         wrOhneU = wrOhne ? null : _anzeigeQuote(m);
         wrPartien = Number(m.partien) || 0;
+        teile = _paarungTeile(m);
       }
     }
     return {
+      teile,
       day2: r.day2Prob * 100,
       w: r.expWin, u: r.expTie, n: r.expLoss,
       quote: (r.expWin / runden) * 100,
@@ -11251,7 +11312,9 @@ window.MetaCall = (function () {
      Rahmen und den Text „von Hand". Leeren des Feldes gibt den gemessenen
      Wert zurueck. */
   const WR_HAND_UNENTSCHIEDEN = 0.02;
-  const WR_EINGABE_MAX = (1 - WR_HAND_UNENTSCHIEDEN) * 0.98 * 100;
+  // DA-47: getippt und gezeigt wird S / (S + N) — dieselbe Groesse, die
+  // der Override-Speicher fuehrt (getMatchup deckelt sie bei 0,98).
+  const WR_EINGABE_MAX = 98;
 
   function _wrHandWert(deckName) {
     const v = _findByNormalized(_winRateOverrides, deckName);
@@ -11270,15 +11333,15 @@ window.MetaCall = (function () {
         'No matches recorded for this pairing — you can enter a number.');
     } else {
       titel = (hand != null ? L('Von dir eingetragen. ', 'Entered by you. ') : '')
-        + _mctQuotenName('mitUnentschieden') + ' ' + _mcPct(z.wr, 1)
-        + (z.wrOhneU != null ? ' · ' + _mctQuotenName('ohneUnentschieden') + ' ' + _mcPct(z.wrOhneU, 1) : '')
-        + ' · ' + zahlLokal(z.wrPartien) + ' ' + L('gezählte Matches', 'counted matches');
+        + _mctQuotenName('ohneUnentschieden') + ' ' + _mcPct(q, 1)
+        + ' · ' + zahlLokal(z.wrPartien) + ' ' + L('gezählte Matches', 'counted matches')
+        + (z.teile ? ' — ' + z.teile : '');
     }
     if (!deckName) {
       return z.wr == null ? '<span class="mc-cell-dash" title="' + esc(titel) + '">—</span>'
-        : `<span class="mc-mct-wr ${klasse}" title="${esc(titel)}">${_mcPct(z.wr, 0)}</span>`;
+        : `<span class="mc-mct-wr ${klasse}" title="${esc(titel)}">${_mcPct(q, 0)}</span>`;
     }
-    const wert = z.wr == null ? '' : String(Math.round(z.wr * 10) / 10);
+    const wert = q == null ? '' : String(Math.round(q * 10) / 10);
     return `<input type="number" min="0" max="${Math.floor(WR_EINGABE_MAX)}" step="0.1"
               class="mc-personal-input mc-wr-input mc-mct-wr ${klasse}${hand != null ? ' has-value' : ''}"
               data-feld="wr" data-deck="${esc(deckName)}" value="${esc(wert)}" placeholder="—"
@@ -11292,8 +11355,8 @@ window.MetaCall = (function () {
     const x = parseFloat(val);
     if (val === '' || isNaN(x)) { _onWrOverride(deckName, ''); return; }
     const gedeckelt = Math.max(0, Math.min(WR_EINGABE_MAX, x));
-    /* gezeigt = pWin = Quote * (1 - 0,02); Quote ist S/(S+N) */
-    _onWrOverride(deckName, String(gedeckelt / (1 - WR_HAND_UNENTSCHIEDEN)));
+    /* DA-47: gezeigt = getippt = S/(S+N) = Override-Speicher. */
+    _onWrOverride(deckName, String(gedeckelt));
   }
 
   function _mctZelleDay2(z) {
@@ -11420,7 +11483,7 @@ window.MetaCall = (function () {
       case 'online':   { const o = _mctOnline(d.name).wert; return o == null ? -1 : o; }
       case 'enc':      return d.finalShare;
       case 'prognose': return Number.isFinite(d.onlineShare) ? d.onlineShare : d.finalShare;
-      case 'wr':       return z && z.wr != null ? z.wr : -1;
+      case 'wr':       return z && z.wr != null ? (z.wrOhneU != null ? z.wrOhneU : z.wr) : -1;
       case 'day2':     return z ? z.day2 : -1;
       case 'bilanz':   return z ? z.w : -1;
       default:         return d.finalShare;
@@ -12332,6 +12395,15 @@ window.MetaCall = (function () {
     const duenn = (r.partien > 0 && r.partien < EV_MIN_PARTIEN)
                || (r.abdeckung > 0 && r.abdeckung < EV_MIN_ABDECKUNG);
     const duennText = duenn ? _evL(' · dünne Grundlage', ' · thin basis') : '';
+    /* DA-49 (05.10.2026, Befund D3-04): die Quote rechnet nur ueber die
+       benannten Decks (z. B. 83,8 % des Metas); Bilanz und Day-2 daneben
+       spielen „Sonstige" mit der Pauschalquote mit. Die Pauschale bleibt
+       aus dieser Zahl heraus (sie ist keine Messung,
+       test-mc-deck-gegen-meta.js) — aber die Kachel sagt es jetzt. */
+    const abdeckungText = (r.abdeckung > 0 && r.abdeckung < 99.5)
+      ? _evL(' · gegen ' + _mcNum(r.abdeckung, 1) + ' % des Metas (ohne Sonstige)',
+             ' · against ' + _mcNum(r.abdeckung, 1) + '% of the meta (without others)')
+      : '';
 
     const bandText = (r.sd > 0)
       ? _evL('Band ' + _mcNum(r.unten, 1) + ' bis ' + _mcNum(r.oben, 1) + ' %',
@@ -12371,7 +12443,7 @@ window.MetaCall = (function () {
     <div class="mc-ev-kachel ${r.ev >= 50 ? 'is-pos' : 'is-neg'}${duenn ? ' is-duenn' : ''}">
       <span class="mc-ev-label">${esc(_evL('Erwartete ', 'Expected ') + _evQuotenName())}</span>
       <span class="mc-ev-wert">${_mcNum(r.ev, 1)}<span class="mc-ev-einheit">${_mcPz()}</span></span>
-      <span class="mc-ev-kontext">${esc(bandText + duennText)}</span>
+      <span class="mc-ev-kontext">${esc(bandText + duennText + abdeckungText)}</span>
     </div>
     <div class="mc-ev-kachel">
       <span class="mc-ev-label">${esc(_evL('Erwartete Siege', 'Expected wins'))}</span>
@@ -12823,7 +12895,7 @@ window.MetaCall = (function () {
           <th>#</th>
           <th>${t('mc.recDeck')}</th>
           <th title="${esc(t('mc.tipRecZiel'))}">${esc(_zielKurz())}</th>
-          <th title="${esc(_wrKonventionsTitel('mitUnentschieden'))}" data-hinweis="${esc(_wrKonventionsTitel('mitUnentschieden'))}">${esc(_wrKurzform(t('mc.recAvgWr')))}</th>
+          <th title="${esc(_wrKonventionsTitel('ohneUnentschieden'))}" data-hinweis="${esc(_wrKonventionsTitel('ohneUnentschieden'))}">${esc(_wrKurzform(t('mc.recAvgWr')))}</th>
           <th class="mc-rec-wins" title="${esc(t('mc.tipRecExpWins'))}">${t('mc.recExpWins')}</th>
           <th class="mc-rec-toggle-th" aria-label="${_mcIstDeutsch() ? 'Warum?' : 'Why?'}"></th>
         </tr></thead>
@@ -13425,9 +13497,18 @@ window.MetaCall = (function () {
     const gewichtung = (() => {
       const pz = (w) => _mcNum(w * 100, 0) + _mcPz();
       const papier = MATCHUP_BLEND_WEIGHT_DAY2 + MATCHUP_BLEND_WEIGHT_DAY1;
-      const kern = _mcIstDeutsch()
-        ? `Gewichtung der Paarungen: ${pz(papier)} Papier (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
-        : `Matchup weighting: ${pz(papier)} paper (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} online`;
+      /* DA-48 (05.10.2026): ohne echte Day-1-Karte (heute: Kopie von
+         Overall, verworfen) rechnet getBaseMatchup mit der Major-
+         Gesamtpaarung — der Satz sagt dann das, nicht „Day 2 · Day 1". */
+      const _echtesDay1 = (typeof _majorMatchupMapDay1 !== 'undefined') && _majorMatchupMapDay1
+        && Object.keys(_majorMatchupMapDay1).length > 0;
+      const kern = _echtesDay1
+        ? (_mcIstDeutsch()
+          ? `Gewichtung der Paarungen: ${pz(papier)} Papier (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
+          : `Matchup weighting: ${pz(papier)} paper (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} online`)
+        : (_mcIstDeutsch()
+          ? `Gewichtung der Paarungen: ${pz(papier)} Papier (Major gesamt) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
+          : `Matchup weighting: ${pz(papier)} paper (major overall) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} online`);
       const deck = _settings.myDeck || '';
       const adj  = deck ? (_deckWRAdjustment[normalize(deck)] || 0) : 0;
       const schub = adj
@@ -13466,8 +13547,8 @@ window.MetaCall = (function () {
         ? konvNameRoh
         : konvNameRoh.charAt(0).toLowerCase() + konvNameRoh.slice(1);
       const titel = _mcIstDeutsch()
-        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Metas vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird in getBaseMatchup auf dieselbe Quote der Paarung aufgeschlagen.'
-        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two metas: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. getBaseMatchup adds the gap to the pair\u2019s rate in the same convention.';
+        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Metas vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird nur auf Paarungen ohne Major-Messung aufgeschlagen — wo die Major-Paarung schon in der Mischung steht, zählte sie sonst doppelt.'
+        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two metas: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. The gap is only added to pairs without a major measurement \u2014 where the major pairing is already in the mix it would count twice.';
       return ` <span class="mc-predictor-banner-gewichtung" title="${esc(titel)}">${esc(kern + schub)}</span>`;
     })();
 
@@ -13776,9 +13857,10 @@ window.MetaCall = (function () {
       personals.push(_intelStatTile(
         t('mc.intelJournal'),
         `${jStats.wins}–${jStats.losses}–${jStats.ties}`,
-        `${jStats.winRate} %`,
+        jStats.winRate == null ? '\u2014' : `${jStats.winRate} %`,
         'mc-intel-tile-personal',
-        _titelPersoenlich
+        // DA-47: das Journal rechnet seit 05.10.2026 S / (S + N).
+        _wrKonventionsTitel('ohneUnentschieden')
       ));
     }
     const rawTgShare = _findByNormalized(_tgFieldShares, deckName) || 0;
@@ -14425,8 +14507,8 @@ window.MetaCall = (function () {
     ctx.fillText(t('mc.recDeck').toUpperCase(), originX + padL + 30, originY - 17);
     ctx.textAlign = 'right';
     ctx.fillText(titleLabel.toUpperCase(), originX + columnW - padR - 70, originY - 17);
-    /* `r.avgWR` ist `expWin / rounds` = Summe(Anteil · pWin) — der
-       Anteil gewonnener Partien an ALLEN gespielten, also S/(S+N+U).
+    /* `r.avgWR` ist seit DA-49 (05.10.2026) S/(S+N) der erwarteten
+       Bilanz — dieselbe Zahl wie in der Tabelle der Seite.
        Der Kopf ist 11 px breit und traegt nur das Kuerzel; der volle
        Name steht in der Legende im Fuss desselben Bildes. */
     ctx.fillText(_wrKurzform(t('mc.recAvgWr')).toUpperCase(), originX + columnW - padR, originY - 17);
@@ -14981,7 +15063,7 @@ window.MetaCall = (function () {
     }
 
     _paintFooter(ctx, W, H, _wrLegende([
-      { was: _wrKurzform(t('mc.recAvgWr')), konvention: 'mitUnentschieden' },
+      { was: _wrKurzform(t('mc.recAvgWr')), konvention: 'ohneUnentschieden' }, // DA-49
     ]));
     _showSharePreview(
       canvas,
@@ -15021,7 +15103,13 @@ window.MetaCall = (function () {
 
     const { day2Prob, expWin, expTie, expLoss } = calcDay2(field);
     const pct = _mcNum(day2Prob * 100, 1);
-    const day1WR = _settings.rounds > 0 ? (expWin / _settings.rounds) * 100 : 0;
+    /* DA-49 (05.10.2026, T3-04): das Bild zeigte 39,1 % (Siege durch
+       Runden, S/(S+N+U)), die Seite 45,4 % (Erwartete Win-Rate, S/(S+N)).
+       Das Bild zeigt jetzt DIESELBE Zahl wie die Kachel der Seite; nur
+       ohne gewaehltes Deck (keine Kachel) die Bilanz der Kette, S/(S+N). */
+    const _evBild = (() => { try { return _evRechne(field); } catch (e) { return null; } })();
+    const day1WR = (_evBild && Number.isFinite(_evBild.ev)) ? _evBild.ev
+      : ((expWin + expLoss) > 0 ? (expWin / (expWin + expLoss)) * 100 : 0);
 
     // ALL matchups (sorted desc by final share), not just the top 10 —
     // user wants the full picture visible. "Others" (junk) pinned to the
@@ -15195,8 +15283,9 @@ window.MetaCall = (function () {
       y += ROW_H;
     });
 
+    // DA-49 (05.10.2026): beide Zahlen des Bildes sind jetzt S/(S+N).
     _paintFooter(ctx, W, H, _wrLegende([
-      { was: _wrKurzform(t('mc.day1WinRate')), konvention: 'mitUnentschieden' },
+      { was: _wrKurzform(t('mc.day1WinRate')), konvention: 'ohneUnentschieden' },
       { was: _mcIstDeutsch() ? 'Matchup-Spalte' : 'matchup column', konvention: 'ohneUnentschieden' },
     ]));
     _showSharePreview(canvas, `metacall-day2-${_formatDateFilename()}.png`,

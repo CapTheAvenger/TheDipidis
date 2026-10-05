@@ -352,6 +352,14 @@ describe('Was nicht verbunden wird, bleibt sichtbar unverbunden', () => {
         // Die Mengen duerfen wachsen, aber die Ueberschneidung muss die Regel
         // bleiben und die Ausnahme klein. Gemessen 21.08.2026: 116 von 123.
         const gemeinsam = [...turnierNamenImFormat].filter(n => ladderNamen.has(n)).length;
+        /* Setwechsel-Probe rot (PR #928, 05.10.2026): am Tag nach einem
+           neuen Set traegt noch kein Turnierdeck den neuen Formatnamen —
+           „0 von 0" ist dann kein Bruch der Bruecke, sondern ein leeres
+           Fenster. Ohne Turniernamen gibt es nichts zu vergleichen. */
+        if (turnierNamenImFormat.size === 0) {
+            console.log('    # leeres Turnierfenster (neues Format) — nichts zu vergleichen');
+            return;
+        }
         assert.ok(gemeinsam > turnierNamenImFormat.size * (FENSTER.istJung() ? 0.6 : 0.8),
             `nur ${gemeinsam} von ${turnierNamenImFormat.size} Turniernamen treffen die Ladder`);
     });

@@ -131,9 +131,13 @@ describe('B1 — die Saetze neben der Spalte tragen denselben Namen wie die Spal
         });
         const html = ctx.renderFrozenBanner();
         assert.ok(!/win\s?%/i.test(html), 'englischer Text nennt weiter win %:\n' + html);
-        // UI-16 (27.09.2026): Kurzname „Win rate" statt „Win share incl. ties".
-        assert.equal(K.kurz('mitUnentschieden'), 'Win rate');
-        assert.ok(html.includes('Win rate'),
+        // UI-16 (27.09.2026) gab S/(S+N+U) den Kurznamen „Win rate".
+        // DA-47 (05.10.2026, Entscheidung Hausi): „Win rate" ist jetzt
+        // S/(S+N); diese eingefrorene Tabelle rechnet S/(S+N+U) und traegt
+        // deshalb deren eigenen Namen.
+        assert.equal(K.kurz('mitUnentschieden'), 'Win share incl. ties');
+        assert.equal(K.kurz('ohneUnentschieden'), 'Win rate');
+        assert.ok(html.includes(K.kurz('mitUnentschieden')),
             'der englische Kurzname fehlt:\n' + html);
     });
 

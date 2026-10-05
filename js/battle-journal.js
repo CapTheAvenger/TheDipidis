@@ -49,7 +49,19 @@
      * ist kein vierter Name und nie falsch. Auf der LEINWAND
      * (shareTournamentSummary) gibt es keine Sprechblase, also muss
      * Name UND Formel mit aufs Bild. */
-    const BJ_KONVENTION = 'mitUnentschieden';
+    const BJ_KONVENTION = 'ohneUnentschieden';
+    /* DA-47 (Zahlenvertrag, Hausi 05.10.2026: „Rechnung angleichen"):
+       das Journal rechnet die Win-Rate wie die ganze Seite, S / (S + N).
+       Unentschieden und No-Shows stehen daneben, in keinem Bruch.
+       Ohne Sieg und ohne Niederlage gibt es keine Quote (null), nicht 0 %. */
+    function bjQuote(siege, niederlagen) {
+        const s = Number(siege) || 0, n = Number(niederlagen) || 0;
+        return (s + n) > 0 ? Math.round((s / (s + n)) * 100) : null;
+    }
+    function bjQuoteText(siege, niederlagen) {
+        const q = bjQuote(siege, niederlagen);
+        return q == null ? '\u2014' : q + '%';
+    }
 
     function bjQuotenFormel(id) {
         const K = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
@@ -498,6 +510,25 @@
         if (lastType) selectJournalType(lastType);
     }
 
+    /* FE-61 (T3-08, 05.10.2026): die Folgerunde. „+ Match" an der
+       Turniergruppe belegte Turnier, Format und Typ vor, aber nicht das
+       eigene Deck — jede Runde kostete 3 Handgriffe mehr, und es gab
+       keine Rundennummer. _folgerunde liest beides aus den Eintraegen
+       DIESES Turniers (gleicher Name und, wenn gesetzt, gleiches Format):
+       das Deck aus dem neuesten Eintrag, die Runde = Zahl der Eintraege + 1.
+       Nur lesen; gespeicherte Eintraege werden nicht angefasst. */
+    function _folgerunde(eintraege, name, meta) {
+        const liste = (Array.isArray(eintraege) ? eintraege : []).filter(function (e) {
+            return e && (e.tournamentName || '') === (name || '')
+                && (!meta || (e.meta || '') === meta);
+        });
+        if (!liste.length) return { deck: '', runde: 1 };
+        const neuester = liste.reduce(function (a, b) {
+            return (b.createdAtMs || 0) > (a.createdAtMs || 0) ? b : a;
+        });
+        return { deck: neuester.ownDeck || '', runde: liste.length + 1 };
+    }
+
     function continueJournalTournament(name, meta, type) {
         openBattleJournalSheet();
         // Pre-fill tournament fields after sheet opens
@@ -506,6 +537,24 @@
         const metaSel = document.getElementById('battleJournalMeta');
         if (metaSel && meta) metaSel.value = meta;
         if (type) selectJournalType(type);
+        const fr = _folgerunde(journalHistoryCache, name, meta);
+        const els = battleJournalElements();
+        if (fr.deck && els.ownDeckValue) {
+            els.ownDeckValue.value = fr.deck;
+            try { persistBattleJournalDraftFromForm(); } catch (e) { /* Entwurf ist Komfort */ }
+        }
+        if (nameEl && nameEl.parentNode) {
+            let hinweis = document.getElementById('battleJournalRundenHinweis');
+            if (!hinweis) {
+                hinweis = document.createElement('div');
+                hinweis.id = 'battleJournalRundenHinweis';
+                hinweis.className = 'bj-runden-hinweis';
+                hinweis.setAttribute('aria-live', 'polite');
+                nameEl.parentNode.insertBefore(hinweis, nameEl.nextSibling);
+            }
+            hinweis.textContent = battleJournalText('bj.rundeN', 'Runde {n}').replace('{n}', String(fr.runde))
+                + (fr.deck ? ' \u00b7 ' + fr.deck : '');
+        }
     }
 
     // ── Dynamic game rows ────────────────────────────────────
@@ -666,6 +715,13 @@
     function alsSiegGewertet(result) {
         return result === 'win' || result === NO_SHOW;
     }
+    /* FE-61: ein No-Show hat keinen Gegner. Die Zeile hiess dann
+       „Deck vs Opponent" (englisch, und ein Gegner, den es nicht gab). */
+    function _bjGegnerLeer(e) {
+        return istNoShow(e)
+            ? battleJournalText('bj.keinGegner', 'kein Gegner erschienen')
+            : battleJournalText('bj.gegnerUnbekannt', 'Gegner unbekannt');
+    }
     function nurGespielte(entries) {
         return (Array.isArray(entries) ? entries : []).filter(function (e) {
             return !istNoShow(e);
@@ -772,7 +828,7 @@
                     : (entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : battleJournalText('bj.secondShort', '2nd'));
                 const bestOfText = istNoShow(entry) ? '\u2013' : (entry.bestOf === 'bo3' ? 'BO3' : 'BO1');
                 const tournamentPart = entry.tournamentName ? `${escapeHtml(entry.tournamentName)} · ` : '';
-                const title = `${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}`;
+                const title = `${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || _bjGegnerLeer(entry)}`;
                 const bo3Text = entry.bestOf === 'bo3' && Array.isArray(entry.bo3Games) && entry.bo3Games.length === 3
                     ? ` · G1:${entry.bo3Games[0].turnOrder || '-'}-${entry.bo3Games[0].result || '-'} G2:${entry.bo3Games[1].turnOrder || '-'}-${entry.bo3Games[1].result || '-'} G3:${entry.bo3Games[2].turnOrder || '-'}-${entry.bo3Games[2].result || '-'}`
                     : '';
@@ -1262,6 +1318,9 @@
         // Always start with a blank form
         resetBattleJournalForm();
         formatVorbelegen(document.getElementById('battleJournalMeta'));
+        // FE-61: der Rundenhinweis gehoert nur zur Folgerunde.
+        const _rh = document.getElementById('battleJournalRundenHinweis');
+        if (_rh) _rh.textContent = '';
         // Load history (incl. Firestore) so getLastTournament works after sync
         loadJournalHistory().then(() => renderLastTournamentButton()).catch(() => {});
         renderLastTournamentButton();
@@ -1528,7 +1587,7 @@
         // 0 von 0 Spielen ist nicht 0 %, sondern undefiniert. Der leere Journal
         // zeigte "0 % Win Rate" — ein neuer Nutzer liest das als "du verlierst
         // alles", bevor er das erste Match eingetragen hat.
-        const winRateLabel = gespielt.length > 0 ? `${Math.round((totalW / gespielt.length) * 100)}%` : '—';
+        const winRateLabel = bjQuoteText(totalW, totalL);
         const noShowKachel = totalN > 0
             ? `<div class="bj-history-stat is-noshow" title="${escapeHtml(battleJournalText('bj.noshowHint', 'Gewonnen, weil der Gegner nicht erschienen ist — zaehlt nicht in die Quote.'))}"><strong>${totalN}</strong><span>${escapeHtml(battleJournalText('bj.noshow', 'No-Show'))}</span></div>`
             : '';
@@ -1585,7 +1644,11 @@
             // Bilanz, nicht Matchup: ein No-Show ist hier ein Sieg (drei
             // Punkte), wird aber daneben ausgewiesen, damit niemand die
             // Zahl fuer gespielte Siege haelt.
-            const mW = metaEntries.filter(e => alsSiegGewertet(e.result)).length;
+            // FE-61 (T3-09): EINE Zaehlweise auf der ganzen Seite — W sind
+            // gespielte Siege, No-Shows stehen als eigene Zahl daneben
+            // (wie im Kopf). Die Turnierbilanz der Bilder zaehlt weiter
+            // wie die Turnierleitung (alsSiegGewertet).
+            const mW = metaEntries.filter(e => e.result === 'win').length;
             const mL = metaEntries.filter(e => e.result === 'loss').length;
             const mT = metaEntries.filter(e => e.result === 'tie').length;
             const mN = metaEntries.filter(istNoShow).length;
@@ -1594,7 +1657,7 @@
                 <div class="bj-meta-folder-header" onclick="this.parentElement.classList.toggle('is-collapsed')">
                     <span class="bj-meta-folder-icon"></span>
                     <span class="bj-meta-folder-label">${escapeHtml(metaLabel)}</span>
-                    <span class="bj-meta-folder-stats">${mW}W ${mL}L ${mT}T${mN > 0 ? ` ${mN}N` : ''}</span>
+                    <span class="bj-meta-folder-stats">${mW}W ${mL}L ${mT}T${mN > 0 ? ` \u00b7 ${mN} ${escapeHtml(battleJournalText('bj.noshow', 'No-Show'))}` : ''}</span>
                     <span class="bj-meta-folder-chevron">▾</span>
                 </div>
                 <div class="bj-meta-folder-content">`;
@@ -1602,7 +1665,7 @@
             tournNames.forEach(tournKey => {
                 const entries = tournaments[tournKey];
                 const tournLabel = tournKey || battleJournalText('bj.noTournament', 'No Tournament');
-                const tW = entries.filter(e => alsSiegGewertet(e.result)).length;
+                const tW = entries.filter(e => e.result === 'win').length;
                 const tL = entries.filter(e => e.result === 'loss').length;
                 const tT = entries.filter(e => e.result === 'tie').length;
                 const tN = entries.filter(istNoShow).length;
@@ -1613,9 +1676,9 @@
                 // gespieltes Match hergibt. Quote: nur Gespieltes, in
                 // Zaehler UND Nenner. Ohne gespielte Partie ist sie nicht 0,
                 // sondern undefiniert.
-                const tGespielt = tTotal - tN;
-                const tWinRate = tGespielt > 0
-                    ? `${Math.round(((tW - tN) / tGespielt) * 100)}%` : '\u2014';
+                // FE-61: tW sind jetzt nur gespielte Siege (No-Show steht als
+                // tN daneben); Quote DA-47: S / (S + N).
+                const tWinRate = bjQuoteText(tW, tL);
                 const safeTournKey = escapeHtml(tournKey).replace(/'/g, "\\'");
                 const groupType = (entries[0]?.tournamentType || '').replace(/'/g, "\\'");
                 // Die Platzierung haengt am Turnier, gespeichert ist sie an
@@ -1628,7 +1691,7 @@
                     <div class="bj-tournament-header">
                         <div class="bj-tournament-info">
                             <strong class="bj-tournament-name">${escapeHtml(tournLabel)}</strong>
-                            <span class="bj-tournament-record">${tW}-${tL}-${tT}${tN > 0 ? ` \u00b7 ${tN}N` : ''} (${tWinRate})</span>${
+                            <span class="bj-tournament-record">${tW}-${tL}-${tT}${tN > 0 ? ` \u00b7 ${tN} ${escapeHtml(battleJournalText('bj.noshow', 'No-Show'))}` : ''} (${tWinRate})</span>${
                                 tPlacement ? `<span class="bj-tournament-placement">${escapeHtml(tPlacement)}</span>` : ''}
                         </div>
                         <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">+ Match</button>
@@ -1734,7 +1797,7 @@
                     <div class="bj-history-matchup">
                         <strong>${escapeHtml(entry.ownDeck || 'Deck')}</strong>
                         <span class="bj-history-vs">vs</span>
-                        <strong>${escapeHtml(entry.opponentArchetype || 'Opponent')}</strong>
+                        <strong>${escapeHtml(entry.opponentArchetype || _bjGegnerLeer(entry))}</strong>
                         ${brickBadge}
                         ${mulliganBadge}
                     </div>
@@ -1823,9 +1886,9 @@
         // `wins` enthaelt den No-Show (so hat die Turnierleitung gewertet),
         // die Quote darf ihn nicht enthalten — in keinem der beiden
         // Brueche. Dieselbe Regel wie nurGespielte() und wie js/ds-share.js.
-        const gespieltN = total - noShows;
-        const winRate = gespieltN > 0
-            ? Math.round(((wins - noShows) / gespieltN) * 100) : 0;
+        // DA-47: Quote S / (S + N) ueber gespielte Partien.
+        const _bildQ = bjQuote(wins - noShows, losses);
+        const winRate = _bildQ == null ? '\u2014' : _bildQ;
 
         const W = 600;
         /* 96 -> 116: unter der Bilanzzeile steht jetzt die Konvention.
@@ -1884,7 +1947,7 @@
         // Bild die Bilanz (2W) und die Quote (14 %) ohne Erklaerung. Und er
         // wird AUSGESCHRIEBEN: in der Formel darunter, S / (S + N + U), ist
         // N die Niederlage.
-        ctx.fillText(`${wins}W-${losses}L-${ties}T${noShows > 0 ? `  \u00b7  ${noShows}\u00d7 No-Show` : ''}  \u00b7  ${winRate} % ${bjQuotenName(BJ_KONVENTION)}`, 16, 78);
+        ctx.fillText(`${wins}W-${losses}L-${ties}T${noShows > 0 ? `  \u00b7  ${noShows}\u00d7 No-Show` : ''}  \u00b7  ${_bildQ == null ? '\u2014' : winRate + ' %'} ${bjQuotenName(BJ_KONVENTION)}`, 16, 78);
         // Die Formel darunter, kleiner: sie ist der Nenner, ohne den
         // der Name auf dem geteilten Bild nichts festlegt.
         ctx.fillStyle = '#8794a8';
@@ -1904,7 +1967,7 @@
             const brickMark = entry.brick    ? '  \ud83e\uddf1' : '';
             const mullMark  = entry.mulligan ? '  \ud83d\udd04' : '';
             const noShowMark = istNoShow(entry) ? '  \u00b7 No-Show' : '';
-            ctx.fillText(`${resultEmoji}  ${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}${brickMark}${mullMark}${noShowMark}`, 20, y + 4);
+            ctx.fillText(`${resultEmoji}  ${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || _bjGegnerLeer(entry)}${brickMark}${mullMark}${noShowMark}`, 20, y + 4);
 
             if (withDetails && size.detailLines.length) {
                 ctx.fillStyle = '#cbd5e0';
@@ -2061,7 +2124,7 @@
         const l = entries.filter(e => e.result === 'loss').length;
         const t = entries.filter(e => e.result === 'tie').length;
         const tot = entries.length;
-        const wr = tot > 0 ? Math.round((w / tot) * 100) : 0;
+        const wr = bjQuoteText(w, l);
         const uniqueDecks = new Set(entries.map(e => e.ownDeck).filter(Boolean)).size;
         const uniqueOpps = new Set(entries.map(e => e.opponentArchetype).filter(Boolean)).size;
         el.innerHTML = `
@@ -2069,7 +2132,7 @@
             <div class="ma-stat is-win"><strong>${w}</strong><span>${escapeHtml(battleJournalText('ma.wins', 'Wins'))}</span></div>
             <div class="ma-stat is-loss"><strong>${l}</strong><span>${escapeHtml(battleJournalText('ma.losses', 'Losses'))}</span></div>
             <div class="ma-stat is-tie"><strong>${t}</strong><span>${escapeHtml(battleJournalText('ma.ties', 'Ties'))}</span></div>
-            <div class="ma-stat" title="${escapeHtml(bjQuotenHinweis(BJ_KONVENTION))}" data-quote-konvention="${BJ_KONVENTION}"><strong>${wr}%</strong><span>${escapeHtml(bjMitQuote(battleJournalText('ma.winRate', '{quote}'), BJ_KONVENTION))}</span></div>
+            <div class="ma-stat" title="${escapeHtml(bjQuotenHinweis(BJ_KONVENTION))}" data-quote-konvention="${BJ_KONVENTION}"><strong>${wr}</strong><span>${escapeHtml(bjMitQuote(battleJournalText('ma.winRate', '{quote}'), BJ_KONVENTION))}</span></div>
             <div class="ma-stat"><strong>${uniqueDecks}</strong><span>${escapeHtml(battleJournalText('ma.decks', 'Decks'))}</span></div>
             <div class="ma-stat"><strong>${uniqueOpps}</strong><span>${escapeHtml(battleJournalText('ma.opponents', 'Opponents'))}</span></div>
         `;
@@ -2219,7 +2282,8 @@
 
         const sorted = Object.entries(opp)
             .filter(([, s]) => s.total >= 2)
-            .map(([name, s]) => ({ name, ...s, wr: Math.round((s.w / s.total) * 100) }))
+            .filter(([, s]) => (s.w + s.l) > 0)
+            .map(([name, s]) => ({ name, ...s, wr: bjQuote(s.w, s.l) }))
             .sort((a, b) => b.wr - a.wr || b.total - a.total);
 
         const best = sorted.slice(0, 5);
@@ -2266,7 +2330,8 @@
         const sorted = Object.entries(matchups).sort((a, b) => b[1].total - a[1].total);
         let html = '<div class="bj-matchup-grid">';
         sorted.forEach(function([opp, stats]) {
-            const winRate = stats.total > 0 ? Math.round((stats.wins / stats.total) * 100) : 0;
+            const _q = bjQuote(stats.wins, stats.losses);
+            const winRate = _q == null ? 0 : _q;
             const barColor = winRate >= 60 ? '#1f8b4d' : (winRate >= 40 ? '#e67e22' : '#c0392b');
             const brickTag = stats.bricks > 0
                 ? `<span class="bj-brick-count" title="${stats.bricks} Brick(s)">🧱 ${stats.bricks}</span>`
@@ -2277,7 +2342,7 @@
                     <div class="bj-matchup-bar-wrap">
                         <div class="bj-matchup-bar" style="width:${winRate}%;background:${barColor}"></div>
                     </div>
-                    <div class="bj-matchup-stats">${stats.wins}-${stats.losses}-${stats.ties} <span class="bj-matchup-rate">${winRate}%</span>${brickTag}</div>
+                    <div class="bj-matchup-stats">${stats.wins}-${stats.losses}-${stats.ties} <span class="bj-matchup-rate">${_q == null ? '\u2014' : winRate + '%'}</span>${brickTag}</div>
                 </div>
             `;
         });
@@ -3220,6 +3285,8 @@
     window.toggleBrickEntry = toggleBrickEntry;
     window.deleteJournalEntry = deleteJournalEntry;
     window.continueJournalTournament = continueJournalTournament;
+    window._bjFolgerunde = _folgerunde;
+    window.bjQuote = bjQuote;
 
     /**
      * Returns per-opponent win rates from journal entries for a given own-deck name.
@@ -3325,7 +3392,8 @@
             if (m.total >= minGames) {
                 result[opp] = {
                     wins: m.wins, losses: m.losses, ties: m.ties, total: m.total,
-                    winRate: Math.round((m.wins / m.total) * 100),
+                    // DA-47: S / (S + N); nur Unentschieden -> null.
+                    winRate: bjQuote(m.wins, m.losses),
                 };
             }
         });

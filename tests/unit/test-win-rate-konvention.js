@@ -329,6 +329,7 @@ describe('Die Anzeigen nennen ihre Konvention', () => {
            dieselbe Konvention, aber mit dem vollen Namen davor. Die
            Plakette schreibt „… % WR", und ohne den Namen im Titel waere
            das Kuerzel eine zweite Bezeichnung. */
-        assert.match(lies('js/app-tier-meta.js'), /tierQuotenHinweis\('mitUnentschieden'\)/);
+        // DA-47 (05.10.2026): die Tier-Karte rechnet S/(S+N) aus der Bilanz.
+        assert.match(lies('js/app-tier-meta.js'), /tierQuotenHinweis\('ohneUnentschieden'\)/);
     });
 });

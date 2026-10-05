@@ -267,8 +267,9 @@ describe('ds-share: ein Turnier ist die Gruppe seiner Partien', () => {
         // ist und in KEINEM der beiden Brueche vorkommen darf. `w`
         // ENTHAELT ihn (das ist die Bilanz, so hat die Turnierleitung
         // gewertet), also muss er im Zaehler abgezogen werden.
-        assert.match(SHARE, /winRate: gespielt \? \(\(w - n\) \/ gespielt\) \* 100 : NaN/);
-        assert.match(SHARE, /var gespielt = scored - n;/,
+        // DA-47 (05.10.2026): wie das Journal S / (S + N); ausgefuehrt in
+        // tests/unit/test-turnierbild.js (1 Sieg, 5 Niederlagen = 1/6).
+        assert.match(SHARE, /winRate: \(\(w - n\) \+ l\) > 0 \? \(\(w - n\) \/ \(\(w - n\) \+ l\)\) \* 100 : NaN/,
             'der Nenner trennt gespielte Partien nicht mehr ab');
         assert.doesNotMatch(SHARE, /\(w \+ t \/ 2\) \/ scored/);
         /* DIE FUSSNOTE MIT DER FORMEL IST SEIT DEM 11.09.2026 WEG.
@@ -277,8 +278,9 @@ describe('ds-share: ein Turnier ist die Gruppe seiner Partien', () => {
            Was bleibt, ist die Zusicherung, auf die es ankommt: die
            Konvention wird weiterhin BENANNT, und der Name kommt aus
            js/win-rate-konvention.js statt abgeschrieben zu sein.
-           SHARE_KONVENTION ist die Vorgabe von quotenName(). */
-        assert.match(SHARE, /var SHARE_KONVENTION = 'mitUnentschieden';/,
+           SHARE_KONVENTION ist die Vorgabe von quotenName().
+           DA-47 (05.10.2026): S/(S+N) wie die ganze Seite. */
+        assert.match(SHARE, /var SHARE_KONVENTION = 'ohneUnentschieden';/,
             'die Bildkarte legt nicht mehr fest, welche Konvention sie benennt');
         assert.doesNotMatch(SHARE, /kurzHinweis\(/,
             'die ausgeschriebene Formel steht wieder unter der Kachel');

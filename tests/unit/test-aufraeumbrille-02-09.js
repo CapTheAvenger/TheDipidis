@@ -507,8 +507,10 @@ describe('die Methodikseite sagt in beiden Sprachen dasselbe', () => {
            Gegenteil sagte und es vorrechnete. */
         assert.doesNotMatch(Q, /ties counted as half/i,
             'die verworfene Konvention steht wieder als Definition auf der Methodikseite');
-        assert.match(Q, /Ties count in the denominator, not as half a win/);
-        assert.match(Q, /13,206 matches/, 'das Rechenbeispiel fehlt in der englischen Fassung');
+        // DA-47 (05.10.2026): die Win-Rate ist S/(S+N) — Unentschieden
+        // zaehlen gar nicht, auch nicht im Nenner. Das Rechenbeispiel bleibt.
+        assert.match(Q, /Ties are left out/);
+        assert.match(Q, /6,430 \/ 13,096 = 49\.1 %/, 'das Rechenbeispiel fehlt in der englischen Fassung');
     });
 
     it('kein Satz verspricht etwas, das der Leerzustand darunter zuruecknimmt', () => {

@@ -178,7 +178,8 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {
            data/limitless_online_decks_matchups.csv = S/(S+N)) und
            zusaetzlich die Formel — nicht mehr das Wort "Win Rate". */
         const SHARE = read('js/ds-share.js');
-        assert.match(SHARE, /var SHARE_KONVENTION = 'mitUnentschieden';/,
+        // DA-47 (05.10.2026): die Bilder rechnen wie die Seite S/(S+N).
+        assert.match(SHARE, /var SHARE_KONVENTION = 'ohneUnentschieden';/,
             'js/ds-share.js legt seine Konvention nicht mehr fest');
         assert.match(SHARE, /quotenName\(\)/,
             'die Deck-Kachel im Bild holt ihren Namen nicht aus dem Modul');

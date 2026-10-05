@@ -2470,9 +2470,10 @@
             const wkDe = (typeof getLang === 'function' && getLang() === 'de');
             const wkKurz = WK ? WK.kurz('matchpunkte') : '';
             const wkFormel = (WK && WK.hol('matchpunkte')) ? WK.hol('matchpunkte').formel : '';
-            const wkMit = WK ? WK.kurz('mitUnentschieden') : '';
-            const wkFormelMit = (WK && WK.hol('mitUnentschieden'))
-                ? WK.hol('mitUnentschieden').formel : '';
+            // DA-47 (05.10.2026): die Deck-Analyse rechnet S / (S + N).
+            const wkMit = WK ? WK.kurz('ohneUnentschieden') : '';
+            const wkFormelMit = (WK && WK.hol('ohneUnentschieden'))
+                ? WK.hol('ohneUnentschieden').formel : '';
             const winPctKonvSatz = WK
                 ? (wkDe
                     ? `Konvention: ${wkKurz} (${wkFormel}) — die Spalte win_pct dieser `

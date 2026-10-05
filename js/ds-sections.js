@@ -96,8 +96,8 @@
            aendert. Faellt das Modul aus, steht die Formel da statt
            eines Hausnamens. */
         { id: 'rang',    auf: true, nimm: ['div.cm-rangliste-block'],
-          de: ['Meta-Performance', 'Listen, {quote:mitUnentschieden} und Top-8-Quote je Deck — sortierbar'],
-          en: ['Meta performance', 'lists, {quote:mitUnentschieden} and top-8 rate per deck — sortable'] },
+          de: ['Meta-Performance', 'Listen, {quote:ohneUnentschieden} und Top-8-Quote je Deck — sortierbar'],
+          en: ['Meta performance', 'lists, {quote:ohneUnentschieden} and top-8 rate per deck — sortable'] },
         /* GANZ NACH UNTEN (11.09.2026). Betreiber: „Most played cards
            als letzten Punkt auf die Seite setzen, weil das ist ja mehr
            eine Side Info zum Meta als wirklich relevant."

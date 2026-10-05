@@ -112,7 +112,9 @@ describe('Top 3 by Win Rate reads the real numbers', () => {
 
     it('the source no longer parseFloats new_winrate', () => {
         assert.doesNotMatch(CARDS, /parseFloat\(\s*row\.new_winrate/);
-        assert.match(CARDS, /winRate:\s*parseLocaleNumber\(row\.new_winrate/);
+        // DA-47 (05.10.2026): die Quote kommt jetzt aus der Bilanz der
+        // Deckdatei (S/(S+N)); new_winrate wird gar nicht mehr gelesen.
+        assert.match(CARDS, /winRate: _bilanz\[String\(row\.deck_name \|\| ''\)\.trim\(\)\]/);
     });
 });
 

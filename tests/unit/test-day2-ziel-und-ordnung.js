@@ -44,29 +44,34 @@ describe('Befund 1 — der Vergleicher ist transitiv', () => {
 
            Und diese Liste wird gegen DAY2_THRESHOLD geschnitten und im
            geteilten Bild veroeffentlicht. */
-        const i = MC.indexOf('const raster = (wert, weite)');
-        assert.ok(i > 0,
-            'die gerundeten Sortierschluessel sind weg — dann stehen dort '
-            + 'wieder Toleranzvergleiche, und die Rangliste haengt von der '
-            + 'Eingabereihenfolge ab');
-        const rumpf = MC.slice(i, i + 500);
-        assert.ok(!/Math\.abs\(\s*a\.day2Prob\s*-\s*b\.day2Prob\s*\)/.test(rumpf)
-                  && !/Math\.abs\(\s*ac\s*-\s*bc\s*\)/.test(rumpf),
-            'der Toleranzvergleich ist zurueck');
-        assert.match(rumpf, /raster\(b\.day2Prob, 0\.02\) - raster\(a\.day2Prob, 0\.02\)/,
-            'der erste Schluessel wird nicht mehr gerastert');
-        assert.match(rumpf, /raster\(b\.empConv, 0\.05\) - raster\(a\.empConv, 0\.05\)/,
-            'der zweite Schluessel wird nicht mehr gerastert');
+        /* DA-49 (05.10.2026, Befund D3-03): das Raster liess 22,6 % vor
+           22,9 % stehen — sortiert wird jetzt nach der GEZEIGTEN Zahl,
+           exakt, mit festen Folgeschluesseln (auch das ist transitiv). */
+        const i = MC.indexOf('return ((b.day2Prob || 0) - (a.day2Prob || 0))');
+        assert.ok(i > 0, 'der Vergleicher nach der gezeigten Zahl ist weg');
+        const rumpf = MC.slice(i, i + 400);
+        assert.ok(!/Math\.abs\(/.test(rumpf), 'der Toleranzvergleich ist zurueck');
     });
 
     it('die Ordnung haengt nicht mehr von der Eingabereihenfolge ab', () => {
         // Der echte Vergleicher, aus der Quelle geschnitten und ausgefuehrt.
-        const i = MC.indexOf('const raster = (wert, weite)');
-        const ende = MC.indexOf('return b.avgWR - a.avgWR;', i);
+        const i = MC.indexOf('return ((b.day2Prob || 0) - (a.day2Prob || 0))');
+        const ende = MC.indexOf('String(a.name).localeCompare(String(b.name));', i);
         assert.ok(ende > i, 'der Vergleicherrumpf ist nicht mehr auffindbar');
-        const koerper = MC.slice(i, ende) + 'return b.avgWR - a.avgWR;';
+        const koerper = MC.slice(i, ende) + 'String(a.name).localeCompare(String(b.name));';
         // eslint-disable-next-line no-new-func
         const cmp = new Function('a', 'b', koerper);
+
+        // Die gezeigte Zahl entscheidet: 22,9 % steht vor 22,6 %.
+        const X = { name: 'X', day2Prob: 0.226, empConv: 0.30, avgWR: 60 };
+        const Y = { name: 'Y', day2Prob: 0.229, empConv: 0.10, avgWR: 40 };
+        assert.deepEqual([X, Y].sort(cmp).map(d => d.name), ['Y', 'X']);
+        // VERFAELSCHUNG: mit dem alten 0,02-Raster stuende X vorn.
+        const alt = new Function('a', 'b',
+            'const r = (w, k) => Math.round((w || 0) / k);'
+            + 'return (r(b.day2Prob, 0.02) - r(a.day2Prob, 0.02)) || (b.empConv - a.empConv);');
+        assert.deepEqual([X, Y].sort(alt).map(d => d.name), ['X', 'Y'],
+            'die Probe unterscheidet altes und neues Verhalten nicht');
 
         const A = { n: 'A', day2Prob: 0.5, empConv: 0.1665, avgWR: 41.11 };
         const B = { n: 'B', day2Prob: 0.5, empConv: 0.1490, avgWR: 42.08 };

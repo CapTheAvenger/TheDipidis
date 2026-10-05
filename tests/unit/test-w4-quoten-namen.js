@@ -251,40 +251,16 @@ describe('W4 — die gerechnete Konvention, an den echten Dateien gemessen', () 
         assert.ok(treffer.matchpunkte < n * 0.9);
     });
 
-    it('das Kampftagebuch fuehrt Unentschieden im Nenner (aus dem Code, nicht aus Daten)', () => {
-        /* HIER STEHT KEINE FREMDE DATEI DAHINTER: js/battle-journal.js
-           rechnet ueber die vom Nutzer selbst eingetragenen Partien. Die
-           Konvention ist deshalb im Code abzulesen — an allen vier
-           Zaehlstellen ist der Nenner die Zahl ALLER Eintraege.
-           GESPEICHERTE NUTZERDATEN WERDEN NICHT ANGEFASST; gelesen wird
-           nur der Quelltext. */
+    it('das Kampftagebuch rechnet S/(S+N) (aus dem Code, nicht aus Daten)', () => {
+        /* DA-47 (05.10.2026, Hausi: „Rechnung angleichen"): bis dahin
+           stand hier die Zusage S/(S+N+U). Das Journal rechnet jetzt wie
+           die ganze Seite S/(S+N); die Rechnung steht in EINEM Helfer
+           bjQuote, ausgefuehrt in tests/unit/test-da47-journal-quote.js.
+           GESPEICHERTE NUTZERDATEN WERDEN NICHT ANGEFASST. */
         const bj = lies('js/battle-journal.js');
-        for (const stelle of [
-            "const total = filtered.length;",
-            "const total = entries.length;",
-            "const tot = entries.length;",
-            "opp[o].total++;",
-        ]) {
-            assert.ok(bj.includes(stelle),
-                'die Zaehlstelle „' + stelle + '" gibt es nicht mehr — die '
-                + 'Konvention des Kampftagebuchs muss neu abgelesen werden');
-        }
-        // Der Beweis, dass Ties in `filtered`/`entries` DRIN sind: sie werden
-        // aus derselben Menge gezaehlt.
-        // 26.09.2026: gezaehlt wird aus `gespielt` statt aus `filtered`.
-        // Der No-Show ist kein gespieltes Match und faellt vorher heraus —
-        // die Unentschieden bleiben drin, und genau das ist hier die
-        // Zusage: Zaehler und Nenner kommen aus DERSELBEN Menge.
-        assert.match(bj, /const totalT = gespielt\.filter\(e => e\.result === 'tie'\)\.length;/);
-        assert.match(bj, /const winRateLabel = gespielt\.length > 0/,
-            'Nenner und Unentschieden muessen aus derselben Menge kommen');
-        assert.match(bj, /const ties = entries\.filter\(e => e\.result === 'tie'\)\.length;/);
-        // Und nirgends wird der Nenner um die Unentschieden gekuerzt.
-        assert.ok(!/\.length\s*-\s*(totalT|ties|t)\b/.test(bj),
-            'irgendwo werden die Unentschieden aus dem Nenner genommen — dann '
-            + 'ist die Konvention S/(S+N) und die Beschriftung falsch');
-        // Die Konstante sagt dasselbe.
-        assert.equal(konstante(bj, 'BJ_KONVENTION'), 'mitUnentschieden');
+        assert.match(bj, /function bjQuote\(siege, niederlagen\)/);
+        assert.match(bj, /const winRateLabel = bjQuoteText\(totalW, totalL\);/);
+        assert.equal(konstante(bj, 'BJ_KONVENTION'), 'ohneUnentschieden');
     });
 });
 
@@ -300,7 +276,7 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
             konstanten: ['BJ_KONVENTION'],
             ausdruck: "bjMitQuote(battleJournalText('bj.histWinRate', '{quote}'), BJ_KONVENTION)",
             schluessel: 'bj.histWinRate',
-            konvention: 'mitUnentschieden',
+            konvention: 'ohneUnentschieden', // DA-47
             schreibt: ["<span>${escapeHtml(bjMitQuote(battleJournalText('bj.histWinRate', '{quote}'), BJ_KONVENTION))}</span>"],
         },
         {
@@ -310,7 +286,7 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
             konstanten: ['BJ_KONVENTION'],
             ausdruck: "bjMitQuote(battleJournalText('ma.winRate', '{quote}'), BJ_KONVENTION)",
             schluessel: 'ma.winRate',
-            konvention: 'mitUnentschieden',
+            konvention: 'ohneUnentschieden', // DA-47
             schreibt: ["<span>${escapeHtml(bjMitQuote(battleJournalText('ma.winRate', '{quote}'), BJ_KONVENTION))}</span>"],
         },
         {
@@ -339,7 +315,7 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
             helfer: ['_mcKartenQuotenFormel', '_mcKartenQuotenName'],
             konstanten: ['_MC_KARTEN_KONVENTION'],
             ausdruck: '_mcKartenQuotenName(_MC_KARTEN_KONVENTION)',
-            konvention: 'mitUnentschieden',
+            konvention: 'ohneUnentschieden', // DA-47: Bilanz S/(S+N)
             /* WO DAS ERGEBNIS WIRKLICH HINGESCHRIEBEN WIRD. Ohne diesen
                Anker bleibt der Test gruen, wenn jemand nur die
                innerHTML-Zeile auf „Top 3 by Win Rate" zurueckdreht und
@@ -356,7 +332,7 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
             konstanten: ['QU_GLOSSAR_KONVENTION'],
             ausdruck: 'mitQuote(z[0], QU_GLOSSAR_KONVENTION)',
             schluessel: null,
-            konvention: 'mitUnentschieden',
+            konvention: 'ohneUnentschieden',   // DA-47 (05.10.2026)
             binder: 'z',
             schreibt: ["esc(mitQuote(z[0], QU_GLOSSAR_KONVENTION))"],
         },
@@ -463,7 +439,7 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
     it('die Leinwand des Kampftagebuchs traegt Name UND Formel — dort gibt es keine Sprechblase', () => {
         const bj = lies('js/battle-journal.js');
         ausDatei('js/battle-journal.js',
-            '${winRate} % ${bjQuotenName(BJ_KONVENTION)}');
+            "${_bildQ == null ? '\\u2014' : winRate + ' %'} ${bjQuotenName(BJ_KONVENTION)}"); // DA-47
         ausDatei('js/battle-journal.js',
             'ctx.fillText(bjQuotenFormel(BJ_KONVENTION), 16, 96);');
         // Der Kopf muss hoch genug sein, sonst liegt die Formel unter der
@@ -479,8 +455,8 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
             const formel = String(fuehreAus('js/battle-journal.js',
                 ['bjQuotenName', 'bjQuotenFormel'], ['BJ_KONVENTION'],
                 'bjQuotenFormel(BJ_KONVENTION)', {}, sprache));
-            assert.equal(name, K.kurz('mitUnentschieden'));
-            assert.equal(formel, K.hol('mitUnentschieden').formel);
+            assert.equal(name, K.kurz('ohneUnentschieden')); // DA-47
+            assert.equal(formel, K.hol('ohneUnentschieden').formel);
             assert.notEqual(name, 'Win %',
                 'die Leinwand nennt eine S/(S+N+U)-Zahl „Win %"');
         }
@@ -498,7 +474,12 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
                              'js/app-quellen.js', 'js/battle-journal.js']) {
             const q = lies(datei)
                 .replace(/\/\*[\s\S]*?\*\//g, ' ')
-                .split('\n').map(z => (/^\s*\/\//.test(z) ? '' : z)).join('\n');
+                .split('\n').map(z => (/^\s*\/\//.test(z) ? '' : z)).join('\n')
+                /* DA-47 (05.10.2026): S/(S+N) heisst jetzt „Win Rate" — genau
+                   das Suchmuster, mit dem js/app-meta-cards.js seinen Absatz
+                   im FREMDEN Markup findet (dort Z. 30 erklaert). Ein
+                   Suchmuster ist keine Beschriftung. */
+                .replace(/textContent\.includes\('Win Rate'\)/g, '');
             for (const n of namen) {
                 if (q.includes(n)) offen.push(datei + ' → „' + n + '"');
             }

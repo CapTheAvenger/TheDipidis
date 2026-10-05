@@ -32,7 +32,11 @@
  * (data/limitless_online_decks_comparison.html:143, ausserhalb dieser
  * Datei) und keine Beschriftung. Er bleibt so stehen, sonst findet die
  * Kachel ihren eigenen Absatz nicht mehr. */
-const _MC_KARTEN_KONVENTION = 'mitUnentschieden';
+/* DA-47 (05.10.2026, Hausi: „Rechnung angleichen"): die Kachel rechnet
+   jetzt S / (S + N) aus wins/losses von data/limitless_online_decks.csv —
+   dieselbe Zahl wie Tier-Liste und Deck-Analyse. new_winrate der
+   Vergleichsdatei (S/(S+N+U)) wird nur noch fuer die Auswahl gelesen. */
+const _MC_KARTEN_KONVENTION = 'ohneUnentschieden';
 
 function _mcKartenQuotenFormel(id) {
     const K = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
@@ -1917,8 +1921,19 @@ function _mcKartenQuotenHinweis(id) {
                 const maxCount = Math.max(...csvData.map(row => parseInt(row.new_count || '0', 10)));
                 const minCountThreshold = maxCount * 0.1;
                 
+                // DA-47: Bilanz je Deck aus der Datei mit wins/losses.
+                const _bilanz = {};
+                try {
+                    const _rohe = await loadCSV('limitless_online_decks.csv');
+                    (_rohe || []).forEach(r => {
+                        const k = String(r.deck_name || '').trim();
+                        const sg = parseInt(r.wins, 10) || 0, nl = parseInt(r.losses, 10) || 0;
+                        if (k && (sg + nl) > 0) _bilanz[k] = (sg / (sg + nl)) * 100;
+                    });
+                } catch (_e) { /* ohne Bilanz keine Quote — die Zeile bleibt leer */ }
                 const decksByWinRate = csvData
                     .filter(row => parseInt(row.new_count || '0', 10) >= minCountThreshold)
+                    .filter(row => _bilanz[String(row.deck_name || '').trim()] != null)
                     .map(row => ({
                         name: row.deck_name,
                         // limitless_online_decks_comparison.csv is `;`-delimited
@@ -1926,7 +1941,7 @@ function _mcKartenQuotenHinweis(id) {
                         // at the comma, so every win rate collapsed to a whole
                         // number and the podium was decided by CSV row order:
                         // 53,49 tied with 53,97 at "53" and won on position.
-                        winRate: parseLocaleNumber(row.new_winrate, 0),
+                        winRate: _bilanz[String(row.deck_name || '').trim()],
                         count: parseInt(row.new_count || '0', 10)
                     }))
                     .sort((a, b) => b.winRate - a.winRate)

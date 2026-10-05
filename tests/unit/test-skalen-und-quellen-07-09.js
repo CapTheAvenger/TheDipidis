@@ -781,9 +781,10 @@ describe('B4 — die Win-%-Kachel nennt die Konvention des Nachbarreiters', () =
                 `[${sprache}] die eigene Konvention wird nicht beim Namen genannt: ${s}`);
             assert.ok(s.includes(WK.KONVENTIONEN.matchpunkte.formel),
                 `[${sprache}] die eigene Formel fehlt: ${s}`);
-            assert.ok(s.includes(WK.kurz('mitUnentschieden')),
+            // DA-47 (05.10.2026): die Deck-Analyse rechnet S/(S+N).
+            assert.ok(s.includes(WK.kurz('ohneUnentschieden')),
                 `[${sprache}] die Konvention des Nachbarreiters fehlt: ${s}`);
-            assert.ok(s.includes(WK.KONVENTIONEN.mitUnentschieden.formel),
+            assert.ok(s.includes(WK.KONVENTIONEN.ohneUnentschieden.formel),
                 `[${sprache}] die Formel des Nachbarreiters fehlt: ${s}`);
             assert.ok(s.includes('win_pct'),
                 `[${sprache}] die Spalte, aus der die Zahl kommt, fehlt: ${s}`);

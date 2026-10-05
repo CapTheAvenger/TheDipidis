@@ -147,10 +147,16 @@ describe('No-Show: keine Auswertung rechnet ihn still als Unentschieden', () => 
             'die Siegquoten je Gegner nehmen den No-Show mit');
     });
 
-    it('die Bilanzen zählen ihn als Sieg und weisen ihn getrennt aus', () => {
+    it('die Seite zählt ihn überall gleich: getrennt, nie als Sieg (FE-61)', () => {
+        /* FE-61 (T3-09, 05.10.2026): Kopf, Turniergruppe und Meta-Ordner
+           zeigten drei Zählweisen (Kopf ohne, Gruppe als Sieg UND als N).
+           Jetzt EINE: W = gespielte Siege, No-Show als eigene Zahl. Nur die
+           Bilder zeigen die Turnierbilanz wie die Turnierleitung. */
         const verlauf = schneideFunktion(rein, 'renderJournalHistory');
-        assert.match(verlauf, /alsSiegGewertet\(e\.result\)/,
-            'Turnier- und Meta-Bilanz müssen ihn als Sieg führen');
+        assert.doesNotMatch(verlauf, /alsSiegGewertet\(e\.result\)/,
+            'Turnier- und Meta-Zeile dürfen ihn nicht als Sieg führen');
+        assert.match(verlauf, /const tW = entries\.filter\(e => e\.result === 'win'\)/);
+        assert.match(verlauf, /const mW = metaEntries\.filter\(e => e\.result === 'win'\)/);
         assert.match(verlauf, /nurGespielte\(filtered\)/,
             'die Quote oben darf nur über gespielte Partien laufen');
         const bild = schneideFunktion(rein, 'shareTournamentSummary');
@@ -267,25 +273,23 @@ describe('No-Show: die Oberfläche kennt ihn', () => {
 describe('No-Show: die Quote bleibt gespielten Partien vorbehalten', () => {
     const rein = ohneKommentare(lies('js/battle-journal.js'));
 
+    /* DA-47/FE-61 (05.10.2026): tW zaehlt nur gespielte Siege, die Quote
+       ist S/(S+N) aus bjQuote (ausgefuehrt in test-da47-journal-quote.js). */
     it('die Turnierzeile rechnet die Quote ohne den No-Show', () => {
-        // tW ENTHAELT den No-Show (Bilanz). Stand er auch im Nenner,
-        // stieg die Quote durch ein nicht gespieltes Match.
-        assert.match(rein, /const tGespielt = tTotal - tN;/,
-            'die Turnierzeile trennt gespielte Partien nicht ab');
-        assert.match(rein, /\(\(tW - tN\) \/ tGespielt\)/,
+        assert.match(rein, /const tWinRate = bjQuoteText\(tW, tL\);/,
+            'die Turnierzeile rechnet die Quote nicht mehr ueber bjQuote');
+        assert.doesNotMatch(rein, /tW - tN|tTotal\)/,
             'der No-Show steht wieder in einem der beiden Brueche');
     });
 
     it('die Turnierzeile weist den No-Show neben der Bilanz aus', () => {
-        assert.match(rein, /\$\{tN > 0 \? ` \\u00b7 \$\{tN\}N` : ''\}/,
+        assert.match(rein, /\$\{tN > 0 \? ` \\u00b7 \$\{tN\} \$\{escapeHtml\(battleJournalText\('bj\.noshow', 'No-Show'\)\)\}` : ''\}/,
             'ohne Ausweis haelt der Leser die Siegzahl fuer gespielte Siege');
     });
 
     it('das Journal-Turnierbild rechnet die Quote ohne den No-Show', () => {
-        assert.match(rein, /const gespieltN = total - noShows;/,
+        assert.match(rein, /const _bildQ = bjQuote\(wins - noShows, losses\);/,
             'das Bild trennt gespielte Partien nicht ab');
-        assert.match(rein, /\(\(wins - noShows\) \/ gespieltN\)/,
-            'der No-Show steht wieder in einem der beiden Brueche');
     });
 
     it('das Journal-Turnierbild schreibt No-Show aus, nicht als N', () => {

@@ -12240,3 +12240,12 @@ td.arc-mu-major.arc-mu-major-bilanz {
     .dvn-druck,
     .dvn-ohne-druck { grid-column: 1 / -1; white-space: normal; }
 }
+
+/* FE-61: Rundenhinweis der Folgerunde („Runde 4 · Mega Excadrill") */
+.bj-runden-hinweis:empty { display: none; }
+.bj-runden-hinweis {
+    margin-top: 6px;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink-2);
+}

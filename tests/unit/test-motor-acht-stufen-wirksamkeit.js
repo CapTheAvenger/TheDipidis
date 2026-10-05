@@ -997,7 +997,7 @@ describe('Stufe 5.3 — die Matchup-Korrektur: Turnierpiloten statt Online-Enthu
     // Nenner (`partien`), damit die Begegnungsliste ihn anzeigen kann.
     const ANWENDUNG = CLIP + '\n' + blockAusQuelle(
         'const adjA = _deckWRAdjustment[a] || 0;',
-        'return { pWin, pTie, pLoss, partien: base.partien || 0 };')
+        'return { pWin, pTie, pLoss, partien: base.partien || 0, schub };' /* DA-48: + schub */)
         + 'return { pWin, pTie, pLoss };';
 
     /* Ein Deck, das online mit `onlineWinPct` (S/(S+N+U)) dasteht und

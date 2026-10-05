@@ -389,15 +389,15 @@ describe('B4 — der Banner nennt das Mischungsverhaeltnis, nicht nur die Quelle
     const W1 = quellKonstante('MATCHUP_BLEND_WEIGHT_DAY1');
     const WO = quellKonstante('MATCHUP_BLEND_WEIGHT_ONLINE');
 
-    function baueChip({ deck = 'Mega Excadrill', adjust = {}, deutsch = true } = {}) {
+    function baueChip({ deck = 'Mega Excadrill', adjust = {}, deutsch = true, day1 = { 'TEF-PBL': {} } } = {}) {
         const quelle = schnitt('const gewichtung = (() => {', '})();');
         const normalize = (n) => (n || '').toLowerCase().replace(/[\s\-']/g, '');
         return new Function('_mcNum', '_mcPz', '_mcIstDeutsch', 'MATCHUP_BLEND_WEIGHT_DAY2',
             'MATCHUP_BLEND_WEIGHT_DAY1', 'MATCHUP_BLEND_WEIGHT_ONLINE', '_settings',
-            '_deckWRAdjustment', 'normalize', 'esc',
+            '_deckWRAdjustment', 'normalize', 'esc', '_majorMatchupMapDay1',
             quelle + '\nreturn gewichtung;')(
             deutsch ? _mcNum : _mcNumEn, deutsch ? _mcPzDe : _mcPzEn, () => deutsch,
-            W2, W1, WO, { myDeck: deck }, adjust, normalize, esc);
+            W2, W1, WO, { myDeck: deck }, adjust, normalize, esc, day1);
     }
 
     it('das Verhaeltnis Papier zu Online steht als Zahl da', () => {
@@ -406,6 +406,12 @@ describe('B4 — der Banner nennt das Mischungsverhaeltnis, nicht nur die Quelle
         assert.match(html, /45 % Day 2/);
         assert.match(html, /35 % Day 1/);
         assert.match(html, /20 % Online/);
+    });
+
+    it('DA-48: ohne echte Day-1-Karte nennt der Satz die Major-Gesamtpaarung', () => {
+        const html = baueChip({ day1: {} });
+        assert.match(html, /80\s%\sPapier \(Major gesamt\) · 20\s%\sOnline/);
+        assert.doesNotMatch(html, /Day 1/);
     });
 
     it('die Prozente sind gelesen, nicht abgeschrieben — 0,45/0,35/0,20 stehen in der Quelle', () => {

@@ -424,7 +424,8 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
     it('der Predictor-5.3-Hinweis nennt die Konvention beider Seiten', () => {
         const anfang = MC.indexOf("const konv = (typeof window !== 'undefined' && window.WinRateKonvention)");
         assert.ok(anfang >= 0, 'der Konventionshinweis im Banner ist verschwunden');
-        const ende = MC.indexOf("in the same convention.';", anfang);
+        // DA-48 (05.10.2026): der englische Satz endet jetzt so.
+        const ende = MC.indexOf("it would count twice.';", anfang);
         assert.ok(ende > anfang, 'der Banner-Hinweis hat kein Ende mehr');
         const stueck = MC.slice(anfang, ende + 25);
         // DA-47 (05.10.2026): S/(S+N) heisst jetzt „Win-Rate" / „win rate".

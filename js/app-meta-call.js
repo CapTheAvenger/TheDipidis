@@ -13480,9 +13480,18 @@ window.MetaCall = (function () {
     const gewichtung = (() => {
       const pz = (w) => _mcNum(w * 100, 0) + _mcPz();
       const papier = MATCHUP_BLEND_WEIGHT_DAY2 + MATCHUP_BLEND_WEIGHT_DAY1;
-      const kern = _mcIstDeutsch()
-        ? `Gewichtung der Paarungen: ${pz(papier)} Papier (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
-        : `Matchup weighting: ${pz(papier)} paper (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} online`;
+      /* DA-48 (05.10.2026): ohne echte Day-1-Karte (heute: Kopie von
+         Overall, verworfen) rechnet getBaseMatchup mit der Major-
+         Gesamtpaarung — der Satz sagt dann das, nicht „Day 2 · Day 1". */
+      const _echtesDay1 = (typeof _majorMatchupMapDay1 !== 'undefined') && _majorMatchupMapDay1
+        && Object.keys(_majorMatchupMapDay1).length > 0;
+      const kern = _echtesDay1
+        ? (_mcIstDeutsch()
+          ? `Gewichtung der Paarungen: ${pz(papier)} Papier (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
+          : `Matchup weighting: ${pz(papier)} paper (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} online`)
+        : (_mcIstDeutsch()
+          ? `Gewichtung der Paarungen: ${pz(papier)} Papier (Major gesamt) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
+          : `Matchup weighting: ${pz(papier)} paper (major overall) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} online`);
       const deck = _settings.myDeck || '';
       const adj  = deck ? (_deckWRAdjustment[normalize(deck)] || 0) : 0;
       const schub = adj
@@ -13521,8 +13530,8 @@ window.MetaCall = (function () {
         ? konvNameRoh
         : konvNameRoh.charAt(0).toLowerCase() + konvNameRoh.slice(1);
       const titel = _mcIstDeutsch()
-        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Metas vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird in getBaseMatchup auf dieselbe Quote der Paarung aufgeschlagen.'
-        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two metas: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. getBaseMatchup adds the gap to the pair\u2019s rate in the same convention.';
+        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Metas vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird nur auf Paarungen ohne Major-Messung aufgeschlagen — wo die Major-Paarung schon in der Mischung steht, zählte sie sonst doppelt.'
+        : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two metas: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. The gap is only added to pairs without a major measurement \u2014 where the major pairing is already in the mix it would count twice.';
       return ` <span class="mc-predictor-banner-gewichtung" title="${esc(titel)}">${esc(kern + schub)}</span>`;
     })();
 

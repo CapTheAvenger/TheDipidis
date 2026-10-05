@@ -3430,7 +3430,7 @@
             const price = parseLocaleNumber(card.eur_price, 0);
             if (card.eur_price && !isNaN(price) && price > 0 && marketUrl) {
                 priceButton = `<a href="${escapeHtmlAttr(marketUrl)}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="Prize Pack price on Cardmarket">
-                    <span class="card-database-price-value">Ø ${_zahlNachSprache(price, 2)} €</span>
+                    <span class="card-database-price-value">Trend ${_zahlNachSprache(price, 2)} €</span>
                 </a>`;
             } else {
                 priceButton = `<div class="card-database-price-placeholder" title="No Cardmarket price found">No Price</div>`;
@@ -3539,8 +3539,8 @@
                     // und 3.015 Zeilen ohne jede Zuordnung ohne ein Wort dazu.
                     const trust = (typeof window.priceTrustBadge === 'function')
                         ? window.priceTrustBadge(card, displayCardMarketUrl) : '';
-                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="View on CardMarket" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `View ${displayName} on CardMarket (opens in new tab)` : `${displayName} bei Cardmarket ansehen (neuer Tab)`}">
-                        <span class="card-database-price-value">Ø ${price.toFixed(2).replace('.', ',')} €</span>
+                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="${(typeof getLang === 'function' && getLang() === 'en') ? 'Cardmarket trend price' : 'Cardmarket-Trendpreis'}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `View ${displayName} on CardMarket (opens in new tab)` : `${displayName} bei Cardmarket ansehen (neuer Tab)`}">
+                        <span class="card-database-price-value">Trend ${price.toFixed(2).replace('.', ',')} €</span>
                     </a>${trust}`;
                 }
             }

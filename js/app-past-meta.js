@@ -743,6 +743,18 @@
                     if (scoreA !== scoreB) return scoreB - scoreA;
                     return a.localeCompare(b);
                 });
+                /* DA-51 / D3-13 (05.10.2026): Formate ohne Major-Daten an der Auswahl
+                   kennzeichnen, nicht erst nach der Deckwahl ("Keine Labs-Daten").
+                   Quelle: data/labs_tournament_decks_verzeichnis.json (meta_keys).
+                   Fehlt das Verzeichnis, steht nichts dran (nichts raten). */
+                let mitMajor = null;
+                try {
+                    const vr = await fetch(BASE_PATH + 'labs_tournament_decks_verzeichnis.json?t=' + Date.now());
+                    if (vr.ok) {
+                        const vz = await vr.json();
+                        if (vz && Array.isArray(vz.meta_keys)) mitMajor = new Set(vz.meta_keys);
+                    }
+                } catch (_) { mitMajor = null; }
                 sortedKeys.forEach(key => {
                     const option = document.createElement('option');
                     option.value = key;
@@ -754,6 +766,9 @@
                     option.textContent = (expanded && expanded !== key)
                         ? `${expanded} (${key})`
                         : key;
+                    if (mitMajor && !mitMajor.has(key)) {
+                        option.textContent += (typeof getLang === 'function' && getLang() === 'en') ? ' · no major data' : ' · ohne Major-Daten';
+                    }
                     option.title = `Format code: ${key}`;
                     formatSelect.appendChild(option);
                 });

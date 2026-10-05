@@ -1236,6 +1236,10 @@
 
         renderBattleJournalSummary();
         closeBattleJournalSheet();
+        // FE-60 (T3-07, 05.10.2026): die Liste im Profil-Journal blieb stehen,
+        // bis man den Unterreiter wechselte (gemessen: Server 18, Anzeige 17).
+        // Jetzt wird sie nach jedem Speichern neu gelesen und gezeichnet.
+        try { await openJournalHistoryTab(); } catch (_e) { /* Anzeige ist nachrangig */ }
     }
 
     /* UI-89 (03.10.2026, Tiefenanalyse N-16/F-15): das Format blieb leer,
@@ -2354,7 +2358,7 @@
 
     async function clearAllJournalEntries() {
         const confirmMsg = battleJournalText('bj.clearConfirm', 'Delete ALL journal entries (local + synced)? This cannot be undone.');
-        if (!confirm(confirmMsg)) return;
+        if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: confirmMsg, gefaehrlich: true }) : confirm(confirmMsg)))) return;
 
         // 1) Clear local outbox
         saveBattleJournalOutbox([]);
@@ -2918,7 +2922,8 @@
         // UI-83: die Rueckfrage nennt den Eintrag (eigenes Deck gegen Gegner).
         const _eintrag = (Array.isArray(journalHistoryCache) && journalHistoryCache.find(e => e && e.id === entryId)) || {};
         const _eintragName = (_eintrag.ownDeck || '—') + ' vs ' + (_eintrag.opponentArchetype || '—');
-        if (!confirm(battleJournalText('bj.deleteEntryConfirm', 'Delete the match {name}?').replace('{name}', _eintragName))) return;
+        const _frage = battleJournalText('bj.deleteEntryConfirm', 'Delete the match {name}?').replace('{name}', _eintragName);
+        if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frage, gefaehrlich: true }) : confirm(_frage)))) return;
 
         // Remove from outbox
         const outbox = getBattleJournalOutbox().filter(e => e.id !== entryId);

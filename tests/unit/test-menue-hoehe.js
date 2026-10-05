@@ -168,8 +168,10 @@ describe('Pokéball-Menü — nachrechnen, wenn sich der Inhalt ändert', () => 
         assert.match(JS, /function menueBeobachtungBeenden\(\)/);
         // Weg 1: der Umschalter.
         assert.match(JS, /else \{ menueBeobachtungBeenden\(\); \}/);
-        // Weg 2: Klick daneben.
-        assert.match(JS, /trigger\.classList\.remove\('open'\);\s*\n\s*menueBeobachtungBeenden\(\);/,
+        // Weg 2: Klick daneben. Seit UI-108 (05.10.2026) schliesst er ueber
+        // toggleMainMenu — damit endet die Beobachtung ueber Weg 1 mit, und
+        // aria-expanded folgt (vorher blieb es auf "true" stehen).
+        assert.match(JS, /!_beschriftung\) \{\s*(\/\/[^\n]*\n\s*)*toggleMainMenu\(\);/,
             'ein Klick neben das Menü schließt es auch — dort lief der Beobachter weiter');
     });
 

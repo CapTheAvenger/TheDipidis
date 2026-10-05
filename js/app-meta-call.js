@@ -12508,7 +12508,15 @@ window.MetaCall = (function () {
       }
       return;
     }
-    _onMyDeck(treffer.name);
+    let _gemerkt = '';
+    try { _gemerkt = localStorage.getItem(MEIN_DECK_KEY) || ''; } catch (_e) { /* privater Modus */ }
+    _onMyDeck(treffer.name, { vorschau: true });
+    if (_gemerkt && normalize(_gemerkt) !== normalize(treffer.name) && typeof window.showToast === 'function') {
+      const de = _mcIstDeutsch();
+      window.showToast(de
+        ? `Ansicht für „${treffer.name}“ — dein Deck „${_gemerkt}“ bleibt gespeichert.`
+        : `Showing "${treffer.name}" — your deck "${_gemerkt}" stays saved.`, 'info', 5000);
+    }
     /* Ans Ergebnis springen, nicht an den Reiteranfang: der Block steht
        weit unten, und wer auf „Gegen das Meta" drueckt, will ihn sehen
        und nicht erst suchen. Zwei Bilder Verzoegerung, damit der Block
@@ -12816,8 +12824,8 @@ window.MetaCall = (function () {
           <th>${t('mc.recDeck')}</th>
           <th title="${esc(t('mc.tipRecZiel'))}">${esc(_zielKurz())}</th>
           <th title="${esc(_wrKonventionsTitel('mitUnentschieden'))}" data-hinweis="${esc(_wrKonventionsTitel('mitUnentschieden'))}">${esc(_wrKurzform(t('mc.recAvgWr')))}</th>
-          <th title="${esc(t('mc.tipRecExpWins'))}">${t('mc.recExpWins')}</th>
-          <th class="mc-rec-toggle-th" aria-label="Why?"></th>
+          <th class="mc-rec-wins" title="${esc(t('mc.tipRecExpWins'))}">${t('mc.recExpWins')}</th>
+          <th class="mc-rec-toggle-th" aria-label="${_mcIstDeutsch() ? 'Warum?' : 'Why?'}"></th>
         </tr></thead>
         <tbody>${day2Rows}</tbody>
       </table>` : '';
@@ -13078,7 +13086,7 @@ window.MetaCall = (function () {
       <th title="${esc(_frozenWrBegriff(t('mc.frozenColScoreHint')))}">${t('mc.frozenColScore')}</th>
       <th title="${esc(_frozenWrHinweis())}">${esc(_frozenWrBegriff(t('mc.frozenColWinPct')))}</th>
       <th title="${esc(_frozenD2Hinweis())}">${t('mc.frozenColDay2Conv')}</th>
-      <th>${t('mc.frozenColPlayers')}</th>
+      <th class="mc-rec-players">${t('mc.frozenColPlayers')}</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>
@@ -15918,9 +15926,12 @@ window.MetaCall = (function () {
     return (_shareList || []).map(d => d.name);
   }
 
-  function _onMyDeck(val) {
+  function _onMyDeck(val, opts) {
     _settings.myDeck = val;
-    _meinDeckMerken(val);
+    /* FE-59 (N3-03, 05.10.2026): „Gegen das Meta →“ an einer Tier-Karte ist
+       ein Blick, keine Wahl — er ueberschrieb still das gemerkte „Mein Deck“.
+       Mit {vorschau:true} wird nichts gemerkt. */
+    if (!(opts && opts.vorschau)) _meinDeckMerken(val);
     _winRateOverrides = {};
     _ladeJournal(val);
     // Preserve scroll so the user stays where they were picking the deck
@@ -16426,17 +16437,21 @@ window.MetaCall = (function () {
     _ladeJournal(_settings.myDeck);
   }
 
-  function _saveScenario() {
+  async function _saveScenario() {
     const existing = _loadScenarios();
     const preset   = _currentScenarioName || '';
-    const name = (prompt(t('mc.scenarioPromptName'), preset) || '').trim();
+    // UI-104 (T3-13): App-Dialoge statt prompt()/alert()/confirm().
+    const _titel = t('mc.scenarioPromptName');
+    const _roh = (typeof showInputModal === 'function' ? await showInputModal({ title: _titel, defaultValue: preset }) : prompt(_titel, preset));
+    const name = (_roh || '').trim();
     if (!name) return;
     if (name.length > 60) {
-      alert(t('mc.scenarioNameTooLong'));
+      if (typeof showToast === 'function') showToast(t('mc.scenarioNameTooLong'), 'warning'); else alert(t('mc.scenarioNameTooLong'));
       return;
     }
     if (existing[name] && name !== _currentScenarioName) {
-      if (!confirm(t('mc.scenarioOverwrite').replace('{name}', name))) return;
+      const _frage = t('mc.scenarioOverwrite').replace('{name}', name);
+      if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frage }) : confirm(_frage)))) return;
     }
     existing[name] = _snapshotState();
     if (!_writeScenarios(existing)) {
@@ -16464,10 +16479,11 @@ window.MetaCall = (function () {
     requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, sy)));
   }
 
-  function _deleteScenario() {
+  async function _deleteScenario() {
     if (!_currentScenarioName) return;
     const name = _currentScenarioName;
-    if (!confirm(t('mc.scenarioDeleteConfirm').replace('{name}', name))) return;
+    const _frage = t('mc.scenarioDeleteConfirm').replace('{name}', name);
+    if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frage, gefaehrlich: true }) : confirm(_frage)))) return;
     const existing = _loadScenarios();
     delete existing[name];
     _writeScenarios(existing);

@@ -1123,6 +1123,19 @@ html.is-signed-out [onclick*="radelist"]:hover {
     .top-card-act { min-height: 36px; }
 }
 
+/* UI-107 (M3-08, 05.10.2026): bei 390 px war die Kachel 83 px breit, die
+ * beiden 44-px-Ziele (♡ ★) brauchten 88 px — ★ ragte 9 px hinaus und lag
+ * 4 px ueber ♡ der Nachbarkachel. Drei statt vier Kacheln je Zeile geben
+ * jeder Kachel ~117 px; die Ziele bleiben daumentauglich. Die Spezifitaet
+ * (ID + zwei Klassen) schlaegt die Vier-Spalten-Regeln in styles.css und
+ * current-meta-matchups.css (die spaeter geladen wird). */
+@media (max-width: 480px) {
+    #currentMetaContent .top-cards-container .top-cards-grid,
+    #currentMetaContent .top-cards-container .top-cards-scroll {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
 /* Der Knopf unter der Rangliste, der den Rest aufdeckt. */
 .cm-rang-mehr-zeile {
     display: flex;

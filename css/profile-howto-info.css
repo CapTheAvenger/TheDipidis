@@ -3431,3 +3431,29 @@
     filter: brightness(0.9);
 }
 
+
+/* UI-105 (G3-01, UI/UX-Ueberpruefung v2, 05.10.2026): Im hellen Modus lag
+ * das Glossar auf diesem festen dunklen Verlauf, die Erklaerungen trugen
+ * aber die Schrift des hellen Modus — 56 Texte bei 1,02-1,41:1, sichtbar
+ * waren nur die fetten Begriffe. Hell bekommt der Rahmen jetzt die Flaeche
+ * und Schrift der Tokens; dunkel bleibt er, wie er ist. */
+html:not([data-theme="dark"]) .tutorial-chapter-wrap {
+    background: var(--surface-2);
+    color: var(--ink);
+    box-shadow: none;
+    border: 1px solid var(--line);
+}
+html:not([data-theme="dark"]) .tutorial-chapter-wrap h3,
+html:not([data-theme="dark"]) .tutorial-chapter-wrap strong,
+html:not([data-theme="dark"]) .tutorial-chapter-wrap dt {
+    color: var(--ink);
+}
+html:not([data-theme="dark"]) .tutorial-chapter-wrap p,
+html:not([data-theme="dark"]) .tutorial-chapter-wrap li,
+html:not([data-theme="dark"]) .tutorial-chapter-wrap dd,
+html:not([data-theme="dark"]) .tutorial-chapter-wrap span {
+    color: var(--ink-2);
+}
+html:not([data-theme="dark"]) .tutorial-chapter-wrap code {
+    background: var(--surface-1);
+}

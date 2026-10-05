@@ -1141,10 +1141,10 @@
 
     // ── RESET ────────────────────────────────────────────────────────
 
-    function _onResetClick() {
+    async function _onResetClick() {
         if (!_target) return;
         const msg = _t('techLab.resetConfirm', 'Reset all overrides (hidden + user-added) for this target?');
-        if (typeof window !== 'undefined' && !window.confirm(msg)) return;
+        if (typeof window !== 'undefined' && !(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: msg, gefaehrlich: true }) : confirm(msg)))) return;
         _resetTargetOverrides(_target.key);
         _renderTechsFor(_target);
     }

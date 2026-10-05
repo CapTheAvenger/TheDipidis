@@ -2866,21 +2866,23 @@
         if (d) d.classList.add('d-none');
     }
 
-    function entfernenKarte(boxId, id) {
+    async function entfernenKarte(boxId, id) {
         const box = boxVon(boxId);
         const k = box && (box.karten || []).find(function (x) { return x.id === id; });
         if (!k) return;
         const frage = tx('abx.entfernenFrage', { name: k.name }, '„{name}“ aus der Box entfernen?');
-        if (typeof window.confirm === 'function' && !window.confirm(frage)) return;
+        if (window.zeigeBestaetigung) { if (!(await window.zeigeBestaetigung({ text: frage, gefaehrlich: true, ok: tx('abx.entfernenOk', null, 'Entfernen') }))) return; }
+        else if (typeof window.confirm === 'function' && !window.confirm(frage)) return;
         aendern(boxId, function (b) { return entfernen(b, id, heuteIso()); });
     }
 
-    function loeschen(id) {
+    async function loeschen(id) {
         const box = boxen.find(function (b) { return b.id === id; });
         if (!box) return;
         const frage = tx('abx.loeschenFrage', { name: nameVon(box) },
             'Archetyp-Box „{name}“ löschen? Deine Sammlung bleibt unberührt.');
-        if (typeof window.confirm === 'function' && !window.confirm(frage)) return;
+        if (window.zeigeBestaetigung) { if (!(await window.zeigeBestaetigung({ text: frage, gefaehrlich: true }))) return; }
+        else if (typeof window.confirm === 'function' && !window.confirm(frage)) return;
         boxen = boxen.filter(function (b) { return b.id !== id; });
         spiegelSchreiben();
         const col = sammlung();

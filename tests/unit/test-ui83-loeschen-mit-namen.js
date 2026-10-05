@@ -37,7 +37,9 @@ describe('UI-83: Loeschen nennt, was geloescht wird', () => {
   }
   it('Deck-Loeschen setzt den Decknamen ein', () => {
     const q = ohneKommentare(lies('js/firebase-collection.js'));
-    assert.match(q, /confirm\(t\('deck\.deleteConfirm'\)\.replace\('\{name\}',\s*_deckName\)\)/);
+    // UI-104 (05.10.2026): die Frage laeuft ueber den App-Dialog; der Name bleibt drin.
+    assert.match(q, /const _frage = t\('deck\.deleteConfirm'\)\.replace\('\{name\}',\s*_deckName\);/);
+    assert.match(q, /zeigeBestaetigung\(\{ text: _frage, gefaehrlich: true \}\)/);
   });
   it('Journal-Loeschen setzt den Eintrag ein', () => {
     const q = ohneKommentare(lies('js/battle-journal.js'));

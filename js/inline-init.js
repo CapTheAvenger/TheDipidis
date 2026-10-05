@@ -280,7 +280,28 @@ function toggleMainMenu() {
     // nachgezogen. Ein Menue, das sich nicht ansagt, ist fuer eine
     // Sprachausgabe dauerhaft geschlossen.
     trig.setAttribute('aria-expanded', String(open));
+    // UI-108 (M3-04, 05.10.2026): der Fokus blieb auf dem Pokeball, Tab
+    // fuehrte erst auf den zweiten Oeffner. Jetzt springt er in den ersten
+    // Eintrag; beim Schliessen zurueck auf den Ausloeser, wenn er im Menue war.
+    if (open) {
+        const erster = drop.querySelector('.menu-item') || drop.querySelector('button');
+        if (erster && erster.focus) setTimeout(function () { try { erster.focus({ preventScroll: true }); } catch (_e) { /* egal */ } }, 0);
+    } else if (drop.contains(document.activeElement)) {
+        try { trig.focus({ preventScroll: true }); } catch (_e) { /* egal */ }
+    }
 }
+
+// UI-108: Esc schliesst das offene Hauptmenue (vorher: blieb offen).
+function _menueEsc(e) {
+    if (e.key !== 'Escape' && e.key !== 'Esc') return;
+    const drop = document.getElementById('mainMenuDropdown');
+    if (!drop || !drop.classList.contains('show')) return;
+    e.preventDefault();
+    const trig = document.getElementById('mainMenuTrigger');
+    toggleMainMenu();
+    if (trig && trig.focus) { try { trig.focus({ preventScroll: true }); } catch (_e) { /* egal */ } }
+}
+document.addEventListener('keydown', _menueEsc);
 
 // Der Pokeball ist ein div mit onclick. Bis zum 18.08.2026 hatte er
 // weder tabindex noch role — gemessen: 19 Tabstopps auf der Startseite,
@@ -484,9 +505,9 @@ document.addEventListener('click', function(e) {
     if (menu && trigger && menu.classList.contains('show')) {
         const _beschriftung = e.target && e.target.closest ? e.target.closest('.menu-label-btn') : null;
         if (!menu.contains(e.target) && !trigger.contains(e.target) && !_beschriftung) {
-            menu.classList.remove('show');
-            trigger.classList.remove('open');
-            menueBeobachtungBeenden();
+            // UI-108: ueber toggleMainMenu schliessen — sonst blieb
+            // aria-expanded="true" stehen (gemessen 05.10.).
+            toggleMainMenu();
         }
     }
 });
@@ -890,6 +911,13 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         } else if (typeof switchTab === 'function') {
             switchTab(tabId);
         }
+        // UI-109: steht die Auswahl schon (Adresse im offenen Tab geaendert,
+        // kein Neuladen), loest niemand den Wunsch ein — das tut jetzt das
+        // Analyse-Modul selbst. Beim ersten Laden ist die Liste noch leer;
+        // dann bleibt der Wunsch fuer den ersten Aufbau der Auswahl liegen.
+        if (deck && typeof window.pendingDeckEinloesen === 'function') {
+            try { window.pendingDeckEinloesen(); } catch (_e) { /* Auswahl baut sich spaeter */ }
+        }
 
         // Profile is a fan-out tab with its own sub-tab system. Aliases
         // like #metacall and #journal need that extra hop or the user
@@ -1041,8 +1069,14 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
            dafuer ist eine Sackgasse. Deshalb setzt openProfileSection() diese
            Marke: der Untertab schreibt gleich selbst, genau einmal. */
         if (window.__dsProfilHashFolgt && tabId === 'profile') return;
-        const h = kanonischerHash(tabId);
+        let h = kanonischerHash(tabId);
         if (!h) return;
+        // UI-109 (UI-99-Rest, 05.10.2026): wer ueber Menue oder Reiter in die
+        // Deck-Analyse wechselt, behielt das gewaehlte Deck nicht in der
+        // Adresse — Neuladen/Teilen zeigte dann den Leerzustand.
+        if (h === 'current-analysis' && window.currentMetaArchetype) {
+            h += '?deck=' + encodeURIComponent(window.currentMetaArchetype);
+        }
         const ziel = window.location.pathname + window.location.search + '#' + h;
         if (window.location.hash === '#' + h && !ersetzen) return;
         try {

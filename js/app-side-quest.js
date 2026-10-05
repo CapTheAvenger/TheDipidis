@@ -1956,8 +1956,8 @@
         const importOpen = host.querySelector('.side-quest-import-open');
         if (importOpen) importOpen.addEventListener('click', openImportModal);
         host.querySelectorAll('[data-remove-import]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (!window.confirm(labels.importRemoveConfirm)) return;
+            btn.addEventListener('click', async () => {
+                if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: labels.importRemoveConfirm, gefaehrlich: true }) : confirm(labels.importRemoveConfirm)))) return;
                 removeImported(btn.getAttribute('data-remove-import'));
                 render();
             });

@@ -665,3 +665,20 @@ Aussagen ueber die eigene Umgebung.
   `visual-*.yml` workflows.
 * When a CI check contradicts your expectation, find out *why* before concluding
   — a "0 rows" result was once CDN throttling, not a code bug.
+
+## LIVE-PRUEFEN MIT AGENTEN — DREI FALLEN (05.10.2026, UI/UX-Ueberpruefung v2)
+
+* **Das Battle Journal liegt in `users/{uid}/battleJournal`**, nicht in `journal`.
+  Eine Zaehlung von `journal` liefert 0 und laesst einen Pruefer glauben, das
+  Journal sei leer — am 04.10. lagen dort 17 echte Matches. Zaehlwerkzeug:
+  `scripts/messe_inventur.js` → `__inventur.nutzerdaten()`.
+* **390 px ohne Mobilgeraet:** `iframe src="/#…"` geht nicht (die CSP erlaubt
+  keinen Rahmen der eigenen Herkunft, `eval` ist verboten). Weg: leeren iframe
+  390×844 anlegen, `index.html` per `fetch('/')` holen und mit
+  `document.open/write/close` hineinschreiben, Messcode als `<script>` einsetzen.
+  Werkzeug und Schritte: `scripts/messe_390.js` (Dateikopf). iPhone-Safari ist
+  damit NICHT geprueft — nur die Breite.
+* **Native Dialoge frieren Agenten-Tabs ein.** `confirm()`/`prompt()` halten im
+  Hintergrund-Tab die Seite an. Seit UI-104 laufen Rueckfragen ueber
+  `zeigeBestaetigung` (App-Dialog), Eingaben ueber `showInputModal`;
+  `tests/unit/test-ui104-app-rueckfrage.js` verbietet neue native Aufrufe.

@@ -903,22 +903,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                              *
                              * Jetzt: einmal richtig lesen, dann in der
                              * Sprache des Nutzers ausgeben. */
-                            const parsedDates = dates.map(d => {
-                                const m = String(d).match(
-                                    /^\s*(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s+(\d{4})\s*$/);
-                                if (!m) return { original: d, datum: null, comparable: '99999999' };
-                                const monate = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
-                                                 jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
-                                const mi = monate[m[2].slice(0, 3).toLowerCase()];
-                                if (mi == null) return { original: d, datum: null, comparable: '99999999' };
-                                const datum = new Date(Date.UTC(Number(m[3]), mi, Number(m[1])));
-                                return {
-                                    original: d,
-                                    datum,
-                                    comparable: m[3] + String(mi + 1).padStart(2, '0')
-                                                     + m[1].padStart(2, '0'),
-                                };
-                            });
+                            const parsedDates = dates.map(_clDatumLesen);
 
                             const minDateObj = parsedDates.reduce((a, b) => a.comparable < b.comparable ? a : b);
                             const maxDateObj = parsedDates.reduce((a, b) => a.comparable > b.comparable ? a : b);
@@ -2287,6 +2272,28 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
          * The <select> stays hidden for data / programmatic access.
          * A visual overlay with a built-in search input replaces it.
          */
+        /* DA-46 (D3-06, 05.10.2026): die City-League-Datei schreibt „29 Sep 26“
+         * (zweistelliges Jahr). Der Leser verlangte vier Stellen, las kein
+         * einziges Datum und zeigte „Zeitraum: 27 Sep 26“ (irgendeine Zeile)
+         * statt 20.–29.09.2026. Jetzt: zwei oder vier Stellen, 20xx. */
+        function _clDatumLesen(d) {
+            const m = String(d).match(
+                /^\s*(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s+(\d{4}|\d{2})\s*$/);
+            if (!m) return { original: d, datum: null, comparable: '99999999' };
+            const monate = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+                             jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+            const mi = monate[m[2].slice(0, 3).toLowerCase()];
+            if (mi == null) return { original: d, datum: null, comparable: '99999999' };
+            const jahr = m[3].length === 2 ? '20' + m[3] : m[3];
+            const datum = new Date(Date.UTC(Number(jahr), mi, Number(m[1])));
+            return {
+                original: d,
+                datum,
+                comparable: jahr + String(mi + 1).padStart(2, '0') + m[1].padStart(2, '0'),
+            };
+        }
+        window._clDatumLesen = _clDatumLesen;
+
         function initSearchableSelect(selectEl) {
             if (!selectEl) return;
             // Defensive: bail out cleanly if the select has been detached
@@ -2325,6 +2332,13 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             display.className = 'searchable-select-display control-input modern-select';
             display.tabIndex = 0;
             display.textContent = selectEl.options[selectEl.selectedIndex]?.textContent || t('cl.selectDeck');
+            // UI-103 (M3-02): ein Kombinationsfeld, das man auch ohne Maus
+            // bedienen kann. Vorher: Enter, Leertaste und Pfeil oeffneten nichts.
+            const _listId = 'sslist-' + (selectEl.id || Math.random().toString(36).slice(2));
+            display.setAttribute('role', 'combobox');
+            display.setAttribute('aria-haspopup', 'listbox');
+            display.setAttribute('aria-expanded', 'false');
+            display.setAttribute('aria-controls', _listId);
 
             // --- Dropdown panel ---
             const dropdown = document.createElement('div');
@@ -2339,6 +2353,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
 
             const list = document.createElement('div');
             list.className = 'searchable-select-options';
+            list.id = _listId;
+            list.setAttribute('role', 'listbox');
 
             dropdown.appendChild(search);
             dropdown.appendChild(list);
@@ -2400,10 +2416,33 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 });
             }
 
+            /* UI-103: Tastaturfuehrung in der offenen Liste. */
+            function _optionen() {
+                return Array.from(list.querySelectorAll('.searchable-select-option'));
+            }
+            function _markiere(idx) {
+                const opts = _optionen();
+                opts.forEach((o, i) => {
+                    o.setAttribute('role', 'option');
+                    o.id = _listId + '-o' + i;
+                    o.setAttribute('aria-selected', o.dataset.value === selectEl.value ? 'true' : 'false');
+                    o.classList.toggle('aktiv', i === idx);
+                });
+                if (idx >= 0 && opts[idx]) {
+                    search.setAttribute('aria-activedescendant', opts[idx].id);
+                    if (opts[idx].scrollIntoView) opts[idx].scrollIntoView({ block: 'nearest' });
+                } else {
+                    search.removeAttribute('aria-activedescendant');
+                }
+                _aktiv = idx;
+            }
+            let _aktiv = -1;
+
             function pick(value, text) {
                 selectEl.value = value;
                 display.textContent = text;
                 close();
+                try { display.focus({ preventScroll: true }); } catch (_e) { /* ohne Fokus weiter */ }
                 // Trigger the existing change handler on the hidden <select>.
                 // _syncSuppressed flips the global change-listener (registered
                 // at the bottom of _initSearchableSelectImpl) into a no-op
@@ -2451,6 +2490,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 dropdown.classList.add('open');
                 search.value = '';
                 buildList('');
+                display.setAttribute('aria-expanded', 'true');
+                _markiere(_optionen().findIndex(o => o.dataset.value === selectEl.value));
                 search.focus({ preventScroll: true });
                 window.addEventListener('scroll', onScrollReposition, { passive: true });
                 window.addEventListener('resize', onScrollReposition, { passive: true });
@@ -2458,6 +2499,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
 
             function close() {
                 dropdown.classList.remove('open');
+                display.setAttribute('aria-expanded', 'false');
                 window.removeEventListener('scroll', onScrollReposition);
                 window.removeEventListener('resize', onScrollReposition);
             }
@@ -2471,7 +2513,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 isOpen() ? close() : open();
             };
 
-            search.oninput = () => buildList(search.value);
+            // Mit Suchtext steht kein Leer-Eintrag oben (buildList) — der
+            // erste Treffer ist dann der, den Enter waehlt.
+            search.oninput = () => { buildList(search.value); _markiere(search.value && _optionen().length ? 0 : -1); };
             search.onclick = (e) => e.stopPropagation();
 
             // Close on outside click
@@ -2479,9 +2523,34 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 if (!wrapper.contains(e.target)) close();
             });
 
-            // Keyboard: Escape closes
+            // Tastatur (UI-103): Esc schliesst und gibt den Fokus zurueck,
+            // Pfeile wandern durch die Liste, Enter waehlt.
             search.onkeydown = (e) => {
-                if (e.key === 'Escape') close();
+                const opts = _optionen();
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    close();
+                    try { display.focus({ preventScroll: true }); } catch (_e) { /* ohne Fokus */ }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (opts.length) _markiere(Math.min(opts.length - 1, _aktiv + 1));
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (opts.length) _markiere(Math.max(0, _aktiv - 1));
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const o = opts[_aktiv >= 0 ? _aktiv : 0];
+                    if (o) pick(o.dataset.value, o.textContent);
+                }
+            };
+            display.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    if (!isOpen()) open();
+                } else if (e.key === 'Escape' && isOpen()) {
+                    e.preventDefault();
+                    close();
+                }
             };
 
             wrapper.appendChild(display);

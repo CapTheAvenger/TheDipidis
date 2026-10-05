@@ -516,3 +516,69 @@ html.is-standalone .container {
     background: #94a3b8;
     cursor: progress;
 }
+
+/* UI-110 (IA Etappe 1, 05.10.2026): „Mein Deck" im Kopf — gilt app-weit
+   (js/mein-deck.js). Gleiche Flaeche wie die Kopf-Knoepfe daneben, eine
+   Zeile, der Name wird gekuerzt statt umzubrechen. */
+.mein-deck-knopf {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    max-width: 220px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+    color: #f4f7fb;
+    font: inherit;
+    font-size: var(--fs-sm, 13px);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.mein-deck-knopf:hover,
+.mein-deck-knopf:focus-visible { border-color: var(--gold, #f5c542); }
+.mein-deck-knopf .mein-deck-stern { color: var(--gold, #f5c542); }
+.mein-deck-knopf.is-leer .mein-deck-stern { opacity: 0.6; }
+.mein-deck-knopf .mein-deck-name { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+@media (max-width: 700px) {
+    .mein-deck-knopf { max-width: 130px; height: 32px; padding: 0 10px; }
+}
+
+.mein-deck-auswahl {
+    position: fixed;
+    z-index: 3000;
+    background: var(--surface-1);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+    padding: 8px;
+    max-height: min(420px, 70vh);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.mein-deck-suche {
+    font: inherit;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+}
+.mein-deck-liste { list-style: none; margin: 0; padding: 0; overflow-y: auto; }
+.mein-deck-option {
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    min-height: 24px;
+}
+.mein-deck-option:hover,
+.mein-deck-option:focus-visible { background: var(--surface-2); outline: none; }
+.mein-deck-option.is-aktiv { font-weight: 700; }
+.mein-deck-option.is-keins { color: var(--ink-2); font-style: italic; }
+/* UI-113: der „?"-Knopf, gleiche Familie wie „Mein Deck", rund. */
+.hilfe-knopf { width: 36px; padding: 0; justify-content: center; font-size: var(--fs-md, 15px); }
+@media (max-width: 700px) { .hilfe-knopf { width: 32px; } }

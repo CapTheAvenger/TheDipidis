@@ -53,14 +53,15 @@ function el(tag) {
     return e;
 }
 
-function umgebung() {
+function umgebung(opts) {
+    opts = opts || {};
     const doc = { activeElement: null };
     const mk = (t, id, kl) => { const e = el(t); e.id = id || ''; e.className = kl || ''; e.focus = function () { doc.activeElement = this; }; return e; };
     const drop = mk('div', 'mainMenuDropdown'); const trig = mk('div', 'mainMenuTrigger');
     const eintrag = mk('button', '', 'menu-item'); drop.appendChild(eintrag);
     doc.getElementById = (id) => ({ mainMenuDropdown: drop, mainMenuTrigger: trig }[id] || null);
     const ctx = L.baue('js/inline-init.js', ['function toggleMainMenu()', 'function _menueEsc(e)'], {
-        document: doc, setTimeout: (f) => f(), menueHoeheAnpassen() {}, menueBeobachtungStarten() {},
+        document: doc, setTimeout: opts.setTimeout || ((f) => f()), menueHoeheAnpassen() {}, menueBeobachtungStarten() {},
         _sichtBeobachtungStarten() {}, menueBeobachtungBeenden() {},
     });
     return { ctx, doc, drop, trig, eintrag };
@@ -88,5 +89,51 @@ describe('UI-108: Hauptmenue per Tastatur', () => {
         const block = q.slice(i, i + 400).split('\n').map(z => z.replace(/\/\/.*$/, '')).join('\n');
         assert.match(block, /toggleMainMenu\(\)/);
         assert.ok(!/classList\.remove\('show'\)/.test(block), 'schliesst wieder an toggleMainMenu vorbei');
+    });
+});
+
+/* Live-Abnahme V2-1 (05.10.2026): solange der CSS-Uebergang `visibility`
+   noch laeuft, verpufft focus() still. Der Fokus muss deshalb nach dem
+   Uebergang (transitionend) bzw. 300 ms noch einmal versucht werden. */
+describe('UI-108: Fokus auch nach dem Einblend-Uebergang', () => {
+    function mitUebergang(src) {
+        const timer = [];
+        const u = umgebung({ setTimeout: (f) => timer.push(f) });
+        let sichtbar = false;
+        u.eintrag.focus = function () { if (sichtbar) u.doc.activeElement = this; };
+        u.trig.focus();
+        u.ctx.toggleMainMenu();
+        timer.splice(0).forEach(f => f());          // Versuch bei 0 ms: noch unsichtbar
+        assert.notEqual(u.doc.activeElement, u.eintrag);
+        sichtbar = true;
+        u.drop.dispatchEvent({ type: 'transitionend' });
+        return u;
+    }
+    it('nach transitionend steht der Fokus im ersten Eintrag', () => {
+        const u = mitUebergang();
+        assert.equal(u.doc.activeElement, u.eintrag);
+    });
+    it('VERFAELSCHUNG: ohne den Nachversuch bleibt er auf dem Pokeball', () => {
+        const q = L.lies('js', 'inline-init.js');
+        const kaputt = q.replace("drop.addEventListener('transitionend', _fokusRein, { once: true });", '')
+            .replace('setTimeout(_fokusRein, 300);', '');
+        assert.notEqual(kaputt, q);
+        const timer = [];
+        const doc = { activeElement: null };
+        const drop = el('div'); drop.className = ''; const trig = el('div'); trig.className = '';
+        const eintrag = el('button'); eintrag.className = 'menu-item'; drop.appendChild(eintrag);
+        let sichtbar = false;
+        trig.focus = function () { doc.activeElement = this; };
+        eintrag.focus = function () { if (sichtbar) doc.activeElement = this; };
+        doc.getElementById = (id) => ({ mainMenuDropdown: drop, mainMenuTrigger: trig }[id] || null);
+        const vm = require('node:vm');
+        const ctx = vm.createContext({
+            document: doc, setTimeout: (f) => timer.push(f), menueHoeheAnpassen() {}, menueBeobachtungStarten() {},
+            _sichtBeobachtungStarten() {}, menueBeobachtungBeenden() {},
+        });
+        vm.runInContext(L.ausschnitt(kaputt, 'function toggleMainMenu()') + ';globalThis.toggleMainMenu=toggleMainMenu;', ctx);
+        trig.focus(); ctx.toggleMainMenu(); timer.splice(0).forEach(f => f());
+        sichtbar = true; drop.dispatchEvent({ type: 'transitionend' }); timer.splice(0).forEach(f => f());
+        assert.notEqual(doc.activeElement, eintrag, 'die Probe unterscheidet nicht');
     });
 });

@@ -1112,6 +1112,22 @@
                 }
             }
 
+            /* UI-110 (IA Etappe 1): ohne Adresse und ohne Wahl startet die
+               Deck-Analyse mit „Mein Deck" — einmal je Seitenaufruf, damit ein
+               bewusst geleertes Feld leer bleibt. */
+            if (!select.value && !pendingMeta && !window.__dsMeinDeckVorgewaehlt
+                && window.MeinDeck && typeof window.MeinDeck.lesen === 'function') {
+                const _md = window.MeinDeck.lesen();
+                const _opt = _md ? Array.from(select.options).find(o =>
+                    o.value && o.value.toLowerCase() === _md.toLowerCase()) : null;
+                window.__dsMeinDeckVorgewaehlt = true;
+                if (_opt) {
+                    select.value = _opt.value;
+                    window.currentMetaArchetype = _opt.value;
+                    loadCurrentMetaDeckData(_opt.value);
+                }
+            }
+
             if (!select.value) {
                 window.currentMetaArchetype = '';
                 clearCurrentMetaDeckView();

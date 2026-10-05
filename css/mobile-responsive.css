@@ -3072,3 +3072,26 @@
 #past-meta .city-league-card-info-bottom .city-league-card-deck-stats-mobile.city-league-card-deck-stats-mobile {
   font-size: var(--fs-xs);
 }
+
+/* UI-110 (IA Etappe 1, 05.10.2026): auf dem Handy stand der Inhalt eines
+   Profil-Untertabs erst bei y 1.368 — darueber 13 Knoepfe in vier
+   Gruppen mit Ueberschriften. Unter 700 px wird die Leiste EINE Zeile zum
+   Wischen; die Gruppen-Ueberschriften fallen weg (die Reihenfolge bleibt
+   gleich), der gewaehlte Knopf rueckt in Sicht (switchProfileTab). */
+@media (max-width: 700px) {
+    #profile-tab-nav {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 6px;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+    }
+    #profile-tab-nav .profile-tab-group,
+    #profile-tab-nav .profile-tab-group-buttons {
+        display: contents;
+    }
+    #profile-tab-nav .profile-tab-group-label,
+    #profile-tab-nav .profile-tab-group + .profile-tab-group::before {
+        display: none;
+    }
+}

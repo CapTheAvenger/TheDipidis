@@ -1318,6 +1318,11 @@
         // Always start with a blank form
         resetBattleJournalForm();
         formatVorbelegen(document.getElementById('battleJournalMeta'));
+        // UI-110: das eigene Deck mit „Mein Deck" aus dem Kopf vorbelegen.
+        if (els.ownDeckValue && !els.ownDeckValue.value && window.MeinDeck) {
+            const _md = window.MeinDeck.lesen();
+            if (_md) els.ownDeckValue.value = _md;
+        }
         // FE-61: der Rundenhinweis gehoert nur zur Folgerunde.
         const _rh = document.getElementById('battleJournalRundenHinweis');
         if (_rh) _rh.textContent = '';
@@ -1809,9 +1814,9 @@
                 </div>
                 <div class="bj-history-actions">
                     <button type="button" class="bj-history-brick-btn${entry.brick ? ' is-active' : ''}" onclick="toggleBrickEntry('${escapeHtml(entry.id)}')" title="${entry.brick ? battleJournalText('bj.removeBrickTitle','Remove brick flag') : battleJournalText('bj.markBrickTitle','Mark as brick')}">🧱</button>
-                    <button type="button" class="bj-history-edit-btn" onclick="openEditEntryModal('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.editEntry', 'Edit'))}">Edit</button>
-                    <button type="button" class="bj-history-delete-btn" onclick="deleteJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.deleteEntry', 'Delete'))}">Del</button>
-                    <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">Copy</button>
+                    <button type="button" class="bj-history-edit-btn" onclick="openEditEntryModal('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.editEntry', 'Edit'))}">${escapeHtml(battleJournalText('bj.editEntry', 'Edit'))}</button>
+                    <button type="button" class="bj-history-delete-btn" onclick="deleteJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.deleteEntry', 'Delete'))}">${escapeHtml(battleJournalText('bj.deleteEntry', 'Delete'))}</button>
+                    <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}</button>
                     <span class="battle-journal-result-pill ${resultClass}">${resultEmoji} ${escapeHtml(resultText)}</span>
                 </div>
             </div>

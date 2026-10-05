@@ -3729,6 +3729,22 @@ function switchProfileTab(tabName) {
     window.setMenuHighlight(tabName === 'deckbuilder' ? 'menu-btn-deckbuilder' : 'menu-btn-profile');
   }
 
+  /* UI-110 (IA Etappe 1, 05.10.2026): ein Klick auf einen Profil-Untertab
+     liess die Adresse bei „#profile" stehen — Neuladen, Teilen und Zurueck
+     landeten in der Sammlung. Jetzt schreibt der Untertab seine eigene
+     Adresse (#decks, #archetypbox …); die Schreibfunktion kennt die
+     Tieflink-Tabelle, schreibt nichts waehrend applyHash routet und nichts,
+     wenn die Adresse schon stimmt. */
+  if (typeof window.__dsSchreibeProfilHash === 'function') {
+    try { window.__dsSchreibeProfilHash(tabName); } catch (_e) { /* Adresse ist Komfort */ }
+  }
+  /* UI-110: auf schmalen Schirmen ist die Untertab-Leiste eine Zeile zum
+     Wischen — der gewaehlte Knopf rueckt in Sicht. */
+  if (activeBtn && typeof activeBtn.scrollIntoView === 'function'
+      && window.matchMedia && window.matchMedia('(max-width: 700px)').matches) {
+    try { activeBtn.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (_e) { /* egal */ }
+  }
+
   // Auto-load journal history when switching to journal tab
   if (tabName === 'journal' && typeof openJournalHistoryTab === 'function') {
     openJournalHistoryTab();

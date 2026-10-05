@@ -27,7 +27,7 @@ describe('DA-51: Preiswort und Lücken an der Formatauswahl', () => {
   const pm = ohne(lies('js/app-past-meta.js'));
   it('Verdrahtung', () => { assert.deepEqual(pruefe(cdb, pm), []); });
   it('Verfaelschungsprobe', () => {
-    assert.ok(pruefe(cdb.replace('price-value">Trend ${price', 'price-value">Ø ${price'), pm).includes('Ø'));
+    assert.ok(pruefe(cdb.split('price-value">Trend ').join('price-value">Ø '), pm).includes('Ø'));
     assert.ok(pruefe(cdb, pm.replace('if (mitMajor && !mitMajor.has(key))', 'if (false)')).includes('Kennzeichen'));
   });
 });

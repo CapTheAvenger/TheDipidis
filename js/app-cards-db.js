@@ -3540,7 +3540,7 @@
                     const trust = (typeof window.priceTrustBadge === 'function')
                         ? window.priceTrustBadge(card, displayCardMarketUrl) : '';
                     priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="${(typeof getLang === 'function' && getLang() === 'en') ? 'Cardmarket trend price' : 'Cardmarket-Trendpreis'}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `View ${displayName} on CardMarket (opens in new tab)` : `${displayName} bei Cardmarket ansehen (neuer Tab)`}">
-                        <span class="card-database-price-value">Trend ${price.toFixed(2).replace('.', ',')} €</span>
+                        <span class="card-database-price-value">Trend ${_zahlNachSprache(price, 2)} €</span>
                     </a>${trust}`;
                 }
             }

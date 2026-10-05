@@ -99,7 +99,7 @@ describe('Dezimalpunkte in deutschen Zahlen', () => {
            auf derselben Kachel. Jetzt fragt eine Funktion fuer beide,
            und sie heisst nach dem, was sie tut. */
         assert.match(CDB, /_zahlNachSprache\(percentage, 1\)/);
-        assert.match(CDB, /Ø \$\{_zahlNachSprache\(price, 2\)\} €/,
+        assert.match(CDB, /Trend \$\{_zahlNachSprache\(price, 2\)\} €/,  // DA-51: Preiswort „Trend“
             'der Preis geht nicht durch dieselbe Funktion — dann stehen auf einer '
             + 'Kachel wieder zwei Dezimaltrenner');
     });

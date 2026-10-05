@@ -265,7 +265,8 @@ test('js/ds-share.js traegt keinen Hausnamen mehr', () => {
 });
 
 test('die Bildkarte beschriftet beide Konventionen aus dem Modul', () => {
-    assert.ok(SHARE.includes("var SHARE_KONVENTION = 'mitUnentschieden';"),
+    // DA-47 (05.10.2026): S/(S+N) wie die Seite.
+    assert.ok(SHARE.includes("var SHARE_KONVENTION = 'ohneUnentschieden';"),
         'js/ds-share.js legt seine Konvention nicht mehr fest');
 
     /* Auf die AUFRUFSTELLEN pruefen, nicht auf die Definition der

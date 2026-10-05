@@ -43,7 +43,9 @@
        EIN BILD HAT KEINE SPRECHBLASE. Was auf der Leinwand steht, ist
        alles, was der Leser bekommt — deshalb steht hier der ganze Name
        und nicht das Kuerzel, und die Fusszeile traegt die Formel. */
-    var SHARE_KONVENTION = 'mitUnentschieden';
+    // DA-47 (05.10.2026, Hausi: „Rechnung angleichen"): die Bilder rechnen
+    // wie die Seite S / (S + N).
+    var SHARE_KONVENTION = 'ohneUnentschieden';
 
     function quotenName(konvention) {
         var K = window.WinRateKonvention;
@@ -1519,7 +1521,9 @@
             // Zähler (w - n) und nicht im Nenner (gespielt). Er ist ein
             // Sieg der Turnierleitung, keine gespielte Partie — dieselbe
             // Regel wie nurGespielte() in js/battle-journal.js.
-            winRate: gespielt ? ((w - n) / gespielt) * 100 : NaN,
+            // DA-47: S / (S + N) — No-Show weder im Zaehler noch im
+            // Nenner, Unentschieden nur in der Bilanz.
+            winRate: ((w - n) + l) > 0 ? ((w - n) / ((w - n) + l)) * 100 : NaN,
             deck: asc[0].ownDeck || '',
             // Die eingefrorene Liste. Sie haengt am Turnier, gespeichert ist
             // sie an jedem Eintrag — also die Gruppe fragen, nicht asc[0]:

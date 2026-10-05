@@ -565,7 +565,8 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
             count: zahl(r.count), partien: zahl(r.wins) + zahl(r.losses) + zahl(r.ties) };
         api.setData(decks, null);
         const html = api.render(DECKS[0].deck_name, 'embed');
-        assert.ok(html.includes(WK.kurz('mitUnentschieden')),
+        // DA-47 (05.10.2026): die Kachel rechnet S/(S+N), der Satz nennt das.
+        assert.ok(html.includes(WK.kurz('ohneUnentschieden')),
             'der Zeitraum-Satz nennt die Konvention der Online-Quote nicht beim Namen');
         assert.ok(!/Anteil, Win % und Top-8-Quote/.test(html),
             'die Karte behauptet wieder "Win %" ueber einer S/(S+N+U)-Quote');

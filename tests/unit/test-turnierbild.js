@@ -693,10 +693,11 @@ describe('Turnierbild: ein No-Show zählt als Sieg, aber nicht in die Quote', ()
     it('die Siegquote rechnet OHNE den No-Show — in beiden Brüchen', () => {
         const I = mitGruppe(HAUSI);
         const spec = I.collectTournamentSpec('Regional', {});
-        // Ein gespielter Sieg aus sieben gespielten Partien. Nicht 2/8
-        // (25 %, der No-Show im Zaehler) und nicht 2/7 (28,6 %).
-        assert.ok(Math.abs(spec.winRate - (1 / 7) * 100) < 0.01,
-            `Quote ${spec.winRate} statt ${(1 / 7) * 100}`);
+        // DA-47 (05.10.2026): S / (S + N). Ein gespielter Sieg, fuenf
+        // Niederlagen: 1/6. Nicht 2/7 (No-Show im Zaehler) und nicht 1/7
+        // (Unentschieden im Nenner, bis 05.10.2026).
+        assert.ok(Math.abs(spec.winRate - (1 / 6) * 100) < 0.01,
+            `Quote ${spec.winRate} statt ${(1 / 6) * 100}`);
     });
 
     it('ohne No-Show bleibt alles, wie es war', () => {
@@ -705,7 +706,7 @@ describe('Turnierbild: ein No-Show zählt als Sieg, aber nicht in die Quote', ()
         const spec = I.collectTournamentSpec('Regional', {});
         assert.deepEqual(alsEinfach(spec.record), { w: 1, l: 5, t: 1, n: 0 });
         assert.equal(I.matchPunkte(spec.rounds), 4);
-        assert.ok(Math.abs(spec.winRate - (1 / 7) * 100) < 0.01);
+        assert.ok(Math.abs(spec.winRate - (1 / 6) * 100) < 0.01); // DA-47: S/(S+N)
     });
 
     it('der Ring ist neutral, nicht rot — rot heißt hier Niederlage', () => {

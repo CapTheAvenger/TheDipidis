@@ -1327,7 +1327,7 @@
                    Hausnamen. */
                 mitQuote(L('arc.convMissingTip', de
                     ? 'Dieses Deck fehlt in der Top-Cut-Datei. Das heißt nicht, dass es nie konvertiert — die {quote} stammt aus einer anderen Quelle.'
-                    : 'This deck is absent from the top-cut file. That does not mean it never converts — the {quote} comes from a different source.'), 'mitUnentschieden'));
+                    : 'This deck is absent from the top-cut file. That does not mean it never converts — the {quote} comes from a different source.'), 'ohneUnentschieden')); // DA-47: die Kachel darueber rechnet S/(S+N)
         /* DIE VIERTE KACHEL: DAY 2, UND SIE HAT KEINE ONLINE-SEITE.
            Die dritte traegt die Top-8-Quote der Online-Turniere, die
            vierte die Day-2-Quote vom Major. Das ist absichtlich KEIN
@@ -1503,9 +1503,10 @@
            falsch. Dass der Name im ANGEZEIGTEN Text auftaucht, ist eine
            Entscheidung des Betreibers vom 05.09.2026 und gehoert ihm,
            nicht dieser Datei. */
-        const quoteName = (WK && WK.kurz('mitUnentschieden'))
-            || ((WK && WK.hol('mitUnentschieden') && WK.hol('mitUnentschieden').formel)
-                || 'S / (S + N + U)');
+        // DA-47: die Kachel rechnet S / (S + N) aus wins/losses derselben Datei.
+        const quoteName = (WK && WK.kurz('ohneUnentschieden'))
+            || ((WK && WK.hol('ohneUnentschieden') && WK.hol('ohneUnentschieden').formel)
+                || 'S / (S + N)');
         const online = de
             ? `Anteil, ${quoteName} und Top-8-Quote: data/limitless_online_decks.csv und `
               + 'data/online_tournament_top8_decks.csv — Gesamtstand des Onlinefeldes, '
@@ -2135,7 +2136,11 @@
         return {
             name,
             share:   d ? d.share : NaN,
-            winRate: d ? d.winRate : NaN,
+            /* DA-47 (05.10.2026, Hausi: „Rechnung angleichen"): das Bild
+               zeigt dieselbe Zahl wie die Kachel, S / (S + N) aus wins und
+               losses derselben Zeile — nicht win_rate_numeric (S/(S+N+U)). */
+            winRate: (d && (d.siege + d.niederlagen) > 0)
+                ? (d.siege / (d.siege + d.niederlagen)) * 100 : NaN,
             count:   d ? d.count : NaN,
             /* Die Online-Partien. Die Kachel auf der Seite zeigt sie
                seit dem 02.09.2026 neben der Quote; das Bild trug sie

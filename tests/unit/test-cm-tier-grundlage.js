@@ -246,7 +246,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
             ['Tier 2 höchstens 112', 'T2_MAX'],
             ['Tier 3 höchstens 113', 'T3_MAX'],
             ['114,0 % Anteil', 'T1_MIN_SHARE'],
-            ['115,0 % Win-Rate', 'T1_MIN_WR'],
+            ['115,0 % Win Rate', 'T1_MIN_WR'],
             ['mindestens 116 % der Listenzahl', 'MINDEST_ANTEIL_GROESSTER'],
             ['Vorwert von 121 Listen', 'TIER_SCORE.PRIOR_LISTEN'],
             ['Anteil (bis 122 %', 'TIER_SCORE.ANTEIL_DECKEL'],
@@ -337,7 +337,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
         assert.ok(s.includes('Tier 2 höchstens ' + T.T2_MAX), s);
         assert.ok(s.includes('Tier 3 höchstens ' + T.T3_MAX), s);
         assert.ok(s.includes(de(T.T1_MIN_SHARE, 1) + ' % Anteil'), s);
-        assert.ok(s.includes(de(T.T1_MIN_WR, 1) + ' % Win-Rate'), s);
+        assert.ok(s.includes(de(T.T1_MIN_WR, 1) + ' % Win Rate'), s);
     });
 
     /* DA-47 (05.10.2026, Entscheidung Hausi „Rechnung angleichen"): die
@@ -346,7 +346,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
        bleibt den Matchpunkten vorbehalten und darf hier NICHT stehen. */
     it('Win-Raten heissen "Win-Rate" (S/(S+N)), nicht "Win %"', () => {
         const d = satz('de'), e = satz('en');
-        assert.ok(d.includes('Win-Rate'), 'deutsche Fassung');
+        assert.ok(d.includes('Win Rate'), 'deutsche Fassung');
         assert.ok(/win rate/i.test(e), 'englische Fassung');
         assert.ok(!/Win %|Siegquote|Gewinnrate/.test(d + e),
             'keine zweite Bezeichnung fuer dieselbe Groesse');

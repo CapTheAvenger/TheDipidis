@@ -474,7 +474,12 @@ describe('W4 — der angezeigte Name, an den AUFRUFSTELLEN ausgefuehrt', () => {
                              'js/app-quellen.js', 'js/battle-journal.js']) {
             const q = lies(datei)
                 .replace(/\/\*[\s\S]*?\*\//g, ' ')
-                .split('\n').map(z => (/^\s*\/\//.test(z) ? '' : z)).join('\n');
+                .split('\n').map(z => (/^\s*\/\//.test(z) ? '' : z)).join('\n')
+                /* DA-47 (05.10.2026): S/(S+N) heisst jetzt „Win Rate" — genau
+                   das Suchmuster, mit dem js/app-meta-cards.js seinen Absatz
+                   im FREMDEN Markup findet (dort Z. 30 erklaert). Ein
+                   Suchmuster ist keine Beschriftung. */
+                .replace(/textContent\.includes\('Win Rate'\)/g, '');
             for (const n of namen) {
                 if (q.includes(n)) offen.push(datei + ' → „' + n + '"');
             }

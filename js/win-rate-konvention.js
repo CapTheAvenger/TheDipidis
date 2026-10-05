@@ -215,7 +215,7 @@
                trug sie den langen Namen „Siegquote ohne Unentschieden" und
                „Win-Rate" hiess S/(S+N+U) — fuer dieselbe Bilanz standen
                45,9 / 39,2 / 44,0 % (Mega Excadrill, Major) auf einer Seite. */
-            kurzDe: 'Win-Rate',
+            kurzDe: 'Win Rate',
             kurzEn: 'Win rate',
             langDe: 'Anteil gewonnener an den entschiedenen Matches — Unentschieden '
                   + 'bleiben ganz aussen vor. Als einzige der drei Konventionen '

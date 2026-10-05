@@ -9825,7 +9825,8 @@ window.MetaCall = (function () {
         name,
         day2Prob: r.day2Prob,
         expWin: r.expWin,
-        avgWR: (r.expWin / _settings.rounds) * 100,
+        // DA-49: S / (S + N) wie jede Win-Rate der Seite.
+        avgWR: (r.expWin + r.expLoss) > 0 ? (r.expWin / (r.expWin + r.expLoss)) * 100 : 0,
       };
     });
     return results
@@ -10090,7 +10091,12 @@ window.MetaCall = (function () {
         p46RecoMult,
         underdogChampion: champ || null,
         expWin: r.expWin,
-        avgWR: (r.expWin / _settings.rounds) * 100,
+        // DA-49 (05.10.2026): „Ø Win-Rate" ist S / (S + N) der erwarteten
+        // Bilanz, nicht mehr Siege durch Runden (S/(S+N+U)).
+        avgWR: (r.expWin + r.expLoss) > 0 ? (r.expWin / (r.expWin + r.expLoss)) * 100 : 0,
+        // Die gezeigte Day-2-Zahl ist gemessen (geglaettet) oder, wenn die
+        // Schrumpfung das Deck nicht kennt, simuliert.
+        day2Gemessen: _rang !== adjustedDay2,
         topMatchups
       };
     }).sort((a, b) => {
@@ -10124,12 +10130,14 @@ window.MetaCall = (function () {
        * zaehlen nicht — sind aber transitiv, weil sie eine echte
        * Aequivalenzklasse bilden. Die Rasterweiten entsprechen den alten
        * Toleranzen: 0,02 und 0,05. */
-      const raster = (wert, weite) => Math.round((wert || 0) / weite);
-      const d = raster(b.day2Prob, 0.02) - raster(a.day2Prob, 0.02);
-      if (d !== 0) return d;
-      const c = raster(b.empConv, 0.05) - raster(a.empConv, 0.05);
-      if (c !== 0) return c;
-      return b.avgWR - a.avgWR;
+      /* DA-49 (05.10.2026, Befund D3-03): sortiert wird nach der GEZEIGTEN
+         Zahl. Das Raster liess 22,6 % vor 22,9 % stehen — fuer den Leser
+         ein Fehler. Exakte Vergleiche mit festen Folgeschluesseln sind
+         ebenfalls transitiv. */
+      return ((b.day2Prob || 0) - (a.day2Prob || 0))
+        || ((b.empConv || 0) - (a.empConv || 0))
+        || (b.avgWR - a.avgWR)
+        || String(a.name).localeCompare(String(b.name));
     });
 
     // Day-2 list — threshold then bounds.
@@ -12387,6 +12395,15 @@ window.MetaCall = (function () {
     const duenn = (r.partien > 0 && r.partien < EV_MIN_PARTIEN)
                || (r.abdeckung > 0 && r.abdeckung < EV_MIN_ABDECKUNG);
     const duennText = duenn ? _evL(' · dünne Grundlage', ' · thin basis') : '';
+    /* DA-49 (05.10.2026, Befund D3-04): die Quote rechnet nur ueber die
+       benannten Decks (z. B. 83,8 % des Metas); Bilanz und Day-2 daneben
+       spielen „Sonstige" mit der Pauschalquote mit. Die Pauschale bleibt
+       aus dieser Zahl heraus (sie ist keine Messung,
+       test-mc-deck-gegen-meta.js) — aber die Kachel sagt es jetzt. */
+    const abdeckungText = (r.abdeckung > 0 && r.abdeckung < 99.5)
+      ? _evL(' · gegen ' + _mcNum(r.abdeckung, 1) + ' % des Metas (ohne Sonstige)',
+             ' · against ' + _mcNum(r.abdeckung, 1) + '% of the meta (without others)')
+      : '';
 
     const bandText = (r.sd > 0)
       ? _evL('Band ' + _mcNum(r.unten, 1) + ' bis ' + _mcNum(r.oben, 1) + ' %',
@@ -12426,7 +12443,7 @@ window.MetaCall = (function () {
     <div class="mc-ev-kachel ${r.ev >= 50 ? 'is-pos' : 'is-neg'}${duenn ? ' is-duenn' : ''}">
       <span class="mc-ev-label">${esc(_evL('Erwartete ', 'Expected ') + _evQuotenName())}</span>
       <span class="mc-ev-wert">${_mcNum(r.ev, 1)}<span class="mc-ev-einheit">${_mcPz()}</span></span>
-      <span class="mc-ev-kontext">${esc(bandText + duennText)}</span>
+      <span class="mc-ev-kontext">${esc(bandText + duennText + abdeckungText)}</span>
     </div>
     <div class="mc-ev-kachel">
       <span class="mc-ev-label">${esc(_evL('Erwartete Siege', 'Expected wins'))}</span>
@@ -12878,7 +12895,7 @@ window.MetaCall = (function () {
           <th>#</th>
           <th>${t('mc.recDeck')}</th>
           <th title="${esc(t('mc.tipRecZiel'))}">${esc(_zielKurz())}</th>
-          <th title="${esc(_wrKonventionsTitel('mitUnentschieden'))}" data-hinweis="${esc(_wrKonventionsTitel('mitUnentschieden'))}">${esc(_wrKurzform(t('mc.recAvgWr')))}</th>
+          <th title="${esc(_wrKonventionsTitel('ohneUnentschieden'))}" data-hinweis="${esc(_wrKonventionsTitel('ohneUnentschieden'))}">${esc(_wrKurzform(t('mc.recAvgWr')))}</th>
           <th class="mc-rec-wins" title="${esc(t('mc.tipRecExpWins'))}">${t('mc.recExpWins')}</th>
           <th class="mc-rec-toggle-th" aria-label="${_mcIstDeutsch() ? 'Warum?' : 'Why?'}"></th>
         </tr></thead>
@@ -14490,8 +14507,8 @@ window.MetaCall = (function () {
     ctx.fillText(t('mc.recDeck').toUpperCase(), originX + padL + 30, originY - 17);
     ctx.textAlign = 'right';
     ctx.fillText(titleLabel.toUpperCase(), originX + columnW - padR - 70, originY - 17);
-    /* `r.avgWR` ist `expWin / rounds` = Summe(Anteil · pWin) — der
-       Anteil gewonnener Partien an ALLEN gespielten, also S/(S+N+U).
+    /* `r.avgWR` ist seit DA-49 (05.10.2026) S/(S+N) der erwarteten
+       Bilanz — dieselbe Zahl wie in der Tabelle der Seite.
        Der Kopf ist 11 px breit und traegt nur das Kuerzel; der volle
        Name steht in der Legende im Fuss desselben Bildes. */
     ctx.fillText(_wrKurzform(t('mc.recAvgWr')).toUpperCase(), originX + columnW - padR, originY - 17);
@@ -15046,7 +15063,7 @@ window.MetaCall = (function () {
     }
 
     _paintFooter(ctx, W, H, _wrLegende([
-      { was: _wrKurzform(t('mc.recAvgWr')), konvention: 'mitUnentschieden' },
+      { was: _wrKurzform(t('mc.recAvgWr')), konvention: 'ohneUnentschieden' }, // DA-49
     ]));
     _showSharePreview(
       canvas,
@@ -15086,7 +15103,13 @@ window.MetaCall = (function () {
 
     const { day2Prob, expWin, expTie, expLoss } = calcDay2(field);
     const pct = _mcNum(day2Prob * 100, 1);
-    const day1WR = _settings.rounds > 0 ? (expWin / _settings.rounds) * 100 : 0;
+    /* DA-49 (05.10.2026, T3-04): das Bild zeigte 39,1 % (Siege durch
+       Runden, S/(S+N+U)), die Seite 45,4 % (Erwartete Win-Rate, S/(S+N)).
+       Das Bild zeigt jetzt DIESELBE Zahl wie die Kachel der Seite; nur
+       ohne gewaehltes Deck (keine Kachel) die Bilanz der Kette, S/(S+N). */
+    const _evBild = (() => { try { return _evRechne(field); } catch (e) { return null; } })();
+    const day1WR = (_evBild && Number.isFinite(_evBild.ev)) ? _evBild.ev
+      : ((expWin + expLoss) > 0 ? (expWin / (expWin + expLoss)) * 100 : 0);
 
     // ALL matchups (sorted desc by final share), not just the top 10 —
     // user wants the full picture visible. "Others" (junk) pinned to the
@@ -15260,8 +15283,9 @@ window.MetaCall = (function () {
       y += ROW_H;
     });
 
+    // DA-49 (05.10.2026): beide Zahlen des Bildes sind jetzt S/(S+N).
     _paintFooter(ctx, W, H, _wrLegende([
-      { was: _wrKurzform(t('mc.day1WinRate')), konvention: 'mitUnentschieden' },
+      { was: _wrKurzform(t('mc.day1WinRate')), konvention: 'ohneUnentschieden' },
       { was: _mcIstDeutsch() ? 'Matchup-Spalte' : 'matchup column', konvention: 'ohneUnentschieden' },
     ]));
     _showSharePreview(canvas, `metacall-day2-${_formatDateFilename()}.png`,

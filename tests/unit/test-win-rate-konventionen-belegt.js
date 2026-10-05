@@ -429,7 +429,7 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
         assert.ok(ende > anfang, 'der Banner-Hinweis hat kein Ende mehr');
         const stueck = MC.slice(anfang, ende + 25);
         // DA-47 (05.10.2026): S/(S+N) heisst jetzt „Win-Rate" / „win rate".
-        for (const [sprache, muster] of [['de', /\(Win-Rate\)/],
+        for (const [sprache, muster] of [['de', /\(Win Rate\)/],
                                          ['en', /win rate/i]]) {
             const win = { getLang: () => sprache };
             new Function('window', lies('js', 'win-rate-konvention.js'))(win);
@@ -469,7 +469,7 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
             // die eine Win-Rate der Seite ist S/(S+N) und traegt den kurzen
             // Namen (UI-16). S/(S+N+U) steht nur noch, wo keine Bilanz da
             // ist, und nennt ihren Unterschied im Namen.
-            assert.match(M.kurz('ohneUnentschieden'), /^(Win-Rate|Win rate)$/);
+            assert.match(M.kurz('ohneUnentschieden'), /^(Win Rate|Win rate)$/);
             assert.match(M.kurz('mitUnentschieden'), /inkl\. Unentschieden|incl\. ties/);
         }
     });

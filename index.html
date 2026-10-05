@@ -677,6 +677,9 @@
                     <button id="langToggleBtn" onclick="switchLanguage(getLang() === 'en' ? 'de' : 'en')" class="lang-toggle-btn" title="Auf Englisch umschalten" data-i18n-title="header.switchLanguageTitle">EN</button>
                     <!-- UI-110 (IA Etappe 1, 05.10.2026): „Mein Deck" app-weit — gilt fuer
                          Meta Call, Journal-Vorbelegung und Deck-Analyse (js/mein-deck.js). -->
+                    <!-- UI-113: Kopf „?" zu Erste Schritte, Glossar und Quellen (die Anleitung
+                         traegt alle drei). -->
+                    <button id="hilfeKnopf" class="mein-deck-knopf hilfe-knopf" type="button" onclick="switchTabAndUpdateMenu('tutorial')" data-i18n-title="header.hilfe" data-i18n-aria="header.hilfe" title="Hilfe: Erste Schritte, Glossar, Quellen" aria-label="Hilfe: Erste Schritte, Glossar, Quellen">?</button>
                     <button id="meinDeckKnopf" class="mein-deck-knopf is-leer" type="button" onclick="MeinDeck.oeffnen()" aria-haspopup="dialog" aria-expanded="false" data-i18n-title="header.myDeck" data-i18n-aria="header.myDeck" title="Mein Deck wählen" aria-label="Mein Deck wählen"><span class="mein-deck-stern" aria-hidden="true">★</span><span class="mein-deck-name">Mein Deck</span></button>
                     <button id="battleJournalFab" class="header-icon-btn header-journal-btn" type="button" onclick="openBattleJournalSheet()" title="Battle Journal" aria-label="Battle Journal" data-i18n-title="bj.openShort" data-i18n-aria="bj.openShort">
                         <svg class="header-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -1317,6 +1320,21 @@
                         <div class="header current-meta-header">
                             <h2><span data-i18n="cm.limitlessHeading">Current meta</span><!-- Die Ueberschrift hiess bis zum 30.08.2026 "Limitless Online Vergleich". Das ist die Quelle, nicht der Inhalt: die Seite zeigt das aktuelle Meta, und wonach der Leser sucht, ist das Format. Die Quelle steht ohnehin im Ausweis darunter. Das Kuerzel fuellt ds-nav.js aus window._formatWindow, damit es die naechste Rotation ueberlebt. --><span class="cm-format" id="cmFormatLabel" aria-hidden="true"></span> <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help" data-i18n-aria="aria.helpCurrentMeta" aria-label="Help for Current Meta" data-i18n-title="btn.helpTitle"></button> <span class="data-freshness-chip" title="Daten zuletzt aktualisiert"><span class="data-freshness-chip-icon" aria-hidden="true">🔄</span> <span data-i18n="data.updated">Daten:</span> <span class="js-data-freshness" data-quelle="limitless_online_decks.csv">…</span></span></h2>
                         </div>
+                        <!-- UI-113 (05.10.2026): die Startseite begann mit Daten, ohne einen
+                             Satz, was die Seite ist (10-Sekunden-Test, Agent 1). Ein Band,
+                             wegklickbar (js/neu-hier.js), drei Einstiege. -->
+                        <section id="neuHierBand" class="neu-hier-band d-none" aria-labelledby="neuHierTitel">
+                            <div class="neu-hier-text">
+                                <strong id="neuHierTitel" data-i18n="neu.titel">Neu hier?</strong>
+                                <span data-i18n="neu.satz">The Dipidis zeigt, welche Decks im Pokémon-TCG gerade gespielt werden und wie gut sie abschneiden — und hilft dir, dein eigenes Deck darauf abzustimmen.</span>
+                            </div>
+                            <div class="neu-hier-knoepfe">
+                                <button type="button" class="btn btn-primary" onclick="switchTabAndUpdateMenu('current-analysis')" data-i18n="neu.deck">Ein Deck ansehen</button>
+                                <button type="button" class="btn btn-secondary" onclick="switchTabAndUpdateMenu('meta-call')" data-i18n="neu.turnier">Turnier vorbereiten</button>
+                                <button type="button" class="btn btn-secondary" onclick="switchTabAndUpdateMenu('tutorial')" data-i18n="neu.anleitung">Erste Schritte</button>
+                            </div>
+                            <button type="button" class="neu-hier-weg" onclick="NeuHier.weg()" data-i18n-aria="neu.weg" data-i18n-title="neu.weg" aria-label="Hinweis ausblenden" title="Hinweis ausblenden">✕</button>
+                        </section>
                         <!-- HIER STANDEN BIS ZUM 01.09.2026 ZWEI BLOECKE.
                          "Unser Pick fuers Turnier" (js/app-deckempfehlung.js)
                          und "Was gerade laeuft" (js/meta-analysis-hub.js).
@@ -4194,6 +4212,7 @@
          Quote anzeigt — app-tier-meta, app-past-meta, ds-share. -->
     <script src="js/win-rate-konvention.js?v=202610050646" defer></script>
     <script src="js/mein-deck.js?v=202610050646" defer></script>
+    <script src="js/neu-hier.js?v=202610050646" defer></script>
     <script src="js/journal-zuordnung.js?v=202610050646" defer></script>
     <script src="js/matchup-glaettung.js?v=202610050646" defer></script>
     <script src="js/rangliste-sortieren.js?v=202610050646" defer></script>

@@ -285,7 +285,18 @@ function toggleMainMenu() {
     // Eintrag; beim Schliessen zurueck auf den Ausloeser, wenn er im Menue war.
     if (open) {
         const erster = drop.querySelector('.menu-item') || drop.querySelector('button');
-        if (erster && erster.focus) setTimeout(function () { try { erster.focus({ preventScroll: true }); } catch (_e) { /* egal */ } }, 0);
+        /* Live-Abnahme V2-1 (05.10.2026): das Menue blendet `visibility`
+           per CSS-Uebergang ein; solange der laeuft, ist der Eintrag noch
+           nicht fokussierbar und focus() verpufft still. Deshalb nach dem
+           Uebergang (transitionend) und hilfsweise nach 300 ms noch einmal —
+           nur, solange das Menue offen ist und der Fokus nicht schon drin. */
+        const _fokusRein = function () {
+            if (!trig.classList.contains('open') || drop.contains(document.activeElement)) return;
+            if (erster && erster.focus) { try { erster.focus({ preventScroll: true }); } catch (_e) { /* egal */ } }
+        };
+        setTimeout(_fokusRein, 0);
+        drop.addEventListener('transitionend', _fokusRein, { once: true });
+        setTimeout(_fokusRein, 300);
     } else if (drop.contains(document.activeElement)) {
         try { trig.focus({ preventScroll: true }); } catch (_e) { /* egal */ }
     }

@@ -1,0 +1,369 @@
+-    <script src="js/app-side-quest-pokedex.js?v=202610061852" defer></script>|
+-    <script src="js/app-side-quest-items.js?v=202610061852" defer></script>|
++    <script src="js/ds-datenstand.js?v=202610061959" defer></script>|
++    <script src="js/app-init.js?v=202610061959" defer></script>|
++    <script src="js/app-current-meta-analysis.js?v=202610061959" defer></script>|
++    <script src="js/app-features.js?v=202610061959" defer></script>|
++    <script src="js/archetype-icons.js?v=202610061959" defer></script>|
++    <script src="js/app-archetype-card.js?v=202610061959" defer></script>|
++    <script src="js/app-meta-call.js?v=202610061959" defer></script>|
++    <script src="js/app-deckempfehlung.js?v=202610061959" defer></script>|
++    <script src="js/meta-analysis-hub.js?v=202610061959" defer></script>|
++    <script src="js/app-testing-groups.js?v=202610061959" defer></script>|
++    <script src="js/battle-journal.js?v=202610061959" defer></script>|
++    <script src="js/meta-binder.js?v=202610061959" defer></script>|
++    <script src="js/custom-binder.js?v=202610061959" defer></script>|
++    <script src="js/archetyp-box.js?v=202610061959" defer></script>|
++    <script src="js/draw-simulator.js?v=202610061959" defer></script>|
++    <script src="js/app-calculator.js?v=202610061959" defer></script>|
++    <script src="js/champions-namen.js?v=202610061959" defer></script>|
++    <script src="js/qr-svg.js?v=202610061959" defer></script>|
++    <script src="js/pocket-deckcode.js?v=202610061959" defer></script>|
++    <script src="js/ds-pocket.js?v=202610061959" defer></script>|
++    <script src="js/app-side-quest.js?v=202610061959" defer></script>|
++    <script src="js/app-side-quest-play.js?v=202610061959" defer></script>|
++    <script src="js/champions-shiny.js?v=202610061959" defer></script>|
++    <script src="js/app-side-quest-pokedex.js?v=202610061959" defer></script>|
++    <script src="js/app-side-quest-items.js?v=202610061959" defer></script>|
+     <!-- Der Datenumfang wird in app-tier-meta.js gerechnet und in|
+          app-quellen.js angezeigt. Muss vor beiden stehen. -->|
+-    <script src="js/ds-datenumfang.js?v=202610061852" defer></script>|
+-    <script src="js/app-quellen.js?v=202610061852" defer></script>|
+-    <script src="js/app-admin.js?v=202610061852" defer></script>|
++    <script src="js/ds-datenumfang.js?v=202610061959" defer></script>|
++    <script src="js/app-quellen.js?v=202610061959" defer></script>|
++    <script src="js/app-admin.js?v=202610061959" defer></script>|
+     <!-- Die Bruecke zwischen Nutzungs-Slug, Anzeigename und Showdown-Name.|
+          Muss VOR allem stehen, was ein gebautes Team weiterverarbeitet. -->|
+-    <script src="js/champions-set.js?v=202610061852" defer></script>|
+-    <script src="js/champions-names.js?v=202610061852" defer></script>|
+-    <script src="js/app-side-quest-builder.js?v=202610061852" defer></script>|
+-    <script src="js/app-side-quest-status.js?v=202610061852" defer></script>|
+-    <script src="js/app-side-quest-resources.js?v=202610061852" defer></script>|
+-    <script src="js/champions-damage.js?v=202610061852" defer></script>|
+-    <script src="js/champions-schwaechen.js?v=202610061852" defer></script>|
+-    <script src="js/app-side-quest-usage.js?v=202610061852" defer></script>|
+-    <script src="js/app-side-quest-matchups.js?v=202610061852" defer></script>|
++    <script src="js/champions-set.js?v=202610061959" defer></script>|
++    <script src="js/champions-names.js?v=202610061959" defer></script>|
++    <script src="js/app-side-quest-builder.js?v=202610061959" defer></script>|
++    <script src="js/app-side-quest-status.js?v=202610061959" defer></script>|
++    <script src="js/app-side-quest-resources.js?v=202610061959" defer></script>|
++    <script src="js/champions-damage.js?v=202610061959" defer></script>|
++    <script src="js/champions-schwaechen.js?v=202610061959" defer></script>|
++    <script src="js/app-side-quest-usage.js?v=202610061959" defer></script>|
++    <script src="js/app-side-quest-matchups.js?v=202610061959" defer></script>|
+     <!-- Kennzeichnung "Kartentext auf Englisch". MUSS vor jeder Datei stehen,|
+@@ -4283,7 +4283,7 @@|
+          window.KartentextHinweis ohne Rueckfall auf. -->|
+-    <script src="js/kartentext-hinweis.js?v=202610061852" defer></script>|
+-    <script src="js/app-profile-deck-builder.js?v=202610061852" defer></script>|
+-    <script src="js/deck-builder-consistency.js?v=202610061852" defer></script>|
+-    <script src="js/current-meta-quickref.js?v=202610061852" defer></script>|
+-    <script src="js/ds-nav.js?v=202610061852" defer></script>|
++    <script src="js/kartentext-hinweis.js?v=202610061959" defer></script>|
++    <script src="js/app-profile-deck-builder.js?v=202610061959" defer></script>|
++    <script src="js/deck-builder-consistency.js?v=202610061959" defer></script>|
++    <script src="js/current-meta-quickref.js?v=202610061959" defer></script>|
++    <script src="js/ds-nav.js?v=202610061959" defer></script>|
+     <!-- Braucht getArchetypeShares() aus app-archetype-card.js und das|
+@@ -4293,6 +4293,6 @@|
+          ds-sections.js stehen: das meldet sich dort in start() an. -->|
+-    <script src="js/ds-abschnitt-info.js?v=202610061852" defer></script>|
+-    <script src="js/ds-sections.js?v=202610061852" defer></script>|
+-    <script src="js/ds-filter.js?v=202610061852" defer></script>|
+-    <script src="js/ds-share.js?v=202610061852" defer></script>|
++    <script src="js/ds-abschnitt-info.js?v=202610061959" defer></script>|
++    <script src="js/ds-sections.js?v=202610061959" defer></script>|
++    <script src="js/ds-filter.js?v=202610061959" defer></script>|
++    <script src="js/ds-share.js?v=202610061959" defer></script>|
+     <!-- Die Uebergabe an posts/index.html (25.09.2026). Klein und ohne|
+@@ -4301,5 +4301,5 @@|
+          Adresse stuende in jedem Verlauf. -->|
+-    <script src="js/ds-post-uebergabe.js?v=202610061852" defer></script>|
+-    <script src="js/ds-tutorial.js?v=202610061852" defer></script>|
+-    <script src="js/ds-masterclass.js?v=202610061852" defer></script>|
++    <script src="js/ds-post-uebergabe.js?v=202610061959" defer></script>|
++    <script src="js/ds-tutorial.js?v=202610061959" defer></script>|
++    <script src="js/ds-masterclass.js?v=202610061959" defer></script>|
+ |
+diff --git a/js/app-cards-db.js b/js/app-cards-db.js|
+index a1f929b0..589c2c57 100644|
+--- a/js/app-cards-db.js|
++++ b/js/app-cards-db.js|
+@@ -3081,3 +3081,3 @@|
+                 // Scroll to top of cards section for filter/pagination changes.|
+-                document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });|
++                document.getElementById('cards').scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' });|
+             }|
+diff --git a/js/app-city-league.js b/js/app-city-league.js|
+index 5cd00565..0fa45821 100644|
+--- a/js/app-city-league.js|
++++ b/js/app-city-league.js|
+@@ -4139,3 +4139,3 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {|
+                         <div class="city-league-card-image-container">|
+-                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">|
++                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" tabindex="0" role="button" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">|
+                             ${deckCount > 0 ? `<div class="city-league-card-deck-count">${deckCount}</div>` : ''}|
+@@ -4512,3 +4512,3 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {|
+                         <div class="card-image-container city-league-card-image-container">|
+-                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">|
++                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" tabindex="0" role="button" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">|
+                             ${usageBarHtml}|
+diff --git a/js/app-core.js b/js/app-core.js|
+index a9e966e3..3ae0db92 100644|
+--- a/js/app-core.js|
++++ b/js/app-core.js|
+@@ -1962,3 +1962,3 @@ const BASE_PATH = './data/';|
+ |
+-            window.scrollTo({ top: 0, behavior: 'smooth' });|
++            window.scrollTo({ top: 0, behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });|
+         };|
+@@ -2009,3 +2009,3 @@ const BASE_PATH = './data/';|
+ |
+-            window.scrollTo({ top: 0, behavior: 'smooth' });|
++            window.scrollTo({ top: 0, behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });|
+         };|
+@@ -2280,3 +2280,3 @@ const BASE_PATH = './data/';|
+             setTimeout(checkAndSelect, 100);|
+-            window.scrollTo({ top: 0, behavior: 'smooth' });|
++            window.scrollTo({ top: 0, behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });|
+         };|
+diff --git a/js/app-current-meta-analysis.js b/js/app-current-meta-analysis.js|
+index ca3cd6bb..2eba7b21 100644|
+--- a/js/app-current-meta-analysis.js|
++++ b/js/app-current-meta-analysis.js|
+@@ -5416,3 +5416,3 @@|
+                             <div class="card-image-container city-league-card-image-container">|
+-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">|
++                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" tabindex="0" role="button" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">|
+                                 ${usageBarHtml}|
+diff --git a/js/app-meta-call.js b/js/app-meta-call.js|
+index 9120507e..06dcb19f 100644|
+--- a/js/app-meta-call.js|
++++ b/js/app-meta-call.js|
+@@ -12598,3 +12598,3 @@ window.MetaCall = (function () {|
+       if (el && typeof el.scrollIntoView === 'function') {|
+-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });|
++        el.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' });|
+       }|
+diff --git a/js/app-past-meta.js b/js/app-past-meta.js|
+index 3b02d0d4..1a2bef52 100644|
+--- a/js/app-past-meta.js|
++++ b/js/app-past-meta.js|
+@@ -2000,3 +2000,3 @@|
+                             <div class="card-image-container city-league-card-image-container">|
+-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">|
++                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" tabindex="0" role="button" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">|
+                                 <div class="city-league-card-badge city-league-card-badge-max"${|
+diff --git a/js/app-quellen.js b/js/app-quellen.js|
+index f9a322e6..a6ba877a 100644|
+--- a/js/app-quellen.js|
++++ b/js/app-quellen.js|
+@@ -527,3 +527,3 @@|
+         el.open = true;|
+-        try { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) {|
++        try { el.scrollIntoView({ block: 'start', behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') }); } catch (e) {|
+             el.scrollIntoView();|
+diff --git a/js/app-side-quest-resources.js b/js/app-side-quest-resources.js|
+index 952354d5..048a43c4 100644|
+--- a/js/app-side-quest-resources.js|
++++ b/js/app-side-quest-resources.js|
+@@ -614,3 +614,3 @@|
+                     const ziel = document.getElementById('szStufenTitel');|
+-                    if (ziel) ziel.scrollIntoView({ block: 'start', behavior: 'smooth' });|
++                    if (ziel) ziel.scrollIntoView({ block: 'start', behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });|
+                 }, 120);|
+diff --git a/js/app-utils.js b/js/app-utils.js|
+index ca70c62c..49eb7df6 100644|
+--- a/js/app-utils.js|
++++ b/js/app-utils.js|
+@@ -17,2 +17,14 @@|
+ |
++// ============================================================================|
++// UI-120 (M3-13): Scrollen respektiert „Bewegung reduzieren“. Ein ausdrueckliches|
++// behavior:'smooth' im Aufruf schlaegt die CSS-Regel in styles.css — darum fragt|
++// jeder Aufruf hier nach.|
++// ============================================================================|
++function scrollVerhalten() {|
++    try {|
++        return (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth';|
++    } catch (e) { return 'smooth'; }|
++}|
++window.scrollVerhalten = scrollVerhalten;|
++|
+ // ============================================================================|
+diff --git a/js/current-meta-quickref.js b/js/current-meta-quickref.js|
+index ec68f28c..14798800 100644|
+--- a/js/current-meta-quickref.js|
++++ b/js/current-meta-quickref.js|
+@@ -499,2 +499,51 @@|
+ |
++  /* UI-95 (06.10.2026): die Referenz-Listen liessen sich nur ansehen.|
++     Jetzt „Liste kopieren“ im PTCGL-Format — Abschnitt nach Kartenart|
++     (_typeRank, Join ueber Set + Nummer), Kopfzeilen zaehlen KARTEN, nicht|
++     Zeilen (vgl. exportToPTCGL). Unbekannte Art steht bei den Pokemon, wie|
++     im Export des Deckbaus. */|
++  function _refAlsPtcgl(cards) {|
++    const teile = { p: [], t: [], e: [] };|
++    const summe = { p: 0, t: 0, e: 0 };|
++    (cards || []).slice().sort((a, b) => {|
++      const tr = _typeRank(a) - _typeRank(b);|
++      return tr !== 0 ? tr : (b.count || 0) - (a.count || 0);|
++    }).forEach(c => {|
++      const n = c.count || 0;|
++      if (n <= 0) return;|
++      const rang = _typeRank(c);|
++      const k = (rang >= 2 && rang <= 5) ? 't' : (rang === 6 || rang === 7) ? 'e' : 'p';|
++      teile[k].push(`${n} ${c.name} ${String(c.set_code || '').toUpperCase()} ${c.set_number || ''}`.trim());|
++      summe[k] += n;|
++    });|
++    const total = summe.p + summe.t + summe.e;|
++    return `Pokémon: ${summe.p}\n${teile.p.join('\n')}\n\nTrainer: ${summe.t}\n${teile.t.join('\n')}`|
++      + `\n\nEnergy: ${summe.e}\n${teile.e.join('\n')}\n\nTotal Cards: ${total}`;|
++  }|
++|
++  function _kopierKnopf(kind) {|
++    const de = (typeof getLang === 'function') ? getLang() === 'de' : true;|
++    return `<div class="cm-ref-aktionen"><button type="button" class="btn btn-secondary btn-sm cm-ref-kopieren" data-ref="${kind}">${de ? 'Liste kopieren (PTCGL)' : 'Copy list (PTCGL)'}</button></div>`;|
++  }|
++|
++  function _refKopieren(kind) {|
++    const ref = kind === 'major' ? global.currentMetaBestMajor : global.currentMetaBestOnline;|
++    if (!ref || !ref.cards) return;|
++    const text = _refAlsPtcgl(ref.cards);|
++    const de = (typeof getLang === 'function') ? getLang() === 'de' : true;|
++    const n = (ref.cards || []).reduce((s, c) => s + (c.count || 0), 0);|
++    const ok = () => { if (typeof global.showDeckShareToast === 'function') global.showDeckShareToast(de ? `Liste kopiert (${n} Karten).` : `List copied (${n} cards).`); };|
++    const zeigen = () => { if (typeof global.showInputModal === 'function') global.showInputModal({ title: 'PTCGL', message: de ? 'Liste zum Kopieren:' : 'List to copy:', defaultValue: text, readonly: true, textarea: true }); };|
++    try {|
++      navigator.clipboard.writeText(text).then(ok).catch(zeigen);|
++    } catch (e) { zeigen(); }|
++  }|
++|
++  if (typeof document !== 'undefined') {|
++    document.addEventListener('click', function (ev) {|
++      const b = ev.target && ev.target.closest && ev.target.closest('.cm-ref-kopieren');|
++      if (b) _refKopieren(b.dataset.ref);|
++    });|
++  }|
++|
+   function _renderCardGrid(cards) {|
+@@ -589,3 +638,3 @@|
+       global.currentMetaBestMajor = majorRes.value;|
+-      majorBody.innerHTML = _renderRefHeader(majorRes.value, 'major') + _renderCardGrid(majorRes.value.cards);|
++      majorBody.innerHTML = _renderRefHeader(majorRes.value, 'major') + _renderCardGrid(majorRes.value.cards) + _kopierKnopf('major');|
+     } else {|
+@@ -607,3 +656,3 @@|
+       global.currentMetaBestOnline = onlineRes.value;|
+-      onlineBody.innerHTML = _renderRefHeader(onlineRes.value, 'online') + _renderCardGrid(onlineRes.value.cards);|
++      onlineBody.innerHTML = _renderRefHeader(onlineRes.value, 'online') + _renderCardGrid(onlineRes.value.cards) + _kopierKnopf('online');|
+     } else {|
+@@ -727,3 +776,3 @@|
+       return `|
+-        <div class="past-meta-best-header" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">|
++        <div class="past-meta-best-header" style="background: var(--tint-info);">|
+           <div class="past-meta-best-headline">|
+@@ -800,3 +849,3 @@|
+     return `|
+-      <div class="past-meta-best-header" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">|
++      <div class="past-meta-best-header" style="background: var(--tint-info);">|
+         <div class="past-meta-best-headline">|
+@@ -1046,2 +1095,3 @@|
+     _renderRefHeader,|
++    _refAlsPtcgl,|
+     _findSynthesizedOnlineBuild,|
+diff --git a/js/custom-binder.js b/js/custom-binder.js|
+index 74b48876..47022842 100644|
+--- a/js/custom-binder.js|
++++ b/js/custom-binder.js|
+@@ -537,3 +537,3 @@|
+         const el = document.getElementById('cbAbgleich');|
+-        if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' });|
++        if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });|
+     }|
+diff --git a/js/ds-masterclass.js b/js/ds-masterclass.js|
+index 3aae161b..44f831b1 100644|
+--- a/js/ds-masterclass.js|
++++ b/js/ds-masterclass.js|
+@@ -309,3 +309,3 @@|
+             verdrahte(buehne, g);|
+-            try { buehne.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }|
++            try { buehne.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' }); } catch (e) { }|
+         }).catch(function (err) {|
+diff --git a/js/firebase-collection.js b/js/firebase-collection.js|
+index 527983e7..beedc522 100644|
+--- a/js/firebase-collection.js|
++++ b/js/firebase-collection.js|
+@@ -3848,3 +3848,3 @@ function switchProfileTab(tabName) {|
+       if (!alreadyVisible) {|
+-        nav.scrollIntoView({ behavior: 'smooth', block: 'start' });|
++        nav.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' });|
+       }|
+diff --git a/js/inline-init.js b/js/inline-init.js|
+index 96696775..11472313 100644|
+--- a/js/inline-init.js|
++++ b/js/inline-init.js|
+@@ -1047,3 +1047,3 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}|
+                 }|
+-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });|
++                target.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'center' });|
+                 // Flash highlight — 3 second amber ring|
+diff --git a/scripts/messe_ui120.js b/scripts/messe_ui120.js|
+new file mode 100644|
+index 00000000..14e5467a|
+--- /dev/null|
++++ b/scripts/messe_ui120.js|
+@@ -0,0 +1,39 @@|
++// UI-120 (06.10.2026): Handy-Messung 390 px gegen einen lokal ausgelieferten Stand.|
++// Aufruf: node scripts/messe_ui120.js http://127.0.0.1:8104  (Playwright noetig)|
++// Zaehlt je Ansicht: sichtbare Texte < 11 px (nach Klasse gruppiert), Bedienziele|
++// < 24 px, Querueberlauf. Ausgabe JSON.|
++const { chromium } = require('playwright');|
++const BASIS = process.argv[2] || 'http://127.0.0.1:8104';|
++const ANSICHTEN = ['current-meta', 'city-league', 'past-meta', 'meta-call', 'cards', 'side-quest', 'current-analysis'];|
++(async () => {|
++    const b = await chromium.launch();|
++    const c = await b.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });|
++    await c.addInitScript(() => { try { localStorage.setItem('app_lang', 'de'); } catch (e) {} });|
++    const p = await c.newPage();|
++    const erg = {};|
++    for (const a of ANSICHTEN) {|
++        await p.goto(BASIS + '/index.html#' + a);|
++        await p.waitForTimeout(9000);|
++        erg[a] = await p.evaluate(() => {|
++            const tab = document.querySelector('.tab-content.active') || document.body;|
++            const klein = {}, ziele = {};|
++            const sichtbar = el => { const r = el.getBoundingClientRect(); const s = getComputedStyle(el); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && el.offsetParent !== null; };|
++            const name = el => el.tagName.toLowerCase() + (el.classList[0] ? '.' + el.classList[0] : '');|
++            tab.querySelectorAll('*').forEach(el => {|
++                if (!sichtbar(el)) return;|
++                const eigenText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());|
++                if (eigenText) {|
++                    const fs = parseFloat(getComputedStyle(el).fontSize);|
++                    if (fs < 10.95) { const k = name(el) + ' ' + fs.toFixed(2); klein[k] = (klein[k] || 0) + 1; }|
++                }|
++                if (el.matches('button, a[href], input, select, [role=button], [tabindex="0"]')) {|
++                    const r = el.getBoundingClientRect();|
++                    if (r.width < 24 || r.height < 24) { const k = name(el); ziele[k] = (ziele[k] || 0) + 1; }|
++                }|
++            });|
++            return { quer: document.documentElement.scrollWidth > innerWidth + 1, klein, ziele };|
++        });|
++    }|
++    console.log(JSON.stringify(erg, null, 1));|
++    await b.close();|
++})();|
+diff --git a/service-worker.js b/service-worker.js|
+index 3cbe246a..a67ffdc5 100644|
+--- a/service-worker.js|
++++ b/service-worker.js|
+@@ -1,3 +1,3 @@|
+ // Service Worker for Pokemon TCG Analysis PWA|
+-// v202610061852|
++// v202610061959|
+ // Strategies:|
+@@ -8,3 +8,3 @@|
+ |
+-const CACHE_NAME = 'tcg-analysis-v202610061852';|
++const CACHE_NAME = 'tcg-analysis-v202610061959';|

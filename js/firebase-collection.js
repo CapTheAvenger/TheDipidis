@@ -97,7 +97,14 @@ function dsDeckMehrToggle(el) {
     el.classList.remove('deck-mehr--oben');
     const r = menue.getBoundingClientRect();
     const oben = el.getBoundingClientRect().top;
-    if (r.bottom > window.innerHeight - 8 && oben > r.height + 8) el.classList.add('deck-mehr--oben');
+    /* Gescrollt wird im BODY (overflow: hidden auto), nicht im Fenster: dessen
+       sichtbare Unterkante ist die Grenze (live 06.10.: Fenster 1588, BODY 1268). */
+    let grenze = window.innerHeight;
+    const sc = document.body;
+    if (sc && sc.clientHeight && typeof getComputedStyle === 'function' && /auto|scroll/.test(getComputedStyle(sc).overflowY)) {
+      grenze = Math.min(grenze, sc.getBoundingClientRect().top + sc.clientHeight);
+    }
+    if (r.bottom > grenze - 8 && oben > r.height + 8) el.classList.add('deck-mehr--oben');
   }
   document.querySelectorAll('details.deck-mehr[open]').forEach(d => { if (d !== el) d.open = false; });
 }

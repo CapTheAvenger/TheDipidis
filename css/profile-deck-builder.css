@@ -885,3 +885,9 @@
     border-color: var(--pokemon-blue);
     color: #fff;
 }
+/* Live 06.10.2026, 390 px: die Trefferkarten sind dort ~97 px breit — von
+   vier Knoepfen waren nur „1 2“ zu sehen. Am Handy 2 × 2. */
+.pdb-menge-btn { min-width: 0; padding: 0; }
+@media (max-width: 640px) {
+    .pdb-menge { grid-template-columns: repeat(2, 1fr); }
+}

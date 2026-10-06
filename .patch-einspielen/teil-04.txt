@@ -1,0 +1,292 @@
++    assert.match(t.menue, /id="langToggleBtn"/, 'Sprache gehoert ins Menue');|
++    assert.doesNotMatch(t.ausserMenue, /id="themeToggleBtn"|id="langToggleBtn"/);|
++    assert.doesNotMatch(t.kopf, /class="header-subtitle"/, 'kein Untertitel');|
++    assert.match(t.kopf, /id="current-tab-title" class="current-tab-badge" hidden/, 'keine sichtbare Pille');|
++    assert.match(t.kopf, /class="kopf-bluete"/, 'kleine Kirschbluete neben dem Namen');|
++}|
++|
++describe('V2-5 Kopf: ein Menue, sechs Kurzwahlknoepfe, Schalter im Menue', () => {|
++    it('index.html haelt die Festlegung', () => pruefe(HTML));|
++    it('VERFAELSCHUNG: ein zweiter Oeffner neben dem Pokeball faellt auf', () => {|
++        const kaputt = HTML.replace('<div id="mainMenuDropdown"', '<button class="x" onclick="toggleMainMenu()">☰</button><div id="mainMenuDropdown"');|
++        assert.notEqual(kaputt, HTML);|
++        assert.throws(() => pruefe(kaputt), /genau EIN Menue-Oeffner/);|
++    });|
++    it('VERFAELSCHUNG: Sprachknopf zurueck im Kopf faellt auf', () => {|
++        const ohneLang = HTML.replace(/<button id="langToggleBtn"[^]*?<\/button>/, '');|
++        const kaputt = ohneLang.replace('<button id="battleJournalFab"', '<button id="langToggleBtn">EN</button><button id="battleJournalFab"');|
++        assert.notEqual(kaputt, HTML);|
++        assert.throws(() => pruefe(kaputt));|
++    });|
++    it('CSS: Beschriftungen der Kurzwahl nur fuer Vorleser, Grossbluete aus', () => {|
++        const css = lies('css', 'cards-header.css').replace(/\/\*[\s\S]*?\*\//g, '');|
++        assert.match(css, /#main-content > \.cards-header \.header-icon-label \{[^}]*clip: rect\(0, 0, 0, 0\)/);|
++        assert.match(css, /#main-content > \.cards-header::after \{ display: none; \}/);|
++    });|
++});|
+diff --git a/tests/unit/test-menue-hoehe.js b/tests/unit/test-menue-hoehe.js|
+index 8d092946..5a209f34 100644|
+--- a/tests/unit/test-menue-hoehe.js|
++++ b/tests/unit/test-menue-hoehe.js|
+@@ -173,3 +173,4 @@ describe('Pokéball-Menü — nachrechnen, wenn sich der Inhalt ändert', () =>|
+         // aria-expanded folgt (vorher blieb es auf "true" stehen).|
+-        assert.match(JS, /!_beschriftung\) \{\s*(\/\/[^\n]*\n\s*)*toggleMainMenu\(\);/,|
++        // V2-5 (06.10.2026): ohne zweiten Oeffner endet die Bedingung am Ausloeser.|
++        assert.match(JS, /!trigger\.contains\(e\.target\)\) \{\s*(\/\/[^\n]*\n\s*)*toggleMainMenu\(\);/,|
+             'ein Klick neben das Menü schließt es auch — dort lief der Beobachter weiter');|
+diff --git a/tests/unit/test-r7-politur.js b/tests/unit/test-r7-politur.js|
+index 47fdef2e..2542fa61 100644|
+--- a/tests/unit/test-r7-politur.js|
++++ b/tests/unit/test-r7-politur.js|
+@@ -166,3 +166,18 @@ describe('FE-46: Testhand wie am Tisch', () => {|
+             _shuffleFisherYates = () => {}; drawNewHand();`, s.ctx);|
+-        assert.equal(s.els.simulatorMulligan.textContent, 'MULLIGAN PREIS');|
++        /* FE-53 (06.10.2026): bei Mulligan liegen noch KEINE Preise beiseite —|
++           die kommen erst nach dem Mulligan. 60 - 7 = 53 im Deck. */|
++        assert.equal(s.els.simulatorMulligan.textContent, 'MULLIGAN ');|
++        assert.equal(s.els.simulatorDeckCount.innerText, 53);|
++    });|
++    it('FE-53 VERFAELSCHUNG: ohne Mulligan-Bedingung laegen die Preise schon beiseite', () => {|
++        const src = roh('js/draw-simulator.js');|
++        const kaputt = src.replace("&& _simMulliganLage(_simulatorHand) !== 'mulligan'", '');|
++        assert.notEqual(kaputt, src);|
++        const els = { simulatorHandGrid: { innerHTML: '', appendChild() {}, parentNode: null }, simulatorDeckCount: {}, simulatorMulligan: { textContent: '' } };|
++        const ctx = { console, Math, document: { getElementById: (id) => els[id] || null, createElement: () => ({ style: {} }) },|
++            t: (k) => (k === 'draw.mulliganHinweis' ? 'MULLIGAN' : 'PREIS'), showToast() {} };|
++        ctx.window = ctx; vm.createContext(ctx); vm.runInContext(kaputt, ctx);|
++        vm.runInContext(`_simulatorDeck = Array.from({ length: 60 }, (_, i) => ({ name: 'K' + i, basis: false }));|
++            _shuffleFisherYates = () => {}; drawNewHand();`, ctx);|
++        assert.equal(els.simulatorDeckCount.innerText, 47);|
+     });|
+diff --git a/tests/unit/test-ui108-menue-tastatur.js b/tests/unit/test-ui108-menue-tastatur.js|
+index 071d0c87..5d5ee7fd 100644|
+--- a/tests/unit/test-ui108-menue-tastatur.js|
++++ b/tests/unit/test-ui108-menue-tastatur.js|
+@@ -87,3 +87,5 @@ describe('UI-108: Hauptmenue per Tastatur', () => {|
+         const q = L.lies('js', 'inline-init.js').replace(/\/\*[\s\S]*?\*\//g, ' ');|
+-        const i = q.indexOf("closest('.menu-label-btn')");|
++        /* V2-5 (06.10.2026): ohne zweiten Oeffner beginnt der Block an der Bedingung. */|
++        const i = q.indexOf("if (!menu.contains(e.target) && !trigger.contains(e.target))");|
++        assert.ok(i > 0, 'Klick-daneben-Bedingung nicht gefunden');|
+         const block = q.slice(i, i + 400).split('\n').map(z => z.replace(/\/\/.*$/, '')).join('\n');|
+diff --git a/tests/unit/test-ui117-filter-nach-wahl.js b/tests/unit/test-ui117-filter-nach-wahl.js|
+new file mode 100644|
+index 00000000..7a225bc1|
+--- /dev/null|
++++ b/tests/unit/test-ui117-filter-nach-wahl.js|
+@@ -0,0 +1,60 @@|
++'use strict';|
++/*|
++ * UI-117 (Abfragerunde 06.10.2026, „Filter erst nach der Wahl"): vor der|
++ * Deckwahl zeigt die Deck-Analyse nur die Archetyp-Wahl. Die Funktion|
++ * loadCurrentMetaDeckData setzt das Merkmal — der Abschnitt wird|
++ * ausgeschnitten und AUSGEFUEHRT; Markup und CSS werden gelesen.|
++ */|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const { lies } = require('./lib-dom-sandkasten.js');|
++|
++const ohne = (q) => q.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '');|
++const HTML = ohne(lies('index.html'));|
++const CSS = ohne(lies('css', 'meta-card-analysis.css'));|
++const JS = lies('js', 'app-current-meta-analysis.js');|
++|
++function merkmalNachLaden(src, archetyp) {|
++    const a = src.indexOf("const _tab = document.getElementById('current-analysis');");|
++    const b = src.indexOf('}\n', src.indexOf("else _tab.removeAttribute('data-cm-gewaehlt');", a)) + 2;|
++    const attr = {};|
++    const tab = { setAttribute: (k) => { attr[k] = true; }, removeAttribute: (k) => { delete attr[k]; } };|
++    new Function('document', 'archetype', src.slice(a, b))({ getElementById: () => tab }, archetyp);|
++    return !!attr['data-cm-gewaehlt'];|
++}|
++|
++describe('UI-117: Filter erst nach der Deckwahl', () => {|
++    it('fuenf Bedienbloecke tragen cm-nach-wahl', () => {|
++        const a = HTML.indexOf('<div id="current-analysis"'), b = HTML.indexOf('id="currentAnalysisEmptyState"', a);|
++        assert.equal((HTML.slice(a, b).match(/cm-nach-wahl/g) || []).length, 5);|
++    });|
++    it('CSS blendet sie ohne Wahl aus', () => {|
++        assert.match(CSS, /#current-analysis:not\(\[data-cm-gewaehlt\]\) \.cm-nach-wahl \{ display: none; \}/);|
++    });|
++    it('Laden mit Deck setzt das Merkmal, ohne Deck nicht', () => {|
++        assert.equal(merkmalNachLaden(JS, 'Dragapult'), true);|
++        assert.equal(merkmalNachLaden(JS, ''), false);|
++    });|
++    it('VERFAELSCHUNG: ohne setAttribute blieben die Filter nach der Wahl versteckt', () => {|
++        const kaputt = JS.replace("if (archetype) _tab.setAttribute('data-cm-gewaehlt', '');", 'if (archetype) {}');|
++        assert.notEqual(kaputt, JS);|
++        assert.equal(merkmalNachLaden(kaputt, 'Dragapult'), false);|
++    });|
++});|
++|
++describe('UI-117: PTCGL-Import neben Max Consistency', () => {|
++    function pruefe(html) {|
++        for (const q of ['cityLeague', 'currentMeta', 'pastMeta']) {|
++            const cta = html.indexOf("autoCompleteConsistency('" + q + "', 'min')\" title=");|
++            const imp = html.indexOf("importFromPTCGL('" + q + "')");|
++            assert.ok(cta > 0 && imp > cta, q + ': Import fehlt hinter dem Hauptknopf');|
++            const zwischen = html.slice(cta, imp);|
++            assert.equal((zwischen.match(/<button/g) || []).length, 1, q + ': Import steht nicht direkt daneben');|
++            assert.equal(html.split("importFromPTCGL('" + q + "')").length - 1, 1, q + ': genau EIN Import-Knopf');|
++        }|
++    }|
++    it('je Quelle direkt hinter „Max Consistency“, nur einmal', () => pruefe(HTML));|
++    it('VERFAELSCHUNG: ein zweiter Import-Knopf faellt auf', () => {|
++        assert.throws(() => pruefe(HTML + "<button onclick=\"importFromPTCGL('pastMeta')\">"));|
++    });|
++});|
+diff --git a/tests/unit/test-ui74-deck-uebernehmen.js b/tests/unit/test-ui74-deck-uebernehmen.js|
+index 1c927e1a..f1fb89cb 100644|
+--- a/tests/unit/test-ui74-deck-uebernehmen.js|
++++ b/tests/unit/test-ui74-deck-uebernehmen.js|
+@@ -52,3 +52,3 @@ describe('UI-74: Deck direkt aus der Analyse speichern', () => {|
+     assert.ok(knopf > sel && knopf - sel < 600, 'Knopf steht nicht direkt unter der Auswahl');|
+-    assert.match(HTML, /onclick="switchProfileTab\('deckbuilder'\)"[^>]*data-i18n="profile\.newDeck"/);|
++    assert.match(HTML, /onclick="[^"]*(ProfileDeckBuilder\.neuesDeck\(\)|switchProfileTab\('deckbuilder'\))[^"]*"[^>]*data-i18n="profile\.newDeck"/ /* UI-97 (06.10.2026): startet leer */);|
+   });|
+diff --git a/tests/unit/test-ui97-neues-deck-menge.js b/tests/unit/test-ui97-neues-deck-menge.js|
+new file mode 100644|
+index 00000000..a073281c|
+--- /dev/null|
++++ b/tests/unit/test-ui97-neues-deck-menge.js|
+@@ -0,0 +1,79 @@|
++/**|
++ * UI-97 (Abfragerunde 06.10.2026, „Beides bauen"): „+ Neues Deck“ startet|
++ * leer — der Entwurf bleibt geparkt und kommt mit einem Klick zurueck —,|
++ * und jede Trefferkarte hat eine Mengenwahl 1–4. Ausgefuehrt im Modul mit|
++ * einem echten Schluessel-Wert-Speicher.|
++ */|
++'use strict';|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const vm = require('node:vm');|
++const SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'app-profile-deck-builder.js'), 'utf-8');|
++const HTML = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf-8').replace(/<!--[\s\S]*?-->/g, '');|
++|
++function laden(src) {|
++  const speicher = {};|
++  const prev = { window: global.window, document: global.document, localStorage: global.localStorage, fetch: global.fetch };|
++  global.window = {};|
++  global.document = { addEventListener: () => {}, getElementById: () => null, querySelectorAll: () => [], dispatchEvent: () => {} };|
++  global.localStorage = { getItem: (k) => (k in speicher ? speicher[k] : null), setItem: (k, v) => { speicher[k] = String(v); }, removeItem: (k) => { delete speicher[k]; } };|
++  global.fetch = async () => ({ ok: false });|
++  let P;|
++  try { vm.runInThisContext(src); P = global.window.ProfileDeckBuilder; } finally {|
++    global.fetch = prev.fetch; // window bleibt: das Modul liest es beim Aufruf|
++  }|
++  return { P, speicher };|
++}|
++const dreepy = { name_en: 'Dreepy', set: 'TWM', number: '128', type: 'Basic', energy_type: 'Dragon' };|
++const boss = { name_en: "Boss's Orders", set: 'MEG', number: '114', type: 'Supporter' };|
++|
++describe('UI-97: Neues Deck leer, Entwurf bleibt', () => {|
++  it('neuesDeck parkt den Entwurf und startet leer; Entwurf kommt zurueck', () => {|
++    const { P, speicher } = laden(SRC);|
++    P.addCopies(dreepy, 4);|
++    P.neuesDeck();|
++    assert.equal(P.countCards(P.getDeck()), 0, 'neues Deck ist leer');|
++    const geparkt = JSON.parse(speicher['dipidis.profileDeckBuilder.entwurf.v1']);|
++    assert.equal(P.countCards(geparkt), 4, 'Entwurf ist gespeichert');|
++    P.setCount(boss, 2);|
++    assert.equal(P.entwurfOeffnen(), true);|
++    assert.equal(P.countCards(P.getDeck()), 4, 'Entwurf wieder offen');|
++    assert.equal(P.countCards(JSON.parse(speicher['dipidis.profileDeckBuilder.entwurf.v1'])), 2,|
++      'das zwischendurch gebaute Deck ist seinerseits geparkt, nichts geht verloren');|
++  });|
++  it('leeres Deck: neuesDeck parkt nichts', () => {|
++    const { P, speicher } = laden(SRC);|
++    P.neuesDeck();|
++    assert.equal(speicher['dipidis.profileDeckBuilder.entwurf.v1'], undefined);|
++  });|
++  it('Knopf „+ Neues Deck“ ruft neuesDeck', () => {|
++    assert.match(HTML, /id="btn-neues-deck"/);|
++    assert.match(HTML, /ProfileDeckBuilder\.neuesDeck\(\)[^>]*id="btn-neues-deck"/);|
++  });|
++  it('VERFAELSCHUNG: ohne Parken waere der Entwurf weg', () => {|
++    const kaputt = SRC.replace("try { localStorage.setItem(ENTWURF_KEY, JSON.stringify(deck)); }", 'try { }');|
++    assert.notEqual(kaputt, SRC);|
++    const { P, speicher } = laden(kaputt);|
++    P.addCopies(dreepy, 4); P.neuesDeck();|
++    assert.throws(() => assert.ok(speicher['dipidis.profileDeckBuilder.entwurf.v1']));|
++  });|
++});|
++|
++describe('UI-97: Mengenwahl 1–4', () => {|
++  it('setzt die Anzahl direkt, nach oben und unten', () => {|
++    const { P } = laden(SRC);|
++    assert.equal(P.setCount(boss, 3), 3);|
++    assert.equal(P.countOf(boss), 3);|
++    assert.equal(P.setCount(boss, 1), 1);|
++    assert.equal(P.countOf(boss), 1);|
++    assert.equal(P.setCount(boss, 9), 4, 'nie ueber 4');|
++  });|
++  it('VERFAELSCHUNG: ohne Obergrenze waeren 9 Kopien moeglich', () => {|
++    const kaputt = SRC.replace('Math.min(MAX_PER_CARD, Math.floor(Number(n) || 0))', 'Math.floor(Number(n) || 0)');|
++    assert.notEqual(kaputt, SRC);|
++    const { P } = laden(kaputt);|
++    assert.throws(() => assert.equal(P.setCount(boss, 9), 4));|
++  });|
++});|
+diff --git a/tests/unit/test-ui98-archetyp-suche-deutsch.js b/tests/unit/test-ui98-archetyp-suche-deutsch.js|
+new file mode 100644|
+index 00000000..622c052d|
+--- /dev/null|
++++ b/tests/unit/test-ui98-archetyp-suche-deutsch.js|
+@@ -0,0 +1,42 @@|
++'use strict';|
++/*|
++ * UI-98 (N2-07): die Archetyp-Suche findet deutsche Namen („glurak"), die|
++ * Gruppen heissen deutsch. archetypDeAlias wird AUSGEFUEHRT — mit der|
++ * Auszug der Artenliste aus data/champions_names_de.json.|
++ */|
++const { describe, it } = require('node:test');|
++const assert = require('node:assert/strict');|
++const fs = require('node:fs');|
++const path = require('node:path');|
++const W = path.join(__dirname, '..', '..');|
++const CL = fs.readFileSync(path.join(W, 'js', 'app-city-league.js'), 'utf8');|
++const CMA = fs.readFileSync(path.join(W, 'js', 'app-current-meta-analysis.js'), 'utf8').replace(/\/\/.*$/gm, '');|
++/* Ein Auszug der Artenliste (data/champions_names_de.json, Abschnitt pokemon),|
++   klein geschrieben wie im Modul — fest im Test, damit er keine Daten liest. */|
++const ARTEN = { charizard: 'Glurak', pidgeot: 'Tauboss', 'raging bolt': 'Furienblitz', ogerpon: 'Ogerpon', excadrill: 'Stalobor', raging: 'XX' };|
++|
++function laden(src) {|
++    const a = src.indexOf('function archetypDeAlias(');|
++    const b = src.indexOf('function archetypTrifft(', a);|
++    return Function(src.slice(a, b) + '\nreturn archetypDeAlias;')();|
++}|
++|
++describe('UI-98: Archetyp-Suche mit deutschen Namen', () => {|
++    const f = laden(CL);|
++    it('Charizard ex → glurak, zweiwortige Arten zuerst', () => {|
++        assert.match(f('Charizard Pidgeot', ARTEN), /glurak/);|
++        assert.match(f('Raging Bolt Ogerpon', ARTEN), new RegExp(ARTEN['raging bolt'].toLowerCase()));|
++        assert.match(f('Mega Excadrill', ARTEN), new RegExp(ARTEN['excadrill'].toLowerCase()));|
++    });|
++    it('die Suche nutzt den Alias in beiden Listenarten', () => {|
++        assert.equal((CL.match(/_trifft\((o|child)\.textContent, q\)/g) || []).length, 2);|
++    });|
++    it('Gruppennamen kommen aus dem Woerterbuch', () => {|
++        assert.doesNotMatch(CMA, /label = 'Top 10 Meta Decks';|label = 'All Other Decks';/);|
++    });|
++    it('VERFAELSCHUNG: nur Einwort-Suche verpasst Raging Bolt', () => {|
++        const kaputt = CL.replace('for (let n = 3; n >= 1; n--) {', 'for (let n = 1; n >= 1; n--) {');|
++        assert.notEqual(kaputt, CL);|
++        assert.doesNotMatch(laden(kaputt)('Raging Bolt', ARTEN), new RegExp(ARTEN['raging bolt'].toLowerCase()));|
++    });|
++});|
+diff --git a/version.json b/version.json|
+index 1413a8b6..8b091d11 100644|
+--- a/version.json|
++++ b/version.json|
+@@ -1 +1 @@|
+-{"version":"202610061215"}|
+\ No newline at end of file|
++{"version":"202610061331"}|
+\ No newline at end of file|
+-- |
+2.34.1|
+|
+|

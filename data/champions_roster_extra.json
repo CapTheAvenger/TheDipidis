@@ -25,7 +25,6 @@
    "Bellibolt",
    "Gliscor",
    "Grapploct",
-   "Hippowdon",
    "Indeedee",
    "Indeedee-F",
    "Kangaskhan",
@@ -37,7 +36,7 @@
    "Squawkabilly",
    "Starmie"
   ],
-  "aus_teams_count": 15,
+  "aus_teams_count": 14,
   "aus_teams_ohne_werte": [],
   "geschlechtsformen": [
    "Basculegion-F"
@@ -53,6 +52,7 @@
    "Gourgeist-Small",
    "Gourgeist-Super",
    "Gyarados",
+   "Hippowdon",
    "Houndstone",
    "Inteleon",
    "Lycanroc-Midnight",
@@ -78,7 +78,7 @@
    "Vileplume",
    "Wigglytuff"
   ],
-  "aus_nutzung_count": 33,
+  "aus_nutzung_count": 34,
   "aus_nutzung_ohne_werte": []
  },
  "smogonKeys": [
@@ -199,7 +199,6 @@
   "Starmie",
   "Altaria",
   "Noivern",
-  "Hippowdon",
   "Gliscor",
   "Bellibolt",
   "Squawkabilly",
@@ -213,6 +212,7 @@
   "Gourgeist-Small",
   "Gourgeist-Super",
   "Gyarados",
+  "Hippowdon",
   "Houndstone",
   "Inteleon",
   "Lycanroc-Midnight",

@@ -1722,3 +1722,6 @@
 .arc-mu-sortierbar th.arc-mu-sort { cursor: pointer; user-select: none; white-space: nowrap; }
 .arc-mu-sortierbar th.arc-mu-sort[aria-sort="ascending"]::after { content: " ▲"; }
 .arc-mu-sortierbar th.arc-mu-sort[aria-sort="descending"]::after { content: " ▼"; }
+
+/* UI-95: „Liste kopieren“ unter den Referenz-Listen. */
+.cm-ref-aktionen { display: flex; justify-content: flex-end; margin-top: 8px; }

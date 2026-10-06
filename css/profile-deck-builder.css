@@ -891,3 +891,8 @@
 @media (max-width: 640px) {
     .pdb-menge { grid-template-columns: repeat(2, 1fr); }
 }
+/* UI-120 (M3-20): am Handy kein Scrollbereich im Scrollbereich — die Treffer
+   fliessen in der Seite (gemessen 05.10.: 5.025 px Inhalt in 560 px Kasten). */
+@media (max-width: 640px) {
+    .pdb-results-grid { max-height: none; overflow-y: visible; }
+}

@@ -12596,7 +12596,7 @@ window.MetaCall = (function () {
     setTimeout(() => {
       const el = document.querySelector('.mc-ev-panel');
       if (el && typeof el.scrollIntoView === 'function') {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' });
       }
     }, 450);
   }

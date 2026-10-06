@@ -264,7 +264,8 @@ describe('Die Zelle zeigt beide Zahlen mit ihrer Herkunft', () => {
     });
 
     it('duenne Paarungen werden markiert', () => {
-        assert.ok(/majorDuenn = !!\(mj && mj\.anzahl < 10\)/.test(jsK),
+        // DA-50 (Hausi 06.10.2026): eine Grenze app-weit, 20 Matches (CONV_MIN_N).
+        assert.ok(/majorDuenn = !!\(mj && mj\.anzahl < \(\(typeof window\.CONV_MIN_N === 'number'\) \? window\.CONV_MIN_N : 20\)\)/.test(jsK),
             'die Markierung fuer duenne Paarungen ist weg');
         // Sie muss auch ANKOMMEN: die Klasse haengt an majorDuenn, nicht
         // an einer Konstanten.

@@ -79,3 +79,15 @@
 .setup-modal-btn-row > .btn-system-danger {
     min-height: 42px;
 }
+
+/* FE-47: Rotations-Hinweis in der Deckzeile (Meine Decks). */
+.deck-rotation {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 0.75em;
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.28);
+    color: #ffe08a;
+}

@@ -10442,7 +10442,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border-top: 1px dotted currentColor;
     margin: 1px 0;
 }
-.heatmap-zelle-duenn { font-style: italic; }
+.heatmap-zelle-duenn { font-style: italic; color: var(--ink-3); }
 
 /* Beschreibung links, Legende rechts (02.09.2026).
    Rechts oben war leer, waehrend im Gitter 100-mal "Win Rate" und

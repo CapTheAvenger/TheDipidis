@@ -2418,6 +2418,66 @@ window.deckAufklappen = deckAufklappen;
  * zugeklappt haben wollen. Deshalb bekommt updateDecksUI die Kennung
  * des Decks, dessen Bearbeitung das Neuzeichnen ausgeloest hat — alles
  * andere bleibt zu. */
+/* FE-47 (Hausi 06.10.2026): „Was rotiert aus meinem Deck?“ — Regulation Mark H
+   rotiert im April (I, J bleiben). Je Deck die Karten mit Marke H zaehlen,
+   Join nur ueber (Set, Nummer) aus dem Deck-Schluessel „Name (SET NUM)“, nie
+   ueber den Namen. Quelle data/regulation_marks.json (DA-28). */
+const DS_ROTIERT_MARKE = 'H';
+let _dsMarkenIndex;   // undefined: nicht geholt, null: nicht ladbar
+function dsMarkenIndexBauen(daten) {
+  if (!daten || !daten.marks) return null;
+  const mk = {};
+  Object.keys(daten.marks).forEach(function (marke) {
+    const sets = daten.marks[marke] || {};
+    Object.keys(sets).forEach(function (set) {
+      (mk[set] = mk[set] || {});
+      String(sets[set]).split(',').forEach(function (teil) {
+        const r = /^(\d+)-(\d+)$/.exec(teil);
+        if (r) { for (let n = +r[1]; n <= +r[2]; n++) mk[set][String(n)] = marke; }
+        else if (teil) mk[set][teil] = marke;
+      });
+    });
+  });
+  return mk;
+}
+function dsRotiertZaehlen(cards, index) {
+  let n = 0;
+  if (!index || !cards) return 0;
+  Object.keys(cards).forEach(function (key) {
+    const anz = cards[key] || 0;
+    if (anz <= 0) return;
+    const m = /\(([A-Z0-9-]+)\s+([A-Za-z0-9-]+)\)\s*$/.exec(String(key));
+    if (!m) return;
+    const set = m[1].toUpperCase();
+    const nr = m[2];
+    const s = index[set];
+    if (!s) return;
+    const marke = s[nr] || s[nr.replace(/^0+/, '')];
+    if (marke === DS_ROTIERT_MARKE) n += anz;
+  });
+  return n;
+}
+function dsRotationsZeile(cards) {
+  if (_dsMarkenIndex === undefined) {
+    _dsMarkenIndex = null;
+    if (typeof fetch === 'function') {
+      fetch('./data/regulation_marks.json').then(r => (r.ok ? r.json() : null)).then(d => {
+        _dsMarkenIndex = dsMarkenIndexBauen(d);
+        if (_dsMarkenIndex && typeof updateDecksUI === 'function') updateDecksUI(true);
+      }).catch(() => { _dsMarkenIndex = null; });
+    }
+    return '';
+  }
+  const n = dsRotiertZaehlen(cards, _dsMarkenIndex);
+  if (!n) return '';
+  const de = (typeof getLang !== 'function') || getLang() === 'de';
+  const txt = de ? `rotiert im April: ${n} ${n === 1 ? 'Karte' : 'Karten'} (Marke ${DS_ROTIERT_MARKE})`
+                 : `rotates in April: ${n} ${n === 1 ? 'card' : 'cards'} (mark ${DS_ROTIERT_MARKE})`;
+  return `<div class="deck-rotation">${txt}</div>`;
+}
+window.dsRotiertZaehlen = dsRotiertZaehlen;
+window.dsMarkenIndexBauen = dsMarkenIndexBauen;
+
 function updateDecksUI(offenHalten) {
   const decksGrid = document.getElementById('decks-grid');
   if (!decksGrid) return;
@@ -2920,6 +2980,7 @@ function updateDecksUI(offenHalten) {
             <div style="font-size: 0.85em; opacity: 0.9;">
               ${safeDeckArchetypeHtml} • ${totalCards} ${getLang()==='de' ? 'Karten' : 'Cards'} (${uniqueCards} ${getLang()==='de' ? 'verschiedene' : 'unique'})
             </div>
+            ${dsRotationsZeile(deck.cards)}
             <div style="font-size: 0.75em; opacity: 0.7; margin-top: 2px;">
               ${deck.folder ? safeFolderHtml + ' • ' : ''}${safeCreatedHtml}
             </div>

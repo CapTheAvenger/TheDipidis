@@ -528,12 +528,11 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
     });
 
     it('eine duenne Stichprobe wird markiert statt verschwiegen', () => {
-        assert.ok(/MAJOR_DUENN_PARTIEN\s*=\s*\d+/.test(ohneKomm),
-            'die Markierung fuer duenne Stichproben ist weg');
-        const m = ohneKomm.match(/MAJOR_DUENN_PARTIEN\s*=\s*(\d+)/);
-        assert.ok(Number(m[1]) >= 50,
-            `die Schwelle liegt bei ${m[1]} Partien — bei so wenigen ist das `
-            + '95-%-Intervall breiter als ±14 Punkte und die Daempfung sagt nichts mehr');
+        // DA-50 (Hausi 06.10.2026): eine Grenze app-weit — 20 Matches,
+        // dieselbe Zahl wie CONV_MIN_N und THIN_GAMES. Vorher 100 (Intervall-
+        // Begruendung); entschieden ist die eine Grenze.
+        assert.ok(/MAJOR_DUENN_PARTIEN\s*=\s*\(typeof window !== 'undefined' && typeof window\.CONV_MIN_N === 'number'\) \? window\.CONV_MIN_N : 20;/.test(ohneKomm),
+            'die Markierung fuer duenne Stichproben haengt nicht an der einen Grenze');
         assert.ok(/arc-halb--duenn/.test(quelle),
             'die gedaempfte Darstellung wird nicht mehr gesetzt');
         const css = fs.readFileSync(path.join(wurzel, 'css', 'styles.css'), 'utf8')

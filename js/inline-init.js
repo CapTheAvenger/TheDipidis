@@ -514,8 +514,9 @@ document.addEventListener('click', function(e) {
     const menu    = document.getElementById('mainMenuDropdown');
     const trigger = document.getElementById('mainMenuTrigger');
     if (menu && trigger && menu.classList.contains('show')) {
-        const _beschriftung = e.target && e.target.closest ? e.target.closest('.menu-label-btn') : null;
-        if (!menu.contains(e.target) && !trigger.contains(e.target) && !_beschriftung) {
+        /* V2-5 Kopf (06.10.2026): der zweite Oeffner „☰ Menü" neben dem
+           Pokeball ist weg (Festlegung B: Pokeball = Menue, EIN Menueknopf). */
+        if (!menu.contains(e.target) && !trigger.contains(e.target)) {
             // UI-108: ueber toggleMainMenu schliessen — sonst blieb
             // aria-expanded="true" stehen (gemessen 05.10.).
             toggleMainMenu();

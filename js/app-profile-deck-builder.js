@@ -16,6 +16,9 @@
     'use strict';
 
     const STORAGE_KEY     = 'dipidis.profileDeckBuilder.v1';
+    /* UI-97 (06.10.2026): „+ Neues Deck“ startet leer, der bisherige Entwurf
+       wird hier geparkt und bleibt mit einem Klick zurueckholbar. */
+    const ENTWURF_KEY     = 'dipidis.profileDeckBuilder.entwurf.v1';
     const SEARCH_DEBOUNCE = 150;          // ms — keystroke → render
     const MAX_RESULTS     = 80;            // cap to keep DOM light
     const DECK_SIZE       = 60;
@@ -117,6 +120,10 @@
             removeAria:    (name) => `${name} aus dem Deck entfernen`,
             illegalMax:    (n) => `Mehr als ${MAX_PER_CARD}× pro Karte ist nicht erlaubt (außer Standard-Energien).`,
             zoomAddBtn:    'Ins Deck',
+            mengeAria:     (name) => `Anzahl von ${name} im Deck`,
+            mengeSetzen:   (n, name) => `${n}× ${name} ins Deck`,
+            entwurfBtn:    (n) => `Letzten Entwurf öffnen (${n} Karten)`,
+            entwurfGeparkt: 'Neues leeres Deck — dein Entwurf ist gespeichert.',
             zoomCloseBtn:  'Schließen',
             zoomNoText:    'Kein Kartentext verfügbar.',
         },
@@ -174,6 +181,10 @@
             removeAria:    (name) => `Remove ${name} from deck`,
             illegalMax:    (n) => `More than ${MAX_PER_CARD}× per card is not allowed (except basic energy).`,
             zoomAddBtn:    'Add to deck',
+            mengeAria:     (name) => `Copies of ${name} in the deck`,
+            mengeSetzen:   (n, name) => `${n}× ${name} in the deck`,
+            entwurfBtn:    (n) => `Open last draft (${n} cards)`,
+            entwurfGeparkt: 'New empty deck — your draft is saved.',
             zoomCloseBtn:  'Close',
             zoomNoText:    'No card text available.',
         },
@@ -992,6 +1003,70 @@
         renderMulligan();
     }
 
+    /* UI-97: Anzahl einer Karte direkt setzen (1–4). Basis-Energie darf
+       mehr, die Knoepfe gehen aber nur bis 4 — fuer mehr bleibt ＋. */
+    function setCount(card, n) {
+        const deck = ensureDeck();
+        const ziel = Math.max(0, Math.min(MAX_PER_CARD, Math.floor(Number(n) || 0)));
+        const key = cardKey(card);
+        const existing = deck.cards.find(c => cardKey(c) === key);
+        if (existing) {
+            if (existing.count === ziel) return ziel;
+            existing.count = ziel;
+            if (!ziel) deck.cards = deck.cards.filter(c => cardKey(c) !== key);
+        } else if (ziel) {
+            deck.cards.push({
+                set: card.set, number: card.number, name_en: card.name_en, name_de: card.name_de,
+                type: card.type, energy_type: card.energy_type, rarity: card.rarity,
+                image_url: card.image_url, is_japanese: !!card.is_japanese, count: ziel,
+            });
+        } else {
+            return 0;
+        }
+        saveDeck();
+        renderDeckPanel();
+        renderMulligan();
+        return ziel;
+    }
+
+    function geparkterEntwurf() {
+        try {
+            const raw = localStorage.getItem(ENTWURF_KEY);
+            const d = raw ? JSON.parse(raw) : null;
+            return d && Array.isArray(d.cards) && countCards(d) > 0 ? d : null;
+        } catch (_) { return null; }
+    }
+
+    /* UI-97: „+ Neues Deck“ — leer starten, den Entwurf parken (nie loeschen). */
+    function neuesDeck() {
+        const deck = ensureDeck();
+        if (countCards(deck) > 0) {
+            try { localStorage.setItem(ENTWURF_KEY, JSON.stringify(deck)); }
+            catch (e) { console.warn('[ProfileDeckBuilder] Entwurf parken fehlgeschlagen', e); return deck; }
+            _deck = emptyDeck();
+            saveDeck();
+            if (_initialized) { renderRoot(); pulseToast(t().entwurfGeparkt); }
+        }
+        if (typeof window.switchProfileTab === 'function') window.switchProfileTab('deckbuilder');
+        return _deck;
+    }
+
+    /* Geparkten Entwurf zurueckholen; ein nicht leeres aktuelles Deck wird
+       dafuer seinerseits geparkt — es geht nie etwas verloren. */
+    function entwurfOeffnen() {
+        const geparkt = geparkterEntwurf();
+        if (!geparkt) return false;
+        const aktuell = ensureDeck();
+        try {
+            if (countCards(aktuell) > 0) localStorage.setItem(ENTWURF_KEY, JSON.stringify(aktuell));
+            else localStorage.removeItem(ENTWURF_KEY);
+        } catch (_) { return false; }
+        _deck = geparkt;
+        saveDeck();
+        if (_initialized) renderRoot();
+        return true;
+    }
+
     function importDeckList(text) {
         const { entries, unknownLines } = parseDeckList(text);
         let added = 0;
@@ -1198,6 +1273,9 @@
                     <div class="pdb-deck-actions">
                         <button type="button" class="btn btn-primary btn-sm" id="pdb-save-account">${escapeHtml(L.saveBtn)}</button>
                         <button type="button" class="pdb-link-btn pdb-link-btn--danger" id="pdb-clear-deck">${escapeHtml(L.clearBtn)}</button>
+                        ${(() => { const g = geparkterEntwurf(); return g
+                            ? `<button type="button" class="pdb-link-btn" id="pdb-entwurf">${escapeHtml(L.entwurfBtn(countCards(g)))}</button>`
+                            : ''; })()}
                     </div>
                 </section>
             </div>
@@ -1257,6 +1335,8 @@
         document.getElementById('pdb-save-account').addEventListener('click', async () => {
             await speichernInsKonto();
         });
+        const _entwurfBtn = document.getElementById('pdb-entwurf');
+        if (_entwurfBtn) _entwurfBtn.addEventListener('click', () => entwurfOeffnen());
         document.getElementById('pdb-paste-btn').addEventListener('click', () => {
             const txt = document.getElementById('pdb-paste').value;
             importDeckList(txt);
@@ -1455,6 +1535,15 @@
             // for one-click quick-add without entering the modal.
             const img = cardEl.querySelector('.pdb-result-imgwrap');
             if (img) img.addEventListener('click', () => zoomFromCard(cardEl));
+            cardEl.querySelectorAll('.pdb-menge-btn').forEach(b => b.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const found = lookup(cardEl);
+                if (!found) return;
+                const neu = setCount(found, Number(b.getAttribute('data-menge')));
+                cardEl.querySelectorAll('.pdb-menge-btn').forEach(x =>
+                    x.setAttribute('aria-pressed', String(Number(x.getAttribute('data-menge')) === neu)));
+            }));
+            cardEl.querySelectorAll('.pdb-menge').forEach(g => g.addEventListener('keydown', (e) => e.stopPropagation()));
             const addBtn = cardEl.querySelector('.pdb-result-addbadge');
             if (addBtn) addBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1501,7 +1590,20 @@
                     <span class="pdb-result-cap-name">${escapeHtml(primary || '?')}${jp}</span>
                     <span class="pdb-result-cap-set">${setBadge}</span>
                 </div>
+                ${mengenwahlHtml(c, primary || setBadge)}
             </div>`;
+    }
+
+    /* UI-97: Mengenwahl 1–4 an jeder Karte — ein Deck von null waren
+       vorher ueber 100 Klicks auf ＋. Die gewaehlte Zahl ist gedrueckt. */
+    function mengenwahlHtml(c, name) {
+        const jetzt = countOf(c);
+        let h = `<div class="pdb-menge" role="group" aria-label="${escapeHtml(t().mengeAria(name))}">`;
+        for (let n = 1; n <= MAX_PER_CARD; n++) {
+            h += `<button type="button" class="pdb-menge-btn" data-menge="${n}" aria-pressed="${jetzt === n}"`
+               + ` title="${escapeHtml(t().mengeSetzen(n, name))}">${n}</button>`;
+        }
+        return h + '</div>';
     }
 
     function groupedDeck() {
@@ -1671,6 +1773,9 @@
         // Fuer den Cardbinder der Masterclass — ein Deck, eine Ablage.
         countOf,
         addCopies,
+        setCount,
+        neuesDeck,
+        entwurfOeffnen,
         removeOne,
         saveToAccount,
         speichernInsKonto,

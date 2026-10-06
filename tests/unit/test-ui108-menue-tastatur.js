@@ -85,7 +85,9 @@ describe('UI-108: Hauptmenue per Tastatur', () => {
     });
     it('Klick daneben schliesst ueber toggleMainMenu', () => {
         const q = L.lies('js', 'inline-init.js').replace(/\/\*[\s\S]*?\*\//g, ' ');
-        const i = q.indexOf("closest('.menu-label-btn')");
+        /* V2-5 (06.10.2026): ohne zweiten Oeffner beginnt der Block an der Bedingung. */
+        const i = q.indexOf("if (!menu.contains(e.target) && !trigger.contains(e.target))");
+        assert.ok(i > 0, 'Klick-daneben-Bedingung nicht gefunden');
         const block = q.slice(i, i + 400).split('\n').map(z => z.replace(/\/\/.*$/, '')).join('\n');
         assert.match(block, /toggleMainMenu\(\)/);
         assert.ok(!/classList\.remove\('show'\)/.test(block), 'schliesst wieder an toggleMainMenu vorbei');

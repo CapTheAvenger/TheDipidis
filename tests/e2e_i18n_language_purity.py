@@ -936,13 +936,15 @@ def run():
         lang_fn = page.evaluate("getLang()")
         check("PERSIST.3 getLang()=de after reload", lang_fn == "de", f"got '{lang_fn}'")
 
-        # Verify a data-i18n element after reload
+        # Verify a data-i18n element after reload.
+        # V2-5 Kopf (06.10.2026): der Untertitel ist weg (Festlegung A);
+        # geprueft wird jetzt die Kurzwahl „Datenbank“ im Kopf.
         subtitle_after = page.evaluate("""(() => {
-            const el = document.querySelector('[data-i18n="app.subtitle"]');
+            const el = document.querySelector('.header-cards-btn [data-i18n="header.cardsShort"]');
             return el ? el.textContent.trim() : '';
         })()""")
-        check("PERSIST.4 subtitle in DE after reload",
-              'Meta-Analyse' in subtitle_after or 'Deckbau' in subtitle_after,
+        check("PERSIST.4 Kopf-Kurzwahl in DE after reload",
+              subtitle_after == 'Datenbank',
               f"got '{subtitle_after}'")
 
         # Reset to English for next tests

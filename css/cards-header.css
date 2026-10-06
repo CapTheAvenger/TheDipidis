@@ -517,3 +517,97 @@ html.is-standalone .container {
     cursor: progress;
 }
 
+
+/* ── V2-5 Kopf (Abfragerunde 06.10.2026, Festlegung B) ───────────────
+ * Pokeball = Menue, „The Dipidis" mit kleiner Kirschbluete, keine Pille,
+ * kein Untertitel. Kurzwahl: 6 kleine Symbolknoepfe (Journal, Meine
+ * Decks, Wunschliste, Tauschliste, Datenbank, Profil) — Name im Hinweis
+ * und fuer Vorleser, sichtbar nur das Symbol. Hell/Dunkel und Sprache
+ * stehen im Menue.
+ * #main-content-Praefix statt Ausrufezeichen: die Kennung schlaegt jede
+ * Klassenregel aus mobile-responsive.css ohne !important. */
+#main-content > .cards-header {
+    padding: 10px 18px;
+}
+#main-content > .cards-header::after { display: none; }
+#main-content > .cards-header .header-flex-row {
+    /* .cards-header ist selbst flex — ohne volle Breite rueckten die
+       Knoepfe direkt neben den Namen statt nach rechts (Vorschau 06.10.). */
+    flex: 1 1 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+}
+#main-content > .cards-header .header-flex-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+#main-content > .cards-header .pokeball-btn { width: 42px; height: 42px; }
+#main-content > .cards-header .main-menu-dropdown { top: calc(100% + 10px); }
+#main-content > .cards-header .header-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 1.35rem;
+    white-space: nowrap;
+}
+#main-content > .cards-header .kopf-bluete {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex: none;
+}
+#main-content > .cards-header .header-flex-user {
+    flex-wrap: nowrap;
+    gap: 8px;
+}
+#main-content > .cards-header .header-icon-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    gap: 0;
+    border-radius: 10px;
+    flex: none;
+}
+#main-content > .cards-header .header-icon-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+/* Handy: Zeile 1 Pokeball + Name, Zeile 2 die sechs Knoepfe ueber die
+   ganze Breite (je 44 px hoch, nie seitlich scrollen — Festlegung A). */
+@media (max-width: 640px) {
+    #main-content > .cards-header { padding: 8px 10px; }
+    #main-content > .cards-header .pokeball-btn { width: 36px; height: 36px; }
+    #main-content > .cards-header .header-title { font-size: 1.15rem; }
+    #main-content > .cards-header .header-flex-user {
+        width: 100%;
+        justify-content: space-between;
+    }
+    #main-content > .cards-header .header-flex-user > .header-icon-btn,
+    #main-content > .cards-header #user-menu {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+    }
+    /* Die fuenf Knoepfe tragen 2 x 6 px Innenabstand (mobile-responsive.css,
+       mit !important) — der zaehlt bei flex-basis 0 mit. Das Profil steckt
+       in #user-menu ohne Abstand und war darum 14 px schmaler (gemessen
+       45 statt 59 px). Gleiche Grundgroesse, gleiche Breite. */
+    #main-content > .cards-header #user-menu { flex-basis: 12px; }
+    #main-content > .cards-header #user-menu .header-icon-btn,
+    #main-content > .cards-header #user-menu .user-info { width: 100%; }
+}

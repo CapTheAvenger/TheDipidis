@@ -28,6 +28,8 @@ const VERBOTEN = [
     { was: '„Top-Archetypen nach Share“ auf der Meta-Seite (05.10.)', js: /renderMetaChart\(\s*'currentMeta'/ },
     { was: '„Top Archetype Share“ in Japan (UI-45)', js: /renderMetaChart\(\s*'cityLeague'/ },
     { was: '„Mein Deck“-Knopf im Kopf (05.10.)', html: /id="meinDeckKnopf"|js\/mein-deck\.js/, js: /window\.MeinDeck|meindeck:geaendert/ },
+    { was: 'zweiter Menue-Oeffner „☰ Menü“ neben dem Pokeball (06.10.)', html: /class="menu-label-btn"|data-i18n="menu\.labelBtn"/, js: /menu-label-btn|'menu\.labelBtn'/ },
+    { was: 'Untertitel „Dein Portal …“ im Kopf (06.10.)', html: /class="header-subtitle"/ },
 ];
 
 describe('Festlegungen A: Entferntes bleibt weg', () => {

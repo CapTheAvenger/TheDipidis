@@ -859,3 +859,29 @@
     border: 0;
     cursor: pointer;
 }
+
+/* UI-97 (06.10.2026): Mengenwahl 1–4 unter jeder Trefferkarte. */
+.pdb-menge {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 4px 6px 6px;
+}
+.pdb-menge-btn {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    min-height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--surface-2);
+    color: var(--text-main);
+    cursor: pointer;
+}
+.pdb-menge-btn:hover,
+.pdb-menge-btn:focus-visible { border-color: var(--pokemon-blue); }
+.pdb-menge-btn[aria-pressed="true"] {
+    background: var(--pokemon-blue);
+    border-color: var(--pokemon-blue);
+    color: #fff;
+}

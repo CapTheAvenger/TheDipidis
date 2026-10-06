@@ -123,8 +123,11 @@ function _simFindCard(setCode, setNumber) {
 function drawNewHand() {
     _shuffleFisherYates(_simulatorDeck);
     _simulatorHand = _simulatorDeck.slice(0, 7);
-    // Preiskarten nur, wenn das Deck dafuer reicht (7 + 6).
-    _simulatorPreisBeiseite = _simulatorDeck.length >= 7 + SIM_PREISKARTEN;
+    // Preiskarten nur, wenn das Deck dafuer reicht (7 + 6) — und erst NACH
+    // dem Mulligan (FE-53, 06.10.2026: Regel — ohne Basis-Pokemon wird neu
+    // gemischt, die Preise liegen dann noch nicht).
+    _simulatorPreisBeiseite = _simulatorDeck.length >= 7 + SIM_PREISKARTEN
+        && _simMulliganLage(_simulatorHand) !== 'mulligan';
     _simulatorNaechste = _simulatorPreisBeiseite ? 7 + SIM_PREISKARTEN : _simulatorHand.length;
     _renderSimulatorHand();
 }

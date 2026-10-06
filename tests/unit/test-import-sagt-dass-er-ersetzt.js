@@ -71,7 +71,13 @@ describe('UI-7: der Import sagt, dass er ersetzt', () => {
 
     it('im HTML unterscheiden sich die Paare im Text, nicht nur im title', () => {
         const html = R('index.html');
-        const paare = [...html.matchAll(/importFromPTCGL\('(\w+)'\)[^>]*>([^<]*)<\/button>\s*<button[^>]*exportToPTCGL\('\1'\)[^>]*>([^<]*)<\/button>/g)];
+        /* UI-117 (06.10.2026): Import steht seither neben „Max Consistency",
+           Export blieb im Panel — die Paare werden je Quelle gesucht. */
+        const paare = ['cityLeague', 'currentMeta', 'pastMeta'].map(wo => {
+            const imp = html.match(new RegExp("importFromPTCGL\\('" + wo + "'\\)[^>]*>([^<]*)<\\/button>"));
+            const exp = html.match(new RegExp("exportToPTCGL\\('" + wo + "'\\)[^>]*>([^<]*)<\\/button>"));
+            return imp && exp ? [null, wo, imp[1], exp[1]] : null;
+        }).filter(Boolean);
         assert.equal(paare.length, 3, `erwartet drei Deckbauer, gefunden ${paare.length}`);
         for (const [, wo, imp, exp] of paare) {
             assert.notEqual(imp.trim(), exp.trim(), `${wo}: beide Knoepfe heissen "${imp.trim()}"`);

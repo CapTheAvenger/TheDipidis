@@ -10,17 +10,10 @@
 
 .pokeball-wrapper { position: relative; z-index: 1000; }
 
-/* UI-79 (03.10.2026, Tiefenanalyse N-13): sichtbare Beschriftung neben dem
-   Logo — vorher war das Menue nur ueber den unbeschrifteten Pokeball zu
-   finden. Das Menue haengt weiter absolut am Wrapper. */
-.pokeball-wrapper { display: flex; align-items: center; gap: 8px; }
-.menu-label-btn {
-    font: inherit; font-size: 0.85rem; font-weight: 600; line-height: 1;
-    min-height: 32px; padding: 6px 10px; border-radius: 8px;
-    border: 1px solid var(--border-color); background: var(--surface-1);
-    color: var(--text-main); cursor: pointer; white-space: nowrap;
-}
-.menu-label-btn:hover, .menu-label-btn:focus-visible { border-color: var(--pokemon-red, #E3350D); }
+/* V2-5 Kopf (06.10.2026): die Beschriftung „☰ Menü" neben dem Pokeball ist
+   weg — zwei Oeffner fuer dasselbe Menue (Hausi: „so eine Scheisse").
+   Der Pokeball ist das Menue. */
+.pokeball-wrapper { display: flex; align-items: center; }
 
 .pokeball-btn {
     width: 50px; height: 50px; border-radius: 50%;
@@ -817,3 +810,31 @@ input[type="number"] { -moz-appearance: textfield; }
     cursor: pointer; user-select: none; transition: transform 0.15s;
 }
 .pt-status-btn:hover { transform: scale(1.2); border-color: var(--pokemon-yellow); }
+
+/* V2-5 Kopf (06.10.2026): Hell/Dunkel und Sprache unten im Menue. */
+.menu-schalter {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border-color);
+}
+.menu-schalter-btn {
+    flex: 1 1 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--surface-2);
+    color: var(--text-main);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.menu-schalter-btn:hover,
+.menu-schalter-btn:focus-visible { border-color: var(--pokemon-blue); outline: 2px solid var(--pokemon-blue); outline-offset: -2px; }
+.menu-schalter-btn .theme-icon { width: 18px; height: 18px; }

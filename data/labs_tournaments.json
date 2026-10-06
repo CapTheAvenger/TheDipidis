@@ -1,5 +1,13 @@
 [
   {
+    "tournament_id": "0075",
+    "tournament_name": "Regional Championship Recife",
+    "tournament_date": "2026-10-03",
+    "tournament_type": "regional",
+    "country": "BR",
+    "total_players": 1072
+  },
+  {
     "tournament_id": "0074",
     "tournament_name": "Regional Championship Frankfurt",
     "tournament_date": "2026-09-26",

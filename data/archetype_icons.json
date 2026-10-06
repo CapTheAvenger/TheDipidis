@@ -3,12 +3,12 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-10-02T08:37:38",
-    "lastScrapedCount": 115,
+    "lastScrapedAt": "2026-10-06T06:33:42",
+    "lastScrapedCount": 123,
     "lastBackfilledAt": "2026-05-05T13:19:27",
     "lastBackfillCount": 342,
     "lastHarvestedFrom": "city_league_archetype_scraper",
-    "lastHarvestedAt": "2026-09-29T11:18:30"
+    "lastHarvestedAt": "2026-10-06T06:25:52"
   },
   "archetypes": {
     "Dragapult": [
@@ -2214,6 +2214,58 @@
     "Mew Box": [
       "mew",
       "clefairy"
+    ],
+    "Dragapult Lycanroc": [
+      "dragapult",
+      "lycanroc"
+    ],
+    "Mega Chandelure Dragapult": [
+      "chandelure-mega",
+      "dragapult"
+    ],
+    "Mega Lucario Drakloak": [
+      "lucario-mega",
+      "drakloak"
+    ],
+    "Alakazam Toucannon": [
+      "alakazam",
+      "toucannon"
+    ],
+    "Zoroark Zekrom": [
+      "zoroark",
+      "zekrom"
+    ],
+    "Mega Kangaskhan Ho-Oh": [
+      "kangaskhan-mega",
+      "ho-oh"
+    ],
+    "Ogerpon Pecharunt": [
+      "ogerpon",
+      "pecharunt"
+    ],
+    "Dragapult Cacturne": [
+      "dragapult",
+      "cacturne"
+    ],
+    "Jellicent Mega Greninja": [
+      "jellicent",
+      "greninja-mega"
+    ],
+    "Honchkrow Crobat": [
+      "honchkrow",
+      "crobat"
+    ],
+    "Beedrill Drakloak": [
+      "beedrill",
+      "drakloak"
+    ],
+    "Dhelmise Sinistcha": [
+      "dhelmise",
+      "sinistcha"
+    ],
+    "Ceruledge Armarouge": [
+      "ceruledge",
+      "armarouge"
     ]
   }
 }

@@ -28030,3 +28030,1077 @@ tournament_id,tournament_date,meta,place,player_name,country,deck_slug,deck_arch
 0073,2026-09-26,TEF-30C,815,Jessica Tai,AU,alakazam-dudunsparce,Alakazam Dudunsparce,0,4,0,41600,0,0,0,1,4,0
 0073,2026-09-26,TEF-30C,816,Jayden Pettit,AU,basic-box-m,Basic Box,0,4,0,51611,0,0,0,1,4,0
 0073,2026-09-26,TEF-30C,817,Brandon Hart,AU,crustle-dri,Crustle,0,5,0,56062,0,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1,Victor Carreira,,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,14,2,1,9812,43,1,1,0,,0
+0075,2026-10-03,TEF-30C,2,Fabrizio Inga Silva,PE,dragapult-ex,Dragapult,13,3,1,2134,40,1,1,0,,0
+0075,2026-10-03,TEF-30C,3,Pedro Pertusi,BR,dragapult-ex,Dragapult,12,3,1,9520,37,1,1,0,,0
+0075,2026-10-03,TEF-30C,4,Marco Cifuentes,CL,n-zoroark,N's Zoroark,12,3,1,5026,37,1,1,0,,0
+0075,2026-10-03,TEF-30C,5,Riguel Assis,BR,mega-excadrill-ex,Mega Excadrill,11,2,2,44818,35,1,1,0,,0
+0075,2026-10-03,TEF-30C,6,Rafael Yuiti,BR,dragapult-ex,Dragapult,11,2,2,4883,35,1,1,0,,0
+0075,2026-10-03,TEF-30C,7,Rafael Neto,BR,slowking-scr,Slowking,11,2,2,57307,35,1,1,0,,0
+0075,2026-10-03,TEF-30C,8,Jose Santos,BR,rockets-honchkrow,Rocket's Honchkrow,11,2,2,9642,35,1,1,0,,0
+0075,2026-10-03,TEF-30C,9,Arthur Sossai,BR,dragapult-ex,Dragapult,10,3,1,33729,31,1,1,0,,0
+0075,2026-10-03,TEF-30C,10,Jonathan Fabrizio Bellucci Lanciano,AR,alakazam-dudunsparce,Alakazam Dudunsparce,9,1,3,5222,30,1,0,0,,0
+0075,2026-10-03,TEF-30C,11,Marcelo Blanes,BR,alakazam-dusknoir,Alakazam Dusknoir,10,3,0,37841,30,1,0,0,,0
+0075,2026-10-03,TEF-30C,12,vinicius menezes,BR,basic-box-m,Basic Box,10,3,0,44704,30,1,0,0,,0
+0075,2026-10-03,TEF-30C,13,Manuel Vivanco,CL,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,9,2,2,42426,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,14,Yerco Valencia,CL,basic-box-m,Basic Box,9,2,2,5177,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,15,Fellipe da Costa,BR,n-zoroark,N's Zoroark,9,2,2,57182,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,16,Gonzalo Zamorano,CL,lucario-hariyama,Lucario Hariyama,9,2,2,5011,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,17,Rafael Masuko,BR,dragapult-ex,Dragapult,9,2,2,34049,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,18,Salomão Vasques,BR,dragapult-ex,Dragapult,9,2,2,57120,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,19,Vitor Lugon Cacciari Martinelli,BR,dragapult-ex,Dragapult,9,2,2,4961,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,20,Caio Pires,BR,basic-box-m,Basic Box,9,2,2,5174,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,21,Rodrigo Ferreira,BR,dragapult-ex,Dragapult,9,2,2,9678,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,22,adilson junior,BR,n-zoroark,N's Zoroark,9,2,2,5348,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,23,Bastian Silva,CL,dragapult-ex,Dragapult,9,2,2,4953,29,1,0,0,,0
+0075,2026-10-03,TEF-30C,24,Laura Braga,BR,dragapult-ex,Dragapult,8,1,4,5139,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,25,Vicente Rodriguez,CL,basic-box-m,Basic Box,9,3,1,5547,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,26,Dalton Acchetta,BR,dragapult-ex,Dragapult,9,3,1,5078,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,27,Álvaro Miguelino,BR,n-zoroark,N's Zoroark,9,3,1,9045,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,28,Anthony Colaco,BR,festival-lead,Dipplin,9,3,1,57119,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,29,Vitor Kusunoki,BR,basic-box-m,Basic Box,9,3,1,38195,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,30,Lucas Matheus,BR,dragapult-ex,Dragapult,9,3,1,4998,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,31,Stephan Vieira,BR,n-zoroark,N's Zoroark,9,3,1,33711,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,32,Guilherme Vitoratti,BR,ceruledge-ex,Ceruledge,9,3,1,50721,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,33,Miguel Angel Rojas Duk,CL,dragapult-ex,Dragapult,9,3,1,9616,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,34,Bruno Zolin,BR,alakazam-dudunsparce,Alakazam Dudunsparce,9,3,1,57079,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,35,Daniel Alejandro Elgueta Cancino,CL,cynthia-garchomp-ex,Cynthia's Garchomp,9,3,1,9870,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,36,Elias Eskaff Diaz,CO,alakazam-dusknoir,Alakazam Dusknoir,9,3,1,29796,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,37,Leonardo Walbrinch,BR,dragapult-ex,Dragapult,9,3,1,5110,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,38,Julian Nicolas Conde Borjas,PE,festival-lead,Dipplin,9,3,1,51847,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,39,Davi Sousa Gomes Costa,BR,alakazam-dusknoir,Alakazam Dusknoir,9,3,1,9360,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,40,Marcelo Miyaki,BR,festival-lead,Dipplin,9,3,1,44536,28,1,0,0,,0
+0075,2026-10-03,TEF-30C,41,Fernando Cifuentes,CL,dragapult-ex,Dragapult,8,2,3,5368,27,1,0,0,,0
+0075,2026-10-03,TEF-30C,42,Gabriel Savedra,BR,n-zoroark,N's Zoroark,8,2,3,44663,27,1,0,0,,0
+0075,2026-10-03,TEF-30C,43,Nathan Aires,BR,rocket-mewtwo-ex,Rocket's Mewtwo,8,2,3,57474,27,1,0,0,,0
+0075,2026-10-03,TEF-30C,44,Lucas Gusso,BR,crustle-dri,Crustle,9,4,0,16383,27,1,0,0,,0
+0075,2026-10-03,TEF-30C,45,Nicolas Buczak,AR,dragapult-ex,Dragapult,8,2,3,5375,27,1,0,0,,0
+0075,2026-10-03,TEF-30C,46,Lucas Sena Machado,BR,alakazam-dudunsparce,Alakazam Dudunsparce,8,2,3,9688,27,1,0,0,,0
+0075,2026-10-03,TEF-30C,47,José Jonas Nascimento filho,BR,sharpedo-toxtricity,Sharpedo Toxtricity,8,2,3,21552,27,1,0,0,,0
+0075,2026-10-03,TEF-30C,48,Nicolás Aparicio Vergara,CL,alakazam-dudunsparce,Alakazam Dudunsparce,8,3,2,42271,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,49,Alison Silva,BR,dragapult-ex,Dragapult,8,3,2,57431,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,50,Abelardo Fukasawa,BR,n-zoroark,N's Zoroark,8,3,2,5366,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,51,Riquelme Pereira Spolavori,BR,dragapult-ex,Dragapult,8,3,2,57288,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,52,Wallysson Lima,BR,dragapult-ex,Dragapult,8,3,2,9256,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,53,Matias Cisterna Nass,CL,alakazam-dusknoir,Alakazam Dusknoir,8,3,2,21400,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,54,João Paulo lucindo Silva,BR,slowking-scr,Slowking,8,3,2,34004,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,55,HUGO SUANNO,BR,crustle-dri,Crustle,8,3,2,5392,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,56,Gabriel Kim,BR,n-zoroark,N's Zoroark,8,3,2,57349,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,57,Luciano Bautista,CL,dragapult-ex,Dragapult,8,3,2,9273,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,58,Diego Makishi,PE,dragapult-ex,Dragapult,8,3,2,42506,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,59,Francisco Toloza,CL,slowking-scr,Slowking,8,3,2,5393,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,60,Gianluca Pagano,AR,dragapult-ex,Dragapult,8,3,2,8812,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,61,Sidney Da silva,BR,cynthia-garchomp-ex,Cynthia's Garchomp,8,3,2,57107,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,62,Francisco Nogueira,BR,alakazam-dudunsparce,Alakazam Dudunsparce,8,3,2,57072,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,63,Brunno Neves de Moura,BR,slowking-scr,Slowking,8,3,2,57085,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,64,Bruno Alves Arruda,BR,lopunny-dudunsparce,Lopunny Dudunsparce,8,3,2,5258,26,1,0,0,,0
+0075,2026-10-03,TEF-30C,65,Pedro Lacerda,BR,n-zoroark,N's Zoroark,8,4,1,5056,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,66,Vitor Padovani,BR,dragapult-dusknoir,Dragapult Dusknoir,8,4,1,4869,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,67,Jeremias Dantas,BR,mega-excadrill-ex,Mega Excadrill,7,2,4,9436,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,68,Bruno Barros,BR,cynthia-garchomp-ex,Cynthia's Garchomp,8,4,1,9718,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,69,Felipe Herrera,BR,basic-box-m,Basic Box,8,4,1,5225,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,70,gustavo wada,BR,dragapult-ex,Dragapult,8,4,1,5341,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,71,Ricardo Hille,BR,n-zoroark,N's Zoroark,8,4,1,5381,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,72,Eduardo Nobre,BR,basic-box-m,Basic Box,8,4,1,57165,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,73,Jose Miguel Torres Medina,CL,n-zoroark,N's Zoroark,7,2,4,26961,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,74,Andre Santos,BR,dragapult-ex,Dragapult,8,4,1,33996,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,75,Gabriel Pino Semedo,BR,mega-excadrill-ex,Mega Excadrill,8,4,1,5121,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,76,Luiz Gustavo Bianchi,BR,dragapult-ex,Dragapult,8,4,1,5351,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,77,Sebastian Arias,CL,raging-bolt-ogerpon,Raging Bolt Ogerpon,8,4,1,4992,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,78,Tomás reyes,CL,basic-box-m,Basic Box,8,4,1,33940,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,79,andres estefano gajardo lopehandia,CL,n-zoroark,N's Zoroark,7,2,4,5062,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,80,Lucas Silva Costa,BR,n-zoroark,N's Zoroark,8,4,1,37995,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,81,William Azevedo,BR,n-zoroark,N's Zoroark,8,4,1,5134,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,82,facundo facio,AR,n-zoroark,N's Zoroark,8,4,1,5188,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,83,Raul Couto,BR,crustle-dri,Crustle,8,4,1,33715,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,84,Lucas Daniel,BR,dragapult-blaziken,Dragapult Blaziken,8,4,1,57382,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,85,Gabriel Souza Bispo da Silva,BR,basic-box-m,Basic Box,8,4,1,9146,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,86,Bruno Silva,BR,slowking-scr,Slowking,8,4,1,21143,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,87,Antonio Victor Melo Trindade,BR,alakazam-dusknoir,Alakazam Dusknoir,8,4,1,50968,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,88,Rodrigo Carvalho Alves,BR,festival-lead,Dipplin,8,4,1,57415,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,89,Thales Trevas,BR,dragapult-ex,Dragapult,7,2,4,21147,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,90,Enrico Souza,BR,crustle-dri,Crustle,8,4,1,21201,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,91,Victor hugo Pasqualino de Carvalho,BR,rockets-honchkrow,Rocket's Honchkrow,8,4,1,5032,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,92,Fábio Fiaes,BR,n-zoroark,N's Zoroark,8,4,1,57075,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,93,Heitor Arruda,BR,dragapult-ex,Dragapult,7,2,4,33795,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,94,Iury Lima Sales,BR,alakazam-dudunsparce,Alakazam Dudunsparce,8,4,1,21465,25,1,0,0,,0
+0075,2026-10-03,TEF-30C,95,Giovanny Sasso,BR,n-zoroark,N's Zoroark,8,5,0,5187,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,96,Abel Yantorno,CL,dragapult-ex,Dragapult,7,3,3,27562,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,97,Cássio Moraes,BR,dragapult-ex,Dragapult,7,3,3,33883,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,98,Abner Vasconcelos,BR,rocket-mewtwo-ex,Rocket's Mewtwo,7,3,3,57426,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,99,Rodrigo Ribeiro Conceição,BR,festival-lead,Dipplin,7,3,3,9646,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,100,Felipe Pinheiro,BR,slowking-scr,Slowking,7,3,3,21321,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,101,Guilherme Stroschon,BR,n-zoroark,N's Zoroark,7,3,3,9842,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,102,Lucas Schafer,CL,dragapult-ex,Dragapult,6,1,6,37788,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,103,Letícia Pessoa,BR,dragapult-ex,Dragapult,7,3,3,57436,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,104,David Faezy,BR,dhelmise-pbl,Dhelmise,7,3,3,57412,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,105,Adriano Melo,BR,dragapult-ex,Dragapult,7,3,3,9847,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,106,Vinicius Augusto Gomes,BR,dragapult-ex,Dragapult,7,3,3,5256,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,107,Augusto Beringuer,BR,n-zoroark,N's Zoroark,7,3,3,5106,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,108,Flavia Tenreiro,BR,slowking-scr,Slowking,7,3,3,33868,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,109,Marllon Felipe,BR,n-zoroark,N's Zoroark,7,3,3,4881,24,1,0,0,,0
+0075,2026-10-03,TEF-30C,110,Isidoro Jaimovich Decotto,AR,mew-ex-30c,Mew Box,7,4,2,8900,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,111,Carlos Sepúlveda,CL,dragapult-dusknoir,Dragapult Dusknoir,6,2,5,5116,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,112,Thalmonn Sales,BR,rockets-honchkrow,Rocket's Honchkrow,7,4,2,57540,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,113,Fabio Cozzolino,BR,mega-excadrill-ex,Mega Excadrill,7,4,2,5193,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,114,Alvaro Ferreira,BR,dragapult-ex,Dragapult,7,4,2,57230,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,115,Alexandre Nobre,BR,dragapult-ex,Dragapult,7,4,2,57531,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,116,Matheus Mendes,BR,lopunny-dudunsparce,Lopunny Dudunsparce,7,4,2,33941,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,117,Guilherme Toledo,BR,dragapult-ex,Dragapult,7,4,2,33939,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,118,Daniel Santos,BR,festival-lead,Dipplin,7,4,2,57500,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,119,Victor Coutinho,BR,festival-lead,Dipplin,7,4,2,5378,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,120,Victor Salgado,BR,dragapult-ex,Dragapult,7,4,2,9242,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,121,Breno Souza,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,4,2,21198,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,122,Vicente Andre,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,4,2,21377,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,123,Francisco Sousa,BR,kangaskhan-bouffalant,Kangaskhan Bouffalant,7,4,2,33635,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,124,Federico Nattkemper,AR,crustle-dri,Crustle,7,4,2,8785,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,125,Sebastian Gonzalez Muñoz,CL,dragapult-dusknoir,Dragapult Dusknoir,7,4,2,42013,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,126,Lucas Moreira,BR,slowking-scr,Slowking,7,4,2,57417,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,127,Vinicius Azisaka,BR,mega-excadrill-ex,Mega Excadrill,7,4,2,16539,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,128,Danrley Rodrigues,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,4,2,57350,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,129,Samuel Tavares,BR,dragapult-ex,Dragapult,7,4,2,44611,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,130,leonardo pessoa,BR,basic-box-m,Basic Box,7,4,2,33878,23,1,0,0,,0
+0075,2026-10-03,TEF-30C,131,Ariel Oliveira,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,5,1,5335,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,132,João Pedro Souza,BR,basic-box-m,Basic Box,7,5,1,9875,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,133,Jesus Rodriguez,PE,rockets-honchkrow,Rocket's Honchkrow,6,3,4,5668,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,134,Gonzalo Kohatsu,PE,mega-excadrill-ex,Mega Excadrill,7,5,1,5659,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,135,Lucas Magalhães,BR,alakazam-dudunsparce,Alakazam Dudunsparce,7,5,1,9823,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,136,Bruno silveira,BR,stevens-metagross,Steven's Metagross,7,5,1,21452,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,137,João Vitor De Sá Medeiros Santos,BR,alakazam-dudunsparce,Alakazam Dudunsparce,7,5,1,5090,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,138,Bruno Basso,BR,slowking-scr,Slowking,7,5,1,9661,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,139,Raissa Arruda,BR,lopunny-dusknoir,Lopunny Dusknoir,7,5,1,5203,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,140,Hilton Nery,BR,n-zoroark,N's Zoroark,7,5,1,57449,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,141,Jair Rodrigo Oliveira Farias,BR,slowking-scr,Slowking,7,5,1,9547,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,142,Arthur Roberto Bergmann,BR,basic-box-m,Basic Box,7,5,1,4983,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,143,Theo Thadeu Vita Calegari,BR,slowking-scr,Slowking,7,5,1,9284,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,144,Joao Antonio Cavalcanti,BR,n-zoroark,N's Zoroark,7,5,1,9691,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,145,Fernando Lopez,CL,n-zoroark,N's Zoroark,6,3,4,4960,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,146,Paulo Anderson,BR,dragapult-ex,Dragapult,7,5,1,10028,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,147,João Henrique Cegielski,BR,n-zoroark,N's Zoroark,7,5,1,4996,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,148,Pedro Augusto Cavalcanti,BR,dragapult-dusknoir,Dragapult Dusknoir,7,5,1,38058,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,149,Alex Douglas,BR,basic-box-m,Basic Box,7,5,1,33725,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,150,Lucas Zaniboni,BR,cinccino-ex,Cinccino,7,5,1,5153,22,1,0,0,,0
+0075,2026-10-03,TEF-30C,151,Diego Cassiraga,AR,alakazam-dudunsparce,Alakazam Dudunsparce,6,4,3,4986,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,152,Paulo edson CABRAL DE OLIVEIRA,BR,sharpedo-toxtricity,Sharpedo Toxtricity,6,4,3,21355,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,153,Carlos Medina Astete,PE,crustle-dri,Crustle,7,6,0,4927,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,154,Hugo Agra Nicéas,BR,dragapult-ex,Dragapult,6,4,3,57201,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,155,Gabriel Barros,BR,lucario-hariyama,Lucario Hariyama,6,4,3,9006,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,156,Victor Uchoa,BR,dragapult-blaziken,Dragapult Blaziken,6,4,3,37671,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,157,José Marcelo de Oliveira,BR,metagross-cri,Metagross,6,4,3,57390,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,158,Hilton Barros,BR,dragapult-ex,Dragapult,6,4,3,21348,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,159,Rodrigo Ferreira Costa Pinto,BR,crustle-dri,Crustle,6,4,3,9409,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,160,Jefferson Yovera,PE,mega-excadrill-ex,Mega Excadrill,5,2,6,33840,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,161,Carlos Barros,BR,dragapult-ex,Dragapult,6,4,3,5275,21,1,0,0,,0
+0075,2026-10-03,TEF-30C,162,Marcelo carlos TEIXEIRA FILHO,BR,festival-lead,Dipplin,6,5,2,57306,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,163,Daniel Osorio,CL,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,6,5,2,57212,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,164,Changyu Liu,CN,alakazam-dusknoir,Alakazam Dusknoir,6,5,2,23463,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,165,Felipe Matos,BR,mega-excadrill-ex,Mega Excadrill,6,5,2,21211,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,166,Pedro Belfort,BR,dragapult-ex,Dragapult,6,5,2,34020,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,167,Henrique Guerra de Melo,BR,sharpedo-toxtricity,Sharpedo Toxtricity,5,3,5,57267,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,168,Wesley Araujo de Souza,BR,hops-trevenant,Hop's Trevenant,6,5,2,57328,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,169,Ivan Brito,BR,dragapult-ex,Dragapult,6,5,2,57312,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,170,Bruno Pontes,BR,mew-ex-30c,Mew Box,6,5,2,9494,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,171,Carlos Cruz,BR,dragapult-blaziken,Dragapult Blaziken,6,5,2,21370,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,172,Victor Kenzo Shibuya,BR,slowking-scr,Slowking,6,5,2,33786,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,173,Gabriel Lourenço Zeferino,BR,n-zoroark,N's Zoroark,6,5,2,37997,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,174,Matheus Ferreira,BR,n-zoroark,N's Zoroark,6,5,2,21142,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,175,Pedro Menezes,BR,mega-excadrill-ex,Mega Excadrill,6,5,2,57318,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,176,José Iuri Brito,BR,mega-chandelure-ex,Mega Chandelure,6,5,2,4924,20,1,0,0,,0
+0075,2026-10-03,TEF-30C,177,Davis Batista,BR,slowking-scr,Slowking,6,6,1,57210,19,1,0,0,,0
+0075,2026-10-03,TEF-30C,178,Caio Costa,BR,n-zoroark,N's Zoroark,6,6,1,5340,19,1,0,0,,0
+0075,2026-10-03,TEF-30C,179,Carlos Pedro Alverga,BR,rocket-mewtwo-ex,Rocket's Mewtwo,6,6,1,57538,19,1,0,0,,0
+0075,2026-10-03,TEF-30C,180,Augusto Junior,BR,kangaskhan-bouffalant,Kangaskhan Bouffalant,5,4,4,21216,19,1,0,0,,0
+0075,2026-10-03,TEF-30C,181,joão victor paz venancio,BR,dragapult-dusknoir,Dragapult Dusknoir,6,6,1,9810,19,1,0,0,,0
+0075,2026-10-03,TEF-30C,182,Leonardo Braga,BR,n-zoroark,N's Zoroark,5,4,4,4855,19,1,0,0,,0
+0075,2026-10-03,TEF-30C,183,Breno Bogéa Alves Passos,BR,n-zoroark,N's Zoroark,5,4,4,57188,19,1,0,0,,0
+0075,2026-10-03,TEF-30C,184,Bianca Cristie,BR,mega-starmie-ex,Mega Starmie,6,6,1,42294,19,1,0,0,,0
+0075,2026-10-03,TEF-30C,185,Lucas Vieira,BR,n-zoroark,N's Zoroark,5,5,3,33842,18,1,0,0,,0
+0075,2026-10-03,TEF-30C,186,Fernando França,BR,slowking-scr,Slowking,5,5,3,44953,18,1,0,0,,0
+0075,2026-10-03,TEF-30C,187,Eric Tortoza,BR,basic-box-m,Basic Box,5,5,3,9564,18,1,0,0,,0
+0075,2026-10-03,TEF-30C,188,LUCAS CLEMENTE,BR,lucario-hariyama,Lucario Hariyama,5,5,3,57363,18,1,0,0,,0
+0075,2026-10-03,TEF-30C,189,Pedro Provinciatti da silva,BR,basic-box-m,Basic Box,5,5,3,57266,18,1,0,0,,0
+0075,2026-10-03,TEF-30C,190,DARLON SIMPLICIO,BR,dragapult-dusknoir,Dragapult Dusknoir,5,5,3,57171,18,1,0,0,,0
+0075,2026-10-03,TEF-30C,191,Vinicius Alves Silva,BR,sharpedo-toxtricity,Sharpedo Toxtricity,4,4,5,57405,17,1,0,0,,0
+0075,2026-10-03,TEF-30C,192,Carlos Valdés,CL,n-zoroark,N's Zoroark,5,6,2,5554,17,1,0,0,,0
+0075,2026-10-03,TEF-30C,193,Vitoria Mialski,BR,crustle-dri,Crustle,5,6,2,4877,17,1,0,0,,0
+0075,2026-10-03,TEF-30C,194,lucas hariel,BR,slowking-scr,Slowking,5,6,2,33988,17,1,0,0,,0
+0075,2026-10-03,TEF-30C,195,Caio Araujo,BR,rocket-mewtwo-ex,Rocket's Mewtwo,5,4,1,57414,16,1,0,1,10,0
+0075,2026-10-03,TEF-30C,196,Caio Victor,,basic-box-m,Basic Box,5,2,1,57643,16,0,0,0,8,0
+0075,2026-10-03,TEF-30C,197,Santiago Blanco Gonzalez,BR,dragapult-ex,Dragapult,5,3,0,16107,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,198,Bruno Luis Litaiff Ramalho Junior,BR,dragapult-blaziken,Dragapult Blaziken,5,3,0,44751,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,199,Nicolas Henriquez,CL,n-zoroark,N's Zoroark,5,3,0,27103,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,200,Lucas Paz,BR,dragapult-dusknoir,Dragapult Dusknoir,5,3,0,33683,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,201,Heitor Barbosa,BR,basic-box-m,Basic Box,5,3,0,57187,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,202,Marco Garcia,BR,dragapult-ex,Dragapult,5,3,0,5367,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,203,ALEXANDRE BACK,BR,dragapult-ex,Dragapult,5,3,0,33738,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,204,Daniel Vitor Blaia Gouvea,BR,mega-excadrill-ex,Mega Excadrill,5,3,0,9353,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,205,Davi Namba,BR,dragapult-blaziken,Dragapult Blaziken,5,3,0,57546,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,206,Luís Gustavo Rattacaso,BR,sharpedo-toxtricity,Sharpedo Toxtricity,5,3,0,37701,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,207,Pedro Thiesen Schiochet,BR,dragapult-ex,Dragapult,5,3,0,5130,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,208,Hiago Thomé,BR,dragapult-ex,Dragapult,4,1,3,33835,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,209,Arthur Assis,BR,dragapult-ex,Dragapult,5,3,0,37951,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,210,José Carlos Gomes Pereira Santos,BR,rocket-mewtwo-ex,Rocket's Mewtwo,4,1,3,57325,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,211,Davi Sousa,BR,slowking-scr,Slowking,5,3,0,21387,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,212,Luiz Henrique Albuquerque Duarte da Silva,BR,dragapult-ex,Dragapult,5,3,0,21293,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,213,Fernando Maia Noronha,BR,dragapult-ex,Dragapult,5,3,0,4909,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,214,Rommel Bonfim Dos Reis Silva,BR,mega-dragonite-ex,Mega Dragonite,5,3,0,57356,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,215,Gustavo Henrique Marques,BR,festival-lead,Dipplin,5,3,0,44618,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,216,Gustavo Faustino,BR,basic-box-m,Basic Box,5,3,0,57355,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,217,Lucas Tortorello,BR,dragapult-ex,Dragapult,5,3,0,57228,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,218,Nicolas Magliulo,AR,alakazam-dudunsparce,Alakazam Dudunsparce,5,3,0,27038,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,219,Gabriel Veloso,BR,dragapult-ex,Dragapult,5,3,0,5095,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,220,Guilherme Barros,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,1,3,44620,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,221,Adriano Manzini Silva,BR,dragapult-ex,Dragapult,5,3,0,33794,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,222,Murilo Melo Mourtada,BR,festival-lead,Dipplin,4,1,3,37772,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,223,Ignacio Viejo,AR,n-zoroark,N's Zoroark,4,1,3,45110,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,224,Thalys Rosa,BR,crustle-dri,Crustle,5,3,0,4897,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,225,Murilo Mercadante,BR,dragapult-ex,Dragapult,5,3,0,5039,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,226,Pablo Pastene,CL,basic-box-m,Basic Box,4,1,3,57440,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,227,Maicon Dias,BR,dragapult-ex,Dragapult,5,3,0,16030,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,228,Jorge Rivero Daca,AR,dragapult-dusknoir,Dragapult Dusknoir,4,1,3,9144,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,229,Frances Kleiton da Silva,BR,alakazam-dudunsparce,Alakazam Dudunsparce,4,1,3,57247,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,230,MIKE WILLIAM LUCHO MOLINA,PE,dragapult-ex,Dragapult,4,1,3,51804,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,231,José Eudes Ferreira Velozo Filho,BR,sharpedo-toxtricity,Sharpedo Toxtricity,5,3,0,57334,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,232,matias diaz,CL,dragapult-ex,Dragapult,5,3,0,9074,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,233,Leonardo Zanardi,BR,slowking-scr,Slowking,5,3,0,9334,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,234,Marco Dardis,AR,dragapult-ex,Dragapult,5,3,0,9849,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,235,Júlio Raphael Oliveira Silva,BR,alakazam-dudunsparce,Alakazam Dudunsparce,5,3,0,57117,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,236,Ágape Maracajá,BR,alakazam-dudunsparce,Alakazam Dudunsparce,5,3,0,57400,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,237,Daichi Shimada,JP,dragapult-ex,Dragapult,5,3,0,12730,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,238,Adriano Kanazawa,BR,basic-box-m,Basic Box,5,3,0,9716,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,239,Emilio Cordero,CL,dragapult-ex,Dragapult,5,3,0,57508,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,240,Leonardo Souza,BR,dragapult-ex,Dragapult,5,3,0,5250,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,241,Martín Piquerez,UY,dragapult-dusknoir,Dragapult Dusknoir,5,3,0,4935,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,242,João Pedro Santos,BR,dragapult-blaziken,Dragapult Blaziken,5,3,0,57478,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,243,Jose Ribamar Teixeira neto,BR,dragapult-blaziken,Dragapult Blaziken,5,3,0,21204,15,0,0,0,8,0
+0075,2026-10-03,TEF-30C,244,Arthur Melo,BR,dragapult-dusknoir,Dragapult Dusknoir,4,2,2,57362,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,245,Gabriel Joly,BR,crustle-dri,Crustle,4,2,2,57552,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,246,Enzo Avila,BR,n-zoroark,N's Zoroark,4,2,2,51097,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,247,VINÍCIUS UEHARA,BR,dragapult-blaziken,Dragapult Blaziken,4,2,2,9406,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,248,Raphael Maia,BR,mega-excadrill-ex,Mega Excadrill,4,2,2,57459,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,249,Lucas Henrique Cavalcanti de Almeida,BR,dragapult-ex,Dragapult,4,2,2,57507,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,250,luiz oliveira,BR,alakazam-dudunsparce,Alakazam Dudunsparce,4,2,2,44440,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,251,Kaue Sales,BR,dhelmise-pbl,Dhelmise,4,2,2,5303,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,252,Danny Olivos Troncoso,CL,dragapult-dusknoir,Dragapult Dusknoir,4,2,2,41920,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,253,arthur azevedo,BR,alakazam-dudunsparce,Alakazam Dudunsparce,4,2,2,50617,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,254,Jonathan Lima,BR,basic-box-m,Basic Box,4,2,2,57528,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,255,Ramoses Dantas,BR,dragapult-ex,Dragapult,4,2,2,21435,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,256,Jhonny Elias Leal Pinto Silva,BR,alakazam-dudunsparce,Alakazam Dudunsparce,4,2,2,57150,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,257,mateus Porto,BR,dragapult-ex,Dragapult,4,2,2,21273,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,258,Luiz Gomes,BR,cynthia-garchomp-ex,Cynthia's Garchomp,4,2,2,37567,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,259,Fernando Henry,CL,slowking-scr,Slowking,4,2,2,8799,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,260,Nicolas Coppini,BR,dragapult-ex,Dragapult,4,2,2,38166,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,261,Claudio Armijo,CL,dragapult-blaziken,Dragapult Blaziken,4,2,2,26753,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,262,Gabriel dos Santos Souza,BR,dragapult-ex,Dragapult,4,2,2,33994,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,263,Flavia Almeida,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,4,2,2,57504,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,264,Rafael Arthou Stein,BR,dragapult-ex,Dragapult,4,2,2,57487,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,265,Pedro Jarandia,BR,dragapult-ex,Dragapult,4,2,2,57496,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,266,Joaquim Postal,BR,slowking-scr,Slowking,4,2,2,37954,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,267,Matías Garay,CL,n-zoroark,N's Zoroark,4,2,2,57381,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,268,Lucas Eduardo,BR,dragapult-ex,Dragapult,4,2,2,5376,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,269,Otavio Gouveia,BR,dragapult-ex,Dragapult,4,2,2,5117,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,270,Vicente Nunes da Silva Araujo,BR,crustle-dri,Crustle,4,2,2,57293,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,271,Cássio Sakamoto,BR,n-zoroark,N's Zoroark,4,2,2,9438,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,272,Rodrigo Andrade,BR,dhelmise-pbl,Dhelmise,4,2,2,21455,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,273,Rodrigo Mendonca,BR,dragapult-ex,Dragapult,4,2,2,57492,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,274,Anderson Brito,BR,dragapult-dusknoir,Dragapult Dusknoir,4,2,2,21186,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,275,Givaldo Moura,BR,dragapult-ex,Dragapult,4,2,2,57163,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,276,Vinicius Noronha,BR,cynthia-garchomp-ex,Cynthia's Garchomp,4,2,2,57133,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,277,Pedro Hage,BR,crustle-dri,Crustle,4,2,2,33779,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,278,Matias Ezequiel Velazquez Burgueño,AR,lucario-hariyama,Lucario Hariyama,4,2,2,16130,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,279,Juan Tayllor Souza Santos,BR,dragapult-ex,Dragapult,4,2,2,44765,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,280,Ignacio Castro Tello,CL,dragapult-blaziken,Dragapult Blaziken,4,2,2,41855,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,281,Javier Romero Ramos,CL,dragapult-ex,Dragapult,4,2,2,38119,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,282,César Miguel Dos Santos Arruda,BR,dragapult-ex,Dragapult,4,2,2,57316,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,283,Fábio Luiz Boff,BR,mega-starmie-ex,Mega Starmie,4,2,2,44815,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,284,Rodrigo Ceballos,AR,mega-excadrill-ex,Mega Excadrill,4,2,2,34078,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,285,Vinicius Ribeiro Melo,BR,dragapult-blaziken,Dragapult Blaziken,4,2,2,44466,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,286,Rafael Rosa,BR,dragapult-ex,Dragapult,4,2,2,57498,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,287,MATEUS LEWIN,BR,other,Other,4,2,2,9898,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,288,Nelson Lins,BR,dragapult-ex,Dragapult,4,2,2,33626,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,289,Gabriel Santos,BR,dragapult-dusknoir,Dragapult Dusknoir,4,2,2,34087,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,290,Phillipe Gaspar,BR,greninja-ex,Greninja,4,2,2,9238,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,291,Igor Leite,BR,mega-excadrill-ex,Mega Excadrill,4,2,2,21351,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,292,Ignacio Oyarzún Alonzo,CL,alakazam-dudunsparce,Alakazam Dudunsparce,4,2,2,9802,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,293,Felipe Miranda,BR,dragapult-blaziken,Dragapult Blaziken,4,2,2,33734,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,294,Jaime Martinez,CL,n-zoroark,N's Zoroark,4,2,2,9983,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,295,Raul Martins Costa Uchoa,BR,dragapult-blaziken,Dragapult Blaziken,4,2,2,21295,14,0,0,0,8,0
+0075,2026-10-03,TEF-30C,296,José Vitor Carvalho de Araújo,BR,dragapult-dusknoir,Dragapult Dusknoir,4,3,1,57232,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,297,Lucas Badaracco,UY,dragapult-ex,Dragapult,4,3,1,27398,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,298,Joel Valente,BR,n-zoroark,N's Zoroark,4,3,1,21526,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,299,Eduardo Vinande,BR,dragapult-ex,Dragapult,4,3,1,15974,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,300,Wagner Junior,BR,dragapult-ex,Dragapult,4,3,1,21385,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,301,Anderson Da Silva Fragoso,BR,dragapult-blaziken,Dragapult Blaziken,4,3,1,9917,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,302,Luis Lucena,BR,slowking-scr,Slowking,4,3,1,57105,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,303,Leonardo Viveiros,BR,n-zoroark,N's Zoroark,4,3,1,57359,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,304,Daniel Valdes Diaz,CL,alakazam-dusknoir,Alakazam Dusknoir,4,3,1,37721,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,305,João Azevedo da Silva,BR,dragapult-blaziken,Dragapult Blaziken,4,3,1,57438,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,306,Rafael Apolinário,BR,basic-box-m,Basic Box,4,3,1,57155,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,307,Bruno Rafael Pires de Melo Silva,BR,festival-lead,Dipplin,4,3,1,57173,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,308,Gustavo Pastorín Rojas,CL,dragapult-ex,Dragapult,4,3,1,9183,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,309,MARLLON ALVES,BR,mega-greninja-ex,Mega Greninja,4,3,1,38157,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,310,Thaisa Miyashiro,BR,slowking-scr,Slowking,4,3,1,37971,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,311,Agnon de Sousa,BR,n-zoroark,N's Zoroark,4,3,1,21133,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,312,Felipe Souza,BR,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1,44523,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,313,João Ricardo Firmino,BR,dragapult-ex,Dragapult,4,3,1,16251,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,314,Danilo de Freitas Antonietto,BR,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1,57144,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,315,William Bogner,BR,dragapult-ex,Dragapult,4,3,1,16425,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,316,Matheus Franca,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,4949,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,317,Ramón Espinoza,CL,n-zoroark,N's Zoroark,4,3,1,9576,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,318,Lucian Villaça,BR,sharpedo-toxtricity,Sharpedo Toxtricity,4,3,1,42437,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,319,Danilo Mendes Ferreira,BR,dragapult-blaziken,Dragapult Blaziken,4,3,1,21180,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,320,Luís Guilherme de Oliveira Azevedo,BR,n-zoroark,N's Zoroark,4,3,1,57272,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,321,Celso Junior,BR,dragapult-ex,Dragapult,3,1,4,57108,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,322,Jose Valdir Pessoa Neto,BR,n-zoroark,N's Zoroark,4,3,1,57241,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,323,Francisco Osorio,CL,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,57170,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,324,Vitor Yamashita,BR,dragapult-ex,Dragapult,4,3,1,9215,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,325,Sandro Frota Costa,BR,joltik-box,Joltik Box,3,1,4,21405,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,326,Nicolás AREVALO,CL,lopunny-dudunsparce,Lopunny Dudunsparce,4,3,1,16274,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,327,Cristofer Soares,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,37584,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,328,Pedro Calheiros,BR,n-zoroark,N's Zoroark,4,3,1,57060,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,329,Victor Bustamante,CL,dragapult-ex,Dragapult,4,3,1,38022,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,330,Alan Takahashi,BR,festival-lead,Dipplin,4,3,1,57225,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,331,Felipe Barreto,BR,crustle-dri,Crustle,4,3,1,9460,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,332,Pedro Vigato,BR,dragapult-ex,Dragapult,4,3,1,44642,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,333,Alexandre Schiller,BR,slowking-scr,Slowking,4,3,1,5171,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,334,Liedson Augusto,BR,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1,57329,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,335,Omar Lima Junior,BR,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1,9505,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,336,Fernando Albuquerque,BR,festival-lead,Dipplin,4,3,1,57084,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,337,Philippe Luiz Lima Moreira Pinto,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,5234,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,338,Filipe Fontenele,BR,dragapult-ex,Dragapult,4,3,1,21460,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,339,Pablo Láscar Carvajal,CL,dragapult-dusknoir,Dragapult Dusknoir,4,3,1,9192,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,340,CAIO GIRAO,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,1,4,57169,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,341,Thiago Suriel,BR,n-zoroark,N's Zoroark,4,3,1,21192,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,342,Carlos Henrique Marques,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,44812,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,343,Joel Pinheiro,BR,n-zoroark,N's Zoroark,4,3,1,21511,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,344,Henrique Jordão Figueiredo Alves,BR,dhelmise-pbl,Dhelmise,4,3,1,21515,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,345,Otávio César Ulbriecht Nascimento,BR,dragapult-blaziken,Dragapult Blaziken,4,3,1,16465,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,346,Denis Paiva Da Silva Filho,BR,dragapult-ex,Dragapult,4,3,1,57310,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,347,Eduardo Leite,BR,dragapult-ex,Dragapult,4,3,1,57116,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,348,Pablo Guzmán,CL,mega-chandelure-ex,Mega Chandelure,4,3,1,10057,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,349,Alessandro Langone,BR,festival-lead,Dipplin,4,3,1,44448,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,350,Iverson Clark,BR,dhelmise-pbl,Dhelmise,4,3,1,57256,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,351,LEONARDO MARTINS,BR,basic-box-m,Basic Box,4,3,1,44787,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,352,Humberto Guimarães,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,57276,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,353,Luis Eduardo,BR,slowking-scr,Slowking,4,3,1,21220,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,354,Nicolás Polito,CL,n-zoroark,N's Zoroark,4,3,1,9002,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,355,Jennyfer Ferreira,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,4,3,1,21165,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,356,Matheus José Faierstein de Sena Pires,BR,dragapult-ex,Dragapult,3,1,4,57248,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,357,Ryan Wesley da Costa,BR,dragapult-ex,Dragapult,3,1,4,5243,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,358,Agustín Carabelli,BR,dragapult-ex,Dragapult,4,3,1,33998,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,359,Ana Liberal,BR,dragapult-dusknoir,Dragapult Dusknoir,4,3,1,57131,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,360,Gustavo Oliveira,BR,cynthia-garchomp-ex,Cynthia's Garchomp,4,3,1,57254,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,361,Rafael Zangrando,BR,dragapult-dusknoir,Dragapult Dusknoir,4,3,1,9697,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,362,Leandro Amaral,BR,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1,9128,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,363,Edinaldo Verissimo,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,21327,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,364,Luis Pedro Ferrari Esbadalate,BR,basic-box-m,Basic Box,4,3,1,5019,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,365,Giovani Lopes,BR,dragapult-ex,Dragapult,4,3,1,4894,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,366,Caio Caires,BR,dragapult-ex,Dragapult,3,1,4,33863,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,367,Lucas Oliveira,BR,basic-box-m,Basic Box,4,3,1,44475,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,368,Rodrigo Takenouchi,BR,dragapult-ex,Dragapult,4,3,1,9991,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,369,Wytalo Silva,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,57233,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,370,Anderson dos Santos Nascimento,BR,mega-excadrill-ex,Mega Excadrill,4,3,1,57338,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,371,Jeckson Ribeiro,BR,dragapult-ex,Dragapult,4,3,1,57533,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,372,João Ribeiro,BR,dragapult-ex,Dragapult,4,3,1,57066,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,373,Francisco Camargo,BR,n-zoroark,N's Zoroark,4,3,1,33685,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,374,Luana Rodrigues,BR,basic-box-m,Basic Box,4,3,1,9955,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,375,Gustavo Ferreira,BR,dragapult-dusknoir,Dragapult Dusknoir,4,3,1,44595,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,376,André Bernacchi,BR,sharpedo-toxtricity,Sharpedo Toxtricity,4,3,1,9081,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,377,João Alcim Neves,BR,mew-ex-30c,Mew Box,4,3,1,9099,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,378,Gabriel Zara,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,33699,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,379,Agustin Perkins,AR,n-zoroark,N's Zoroark,4,3,1,5070,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,380,Fernando Alves,BR,crustle-dri,Crustle,4,3,1,21222,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,381,Johnatan Rodrigues,BR,mega-lucario-ex,Mega Lucario,4,3,1,57517,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,382,Vicente Varas,CL,dragapult-ex,Dragapult,4,3,1,57115,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,383,Rafael Bueno,BR,dragapult-ex,Dragapult,4,3,1,33642,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,384,PAULO HIGOR RAMALHO,BR,mega-excadrill-ex,Mega Excadrill,4,3,1,57489,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,385,Guilherme Geber,BR,dragapult-ex,Dragapult,3,1,4,33897,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,386,Ana Tereza,BR,cynthia-garchomp-ex,Cynthia's Garchomp,4,3,1,57252,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,387,Bruno Mazzarolo,BR,n-zoroark,N's Zoroark,4,3,1,57073,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,388,André Porto,BR,cynthia-garchomp-ex,Cynthia's Garchomp,4,3,1,9407,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,389,Guilherme Garcia Borges,BR,dhelmise-pbl,Dhelmise,4,3,1,57339,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,390,José Gustavo Macedo Assunção,BR,dhelmise-pbl,Dhelmise,4,3,1,57413,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,391,Lucas Eufrasio,BR,dragapult-ex,Dragapult,4,3,1,21255,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,392,Fellipe Sena,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,3,1,57384,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,393,João Guilherme Cavalcanti Marques,BR,cynthia-garchomp-ex,Cynthia's Garchomp,4,3,1,57261,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,394,Camilo Fernandez,CL,alakazam-dudunsparce,Alakazam Dudunsparce,4,3,1,6030,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,395,Higor Naves,BR,mega-lucario-ex,Mega Lucario,4,3,1,57447,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,396,Salmo Simon,BR,mega-venusaur-ex,Mega Venusaur,4,3,1,50626,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,397,Henrique Marques,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,4,3,1,44459,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,398,Washington Gabriel Gomes de Lima,BR,lucario-hariyama,Lucario Hariyama,4,3,1,57450,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,399,Silvio Filho,BR,mega-lucario-ex,Mega Lucario,4,3,1,57456,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,400,Geovane Alves de Freitas Junior,BR,alakazam-dusknoir,Alakazam Dusknoir,3,1,4,57259,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,401,Leonardo Momi,BR,dragapult-ex,Dragapult,4,3,1,57448,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,402,Erick Farias,BR,dragapult-ex,Dragapult,4,3,1,57246,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,403,Samuel Medeiros,BR,crustle-dri,Crustle,4,3,1,21484,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,404,Leonardo Andres ferreria oliva,CL,lopunny-dusknoir,Lopunny Dusknoir,4,3,1,16424,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,405,Endrews Oliveira,BR,crustle-dri,Crustle,4,3,1,4946,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,406,Daniel Cavalcante Maia,BR,dragapult-blaziken,Dragapult Blaziken,4,3,1,57399,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,407,V. Enzo Toledo,BR,dhelmise-pbl,Dhelmise,4,3,1,57235,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,408,Vinicius Junger,BR,dragapult-ex,Dragapult,4,3,1,16548,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,409,Andrey Lima Anastacio,BR,dragapult-blaziken,Dragapult Blaziken,4,3,1,33961,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,410,Gustavo Serafim,BR,dragapult-ex,Dragapult,4,3,1,5396,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,411,Rodrigo Prazeres,BR,alakazam-dusknoir,Alakazam Dusknoir,4,3,1,57421,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,412,Antônio Maykon Saraiva Santiago,BR,beedrill-ex-cri,Beedrill,4,3,1,57437,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,413,Nicholas Ikai,BR,lopunny-dudunsparce,Lopunny Dudunsparce,4,3,1,44563,13,0,0,0,8,0
+0075,2026-10-03,TEF-30C,414,Marcelo Dias,BR,rocket-mewtwo-ex,Rocket's Mewtwo,4,4,0,57227,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,415,Yuri Araújo,BR,dragapult-ex,Dragapult,4,4,0,16447,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,416,Carlos Gomes,BR,lopunny-dudunsparce,Lopunny Dudunsparce,4,4,0,9243,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,417,Pedro Teófilo,BR,lopunny-dudunsparce,Lopunny Dudunsparce,4,4,0,33973,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,418,Santiago Iván Rossi,AR,dragapult-ex,Dragapult,3,2,3,9327,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,419,Lautaro Allende,AR,dragapult-ex,Dragapult,3,2,3,45192,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,420,Ramon Paiva,BR,lucario-hariyama,Lucario Hariyama,4,4,0,50765,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,421,Nelson Barros,BR,slowking-scr,Slowking,4,4,0,5075,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,422,Felipe Augusto Souto Ananias,BR,slowking-scr,Slowking,3,2,3,21475,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,423,João Pedro Vilaça,BR,lucario-hariyama,Lucario Hariyama,4,4,0,57452,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,424,Agustin Castillo,BR,dragapult-dusknoir,Dragapult Dusknoir,3,2,3,50664,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,425,Bruno Sousa,BR,dragapult-ex,Dragapult,3,2,3,21520,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,426,caian silvestre,BR,n-zoroark,N's Zoroark,4,4,0,38138,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,427,Nicolas Bralla,CL,basic-box-m,Basic Box,4,4,0,8976,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,428,Rafael Sepulveda,CL,dragapult-ex,Dragapult,3,2,3,27060,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,429,Victor Lopes,BR,n-zoroark,N's Zoroark,4,4,0,46750,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,430,Pedro Librelato,BR,dragapult-ex,Dragapult,4,4,0,5156,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,431,Otaner Demarchi,BR,basic-box-m,Basic Box,4,4,0,4917,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,432,Enzo Paulino,BR,n-zoroark,N's Zoroark,4,4,0,37822,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,433,Winston Chiba,BR,dragapult-ex,Dragapult,4,4,0,9889,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,434,Fabrício Corredor,BR,lopunny-dusknoir,Lopunny Dusknoir,4,4,0,33665,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,435,Raul Barahona,CL,slowking-scr,Slowking,4,4,0,5342,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,436,Juan Jose Madrigal,CO,alakazam-dusknoir,Alakazam Dusknoir,4,4,0,29333,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,437,Guilherme Tersariol,BR,dragapult-blaziken,Dragapult Blaziken,3,2,3,44690,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,438,Thiago Bisewski,BR,dragapult-ex,Dragapult,4,4,0,5059,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,439,Igor Dias,BR,clefairy-ogerpon,Clefairy Ogerpon,4,4,0,57555,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,440,bruno pereira,BR,alakazam-dusknoir,Alakazam Dusknoir,4,4,0,5358,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,441,Ramon Barbosa,BR,dragapult-ex,Dragapult,4,4,0,37700,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,442,David Valdebenito,CL,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,2,3,26980,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,443,João Lucas Caetano de Souza,BR,dragapult-dusknoir,Dragapult Dusknoir,4,4,0,57484,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,444,Gustavo Teixeira Bione,BR,dragapult-ex,Dragapult,3,2,3,57132,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,445,Felipe Tudela,CL,dragapult-ex,Dragapult,3,2,3,57370,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,446,Paulo Gouveia de Freitas,BR,lopunny-dusknoir,Lopunny Dusknoir,4,4,0,5377,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,447,Lucas Daniel Madureira Morais,BR,basic-box-m,Basic Box,4,4,0,33692,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,448,Marco Antônio Mota,BR,dragapult-blaziken,Dragapult Blaziken,4,4,0,57089,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,449,Cristian Bergia,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,4,4,0,21161,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,450,Alan Lima,BR,beedrill-ex-cri,Beedrill,3,2,3,57283,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,451,Ricardo Vilela,BR,mega-absol-box,Mega Absol Box,4,4,0,5049,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,452,Emerson Mendonça,BR,lopunny-dudunsparce,Lopunny Dudunsparce,3,2,3,57291,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,453,Pedro Rebouças,BR,grimmsnarl-froslass,Grimmsnarl Froslass,4,4,0,57466,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,454,Philipp Leenen,BR,starmie-froslass,Starmie Froslass,4,4,0,57494,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,455,Jose Avila,CO,dragapult-dudunsparce,Dragapult Dudunsparce,4,4,0,57278,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,456,lucas galarce,AR,dragapult-ex,Dragapult,3,2,3,57470,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,457,Gianluca Carboni,CL,dragapult-ex,Dragapult,4,4,0,27554,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,458,Allan Cruz,BR,dragapult-ex,Dragapult,4,4,0,10007,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,459,Michael Koji Takano,BR,other,Other,4,4,0,34022,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,460,Bruno Rosa,BR,lopunny-dudunsparce,Lopunny Dudunsparce,4,4,0,16000,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,461,Rudson Guimarães,BR,dragapult-blaziken,Dragapult Blaziken,4,4,0,57471,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,462,FRANCISCO BETH ROJAS,CL,alakazam-dudunsparce,Alakazam Dudunsparce,3,2,3,57280,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,463,Jorge Martin,BR,lopunny-dudunsparce,Lopunny Dudunsparce,3,2,3,50973,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,464,Hugo Passos,BR,dragapult-ex,Dragapult,4,4,0,57520,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,465,Matheus Pacifico,BR,sharpedo-toxtricity,Sharpedo Toxtricity,4,4,0,57185,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,466,Alejandro Luciano Eijo,BR,basic-box-m,Basic Box,4,4,0,5244,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,467,João Vítor Moraes Castanho,BR,dragapult-dusknoir,Dragapult Dusknoir,4,4,0,34029,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,468,Arthur Liegel,BR,cynthia-garchomp-ex,Cynthia's Garchomp,4,4,0,50549,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,469,Erick Mateus Gomes de Souza,BR,dragapult-blaziken,Dragapult Blaziken,4,4,0,57263,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,470,Luccas Teves,BR,dragapult-ex,Dragapult,4,4,0,4879,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,471,Lucas Stirling,BR,lucario-hariyama,Lucario Hariyama,4,4,0,57419,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,472,Henrique Mancini Castilho,BR,dragapult-ex,Dragapult,3,2,3,37967,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,473,Raul Ribeiro,BR,rockets-honchkrow,Rocket's Honchkrow,4,4,0,57282,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,474,Diego Alejandro Grbin,AR,festival-lead,Dipplin,4,4,0,57480,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,475,Vinicius Silva,BR,basic-box-m,Basic Box,4,4,0,57123,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,476,Wendel Silva,BR,dragapult-ex,Dragapult,3,2,3,37949,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,477,Jeison Chaparro,CO,dragapult-ex,Dragapult,3,2,3,57340,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,478,Fido Perez,UY,alakazam-dudunsparce,Alakazam Dudunsparce,4,4,0,43123,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,479,Júnior Freitas,BR,grimmsnarl-froslass,Grimmsnarl Froslass,4,4,0,57074,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,480,GUILHERME BEHAR,BR,dragapult-ex,Dragapult,3,2,3,57279,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,481,Leonardo de Holanda,BR,n-zoroark,N's Zoroark,3,2,3,57368,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,482,Rennan Costa,BR,dragapult-ex,Dragapult,4,4,0,16049,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,483,Flávio Ricardson,BR,mega-venusaur-ex,Mega Venusaur,3,2,3,57127,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,484,Gael Piera,BR,lopunny-dudunsparce,Lopunny Dudunsparce,4,4,0,57221,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,485,Alexsandro Silva,BR,dragapult-ex,Dragapult,4,4,0,16551,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,486,Matias Guzman,CL,dragapult-blaziken,Dragapult Blaziken,4,4,0,57553,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,487,Alejandro Cabeza,CO,n-zoroark,N's Zoroark,3,2,3,31941,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,488,Monique Marques,BR,lopunny-dusknoir,Lopunny Dusknoir,4,4,0,9548,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,489,Ariel Jonatan Song,AR,dragapult-dusknoir,Dragapult Dusknoir,4,4,0,34032,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,490,Pedro Barbosa,BR,ethan-typhlosion,Ethan's Typhlosion,4,4,0,21311,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,491,Sarah Lima,BR,mega-excadrill-ex,Mega Excadrill,4,4,0,57222,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,492,Guilherme Silva,BR,grimmsnarl-froslass,Grimmsnarl Froslass,4,4,0,21151,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,493,Leonardo Giovani SANDRINI,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,2,3,57341,12,0,0,0,8,0
+0075,2026-10-03,TEF-30C,494,Lucas Reis,BR,dragapult-dusknoir,Dragapult Dusknoir,3,3,2,4864,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,495,Filiphe Sotero,BR,dragapult-ex,Dragapult,2,1,5,57488,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,496,Ruan Gondim,BR,crustle-dri,Crustle,3,3,2,57260,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,497,Gabriel Paulino Pache,BR,lucario-hariyama,Lucario Hariyama,3,3,2,44613,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,498,Lívson Henrique,BR,dragapult-ex,Dragapult,3,3,2,57167,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,499,Ricardo Manuel Gajardo Laubrin,CL,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2,9069,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,500,Jakobson Santos,BR,dragapult-ex,Dragapult,3,3,2,57184,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,501,Rodrigo Gomes Pascoal,BR,crustle-dri,Crustle,3,3,2,57139,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,502,Fabilson Ramos,BR,crustle-dri,Crustle,3,3,2,21265,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,503,Rafael Dias Campos,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,3,2,37781,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,504,Victor Freitas,BR,dragapult-ex,Dragapult,3,3,2,5301,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,505,Tiago Marins Amaral,BR,dragapult-ex,Dragapult,3,3,2,9036,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,506,Sullivan Arthur Citadin,BR,mega-excadrill-ex,Mega Excadrill,3,3,2,57526,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,507,Diogo Souza,BR,dragapult-ex,Dragapult,3,3,2,4900,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,508,Bento Tubino,BR,dhelmise-pbl,Dhelmise,3,3,2,57550,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,509,Samuel Morais Cerqueira,BR,dragapult-ex,Dragapult,3,3,2,57062,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,510,Pedro Mesquita,BR,dragapult-ex,Dragapult,3,3,2,21227,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,511,Matheus Macaubas,BR,grimmsnarl-froslass,Grimmsnarl Froslass,3,3,2,57462,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,512,Phillip Jorge,BR,dragapult-blaziken,Dragapult Blaziken,3,3,2,21200,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,513,Rodrigo Almeida,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2,57136,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,514,Jonh Pablo Vaz,BR,dragapult-dusknoir,Dragapult Dusknoir,3,3,2,57513,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,515,Alvaro Guerrero,CL,dragapult-ex,Dragapult,3,3,2,33663,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,516,Lucas Namba,BR,dragapult-ex,Dragapult,3,3,2,44597,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,517,Marcus Vinicius Da Silva,BR,rocket-mewtwo-ex,Rocket's Mewtwo,3,3,2,57315,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,518,Leonardo Agra,BR,dragapult-blaziken,Dragapult Blaziken,3,3,2,57490,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,519,Daniela Lima,BR,crustle-dri,Crustle,3,3,2,9890,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,520,Adolfo ignacio Gonzalez saez,CL,festival-lead,Dipplin,3,3,2,29267,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,521,João Santos,BR,crustle-dri,Crustle,3,3,2,9463,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,522,Bruno Watanabe,BR,dragapult-ex,Dragapult,3,3,2,5291,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,523,Pedro Giardini,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2,44495,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,524,Mathaus Luksevicius,BR,festival-lead,Dipplin,3,3,2,57389,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,525,Pedro Ivo Lopes,BR,dragapult-ex,Dragapult,3,3,2,44576,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,526,alissa costa,BR,cynthia-garchomp-ex,Cynthia's Garchomp,3,3,2,57377,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,527,Maderson Martins,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,3,2,57164,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,528,Ricardo Villablanca,CL,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2,57344,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,529,Lucas Russo,BR,basic-box-m,Basic Box,3,3,2,9025,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,530,vinicius santos,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2,21322,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,531,Pedro Neto Lima da Silva,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2,57521,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,532,STOESSEL JUNIOR,BR,basic-box-m,Basic Box,3,3,2,5413,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,533,Carlos Eduardo Medeiros,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2,21556,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,534,Leandra Marx,BR,dragapult-dusknoir,Dragapult Dusknoir,3,3,2,37866,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,535,Andrey Basilio,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2,57229,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,536,Leonardo Arantes,BR,basic-box-m,Basic Box,3,3,2,57481,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,537,Carol Luckesi,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,3,2,57383,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,538,Alejandro Soto,CL,mew-ex-30c,Mew Box,3,3,2,42225,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,539,David Jr Escalante,PE,dragapult-ex,Dragapult,3,3,2,57444,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,540,Felipe Pérez Tapia,CL,lucario-hariyama,Lucario Hariyama,3,3,2,42595,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,541,Alexander Marques Avistá,BR,crustle-dri,Crustle,3,3,2,10013,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,542,Alannys de Oliveira,BR,cynthia-garchomp-ex,Cynthia's Garchomp,3,3,2,57059,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,543,Ricardo Duguet,CL,dragapult-ex,Dragapult,3,3,2,38076,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,544,Rafael Maruta,BR,dragapult-ex,Dragapult,3,3,2,37868,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,545,Daniel Baeta Neves,BR,dragapult-ex,Dragapult,3,3,2,16239,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,546,Felipe garcia,BR,dragapult-dusknoir,Dragapult Dusknoir,3,3,2,4968,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,547,Adelson Araujo,BR,mega-lucario-ex,Mega Lucario,3,3,2,57404,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,548,Alex Oliveira,BR,dragapult-blaziken,Dragapult Blaziken,3,3,2,9351,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,549,Luiz Fellype Silveira de Oliveira de Souza,BR,dragapult-ex,Dragapult,3,3,2,21491,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,550,carlos eduardo,BR,stevens-metagross,Steven's Metagross,2,1,5,57430,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,551,Hiago Santos,BR,dragapult-ex,Dragapult,3,3,2,57319,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,552,Estevam Torezani,BR,dragapult-ex,Dragapult,3,3,2,33741,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,553,Caio Diego,BR,rockets-honchkrow,Rocket's Honchkrow,3,3,2,57258,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,554,Rafael Luksevicius,BR,crustle-dri,Crustle,3,3,2,57190,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,555,Alan Vion,AR,dragapult-ex,Dragapult,3,3,2,57429,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,556,HOSANA SOUZA,BR,greninja-ex,Greninja,3,3,2,57091,11,0,0,0,8,0
+0075,2026-10-03,TEF-30C,557,Cristian Toledo,AR,dragapult-ex,Dragapult,2,2,4,57098,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,558,Danilo Menezes,BR,dragapult-ex,Dragapult,2,2,4,57159,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,559,Luan Sacramento,BR,dragapult-ex,Dragapult,3,4,1,21140,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,560,Jeilanny Castro,BR,slowking-scr,Slowking,3,4,1,57354,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,561,Andre Guerra,BR,lopunny-dusknoir,Lopunny Dusknoir,3,4,1,50958,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,562,Thalys Alencar,BR,cynthia-garchomp-ex,Cynthia's Garchomp,3,3,1,50591,10,0,0,1,7,0
+0075,2026-10-03,TEF-30C,563,Guilherme Pinheiro,BR,crustle-dri,Crustle,2,2,4,21540,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,564,Sonielson Silva,BR,lopunny-dudunsparce,Lopunny Dudunsparce,3,4,1,57423,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,565,Rogerio Rodrigues,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,4,1,44719,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,566,TIAGO ROCHA GOMES,BR,crustle-dri,Crustle,3,4,1,5297,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,567,Pedro Turra,BR,dragapult-blaziken,Dragapult Blaziken,3,4,1,5386,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,568,JADIEL SILVA LEITE,BR,dragapult-ex,Dragapult,3,4,1,16310,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,569,Mateus Reis,BR,basic-box-m,Basic Box,3,4,1,57299,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,570,RAFAEL DIAS,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,4,1,57549,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,571,Matheus Alves dos Santos,BR,grimmsnarl-froslass,Grimmsnarl Froslass,3,4,1,57395,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,572,Gabriel Oliveira,BR,dragapult-ex,Dragapult,3,4,1,57113,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,573,Khriztian Bastias,BR,n-zoroark,N's Zoroark,3,4,1,50671,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,574,Pedro Luna,BR,dragapult-ex,Dragapult,3,4,1,57096,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,575,Gabriel Bezerra,BR,dragapult-dusknoir,Dragapult Dusknoir,3,4,1,57275,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,576,Vinicius Pereira,BR,basic-box-m,Basic Box,3,4,1,57204,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,577,Kauai Palmeira,BR,slowking-scr,Slowking,3,4,1,9241,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,578,DANIEL BEZERRA,BR,dragapult-ex,Dragapult,3,4,1,21389,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,579,Pedro Almeida,BR,n-zoroark,N's Zoroark,3,4,1,57172,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,580,Letícia Vieira Silva,BR,starmie-froslass,Starmie Froslass,3,3,1,21496,10,0,0,1,7,0
+0075,2026-10-03,TEF-30C,581,Renato Christian,BR,dragapult-ex,Dragapult,3,4,1,9151,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,582,Gleydson Bernardo Pimentel Silva,BR,lopunny-dusknoir,Lopunny Dusknoir,3,4,1,57439,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,583,Diego González,CL,dragapult-ex,Dragapult,3,4,1,38031,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,584,ANA CAROLINA GALVÃO,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,4,1,57332,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,585,Matheus Almeida,BR,dragapult-ex,Dragapult,3,4,1,57374,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,586,Thalisson Maximino Leite Silva,BR,alakazam-dusknoir,Alakazam Dusknoir,3,4,1,57240,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,587,Vitor Augusto Almeida de Moura,BR,slowking-scr,Slowking,3,4,1,57177,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,588,Leonardo Guilherme Lima Rodrigues de Morais Sobreira,BR,mega-excadrill-ex,Mega Excadrill,3,4,1,37875,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,589,Vicente (MoeHawk) Canales-Loyola,PY,n-zoroark,N's Zoroark,3,4,1,5313,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,590,Augusto Gallego,BR,alakazam-dusknoir,Alakazam Dusknoir,3,4,1,50633,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,591,Denilson Nunes,BR,alakazam-dusknoir,Alakazam Dusknoir,3,4,1,57313,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,592,Leonardo Danna,BR,basic-box-m,Basic Box,3,4,1,5088,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,593,Luiza Back,BR,basic-box-m,Basic Box,3,4,1,5363,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,594,Fred Medeiros,BR,dragapult-ex,Dragapult,3,4,1,57372,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,595,Marcelo Cansian,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,4,1,5289,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,596,Adriano James,,lucario-hariyama,Lucario Hariyama,3,4,1,57556,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,597,Elizeu Becker,BR,mega-chandelure-ex,Mega Chandelure,3,4,1,57199,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,598,Rodrigo Guedes,BR,dragapult-ex,Dragapult,3,4,1,57460,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,599,Peter Miguel Fidelis Alexandre,BR,dragapult-ex,Dragapult,2,2,4,38108,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,600,Pedro Azevedo,BR,lopunny-dusknoir,Lopunny Dusknoir,3,4,1,57218,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,601,Júnio Fernandes,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,4,1,5155,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,602,Leonardo Raggio,BR,basic-box-m,Basic Box,3,4,1,50736,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,603,Fmarcos BrAm,BR,basic-box-m,Basic Box,3,4,1,57213,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,604,Leonardo Martins,BR,dragapult-dusknoir,Dragapult Dusknoir,3,4,1,57473,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,605,Ewerton Josepher,BR,toxtricity-box,Toxtricity Box,3,4,1,57505,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,606,Guilherme Mourão,BR,lopunny-dudunsparce,Lopunny Dudunsparce,3,4,1,37602,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,607,Rodrigo Penoni,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,4,1,50709,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,608,Patricio Marcelo,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,4,1,57143,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,609,HUGO ALMEIDA,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,4,1,9644,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,610,Camilo Luttecke,CL,dragapult-ex,Dragapult,3,4,1,42314,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,611,Matheus Duarte,BR,mega-excadrill-ex,Mega Excadrill,2,2,4,21517,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,612,pascal donoso,CL,mega-starmie-ex,Mega Starmie,3,4,1,16115,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,613,Filipe Cortez,BR,slowking-scr,Slowking,3,4,1,21261,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,614,Thiago Pilotto,BR,dragapult-blaziken,Dragapult Blaziken,3,4,1,5166,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,615,Rodrigo Escosteguy Medronho,BR,rockets-honchkrow,Rocket's Honchkrow,3,4,1,57347,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,616,Mateus Mendes,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,4,1,37174,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,617,Roberto Mendes,BR,dragapult-ex,Dragapult,3,4,1,57069,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,618,Beatriz Costa,BR,dragapult-ex,Dragapult,3,4,1,37590,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,619,Yuri Landim,BR,dragapult-ex,Dragapult,3,4,1,57443,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,620,João Bahiense,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,4,1,57137,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,621,Luciano Reis,BR,dragapult-dusknoir,Dragapult Dusknoir,3,4,1,5422,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,622,Gabriel Melo,BR,ethan-typhlosion,Ethan's Typhlosion,3,4,1,57379,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,623,Luiz Filipe Cavalcanti de Albuquerque,BR,festival-lead,Dipplin,3,4,1,57194,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,624,Lucas Keiji Hori Rosa,BR,basic-box-m,Basic Box,3,4,1,5295,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,625,Jesulen Vicente,BR,n-zoroark,N's Zoroark,3,4,1,57100,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,626,Laura Ramalho,BR,basic-box-m,Basic Box,3,4,1,33633,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,627,Julio Brandão,BR,dragapult-dusknoir,Dragapult Dusknoir,3,4,1,57198,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,628,Enrico Vieira,BR,sharpedo-toxtricity,Sharpedo Toxtricity,2,2,4,34000,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,629,Yasmin Lopes,BR,cynthia-garchomp-ex,Cynthia's Garchomp,3,4,1,44731,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,630,Wellington Gabriel de Lima Alves,BR,rockets-honchkrow,Rocket's Honchkrow,3,4,1,57472,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,631,JORDANIA LUZIA PEREIRA RAMOS DE FRANÇ,BR,grimmsnarl-froslass,Grimmsnarl Froslass,3,4,1,57216,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,632,Wagner Barros,BR,dragapult-ex,Dragapult,3,4,1,57346,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,633,João Victor Calado,BR,lopunny-dudunsparce,Lopunny Dudunsparce,3,4,1,50891,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,634,joão luiz figueiredo bisneto,BR,alakazam-dusknoir,Alakazam Dusknoir,3,4,1,57294,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,635,caique barral,BR,alakazam-dudunsparce,Alakazam Dudunsparce,3,4,1,33880,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,636,Daniel Neves Vailan,BR,starmie-froslass,Starmie Froslass,3,4,1,44768,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,637,DECIO AGUIAR,BR,dragapult-ex,Dragapult,3,4,1,57514,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,638,João Lustosa,BR,dragapult-ex,Dragapult,3,4,1,57547,10,0,0,0,8,0
+0075,2026-10-03,TEF-30C,639,Guilherme Savio,BR,dragapult-ex,Dragapult,3,3,0,57525,9,0,0,1,6,0
+0075,2026-10-03,TEF-30C,640,Vinícius fernandez,BR,n-zoroark,N's Zoroark,3,3,0,5107,9,0,0,1,6,0
+0075,2026-10-03,TEF-30C,641,Henrique Guedes Formiga,BR,mega-excadrill-ex,Mega Excadrill,3,5,0,21291,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,642,Luiz Fernando Nascimento da Silva,BR,dragapult-ex,Dragapult,3,5,0,57463,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,643,Andre Neves,BR,festival-lead,Dipplin,3,5,0,57134,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,644,Thiago Carvalho,BR,dhelmise-pbl,Dhelmise,2,3,3,37978,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,645,Julia Hornick,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,4,0,57087,9,0,0,1,7,0
+0075,2026-10-03,TEF-30C,646,WILLIAN DE PAULA,BR,slowking-scr,Slowking,3,5,0,33653,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,647,Carlos R.S.Neto,BR,stevens-metagross,Steven's Metagross,3,5,0,57243,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,648,Pedro Messias,BR,mew-ex-30c,Mew Box,3,4,0,4991,9,0,0,1,7,0
+0075,2026-10-03,TEF-30C,649,Damian Fernandez Urroz,AR,lopunny-dusknoir,Lopunny Dusknoir,3,5,0,5064,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,650,João Rosa,BR,festival-lead,Dipplin,2,2,3,57333,9,0,0,1,7,0
+0075,2026-10-03,TEF-30C,651,João Gabriel,BR,dragapult-ex,Dragapult,3,4,0,57323,9,0,0,1,7,0
+0075,2026-10-03,TEF-30C,652,Luiz Sena,BR,lopunny-dudunsparce,Lopunny Dudunsparce,2,3,3,57245,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,653,caio matheus bezerra da silva,BR,festival-lead,Dipplin,3,3,0,57536,9,0,0,1,6,0
+0075,2026-10-03,TEF-30C,654,Ronald Gonçalves,BR,n-zoroark,N's Zoroark,2,3,3,57064,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,655,José Cleiton Silva,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,3,0,57385,9,0,0,1,6,0
+0075,2026-10-03,TEF-30C,656,André Neto,BR,dragapult-ex,Dragapult,3,5,0,9957,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,657,Gabriel Pontes,BR,dragapult-dusknoir,Dragapult Dusknoir,3,4,0,10038,9,0,0,1,7,0
+0075,2026-10-03,TEF-30C,658,Ismael Valdes,CL,lopunny-dusknoir,Lopunny Dusknoir,3,5,0,37797,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,659,Federico Castro,UY,starmie-froslass,Starmie Froslass,3,5,0,57153,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,660,Nahuel Avalos,AR,alakazam-dudunsparce,Alakazam Dudunsparce,2,3,3,5269,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,661,Eduardo Fonseca,BR,starmie-froslass,Starmie Froslass,3,5,0,57535,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,662,Giovanni Chacon,BR,basic-box-m,Basic Box,3,5,0,44654,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,663,Wallace Cavalcante,BR,dhelmise-pbl,Dhelmise,2,2,3,57524,9,0,0,1,7,0
+0075,2026-10-03,TEF-30C,664,Guilherme Borges,BR,other,Other,3,5,0,57061,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,665,Milton Andrade,BR,crustle-dri,Crustle,3,5,0,21494,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,666,Rafael Gomes de Almeida,BR,slowking-scr,Slowking,3,4,0,9377,9,0,0,1,7,0
+0075,2026-10-03,TEF-30C,667,André Moreira,BR,mega-lucario-ex,Mega Lucario,3,5,0,50607,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,668,Igor Nunes,BR,hop-zacian,Hop's Zacian,2,3,3,21438,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,669,Victor Viana,BR,basic-box-m,Basic Box,3,4,0,57082,9,0,0,1,7,0
+0075,2026-10-03,TEF-30C,670,João Guilherme de França Bragaia,BR,mega-excadrill-ex,Mega Excadrill,3,5,0,9583,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,671,Christtyan Ramos,BR,cynthia-garchomp-ex,Cynthia's Garchomp,2,3,3,57345,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,672,Renato Guardiato,BR,dragapult-ex,Dragapult,3,5,0,57196,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,673,Dilson Albuquerque,BR,basic-box-m,Basic Box,3,3,0,57104,9,0,0,1,6,0
+0075,2026-10-03,TEF-30C,674,Alejandro Rivera,CO,alakazam-dusknoir,Alakazam Dusknoir,3,5,0,12558,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,675,Douglas Lira,BR,dragapult-dusknoir,Dragapult Dusknoir,3,5,0,57467,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,676,Gabriel Andrade,BR,dragapult-ex,Dragapult,3,5,0,57215,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,677,Giovanni Chrysostomo,BR,dragapult-dusknoir,Dragapult Dusknoir,3,5,0,51001,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,678,Thiago Carpinteiro,BR,dragapult-dusknoir,Dragapult Dusknoir,2,3,3,44542,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,679,Eduardo Pozo Sandoval,CL,alakazam-dudunsparce,Alakazam Dudunsparce,2,3,3,57211,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,680,Anderson Proscholdt,BR,dragapult-ex,Dragapult,3,5,0,4871,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,681,Javier Rubí Miranda,CL,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,5,0,42590,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,682,GABRIEL DA SILVA,BR,lucario-hariyama,Lucario Hariyama,3,5,0,57309,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,683,João Nunes,BR,ceruledge-ex,Ceruledge,3,5,0,57365,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,684,Vitor Kleindinst Figueiredo,BR,festival-lead,Dipplin,2,3,3,9796,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,685,Hewerton Amadeu,BR,dhelmise-pbl,Dhelmise,3,5,0,21557,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,686,Stiven Souza,BR,dragapult-dusknoir,Dragapult Dusknoir,3,3,0,57152,9,0,0,1,6,0
+0075,2026-10-03,TEF-30C,687,Sérgio Lucas,BR,lucario-hariyama,Lucario Hariyama,3,3,0,57249,9,0,0,1,6,0
+0075,2026-10-03,TEF-30C,688,Gabriel Santos,BR,mega-lucario-ex,Mega Lucario,3,5,0,57106,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,689,Gustavo Barbosa,BR,dragapult-dusknoir,Dragapult Dusknoir,3,5,0,50656,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,690,Kleber Fanini,BR,mega-excadrill-ex,Mega Excadrill,3,5,0,57070,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,691,Maiky Gabriel Reinaldo Batista,BR,dragapult-ex,Dragapult,3,5,0,33631,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,692,Willams Apolo Santos Albuquerque,BR,crustle-dri,Crustle,2,3,3,57371,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,693,Victor durval Rios de Araújo Costa,BR,dhelmise-pbl,Dhelmise,3,5,0,57378,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,694,Lucas Paiva,BR,seaking-pre,Seaking Festival Lead,3,5,0,57506,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,695,Victor Virgolino,BR,basic-box-m,Basic Box,3,5,0,57503,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,696,Bruna Lima,BR,dragapult-dusknoir,Dragapult Dusknoir,3,5,0,57373,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,697,Roberto Durli,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,5,0,57274,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,698,Bruno Firriolo,IT,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,5,0,5360,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,699,Nicola Latorraca,BR,crustle-dri,Crustle,3,4,0,57418,9,0,0,1,7,0
+0075,2026-10-03,TEF-30C,700,Lucas Galvão Pereira,BR,lucario-hariyama,Lucario Hariyama,3,3,0,57427,9,0,0,1,6,0
+0075,2026-10-03,TEF-30C,701,Bruno Araujo,BR,mega-chandelure-ex,Mega Chandelure,3,5,0,57186,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,702,Medson Ribeiro,BR,cynthia-garchomp-ex,Cynthia's Garchomp,2,3,3,57206,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,703,Pedro Costa,BR,n-zoroark,N's Zoroark,3,5,0,57451,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,704,Ana Carla Bezerra Silva,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,5,0,21507,9,0,0,0,8,0
+0075,2026-10-03,TEF-30C,705,Felipe Mizutani,BR,dragapult-ex,Dragapult,2,2,2,44675,8,0,0,1,6,0
+0075,2026-10-03,TEF-30C,706,Leonardo Santos,BR,dragapult-ex,Dragapult,2,3,2,16441,8,0,0,1,7,0
+0075,2026-10-03,TEF-30C,707,Ronierison Lima,BR,slowking-scr,Slowking,2,4,2,33716,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,708,Lucas Lima,BR,dragapult-ex,Dragapult,2,3,2,57391,8,0,0,1,7,0
+0075,2026-10-03,TEF-30C,709,felipe william,BR,crustle-dri,Crustle,2,4,2,5162,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,710,Henrique Andrade,BR,dragapult-ex,Dragapult,2,2,2,57071,8,0,0,1,6,0
+0075,2026-10-03,TEF-30C,711,Victor Santos,BR,dragapult-ex,Dragapult,2,2,2,57302,8,0,0,1,6,0
+0075,2026-10-03,TEF-30C,712,Gabriel Modesto,BR,dragapult-ex,Dragapult,2,4,2,8968,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,713,Tiago Saliba,BR,dragapult-blaziken,Dragapult Blaziken,2,3,2,16120,8,0,0,1,7,0
+0075,2026-10-03,TEF-30C,714,Luis Javier Murcia Baracaldo,BR,lopunny-dudunsparce,Lopunny Dudunsparce,2,3,2,57093,8,0,0,1,7,0
+0075,2026-10-03,TEF-30C,715,Adryelle Costa,BR,festival-lead,Dipplin,2,2,2,57237,8,0,0,1,6,0
+0075,2026-10-03,TEF-30C,716,Matheus Gomes,BR,mega-excadrill-ex,Mega Excadrill,2,3,2,57223,8,0,0,1,7,0
+0075,2026-10-03,TEF-30C,717,Guilherme Santos,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,3,2,44444,8,0,0,1,7,0
+0075,2026-10-03,TEF-30C,718,Henrique Santos,BR,dhelmise-pbl,Dhelmise,2,4,2,57454,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,719,Leonardo Melo,BR,dragapult-blaziken,Dragapult Blaziken,2,2,2,57388,8,0,0,1,6,0
+0075,2026-10-03,TEF-30C,720,Joseildo Barbosa da Silva Junior,BR,dragapult-dusknoir,Dragapult Dusknoir,2,4,2,44602,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,721,Lohan Stone,BR,dragapult-ex,Dragapult,2,4,2,57151,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,722,Douglas Borges,BR,alakazam-dusknoir,Alakazam Dusknoir,2,3,2,5223,8,0,0,1,7,0
+0075,2026-10-03,TEF-30C,723,Anderson Araújo,BR,alakazam-dusknoir,Alakazam Dusknoir,2,4,2,5076,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,724,Joyce Freire,BR,ceruledge-ex,Ceruledge,2,4,2,57336,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,725,PEDRO ALVIM,BR,crustle-dri,Crustle,2,4,2,44573,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,726,Thales Andrade,BR,cynthia-garchomp-ex,Cynthia's Garchomp,2,3,2,5294,8,0,0,1,7,0
+0075,2026-10-03,TEF-30C,727,Frederico Assis,BR,hop-zacian,Hop's Zacian,2,4,2,9462,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,728,GABRIEL DUARTE,BR,cynthia-garchomp-ex,Cynthia's Garchomp,2,2,2,57183,8,0,0,1,6,0
+0075,2026-10-03,TEF-30C,729,Amanda Gonzalez,BR,dragapult-ex,Dragapult,2,4,2,9411,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,730,Marcio Junior,BR,cynthia-garchomp-ex,Cynthia's Garchomp,2,4,2,57495,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,731,Roberto Oliveira,BR,dhelmise-pbl,Dhelmise,2,4,2,16401,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,732,Jose Guedes,BR,alakazam-dudunsparce,Alakazam Dudunsparce,2,4,2,57287,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,733,Roberto maximiliano Gonzalez Perez de Arce,CL,dragapult-dusknoir,Dragapult Dusknoir,2,4,2,57219,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,734,Igor Augusto,BR,lucario-hariyama,Lucario Hariyama,2,4,2,57154,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,735,Diego Bolivar,CL,dragapult-ex,Dragapult,2,4,2,57485,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,736,Arthur Sarmento,BR,n-zoroark,N's Zoroark,2,4,2,57358,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,737,Matheus Enrique Alves,BR,dragapult-ex,Dragapult,2,4,2,57409,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,738,Leandro Cavalcanti,BR,dragapult-dusknoir,Dragapult Dusknoir,2,4,2,57337,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,739,ARTHUR LEMOS,BR,dragapult-ex,Dragapult,2,4,2,57077,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,740,Jheyssy Rocha,BR,mega-lucario-ex,Mega Lucario,2,3,2,9127,8,0,0,1,7,0
+0075,2026-10-03,TEF-30C,741,Artur Rodrigues,BR,festival-lead,Dipplin,2,4,2,57197,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,742,Dymas Rodrigues Nunes,BR,slowking-scr,Slowking,2,4,2,57357,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,743,João Victor,BR,dhelmise-pbl,Dhelmise,2,4,2,57109,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,744,Rafaella Silva,BR,starmie-froslass,Starmie Froslass,2,4,2,57477,8,0,0,0,8,0
+0075,2026-10-03,TEF-30C,745,Danilo Da Silva Ciciliotti,BR,dragapult-ex,Dragapult,1,2,4,50849,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,746,luiz henrique romanini,BR,dragapult-ex,Dragapult,2,4,1,9631,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,747,Hugo Casaroto,BR,lopunny-dusknoir,Lopunny Dusknoir,2,3,1,33881,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,748,Guilherme Araujo,BR,mega-excadrill-ex,Mega Excadrill,2,3,1,57102,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,749,Filipe Barbosa Amorim,BR,mega-excadrill-ex,Mega Excadrill,2,4,1,57530,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,750,Esdras Lucena,BR,n-zoroark,N's Zoroark,2,3,1,57081,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,751,André Miranda,BR,alakazam-dusknoir,Alakazam Dusknoir,2,4,1,5149,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,752,Weslley Marins,BR,dragapult-dusknoir,Dragapult Dusknoir,2,4,1,57303,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,753,Aderbal Sabrá,BR,alakazam-dusknoir,Alakazam Dusknoir,2,4,1,16041,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,754,Anthony Ribeiro,BR,alakazam-dudunsparce,Alakazam Dudunsparce,2,4,1,5211,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,755,Caio Monte,BR,festival-lead,Dipplin,2,3,1,57502,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,756,Ribamar José Bassan Filho,BR,sharpedo-toxtricity,Sharpedo Toxtricity,1,2,4,5331,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,757,André Meneses,BR,ethan-typhlosion,Ethan's Typhlosion,2,5,1,57090,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,758,Edmond Jacob,BR,dragapult-blaziken,Dragapult Blaziken,2,4,1,57175,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,759,Thales Barros,BR,dragapult-ex,Dragapult,2,3,1,57083,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,760,Vinicius Costa,BR,dragapult-ex,Dragapult,2,3,1,8994,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,761,Leticia Dias,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,5,1,37683,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,762,Lucas Alencar,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,5,1,9900,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,763,LUIZ GUSTHAVO DE ALBUQUERQUE,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,3,1,57518,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,764,João Gabriel Sales da Silveira Alvetti,BR,basic-box-m,Basic Box,2,5,1,57441,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,765,Lucas Henrique,BR,mega-excadrill-ex,Mega Excadrill,2,5,1,57537,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,766,Raul Oliveira,BR,dragapult-ex,Dragapult,2,5,1,37582,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,767,Luiz Henrique,BR,dragapult-ex,Dragapult,2,4,1,57251,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,768,LUCCA FOLENA,BR,n-zoroark,N's Zoroark,2,3,1,9159,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,769,Filipe Alencar,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,3,1,57238,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,770,Bruno Jorge Souza,BR,lucario-hariyama,Lucario Hariyama,2,4,1,57080,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,771,Guilherme Vaz,BR,dhelmise-pbl,Dhelmise,2,4,1,57458,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,772,Erberson Rodrigues da Silva,BR,mega-excadrill-ex,Mega Excadrill,1,3,4,21508,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,773,Ádria Mori,BR,basic-box-m,Basic Box,2,5,1,38047,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,774,João Vitor Melo Nascimento,BR,slowking-scr,Slowking,2,5,1,57433,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,775,Igor Guimarães,BR,n-zoroark,N's Zoroark,2,3,1,44969,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,776,Vanessa do Nascimento Santos,BR,dragapult-dusknoir,Dragapult Dusknoir,2,3,1,57320,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,777,Isaias Batalha,BR,dragapult-ex,Dragapult,2,4,1,57411,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,778,Bruna Mendes,BR,dragapult-dusknoir,Dragapult Dusknoir,2,5,1,57469,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,779,Miguel Arata,CL,mega-excadrill-ex,Mega Excadrill,2,5,1,57292,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,780,iago silva,BR,kangaskhan-bouffalant,Kangaskhan Bouffalant,2,5,1,57401,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,781,Gustavo Barroso Pessanha Bastos,BR,basic-box-m,Basic Box,2,5,1,57208,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,782,Andre Maciel Vieira de Melo,BR,hop-zacian,Hop's Zacian,2,3,1,57545,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,783,Gabriel Cardoso,BR,cynthia-garchomp-ex,Cynthia's Garchomp,2,5,1,57402,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,784,Mateus Costa,BR,n-zoroark,N's Zoroark,2,5,1,50702,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,785,Romario Jonas Veloso,BR,mega-excadrill-ex,Mega Excadrill,1,3,4,57393,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,786,Victor Montenegro,BR,dragapult-ex,Dragapult,2,5,1,57101,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,787,Guilherme Pimentel,BR,basic-box-m,Basic Box,2,5,1,57499,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,788,Igor Franca Gadelha Filho,BR,n-zoroark,N's Zoroark,2,5,1,57192,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,789,Amilton Junior,BR,dragapult-ex,Dragapult,2,5,1,57529,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,790,Ribamar Netto,BR,dragapult-blaziken,Dragapult Blaziken,2,4,1,57324,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,791,Fernando Silva,BR,flareon-noctowl,Flareon Noctowl,2,5,1,57343,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,792,Pedro Neto,BR,mega-excadrill-ex,Mega Excadrill,2,4,1,57298,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,793,Luiz Filipe Cavalcanti,BR,crustle-dri,Crustle,2,3,1,57367,7,0,0,1,6,0
+0075,2026-10-03,TEF-30C,794,Diuary da Silva Clementino,BR,manectric-eelektrik,Manectric Eelektrik,2,5,1,57063,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,795,Debora Garros,BR,dragapult-ex,Dragapult,2,5,1,57203,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,796,Jose Denilson,BR,dragapult-blaziken,Dragapult Blaziken,1,3,4,57366,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,797,Pedro César,BR,n-zoroark,N's Zoroark,2,5,1,57457,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,798,Bruno Franca,BR,dragapult-dusknoir,Dragapult Dusknoir,2,5,1,57176,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,799,Jeová Barbosa Dos Santos,BR,starmie-dusknoir,Starmie Dusknoir,2,5,1,57217,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,800,Thais Farto,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,4,1,9737,7,0,0,1,7,0
+0075,2026-10-03,TEF-30C,801,Rafael Silva,BR,lucario-hariyama,Lucario Hariyama,1,3,4,57114,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,802,Yann Freesz Cordova,BR,mega-lucario-ex,Mega Lucario,2,5,1,57425,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,803,Aldyr Bayma,BR,sharpedo-toxtricity,Sharpedo Toxtricity,2,5,1,57527,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,804,Filipe Brito,BR,dhelmise-pbl,Dhelmise,2,5,1,57130,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,805,João Moisakis,BR,dragapult-ex,Dragapult,2,5,1,57387,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,806,Wesley Cavalcante,,,,2,5,1,57308,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,807,Ryan Sales,BR,slowking-scr,Slowking,2,5,1,21209,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,808,Anthony Almeida,BR,other,Other,2,5,1,57542,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,809,Lucas Cavalcanti,BR,alakazam-dudunsparce,Alakazam Dudunsparce,2,5,1,57330,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,810,Hamilton Viveiros,BR,mega-excadrill-ex,Mega Excadrill,2,5,1,4952,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,811,RICARDO SCHMITZ,BR,toxtricity-pfl,Toxtricity,2,5,1,9357,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,812,Wilton Barbosa,BR,rocket-mewtwo-ex,Rocket's Mewtwo,2,5,1,57321,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,813,Hudson Correia,BR,alakazam-dusknoir,Alakazam Dusknoir,2,5,1,57118,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,814,Marlon Castro,BR,n-zoroark,N's Zoroark,2,5,1,57554,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,815,Damasio Silva Umbelino,BR,dragapult-ex,Dragapult,2,5,1,21294,7,0,0,0,8,0
+0075,2026-10-03,TEF-30C,816,Gabriel Leite de Sousa,BR,n-zoroark,N's Zoroark,2,4,0,44762,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,817,miguel satyro fernandes,BR,dragapult-ex,Dragapult,2,5,0,57297,6,0,0,1,7,0
+0075,2026-10-03,TEF-30C,818,WELLINGTON ZOOBI,BR,dhelmise-pbl,Dhelmise,2,3,0,5002,6,0,0,1,5,0
+0075,2026-10-03,TEF-30C,819,LUCAS FONTENELE,BR,starmie-dusknoir,Starmie Dusknoir,2,4,0,16184,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,820,Joan Araujo,BR,lopunny-dusknoir,Lopunny Dusknoir,2,3,0,5336,6,0,0,1,5,0
+0075,2026-10-03,TEF-30C,821,Matheus Henrique,BR,basic-box-m,Basic Box,2,4,0,57408,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,822,Lucas Gusmão,BR,crustle-dri,Crustle,2,3,0,44893,6,0,0,1,5,0
+0075,2026-10-03,TEF-30C,823,RAFAEL Tavares,BR,slowking-scr,Slowking,2,4,0,37591,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,824,Rodrigo Coltro,BR,dragapult-blaziken,Dragapult Blaziken,2,4,0,5232,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,825,Vitor Pires,BR,mega-darkrai-ex,Mega Darkrai,2,4,0,57515,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,826,BRUNO LIMA,BR,mega-excadrill-ex,Mega Excadrill,2,6,0,5164,6,0,0,0,8,0
+0075,2026-10-03,TEF-30C,827,Daniel Marques,BR,basic-box-m,Basic Box,2,4,0,16238,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,828,Carlos Medel,CL,slowking-scr,Slowking,2,4,0,27364,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,829,Ruan Guedes,BR,dragapult-ex,Dragapult,2,4,0,57353,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,830,Suetoni Barros da Silva,BR,dragapult-ex,Dragapult,2,4,0,57129,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,831,Eduardo canuto,BR,dragapult-dusknoir,Dragapult Dusknoir,2,4,0,57403,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,832,João Monte,BR,rocket-mewtwo-ex,Rocket's Mewtwo,2,4,0,57539,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,833,Wellington Alves da Cruz,BR,dragapult-dusknoir,Dragapult Dusknoir,2,4,0,57376,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,834,João Zago,BR,alakazam-dusknoir,Alakazam Dusknoir,2,5,0,5105,6,0,0,1,7,0
+0075,2026-10-03,TEF-30C,835,Daniel Amarante,BR,dhelmise-pbl,Dhelmise,1,3,3,21181,6,0,0,1,7,0
+0075,2026-10-03,TEF-30C,836,Yan Meneses,BR,alakazam-dudunsparce,Alakazam Dudunsparce,2,4,0,50943,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,837,Michael Proano,BR,mega-excadrill-ex,Mega Excadrill,2,6,0,57269,6,0,0,0,8,0
+0075,2026-10-03,TEF-30C,838,João Gabriel,BR,slowking-scr,Slowking,2,5,0,9386,6,0,0,1,7,0
+0075,2026-10-03,TEF-30C,839,Matheus Yasser,BR,basic-box-m,Basic Box,2,3,0,57453,6,0,0,1,5,0
+0075,2026-10-03,TEF-30C,840,Pedro Side,BR,basic-box-m,Basic Box,2,4,0,42345,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,841,Marco Monteiro,BR,dragapult-ex,Dragapult,2,4,0,37909,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,842,Ricardo Saldanha,BR,slowking-scr,Slowking,2,3,0,21476,6,0,0,1,5,0
+0075,2026-10-03,TEF-30C,843,David Welson Silva,BR,rockets-honchkrow,Rocket's Honchkrow,1,2,3,57157,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,844,Renato Alcantara,BR,dragapult-ex,Dragapult,2,4,0,57226,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,845,Vitor Lima,BR,dragapult-ex,Dragapult,2,4,0,37790,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,846,Jose Almeida de Sa Junior,BR,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,2,4,0,57348,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,847,Khaiam Farias,BR,alakazam-dudunsparce,Alakazam Dudunsparce,1,4,3,57464,6,0,0,0,8,0
+0075,2026-10-03,TEF-30C,848,Ashley Vieira,BR,alakazam-dudunsparce,Alakazam Dudunsparce,2,6,0,57351,6,0,0,0,8,0
+0075,2026-10-03,TEF-30C,849,Alberto Gonzaga,BR,dragapult-ex,Dragapult,1,2,3,33815,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,850,Carlos Neto,BR,mega-excadrill-ex,Mega Excadrill,2,4,0,57512,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,851,Jefferson Sousa,BR,festival-lead,Dipplin,2,4,0,21480,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,852,Li Yiu Kang,BR,dragapult-ex,Dragapult,2,3,0,5145,6,0,0,1,5,0
+0075,2026-10-03,TEF-30C,853,Severino Eliziário dos Santos Neto,BR,n-zoroark,N's Zoroark,2,5,0,21299,6,0,0,1,7,0
+0075,2026-10-03,TEF-30C,854,Marcelo Neto,BR,cynthia-garchomp-ex,Cynthia's Garchomp,1,4,3,57076,6,0,0,0,8,0
+0075,2026-10-03,TEF-30C,855,Rafael Orazi,BR,greninja-ex,Greninja,2,4,0,8964,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,856,Anderson De Sousa Coelho,BR,rocket-spidops,Rocket's Spidops,2,4,0,57200,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,857,Gustavo Mariano,BR,dragapult-ex,Dragapult,2,4,0,5079,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,858,Marcelo Oliveira,BR,dragapult-dusknoir,Dragapult Dusknoir,2,4,0,57124,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,859,Nelson Meira,BR,lucario-hariyama,Lucario Hariyama,2,4,0,57476,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,860,GABRIEL LUIZ GOMES BARROS,BR,seaking-pre,Seaking Festival Lead,1,2,3,57224,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,861,Daniel Toyoda,BR,dragapult-blaziken,Dragapult Blaziken,2,3,0,33991,6,0,0,1,5,0
+0075,2026-10-03,TEF-30C,862,Italo Rodrigues Viana,BR,alakazam-dudunsparce,Alakazam Dudunsparce,2,5,0,57432,6,0,0,1,7,0
+0075,2026-10-03,TEF-30C,863,Eduardo Martins,BR,lopunny-dusknoir,Lopunny Dusknoir,2,6,0,21390,6,0,0,0,8,0
+0075,2026-10-03,TEF-30C,864,matheus valenca pinheiro,BR,greninja-ex,Greninja,2,5,0,57305,6,0,0,1,7,0
+0075,2026-10-03,TEF-30C,865,Walter Jocoski,BR,lucario-hariyama,Lucario Hariyama,2,4,0,57095,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,866,Pedro Vinicius De Lima Oliveira,BR,mega-lucario-ex,Mega Lucario,2,6,0,57094,6,0,0,0,8,0
+0075,2026-10-03,TEF-30C,867,Gabriel Monteiro de Siqueira Leite,BR,basic-box-m,Basic Box,2,5,0,57281,6,0,0,1,7,0
+0075,2026-10-03,TEF-30C,868,JOAO ROCCHA,BR,dragapult-ex,Dragapult,2,5,0,21346,6,0,0,1,7,0
+0075,2026-10-03,TEF-30C,869,Myna Obara,BR,alakazam-meg,Alakazam,2,6,0,33641,6,0,0,0,8,0
+0075,2026-10-03,TEF-30C,870,Mauro Filho,BR,alakazam-dudunsparce,Alakazam Dudunsparce,2,4,0,57162,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,871,Renato Santos,BR,slowking-scr,Slowking,2,4,0,21418,6,0,0,1,6,0
+0075,2026-10-03,TEF-30C,872,Beatriz Gomes,BR,alakazam-dudunsparce,Alakazam Dudunsparce,1,1,3,57209,6,0,0,1,5,0
+0075,2026-10-03,TEF-30C,873,Carlos Albuquerque,BR,lucario-hariyama,Lucario Hariyama,1,3,2,57253,5,0,0,1,6,0
+0075,2026-10-03,TEF-30C,874,Diego Silva Melo,BR,slowking-scr,Slowking,1,3,2,21266,5,0,0,1,6,0
+0075,2026-10-03,TEF-30C,875,Johana Requena,BR,mega-chandelure-ex,Mega Chandelure,1,3,2,33852,5,0,0,1,6,0
+0075,2026-10-03,TEF-30C,876,Vitor Nascimento,BR,lucario-hariyama,Lucario Hariyama,1,3,2,57493,5,0,0,1,6,0
+0075,2026-10-03,TEF-30C,877,Jullio Felippe,BR,dragapult-ex,Dragapult,1,4,2,21523,5,0,0,1,7,0
+0075,2026-10-03,TEF-30C,878,luiz henrique marques de oliveira,BR,dragapult-dusknoir,Dragapult Dusknoir,1,2,2,9012,5,0,0,1,5,0
+0075,2026-10-03,TEF-30C,879,Mario Braga,BR,alakazam-dudunsparce,Alakazam Dudunsparce,1,3,2,57257,5,0,0,1,6,0
+0075,2026-10-03,TEF-30C,880,Matheus Gustavo Alves Sasso,BR,dragapult-blaziken,Dragapult Blaziken,1,4,2,5245,5,0,0,1,7,0
+0075,2026-10-03,TEF-30C,881,Gustavo Dutra Cavalcanti,BR,dragapult-ex,Dragapult,1,3,2,57290,5,0,0,1,6,0
+0075,2026-10-03,TEF-30C,882,Segundo Silva,BR,dragapult-ex,Dragapult,1,4,2,38040,5,0,0,1,7,0
+0075,2026-10-03,TEF-30C,883,Gabriel Benayon,BR,dragapult-ex,Dragapult,1,3,2,57234,5,0,0,1,6,0
+0075,2026-10-03,TEF-30C,884,mario silva,BR,slowking-scr,Slowking,1,5,2,57455,5,0,0,0,8,0
+0075,2026-10-03,TEF-30C,885,João Lima,BR,lopunny-dudunsparce,Lopunny Dudunsparce,1,4,2,37993,5,0,0,1,7,0
+0075,2026-10-03,TEF-30C,886,Juan David Cruz,CL,dragapult-ex,Dragapult,1,5,2,5151,5,0,0,0,8,0
+0075,2026-10-03,TEF-30C,887,Pedro Granjense,,,,1,4,2,57557,5,0,0,1,7,0
+0075,2026-10-03,TEF-30C,888,Carlos Lopes,BR,dragapult-ex,Dragapult,1,3,2,5031,5,0,0,1,6,0
+0075,2026-10-03,TEF-30C,889,Leonardo Ribeiro,BR,mega-excadrill-ex,Mega Excadrill,1,2,2,57207,5,0,0,1,5,0
+0075,2026-10-03,TEF-30C,890,Thiago Gabriel,BR,dragapult-ex,Dragapult,1,2,2,21137,5,0,0,1,5,0
+0075,2026-10-03,TEF-30C,891,Shayan Farias,BR,n-zoroark,N's Zoroark,1,5,2,57255,5,0,0,0,8,0
+0075,2026-10-03,TEF-30C,892,José Manoel,BR,mega-excadrill-ex,Mega Excadrill,1,5,2,57193,5,0,0,0,8,0
+0075,2026-10-03,TEF-30C,893,Humberto Constantino,BR,alakazam-dudunsparce,Alakazam Dudunsparce,1,5,2,57205,5,0,0,0,8,0
+0075,2026-10-03,TEF-30C,894,Leonardo Albergaria,BR,slowking-scr,Slowking,1,5,2,57145,5,0,0,0,8,0
+0075,2026-10-03,TEF-30C,895,Alisson Nascimento Santos,BR,dragapult-ex,Dragapult,1,5,2,21175,5,0,0,0,8,0
+0075,2026-10-03,TEF-30C,896,Adelson José de Ornellas Filho,BR,rocket-mewtwo-ex,Rocket's Mewtwo,1,5,2,57397,5,0,0,0,8,0
+0075,2026-10-03,TEF-30C,897,PAULO FERRAZ,BR,dragapult-ex,Dragapult,1,3,1,33930,4,0,0,1,5,0
+0075,2026-10-03,TEF-30C,898,joao vitor ramos simoni,BR,alakazam-dusknoir,Alakazam Dusknoir,1,3,1,57125,4,0,0,1,5,0
+0075,2026-10-03,TEF-30C,899,Jefferson Santos da Silva,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,4,1,57178,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,900,Lívia Leite,BR,dhelmise-pbl,Dhelmise,1,3,1,57181,4,0,0,1,5,0
+0075,2026-10-03,TEF-30C,901,Patrick Braz,BR,ceruledge-ex,Ceruledge,1,3,1,21522,4,0,0,1,5,0
+0075,2026-10-03,TEF-30C,902,Harlley Freitas,BR,dragapult-blaziken,Dragapult Blaziken,0,1,4,57516,4,0,0,1,5,0
+0075,2026-10-03,TEF-30C,903,Alisson Brandão,BR,alakazam-dudunsparce,Alakazam Dudunsparce,1,4,1,16026,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,904,Juan Cid,BR,n-zoroark,N's Zoroark,1,4,1,57149,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,905,Daniel Oliveira,BR,mega-starmie-ex,Mega Starmie,1,4,1,16240,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,906,henrique andrade tenorio vaz,BR,dragapult-dusknoir,Dragapult Dusknoir,1,4,1,21492,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,907,Allison Barros,BR,lucario-hariyama,Lucario Hariyama,1,4,1,57231,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,908,Henrique Nagano,BR,dragapult-dusknoir,Dragapult Dusknoir,1,4,1,57551,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,909,Juanito Romero,BR,hops-trevenant,Hop's Trevenant,1,4,1,21373,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,910,Leonardo Silva Maximiano dos Santos,BR,slowking-scr,Slowking,1,4,1,57112,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,911,Saulo Queiroz de Azevedo,BR,joltik-box,Joltik Box,1,3,1,57326,4,0,0,1,5,0
+0075,2026-10-03,TEF-30C,912,Rafael Fontan,BR,dragapult-dudunsparce,Dragapult Dudunsparce,1,3,1,57286,4,0,0,1,5,0
+0075,2026-10-03,TEF-30C,913,Fausto Lourenço,BR,dragapult-ex,Dragapult,1,4,1,57522,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,914,Mariah Santos,BR,dragapult-dusknoir,Dragapult Dusknoir,1,4,1,21278,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,915,João Delgado,BR,dragapult-ex,Dragapult,1,4,1,57396,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,916,Renan Amaral,BR,toxtricity-pfl,Toxtricity,1,4,1,50894,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,917,João Muribeca,BR,dragonite-eelektrik,Dragonite Eelektrik,1,5,1,57092,4,0,0,1,7,0
+0075,2026-10-03,TEF-30C,918,José Liedson Silva Souza,BR,mega-excadrill-ex,Mega Excadrill,1,4,1,57067,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,919,Sarah de Araújo,BR,grimmsnarl-froslass,Grimmsnarl Froslass,1,4,1,57475,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,920,Arthur Sousa,BR,grimmsnarl-froslass,Grimmsnarl Froslass,1,4,1,37777,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,921,Anne Elysabeth Silva,BR,mega-feraligatr-ex,Mega Feraligatr,1,6,1,57166,4,0,0,0,8,0
+0075,2026-10-03,TEF-30C,922,Dayane Silva,BR,mega-venusaur-ex,Mega Venusaur,1,6,1,57264,4,0,0,0,8,0
+0075,2026-10-03,TEF-30C,923,João Marcelo Alves Barbosa Ferreira,BR,rockets-honchkrow,Rocket's Honchkrow,1,4,1,57446,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,924,Vinícius Marçal,BR,dragapult-dudunsparce,Dragapult Dudunsparce,1,3,1,16560,4,0,0,1,5,0
+0075,2026-10-03,TEF-30C,925,Leandro Gomes,BR,grimmsnarl-froslass,Grimmsnarl Froslass,1,6,1,57148,4,0,0,0,8,0
+0075,2026-10-03,TEF-30C,926,Victor Cortez,BR,mega-starmie-ex,Mega Starmie,1,3,1,57160,4,0,0,1,5,0
+0075,2026-10-03,TEF-30C,927,Kristyan Patrick,BR,dragapult-ex,Dragapult,1,4,1,4937,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,928,Ravel Maximino,BR,dhelmise-pbl,Dhelmise,1,6,1,57174,4,0,0,0,8,0
+0075,2026-10-03,TEF-30C,929,Marco Cifuentes D,CL,lucario-hariyama,Lucario Hariyama,1,4,1,5067,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,930,Erick Figueiredo,BR,dragapult-blaziken,Dragapult Blaziken,1,4,1,57434,4,0,0,1,6,0
+0075,2026-10-03,TEF-30C,931,Prynscyss Botelho,BR,alakazam-dudunsparce,Alakazam Dudunsparce,1,6,1,57361,4,0,0,0,8,0
+0075,2026-10-03,TEF-30C,932,Ingrid Souza,BR,beedrill-ex-cri,Beedrill,1,5,1,50548,4,0,0,1,7,0
+0075,2026-10-03,TEF-30C,933,Mateus Andrade,BR,greninja-ex,Greninja,1,3,0,57483,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,934,Paulo Henrique Feijo de Sousa,BR,mega-venusaur-ex,Mega Venusaur,1,4,0,57428,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,935,Marcelo Antonio Turra,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,4,0,5202,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,936,Jhonata Santos,BR,alakazam-dudunsparce,Alakazam Dudunsparce,1,4,0,57111,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,937,Maria Eduarda Melo da Silva,BR,grimmsnarl-froslass,Grimmsnarl Froslass,1,2,0,57168,3,0,0,1,3,0
+0075,2026-10-03,TEF-30C,938,João Pedro Cavalcanti,BR,alakazam-dusknoir,Alakazam Dusknoir,1,4,0,21547,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,939,Bruno Prata,BR,alolan-exeggutor-ex,Alolan Exeggutor ex,1,3,0,57065,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,940,Bruno Cacho,BR,mega-lucario-ex,Mega Lucario,1,3,0,57214,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,941,Gustavo Silva,BR,alakazam-dusknoir,Alakazam Dusknoir,1,3,0,57491,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,942,Edilson Sakyo,BR,slowking-scr,Slowking,1,4,0,57406,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,943,Rodrigo Cardoso,BR,dragapult-blaziken,Dragapult Blaziken,1,2,0,57422,3,0,0,1,3,0
+0075,2026-10-03,TEF-30C,944,Marcos Ferreira,BR,lucario-hariyama,Lucario Hariyama,1,3,0,57523,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,945,Rafael Zaccharias do Prado,BR,lopunny-dudunsparce,Lopunny Dudunsparce,1,4,0,27372,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,946,Rafael Souza,BR,dragapult-ex,Dragapult,1,4,0,57519,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,947,Lucas Barbosa,BR,dragapult-ex,Dragapult,1,5,0,57322,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,948,Maicky Winicius Sarraf vilhena,BR,grimmsnarl-froslass,Grimmsnarl Froslass,1,3,0,57099,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,949,Marcos Felipe Carneiro Leal,BR,dragapult-ex,Dragapult,0,1,3,57482,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,950,Douglas Veleda,BR,basic-box-m,Basic Box,1,4,0,4875,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,951,Luiz Felipe,BR,lucario-hariyama,Lucario Hariyama,1,4,0,21458,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,952,Jackson Henrique da Silva Souza,BR,mega-excadrill-ex,Mega Excadrill,0,2,3,57284,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,953,Wesley Silva,BR,cynthia-garchomp-ex,Cynthia's Garchomp,1,5,0,21185,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,954,Bruno Gimenes,BR,basic-box-m,Basic Box,1,5,0,50641,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,955,João Paulo Wilhoit,BR,dragapult-dudunsparce,Dragapult Dudunsparce,1,4,0,57360,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,956,Daniel Granados,MX,n-zoroark,N's Zoroark,1,4,0,18871,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,957,Ruud Gullit,BR,mega-absol-box,Mega Absol Box,1,3,0,57442,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,958,Sanderson Victor Oliveira Costa,BR,dragapult-ex,Dragapult,1,3,0,57416,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,959,Vinícius Paim,BR,dragapult-ex,Dragapult,1,3,0,57445,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,960,Guilherme Neves,BR,dragapult-ex,Dragapult,1,3,0,57511,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,961,Bianca Lima,BR,dragapult-ex,Dragapult,1,3,0,57156,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,962,Gabriel Romay,BR,basic-box-m,Basic Box,1,3,0,9532,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,963,YURI DE CASTRO,BR,lopunny-dusknoir,Lopunny Dusknoir,1,3,0,57189,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,964,Tiago Fernandes,BR,festival-lead,Dipplin,1,4,0,5346,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,965,Alison Costa,BR,ethan-typhlosion,Ethan's Typhlosion,1,4,0,57158,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,966,Esteban Chocano,CL,alakazam-dusknoir,Alakazam Dusknoir,1,5,0,26891,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,967,Nillia Sousa,BR,diancie-dusknoir,Diancie Dusknoir,1,5,0,57331,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,968,Pedro Ferreira Cabral,BR,festival-lead,Dipplin,1,5,0,57142,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,969,Diogo Florentino Barbosa,BR,dragapult-ex,Dragapult,0,1,3,57161,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,970,Allyson Farias,BR,lillie-clefairy,Lillie's Clefairy,1,3,0,57268,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,971,Thuane Oliveira,BR,alakazam-dudunsparce,Alakazam Dudunsparce,1,3,0,57180,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,972,vanessa barral,BR,lucario-hariyama,Lucario Hariyama,1,3,0,34048,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,973,João Santos,BR,ethan-typhlosion,Ethan's Typhlosion,1,5,0,57392,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,974,Wellen Nogueira,BR,other,Other,1,6,0,33828,3,0,0,1,7,0
+0075,2026-10-03,TEF-30C,975,Samuel Azevedo Do Nascimento,BR,dragapult-ex,Dragapult,1,6,0,21135,3,0,0,1,7,0
+0075,2026-10-03,TEF-30C,976,Nicolas Mainar Silva Eliziario,BR,ursaluna-lunatone,Ursaluna Lunatone,1,6,0,21539,3,0,0,1,7,0
+0075,2026-10-03,TEF-30C,977,jose mello,BR,mega-excadrill-ex,Mega Excadrill,1,5,0,44500,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,978,Armando Salvador,BR,dragapult-dusknoir,Dragapult Dusknoir,1,5,0,57146,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,979,Allana Mendes,BR,crustle-dri,Crustle,1,5,0,57239,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,980,Cleber Pontes,BR,dragapult-dusknoir,Dragapult Dusknoir,1,4,0,34052,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,981,Pablo Santos,BR,rockets-honchkrow,Rocket's Honchkrow,1,3,0,57461,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,982,Javiera Roling Nuñez,CL,slowking-scr,Slowking,1,5,0,57410,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,983,Felipe Borba,BR,toxtricity-pfl,Toxtricity,1,4,0,57273,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,984,Victor Gabriel,BR,lopunny-dusknoir,Lopunny Dusknoir,1,3,0,57301,3,0,0,1,4,0
+0075,2026-10-03,TEF-30C,985,CLAUDIO Karcher,BR,dragapult-dusknoir,Dragapult Dusknoir,1,5,0,57544,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,986,Rita Myllena Melo Santos,BR,grimmsnarl-froslass,Grimmsnarl Froslass,1,6,0,57141,3,0,0,1,7,0
+0075,2026-10-03,TEF-30C,987,Alessandro Marques da Silva,BR,okidogi-barbaracle,Okidogi Barbaracle,1,5,0,21369,3,0,0,1,6,0
+0075,2026-10-03,TEF-30C,988,Sofia Valadares Cavalcanti,BR,dragapult-ex,Dragapult,1,4,0,57086,3,0,0,1,5,0
+0075,2026-10-03,TEF-30C,989,Alexandre Garuti,BR,n-zoroark,N's Zoroark,1,6,0,9290,3,0,0,1,7,0
+0075,2026-10-03,TEF-30C,990,Pedro CERQUEIRA,BR,basic-box-m,Basic Box,1,7,0,57289,3,0,0,0,8,0
+0075,2026-10-03,TEF-30C,991,Diego Romaguera,BR,misty-gyarados,Misty's Gyarados,0,1,2,57126,2,0,0,1,3,0
+0075,2026-10-03,TEF-30C,992,Pedro Marinho,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,0,2,2,57220,2,0,0,1,4,0
+0075,2026-10-03,TEF-30C,993,Júnior Melo,BR,alakazam-dudunsparce,Alakazam Dudunsparce,0,3,2,57296,2,0,0,1,5,0
+0075,2026-10-03,TEF-30C,994,Francisco Wellison Sousa Ferreira,BR,dragapult-ex,Dragapult,0,3,2,57236,2,0,0,1,5,0
+0075,2026-10-03,TEF-30C,995,Alexandre Bruno Pereira de Araújo,BR,dragapult-ex,Dragapult,0,3,2,57420,2,0,0,1,5,0
+0075,2026-10-03,TEF-30C,996,Leonardo Campello,BR,rocket-mewtwo-ex,Rocket's Mewtwo,0,3,2,57140,2,0,0,1,5,0
+0075,2026-10-03,TEF-30C,997,Pedro Leão,BR,dragapult-dusknoir,Dragapult Dusknoir,0,3,2,57369,2,0,0,1,5,0
+0075,2026-10-03,TEF-30C,998,Josina Oliveira,BR,dragapult-ex,Dragapult,0,4,2,57295,2,0,0,1,6,0
+0075,2026-10-03,TEF-30C,999,Wesley Duarte,BR,dragapult-ex,Dragapult,0,5,2,57271,2,0,0,1,7,0
+0075,2026-10-03,TEF-30C,1000,Leonardo Lopes Varela,BR,alakazam-dudunsparce,Alakazam Dudunsparce,0,2,2,57262,2,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1001,Michael Medeiros,BR,mega-chandelure-ex,Mega Chandelure,0,6,2,57314,2,0,0,0,8,0
+0075,2026-10-03,TEF-30C,1002,Gabriel Luiz dos Santos,BR,dragapult-ex,Dragapult,0,4,1,57250,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1003,DIEGO GOMES,BR,dragapult-blaziken,Dragapult Blaziken,0,2,1,57386,1,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1004,Raphaella Alves,BR,rockets-honchkrow,Rocket's Honchkrow,0,3,1,57380,1,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1005,Humberto Cansian,BR,dragapult-dusknoir,Dragapult Dusknoir,0,4,1,57300,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1006,Jhonatta Ramon,BR,flareon-noctowl,Flareon Noctowl,0,4,1,57543,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1007,Armindo Filho,BR,dragapult-ex,Dragapult,0,4,1,57398,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1008,Igor Alves,BR,mega-lucario-ex,Mega Lucario,0,4,1,57394,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1009,Rogério Ferreira de Almeida,BR,mega-lucario-ex,Mega Lucario,0,4,1,21270,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1010,Thiago Andrade Bariani,BR,dragapult-ex,Dragapult,0,2,1,21368,1,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1011,Murilo Peres,BR,other,Other,0,2,1,9651,1,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1012,Arthur Victor Monteiro Silva,BR,basic-box-m,Basic Box,0,3,1,9652,1,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1013,Yago nascimento xavier da silva,BR,alakazam-dudunsparce,Alakazam Dudunsparce,0,3,1,57548,1,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1014,Rafael Nogueira,BR,dhelmise-pbl,Dhelmise,0,4,1,57364,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1015,Bruno Matos,BR,mega-chandelure-ex,Mega Chandelure,0,4,1,21537,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1016,André Lima,BR,dragapult-blaziken,Dragapult Blaziken,0,4,1,57311,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1017,Claudio José Neves Baptista Neto,BR,mega-excadrill-ex,Mega Excadrill,0,5,1,57068,1,0,0,1,6,0
+0075,2026-10-03,TEF-30C,1018,Matheus Costa,BR,mega-excadrill-ex,Mega Excadrill,0,3,1,57191,1,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1019,Thales Tenório de Medeiros,BR,toxtricity-pfl,Toxtricity,0,5,1,57317,1,0,0,1,6,0
+0075,2026-10-03,TEF-30C,1020,Marcelo Victor Batista da SIlva,BR,dragapult-ex,Dragapult,0,4,1,57244,1,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1021,REGINALDO JUNIOR,BR,mega-excadrill-ex,Mega Excadrill,0,3,1,57497,1,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1022,Allan Lima,BR,dragapult-dudunsparce,Dragapult Dudunsparce,0,3,1,57375,1,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1023,adilson neres,BR,rocket-mewtwo-ex,Rocket's Mewtwo,0,5,1,57304,1,0,0,1,6,0
+0075,2026-10-03,TEF-30C,1024,Thyago Sasso Sheldon,BR,mega-lucario-ex,Mega Lucario,0,3,1,57147,1,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1025,Aureliana Araujo,BR,dragapult-dusknoir,Dragapult Dusknoir,0,7,1,57352,1,0,0,0,8,0
+0075,2026-10-03,TEF-30C,1026,Jean Araújo,BR,basic-box-m,Basic Box,0,1,0,57078,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1027,Ricardo Silva Martini de Albuquerque,BR,dragapult-dusknoir,Dragapult Dusknoir,0,1,0,57135,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1028,Ruiter Resende,BR,mega-dragonite-ex,Mega Dragonite,0,1,0,33945,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1029,Erick Gabriel Santos Carneiro,BR,grimmsnarl-froslass,Grimmsnarl Froslass,0,1,0,57532,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1030,RODRIGO DE MEDEIROS,BR,lucario-hariyama,Lucario Hariyama,0,1,0,57541,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1031,Mell Brayner,BR,dragapult-blaziken,Dragapult Blaziken,0,2,0,57435,0,0,0,1,2,0
+0075,2026-10-03,TEF-30C,1032,Bruno Henrique Alves e Silva,BR,grimmsnarl-froslass,Grimmsnarl Froslass,0,2,0,57510,0,0,0,1,2,0
+0075,2026-10-03,TEF-30C,1033,Jose Marcondes Barbosa Junior,BR,alakazam-dusknoir,Alakazam Dusknoir,0,1,0,9168,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1034,Renato França,BR,alakazam-dusknoir,Alakazam Dusknoir,0,1,0,57088,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1035,Talitha Camargo,BR,dhelmise-pbl,Dhelmise,0,1,0,57110,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1036,Danilo Riatto,BR,dragapult-ex,Dragapult,0,1,0,57121,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1037,Rebeca de Mattos,BR,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,0,1,0,57138,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1038,Marcio Eduardo da Silva,BR,lucario-hariyama,Lucario Hariyama,0,1,0,5146,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1039,Pablo Freitas,BR,raging-bolt-ogerpon,Raging Bolt Ogerpon,0,1,0,57242,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1040,Guilherme Lessa,BR,basic-box-m,Basic Box,0,1,0,5160,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1041,Lucas Felinto,BR,lucario-hariyama,Lucario Hariyama,0,1,0,57468,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1042,Luiz Micheletto,BR,alakazam-dudunsparce,Alakazam Dudunsparce,0,1,0,21453,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1043,Vitor Mendonça,BR,dragapult-ex,Dragapult,0,1,0,57501,0,0,0,1,1,0
+0075,2026-10-03,TEF-30C,1044,Caio Saboya,BR,alakazam-dusknoir,Alakazam Dusknoir,0,3,0,57265,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1045,Rogério Cardozo,BR,dragapult-ex,Dragapult,0,3,0,57509,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1046,Edrick Costa,BR,n-zoroark,N's Zoroark,0,3,0,21440,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1047,Klayton Martins,BR,dragapult-ex,Dragapult,0,3,0,57277,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1048,Bernardo Guimarães,BR,dragapult-ex,Dragapult,0,3,0,33762,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1049,Heitor Oliveira,BR,dragapult-ex,Dragapult,0,3,0,57479,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1050,Samara Bezerra Lisboa,BR,alakazam-dudunsparce,Alakazam Dudunsparce,0,4,0,57097,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1051,Cíntia Vasconcelos,BR,other,Other,0,4,0,57202,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1052,Thiago Machado,BR,dhelmise-pbl,Dhelmise,0,4,0,57407,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1053,Guilherme Bittencourt,BR,grimmsnarl-froslass,Grimmsnarl Froslass,0,4,0,57195,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1054,Alexius Strauss,BR,crustle-dri,Crustle,0,4,0,50623,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1055,Guilherme Sebold Pires,BR,lopunny-dusknoir,Lopunny Dusknoir,0,3,0,33726,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1056,Beatriz Siqueira,BR,n-zoroark,N's Zoroark,0,4,0,50661,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1057,Bernardo Melo,BR,lucario-hariyama,Lucario Hariyama,0,2,0,57128,0,0,0,1,2,0
+0075,2026-10-03,TEF-30C,1058,IAN Gonçalves,BR,mega-greninja-ex,Mega Greninja,0,4,0,57103,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1059,Paulo Ramon Lima Braga,BR,festival-lead,Dipplin,0,4,0,57465,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1060,Hengles CruZ,BR,basic-box-m,Basic Box,0,4,0,33727,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1061,weilen su,BR,ceruledge-ex,Ceruledge,0,3,0,57285,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1062,Igor Reinan,BR,slowking-scr,Slowking,0,4,0,57122,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1063,DIMAS Fonseca Neto,BR,dragapult-dusknoir,Dragapult Dusknoir,0,4,0,50853,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1064,Luis Henrique,BR,other,Other,0,5,0,57486,0,0,0,1,5,0
+0075,2026-10-03,TEF-30C,1065,Crisóstomo Dias,BR,n-zoroark,N's Zoroark,0,4,0,9862,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1066,João Gabriel Riedel,BR,mega-excadrill-ex,Mega Excadrill,0,4,0,57335,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1067,Beatriz Prado,BR,lucario-hariyama,Lucario Hariyama,0,4,0,57179,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1068,Vinícius Valença,BR,dragapult-ex,Dragapult,0,4,0,57534,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1069,Crislayne Toyoda,BR,alakazam-dudunsparce,Alakazam Dudunsparce,0,3,0,33948,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1070,Luan Petrus,BR,mega-excadrill-ex,Mega Excadrill,0,3,0,57327,0,0,0,1,3,0
+0075,2026-10-03,TEF-30C,1071,Ronny De Vasconcelos,BR,sharpedo-toxtricity,Sharpedo Toxtricity,0,4,0,57342,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1072,Osvaldo Rodríguez,CL,dragapult-ex,Dragapult,0,4,0,51968,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1073,Erick Silva,BR,dragapult-ex,Dragapult,0,4,0,57424,0,0,0,1,4,0
+0075,2026-10-03,TEF-30C,1074,Matheus Burigo,BR,dragapult-dusknoir,Dragapult Dusknoir,0,3,0,44828,0,0,0,1,3,0

@@ -12272,3 +12272,4 @@ td.arc-mu-major.arc-mu-major-bilanz {
 .saved-deck-item .deck-mehr-menue .deck-mehr-item:hover,
 .saved-deck-item .deck-mehr-menue .deck-mehr-item:focus-visible { background: var(--surface-2); }
 .saved-deck-item .deck-mehr-menue .deck-btn-delete { color: var(--danger, #e5534b); }
+.saved-deck-item .deck-mehr.deck-mehr--oben .deck-mehr-menue { top: auto; bottom: calc(100% + 4px); }

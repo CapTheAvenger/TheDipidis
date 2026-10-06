@@ -89,7 +89,16 @@ function dsDeckMehrToggle(el) {
   /* Die Deckkarte schneidet sonst das Menue ab (overflow: hidden fuer die runden Ecken). */
   const karte = el.closest('.saved-deck-item');
   if (karte) karte.style.overflow = el.open ? 'visible' : 'hidden';
-  if (!el.open) return;
+  if (!el.open) { el.classList.remove('deck-mehr--oben'); return; }
+  /* Live 06.10.: beim letzten Deck lief das Menue ueber das Seitenende hinaus.
+     Reicht der Platz unten nicht, klappt es nach oben auf. */
+  const menue = el.querySelector('.deck-mehr-menue');
+  if (menue) {
+    el.classList.remove('deck-mehr--oben');
+    const r = menue.getBoundingClientRect();
+    const oben = el.getBoundingClientRect().top;
+    if (r.bottom > window.innerHeight - 8 && oben > r.height + 8) el.classList.add('deck-mehr--oben');
+  }
   document.querySelectorAll('details.deck-mehr[open]').forEach(d => { if (d !== el) d.open = false; });
 }
 window.dsDeckMehrToggle = dsDeckMehrToggle;

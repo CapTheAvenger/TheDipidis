@@ -64,4 +64,25 @@ describe('UI-114: Deckzeile Meine Decks', () => {
     assert.notEqual(kaputt, QUELLE);
     assert.throws(() => pruefe(kaputt));
   });
+  it('Menue klappt nach oben auf, wenn unten der Platz fehlt (live 06.10.)', () => {
+    const a = QUELLE.indexOf('function dsDeckMehrToggle(');
+    const b = QUELLE.indexOf('window.dsDeckMehrToggle');
+    const lauf = (unten, oben, quelle) => {
+      const q = quelle || QUELLE;
+      const klassen = new Set();
+      const menue = { getBoundingClientRect: () => ({ bottom: unten, height: 430 }) };
+      const el = { open: true, classList: { add: (k) => klassen.add(k), remove: (k) => klassen.delete(k) },
+        closest: () => null, querySelector: () => menue, getBoundingClientRect: () => ({ top: oben }) };
+      const ctx = { window: { innerHeight: 988 }, document: { querySelectorAll: () => [] }, el };
+      vm.runInNewContext(q.slice(q.indexOf('function dsDeckMehrToggle('), q.indexOf('window.dsDeckMehrToggle')) + '; dsDeckMehrToggle(el);', ctx);
+      return klassen.has('deck-mehr--oben');
+    };
+    assert.ok(a > 0 && b > a);
+    assert.equal(lauf(1270, 809), true);
+    assert.equal(lauf(600, 150), false);
+    assert.equal(lauf(1270, 200), false);
+    const kaputt = QUELLE.replace("el.classList.add('deck-mehr--oben')", 'void 0');
+    assert.notEqual(kaputt, QUELLE);
+    assert.equal(lauf(1270, 809, kaputt), false);
+  });
 });

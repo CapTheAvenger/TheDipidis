@@ -2294,6 +2294,49 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
         }
         window._clDatumLesen = _clDatumLesen;
 
+        /* UI-98 (N2-07, 06.10.2026): die Archetyp-Suche findet auch deutsche
+           Pokemon-Namen („glurak" → Charizard). Die Liste EN→DE liegt schon
+           in data/champions_names_de.json (Abschnitt pokemon, 1.025 Arten);
+           sie wird beim ersten Oeffnen einer Suche geladen. */
+        let _deArten = null, _deArtenLaedt = false;
+        const _deAliasCache = Object.create(null);
+        function archetypDeAlias(text, arten) {
+            if (!arten) return '';
+            const woerter = String(text || '').replace(/[()]/g, ' ').split(/\s+/).filter(Boolean);
+            const treffer = [];
+            for (let i = 0; i < woerter.length; i++) {
+                for (let n = 3; n >= 1; n--) {
+                    if (i + n > woerter.length) continue;
+                    const de = arten[woerter.slice(i, i + n).join(' ').toLowerCase()];
+                    if (de) { treffer.push(de); i += n - 1; break; }
+                }
+            }
+            return treffer.join(' ').toLowerCase();
+        }
+        function archetypTrifft(text, q) {
+            if (!q) return true;
+            const t0 = String(text || '').toLowerCase();
+            if (t0.includes(q)) return true;
+            if (!_deArten) return false;
+            if (!(t0 in _deAliasCache)) _deAliasCache[t0] = archetypDeAlias(text, _deArten);
+            return _deAliasCache[t0].includes(q);
+        }
+        function _deArtenLaden(fertig) {
+            if (_deArten || _deArtenLaedt || typeof fetch !== 'function') return;
+            _deArtenLaedt = true;
+            const basis = (typeof BASE_PATH === 'string' && BASE_PATH) ? BASE_PATH : 'data/';
+            fetch(basis + 'champions_names_de.json').then(r => (r.ok ? r.json() : null)).then(j => {
+                const roh = (j && j.pokemon) || {};
+                const klein = {};
+                Object.keys(roh).forEach(en => { klein[en.toLowerCase()] = roh[en]; });
+                _deArten = klein;
+                if (typeof fertig === 'function') fertig();
+            }).catch(() => { _deArten = {}; });
+        }
+        window._archetypDeAlias = archetypDeAlias;
+        window._archetypTrifft = archetypTrifft;
+        window._archetypDeArtenLaden = _deArtenLaden;
+
         function initSearchableSelect(selectEl) {
             if (!selectEl) return;
             // Defensive: bail out cleanly if the select has been detached
@@ -2359,6 +2402,12 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             dropdown.appendChild(search);
             dropdown.appendChild(list);
 
+            /* UI-98: Suche mit deutschen Namen, wenn die Helfer geladen sind;
+               sonst wie bisher (Teilstring im angezeigten Namen). */
+            const _trifft = (typeof window !== 'undefined' && window._archetypTrifft)
+                || ((text, q) => !q || String(text || '').toLowerCase().includes(q));
+            const _artenLaden = (typeof window !== 'undefined' && window._archetypDeArtenLaden) || (() => {});
+
             // --- Build visible option items from <select> ---
             function buildList(filter) {
                 list.innerHTML = '';
@@ -2377,7 +2426,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 // Grouped options (<optgroup>)
                 Array.from(selectEl.querySelectorAll('optgroup')).forEach(group => {
                     const opts = Array.from(group.querySelectorAll('option')).filter(o =>
-                        !q || o.textContent.toLowerCase().includes(q)
+                        _trifft(o.textContent, q)
                     );
                     if (opts.length === 0) return;
 
@@ -2399,7 +2448,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 // Standalone options (not inside <optgroup>)
                 Array.from(selectEl.children).forEach(child => {
                     if (child.tagName !== 'OPTION' || child === selectEl.options[0]) return;
-                    if (q && !child.textContent.toLowerCase().includes(q)) return;
+                    if (q && !_trifft(child.textContent, q)) return;
                     const item = document.createElement('div');
                     item.className = 'searchable-select-option' + (child.value === selectEl.value ? ' selected' : '');
                     item.textContent = child.textContent;
@@ -2515,7 +2564,10 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
 
             // Mit Suchtext steht kein Leer-Eintrag oben (buildList) — der
             // erste Treffer ist dann der, den Enter waehlt.
-            search.oninput = () => { buildList(search.value); _markiere(search.value && _optionen().length ? 0 : -1); };
+            search.oninput = () => {
+                _artenLaden(() => { if (search.value) { buildList(search.value); _markiere(_optionen().length ? 0 : -1); } });
+                buildList(search.value); _markiere(search.value && _optionen().length ? 0 : -1);
+            };
             search.onclick = (e) => e.stopPropagation();
 
             // Close on outside click

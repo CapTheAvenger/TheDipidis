@@ -39,7 +39,9 @@ const translations = {
   en: {
     // ── Main title & header ──────────────────────────────────
     'app.title':              'The Dipidis',
-    'menu.labelBtn':          '☰ Menu',
+    'menu.themeLabel':        'Light / dark',
+    'menu.schalterAria':      'Appearance and language',
+    'header.tradelist':       'Trade List',
     'glossar.nachlesen':      'Look up in the glossary',
     'app.subtitle':           'Your Portal for Meta Analysis & Deck Building',
     'header.signIn':          'Sign In',
@@ -2120,6 +2122,9 @@ const translations = {
     'deck.importPTCGLReplaces': 'This replaces the current deck ({n} cards).',
     'deck.importPTCGLDone':     'PTCGL import: {n} cards ({total} total)',
     'deck.importPTCGLErrors':   '{n} lines not recognised',
+    'deck.importNicht60':       '{n} instead of 60 cards',
+    'deck.importUeberVier':     'More than 4 copies (not allowed except basic energy):',
+    'deck.importUmbenannt':     'Name taken from set + number:',
     'deck.importBerichtTitel':  'Not everything was imported',
     'deck.importBerichtText':   'These lines are not in the deck:',
     'deck.importNichtGefunden': 'Set and number not in the card database:',
@@ -2959,7 +2964,9 @@ const translations = {
   de: {
     // ── Main title & header ──────────────────────────────────
     'app.title':              'The Dipidis',
-    'menu.labelBtn':          '☰ Menü',
+    'menu.themeLabel':        'Hell / Dunkel',
+    'menu.schalterAria':      'Darstellung und Sprache',
+    'header.tradelist':       'Tauschliste',
     'glossar.nachlesen':      'Im Glossar nachlesen',
     'app.subtitle':           'Dein Portal für Meta-Analyse & Deckbau',
     'header.signIn':          'Anmelden',
@@ -5034,6 +5041,9 @@ const translations = {
     'deck.importPTCGLReplaces': 'Das ersetzt das aktuelle Deck ({n} Karten).',
     'deck.importPTCGLDone':     'PTCGL-Import: {n} Zeilen ({total} Karten)',
     'deck.importPTCGLErrors':   '{n} Zeilen nicht erkannt',
+    'deck.importNicht60':       '{n} statt 60 Karten',
+    'deck.importUeberVier':     'Mehr als 4 Kopien (nur Basis-Energie darf das):',
+    'deck.importUmbenannt':     'Name nach Set + Nummer übernommen:',
     'deck.importBerichtTitel':  'Nicht alles übernommen',
     'deck.importBerichtText':   'Diese Zeilen sind nicht im Deck:',
     'deck.importNichtGefunden': 'Set und Nummer nicht in der Kartendatenbank:',

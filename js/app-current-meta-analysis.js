@@ -1030,7 +1030,7 @@
             
             if (top10.length > 0) {
                 const optgroup = document.createElement('optgroup');
-                optgroup.label = 'Top 10 Meta Decks';
+                optgroup.label = (typeof t === 'function' ? t('cl.topMetaDecks') : 'Top 10 Meta Decks'); // UI-98: deutsch
                 top10.forEach(deck => {
                     const option = document.createElement('option');
                     option.value = deck.name;
@@ -1042,7 +1042,7 @@
             
             if (rest.length > 0) {
                 const optgroup = document.createElement('optgroup');
-                optgroup.label = 'All Other Decks';
+                optgroup.label = (typeof t === 'function' ? t('cl.allOtherDecks') : 'All Other Decks'); // UI-98: deutsch
                 rest.forEach(deck => {
                     const option = document.createElement('option');
                     option.value = deck.name;
@@ -1123,7 +1123,7 @@
                 fusionSelect.innerHTML = `<option value="">${typeof t === 'function' ? t('cm.fuseNone') : '-- None (single deck) --'}</option>`;
                 if (top10.length > 0) {
                     const og = document.createElement('optgroup');
-                    og.label = 'Top 10 Meta Decks';
+                    og.label = (typeof t === 'function' ? t('cl.topMetaDecks') : 'Top 10 Meta Decks'); // UI-98: deutsch
                     top10.forEach(deck => {
                         const o = document.createElement('option');
                         o.value = deck.name;
@@ -1134,7 +1134,7 @@
                 }
                 if (rest.length > 0) {
                     const og = document.createElement('optgroup');
-                    og.label = 'All Other Decks';
+                    og.label = (typeof t === 'function' ? t('cl.allOtherDecks') : 'All Other Decks'); // UI-98: deutsch
                     rest.forEach(deck => {
                         const o = document.createElement('option');
                         o.value = deck.name;
@@ -2286,6 +2286,13 @@
             // empty-archetype guard).
             const emptyState = document.getElementById('currentAnalysisEmptyState');
             if (emptyState) emptyState.classList.add('d-none');
+            /* UI-117 (Abfragerunde 06.10.2026): die Filter erscheinen erst nach
+               der Deckwahl (css/meta-card-analysis.css, .cm-nach-wahl). */
+            const _tab = document.getElementById('current-analysis');
+            if (_tab) {
+                if (archetype) _tab.setAttribute('data-cm-gewaehlt', '');
+                else _tab.removeAttribute('data-cm-gewaehlt');
+            }
 
             // The archetype card sits right under the dropdown: after
             // arriving here from a tier-list click, the first thing you
@@ -2669,6 +2676,10 @@
                 
                 // Render matchups
                 renderCurrentMetaMatchups(archetype);
+                /* FE-62 (06.10.2026): die volle, sortierbare Tabelle aller
+                   Paarungen (schlechteste oben) — NACH dem alten Fuellweg,
+                   weil der den Abschnitt in einigen Faellen versteckt. */
+                zeigeCmMatchupTabelle(archetype);
 
                 // Render "Matchups vs Meta Call" — picks up window.MetaCall
                 // state if available. Silently hides itself when MetaCall
@@ -2690,6 +2701,8 @@
         }
         
         function clearCurrentMetaDeckView() {
+            const _tabLeer = document.getElementById('current-analysis');
+            if (_tabLeer) _tabLeer.removeAttribute('data-cm-gewaehlt');
             ['currentMetaArchetypeCard', 'currentMetaStatsSection', 'currentMetaMatchupsSection', 'currentMetaDeckVisual', 'currentMetaDeckTableView', 'currentMetaTop256Section'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('d-none');
@@ -4579,6 +4592,17 @@
                 detailsEl.style.display = 'none';
             }
             return { liste, quelle };
+        }
+
+        function zeigeCmMatchupTabelle(archetype) {
+            const ziel = document.getElementById('currentMetaMatchupTabelle');
+            const abschnitt = document.getElementById('currentMetaMatchupsSection');
+            const titel = document.getElementById('currentMetaMatchupsTitle');
+            if (!ziel || !abschnitt || typeof window.renderArchetypeMatchupTabelle !== 'function') return;
+            window.renderArchetypeMatchupTabelle(ziel, archetype).then(() => {
+                if (titel) titel.textContent = 'Matchups · ' + archetype;
+                abschnitt.classList.remove('d-none');
+            }).catch(e => console.error('[FE-62] Matchup-Tabelle:', e));
         }
 
         // Render best/worst matchups for Current Meta - extract directly from loaded HTML (1:1 copy)

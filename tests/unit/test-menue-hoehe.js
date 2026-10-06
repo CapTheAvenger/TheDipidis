@@ -171,7 +171,8 @@ describe('Pokéball-Menü — nachrechnen, wenn sich der Inhalt ändert', () => 
         // Weg 2: Klick daneben. Seit UI-108 (05.10.2026) schliesst er ueber
         // toggleMainMenu — damit endet die Beobachtung ueber Weg 1 mit, und
         // aria-expanded folgt (vorher blieb es auf "true" stehen).
-        assert.match(JS, /!_beschriftung\) \{\s*(\/\/[^\n]*\n\s*)*toggleMainMenu\(\);/,
+        // V2-5 (06.10.2026): ohne zweiten Oeffner endet die Bedingung am Ausloeser.
+        assert.match(JS, /!trigger\.contains\(e\.target\)\) \{\s*(\/\/[^\n]*\n\s*)*toggleMainMenu\(\);/,
             'ein Klick neben das Menü schließt es auch — dort lief der Beobachter weiter');
     });
 

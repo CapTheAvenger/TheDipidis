@@ -50,6 +50,6 @@ describe('UI-74: Deck direkt aus der Analyse speichern', () => {
     const sel = HTML.indexOf('id="currentMetaDeckSelect"');
     const knopf = HTML.indexOf("onclick=\"deckUebernehmen('currentMeta')\"");
     assert.ok(knopf > sel && knopf - sel < 600, 'Knopf steht nicht direkt unter der Auswahl');
-    assert.match(HTML, /onclick="switchProfileTab\('deckbuilder'\)"[^>]*data-i18n="profile\.newDeck"/);
+    assert.match(HTML, /onclick="[^"]*(ProfileDeckBuilder\.neuesDeck\(\)|switchProfileTab\('deckbuilder'\))[^"]*"[^>]*data-i18n="profile\.newDeck"/ /* UI-97 (06.10.2026): startet leer */);
   });
 });

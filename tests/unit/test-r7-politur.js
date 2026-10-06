@@ -164,7 +164,22 @@ describe('FE-46: Testhand wie am Tisch', () => {
         assert.equal(s.ctx._simMulliganLage(Array(7).fill({ basis: null })), null);
         vm.runInContext(`_simulatorDeck = Array.from({ length: 60 }, (_, i) => ({ name: 'K' + i, basis: false }));
             _shuffleFisherYates = () => {}; drawNewHand();`, s.ctx);
-        assert.equal(s.els.simulatorMulligan.textContent, 'MULLIGAN PREIS');
+        /* FE-53 (06.10.2026): bei Mulligan liegen noch KEINE Preise beiseite —
+           die kommen erst nach dem Mulligan. 60 - 7 = 53 im Deck. */
+        assert.equal(s.els.simulatorMulligan.textContent, 'MULLIGAN ');
+        assert.equal(s.els.simulatorDeckCount.innerText, 53);
+    });
+    it('FE-53 VERFAELSCHUNG: ohne Mulligan-Bedingung laegen die Preise schon beiseite', () => {
+        const src = roh('js/draw-simulator.js');
+        const kaputt = src.replace("&& _simMulliganLage(_simulatorHand) !== 'mulligan'", '');
+        assert.notEqual(kaputt, src);
+        const els = { simulatorHandGrid: { innerHTML: '', appendChild() {}, parentNode: null }, simulatorDeckCount: {}, simulatorMulligan: { textContent: '' } };
+        const ctx = { console, Math, document: { getElementById: (id) => els[id] || null, createElement: () => ({ style: {} }) },
+            t: (k) => (k === 'draw.mulliganHinweis' ? 'MULLIGAN' : 'PREIS'), showToast() {} };
+        ctx.window = ctx; vm.createContext(ctx); vm.runInContext(kaputt, ctx);
+        vm.runInContext(`_simulatorDeck = Array.from({ length: 60 }, (_, i) => ({ name: 'K' + i, basis: false }));
+            _shuffleFisherYates = () => {}; drawNewHand();`, ctx);
+        assert.equal(els.simulatorDeckCount.innerText, 47);
     });
 });
 

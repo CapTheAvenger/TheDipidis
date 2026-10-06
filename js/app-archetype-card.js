@@ -1744,7 +1744,13 @@
                 ? 'Für dieses Deck liegen keine Matchup-Daten vor.'
                 : 'No matchup data for this deck.'))}</p>`;
         }
-        const rows = (preview && all.length > preview) ? vorschauAuswahl(all, preview) : all;
+        const sortierbar = !!(opts && opts.sortierbar);
+        /* FE-62 (Abfragerunde 06.10.2026): in der Deck-Analyse stehen ALLE
+           Paarungen, die schlechtesten oben — dort sucht man, wogegen das
+           eigene Deck verliert. Die Tier-Karte bleibt beste-zuerst. */
+        const rows = (opts && opts.schlechtesteOben)
+            ? all.slice().sort((a, b) => a.winRate - b.winRate)
+            : ((preview && all.length > preview) ? vorschauAuswahl(all, preview) : all);
         /* ── Eine Spalte ohne Zahlen ist keine Spalte ────────────────
          *
          * Der Betreiber am 02.09.2026, vor drei Spalten voller Striche:
@@ -1884,6 +1890,7 @@
                 </table>
             </div>
             ${legendeHtml(hatMajor, variante)}${note}${praesenzNote}`;
+        if (sortierbar) return sortierbarMachen(table);
         if (!collapsed) return table;
         // Closed by default inline: the tiles are the scroll content, the
         // table is a reference you open when you need it. Otherwise a
@@ -1910,6 +1917,54 @@
                 ${table}
             </details>`;
     }
+
+    /* FE-62: Spaltenkoepfe als Sortierknoepfe. Nachgeruestet statt in
+       jeden <th> geschrieben, damit die Tier-Karte unveraendert bleibt.
+       Die WR-Spalte startet als „aufsteigend" (schlechteste oben). */
+    function sortierbarMachen(html) {
+        let i = 0;
+        return html
+            .replace('<table class="arc-mu-table">', '<table class="arc-mu-table arc-mu-sortierbar">')
+            .replace(/<th(?=[\s>])/g, function () {
+                const spalte = i++;
+                return '<th class="arc-mu-sort" role="button" tabindex="0" data-spalte="' + spalte
+                    + '" aria-sort="' + (spalte === 1 ? 'ascending' : 'none') + '"';
+            });
+    }
+    function zellWert(td) {
+        const t = String(td ? td.textContent : '').trim();
+        if (!t || /^[–-]$/.test(t)) return null;
+        const zahl = parseFloat(t.replace(/\./g, '').replace(',', '.'));
+        return Number.isFinite(zahl) && /^[\d.,]+\s*%?$/.test(t) ? zahl : t.toLowerCase();
+    }
+    function sortiereNachSpalte(th) {
+        const table = th.closest('table');
+        const tbody = table && table.tBodies[0];
+        if (!tbody) return;
+        const spalte = Number(th.getAttribute('data-spalte'));
+        const auf = th.getAttribute('aria-sort') !== 'ascending';
+        const reihen = Array.from(tbody.rows);
+        reihen.sort((a, b) => {
+            const x = zellWert(a.cells[spalte]), y = zellWert(b.cells[spalte]);
+            if (x === null && y === null) return 0;
+            if (x === null) return 1;            // Striche immer unten
+            if (y === null) return -1;
+            const v = (typeof x === 'number' && typeof y === 'number') ? x - y : String(x).localeCompare(String(y), 'de');
+            return auf ? v : -v;
+        });
+        reihen.forEach(r => tbody.appendChild(r));
+        table.querySelectorAll('th.arc-mu-sort').forEach(k => k.setAttribute('aria-sort', 'none'));
+        th.setAttribute('aria-sort', auf ? 'ascending' : 'descending');
+    }
+    document.addEventListener('click', (e) => {
+        const th = e.target.closest && e.target.closest('table.arc-mu-sortierbar th.arc-mu-sort');
+        if (th) sortiereNachSpalte(th);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const th = e.target.closest && e.target.closest('table.arc-mu-sortierbar th.arc-mu-sort');
+        if (th) { e.preventDefault(); sortiereNachSpalte(th); }
+    });
 
     // One renderer, three shapes. Two implementations of "the card" would
     // drift apart the moment either is touched.
@@ -2307,9 +2362,17 @@
         if (!el || !name) return Promise.resolve(false);
         return load().then(() => { el.innerHTML = render(name, 'embed'); return true; });
     };
+    /* FE-62: die volle Matchup-Tabelle eines Decks fuer die Deck-Analyse. */
+    window.renderArchetypeMatchupTabelle = function (el, name) {
+        if (!el || !name) return Promise.resolve(false);
+        return load().then(() => {
+            el.innerHTML = matchupTableHtml(name, { sortierbar: true, schlechtesteOben: true, variante: 'embed' });
+            return true;
+        });
+    };
     // Exposed for tests; not part of the page's own API surface.
     window._archetypeCardInternals = {
-        matchupsFor, parseSemicolonCsv, findKey, THIN_GAMES, factsFor,
+        matchupsFor, parseSemicolonCsv, findKey, THIN_GAMES, factsFor, matchupTableHtml, sortiereNachSpalte, zellWert,
         // Fuer ausgefuehrte Zusicherungen: die Mindeststichprobe und die
         // Entscheidung, die an ihr haengt (07.09.2026).
         MIN_PRAESENZ_PARTIEN, praesenzZelle, praesenzZellen,

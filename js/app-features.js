@@ -1350,6 +1350,9 @@
             const newDeck = gelesen.deck;
             const importCount = gelesen.zeilen;
             const errorCount = gelesen.nichtErkannt.length + gelesen.nichtGefunden.length;
+            const hinweise = [];
+            if (gelesen.summe !== 60) hinweise.push(t('deck.importNicht60', { n: gelesen.summe }));
+            if (gelesen.ueberVier.length) hinweise.push(t('deck.importUeberVier'));
 
             if (importCount === 0) {
                 showDeckShareToast(t('deck.importPTCGLNone'));
@@ -1371,9 +1374,12 @@
             updateDeckDisplay(source);
             const totalCards = Object.values(newDeck).reduce((s, c) => s + c, 0);
             showDeckShareToast(t('deck.importPTCGLDone', { n: importCount, total: totalCards })
-                + (errorCount > 0 ? ' | ' + t('deck.importPTCGLErrors', { n: errorCount }) : ''));
-            if (errorCount > 0) {
+                + (errorCount > 0 ? ' | ' + t('deck.importPTCGLErrors', { n: errorCount }) : '')
+                + (hinweise.length ? ' | ' + hinweise.join(' | ') : ''));
+            if (errorCount > 0 || gelesen.ueberVier.length || gelesen.umbenannt.length) {
                 const bericht = []
+                    .concat(gelesen.ueberVier.length ? [t('deck.importUeberVier')].concat(gelesen.ueberVier, ['']) : [])
+                    .concat(gelesen.umbenannt.length ? [t('deck.importUmbenannt')].concat(gelesen.umbenannt, ['']) : [])
                     .concat(gelesen.nichtGefunden.length ? [t('deck.importNichtGefunden')].concat(gelesen.nichtGefunden) : [])
                     .concat(gelesen.nichtGefunden.length && gelesen.nichtErkannt.length ? [''] : [])
                     .concat(gelesen.nichtErkannt.length ? [t('deck.importNichtErkannt')].concat(gelesen.nichtErkannt) : [])
@@ -1389,20 +1395,34 @@
             const deck = {};
             const nichtErkannt = [];
             const nichtGefunden = [];
+            const umbenannt = [];
+            const basisEnergie = {};
             let zeilen = 0;
             for (const line of String(text || '').split('\n')) {
                 const trimmed = line.trim();
-                if (!trimmed || /^(Pokémon|Pokemon|Trainer|Energy|Energie|Total Cards)\b[^0-9]*:?\s*\d*\s*$/i.test(trimmed)) continue;
+                /* FE-50 (06.10.2026): auch „Pokémon (19)" ist eine Kopfzeile. */
+                if (!trimmed || /^(Pokémon|Pokemon|Trainer|Energy|Energie|Total Cards)\b[^0-9]*:?\s*\(?\s*\d*\s*\)?\s*$/i.test(trimmed)) continue;
                 const match = trimmed.match(/^(\d+)\s+(.+?)\s+([A-Za-z0-9-]{2,5})\s+([A-Za-z0-9]+)$/);
                 if (!match) { nichtErkannt.push(trimmed); continue; }
                 const [, countStr, cardName, setRoh, setNumber] = match;
                 const setCode = setRoh.toUpperCase();
-                if (!cardsBySetNumber[`${setCode}_${setNumber}`]) { nichtGefunden.push(trimmed); continue; }
-                const deckKey = `${cardName} (${setCode} ${setNumber})`;
+                const dbKarte = cardsBySetNumber[`${setCode}_${setNumber}`];
+                if (!dbKarte) { nichtGefunden.push(trimmed); continue; }
+                /* FE-50 (06.10.2026): der Name kommt aus der Datenbank, nicht
+                   aus der Zeile — „1 Pikachu ASC 160" ist Dragapult ex.
+                   (set, number) bestimmt die Karte, nie der Name. */
+                const name = (dbKarte.name || '').trim() || cardName;
+                if (dbKarte.name && dbKarte.name.trim() !== cardName.trim()) umbenannt.push(`${cardName} → ${dbKarte.name} (${setCode} ${setNumber})`);
+                const deckKey = `${name} (${setCode} ${setNumber})`;
                 deck[deckKey] = (deck[deckKey] || 0) + parseInt(countStr, 10);
+                if (/basic energy/i.test(dbKarte.type || '')) basisEnergie[deckKey] = true;
                 zeilen++;
             }
-            return { deck, zeilen, nichtErkannt, nichtGefunden };
+            /* FE-50: Hinweise statt stiller Uebernahme — mehr als 4 Kopien
+               (ausser Basis-Energie) und eine Summe ungleich 60. */
+            const ueberVier = Object.keys(deck).filter(k => deck[k] > 4 && !basisEnergie[k]).map(k => `${deck[k]}× ${k}`);
+            const summe = Object.values(deck).reduce((a, n) => a + n, 0);
+            return { deck, zeilen, nichtErkannt, nichtGefunden, umbenannt, ueberVier, summe };
         }
         window.ptcglZeilenLesen = ptcglZeilenLesen;
 

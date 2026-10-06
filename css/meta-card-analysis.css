@@ -410,3 +410,9 @@
 #current-analysis[data-cm-fusion="active"] #currentMetaTechVsNormalSection {
     display: none !important;
 }
+
+/* UI-117 (Abfragerunde 06.10.2026): vor der Deckwahl steht in der
+   Deck-Analyse nur die Archetyp-Wahl. Ansicht (Schnellüberblick/Cooking),
+   Turnierart, Datum, Vergleichsdeck und Karten-Share erscheinen danach an
+   derselben Stelle. Das Attribut setzt loadCurrentMetaDeckData(). */
+#current-analysis:not([data-cm-gewaehlt]) .cm-nach-wahl { display: none; }

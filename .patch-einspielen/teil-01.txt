@@ -1,0 +1,28 @@
+From 80cc2deddcd81bc200d21f03a2126858fdaa426e Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Tue, 6 Oct 2026 19:06:36 +0000|
+Subject: [PATCH] Sprachreinheit: Menuepunkte mit Formatkuerzel als dynamisch|
+ fuehren|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01KZTh97MtJfz4ENqWx3xh9e|
+---|
+ tests/e2e_i18n_language_purity.py | 5 +++++|
+ 1 file changed, 5 insertions(+)|
+|
+diff --git a/tests/e2e_i18n_language_purity.py b/tests/e2e_i18n_language_purity.py|
+index 15ca38fb..20be44ba 100644|
+--- a/tests/e2e_i18n_language_purity.py|
++++ b/tests/e2e_i18n_language_purity.py|
+@@ -34,2 +34,7 @@ I18N_DYNAMIC_KEYS = {|
+     'bj.themeLight',|
++    # V2-8 (06.10.2026): ds-nav.js setzt das Formatkuerzel ein|
++    # („TEF–30C Meta-Analyse“, „Deck-Analyse (TEF–30C)“); der i18n-Text|
++    # ist nur der Rueckfall ohne bekanntes Format.|
++    'menu.currentMeta',|
++    'menu.currentMetaAnalysis',|
+ }|
+-- |
+2.34.1|
+|
+|

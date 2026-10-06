@@ -113,6 +113,11 @@
 
     function ragtHinaus(table) {
         if (!sichtbar(table)) return false;
+        /* Live 06.10. gemessen: die Japan-Siegertabelle ist SELBST der
+           Bildlaufbereich (display: block; overflow-x: auto) — 329 breit,
+           Inhalt 367. Dann zaehlt ihr eigener Inhalt, nicht ihr Rahmen. */
+        var eigen = window.getComputedStyle(table).overflowX;
+        if ((eigen === 'auto' || eigen === 'scroll') && table.scrollWidth > table.clientWidth + 1) return true;
         var breite = table.getBoundingClientRect().width;
         var s = bildlaufVorfahr(table);
         var platz = s ? s.clientWidth : document.documentElement.clientWidth;
@@ -232,10 +237,14 @@
                         return k && !/^(heatmap-t[dh]|heatmap-col|ds-num|ds-rank)/.test(k);
                     }).join(' ');
                     dd.innerHTML = zelle.innerHTML;
-                    if (zelle.style) {
-                        if (zelle.style.backgroundColor) dd.style.backgroundColor = zelle.style.backgroundColor;
-                        if (zelle.style.background) dd.style.background = zelle.style.background;
-                        if (zelle.style.color) dd.style.color = zelle.style.color;
+                    /* Zellfarbe nur, wenn die Zelle ihre eigene Farbe traegt
+                       (Inline-Stil). Die Heatmap setzt dort --heatmap-bg und
+                       faerbt per Klasse — darum die BERECHNETE Farbe, nicht
+                       die Klasse (live 06.10.: sonst waren alle Felder grau). */
+                    if (zelle.getAttribute && zelle.getAttribute('style')) {
+                        var cs = window.getComputedStyle(zelle);
+                        if (cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent') dd.style.backgroundColor = cs.backgroundColor;
+                        if (cs.color) dd.style.color = cs.color;
                     }
                     weiterleiten(dd, zelle);
                     dl.appendChild(dt);

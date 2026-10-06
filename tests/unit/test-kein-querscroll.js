@@ -57,13 +57,14 @@ function tabelle(kopf, zeilen, breite) {
   tb.alleZeilen = trs; t.appendChild(tb); t.tBodies = [tb]; t.alleZeilen = [kr].concat(trs);
   return t;
 }
-function welt(fensterBreite, tabBreite, quelle) {
+function welt(fensterBreite, tabBreite, quelle, opt = {}) {
   dok = { body: new El('body'), documentElement: new El('html') };
   dok.documentElement.clientWidth = fensterBreite; dok.documentElement.lang = 'de';
   const huelle = new El('div'); huelle.ox = 'auto'; huelle.clientWidth = Math.min(fensterBreite, 360); huelle.breite = 360;
   dok.body.appendChild(huelle);
   const t = tabelle(['#', 'Deck', 'Anteil', 'WR'], [['1', 'Dragapult', '12 %', '52 %'], ['2', 'Gholdengo', '9 %', '-']], tabBreite);
   huelle.appendChild(t);
+  if (opt.eigenScroll) { t.ox = 'auto'; t.clientWidth = tabBreite; t.scrollWidth = opt.eigenScroll; }
   dok.querySelectorAll = (sel) => (sel.startsWith('table') && !t.hasAttribute('data-qs-ersetzt') && t.isConnected ? [t] : []);
   dok.createElement = (tag) => new El(tag); dok.createTextNode = (s) => { const e = new El('#text'); e._text = s; return e; };
   dok.addEventListener = () => {};
@@ -85,6 +86,16 @@ describe('Festlegung A: keine seitlich wischbare Tabelle am Handy', () => {
     assert.deepEqual(dl, ['Anteil', '12 %', 'WR', '52 %']);
     /* „-" (keine Daten) belegt keine Zeile */
     assert.deepEqual(karten[1].children[1].children.map((c) => c.textContent), ['Anteil', '9 %']);
+  });
+  it('390 px: Tabelle, die SELBST seitlich scrollt (Japan-Sieger, 329→367), wird Kartenliste', () => {
+    const { t } = welt(390, 329, QUELLE, { eigenScroll: 367 });
+    assert.equal(t.style.display, 'none');
+  });
+  it('Verfaelschungsprobe: ohne Eigen-Bildlauf-Pruefung bleibt die Japan-Tabelle wischbar', () => {
+    const kaputt = QUELLE.replace("if ((eigen === 'auto' || eigen === 'scroll') && table.scrollWidth > table.clientWidth + 1) return true;", '');
+    assert.notEqual(kaputt, QUELLE);
+    const { t } = welt(390, 329, kaputt, { eigenScroll: 367 });
+    assert.throws(() => assert.equal(t.style.display, 'none'));
   });
   it('390 px: passende Tabelle bleibt Tabelle', () => {
     const { t, huelle } = welt(390, 340, QUELLE);

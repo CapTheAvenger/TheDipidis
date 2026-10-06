@@ -99,8 +99,14 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        gap: 3px;
+        /* V2-8: Symbole auf einer Hoehe — vorher mittig, dadurch sassen
+           die Symbole bei zweizeiligen Beschriftungen hoeher („wellig“). */
+        justify-content: flex-start;
+        padding: 9px 2px 6px;
+        gap: 4px;
+        line-height: 1.15;
+        text-align: center;
+        text-wrap: balance;
         color: var(--ink-3);
         font: inherit;
         font-size: var(--lbl);
@@ -156,6 +162,8 @@
 /* `display: flex` schlägt sonst das hidden-Attribut, und der leere Ausweis
  * bleibt als 3-px-Strich stehen. */
 .ds-space[hidden] { display: none; }
+/* V2-8: ein leerer Ausweis war ein leerer Balken zwischen Kopf und Ueberschrift. */
+.ds-space:empty { display: none; }
 
 .ds-space[data-space="jp"]   { border-left-color: var(--space-jp); }
 .ds-space[data-space="gl"]   { border-left-color: var(--space-gl); }

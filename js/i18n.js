@@ -71,7 +71,7 @@ const translations = {
     'menu.cardDatabase':      'Card Database',
     'menu.metaCall':          'Meta Call',
     'menu.metaCallTitle':     'Meta Call \u2014 predicted field for your next tournament',
-    'menu.deckBuilder':       'Build a deck',
+    'menu.deckBuilder':       'Deck Builder',
     'menu.proxyPrinter':      'Proxy Printer',
     'menu.calculator':        'Calculator',
     'menu.playtester':        'Playtester',
@@ -2996,7 +2996,7 @@ const translations = {
     'menu.cardDatabase':      'Kartendatenbank',
     'menu.metaCall':          'Meta Call',
     'menu.metaCallTitle':     'Meta Call \u2014 vorhergesagtes Meta f\u00fcr dein n\u00e4chstes Turnier',
-    'menu.deckBuilder':       'Deck bauen',
+    'menu.deckBuilder':       'Deck Builder',
     'menu.proxyPrinter':      'Proxy-Drucker',
     'menu.calculator':        'Rechner',
     'menu.playtester':        'Playtester',
@@ -6049,7 +6049,7 @@ function updateTranslationsInDOM() {
   // Uebersetzung den Platzhalter {quote}; die Module fuellen ihn nur nach
   // 'languageChanged'. Andere Aufrufer dieser Funktion (z. B. die
   // Kartendatenbank) liessen „{QUOTE}“ sichtbar stehen. Darum hier nachfuellen.
-  ['cmaQuotenNamenImDom', 'antiTechQuotenNamenImDom'].forEach(function (fn) {
+  ['cmaQuotenNamenImDom', 'antiTechQuotenNamenImDom', 'dsFormatMarke'].forEach(function (fn) {
     if (typeof window !== 'undefined' && typeof window[fn] === 'function') {
       try { window[fn](); } catch (_) { /* Beschriftung bleibt, Seite laeuft weiter */ }
     }

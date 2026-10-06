@@ -399,6 +399,8 @@
     // hierher. Beispiel aus app-tier-meta.js:
     //   DsNav.setSpaceFacts({ sample: '7.456 gewichtete Antritte', window: '20.07.–17.08.' })
     window.DsNav = {
+        // V2-8: das Formatkuerzel fuer andere Module (Datenraum-Knopf).
+        formatLabel: function (key) { return formatFor(key).label; },
         // Fakten werden nach DATENRAUM abgelegt, nicht nach Tab. Die Ansichten
         // laden asynchron: die City-League-Daten sind beim Seitenstart fertig,
         // während noch der Hub aktiv ist — nach `current` geschlüsselt landeten
@@ -490,11 +492,27 @@
     // die naechste Rotation es mitnimmt statt es stehen zu lassen.
     // UI-43 (28.09.2026): dieselbe Marke steht auch in der Ueberschrift
     // der Deck-Analyse (Global), statt dort „aktuelles Meta“ zu sagen.
+    // V2-8: i18n ruft das nach jeder Uebersetzung auf (die Menuepunkte
+    // tragen sonst wieder den i18n-Text).
+    window.dsFormatMarke = function () { formatMarke(); };
     function formatMarke() {
         var f = formatFor('gl');
         ['cmFormatLabel', 'cmAnalysisFormatLabel'].forEach(function (id) {
             var el = document.getElementById(id);
             if (el) el.textContent = f.label ? ' \u00b7 ' + f.label : '';
+        });
+        // V2-8 (Hausi 06.10.): die Menuepunkte heissen wie das Format,
+        // „Global“ ergibt sich daraus. Ohne bekanntes Format bleibt der
+        // Text aus i18n stehen.
+        if (!f.label) return;
+        var de = (typeof window.getLang !== 'function') || window.getLang() === 'de';
+        [['menu-btn-current-meta', de ? f.label + ' Meta-Analyse' : f.label + ' meta analysis'],
+         ['menu-btn-current-analysis', de ? 'Deck-Analyse (' + f.label + ')' : 'Deck analysis (' + f.label + ')']
+        ].forEach(function (p) {
+            var b = document.getElementById(p[0]);
+            if (!b) return;
+            var l = b.querySelector('.menu-item-label') || b;
+            l.textContent = p[1];
         });
     }
 

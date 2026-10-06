@@ -37,7 +37,8 @@ function pruefe(html) {
     assert.doesNotMatch(t.ausserMenue, /id="themeToggleBtn"|id="langToggleBtn"/);
     assert.doesNotMatch(t.kopf, /class="header-subtitle"/, 'kein Untertitel');
     assert.match(t.kopf, /id="current-tab-title" class="current-tab-badge" hidden/, 'keine sichtbare Pille');
-    assert.match(t.kopf, /class="kopf-bluete"/, 'kleine Kirschbluete neben dem Namen');
+    // V2-8 (Hausi 06.10. abends): Bluetenschicht rechts oben statt kleiner Bluete am Namen.
+    assert.doesNotMatch(t.kopf, /class="kopf-bluete"/, 'keine kleine Bluete neben dem Namen');
 }
 
 describe('V2-5 Kopf: ein Menue, sechs Kurzwahlknoepfe, Schalter im Menue', () => {
@@ -53,9 +54,9 @@ describe('V2-5 Kopf: ein Menue, sechs Kurzwahlknoepfe, Schalter im Menue', () =>
         assert.notEqual(kaputt, HTML);
         assert.throws(() => pruefe(kaputt));
     });
-    it('CSS: Beschriftungen der Kurzwahl nur fuer Vorleser, Grossbluete aus', () => {
+    it('CSS: Beschriftungen der Kurzwahl nur fuer Vorleser, Bluetenschicht an', () => {
         const css = lies('css', 'cards-header.css').replace(/\/\*[\s\S]*?\*\//g, '');
         assert.match(css, /#main-content > \.cards-header \.header-icon-label \{[^}]*clip: rect\(0, 0, 0, 0\)/);
-        assert.match(css, /#main-content > \.cards-header::after \{ display: none; \}/);
+        assert.doesNotMatch(css, /#main-content > \.cards-header::after \{ display: none; \}/);
     });
 });

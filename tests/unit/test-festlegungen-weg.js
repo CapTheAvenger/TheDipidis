@@ -30,6 +30,7 @@ const VERBOTEN = [
     { was: '„Mein Deck“-Knopf im Kopf (05.10.)', html: /id="meinDeckKnopf"|js\/mein-deck\.js/, js: /window\.MeinDeck|meindeck:geaendert/ },
     { was: 'zweiter Menue-Oeffner „☰ Menü“ neben dem Pokeball (06.10.)', html: /class="menu-label-btn"|data-i18n="menu\.labelBtn"/, js: /menu-label-btn|'menu\.labelBtn'/ },
     { was: 'Untertitel „Dein Portal …“ im Kopf (06.10.)', html: /class="header-subtitle"/ },
+    { was: 'ⓘ-Glossarknoepfe neben Auswahlen und Ueberschriften (06.10.)', html: /class="glossar-i"/ },
 ];
 
 describe('Festlegungen A: Entferntes bleibt weg', () => {

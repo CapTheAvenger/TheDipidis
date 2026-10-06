@@ -247,11 +247,11 @@ describe('Anleitung: Erste Schritte + Glossar', () => {
         behaupte2.deepEqual(ids(DE2).sort(), ids(EN2).sort());
     });
 
-    it('die ⓘ-Knoepfe der Seite zeigen auf vorhandene Eintraege', () => {
-        const da = new Set(ids(DE2));
-        const knoepfe = [...HTML.matchAll(/class="glossar-i" data-glossar="([a-z0-9-]+)"/g)].map(m => m[1]);
-        behaupte2.ok(knoepfe.length >= 4, `nur ${knoepfe.length} ⓘ-Knoepfe`);
-        for (const k of knoepfe) behaupte2.ok(da.has('glossar-' + k), `ⓘ ins Leere: ${k}`);
+    /* Rueckblick 06.10.2026: die vier ⓘ-Knoepfe „Im Glossar nachlesen“ (R5)
+       sind weg — Hilfe laeuft ueber Professor Eich (Festlegung B), nie als
+       Element mitten in der Bedienung. Das Glossar bleibt in der Anleitung. */
+    it('keine ⓘ-Glossarknoepfe mehr in der Bedienung', () => {
+        behaupte2.equal((HTML.match(/class="glossar-i"/g) || []).length, 0);
     });
 
     it('die deutsche Fassung sagt nie „Feld", „Cooking" oder eine alte Version', () => {

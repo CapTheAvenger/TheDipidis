@@ -74,6 +74,43 @@ document.addEventListener('click', function(e) {
   });
 });
 
+/* UI-114 (Hausi, 05.10.2026): "Post/Post-Seite nur fuer mein Konto". Nur Anzeige,
+ * keine Sicherheitsgrenze — die Firebase-Uid ist kein Geheimnis. */
+const DS_BETREIBER_UID = 'SUSCeMi8oSd7likomxIC6z3qAqf2';
+function dsIstBetreiber() {
+  try { return !!(window.auth && window.auth.currentUser && window.auth.currentUser.uid === DS_BETREIBER_UID); }
+  catch (_) { return false; }
+}
+window.dsIstBetreiber = dsIstBetreiber;
+
+/* "⋯ Mehr" der Deckzeile: immer nur ein Menue offen; Esc und Klick daneben schliessen. */
+function dsDeckMehrToggle(el) {
+  if (!el) return;
+  /* Die Deckkarte schneidet sonst das Menue ab (overflow: hidden fuer die runden Ecken). */
+  const karte = el.closest('.saved-deck-item');
+  if (karte) karte.style.overflow = el.open ? 'visible' : 'hidden';
+  if (!el.open) return;
+  document.querySelectorAll('details.deck-mehr[open]').forEach(d => { if (d !== el) d.open = false; });
+}
+window.dsDeckMehrToggle = dsDeckMehrToggle;
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('details.deck-mehr[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; });
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('details.deck-mehr[open]').forEach(d => {
+    d.open = false;
+    const s = d.querySelector('summary'); if (s) s.focus();
+  });
+});
+/* Ein Menuepunkt schliesst das Menue nach dem Klick. */
+document.addEventListener('click', (e) => {
+  const item = e.target && e.target.closest ? e.target.closest('.deck-mehr-item') : null;
+  if (!item) return;
+  const d = item.closest('details.deck-mehr');
+  if (d) setTimeout(() => { d.open = false; }, 0);
+}, true);
+
 function escapeJsSingleQuoted(value) {
   return String(value)
     .replace(/\\/g, '\\\\')
@@ -1629,7 +1666,7 @@ function buildWishlistTargetPill(cmPriceRaw, userMaxRaw) {
   const titel = t('preis.zielPillTitel')
     .replace('{cm}', `${cm.toFixed(2).replace('.', ',')} €`)
     .replace('{max}', `${max.toFixed(2).replace('.', ',')} €`);
-  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,var(--solid-ok),#15803d);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(22,163,74,0.35);" title="${escapeHtml(titel)}">${escapeHtml(t('preis.zielPill'))}</div>`;
+  return `<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:linear-gradient(135deg,var(--solid-ok),#15803d);color:#fff;border-radius:999px;font-size:0.70em;font-weight:800;letter-spacing:0.02em;box-shadow:0 1px 4px rgba(22,163,74,0.35);" title="${escapeHtml(titel)}">${escapeHtml(t('preis.zielPill').replace('{cm}', `${cm.toFixed(2).replace('.', ',')} €`))}</div>`;
 }
 
 function buildTradelistUnderpricedPill(cmPriceRaw, userMinRaw) {
@@ -1915,7 +1952,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: var(--profil-decks-ink); font-weight: 600;">Max:</span>
               <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
-                aria-label="Maximum price for ${safeNameHtml}"
+                aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Maximum price for ${safeNameHtml}` : `Höchstpreis für ${safeNameHtml}`}"
                 style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; background: var(--surface-1); color: var(--profil-decks-ink); text-align: right; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='var(--profil-decks-ink)'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
@@ -2872,52 +2909,58 @@ function updateDecksUI(offenHalten) {
             </div>
           </div>
           <div class="deck-action-buttons" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <!-- All deck actions inline. Per user request: drowning vs.
-                 scanable was a wash — they prefer one click instead of
-                 two. flex-wrap keeps narrow viewports happy when the
-                 row gets too long. -->
-            <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-irl${isActive ? ' deck-btn-irl--active' : ''}" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
-              IRL ${isActive ? '✓' : ''}
-            </button>
-            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="${getLang()==='de' ? 'Für Pokémon TCG Live (PTCGL) kopieren' : 'Copy in PTCGL format (Pokémon TCG Live)'}">
-              PTCGL
-            </button>
+            <!-- UI-114 (Hausi, 05.10.2026): drei Hauptaktionen sichtbar (Decklist, Bild,
+                 Proxy), alles andere unter "⋯ Mehr". Post/Post-Seite nur fuer das
+                 Betreiber-Konto (dsIstBetreiber). -->
             <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="${getLang()==='de' ? 'Kopieren und Limitless-Deckbuilder öffnen' : 'Copy &amp; open Limitless Builder'}">
               ${getLang()==='de' ? 'Decklist' : 'Print Decklist'}
-            </button>
-            <button onclick="event.stopPropagation(); copyDeckAndOpenShowdown(${deckIndex})" class="deck-action-btn deck-btn-showdown" data-i18n-title="showdown.buttonTitle" title="${t('showdown.buttonTitle')}">
-              <span data-i18n="showdown.buttonLabel">📋 TCG Showdown ↗</span>
-            </button>
-            <button onclick="event.stopPropagation(); printSavedDeckProxies(${deckIndex})" class="deck-action-btn deck-btn-proxy-all" title="${getLang()==='de' ? 'Alle Karten in den Proxy Printer' : 'Send full deck to Proxy Printer'}">
-              ${getLang()==='de' ? 'Proxy' : 'Print Proxy'}
-            </button>
-            <button onclick="event.stopPropagation(); printSavedDeckMissingProxies(${deckIndex})" class="deck-action-btn deck-btn-proxy-missing" title="${getLang()==='de' ? 'Nur fehlende Karten in den Proxy Printer' : 'Send only missing cards to Proxy Printer'}">
-              ${getLang()==='de' ? 'Fehlende Proxy' : 'Print Missing'}
-            </button>
-            <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="${getLang()==='de' ? 'Vergleichen' : 'Compare'}">
-              ${getLang()==='de' ? 'Vergleichen' : 'Compare'}
-            </button>
-            <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" class="deck-action-btn deck-btn-folder" title="${getLang()==='de' ? 'In Ordner verschieben' : 'Move to folder'}">
-              ${getLang()==='de' ? 'Ordner' : 'Folder'}
             </button>
             <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" class="deck-action-btn deck-btn-export" title="${getLang()==='de' ? 'Als Bild speichern' : 'Save as image'}">
               ${getLang()==='de' ? 'Bild' : 'Image'}
             </button>
-            <button onclick="event.stopPropagation(); postSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-post" title="${getLang()==='de' ? 'Post im Instagram-Format (1080\u00d71350) erzeugen und teilen' : 'Create the Instagram post (1080\u00d71350) and share it'}">
+            <button onclick="event.stopPropagation(); printSavedDeckProxies(${deckIndex})" class="deck-action-btn deck-btn-proxy-all" title="${getLang()==='de' ? 'Alle Karten in den Proxy Printer' : 'Send full deck to Proxy Printer'}">
+              ${getLang()==='de' ? 'Proxy' : 'Print Proxy'}
+            </button>
+            <details class="deck-mehr" onclick="event.stopPropagation()" ontoggle="dsDeckMehrToggle(this)">
+              <summary class="deck-action-btn deck-btn-mehr" aria-haspopup="menu">⋯ ${getLang()==='de' ? 'Mehr' : 'More'}</summary>
+              <div class="deck-mehr-menue" role="menu">
+                <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" role="menuitem" class="deck-mehr-item deck-btn-irl${isActive ? ' deck-btn-irl--active' : ''}" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
+              IRL ${isActive ? '✓' : ''}
+                </button>
+                <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-copy" title="${getLang()==='de' ? 'Für Pokémon TCG Live (PTCGL) kopieren' : 'Copy in PTCGL format (Pokémon TCG Live)'}">
+              PTCGL
+                </button>
+                <button onclick="event.stopPropagation(); copyDeckAndOpenShowdown(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-showdown" data-i18n-title="showdown.buttonTitle" title="${t('showdown.buttonTitle')}">
+              <span data-i18n="showdown.buttonLabel">📋 TCG Showdown ↗</span>
+                </button>
+                <button onclick="event.stopPropagation(); printSavedDeckMissingProxies(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-proxy-missing" title="${getLang()==='de' ? 'Nur fehlende Karten in den Proxy Printer' : 'Send only missing cards to Proxy Printer'}">
+              ${getLang()==='de' ? 'Fehlende Proxy' : 'Print Missing'}
+                </button>
+                <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-compare" title="${getLang()==='de' ? 'Vergleichen' : 'Compare'}">
+              ${getLang()==='de' ? 'Vergleichen' : 'Compare'}
+                </button>
+                <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-folder" title="${getLang()==='de' ? 'In Ordner verschieben' : 'Move to folder'}">
+              ${getLang()==='de' ? 'Ordner' : 'Folder'}
+                </button>
+                ${dsIstBetreiber() ? `
+                <button onclick="event.stopPropagation(); postSavedDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-post" title="${getLang()==='de' ? 'Post im Instagram-Format (1080\u00d71350) erzeugen und teilen' : 'Create the Instagram post (1080\u00d71350) and share it'}">
               ${getLang()==='de' ? 'Post' : 'Post'}
-            </button>
-            <button onclick="event.stopPropagation(); postSavedDeckAufPostSeite(${deckIndex})" class="deck-action-btn deck-btn-postseite" title="${getLang()==='de' ? 'Dieses Deck auf der Post-Seite \u00f6ffnen (\u00dcberschrift, Text und Hashtags dort)' : 'Open this deck on the posts page (headline, caption and hashtags there)'}">
+                </button>
+                <button onclick="event.stopPropagation(); postSavedDeckAufPostSeite(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-postseite" title="${getLang()==='de' ? 'Dieses Deck auf der Post-Seite \u00f6ffnen (\u00dcberschrift, Text und Hashtags dort)' : 'Open this deck on the posts page (headline, caption and hashtags there)'}">
               ${getLang()==='de' ? 'Post-Seite' : 'Posts page'}
-            </button>
-            <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" class="deck-action-btn deck-btn-rename" title="${getLang()==='de' ? 'Umbenennen' : 'Rename'}">
+                </button>
+                ` : ''}
+                <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-rename" title="${getLang()==='de' ? 'Umbenennen' : 'Rename'}">
               ${getLang()==='de' ? 'Umbenennen' : 'Rename'}
-            </button>
-            <button onclick="event.stopPropagation(); duplicateDeck(${deckIndex})" class="deck-action-btn deck-btn-duplicate" title="${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}">
+                </button>
+                <button onclick="event.stopPropagation(); duplicateDeck(${deckIndex})" role="menuitem" class="deck-mehr-item deck-btn-duplicate" title="${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}">
               ${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}
-            </button>
-            <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-delete" title="${getLang()==='de' ? 'Löschen' : 'Delete'}">
+                </button>
+                <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" role="menuitem" class="deck-mehr-item deck-btn-delete" title="${getLang()==='de' ? 'Löschen' : 'Delete'}">
               ${getLang()==='de' ? 'Löschen' : 'Delete'}
-            </button>
+                </button>
+              </div>
+            </details>
             <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg); margin-left: auto;">▼</div>
           </div>
         </div>
@@ -3975,7 +4018,7 @@ async function chooseDeckFolderWithCreate(options = {}) {
   }
 
   if (selected === '__NEW_FOLDER__') {
-    const newFolderName = await showInputModal({ title: 'New Folder', message: 'Enter folder name:', placeholder: 'Folder name' });
+    const newFolderName = await showInputModal({ title: getLang()==='de' ? 'Neuer Ordner' : 'New Folder', message: getLang()==='de' ? 'Name des Ordners:' : 'Enter folder name:', placeholder: getLang()==='de' ? 'Ordnername' : 'Folder name' });
     if (!newFolderName || !newFolderName.trim()) {
       return null;
     }
@@ -4573,7 +4616,7 @@ async function openCompareSavedDeck(deckIndex) {
   modal.innerHTML = `
     <div style="background: var(--surface-1);border-radius:12px;max-width:760px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.35);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <h2 style="margin:0;font-size:1.25em;">Compare Deck: ${safeBaseDeckName}</h2>
+        <h2 style="margin:0;font-size:1.25em;">${getLang()==='de' ? 'Deck vergleichen' : 'Compare deck'}: ${safeBaseDeckName}</h2>
         <button id="deck-compare-source-close" style="background:none;border:none;font-size:24px;cursor:pointer;line-height:1;">✕</button>
       </div>
       <p style="margin:0 0 14px 0;color: var(--ink-2);">${getLang()==='de' ? 'Wähle, womit du vergleichen möchtest:' : 'Choose what to compare with:'}</p>
@@ -4860,7 +4903,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
     const a = aggA.get(key) || { count: 0, label: '' };
     const b = aggB.get(key) || { count: 0, label: '' };
     const labelBase = a.label || b.label || key;
-    const label = `${escapeHtml(labelBase)}${(mode === 'functional' && (a.collapsedPrints || b.collapsedPrints)) ? ' <span title="Int-Prints zusammengefasst" style="color:var(--vorbehalt);">(prints merged)</span>' : ''}`;
+    const label = `${escapeHtml(labelBase)}${(mode === 'functional' && (a.collapsedPrints || b.collapsedPrints)) ? ' <span title="Int-Prints zusammengefasst" style="color:var(--vorbehalt);" aria-hidden="true">*</span>' : ''}`;  // UI-117: kurze Marke statt "(prints merged)" je Karte
 
     if (a.count > 0 && b.count === 0) {
       onlyA.push(`${label} x${a.count}`);
@@ -5089,8 +5132,8 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       </div>
       <div style="display:${view === 'side' ? 'none' : 'flex'};gap:8px;align-items:center;justify-content:flex-end;margin-bottom:12px;">
         <span style="font-size:12px;color: var(--ink-2);font-weight:700;margin-right:4px;">${de ? 'Vergleichsart:' : 'Compare mode:'}</span>
-        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Functional (prints merged)</button>
-        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Exact print</button>
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">${getLang()==='de' ? 'Drucke zusammengefasst (*)' : 'Prints merged (*)'}</button>
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">${getLang()==='de' ? 'Genauer Druck' : 'Exact print'}</button>
       </div>
       <div style="margin:-4px 0 12px 0;font-size:12px;color: var(--ink-2);">${view === 'side'
         ? (de ? 'Jeder Druck (Set + Nummer) steht als eigene Zeile — die Vergleichsart gilt hier nicht.' : 'Every print (set + number) is its own row — the compare mode does not apply here.')
@@ -6128,7 +6171,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: var(--tint-ok-ink); font-weight: 600;">ca</span>
               <input type="text" inputmode="decimal" value="${minPriceVal}" placeholder="\u2014"
-                aria-label="Minimum price for ${safeNameHtml}"
+                aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Minimum price for ${safeNameHtml}` : `Mindestpreis für ${safeNameHtml}`}"
                 style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; color: var(--tint-ok-ink); text-align: right; outline: none; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#16a085'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveTradelistMinPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">

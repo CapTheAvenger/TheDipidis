@@ -283,9 +283,7 @@
         h.innerHTML =
             '<p class="mcl-lead">' + esc(T('regalLead')) + '</p>' +
             '<div class="mcl-regal">' +
-            GUIDES.map(kachel).join('') +
-            '<div class="mcl-platz"><span>' + esc(T('platz')) + '</span>' +
-            '<span class="mcl-fein">' + esc(T('platzFein')) + '</span></div>' +
+            GUIDES.map(kachel).join('') +   /* UI-117: keine Platzhalterkachel mehr */
             '</div><div class="mcl-buehne" id="mclBuehne" hidden></div>';
         h.dataset.state = 'regal';
     }

@@ -1478,6 +1478,24 @@ window.formatPercentSigned = formatPercentSigned;
  * Returns markup, so it is the caller's job to pass trusted labels.
  * The explanation is escaped because it ends up in a title attribute.
  */
+/* UI-115 (05.10.2026): Vorlese-Text kurz halten. Die volle Erklaerung steht in der
+ * Sprechblase (data-hinweis); aria-label bekommt den ersten Satz, hoechstens `max`
+ * Zeichen, an einer Wortgrenze gekuerzt. Gemessen live 05.10.: 50 aria-label
+ * ueber 200 Zeichen auf "Aktuelles Meta" (bis 759). */
+function dsKurzLabel(text, max) {
+    const grenze = max || 140;
+    const t = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+    const satz = t.match(/^[\s\S]*?[.!?](?=\s|$)/);
+    let k = satz && satz[0].length >= 20 ? satz[0] : t;
+    if (k.length > grenze) {
+        k = k.slice(0, grenze);
+        const w = k.lastIndexOf(' ');
+        k = (w > grenze * 0.6 ? k.slice(0, w) : k).replace(/[\s,;:—–-]+$/, '') + ' …';
+    }
+    return k;
+}
+if (typeof window !== 'undefined') window.dsKurzLabel = dsKurzLabel;
+
 function termHint(label, explanation) {
     const esc = (s) => String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -1510,7 +1528,7 @@ function termHint(label, explanation) {
        sortieren"). Ohne den leeren eigenen title erbt die Marke jenen
        und der Browser malte seine Sprechblase neben unsere. */
     return `<span class="ds-term" data-hinweis="${esc(explanation)}" title="" tabindex="0"`
-         + ` role="note" aria-label="${esc(label)}: ${esc(explanation)}">${esc(label)}</span>`;
+         + ` role="note" aria-label="${esc(label)}: ${esc(dsKurzLabel(explanation))}">${esc(label)}</span>`;
 }
 window.termHint = termHint;
 

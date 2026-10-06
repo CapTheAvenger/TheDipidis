@@ -739,7 +739,7 @@
         const hat = !!titleAttr;
         const ttl = hat
             ? ` data-hinweis="${esc(titleAttr)}" tabindex="0"`
-              + ` aria-label="${esc(label)} ${esc(value).replace(/<[^>]*>/g, '')}: ${esc(titleAttr)}"`
+              + ` aria-label="${esc(label)} ${esc(value).replace(/<[^>]*>/g, '')}: ${esc((typeof window.dsKurzLabel === 'function' ? window.dsKurzLabel : String)(titleAttr))}"`
             : '';
         const arw = arrow ? `<span class="arc-tile-arrow" aria-hidden="true">${arrow}</span>` : '';
         // Wert oben, Bezeichnung darunter — genau die Reihenfolge, in der
@@ -967,7 +967,7 @@
             ? ` data-hinweis="${esc(tip)}" tabindex="0"`
               + ` aria-label="${esc(label)} — ${de ? 'online' : 'online'} ${
                     esc(String(onlineWert).replace(/<[^>]*>/g, ''))}, Major ${
-                    esc(String(majorWert || majorLeer).replace(/<[^>]*>/g, ''))}: ${esc(tip)}"`
+                    esc(String(majorWert || majorLeer).replace(/<[^>]*>/g, ''))}: ${esc((typeof window.dsKurzLabel === 'function' ? window.dsKurzLabel : String)(tip))}"`
             : '';
         const arw = pfeil ? `<span class="arc-tile-arrow" aria-hidden="true">${pfeil}</span>` : '';
         /* Herkunft LINKS, Zahl RECHTS, eine Zeile je Quelle.
@@ -1112,7 +1112,7 @@
                    macht (siehe praesenzNote weiter unten). */
                 (_oFeld.listen
                     ? (de
-                        ? 'Anteil am Onlinefeld: der Bruch {n} / {g}. Gezählt ist davon nur der Zähler (Spalte count in data/limitless_online_decks.csv). Der Nenner steht in KEINER Spalte — er ist aus den Anteilen derselben Datei HOCHGERECHNET: {s} Listen sind namentlich gelistet und tragen zusammen {a} % der Anteile, den Rest führt Limitless als „Other“. Daraus ≈ {g} Listen{u}. Unter „Other“ liegen danach rund {r} Listen ({g} − {s} = {o}{c}) — auch diese Zahl ist nicht gezählt. NICHT dieselbe Größe wie der Meta-Anteil auf der Startseite: der zählt Antritte an Online-Turnieren aus data/online_tournament_top8_decks.csv. {mj}'
+                        ? 'Anteil am Online-Meta: der Bruch {n} / {g}. Gezählt ist davon nur der Zähler (Spalte count in data/limitless_online_decks.csv). Der Nenner steht in KEINER Spalte — er ist aus den Anteilen derselben Datei HOCHGERECHNET: {s} Listen sind namentlich gelistet und tragen zusammen {a} % der Anteile, den Rest führt Limitless als „Other“. Daraus ≈ {g} Listen{u}. Unter „Other“ liegen danach rund {r} Listen ({g} − {s} = {o}{c}) — auch diese Zahl ist nicht gezählt. NICHT dieselbe Größe wie der Meta-Anteil auf der Startseite: der zählt Antritte an Online-Turnieren aus data/online_tournament_top8_decks.csv. {mj}'
                         : 'Share of the online field: the fraction {n} / {g}. Only the numerator is counted (column count in data/limitless_online_decks.csv). The base appears in NO column — it is EXTRAPOLATED from the file\u2019s own shares: {s} lists are named and carry {a} % of the shares between them, the remainder is what Limitless groups as \u201cOther\u201d. Hence ≈ {g} lists{u}. \u201cOther\u201d is then about {r} lists ({g} − {s} = {o}{c}) — that figure is not counted either. NOT the same quantity as the meta share on the home page: that one counts entries at online tournaments from data/online_tournament_top8_decks.csv. {mj}')
                         .replace('{u}', _spanneSatz)
                         .replace('{c}', _otherSpanneSatz)
@@ -1509,7 +1509,7 @@
                 || 'S / (S + N)');
         const online = de
             ? `Anteil, ${quoteName} und Top-8-Quote: data/limitless_online_decks.csv und `
-              + 'data/online_tournament_top8_decks.csv — Gesamtstand des Onlinefeldes, '
+              + 'data/online_tournament_top8_decks.csv — Gesamtstand des Online-Metas, '
               + 'ohne Turnierdatum je Zeile.'
             : `Share, ${quoteName} and top-8 rate: data/limitless_online_decks.csv and `
               + 'data/online_tournament_top8_decks.csv — cumulative online field, '

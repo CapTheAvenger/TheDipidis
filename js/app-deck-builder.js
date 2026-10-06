@@ -400,7 +400,7 @@ if (typeof window.addEventListener === 'function') {
                         '<span class="tech-slot-name" title="' + safeName + '">' + safeName + '</span>' +
                         '<button class="tech-slot-remove" type="button" ' +
                         'onclick="removeTechSlot(\'' + source + '\', \'' + jsName + '\')" ' +
-                        'aria-label="Remove tech card" title="Remove">×</button>';
+                        'aria-label="' + ((typeof getLang === 'function' && getLang() === 'en') ? 'Remove tech card' : 'Tech-Karte entfernen') + '" title="' + ((typeof getLang === 'function' && getLang() === 'en') ? 'Remove' : 'Entfernen') + '">×</button>';
                 } else {
                     tile.className = 'tech-slot-tile tech-slot-empty';
                     tile.setAttribute('role', 'button');

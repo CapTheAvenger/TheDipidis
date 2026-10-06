@@ -221,6 +221,8 @@ describe('Ebene 1 auf der Einstiegsseite', () => {
 
 describe('Fachbegriffe erklären sich dort, wo die Zahl steht', () => {
     const termHint = new Function(
+        // UI-115 (05.10.2026): termHint kuerzt das aria-label mit dsKurzLabel — beide laden.
+        UTILS.match(/function dsKurzLabel\(text, max\) \{[\s\S]*?\n\}/)[0] + '\n' +
         UTILS.match(/function termHint\(label, explanation\) \{[\s\S]*?\n\}/)[0] +
         '\nreturn termHint;')();
 

@@ -10960,7 +10960,7 @@ window.MetaCall = (function () {
     return `
 <div class="mc-combo-row" title="${esc(t(hintKey))}">
   <span class="mc-combo-label">${t('mc.panelMode')}</span>
-  <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="Meta Call mode">
+  <div class="mc-tt-tabs mc-tt-tabs-inline" role="tablist" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Meta Call mode` : `Meta-Call-Modus`}">
     ${pill('standard', 'mc.modeStandard')}
     ${pill('counter',  'mc.modeCounter')}
   </div>

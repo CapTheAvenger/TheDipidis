@@ -272,7 +272,8 @@ describe('Rutsch S: Alle-Karten-Box und aufklappbare Boxliste (Hausi, 03.10.2026
     assert.equal(L.ALLE_KARTEN, '__alle_karten__');
   });
   it('Die Ansicht rechnet die Kopie und die Zahlen aus der Alle-Karten-Box', () => {
-    assert.match(code, /const alleKarten = aktiveId === ALLE_KARTEN/);
+    assert.match(code, /const sbAnsicht = aktiveId === ALLE_KARTEN && boxen\.length > 1;/);
+    assert.match(code, /const alleKarten = sbAnsicht && !spielboxJetzt;/);
     assert.match(code, /sichtbareKarten = groesste \? groesste\.map\(function \(g\) \{ return g\.k; \}\)/);
     assert.match(code, /alleKartenChip = chip\(ALLE_KARTEN/);
   });
@@ -444,8 +445,88 @@ describe('Rutsch U: Spielbox, Regulation Mark, Preise in der Druckwahl (Hausi, 0
     assert.match(code, /filterPasst\(e\.k, ansicht, e\.element, markenVonEintrag\)/);
     assert.match(code, /filterPasst\(k, ansicht, elementVon\(k\), markenVonEintrag\)/);
     assert.match(code, /preisVon\(rec\)/);
-    assert.match(code, /ArchetypBox\.spielboxEinspielen\(\)/);
-    assert.match(code, /await schreiben\(erg\.box\)/);
+    // FE-63 (05.10.2026): kein Anlegen-Knopf mehr — die Ansicht IST die Spielbox und schreibt selbst.
+    assert.doesNotMatch(code, /spielboxEinspielen/);
+    assert.match(code, /if \(erg\.geaendert\) schreiben\(erg\.box\);/);
     assert.match(code, /knopf\('marke', 'alle'/);
+  });
+});
+
+describe('FE-63: "Alle Standard-Karten" ist die Spielbox (Hausi, 05.10.2026)', () => {
+  const code = QUELLE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const kk = (set, nr, n, extra) => Object.assign({ id: set + '-' + nr, name: 'Karte ' + nr, set: set, number: nr, gefordert: n, typ: 'Item', refs: [] }, extra || {});
+  const ak = (liste) => liste.map((k) => ({ id: k.id, k: k, max: k.gefordert, boxen: 1 }));
+
+  it('Erstes Oeffnen: Spielbox mit fester Id, alle Karten "fehlt", Anzahl = groesste gespielte', () => {
+    const r = L.spielboxAbgleichen(ak([kk('TEF', '3', 4), kk('DRI', '10', 2)]), null, null, '2026-10-05');
+    assert.equal(r.box.id, L.SPIELBOX_AUTO_ID);
+    assert.equal(L.istAutoSpielbox(r.box), true);
+    assert.equal(r.geaendert, true);
+    assert.deepEqual(r.box.karten.map((k) => [k.id, k.gefordert, k.status]), [['TEF-3', 4, 'fehlt'], ['DRI-10', 2, 'fehlt']]);
+  });
+  it('Aktualisiert sich selbst: neue Karte dazu, rotierte raus, Anzahl folgt, Haken bleiben', () => {
+    const erst = L.spielboxAbgleichen(ak([kk('TEF', '3', 4), kk('OBF', '1', 2)]), null, null, '2026-10-05').box;
+    erst.karten[0].status = 'original';
+    erst.karten[0].drucke = [{ id: 'MEP-3', set: 'MEP', number: '3', n: 2 }];
+    const r = L.spielboxAbgleichen(ak([kk('TEF', '3', 3), kk('SFA', '9', 1)]), erst, null, '2026-10-06');
+    assert.deepEqual(r.box.karten.map((k) => k.id), ['TEF-3', 'SFA-9']);
+    assert.deepEqual(r.hinzu.map((k) => k.id), ['SFA-9']);
+    assert.deepEqual(r.raus.map((k) => k.id), ['OBF-1']);
+    assert.equal(r.box.karten[0].status, 'original');
+    assert.equal(r.box.karten[0].gefordert, 3);
+    assert.equal(r.box.karten[0].drucke[0].id, 'MEP-3');
+  });
+  it('Nichts geaendert -> geaendert=false (kein Schreiben bei jedem Oeffnen)', () => {
+    const erst = L.spielboxAbgleichen(ak([kk('TEF', '3', 4)]), null, null, '2026-10-05').box;
+    const r = L.spielboxAbgleichen(ak([kk('TEF', '3', 4)]), erst, null, '2026-10-06');
+    assert.equal(r.geaendert, false);
+  });
+  it('Von Hand entfernte Karte kommt nicht still zurueck', () => {
+    const erst = L.spielboxAbgleichen(ak([kk('TEF', '3', 4), kk('TEF', '4', 1)]), null, null, '2026-10-05').box;
+    const ohne = L.entfernen(erst, 'TEF-4', '2026-10-05');
+    const r = L.spielboxAbgleichen(ak([kk('TEF', '3', 4), kk('TEF', '4', 1)]), ohne, null, '2026-10-06');
+    assert.deepEqual(r.box.karten.map((k) => k.id), ['TEF-3']);
+  });
+  it('Alte Spielbox (FE-54): Haken werden einmal uebernommen, die alte Box bleibt unveraendert', () => {
+    const alt = L.spielboxBefuellen(ak([kk('TEF', '3', 4)]), null, '2026-10-04').box;
+    alt.karten[0].status = 'proxy';
+    alt.karten[0].drucke = [{ id: 'TEF-3', set: 'TEF', number: '3', n: 4 }];
+    const vorher = JSON.stringify(alt);
+    const r = L.spielboxAbgleichen(ak([kk('TEF', '3', 4), kk('DRI', '10', 2)]), null, alt, '2026-10-05');
+    assert.equal(r.box.karten[0].status, 'proxy');
+    assert.equal(r.box.karten[0].drucke[0].n, 4);
+    assert.equal(r.box.karten[1].status, 'fehlt');
+    assert.equal(JSON.stringify(alt), vorher);
+    assert.notEqual(r.box.karten[0].drucke, alt.karten[0].drucke);
+  });
+  it('Zuordnung nie ueber den Namen: gleicher Name, anderes Set = zwei Karten', () => {
+    const r = L.spielboxAbgleichen(ak([kk('TEF', '3', 1, { name: 'X' }), kk('DRI', '3', 1, { name: 'X' })]), null, null, '2026-10-05');
+    assert.equal(r.box.karten.length, 2);
+  });
+  it('Zu gross: nichts schreiben', () => {
+    const viele = [];
+    for (let i = 0; i < 4000; i++) viele.push(kk('TEF', String(i + 1), 1, { name: 'x'.repeat(200), bild: 'https://b/' + 'y'.repeat(100) }));
+    const r = L.spielboxAbgleichen(ak(viele), null, null, '2026-10-05');
+    assert.equal(r.zuGross, true);
+    assert.equal(r.geaendert, false);
+  });
+  it('Verdrahtung: Spielbox nie in der Boxliste, Chip heisst "Spielbox", kein Loeschen/Liste/Suche dort', () => {
+    assert.match(code, /boxen = boxen\.filter\(function \(b\) \{ return !istAutoSpielbox\(b\); \}\);/);
+    assert.match(code, /tx\('abx\.spielboxChip', null, 'Spielbox'\)/);
+    assert.match(code, /eine && !spielboxJetzt \? '<button type="button" class="btn btn-outline" onclick="ArchetypBox\.loeschen/);
+    assert.match(code, /const suche = eine && !spielboxJetzt/);
+    assert.match(code, /const liste = eine && !spielboxJetzt \? listeBlock\(eine\) : '';/);
+  });
+  it('Verfaelschungsprobe: ohne Entfernen rotierter Karten faellt die Zusage', () => {
+    const vm = require('node:vm');
+    const kaputt = QUELLE.replace("const raus = basis.karten.filter(function (k) { return karten.indexOf(k) < 0; });",
+      "const raus = []; karten.push.apply(karten, basis.karten.filter(function (k) { return karten.indexOf(k) < 0; }));");
+    assert.notEqual(kaputt, QUELLE);
+    const m = { exports: {} };
+    vm.runInNewContext(kaputt, { module: m, exports: m.exports, console });
+    const K = m.exports;
+    const erst = K.spielboxAbgleichen(ak([kk('TEF', '3', 4), kk('OBF', '1', 2)]), null, null, '2026-10-05').box;
+    const r = K.spielboxAbgleichen(ak([kk('TEF', '3', 4)]), erst, null, '2026-10-06');
+    assert.notDeepEqual(r.box.karten.map((k) => k.id), ['TEF-3']);
   });
 });

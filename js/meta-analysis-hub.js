@@ -769,7 +769,7 @@
             return `<button type="button" class="meta-hub-subnav-btn${activeClass}" data-sub-tab="${id}">${escapeHtml(label)}</button>`;
         }).join('');
         return `
-            <nav class="meta-hub-subnav" aria-label="Meta &amp; Deck Analysis sub-navigation">
+            <nav class="meta-hub-subnav" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Meta &amp; Deck Analysis sub-navigation` : `Unternavigation Meta und Deck-Analyse`}">
                 <button type="button" class="meta-hub-subnav-back" id="metaHubBackBtn">${escapeHtml(backLabel)}</button>
                 <div class="meta-hub-subnav-items">${items}</div>
             </nav>

@@ -177,7 +177,8 @@ describe('Die Kacheln nutzen die gemeinsame Rechnung', () => {
 
     it('die Beschriftung nennt die Ø-Liste, nicht "Gesamt"', () => {
         const q = lies('js/i18n.js');
-        assert.ok(q.includes("'stats.cardsInDeck':        'Karten im Deck (verschiedene / Ø-Liste)'"),
+        // UI-117 (05.10.2026, N3-07): „67 / 60“ las sich als „67 Karten, erlaubt 60“.
+        assert.ok(q.includes("'stats.cardsInDeck':        'Verschiedene Karten gespielt / Karten je Liste'"),
             'deutsche Beschriftung nicht angepasst');
         assert.ok(!/stats\.cardsInDeck':\s*'Karten im Deck \(Unique \/ Gesamt\)/.test(q),
             '"Gesamt" steht noch da');

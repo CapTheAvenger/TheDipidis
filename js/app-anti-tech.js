@@ -397,7 +397,7 @@
                             data-target="${name.replace(/"/g, '&quot;')}">
                 <span class="anti-tech-quick-pick-name">${name}</span>
                 <span class="anti-tech-quick-pick-meta">
-                    <span class="anti-tech-quick-pick-share" title="${_t('antiTech.fieldShareTooltip', 'Share of the predicted field')}">${sharePct.toFixed(1)}%</span>
+                    <span class="anti-tech-quick-pick-share" title="${_t('antiTech.fieldShareTooltip', 'Share of the predicted field')}">${sharePct.toLocaleString((typeof getLang === 'function' && getLang() === 'en') ? 'en-US' : 'de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %</span>
                     <span class="mc-vs-pill ${wrCls} anti-tech-quick-pick-wr" data-quote-konvention="${ANTI_TECH_KONVENTION}" title="${_mitQuote(_t('antiTech.wrTooltip', '{quote} ({formel}) against this deck — red means tech priority'), ANTI_TECH_KONVENTION) + ' · ' + _quotenHinweis(ANTI_TECH_KONVENTION)}">${wrText}</span>
                 </span>
             </button>`;
@@ -471,7 +471,7 @@
             const safe = display.replace(/"/g, '&quot;');
             return `<span class="anti-tech-chip" data-target="${safe}">
                 <span class="anti-tech-chip-label">${display}</span>
-                <button type="button" class="anti-tech-chip-x" data-target="${safe}" aria-label="Remove">×</button>
+                <button type="button" class="anti-tech-chip-x" data-target="${safe}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Remove` : `Entfernen`}">×</button>
             </span>`;
         }).join('');
         wrap.querySelectorAll('.anti-tech-chip-x').forEach(btn => {
@@ -979,7 +979,7 @@
             const imgUrl = _cardImageUrl(c.cardId);
             const safeImgUrl = imgUrl ? imgUrl.replace(/"/g, '&quot;') : '';
             const thumb = imgUrl
-                ? `<span class="anti-tech-card-thumb-wrap" data-card-img="${safeImgUrl}" data-card-name="${safe}" role="button" aria-label="Zoom card ${safe}" tabindex="0"><img class="anti-tech-card-thumb" src="${safeImgUrl}" alt="${safe}" loading="lazy"></span>`
+                ? `<span class="anti-tech-card-thumb-wrap" data-card-img="${safeImgUrl}" data-card-name="${safe}" role="button" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Zoom card ${safe}` : `Karte ${safe} vergrößern`}" tabindex="0"><img class="anti-tech-card-thumb" src="${safeImgUrl}" alt="${safe}" loading="lazy"></span>`
                 : `<span class="anti-tech-card-thumb-wrap anti-tech-card-thumb-fallback" aria-hidden="true">?</span>`;
             return `<label class="anti-tech-card-item${isOn ? ' is-selected' : ''}">
                 <input type="checkbox" class="anti-tech-card-check" data-card="${safe}" ${isOn ? 'checked' : ''}>

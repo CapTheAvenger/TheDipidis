@@ -461,7 +461,7 @@ function runComboCalculation() {
            "47.1" aus dem Worker und stand dadurch als "47.1% Chance"
            neben "0,66€" in derselben Ansicht. Gefunden bei der
            Live-Pruefung am 06.09.2026. */
-        display.textContent = `${window.formatPercent(wert, 1)} ${de ? 'Chance' : 'chance'}`;
+        display.textContent = `${window.formatPercent(wert, 1)} ${de ? 'Chance in der Starthand (7 Karten)' : 'chance in the opening hand (7 cards)'}`;  // UI-117 / T3-18: wofuer die Zahl gilt (combo-worker zieht 7)
         const hinweisId = 'comboResultHinweis';
         let hinweis = document.getElementById(hinweisId);
         if (!hinweis) {

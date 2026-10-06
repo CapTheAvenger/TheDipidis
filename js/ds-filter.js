@@ -180,6 +180,11 @@
             b.setAttribute('data-space', r.key);
             b.setAttribute('aria-pressed', String(r.key === raum.key));
             b.textContent = d ? r.de : r.en;
+            // V2-8 (Hausi 06.10.): „Global“ heisst wie das Format.
+            if (r.key === 'gl' && window.DsNav && typeof window.DsNav.formatLabel === 'function') {
+                var fl = window.DsNav.formatLabel('gl');
+                if (fl) b.textContent = '\ud83c\udf10 ' + fl;
+            }
             b.addEventListener('click', function () {
                 if (r.key === raum.key) return;
                 if (typeof window.switchTabAndUpdateMenu === 'function') {

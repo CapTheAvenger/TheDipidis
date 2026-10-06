@@ -529,7 +529,8 @@ html.is-standalone .container {
 #main-content > .cards-header {
     padding: 10px 18px;
 }
-#main-content > .cards-header::after { display: none; }
+/* V2-8 (Hausi 06.10.): die Bluetenschicht rechts oben bleibt — sie gefiel
+   besser als die kleine Bluete neben dem Namen. */
 #main-content > .cards-header .header-flex-row {
     /* .cards-header ist selbst flex — ohne volle Breite rueckten die
        Knoepfe direkt neben den Namen statt nach rechts (Vorschau 06.10.). */

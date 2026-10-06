@@ -3525,3 +3525,42 @@
     padding-left: 12px;
     border-left: 1px solid var(--line);
 }
+
+/* ── V2-8 Deck-Analyse (Hausi 06.10.2026) ─────────────────────────────
+ * Deckwahl oben, volle Breite; Turnierformat als ovale Knoepfe wie die
+ * Raumwahl Japan / TEF–30C / Vergangene Formate (.ds-filter-seg). */
+#current-analysis .cm-deckwahl { margin-bottom: 12px; }
+#current-analysis .cm-deckwahl .control-group { width: 100%; max-width: none; }
+#current-analysis .cm-deckwahl #currentMetaDeckSelect,
+#current-analysis .cm-deckwahl .cm-archetyp-auswahl,
+#current-analysis .cm-deckwahl .control-input { width: 100%; max-width: none; }
+#current-analysis .current-meta-format-group .current-meta-format-btns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+#current-analysis .current-meta-format-group .current-meta-filter-status {
+    flex-basis: 100%;
+    margin-left: 0;
+    font-size: var(--fs-xs);
+}
+#current-analysis .current-meta-format-group .current-meta-format-btn {
+    width: auto;
+    min-height: 40px;
+    padding: 6px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    box-shadow: none;
+    transform: none;
+}
+#current-analysis .current-meta-format-group .current-meta-format-btn.active {
+    background: var(--surface-1);
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--space-gl), var(--e-1);
+}
+#current-analysis .cm-deckwahl #btn-deck-uebernehmen { width: auto; }

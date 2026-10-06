@@ -32,6 +32,11 @@ I18N_DYNAMIC_KEYS = {
     'btn.gridView',       # toggled to '📋 List View' / '📊 Grid'
     'bj.themeDark',       # shows current theme, not translation
     'bj.themeLight',
+    # V2-8 (06.10.2026): ds-nav.js setzt das Formatkuerzel ein
+    # („TEF–30C Meta-Analyse“, „Deck-Analyse (TEF–30C)“); der i18n-Text
+    # ist nur der Rueckfall ohne bekanntes Format.
+    'menu.currentMeta',
+    'menu.currentMetaAnalysis',
 }
 
 # ── German-only words (should NOT appear in English mode) ─────

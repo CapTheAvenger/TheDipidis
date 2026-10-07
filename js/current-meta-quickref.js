@@ -265,9 +265,9 @@
     return { ...best, cards: _consolidateCards(best.cards) };
   }
 
-  /* D2-12 (07.10.2026): die Prozentzahl neben der Bilanz ist die
-     Matchpunkte-Quote — ohne Namen las sie sich wie eine Win-Rate. Und das
-     Datum stand als ISO-Tag (2026-09-26) neben deutschen Daten. */
+  /* D2-12 (07.10.2026): das Datum stand als ISO-Tag (2026-09-26) neben
+     deutschen Daten. Das Wort „Punkte“ hinter der Quote war auf der
+     Vergleichsseite drin und flog auf Hausis Wunsch wieder raus (Platz). */
   function _datumLesbar(roh) {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(roh || '').trim());
     if (!m || (typeof getLang === 'function' && getLang() === 'en')) return String(roh || '');
@@ -694,7 +694,7 @@
       const _qWpVal = _qWK
         ? _qWK.KONVENTIONEN.matchpunkte.rechne(ref.wins || 0, ref.losses || 0, ref.ties || 0)
         : (_winRate(ref) * 100);
-      const _qWpStr = zahlKomma((Number.isFinite(_qWpVal) ? _qWpVal : 0)) + ' % ' + ((typeof getLang === 'function' && getLang() === 'en') ? 'points' : 'Punkte');
+      const _qWpStr = zahlKomma((Number.isFinite(_qWpVal) ? _qWpVal : 0)) + '%';
       const _qWpHinweis = _qWK ? _qWK.hinweis('matchpunkte') : '';
       const recordBlock = games > 0
         ? `<span class="past-meta-best-record"${_qWpHinweis ? ` title="${_escHtml(_qWpHinweis)}"` : ''}>${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${_qWpStr}</span>`
@@ -776,7 +776,7 @@
         ? _oWK.KONVENTIONEN.matchpunkte.rechne(ref.wins || 0, ref.losses || 0, ref.ties || 0)
         : NaN;
       const _oWpStr = Number.isFinite(_oWpVal)
-        ? zahlKomma(_oWpVal) + ' % ' + ((typeof getLang === 'function' && getLang() === 'en') ? 'points' : 'Punkte')
+        ? zahlKomma(_oWpVal) + '%'
         : '';
       const _oWpHinweis = _oWK ? _oWK.hinweis('matchpunkte') : '';
       const recordBlock = (games > 0 && _oWpStr)

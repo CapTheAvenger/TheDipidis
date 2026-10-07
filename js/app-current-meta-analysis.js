@@ -5545,8 +5545,8 @@
                 /* N2-14 (07.10.2026): L, P, ★, ♡ waren nur per title erklaert — auf dem
                    Handy gar nicht. Eine Zeile ueber den Karten. */
                 const _knopfLegende = `<p class="karten-knopf-legende">${(typeof getLang === 'function' && getLang() === 'en')
-                    ? 'L = open on Limitless · P = add to proxies · ★ = change print · ♡ = wishlist'
-                    : 'L = auf Limitless öffnen · P = zu den Proxys · ★ = Druck wechseln · ♡ = Wunschliste'}</p>`;
+                    ? 'L = open on Limitless · P = add to proxies · ★ = change rarity · ♡ = wishlist'
+                    : 'L = auf Limitless öffnen · P = zu den Proxys · ★ = Change Rarity · ♡ = Wunschliste'}</p>`;
                 gridContainer.innerHTML = _knopfLegende + `<div class="meta-card-skeleton-wrap">
                     ${sectionHtml(`<i class="ds-usage-dot" data-usage="main" aria-hidden="true"></i> ${
                         t('cl.skelMain') || 'Main Cards'} <span class="meta-card-skeleton-hint">${

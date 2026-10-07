@@ -2876,7 +2876,7 @@
             const _wpVal = _WK
                 ? _WK.KONVENTIONEN.matchpunkte.rechne(best.wins || 0, best.losses || 0, best.ties || 0)
                 : (_pmListWinRate(best) * 100);
-            const wpStr = zahlKomma((Number.isFinite(_wpVal) ? _wpVal : 0)) + ' % ' + ((typeof getLang === 'function' && getLang() === 'en') ? 'points' : 'Punkte');   // D2-12 (07.10.2026)
+            const wpStr = zahlKomma((Number.isFinite(_wpVal) ? _wpVal : 0)) + '%';
             const wpHinweis = _WK ? _WK.hinweis('matchpunkte') : '';
             const placeStr = (best.place && best.place < 9999) ? `#${best.place}` : '—';
             const tournName = _pmCleanTournamentName(best.tournament_name);

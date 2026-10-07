@@ -96,7 +96,8 @@ describe('Ein Maßstab fuer beide Reihen', () => {
 
     it('die Zahlenchips stehen auf demselben Maßstab wie die Knoepfe', () => {
         const rumpf = regel(CITY, '.toolbar-metric {');
-        assert.ok(/font-size:\s*13px/.test(rumpf),
+        // Stufe 2 (07.10.2026): 13 px -> 14 px, wie --ui-btn-font-size
+        assert.ok(/font-size:\s*14px/.test(rumpf),
             'Chip-Schrift weicht vom Knopfmaßstab ab: ' + rumpf.trim());
         assert.ok(/min-height:\s*31px/.test(rumpf),
             'ohne feste Hoehe kommt sie aus dem Inhalt — der mittlere Chip war 2 px niedriger');

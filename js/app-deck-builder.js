@@ -5084,6 +5084,14 @@ if (typeof window.addEventListener === 'function') {
 
                 panel.innerHTML = btns;
                 modalContent.appendChild(panel);
+                // UI-94: in der Kartendatenbank zeigt das Kartendetail, in welchen Decks die Karte steckt.
+                const _alt = overlay.querySelector('.karten-gespielt-in');
+                if (_alt) _alt.remove();
+                const _aktiv = document.querySelector('.tab-content.active');
+                if (_aktiv && _aktiv.id === 'cards' && typeof window.kartenGespieltInHtml === 'function') {
+                    const _html = window.kartenGespieltInHtml(resolvedName);
+                    if (_html) panel.insertAdjacentHTML('afterend', _html);
+                }
             }
 
             if (window.HintergrundSperre) window.HintergrundSperre.sperren('einzelkarte');

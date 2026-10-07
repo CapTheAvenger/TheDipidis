@@ -185,7 +185,7 @@
     margin: 0 auto 20px auto;
     padding: 16px 20px;
     background: var(--surface-1);
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 .guide-title {
@@ -193,18 +193,18 @@
     border-bottom: 3px solid var(--color-info);
     padding-bottom: 0.5rem;
     margin-bottom: 1.5rem;
-    font-size: 1.4rem;
+    font-size: 21px;
     font-weight: 700;
 }
 .guide-desc {
-    font-size: 1.1rem;
+    font-size: 17px;
     line-height: 1.8;
     color: var(--text-muted);
 }
 .info-panel {
     background: var(--surface-2);
     padding: 1rem 1.5rem;
-    border-radius: 8px;
+    border-radius: 10px;
     line-height: 1.6;
     margin-bottom: 1rem;
 }
@@ -392,7 +392,7 @@
         }
         .tab-navigation::-webkit-scrollbar-thumb {
             background: rgba(255,255,255,0.3);
-            border-radius: 2px;
+            border-radius: 6px;
         }
         
         /* Main top-level tab strip (.tab-navigation = dark gradient).
@@ -405,7 +405,7 @@
             background: rgba(255,255,255,0.1);
             color: rgba(255,255,255,0.9);
             font-weight: 700;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.25s ease;
             font-size: max(13px, 0.9em);
@@ -416,7 +416,7 @@
         }
 
         .tab-subtitle {
-            font-size: 10px;
+            font-size: 11px;
             color: rgba(255,255,255,0.85);
             display: block;
             margin-top: 2px;
@@ -472,8 +472,8 @@
             background: var(--ui-input-bg);
             color: var(--ink);
             border: 2px solid var(--line);
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 17px;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
@@ -540,7 +540,7 @@
         }
 
         .deck-metric-label {
-            font-size: 0.78rem;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.3px;
             color: var(--ink-3);
@@ -548,7 +548,7 @@
         }
 
         .deck-metric-value {
-            font-size: 1.08rem;
+            font-size: 17px;
             font-weight: 800;
             color: var(--ink);
             line-height: 1.2;
@@ -567,7 +567,7 @@
             max-width: 500px;
             padding: 10px;
             border: 2px solid #ddd;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1em;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
@@ -654,7 +654,7 @@
             background: var(--pokemon-blue, #3B4CCA);
             color: #fff;
             font-weight: 700;
-            border-radius: 0 0 8px 8px;
+            border-radius: 0 0 10px 10px;
             text-decoration: none;
             font-size: 14px;
         }
@@ -663,7 +663,7 @@
         }
 
         .card-skeleton {
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
             background: linear-gradient(180deg, #ffffff 0%, #f6f8fb 100%);
             border: 1px solid rgba(148, 163, 184, 0.18);
@@ -753,7 +753,7 @@
             margin-top: 16px;
             padding: 20px;
             background: var(--bg-light);
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid rgba(0,0,0,0.06);
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
@@ -768,7 +768,7 @@
         .filter-section-main {
             background: white;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -840,7 +840,7 @@
             padding: 10px 14px;
             border: 2px solid #e0e5f0;
             border-radius: 10px;
-            font-size: 15px;
+            font-size: 14px;
             box-sizing: border-box;
             font-family: 'Nunito', sans-serif;
             transition: border-color 0.2s, box-shadow 0.2s;
@@ -889,10 +889,10 @@
             text-align: center;
             padding: 32px;
             color: var(--ink-3);
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid rgba(59, 76, 202, 0.08);
             margin: 12px 0;
         }
@@ -902,7 +902,7 @@
             border-left: 4px solid var(--color-error);
             color: var(--color-error-ink);
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 6px;
             margin: 20px 0;
         }
         
@@ -911,7 +911,7 @@
             border-left: 4px solid #2196f3;
             color: #1976d2;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 6px;
             margin: 20px 0;
             text-align: center;
         }
@@ -972,7 +972,7 @@
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
@@ -1019,7 +1019,7 @@
             max-width: 400px;
             padding: 10px 15px;
             border: 2px solid #ddd;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: max(15px, 1em);
             -webkit-appearance: none;
             appearance: none;
@@ -1042,7 +1042,7 @@
         .footer {
             text-align: center;
             color: var(--ink-2);
-            font-size: 13px;
+            font-size: 14px;
             padding: 20px;
             margin-top: 30px;
         }
@@ -1062,7 +1062,7 @@
             color: white;
             padding: 16px 20px;
             text-align: center;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 12px;
         }
 
@@ -1108,7 +1108,7 @@
             width: 100%;
             padding: 12px;
             border: 2px solid var(--line);
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: max(16px, 1em);
             background: var(--ui-input-bg);
             color: var(--ink);
@@ -1140,8 +1140,8 @@
             max-width: 500px;
             padding: 10px 15px;
             border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
+            border-radius: 10px;
+            font-size: 14px;
             transition: all 0.3s;
         }
 
@@ -1171,7 +1171,7 @@
                waehrend die Textfarben schon dunkelmodus-hell waren. Ein
                weisser Block mit fast weisser Schrift. */
             background: var(--bg-white);
-            border-radius: 12px;
+            border-radius: 14px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.12);
             overflow: hidden;
         }
@@ -1242,7 +1242,7 @@
         /* Deck Visual Styles */
         .deck-visual {
             background: white;
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 16px;
             margin-bottom: 16px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -1322,7 +1322,7 @@
             padding: 16px 20px;
             background: var(--surface-0);
             border-top: 3px solid var(--pokemon-blue, #3B4CCA);
-            border-radius: 0 0 12px 12px;
+            border-radius: 0 0 14px 14px;
         }
         
         .deck-builder h2 {
@@ -1343,7 +1343,7 @@
             align-items: center;
             padding: 3px;
             background: #f0f4ff;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid rgba(59, 76, 202, 0.10);
         }
 
@@ -1374,10 +1374,10 @@
         .btn {
             padding: 14px 22px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
             transition: all 0.3s;
             min-height: 44px;
             display: inline-flex;
@@ -1453,7 +1453,7 @@
         .cards-table-header {
             padding: 15px;
             background: var(--bg-light);
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 10px;
             cursor: pointer;
             display: flex;
@@ -1478,7 +1478,7 @@
             height: 24px;
             margin-right: 10px;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 21px;
             line-height: 24px;
             transition: transform 0.3s ease;
         }
@@ -1507,7 +1507,7 @@
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
@@ -1534,7 +1534,7 @@
         .deck-visual {
             background: var(--bg-light);
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 16px;
         }
         
@@ -1549,7 +1549,7 @@
             position: relative;
             width: 100%;
             padding-bottom: 140%;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             transition: transform 0.2s;
@@ -1586,7 +1586,7 @@
             background: var(--accent);
             color: white;
             padding: 2px 6px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: bold;
             font-size: 0.8em;
         }
@@ -1623,7 +1623,7 @@
             background: rgba(0, 0, 0, 0.75);
             color: #fff;
             padding: 2px 6px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 0.65em;
             font-weight: 700;
             z-index: 2;
@@ -1725,7 +1725,7 @@
         .cards-filter-section {
             background: var(--surface-1);
             padding: 16px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -1756,7 +1756,7 @@
             cursor: pointer;
             user-select: none;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 14px;
             margin-bottom: 4px;
             transition: all 0.3s;
         }
@@ -1810,12 +1810,12 @@
         
         .cards-filter-options::-webkit-scrollbar-track {
             background: var(--surface-2);
-            border-radius: 4px;
+            border-radius: 6px;
         }
         
         .cards-filter-options::-webkit-scrollbar-thumb {
             background: var(--accent);
-            border-radius: 4px;
+            border-radius: 6px;
         }
         
         .cards-filter-options::-webkit-scrollbar-thumb:hover {
@@ -1826,7 +1826,7 @@
             display: block;
             padding: 6px;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: background 0.2s;
             user-select: none;
         }
@@ -1911,7 +1911,7 @@
             width: 50px !important;
             height: auto !important;
             aspect-ratio: auto !important;
-            border-radius: 4px;
+            border-radius: 6px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         
@@ -1937,7 +1937,7 @@
         .cards-autocomplete-count {
             padding: 4px 8px;
             background: var(--bg-muted);
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 11px;
             color: #555;
             font-weight: 600;
@@ -1954,7 +1954,7 @@
         
         .card-database-item {
             background: var(--surface-1);
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -1983,7 +1983,7 @@
         
         .card-database-name {
             font-weight: 700;
-            font-size: 13px;
+            font-size: 14px;
             color: var(--text-dark);
             margin: 0;
             overflow: hidden;
@@ -2004,13 +2004,13 @@
             font-weight: 600;
             background: var(--bg-muted);
             padding: 2px 6px;
-            border-radius: 4px;
+            border-radius: 6px;
         }
         
         .card-database-type {
             font-size: 11px;
             padding: 2px 6px;
-            border-radius: 4px;
+            border-radius: 6px;
             background: #e8f5e9;
             color: #2e7d32;
         }
@@ -2018,7 +2018,7 @@
         .card-database-rarity {
             display: inline-block;
             padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 11px;
             font-weight: 700;
             margin-top: 4px;
@@ -2052,7 +2052,7 @@
             flex: 1;
             padding: 6px 10px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
@@ -2093,7 +2093,7 @@
         .matchups-grid-container > div {
             background: white;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
         
@@ -2227,7 +2227,7 @@
             max-height: 85vh;
             overflow-y: auto;
             margin: 5vh auto;
-            border-radius: 12px;
+            border-radius: 14px;
             position: relative;
         }
 
@@ -2258,7 +2258,7 @@
             right: 16px;
             background: none;
             border: none;
-            font-size: 20px;
+            font-size: 21px;
             cursor: pointer;
             color: #666;
         }
@@ -2309,7 +2309,7 @@
             border-bottom: 1px solid #f0f3f7;
             color: var(--ink);
             text-decoration: none;
-            font-size: 13px;
+            font-size: 14px;
             transition: background 0.12s;
         }
         .cm-link-row:last-child { border-bottom: none; }
@@ -2340,7 +2340,7 @@
             padding: 16px;
             text-align: center;
             color: var(--ink-3);
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .image-view-content {
@@ -2351,7 +2351,7 @@
             max-width: 1400px;
             max-height: 90vh;
             overflow-y: auto;
-            border-radius: 12px;
+            border-radius: 14px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
@@ -2374,7 +2374,7 @@
             background: var(--color-error);
             color: white;
             border: none;
-            font-size: 28px;
+            font-size: 30px;
             font-weight: bold;
             cursor: pointer;
             border-radius: 50%;
@@ -2395,7 +2395,7 @@
             background: linear-gradient(135deg, #1abc9c, #16a085);
             color: var(--ink);
             border: none;
-            font-size: 20px;
+            font-size: 21px;
             cursor: pointer;
             border-radius: 50%;
             width: 40px;
@@ -2422,7 +2422,7 @@
 
         .compact-card {
             position: relative;
-            border-radius: 5px;
+            border-radius: 6px;
             overflow: hidden;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -2479,7 +2479,7 @@
 
             .mobile-compact-grid .compact-card {
                 aspect-ratio: 245/342;
-                border-radius: 3px;
+                border-radius: 6px;
             }
 
             .mobile-compact-grid .compact-badge {
@@ -2559,7 +2559,7 @@
             max-width: 90vw;
             width: auto;
             height: auto;
-            border-radius: 15px;
+            border-radius: 14px;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
             cursor: default;
             transform: scale(0.9);
@@ -2639,7 +2639,7 @@
                 right: 12px;
                 width: 40px;
                 height: 40px;
-                font-size: 24px;
+                font-size: 21px;
             }
         }
 
@@ -2665,7 +2665,7 @@
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             color: white;
             text-decoration: none;
@@ -2678,7 +2678,7 @@
             display: flex; align-items: center; justify-content: center;
             width: 28px; height: 28px; border-radius: 50%;
             background: rgba(255,255,255,0.2);
-            font-size: 15px; flex-shrink: 0; font-weight: bold;
+            font-size: 14px; flex-shrink: 0; font-weight: bold;
         }
         .sc-action-label { flex: 1; text-align: left; }
         .sc-action-wishlist  { background: #F48FB1; }
@@ -2705,10 +2705,10 @@
             .sc-action-btn {
                 padding: 8px 10px;
                 font-size: 11px;
-                border-radius: 8px;
+                border-radius: 10px;
             }
             .sc-action-label { display: none; }
-            .sc-action-icon { width: 32px; height: 32px; font-size: 16px; }
+            .sc-action-icon { width: 32px; height: 32px; font-size: 17px; }
         }
 
         /* Rarity Switcher Modal Styles */
@@ -2740,7 +2740,7 @@
             background-color: var(--surface-1);
             color: var(--ink);
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             max-width: 1200px;
             width: 96%;
@@ -2756,7 +2756,7 @@
              * Wechsler, Bauen-gegen-Deck, Deck-Vergleich und Tech-Lab.
              * #333 stand darin auf 1,3:1 im Dunkeln. */
             color: var(--ink);
-            font-size: 22px;
+            font-size: 21px;
             text-align: center;
         }
 
@@ -2769,7 +2769,7 @@
 
         .rarity-option-card {
             border: 2px solid var(--line-strong);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -2811,7 +2811,7 @@
             max-width: 118px;
             height: auto;
             margin-bottom: 6px;
-            border-radius: 4px;
+            border-radius: 6px;
         }
 
 
@@ -2868,7 +2868,7 @@
             background-color: var(--gold);
             color: var(--on-light);
             padding: 3px 8px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 11px;
             font-weight: bold;
             margin-top: 5px;
@@ -2889,7 +2889,7 @@
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
@@ -2978,7 +2978,7 @@
             background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
             color: var(--ink);
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
@@ -3018,7 +3018,7 @@
         .rarity-option-cardmarket {
             margin-top: 8px;
             width: 100%;
-            font-size: 10px;
+            font-size: 11px;
             padding: 6px 8px;
         }
 
@@ -3177,7 +3177,7 @@
             .control-group input[type="date"] {
                 width: 100% !important;
                 padding: 12px !important;
-                font-size: 16px !important;
+                font-size: 17px !important;
                 -webkit-appearance: none;
             }
             
@@ -3306,20 +3306,20 @@
             }
 
             .grid-view-active #cityLeagueDeckOverview .deck-card {
-                font-size: 10px;
+                font-size: 11px;
             }
 
             /* .card-max-count stand hier mit 20 px — seit UI-37 (27.09.2026)
                kommt die Groesse aus der Plaketten-Familie am Ende von
                css/mobile-responsive.css; die ID haette sie geschlagen. */
             .grid-view-active #cityLeagueDeckOverview .card-in-deck-count {
-                font-size: 10px !important;
+                font-size: 11px !important;
                 width: 20px !important;
                 height: 20px !important;
             }
 
             .grid-view-active #cityLeagueDeckOverview button {
-                font-size: 10px !important;
+                font-size: 11px !important;
                 padding: 3px 5px !important;
                 min-width: 16px !important;
                 min-height: 16px !important;
@@ -3376,7 +3376,7 @@
             .card-search-input {
                 max-width: 100% !important;
                 width: 100% !important;
-                font-size: 16px; /* Verhindert Auto-Zoom auf iOS */
+                font-size: 17px; /* Verhindert Auto-Zoom auf iOS */
             }
 
             /* Control Groups Stack */
@@ -3440,7 +3440,7 @@
 
             .control-group select,
             .control-group input {
-                font-size: 16px !important; /* Verhindert Auto-Zoom */
+                font-size: 17px !important; /* Verhindert Auto-Zoom */
                 padding: 12px;
             }
 
@@ -3501,7 +3501,7 @@
             .single-card-close {
                 width: 44px;
                 height: 44px;
-                font-size: 24px;
+                font-size: 21px;
             }
 
             /* Buttons touch-friendly */
@@ -3510,13 +3510,13 @@
                 min-height: 44px;
                 min-width: 44px;
                 padding: 10px 15px;
-                font-size: 15px;
+                font-size: 14px;
             }
 
             /* Karten-Badges optimiert */
             .compact-badge,
             [style*="border-radius: 50%"] {
-                font-size: 10px !important;
+                font-size: 11px !important;
                 min-width: 18px !important;
                 min-height: 18px !important;
             }
@@ -3548,7 +3548,7 @@
 
             .tab-btn {
                 padding: 10px 14px;
-                font-size: 13px;
+                font-size: 14px;
             }
 
             /* Content Padding minimal */
@@ -3559,7 +3559,7 @@
             /* Tables kompakt aber lesbar */
             table:not(.ds-table) th, table:not(.ds-table) td {
                 padding: 6px 2px;
-                font-size: 10px;
+                font-size: 11px;
             }
 
             /* Stat Cards */
@@ -3582,7 +3582,7 @@
             .control-group select,
             .control-group input {
                 padding: 10px;
-                font-size: 15px;
+                font-size: 14px;
             }
             
             /* Karten-Buttons noch kompakter für kleine Screens */
@@ -3676,7 +3676,7 @@
                 justify-content: flex-start !important;
                 z-index: 10 !important;
                 overflow: hidden !important;
-                border-radius: 0 0 8px 8px !important;
+                border-radius: 0 0 10px 10px !important;
             }
             
             /* Card items: rounded corners */
@@ -3868,18 +3868,18 @@
             }
             
             .card-database-set {
-                font-size: 10px !important;
+                font-size: 11px !important;
                 padding: 2px 5px !important;
-                border-radius: 3px !important;
+                border-radius: 6px !important;
                 background: #e0e0e0 !important;
                 color: var(--on-light) !important;
                 font-weight: 600 !important;
             }
             
             .card-database-type {
-                font-size: 10px !important;
+                font-size: 11px !important;
                 padding: 2px 5px !important;
-                border-radius: 3px !important;
+                border-radius: 6px !important;
                 background: var(--surface-2) !important;
                 color: var(--ink) !important;
                 font-weight: 600 !important;
@@ -3889,7 +3889,7 @@
             .card-database-rarity {
                 font-size: var(--fs-xs) !important;
                 padding: 1px 3px !important;
-                border-radius: 2px !important;
+                border-radius: 6px !important;
                 margin-top: 1px !important;
             }
             
@@ -3907,8 +3907,8 @@
                 width: 100% !important;
                 height: 22px !important;
                 padding: 0 8px !important;
-                font-size: 10px !important;
-                border-radius: 5px !important;
+                font-size: 11px !important;
+                border-radius: 6px !important;
                 font-weight: 700 !important;
                 line-height: 22px !important;
                 display: flex !important;
@@ -3922,8 +3922,8 @@
             .card-database-price {
                 margin-top: 1px !important;
                 padding: 1px 3px !important;
-                font-size: 10px !important;
-                border-radius: 2px !important;
+                font-size: 11px !important;
+                border-radius: 6px !important;
                 font-weight: 600 !important;
             }
             
@@ -3932,7 +3932,7 @@
                 margin-top: 4px !important;
                 padding: 5px !important;
                 font-size: var(--fs-xs) !important;
-                border-radius: 4px !important;
+                border-radius: 6px !important;
                 text-align: center !important;
                 font-weight: 600 !important;
             }
@@ -3961,7 +3961,7 @@
             /* Filter Header touch-friendly */
             .cards-filter-header {
                 padding: 10px 12px !important;
-                font-size: 13px !important;
+                font-size: 14px !important;
             }
             
             /* Filter Options kompakt */
@@ -3983,11 +3983,11 @@
             /* Reset Button und Results Info */
             .cards-filter-section > div:nth-child(3) button {
                 padding: 10px 18px !important;
-                font-size: 13px !important;
+                font-size: 14px !important;
             }
             
             #cardResultsInfo {
-                font-size: 13px !important;
+                font-size: 14px !important;
                 padding: 10px !important;
             }
             
@@ -4030,7 +4030,7 @@
             }
             
             .control-group label {
-                font-size: 13px !important;
+                font-size: 14px !important;
                 margin-bottom: 5px !important;
             }
             
@@ -4046,7 +4046,7 @@
             .btn-secondary,
             .btn-warning {
                 padding: 10px 16px !important;
-                font-size: 13px !important;
+                font-size: 14px !important;
                 min-height: 44px !important;
             }
             
@@ -4107,7 +4107,7 @@
             
             .tab-btn {
                 padding: 10px 14px !important;
-                font-size: 13px !important;
+                font-size: 14px !important;
                 white-space: nowrap !important;
                 min-height: 44px !important;
             }
@@ -4205,7 +4205,7 @@
                 bottom: 40px !important;
                 font-size: var(--fs-xs) !important;
                 padding: 1px 3px !important;
-                border-radius: 2px !important;
+                border-radius: 6px !important;
                 max-width: unset !important;
                 left: 3px !important;
                 right: 3px !important;
@@ -4226,7 +4226,7 @@
                 display: block !important;
                 text-align: center !important;
                 letter-spacing: 0 !important;
-                font-size: 10px !important;
+                font-size: 11px !important;
                 padding: 0 1px !important;
                 white-space: nowrap !important;
                 overflow: hidden !important;
@@ -4251,7 +4251,7 @@
                 max-width: unset !important;
                 min-height: 15px !important;
                 font-size: var(--fs-xs) !important;
-                border-radius: 2px !important;
+                border-radius: 6px !important;
                 padding: 0 !important;
             }
 
@@ -4269,14 +4269,14 @@
             }
             
             .card-database-name {
-                font-size: 10px !important;
+                font-size: 11px !important;
             }
             
             .card-database-meta,
             .card-database-set,
             .card-database-type,
             .card-database-rarity {
-                font-size: 10px !important;
+                font-size: 11px !important;
             }
             
             /* Noch kompaktere Info-Section */
@@ -4287,7 +4287,7 @@
             
             .card-database-name {
                 margin: 0 0 2px 0 !important;
-                font-size: 10px !important;
+                font-size: 11px !important;
             }
             
             .card-database-meta {
@@ -4320,7 +4320,7 @@
                 padding: 0 6px !important;
                 font-size: var(--fs-xs) !important;
                 line-height: 20px !important;
-                border-radius: 4px !important;
+                border-radius: 6px !important;
                 flex: none !important;
             }
             
@@ -4328,8 +4328,8 @@
             .card-database-coverage {
                 margin-top: 2px !important;
                 padding: 4px !important;
-                font-size: 10px !important;
-                border-radius: 4px !important;
+                font-size: 11px !important;
+                border-radius: 6px !important;
             }
             
             /* Buttons: gleiche Dimensionen auf sehr kleinen Screens */
@@ -4433,7 +4433,7 @@
             input,
             select,
             textarea {
-                font-size: 16px !important;
+                font-size: 17px !important;
             }
 
             /* Fix für iOS 100vh Problem */
@@ -4475,7 +4475,7 @@
     max-width: 90%;
     max-height: 90vh;
     object-fit: contain;
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
     cursor: default;
     transition: transform 0.3s ease;
@@ -4494,7 +4494,7 @@
     border-radius: 50%;
     width: 50px;
     height: 50px;
-    font-size: 28px;
+    font-size: 30px;
     font-weight: bold;
     color: #333;
     cursor: pointer;
@@ -4531,7 +4531,7 @@
     .fullscreen-close {
         width: 44px;
         height: 44px;
-        font-size: 24px;
+        font-size: 21px;
         top: 10px;
         right: 10px;
     }
@@ -4550,7 +4550,7 @@
 @media (max-width: 768px) {
     .deck-table-view td {
         padding: 8px 4px;
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .builder-controls .btn {
@@ -4577,8 +4577,8 @@ h3:has(text:contains("Tech")),
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     color: #ffffff;
     padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 1.1rem;
+    border-radius: 10px;
+    font-size: 17px;
     font-weight: 800;
     margin: 30px 0 15px 0;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
@@ -4608,7 +4608,7 @@ h3:first-child {
 .matchup-heatmap-container {
     width: 100%;
     overflow-x: auto;
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     margin: 20px 0;
     background: #ffffff;
@@ -4618,7 +4618,7 @@ h3:first-child {
     width: 100%;
     border-collapse: collapse;
     min-width: 600px;
-    font-size: 0.9rem;
+    font-size: 14px;
 }
 
 .matchup-heatmap th, 
@@ -4692,7 +4692,7 @@ h3:first-child {
     /* Deckbuilder-Listen kompakter machen */
     .decklist-item {
         padding: 8px 10px !important;
-        font-size: 0.9rem;
+        font-size: 14px;
     }
 
     /* Daumen-freundliche Buttons (Mindestens 44px Höhe für Touch)
@@ -4720,7 +4720,7 @@ h3:first-child {
     h3:has(text:contains("Core")), 
     h3:has(text:contains("Ace")), 
     h3:has(text:contains("Tech")) {
-        font-size: 1rem !important;
+        font-size: 17px !important;
         padding: 10px 15px !important;
         margin: 20px 0 10px 0 !important;
     }
@@ -4755,7 +4755,7 @@ h3:first-child {
     right: 0;
     background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
     border-top: 3px solid var(--pokemon-yellow);
-    border-radius: 20px 20px 0 0;
+    border-radius: 999px 999px 0 0;
     padding: 20px;
     z-index: 20000;
     transition: bottom 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
@@ -4773,19 +4773,19 @@ h3:first-child {
     padding: 24px 20px;
     color: #7f8c8d;
     background: white;
-    border-radius: 8px;
+    border-radius: 10px;
     margin: 16px 0;
 }
 
 .empty-state h3 {
     margin-bottom: 8px;
     color: #5d6d7e;
-    font-size: 1.2rem;
+    font-size: 21px;
 }
 
 .empty-state p {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 14px;
     line-height: 1.5;
 }
 
@@ -4800,7 +4800,7 @@ h3:first-child {
 
 #ptContextCardName {
     color: var(--pokemon-yellow);
-    font-size: 1.2rem;
+    font-size: 21px;
     font-weight: 700;
 }
 
@@ -4828,9 +4828,9 @@ h3:first-child {
     background: linear-gradient(135deg, var(--pokemon-blue) 0%, #2a3a9a 100%);
     color: white;
     border: 2px solid rgba(255, 203, 5, 0.3);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 16px;
-    font-size: 1.1rem;
+    font-size: 17px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -4869,7 +4869,7 @@ h3:first-child {
     background: rgba(59, 76, 202, 0.95);
 }
 .pt-radial-icon {
-    font-size: 18px;
+    font-size: 17px;
     line-height: 1;
 }
 .pt-radial-label {
@@ -4962,7 +4962,7 @@ h3:first-child {
         width: auto !important;
         max-width: 60px !important;
         object-fit: contain !important;
-        border-radius: 4px !important;
+        border-radius: 6px !important;
     }
 
     /* 4. Hand-Zone (Strikte wischbare Reihe, KEIN Stappeln!) */
@@ -5010,7 +5010,7 @@ h3:first-child {
     }
     #ptStartPhaseModal h2 {
         margin: 0 0 4px 0 !important;
-        font-size: 1.85rem !important;
+        font-size: 30px !important;
     }
     #ptStartPhaseModal p {
         margin: 0 0 6px 0 !important;
@@ -5024,7 +5024,7 @@ h3:first-child {
     }
     #ptStartPhaseModal > div > div[style*="border:2px solid"] {
         padding: 8px !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
     }
     #ptStartPhaseModal > div > div[style*="border:2px solid"] > div:first-child {
         margin-bottom: 4px !important;
@@ -5047,7 +5047,7 @@ h3:first-child {
     }
     .pt-setup-hand-row img {
         width: 42px !important;
-        border-radius: 4px !important;
+        border-radius: 6px !important;
     }
     .pt-setup-hand-row span {
         display: none !important;
@@ -5076,7 +5076,7 @@ h3:first-child {
         border-radius: 50% !important;
         background-color: #9c27b0 !important;
         color: white !important;
-        font-size: 28px !important;
+        font-size: 30px !important;
         box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
         border: none !important;
         z-index: 1000 !important;
@@ -5103,7 +5103,7 @@ h3:first-child {
     }
     .pt-controls button {
         padding: 5px 10px !important;
-        font-size: 20px !important;
+        font-size: 21px !important;
         border: none !important;
         background: transparent !important;
     }
@@ -5145,17 +5145,17 @@ h3:first-child {
     /* Links (Attack & End) docken an den linken Rand an */
     .attack-btn {
         background: var(--color-error-dark) !important;
-        border-radius: 0 8px 8px 0 !important; /* Rechts abgerundet */
+        border-radius: 0 10px 10px 0 !important; /* Rechts abgerundet */
     }
     .endturn-btn {
         background: var(--solid-ok) !important;
-        border-radius: 0 8px 8px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
     }
 
     /* Rechts (Opp View) dockt an den rechten Rand an */
     .oppview-btn {
         background: #8e44ad !important;
-        border-radius: 8px 0 0 8px !important; /* Links abgerundet */
+        border-radius: 10px 0 0 10px !important; /* Links abgerundet */
     }
 }
 
@@ -5172,13 +5172,13 @@ h3:first-child {
     }
     
     .pt-context-btn {
-        font-size: 1rem !important;
+        font-size: 17px !important;
         padding: 14px !important;
         min-height: 50px !important;
     }
     
     #ptContextCardName {
-        font-size: 1rem !important;
+        font-size: 17px !important;
     }
 }
 
@@ -5194,7 +5194,7 @@ h3:first-child {
         padding-bottom: calc(6px + env(safe-area-inset-bottom)) !important;
     }
     #ptStartPhaseModal h2 {
-        font-size: 1.55rem !important;
+        font-size: 21px !important;
         margin: 0 0 2px 0 !important;
     }
     #ptStartPhaseModal p {
@@ -5215,19 +5215,19 @@ h3:first-child {
     }
     .pt-setup-hand-row img {
         width: 36px !important;
-        border-radius: 3px !important;
+        border-radius: 6px !important;
     }
     #ptStartPhaseModal button[onclick*="ptStartMulligan"],
     #ptStartPhaseModal button[onclick*="ptStartClearBench"] {
         padding: 5px 8px !important;
-        font-size: 10px !important;
+        font-size: 11px !important;
     }
     #ptStartBtn {
         font-size: 0.95em !important;
         padding: 8px 18px !important;
     }
     #ptStartHint {
-        font-size: 10px !important;
+        font-size: 11px !important;
         margin-top: 3px !important;
     }
 
@@ -5242,7 +5242,7 @@ h3:first-child {
 
     /* Slightly smaller top controls to prevent crowding */
     .pt-controls button {
-        font-size: 18px !important;
+        font-size: 17px !important;
         padding: 4px !important;
     }
 
@@ -5278,7 +5278,7 @@ h3:first-child {
     display: flex;
     align-items: baseline;
     gap: 8px;
-    font-size: 1.4rem;
+    font-size: 21px;
     font-weight: 900;
     margin: 6px 0 16px 0;
     padding-bottom: 10px;
@@ -5313,7 +5313,7 @@ h3:first-child {
 .tier-hero-section {
     margin: 0 0 28px 0;
     padding: 20px;
-    border-radius: 16px;
+    border-radius: 14px;
     background: var(--surface-1);
     border: 1px solid var(--line);
     box-shadow: var(--e-2);
@@ -5321,7 +5321,7 @@ h3:first-child {
 
 .tier-hero-header h2 {
     margin: 0;
-    font-size: 1.35rem;
+    font-size: 21px;
     font-weight: 900;
     /* 29.08.2026: stand auf #14213d — dunkles Marineblau auf einer
        Flaeche, die im Dunkelmodus selbst #111730 ist. Die Ueberschrift
@@ -5333,7 +5333,7 @@ h3:first-child {
 .tier-hero-header p {
     margin: 6px 0 0 0;
     color: var(--ink-3);
-    font-size: 0.92rem;
+    font-size: 14px;
 }
 
 .tier-hero-grid {
@@ -5400,7 +5400,7 @@ h3:first-child {
     border-radius: 999px;
     background: #14213d;
     color: #fff;
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: 800;
     flex-shrink: 0;
 }
@@ -5424,7 +5424,7 @@ h3:first-child {
 
 .tier-hero-name {
     flex: 1;
-    font-size: 1.05rem;
+    font-size: 17px;
     font-weight: 900;
     color: #1a2c43;
     text-transform: capitalize;
@@ -5437,7 +5437,7 @@ h3:first-child {
 
 .tier-hero-meta {
     color: var(--ink-3);
-    font-size: 0.8rem;
+    font-size: 12px;
     font-weight: 700;
 }
 
@@ -5450,7 +5450,7 @@ h3:first-child {
 @media (max-width: 768px) {
     .tier-hero-section {
         padding: 14px;
-        border-radius: 12px;
+        border-radius: 14px;
     }
 
     .tier-hero-grid {
@@ -5493,7 +5493,7 @@ h3:first-child {
 }
 
 .deck-tier-title {
-    font-size: 1.5rem;
+    font-size: 21px;
     font-weight: 900;
     text-transform: uppercase;
     margin-bottom: 15px;
@@ -5526,7 +5526,7 @@ h3:first-child {
     min-height: 56px;
     background: rgba(0, 180, 50, 0.10);
     border: 2px dashed rgba(0, 200, 60, 0.45);
-    border-radius: 8px;
+    border-radius: 10px;
     margin-bottom: 4px;
     color: rgba(0, 220, 60, 0.75);
     font-size: 12px;
@@ -5566,7 +5566,7 @@ h3:first-child {
         color: white !important;
         font-weight: bold !important;
         padding: 7px 5px !important;
-        font-size: 10px !important;
+        font-size: 11px !important;
         min-width: 68px !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
         cursor: pointer !important;
@@ -5575,17 +5575,17 @@ h3:first-child {
 
     .attack-btn {
         background: var(--color-error-dark) !important;
-        border-radius: 0 8px 8px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
     }
 
     .endturn-btn {
         background: var(--solid-ok) !important;
-        border-radius: 0 8px 8px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
     }
 
     .oppview-btn {
         background: #8e44ad !important;
-        border-radius: 0 8px 8px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
     }
 
     /* FAB is now the 4th left-side action button */
@@ -5594,10 +5594,10 @@ h3:first-child {
         display: block !important;
         width: auto !important;
         height: auto !important;
-        border-radius: 0 8px 8px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
         background: #9c27b0 !important;
         color: #fff !important;
-        font-size: 16px !important;
+        font-size: 17px !important;
         padding: 7px 5px !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
         border: none !important;
@@ -5664,7 +5664,7 @@ h3:first-child {
         height: 108px !important;
     }
     .pt-deck-half {
-        font-size: 15px !important;
+        font-size: 14px !important;
     }
 
     #ptDiscardPile-p1,
@@ -5691,7 +5691,7 @@ h3:first-child {
         min-height: 52px;
         background: rgba(0, 180, 50, 0.12);
         border: 2px dashed rgba(0, 200, 60, 0.55);
-        border-radius: 8px;
+        border-radius: 10px;
         margin-bottom: 4px;
         color: rgba(0, 220, 60, 0.85);
         font-size: 11px;
@@ -5774,7 +5774,7 @@ h3:first-child {
         position: absolute;
         top: 1px;
         left: 4px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
         color: #fff;
         background: rgba(0, 0, 0, 0.45);
@@ -5812,11 +5812,11 @@ h3:first-child {
 .tier-trending-summary:hover { opacity: 0.85; }
 
 .tier-trending-count {
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: 600;
     color: #fff;
     background: #1976d2;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 2px 10px;
     margin-left: 4px;
 }
@@ -5824,7 +5824,7 @@ h3:first-child {
 /* Chevron arrow on the summary */
 .tier-trending-summary::after {
     content: '▼';
-    font-size: 0.75rem;
+    font-size: 12px;
     color: var(--ink-3);
     margin-left: auto;
     transition: transform 0.25s ease;
@@ -5861,7 +5861,7 @@ details[open] > .tier-trending-summary::after {
     /* 29.08.2026: fest #fff. Elf dieser Karten standen im Dunkelmodus
        weiss da, mit der hellen Dunkelmodus-Schrift darauf. */
     background: var(--surface-1);
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     position: relative;
@@ -5915,7 +5915,7 @@ details[open] > .tier-trending-summary::after {
 }
 
 .deck-banner-name {
-    font-size: 1.2rem;
+    font-size: 21px;
     font-weight: 800;
     color: var(--ink);
     margin-bottom: 5px;
@@ -5931,7 +5931,7 @@ details[open] > .tier-trending-summary::after {
     gap: 4px;
     align-items: flex-start;
     margin-top: auto;
-    font-size: 0.9rem;
+    font-size: 14px;
     /* 29.08.2026: fest #666 statt des Tokens daneben. Elf Kacheln der
        City League bei 3,08:1 im Dunkelmodus. */
     color: var(--ink-3);
@@ -5976,7 +5976,7 @@ details[open] > .tier-trending-summary::after {
    verschwand. */
 .cm-rang-offen {
     margin-top: 10px;
-    font-size: 0.8rem;
+    font-size: 12px;
     line-height: 1.55;
     color: var(--vorbehalt);
     max-width: 88ch;
@@ -5986,7 +5986,7 @@ details[open] > .tier-trending-summary::after {
  * Zurueckhaltend: sie ist ein Vorbehalt, keine Ueberschrift. */
 .tier-grundlage {
     margin: 0 0 14px;
-    font-size: 0.82rem;
+    font-size: 14px;
     line-height: 1.5;
     color: var(--ink-3);
     max-width: 78ch;
@@ -6026,8 +6026,8 @@ details[open] > .tier-trending-summary::after {
     align-items: center;
     gap: 5px;
     padding: 2px 6px;
-    border-radius: 5px;
-    font-size: 0.68rem;
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 600;
     margin-bottom: 2px;
     /* War rgba(255,255,255,.9): eine feste weisse Scheibe, die im
@@ -6039,7 +6039,7 @@ details[open] > .tier-trending-summary::after {
 }
 
 .stat-compare-value {
-    font-size: 0.65rem;
+    font-size: 11px;
     color: var(--ink-3);
     font-weight: 400;
     margin-left: 2px;
@@ -6050,7 +6050,7 @@ details[open] > .tier-trending-summary::after {
 .trend-neutral { color: #757575 !important; }
 
 .trend-icon {
-    font-size: 0.8rem;
+    font-size: 12px;
     display: inline-block;
     vertical-align: middle;
     font-weight: bold;
@@ -6076,11 +6076,11 @@ details[open] > .tier-trending-summary::after {
     top: 10px;
     right: 10px;
     padding: 4px 8px;
-    border-radius: 20px;
+    border-radius: 999px;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
     color: white;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 800;
     z-index: 5;
     display: flex;
@@ -6098,7 +6098,7 @@ details[open] > .tier-trending-summary::after {
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 6px;
     padding: 3px 6px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 800;
     color: #fff;
     z-index: 10;
@@ -6143,7 +6143,7 @@ details[open] > .tier-trending-summary::after {
      * mit einer Ueberschrift in #2c3e50 darauf (1,6:1). Beide Enden
      * haengen jetzt an Flaechen-Merkmalen. */
     background: linear-gradient(135deg, var(--surface-1) 0%, var(--bg-light) 100%);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 20px;
     margin-bottom: 30px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -6255,7 +6255,7 @@ details[open] > .tier-trending-summary::after {
     display: inline-block;
     margin-left: 5px;
     padding: 0 5px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: var(--fs-xs);
     font-variant-numeric: tabular-nums;
     background: var(--surface-2);
@@ -6284,13 +6284,13 @@ details[open] > .tier-trending-summary::after {
 .top-cards-scroll::-webkit-scrollbar-track,
 .top-cards-grid::-webkit-scrollbar-track {
     background: #f1f1f1;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 .top-cards-scroll::-webkit-scrollbar-thumb,
 .top-cards-grid::-webkit-scrollbar-thumb {
     background: #888;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 .top-cards-scroll::-webkit-scrollbar-thumb:hover,
@@ -6324,7 +6324,7 @@ details[open] > .tier-trending-summary::after {
     background: #f39c12;
     color: var(--on-light);
     padding: 2px 5px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-weight: 900;
     font-size: var(--fs-xs);
     z-index: 2;
@@ -6355,7 +6355,7 @@ details[open] > .tier-trending-summary::after {
     align-items: center;
     background: linear-gradient(135deg, rgba(59, 76, 202, 0.08) 0%, rgba(255, 203, 5, 0.14) 100%);
     border: 1px solid rgba(59, 76, 202, 0.18);
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 18px;
     box-shadow: 0 8px 24px rgba(59, 76, 202, 0.08);
 }
@@ -6384,7 +6384,7 @@ details[open] > .tier-trending-summary::after {
 .battle-journal-profile-stat {
     min-width: 120px;
     background: var(--surface-2);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 10px 12px;
     border: 1px solid var(--line);
 }
@@ -6401,7 +6401,7 @@ details[open] > .tier-trending-summary::after {
    bei 1,59:1. --brand-ink traegt dieselbe Bedeutung in beiden Saetzen
    (6,32:1 dunkel). */
 .battle-journal-profile-stat strong {
-    font-size: 16px;
+    font-size: 17px;
     color: var(--brand-ink);
 }
 
@@ -6448,7 +6448,7 @@ details[open] > .tier-trending-summary::after {
 }
 
 .battle-journal-fab-icon {
-    font-size: 18px;
+    font-size: 17px;
 }
 
 .battle-journal-fab-label {
@@ -6496,7 +6496,7 @@ details[open] > .tier-trending-summary::after {
     max-height: min(88vh, 820px);
     overflow-y: auto;
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-    border-radius: 24px 24px 0 0;
+    border-radius: 999px 999px 0 0;
     padding: 16px 16px 18px;
     box-shadow: 0 -10px 38px rgba(15, 23, 42, 0.25);
 }
@@ -6533,7 +6533,7 @@ details[open] > .tier-trending-summary::after {
     margin: 0;
     color: var(--text-light);
     line-height: 1.45;
-    font-size: 0.95rem;
+    font-size: 14px;
 }
 
 .battle-journal-close {
@@ -6543,7 +6543,7 @@ details[open] > .tier-trending-summary::after {
     border: 1px solid var(--line-strong);
     background: var(--surface-1);
     color: var(--text-dark);
-    font-size: 24px;
+    font-size: 21px;
     cursor: pointer;
     flex-shrink: 0;
 }
@@ -6576,7 +6576,7 @@ details[open] > .tier-trending-summary::after {
     padding: 8px 12px;
     background: var(--tint-info);
     color: var(--tint-info-ink);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
 }
 
@@ -6596,7 +6596,7 @@ details[open] > .tier-trending-summary::after {
 }
 
 .battle-journal-pending-count {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text-light);
 }
@@ -6609,7 +6609,7 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-label {
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text-dark);
     margin-bottom: 6px;
@@ -6618,12 +6618,12 @@ details[open] > .tier-trending-summary::after {
 .battle-journal-input {
     width: 100%;
     min-height: 48px;
-    border-radius: 12px;
+    border-radius: 14px;
     border: 2px solid var(--line-strong);
     background: var(--surface-1);
     color: var(--ink);
     padding: 12px 14px;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 /* Der Platzhalter kam vom Browser (#757575) und stand damit auf dunklem
@@ -6664,7 +6664,7 @@ details[open] > .tier-trending-summary::after {
     padding: 11px 14px;
     cursor: pointer;
     border-bottom: 1px solid var(--line);
-    font-size: 0.92rem;
+    font-size: 14px;
     color: var(--ink);
     line-height: 1.3;
     -webkit-tap-highlight-color: rgba(59, 76, 202, 0.18);
@@ -6722,7 +6722,7 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-bo3-details {
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 10px;
     background: var(--surface-1);
 }
@@ -6754,7 +6754,7 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-game-btns .battle-journal-choice {
     min-height: 38px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
     border-radius: 10px;
 }
@@ -6781,7 +6781,7 @@ details[open] > .tier-trending-summary::after {
     border: 2px solid var(--line-strong);
     background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-0) 100%);
     color: var(--ink);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
     padding: 8px;
     text-align: center;
@@ -6816,7 +6816,7 @@ details[open] > .tier-trending-summary::after {
  * unsichtbar. Beides muss aus derselben Welt kommen. */
 .battle-journal-choice {
     min-height: 48px;
-    border-radius: 12px;
+    border-radius: 14px;
     border: 2px solid var(--line-strong);
     background: var(--surface-1);
     color: var(--ink);
@@ -6873,7 +6873,7 @@ details[open] > .tier-trending-summary::after {
     min-height: 52px;
     padding: 9px 14px;
     border: 2px dashed var(--line-strong);
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--surface-1);
     color: var(--ink);
     cursor: pointer;
@@ -6914,7 +6914,7 @@ details[open] > .tier-trending-summary::after {
 .battle-journal-secondary-btn,
 .battle-journal-link-btn {
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     font-weight: 800;
 }
@@ -6940,7 +6940,7 @@ details[open] > .tier-trending-summary::after {
     width: 100%;
     min-width: unset;
     min-height: 40px;
-    font-size: 0.92rem;
+    font-size: 14px;
     text-align: left;
     border: 1px dashed rgba(31, 45, 61, 0.25);
     border-radius: 10px;
@@ -6965,8 +6965,8 @@ details[open] > .tier-trending-summary::after {
     padding: 10px 18px;
     min-width: 70px;
 }
-.bj-history-stat strong { font-size: 1.3rem; }
-.bj-history-stat span { font-size: 0.78rem; color: var(--text-muted, #888); }
+.bj-history-stat strong { font-size: 21px; }
+.bj-history-stat span { font-size: 12px; color: var(--text-muted, #888); }
 .bj-history-stat.is-win strong { color: var(--tint-ok-ink); }
 .bj-history-stat.is-loss strong { color: var(--tint-bad-ink); }
 .bj-history-stat.is-tie strong { color: var(--tint-warn-ink); }
@@ -6983,7 +6983,7 @@ details[open] > .tier-trending-summary::after {
     align-items: center;
     gap: 6px 10px;
     padding: 10px 14px;
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--surface-2);
     border-left: 4px solid #999;
 }
@@ -6994,7 +6994,7 @@ details[open] > .tier-trending-summary::after {
 
 .bj-history-item-main { flex: 1; min-width: 0; grid-column: 1; grid-row: 1 / span 2; }
 .bj-history-tournament {
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--text-muted, #888);
     margin-bottom: 2px;
     white-space: nowrap;
@@ -7002,7 +7002,7 @@ details[open] > .tier-trending-summary::after {
     text-overflow: ellipsis;
 }
 .bj-history-matchup {
-    font-size: 0.88rem;
+    font-size: 14px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -7011,31 +7011,31 @@ details[open] > .tier-trending-summary::after {
 .bj-history-vs {
     color: var(--text-muted, #999);
     font-weight: 400;
-    font-size: 0.82rem;
+    font-size: 14px;
 }
 .bj-history-meta {
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--text-muted, #888);
     margin-top: 2px;
 }
 .bj-history-games {
-    font-size: 0.75rem;
+    font-size: 12px;
     color: var(--text-muted, #999);
     margin-top: 2px;
 }
 .bj-history-pending {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 11px;
     background: #aa5a13;
     color: #fff;
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 1px 6px;
     margin-left: 4px;
     vertical-align: middle;
 }
 .bj-history-clip {
     display: none;
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--brand-ink);
     font-weight: 600;
     margin-top: 3px;
@@ -7052,9 +7052,9 @@ details[open] > .tier-trending-summary::after {
     background: none;
     color: var(--ink);
     border: 1px solid var(--line-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 14px;
     width: 28px;
     height: 28px;
     display: inline-flex;
@@ -7082,7 +7082,7 @@ details[open] > .tier-trending-summary::after {
     border-radius: 999px;
     border: 1.5px solid rgba(0,0,0,.12);
     background: var(--surface-2);
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all .15s;
@@ -7116,19 +7116,19 @@ details[open] > .tier-trending-summary::after {
 .bj-meta-folder-header:hover {
     background: linear-gradient(135deg, rgba(37,99,235,.14), rgba(37,99,235,.06));
 }
-.bj-meta-folder-icon { font-size: 1.1rem; }
+.bj-meta-folder-icon { font-size: 17px; }
 .bj-meta-folder-label {
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 14px;
     flex: 1;
 }
 .bj-meta-folder-stats {
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--text-muted, #888);
     font-weight: 600;
 }
 .bj-meta-folder-chevron {
-    font-size: 0.85rem;
+    font-size: 14px;
     transition: transform .2s;
 }
 .bj-meta-folder.is-collapsed .bj-meta-folder-chevron {
@@ -7160,14 +7160,14 @@ details[open] > .tier-trending-summary::after {
 }
 .bj-tournament-info { flex: 1; min-width: 0; }
 .bj-tournament-name {
-    font-size: 0.82rem;
+    font-size: 14px;
     display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .bj-tournament-record {
-    font-size: 0.72rem;
+    font-size: 12px;
     color: var(--text-muted, #888);
     font-weight: 600;
 }
@@ -7182,16 +7182,16 @@ details[open] > .tier-trending-summary::after {
     border-radius: var(--r-sm);
     color: var(--ink-2);
     font-family: var(--font-num);
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 700;
 }
 .bj-tournament-share-btn {
     background: none;
     color: var(--ink);
     border: 1px solid var(--line-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: 12px;
     padding: 2px 6px;
     line-height: 1;
     flex-shrink: 0;
@@ -7231,10 +7231,10 @@ details[open] > .tier-trending-summary::after {
     min-height: 44px;
     padding: 10px 12px;
     border: 0;
-    border-radius: 8px;
+    border-radius: 10px;
     background: none;
     color: inherit;
-    font-size: 0.85rem;
+    font-size: 14px;
     text-align: left;
     cursor: pointer;
 }
@@ -7251,7 +7251,7 @@ details[open] > .tier-trending-summary::after {
     .bj-tournament-header .bj-tournament-share-btn {
         min-height: 40px;
         padding: 8px 14px;
-        font-size: 0.85rem;
+        font-size: 14px;
     }
     .bj-tournament-menu { min-width: 0; left: auto; right: 0; width: max-content; max-width: 88vw; }
 }
@@ -7284,7 +7284,7 @@ details[open] > .tier-trending-summary::after {
 }
 .bj-matchup-name {
     width: 140px;
-    font-size: 0.85rem;
+    font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -7295,16 +7295,16 @@ details[open] > .tier-trending-summary::after {
     flex: 1;
     height: 14px;
     background: rgba(0,0,0,.06);
-    border-radius: 7px;
+    border-radius: 6px;
     overflow: hidden;
 }
 .bj-matchup-bar {
     height: 100%;
-    border-radius: 7px;
+    border-radius: 6px;
     transition: width .3s;
 }
 .bj-matchup-stats {
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
     min-width: 80px;
@@ -7319,7 +7319,7 @@ details[open] > .tier-trending-summary::after {
 .ma-modal-shell {
     width: min(96vw, 900px);
     background: var(--surface-1);
-    border-radius: 20px;
+    border-radius: 999px;
     box-shadow: 0 24px 80px rgba(0,0,0,.35);
     overflow: hidden;
     margin: auto;
@@ -7334,13 +7334,13 @@ details[open] > .tier-trending-summary::after {
 .ma-modal-title {
     margin: 0;
     color: #fff;
-    font-size: 1.3rem;
+    font-size: 21px;
     font-weight: 800;
 }
 .ma-modal-subtitle {
     margin: 4px 0 0;
     color: rgba(255,255,255,.65);
-    font-size: .85rem;
+    font-size: 14px;
 }
 .ma-modal-close {
     background: rgba(255,255,255,.15);
@@ -7349,7 +7349,7 @@ details[open] > .tier-trending-summary::after {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    font-size: 22px;
+    font-size: 21px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -7379,7 +7379,7 @@ details[open] > .tier-trending-summary::after {
     flex: 2 1 280px;
 }
 .ma-filter-label {
-    font-size: .72rem;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .5px;
@@ -7396,7 +7396,7 @@ details[open] > .tier-trending-summary::after {
     border: 1.5px solid rgba(0,0,0,.12);
     background: var(--surface-2);
     color: var(--ink);
-    font-size: .8rem;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all .15s;
@@ -7420,7 +7420,7 @@ details[open] > .tier-trending-summary::after {
     padding: 8px 12px;
     border: 1.5px solid rgba(0,0,0,.1);
     border-radius: 10px;
-    font-size: .88rem;
+    font-size: 14px;
     background: var(--surface-1);
     color: var(--ink);
 }
@@ -7441,17 +7441,17 @@ details[open] > .tier-trending-summary::after {
     flex: 1 1 80px;
     text-align: center;
     padding: 10px 6px;
-    border-radius: 12px;
+    border-radius: 14px;
     background: rgba(0,0,0,.03);
 }
 .ma-stat strong {
     display: block;
-    font-size: 1.35rem;
+    font-size: 21px;
     font-weight: 800;
     line-height: 1.2;
 }
 .ma-stat span {
-    font-size: .75rem;
+    font-size: 12px;
     color: var(--text-muted, #888);
     font-weight: 600;
     text-transform: uppercase;
@@ -7471,7 +7471,7 @@ details[open] > .tier-trending-summary::after {
 .ma-section:last-child { border-bottom: none; }
 .ma-section-title {
     margin: 0 0 12px;
-    font-size: 1rem;
+    font-size: 17px;
     font-weight: 700;
 }
 
@@ -7481,13 +7481,13 @@ details[open] > .tier-trending-summary::after {
     overflow-x: auto;
     overflow-y: auto;
     max-height: 400px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid rgba(0,0,0,.08);
     -webkit-overflow-scrolling: touch;
 }
 .ma-heatmap-table {
     border-collapse: collapse;
-    font-size: .8rem;
+    font-size: 12px;
     min-width: 100%;
 }
 .ma-heatmap-table thead {
@@ -7508,7 +7508,7 @@ details[open] > .tier-trending-summary::after {
 .ma-heatmap-col-header {
     padding: 6px 4px;
     font-weight: 700;
-    font-size: .7rem;
+    font-size: 11px;
     text-align: center;
     white-space: normal;
     word-break: break-word;
@@ -7528,7 +7528,7 @@ details[open] > .tier-trending-summary::after {
 .ma-heatmap-row-header {
     padding: 6px 10px;
     font-weight: 700;
-    font-size: .78rem;
+    font-size: 12px;
     white-space: normal;
     line-height: 1.25;
     position: sticky;
@@ -7543,7 +7543,7 @@ details[open] > .tier-trending-summary::after {
     text-align: center;
     padding: 8px 6px;
     font-weight: 800;
-    font-size: .88rem;
+    font-size: 14px;
     min-width: 56px;
     border: 1px solid rgba(0,0,0,.04);
     cursor: default;
@@ -7603,7 +7603,7 @@ details[open] > .tier-trending-summary::after {
 .ma-rank-item:last-child { border-bottom: none; }
 .ma-rank-name {
     flex: 1;
-    font-size: .85rem;
+    font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -7616,13 +7616,13 @@ details[open] > .tier-trending-summary::after {
     min-width: 0;
 }
 .ma-rank-wr {
-    font-size: .88rem;
+    font-size: 14px;
     font-weight: 800;
     min-width: 42px;
     text-align: right;
 }
 .ma-rank-record {
-    font-size: .75rem;
+    font-size: 12px;
     color: var(--text-muted, #888);
     min-width: 46px;
     text-align: right;
@@ -7657,7 +7657,7 @@ details[open] > .tier-trending-summary::after {
 .bj-edit-modal {
     max-width: 480px;
     width: 95%;
-    border-radius: 16px;
+    border-radius: 14px;
     overflow: hidden;
     background: var(--surface-1);
     color: var(--ink);
@@ -7672,13 +7672,13 @@ details[open] > .tier-trending-summary::after {
 }
 .bj-edit-modal-header h3 {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 17px;
 }
 .bj-edit-modal-close {
     background: none;
     border: none;
     color: #fff;
-    font-size: 24px;
+    font-size: 21px;
     cursor: pointer;
     padding: 0;
     line-height: 1;
@@ -7692,7 +7692,7 @@ details[open] > .tier-trending-summary::after {
     overflow-y: auto;
 }
 .bj-edit-label {
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 700;
     color: var(--ink-2);
     margin-bottom: -4px;
@@ -7702,7 +7702,7 @@ details[open] > .tier-trending-summary::after {
     padding: 10px 12px;
     border: 1.5px solid var(--line-strong);
     border-radius: 10px;
-    font-size: 0.95rem;
+    font-size: 14px;
     background: var(--surface-0);
     color: var(--ink);
     box-sizing: border-box;
@@ -7733,9 +7733,9 @@ details[open] > .tier-trending-summary::after {
     background: none;
     color: var(--ink);
     border: 1px solid var(--line-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: 12px;
     width: 28px;
     height: 28px;
     display: inline-flex;
@@ -7752,9 +7752,9 @@ details[open] > .tier-trending-summary::after {
     background: none;
     color: var(--ink);
     border: 1px solid var(--line-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: .78rem;
+    font-size: 12px;
     padding: 3px 6px;
     line-height: 1;
     opacity: .45;
@@ -7769,9 +7769,9 @@ details[open] > .tier-trending-summary::after {
     background: none;
     color: var(--ink);
     border: 1px solid var(--line-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: 12px;
     padding: 2px 6px;
     line-height: 1;
     flex-shrink: 0;
@@ -7904,7 +7904,7 @@ details[open] > .tier-trending-summary::after {
     white-space: pre-line;
     line-height: 1.5;
     color: #2c3e50;
-    font-size: 0.95rem;
+    font-size: 14px;
 }
 
 .tooltip-admin-controls {
@@ -7944,7 +7944,7 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-pending-item,
 .battle-journal-empty-state {
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--surface-1);
     border: 1px solid var(--line);
     padding: 10px 12px;
@@ -8008,7 +8008,7 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-empty-state {
     color: var(--text-light);
-    font-size: 13px;
+    font-size: 14px;
 }
 
 /* Die Seite hinter dem Journal haelt js/hintergrund-sperre.js an. Hier
@@ -8019,7 +8019,7 @@ details[open] > .tier-trending-summary::after {
 
 @media (min-width: 760px) {
     .battle-journal-sheet {
-        border-radius: 24px;
+        border-radius: 999px;
         margin-bottom: 18px;
     }
 
@@ -8052,7 +8052,7 @@ details[open] > .tier-trending-summary::after {
     .battle-journal-sheet {
         width: 100%;
         max-height: 92vh;
-        border-radius: 24px 24px 0 0;
+        border-radius: 999px 999px 0 0;
         padding-bottom: calc(20px + env(safe-area-inset-bottom));
     }
 
@@ -8096,7 +8096,7 @@ details[open] > .tier-trending-summary::after {
    hatte, nur mit Folgen. */
 
 .top-card-name {
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 700;
     color: var(--text-dark);
     margin-bottom: 1px;
@@ -8107,7 +8107,7 @@ details[open] > .tier-trending-summary::after {
 }
 
 .top-card-share {
-    font-size: 0.65rem;
+    font-size: 11px;
     font-weight: 600;
     color: var(--brand-ink);
     margin-bottom: 1px;
@@ -8137,7 +8137,7 @@ details[open] > .tier-trending-summary::after {
     }
     
     .top-card-name {
-        font-size: 0.65rem;
+        font-size: 11px;
     }
     
     /* Format Toggle auf Mobile */
@@ -8148,7 +8148,7 @@ details[open] > .tier-trending-summary::after {
     .format-toggle-container select {
         width: 100%;
         max-width: 300px;
-        font-size: 0.9rem;
+        font-size: 14px;
     }
     
     /* Deck Banner Grid auf Mobile */
@@ -8162,7 +8162,7 @@ details[open] > .tier-trending-summary::after {
     }
     
     .deck-banner-name {
-        font-size: 1.1rem;
+        font-size: 17px;
     }
 }
 
@@ -8188,7 +8188,7 @@ details[open] > .tier-trending-summary::after {
     min-width: 280px;
     max-width: 420px;
     padding: 14px 20px;
-    border-radius: 12px;
+    border-radius: 14px;
     background: #323232;
     color: #fff;
     font-family: 'Nunito', sans-serif;
@@ -8223,7 +8223,7 @@ details[open] > .tier-trending-summary::after {
     background: none;
     border: none;
     color: inherit;
-    font-size: 18px;
+    font-size: 17px;
     cursor: pointer;
     opacity: 0.7;
     padding: 0 0 0 8px;
@@ -8328,7 +8328,7 @@ details[open] > .tier-trending-summary::after {
 
 .help-modal-content {
     background: #fff;
-    border-radius: 16px;
+    border-radius: 14px;
     max-width: 600px;
     width: 90%;
     max-height: 80vh;
@@ -8364,11 +8364,11 @@ details[open] > .tier-trending-summary::after {
     right: 16px;
     background: none;
     border: none;
-    font-size: 24px;
+    font-size: 21px;
     cursor: pointer;
     color: var(--ink-3);
     padding: 4px 8px;
-    border-radius: 8px;
+    border-radius: 10px;
     line-height: 1;
 }
 .help-modal-close:hover { background: #f0f0f0; color: #333; }
@@ -8383,7 +8383,7 @@ details[open] > .tier-trending-summary::after {
 /* ============================================================ */
 .skeleton-card {
     background: #e8e8e8;
-    border-radius: 12px;
+    border-radius: 14px;
     position: relative;
     overflow: hidden;
     width: 100%;
@@ -8587,7 +8587,7 @@ details[open] > .tier-trending-summary::after {
     .deck-card button:not(.wishlist-heart-badge) {
         min-height: 44px !important;
         height: auto !important;
-        font-size: 13px !important;
+        font-size: 14px !important;
     }
 
     /* Card overlay action buttons stay compact (overrides above) */
@@ -8784,7 +8784,7 @@ details[open] > .tier-trending-summary::after {
     max-height: 90vh;
     overflow-y: auto;
     padding: 20px !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
     text-align: center;
 }
 
@@ -8830,15 +8830,15 @@ details[open] > .tier-trending-summary::after {
     margin-bottom: 0 !important;
     padding: 6px 16px !important;
     font-weight: bold !important;
-    font-size: 13px !important;
-    border-radius: 8px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
 }
 #drawSimModal .draw-sim-combo-actions button {
     width: auto !important;
     margin-bottom: 0 !important;
     padding: 6px 14px !important;
     font-size: 12px !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
 }
 
 @media (max-width: 768px) {
@@ -8863,7 +8863,7 @@ details[open] > .tier-trending-summary::after {
         font-size: 11px;
         height: 22px;
     }
-    .search-filters { font-size: 10px; }
+    .search-filters { font-size: 11px; }
 
     /* Hauptinhalt / Kartenliste */
     #main-content {
@@ -8878,7 +8878,7 @@ details[open] > .tier-trending-summary::after {
         display: flex;
         gap: 1px;
         flex-wrap: wrap;
-        font-size: 10px;
+        font-size: 11px;
     }
     .card-name {
         font-size: 11px;
@@ -8892,7 +8892,7 @@ details[open] > .tier-trending-summary::after {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 1px;
-        font-size: 10px;
+        font-size: 11px;
         width: 100%;
     }
     .price-point {
@@ -8917,7 +8917,7 @@ details[open] > .tier-trending-summary::after {
     }
     .archetype-header { font-size: 11px; margin-bottom: 1px; }
     .archetype-card-list { gap: 1px; }
-    .archetype-card-list li { font-size: 10px; padding: 0; }
+    .archetype-card-list li { font-size: 11px; padding: 0; }
 
     /* Bottom Navigation */
     #bottom-nav {
@@ -8946,8 +8946,8 @@ details[open] > .tier-trending-summary::after {
     color: #fff;
     font-weight: 700;
     padding: 10px 14px;
-    font-size: 13px;
-    border-radius: 8px;
+    font-size: 14px;
+    border-radius: 10px;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0,0,0,0.45);
     transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
@@ -9018,7 +9018,7 @@ details[open] > .tier-trending-summary::after {
         color: white !important;
         font-weight: bold !important;
         padding: 9px 6px !important;
-        font-size: 10px !important;
+        font-size: 11px !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
         cursor: pointer !important;
         white-space: nowrap !important;
@@ -9033,24 +9033,24 @@ details[open] > .tier-trending-summary::after {
 
     .attack-btn {
         background: var(--color-error-dark) !important;
-        border-radius: 0 8px 8px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
     }
 
     .endturn-btn {
         background: var(--solid-ok) !important;
-        border-radius: 0 8px 8px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
     }
 
     .oppview-btn {
         background: #8e44ad !important;
-        border-radius: 8px 0 0 8px !important;
+        border-radius: 10px 0 0 10px !important;
     }
 
     /* Deck verkleinern */
     .pt-deck-pile {
         width: 60px !important;
         height: 85px !important;
-        font-size: 10px !important;
+        font-size: 11px !important;
     }
     .pt-deck-half {
         font-size: 14px !important;
@@ -9059,8 +9059,8 @@ details[open] > .tier-trending-summary::after {
     /* FAB Action Button kompakter machen */
     #fab-action-btn.fab-side-btn {
         background: #9c27b0 !important;
-        border-radius: 0 8px 8px 0 !important;
-        font-size: 16px !important;
+        border-radius: 0 10px 10px 0 !important;
+        font-size: 17px !important;
         padding: 8px !important;
     }
 }
@@ -9215,7 +9215,7 @@ details[open] > .tier-trending-summary::after {
         flex-direction: column;
         align-items: flex-start;
         gap: 3px;
-        font-size: 10px !important;
+        font-size: 11px !important;
     }
 
     /* Proxy Printer */
@@ -9254,11 +9254,11 @@ details[open] > .tier-trending-summary::after {
     }
 
     .proxy-card-item {
-        font-size: 10px !important;
+        font-size: 11px !important;
     }
 
     .proxy-card-item img {
-        border-radius: 4px !important;
+        border-radius: 6px !important;
     }
 
     .proxy-card-controls button {
@@ -9292,7 +9292,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
   padding: 5px 10px;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.78em;
@@ -9313,7 +9313,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
   font-weight: 700;
   color: #333;
   letter-spacing: 0.02em;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: background 0.15s;
 }
 .pt-top-btn:hover {
@@ -9403,7 +9403,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     min-width: 200px;
     background: #fff;
     border: 1px solid #e0e6ed;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.14);
     padding: 4px;
     display: none;
@@ -9418,7 +9418,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     border: none;
     color: var(--ink);
     padding: 8px 12px;
-    font-size: 0.9rem;
+    font-size: 14px;
     text-align: left;
     border-radius: 6px;
     cursor: pointer;
@@ -9497,7 +9497,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     gap: 7px;
     cursor: pointer;
     user-select: none;
-    font-size: 0.9rem;
+    font-size: 14px;
 }
 .bj-brick-checkbox {
     width: 18px;
@@ -9506,10 +9506,10 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     cursor: pointer;
     flex-shrink: 0;
 }
-.bj-brick-icon { font-size: 1rem; }
+.bj-brick-icon { font-size: 17px; }
 .bj-brick-text { font-weight: 700; color: var(--tint-bad-ink); }
 .bj-brick-hint {
-    font-size: 0.76rem;
+    font-size: 12px;
     color: var(--ink-3);
     font-weight: 400;
 }
@@ -9519,8 +9519,8 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     width: 100%;
     padding: 8px 10px;
     border: 1px solid var(--line-strong);
-    border-radius: 8px;
-    font-size: 0.88rem;
+    border-radius: 10px;
+    font-size: 14px;
     line-height: 1.4;
     resize: vertical;
     font-family: inherit;
@@ -9546,9 +9546,9 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     display: inline-flex;
     align-items: center;
     gap: 3px;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 700;
-    border-radius: 5px;
+    border-radius: 6px;
     padding: 1px 6px;
     margin-left: 6px;
     vertical-align: middle;
@@ -9572,7 +9572,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     opacity: 0.85;
 }
 .bj-history-notes {
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--ink-2);
     margin-top: 3px;
     font-style: italic;
@@ -9609,9 +9609,9 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     height: 36px;
     border: 1px solid var(--line-strong);
     background: var(--surface-1);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 17px;
     line-height: 1;
     /* Ohne das nimmt der Knopf die Systemfarbe `buttontext` (schwarz)
      * und nicht --ink. Das faellt nur auf, wenn ein Schirm das Emoji
@@ -9643,8 +9643,8 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     min-width: 0;
     padding: 7px 10px;
     border: 1px solid var(--line-strong);
-    border-radius: 8px;
-    font-size: 0.85rem;
+    border-radius: 10px;
+    font-size: 14px;
     font-family: inherit;
     color: var(--ink);
     background: var(--surface-2);
@@ -9680,7 +9680,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 
 /* Brick count in bar list */
 .bj-brick-count {
-    font-size: 0.72rem;
+    font-size: 12px;
     color: var(--tint-warn-ink);
     margin-left: 6px;
     cursor: help;
@@ -9690,7 +9690,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
 
 /* ── Compact Matchup List (replaces heatmap when 2D makes no sense) ── */
 .ma-matchup-list-context {
-    font-size: 0.85rem;
+    font-size: 14px;
     color: var(--ink-3);
     margin: 0 0 10px 2px;
 }
@@ -9709,7 +9709,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     background: #fafbfd;
     border: 1px solid #e8edf5;
     border-radius: 10px;
-    font-size: 0.92rem;
+    font-size: 14px;
     transition: background .12s, border-color .12s;
 }
 .ma-matchup-row:hover {
@@ -9729,7 +9729,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     min-width: 0;
 }
 .ma-matchup-record {
-    font-size: 0.82rem;
+    font-size: 14px;
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -9739,15 +9739,15 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     margin-left: 6px;
     padding: 1px 7px;
     background: #eef2f7;
-    border-radius: 8px;
-    font-size: 0.72rem;
+    border-radius: 10px;
+    font-size: 12px;
     color: #55637a;
 }
 .ma-matchup-wr {
     padding: 5px 0;
-    border-radius: 12px;
+    border-radius: 14px;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 14px;
     text-align: center;
     font-variant-numeric: tabular-nums;
     min-width: 62px;
@@ -9760,12 +9760,12 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none; }
     .ma-matchup-row {
         padding: 9px 12px;
         gap: 8px;
-        font-size: 0.88rem;
+        font-size: 14px;
         grid-template-columns: 1fr auto 56px;
     }
-    .ma-matchup-record { font-size: 0.76rem; }
-    .ma-matchup-total  { font-size: 0.68rem; padding: 1px 6px; }
-    .ma-matchup-wr     { font-size: 0.88rem; min-width: 56px; padding: 4px 0; }
+    .ma-matchup-record { font-size: 12px; }
+    .ma-matchup-total  { font-size: 11px; padding: 1px 6px; }
+    .ma-matchup-wr     { font-size: 14px; min-width: 56px; padding: 4px 0; }
 }
 
 /* Dark mode */
@@ -9798,11 +9798,11 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     }
     .ma-modal-shell {
         margin: 0 !important;
-        border-radius: 12px 12px 0 0 !important;
+        border-radius: 14px 14px 0 0 !important;
         min-height: 80vh !important;
     }
     .ma-chip {
-        font-size: 0.75rem !important;
+        font-size: 12px !important;
         padding: 5px 10px !important;
     }
     .ma-heatmap-scroll {
@@ -9811,15 +9811,15 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     }
     .ma-heatmap-col-header {
         min-width: 100px !important;
-        font-size: 0.72rem !important;
+        font-size: 12px !important;
     }
     .ma-heatmap-cell {
         min-width: 100px !important;
-        font-size: 0.88rem !important;
+        font-size: 14px !important;
         padding: 10px 6px !important;
     }
     .ma-heatmap-row-header {
-        font-size: 0.75rem !important;
+        font-size: 12px !important;
         min-width: 110px !important;
         max-width: 140px !important;
         padding: 6px 8px !important;
@@ -9834,7 +9834,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
         width: 100% !important;
         max-width: 100% !important;
         max-height: 95dvh !important;
-        border-radius: 16px 16px 0 0 !important;
+        border-radius: 14px 14px 0 0 !important;
         padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     .battle-journal-form {
@@ -9845,17 +9845,17 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     }
     .battle-journal-choice {
         min-height: 44px !important;
-        font-size: 0.9rem !important;
+        font-size: 14px !important;
     }
     .bj-type-chip {
         min-height: 38px !important;
-        font-size: 0.8rem !important;
+        font-size: 12px !important;
         padding: 7px 11px !important;
     }
     .battle-journal-primary-btn,
     .battle-journal-secondary-btn {
         min-height: 48px !important;
-        font-size: 0.95rem !important;
+        font-size: 14px !important;
     }
     .bj-extra-fields {
         gap: 8px;
@@ -9932,7 +9932,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     right: 0;
     background: #fff;
     border: 1px solid #ddd;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 10px 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     max-height: 280px;
     overflow-y: auto;
@@ -9957,7 +9957,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     height: 45px !important;
     min-width: 32px !important;
     object-fit: cover;
-    border-radius: 3px;
+    border-radius: 6px;
     flex: 0 0 auto;
 }
 .tech-options-autocomplete-row .row-name {
@@ -9989,7 +9989,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     position: relative;
     background: #fff;
     border: 1px solid #e1e7f0;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     display: flex;
@@ -10023,10 +10023,10 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .tech-btn {
     height: 24px;
     border: none;
-    border-radius: 3px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: 800;
-    font-size: 13px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -10056,7 +10056,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .tech-option-select {
     padding: 4px 6px;
     border: 1px solid #d6dde7;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.85em;
     background: #fff;
     color: var(--on-light);
@@ -10071,7 +10071,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     box-sizing: border-box;
     padding: 5px 7px;
     border: 1px solid #d6dde7;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.82em;
     background: #fff;
     color: var(--on-light);
@@ -10114,7 +10114,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
         grid-area: img !important;
         width: 64px !important;
         height: auto !important;
-        border-radius: 4px !important;
+        border-radius: 6px !important;
         align-self: start !important;
     }
 
@@ -10137,10 +10137,10 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     }
     .tech-btn {
         height: 30px !important;        /* WCAG-compliant tap target */
-        font-size: 15px !important;
-        border-radius: 4px !important;
+        font-size: 14px !important;
+        border-radius: 6px !important;
     }
-    .tech-btn-del { font-size: 13px !important; }
+    .tech-btn-del { font-size: 14px !important; }
 
     /* Meta row spans both columns under the image so the Replaces select
        and Note input each get ~330px on a 390px phone. */
@@ -10175,8 +10175,8 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     gap: 2px;
     margin-left: 4px;
     padding: 1px 6px;
-    border-radius: 8px;
-    font-size: 0.7rem;
+    border-radius: 10px;
+    font-size: 11px;
     font-weight: 700;
     line-height: 1.4;
     background: rgba(255,255,255,0.10);
@@ -10208,7 +10208,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border: 1px solid rgba(52,152,219,0.40);
     border-left: 4px solid #2980b9;
     border-radius: 10px;
-    font-size: 0.95rem;
+    font-size: 14px;
     color: var(--tint-info-ink);
     margin-bottom: 18px;
     max-width: 100%;
@@ -10244,11 +10244,11 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .tier-movers-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
+    font-size: 14px;
 }
 .tier-movers-table th {
     text-align: center;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -10275,7 +10275,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .tier-movers-table tr:last-child td { border-bottom: none; }
 .tier-mover-name  { color: var(--ink); font-weight: 600; }
 .tier-mover-share { color: #374151; font-variant-numeric: tabular-nums; }
-.tier-mover-prev  { color: var(--ink-3); font-variant-numeric: tabular-nums; font-size: 0.82rem; }
+.tier-mover-prev  { color: var(--ink-3); font-variant-numeric: tabular-nums; font-size: 14px; }
 .tier-mover-delta { font-weight: 800; font-variant-numeric: tabular-nums; }
 /* Hier stand bis zum 20.08.2026 #16a34a gegen #dc2626 — Gruen gegen
    Rot, also genau das Paar, das der haeufigste Fall von
@@ -10300,7 +10300,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     gap: 8px;
     padding: 12px 4px;
     color: var(--ink-3);
-    font-size: 0.82rem;
+    font-size: 14px;
     font-style: italic;
 }
 .tier-movers-empty-icon {
@@ -10319,7 +10319,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     justify-content: center;
     gap: 10px;
     color: var(--ink-3);
-    font-size: 0.88rem;
+    font-size: 14px;
 }
 
 /* Overall vs Top-8 dual-table panel — sits above the tier sections.
@@ -10430,7 +10430,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     text-align: left;
 }
 .heatmap-zelle-wr {
-    font-size: 0.8rem;
+    font-size: 12px;
     font-weight: 700;
 }
 .heatmap-zelle-n {
@@ -10468,8 +10468,8 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     margin: 0;
     padding: 8px 12px;
     border: 1px solid var(--line, #2a3a5e);
-    border-radius: 8px;
-    font-size: 0.72rem;
+    border-radius: 10px;
+    font-size: 12px;
     line-height: 1.3;
     align-content: start;
 }
@@ -10489,7 +10489,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
    passen die acht Spalten wieder ohne waagerechtes Scrollen. */
 .arc-mu-legende {
     margin: 6px 12px 10px;
-    font-size: 0.68rem;
+    font-size: 11px;
     line-height: 1.35;
     color: var(--arc-ink3);
 }
@@ -10521,7 +10521,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     .cm-vs-top8-row {
         grid-template-columns: 1fr;
     }
-    .tier-data-source { font-size: 0.78rem; padding: 6px 10px; }
+    .tier-data-source { font-size: 12px; padding: 6px 10px; }
     .tier-trend-chip { font-size: var(--fs-xs); padding: 1px 4px; }
     /* 29.08.2026: die Zelle traegt eine Datenfarbe, die mit dem Wert
    wandert — von fast weiss bis zu einem satten Blaugruen. --ink-2 haelt
@@ -10587,7 +10587,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
    Eine Klasse, zwei fest verdrahtete Farben, keine fuer beide Modi.
    --ink kippt mit dem Modus und loest beide Faelle. */
 .meta-card-skeleton-title {
-    font-size: 1rem;
+    font-size: 17px;
     font-weight: 700;
     color: var(--ink);
     margin: 0 0 10px 0;
@@ -10605,13 +10605,13 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
    Dunkelmodus stimmte beides. Ueber Token stimmen jetzt beide in
    beiden Modi. */
 .meta-card-skeleton-hint {
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 500;
     color: var(--ink-3);
     margin-left: 6px;
 }
 .meta-card-skeleton-count {
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 700;
     padding: 1px 8px;
     border-radius: 999px;
@@ -10681,7 +10681,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .meta-hub-subtitle {
     color: var(--text-light, #666);
-    font-size: 1rem;
+    font-size: 17px;
     margin: 0;
 }
 .meta-hub-tile-grid {
@@ -10714,7 +10714,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     outline: none;
 }
 .meta-hub-tile-title {
-    font-size: 1.18rem;
+    font-size: 17px;
     font-weight: 700;
     line-height: 1.25;
     color: var(--text-dark, #2c3e50);
@@ -10729,7 +10729,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     margin: 0;
     padding-left: 0;
     color: var(--text-muted, #4a4a4a);
-    font-size: 0.94rem;
+    font-size: 14px;
     line-height: 1.5;
     display: flex;
     flex-direction: column;
@@ -10760,9 +10760,9 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border: 1px solid rgba(59, 76, 202, 0.30);
     color: var(--pokemon-blue, #3B4CCA);
     padding: 6px 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.88rem;
+    font-size: 14px;
     font-weight: 600;
     transition: background 0.15s ease, border-color 0.15s ease;
 }
@@ -10784,12 +10784,12 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border: 1px solid var(--border-light, #e0e0e0);
     color: var(--text-muted, #4a4a4a);
     padding: 6px 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     /* F-19 from visual sweep: meta-hub sub-nav buttons were ~30px
      * tall, below the 44px touch-target minimum on mobile. */
     min-height: 44px;
-    font-size: 0.88rem;
+    font-size: 14px;
     font-weight: 500;
     transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     white-space: nowrap;
@@ -10812,7 +10812,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
         padding: 18px var(--page-gutter) 36px;
     }
     .meta-hub-header h2 {
-        font-size: 1.5rem;
+        font-size: 21px;
     }
     .meta-hub-tile-grid {
         grid-template-columns: 1fr;
@@ -10823,17 +10823,17 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
         padding: 18px 16px 16px;
     }
     .meta-hub-tile-title {
-        font-size: 1.06rem;
+        font-size: 17px;
     }
     .meta-hub-tile-bullets {
-        font-size: 0.90rem;
+        font-size: 14px;
     }
     .meta-hub-subnav {
         padding: 8px;
     }
     .meta-hub-subnav-btn,
     .meta-hub-subnav-back {
-        font-size: 0.82rem;
+        font-size: 14px;
         padding: 5px 10px;
     }
 }
@@ -10848,12 +10848,12 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     max-width: 1100px;
     padding: 24px;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 16px;
+    border-radius: 14px;
     border: 1px solid #e2e8f0;
 }
 .meta-hub-legend-title {
     margin: 0 0 18px;
-    font-size: 1.25rem;
+    font-size: 21px;
     color: #1e293b;
     text-align: center;
 }
@@ -10917,7 +10917,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     align-items: start;
     padding: 8px 12px;
     background: #ffffff;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #e2e8f0;
 }
 .meta-hub-legend-item dt {
@@ -10928,7 +10928,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .meta-hub-legend-item dd {
     margin: 0;
-    font-size: 0.88rem;
+    font-size: 14px;
     line-height: 1.45;
     color: #334155;
 }
@@ -10945,7 +10945,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     justify-content: center;
     background: #475569;
     color: #ffffff;
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 800;
 }
 /* BEFUND (2. Abnahmerunde 30.08.2026): weisse Buchstaben auf diesen
@@ -10974,7 +10974,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
         width: 170px;
     }
     .meta-hub-legend-item dd {
-        font-size: 0.84rem;
+        font-size: 14px;
     }
 }
 
@@ -11003,13 +11003,13 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .ca-empty-title {
     margin: 0 0 8px 0;
-    font-size: 1.15rem;
+    font-size: 17px;
     font-weight: 700;
     color: var(--ink);
 }
 .ca-empty-hint {
     margin: 0;
-    font-size: 0.92rem;
+    font-size: 14px;
     color: var(--ink-3);
     line-height: 1.5;
 }
@@ -11069,7 +11069,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
    the data covers before they bother picking a date. */
 .cl-date-range-hint {
     margin-top: 4px;
-    font-size: 0.74rem;
+    font-size: 12px;
     color: var(--ink-3);
     font-style: italic;
     line-height: 1.3;
@@ -11085,7 +11085,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .date-format-hint {
     display: block;
     margin-top: 2px;
-    font-size: 0.72rem;
+    font-size: 12px;
     color: var(--text-muted, var(--ink-3));
     letter-spacing: 0.02em;
 }
@@ -11110,9 +11110,9 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     border: 1px solid var(--border-light, #e0e0e0);
     color: var(--text-muted, #4a4a4a);
     padding: 8px 14px;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.88rem;
+    font-size: 14px;
     font-weight: 600;
     min-height: 44px;
     transition: background 0.15s ease, border-color 0.15s ease;
@@ -11257,7 +11257,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     background: var(--arc-bg0);
     color: var(--arc-ink);
 }
-.arc-name { font-size: 1rem; font-weight: 800; letter-spacing: 0.01em; }
+.arc-name { font-size: 17px; font-weight: 800; letter-spacing: 0.01em; }
 .arc-icons { display: inline-flex; gap: 3px; align-items: center; }
 .arc-icons img { height: 20px; width: auto; }
 .arc-close {
@@ -11265,7 +11265,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     width: 30px; height: 30px;
     border: 0; background: transparent;
     color: var(--arc-ink2);
-    font-size: 1.3rem; line-height: 1; cursor: pointer; z-index: 2;
+    font-size: 21px; line-height: 1; cursor: pointer; z-index: 2;
 }
 .arc-close:hover { color: var(--arc-ink); }
 
@@ -11442,7 +11442,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 .arc-halb .arc-tile-value {
     /* Fest, nicht clamp(): die Kachel ist schmal und ihre Breite haengt
        nicht am Bildschirm. Immer noch die groesste Schrift der Kachel. */
-    font-size: 1.05rem;
+    font-size: 17px;
     line-height: 1.2;
     /* Rechtsbuendig, damit die Werte beider Zeilen an derselben Kante
        enden — sonst haengt "7,3 %" gegen "22,2 %" versetzt. */
@@ -11474,7 +11474,7 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
  * Keine Abkuerzung, kein abgeschnittenes Wort. */
 @container (max-width: 163px) {
     .arc-halbe { gap: 3px 5px; }
-    .arc-halb .arc-tile-value { font-size: 0.95rem; }
+    .arc-halb .arc-tile-value { font-size: 14px; }
 }
 
 .arc-halb-quelle {
@@ -11612,18 +11612,18 @@ td.arc-mu-major.arc-mu-major-bilanz {
    duerfen sie deshalb groesser zeigen — aber auch hier fest, aus
    demselben Grund. */
 .arc-tiles--vier .arc-tile:not(.arc-tile--geteilt) .arc-tile-value {
-    font-size: 1.25rem;
+    font-size: 21px;
 }
 
 .arc-mu-title {
-    margin: 10px 12px 4px; font-size: 0.72rem; color: var(--arc-ink3);
+    margin: 10px 12px 4px; font-size: 12px; color: var(--arc-ink3);
     text-transform: uppercase; letter-spacing: 0.04em;
 }
 .arc-mu-details { border-top: 1px solid var(--arc-line); }
 .arc-mu-summary {
     display: flex; align-items: center;
     min-height: 44px; padding: 0 12px;   /* Fingerflaeche */
-    color: var(--arc-brand-ink); font-size: 0.78rem; font-weight: 600;
+    color: var(--arc-brand-ink); font-size: 12px; font-weight: 600;
     cursor: pointer; list-style: none;
 }
 .arc-mu-summary::-webkit-details-marker { display: none; }
@@ -11644,7 +11644,7 @@ td.arc-mu-major.arc-mu-major-bilanz {
        Bezeichner-Stelle. Das Ausrufezeichen stand hier seit dem ersten
        Entwurf und war nie noetig. */
     display: table; width: 100%; min-width: 0; table-layout: fixed;
-    border-collapse: collapse; font-size: 0.76rem;
+    border-collapse: collapse; font-size: 12px;
     background: var(--arc-s1);
 }
 /* DIESE TABELLE SCROLLT DOCH — seit dem 02.09.2026.
@@ -11837,7 +11837,7 @@ td.arc-mu-major.arc-mu-major-bilanz {
    Stichprobe, nie die ganze Zeile abgedunkelt. */
 .arc-mu-n-low { color: var(--arc-ink3); font-style: italic; }
 .arc-mu-note, .arc-empty {
-    color: var(--arc-ink3); font-size: 0.66rem; line-height: 1.4; margin: 6px 12px;
+    color: var(--arc-ink3); font-size: 11px; line-height: 1.4; margin: 6px 12px;
 }
 .arc-actions {
     display: flex; flex-wrap: wrap; gap: 8px;
@@ -11846,9 +11846,9 @@ td.arc-mu-major.arc-mu-major-bilanz {
 }
 .arc-mu-more, .arc-goto, .arc-meta {
     padding: 7px 12px; min-height: 36px;
-    border: 1px solid var(--arc-line-strong); border-radius: 7px;
+    border: 1px solid var(--arc-line-strong); border-radius: 6px;
     background: var(--arc-s1); color: var(--arc-brand-ink);
-    font-size: 0.76rem; font-weight: 600; cursor: pointer;
+    font-size: 12px; font-weight: 600; cursor: pointer;
 }
 .arc-mu-more:hover, .arc-goto:hover, .arc-meta:hover { background: var(--arc-s2); }
 /* Der Sprung in den Meta Call ist die Handlung, wegen der man diese
@@ -11872,13 +11872,13 @@ td.arc-mu-major.arc-mu-major-bilanz {
        nachdem der 12-px-Boden die Zahl nicht mehr stillschweigend klein
        hielt: das Prozentzeichen war abgeschnitten. */
     .arc-tile-value { font-size: clamp(0.85rem, 3.6vw, 1.1rem); }
-    .arc-tile-label { font-size: 0.7rem; letter-spacing: 0.02em; }
-    .arc-tile-ctx { font-size: 0.7rem; }
-    .arc-name { font-size: 0.9rem; }
-    #currentMetaContent .arc-mu-table { font-size: 0.75rem; }
+    .arc-tile-label { font-size: 11px; letter-spacing: 0.02em; }
+    .arc-tile-ctx { font-size: 11px; }
+    .arc-name { font-size: 14px; }
+    #currentMetaContent .arc-mu-table { font-size: 12px; }
     #currentMetaContent .arc-mu-table th,
-    #archetypeCardOverlay .arc-mu-table th { font-size: 0.7rem; }
-    .arc-mu-note, .arc-empty { font-size: 0.72rem; }
+    #archetypeCardOverlay .arc-mu-table th { font-size: 11px; }
+    .arc-mu-note, .arc-empty { font-size: 12px; }
     /* DER SPALTENPLAN FUER DAS TELEFON. Er muss in die Karte passen,
        nicht in irgendeine Wunschbreite.
        Bis zum 03.09.2026 stand hier `width: 62px` fuer die WR-Spalte und
@@ -11931,7 +11931,7 @@ td.arc-mu-major.arc-mu-major-bilanz {
  * nach einem Fehler aus. */
 .bj-edit-snapshot-state {
     margin: 6px 0 0;
-    font-size: 0.76rem;
+    font-size: 12px;
     line-height: 1.35;
     color: var(--text-muted, #888);
 }
@@ -12265,7 +12265,7 @@ td.arc-mu-major.arc-mu-major-bilanz {
 .saved-deck-item .deck-mehr-menue .deck-mehr-item {
   display: flex; align-items: center; cursor: pointer; font-family: inherit; font-weight: 600;
   width: 100%; justify-content: flex-start; text-align: left;
-  margin: 0; font-size: 13px; min-height: 36px; padding: 6px 10px;
+  margin: 0; font-size: 14px; min-height: 36px; padding: 6px 10px;
   background: transparent; color: var(--ink); border: 0; box-shadow: none;
   border-radius: 6px;
 }

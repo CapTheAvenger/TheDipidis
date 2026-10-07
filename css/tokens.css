@@ -80,7 +80,7 @@
 
     /* ── Radien: drei ────────────────────────────────────────────── */
     --r-sm: 6px;        /* Chips, Zellen, kleine Knöpfe */
-    --r-md: 11px;       /* Zeilen, Listeneinträge */
+    --r-md: 10px;       /* Zeilen, Listeneinträge (UI-118 Stufe 2: 6/10/14) */
     --r-lg: 14px;       /* Panels, Karten */
 
     /* ── Elevation: zwei ─────────────────────────────────────────── */

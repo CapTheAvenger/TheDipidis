@@ -190,6 +190,7 @@ function fuehreHandlerAus(quelltext) {
         toggleExcludeCard: (...a) => protokoll.aufrufe.push(['toggleExcludeCard', ...a]),
         showSingleCard: (...a) => protokoll.aufrufe.push(['showSingleCard', ...a]),
         showToast: (...a) => protokoll.aufrufe.push(['showToast', ...a]),
+        navigateToCurrentMetaWithDeck: (...a) => protokoll.aufrufe.push(['navigateToCurrentMetaWithDeck', ...a]),
         handleCardImageError: (...a) => protokoll.aufrufe.push(['handleCardImageError', ...a]),
         // alles, was ein Angreifer erreichen wollen wuerde
         alert: (...a) => protokoll.ausgefuehrt.push(['alert', ...a]),
@@ -282,14 +283,14 @@ const BAUFORMEN = [
         bauen: (m) => `<button class="city-league-card-action-btn" onclick="event.stopPropagation(); openRaritySwitcher('${m}', '${m} (SV1 025)')" title="Druck wechseln">*</button>`,
     },
     {
-        titel: 'app-current-meta.js:679 — Wert im onclick NEBEN einem title-Attribut',
+        titel: 'app-current-meta.js — Heatmap-Zelle: Wert im onclick NEBEN einem title-Attribut',
         datei: 'js/app-current-meta.js',
-        beleg: "onclick=\"showToast('${safeRow} vs ${safeCol}: ${escapeHtmlAttr(escapeJsStr(vollTip))}', 'info', 5000)\"",
+        beleg: "onclick=\"navigateToCurrentMetaWithDeck('${safeRow}')\"",
         erwarteteAttribute: ['class', 'title', 'onclick'],
-        zielFunktion: 'showToast',
+        zielFunktion: 'navigateToCurrentMetaWithDeck',
         stelle: 0,
-        // safeRow steht als ERSTER Teil derselben JS-Zeichenkette drin
-        bauen: (m) => `<td class="heatmap-td" title="Bilanz" onclick="showToast('${m}', 'info', 5000)">51 %</td>`,
+        // V2-13 (07.10.2026): die Zelle fuehrt in die Deck-Analyse statt eine Meldung zu zeigen
+        bauen: (m) => `<td class="heatmap-td" title="Bilanz" onclick="navigateToCurrentMetaWithDeck('${m}')">51 %</td>`,
     },
     {
         titel: 'app-past-meta.js:1638 — Marktknopf, Wert neben data-Attributen',

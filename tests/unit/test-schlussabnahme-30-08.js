@@ -156,7 +156,7 @@ describe('Reitertitel und der letzte englische Knopf', () => {
         assert.match(CORE, /const ueberschriftEl = !menuLabelEl/);
         assert.match(CORE, /ueberschriftEl \? ueberschriftEl\.textContent\.trim\(\)/);
         // Und die Ueberschrift, aus der er sich bedient, gibt es wirklich.
-        assert.match(lies('index.html'), /<div id="meta-analysis-hub"[\s\S]{0,600}?<h2><span data-i18n="metaHub\.title"/);
+        assert.match(lies('index.html'), /<div id="meta-analysis-hub"[\s\S]{0,600}?<h2[^>]*><span data-i18n="metaHub\.title"/);
     });
 
     it('kein fest verdrahteter englischer Knopftitel mehr im Profil-Deck', () => {

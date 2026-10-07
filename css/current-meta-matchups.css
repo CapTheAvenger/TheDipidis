@@ -298,7 +298,7 @@
     overflow-wrap: anywhere !important;
     word-break: break-word !important;
     line-height: 1.15;
-    font-size: 0.76rem;
+    font-size: 12px;
     overflow: hidden;
     text-overflow: clip;
 }
@@ -336,7 +336,7 @@
     background: linear-gradient(135deg, var(--solid-info) 0%, #764ba2 100%);
     color: white;
     padding: 20px 22px;
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: 0 4px 16px rgba(102,126,234,0.3);
 }
 #currentMetaContent .stat-card h3 {
@@ -378,7 +378,7 @@
 #currentMetaContent .section table:not(.ds-table) {
     width: 100%;
     border-collapse: collapse;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     margin-top: 0;
@@ -585,7 +585,7 @@
     left: 3px;
     color: #fff;
     padding: 2px 5px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-weight: 900;
     font-size: var(--fs-xs);
     line-height: 1;
@@ -730,7 +730,7 @@
 
 /* Opponent search sections in loaded HTML */
 #currentMetaContent [style*="border: 2px solid #3498db"] {
-    border-radius: 8px !important;
+    border-radius: 10px !important;
 }
 
 /* Rank badges — display:inline-block + white-space:nowrap so the
@@ -871,7 +871,7 @@
 .uv-breakdown li {
     padding: 4px 8px;
     background: rgba(255, 255, 255, 0.6);
-    border-radius: 4px;
+    border-radius: 6px;
     border-left: 2px solid #d1d5db;
 }
 .uv-breakdown li:last-child {
@@ -1120,7 +1120,7 @@
     font-size: 0.85em;
     font-weight: 600;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     margin-bottom: 6px;
 }
 .uv-diff-add-label {
@@ -1147,7 +1147,7 @@
     align-items: center;
     gap: 8px;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.85em;
     background: rgba(255, 255, 255, 0.6);
 }
@@ -1459,7 +1459,7 @@
         padding-left: 6px;
         border-left-width: 3px;
     }
-    .mc-vs-summary-row { font-size: 0.85em; gap: 4px 8px; padding: 8px 10px; border-radius: 8px; }
+    .mc-vs-summary-row { font-size: 0.85em; gap: 4px 8px; padding: 8px 10px; border-radius: 10px; }
     .mc-vs-summary-row .mc-vs-pill { font-size: 0.95em; padding: 4px 12px; min-width: 64px; }
     .mc-vs-summary-label { font-size: 0.7em; }
     .mc-vs-table-wrap { border-radius: 6px; }
@@ -1472,7 +1472,7 @@
     .mc-vs-table td { padding: 7px 6px !important; font-size: 0.85em; }
     .mc-vs-table td:first-child { font-size: 0.82em; }
     .mc-vs-pill { min-width: 48px; padding: 2px 8px; font-size: 0.86em; }
-    .mc-vs-legend { padding: 8px 10px; border-radius: 8px; }
+    .mc-vs-legend { padding: 8px 10px; border-radius: 10px; }
 }
 
 /* ============================================================
@@ -1709,7 +1709,7 @@
     height: 14px;
     margin-right: 2px;
     border: 1px solid var(--line-strong);
-    border-radius: 3px;
+    border-radius: 6px;
     vertical-align: -2px;
 }
 .heatmap-key-fav   { background: rgba(42, 120, 214, .34); }

@@ -90,7 +90,8 @@ describe('Der Boden laesst das Designsystem aus', () => {
             'select gehoert nicht mehr in den Boden');
         assert.doesNotMatch(treffer[1], /\.tab-content input/,
             'input gehoert nicht mehr in den Boden');
-        assert.match(M, /body \.tab-content input\[type\][\s\S]{0,120}font-size: 16px !important/,
+        // Stufe 2 (07.10.2026) zieht 16 auf 17 px — die Schwelle ist ein Boden, kein Wert
+        assert.match(M, /body \.tab-content input\[type\][\s\S]{0,120}font-size: 1[6-9]px !important/,
             '16 px ist die Schwelle, unter der iOS beim Antippen hineinzoomt');
         // [type] ist kein Zierrat: ux-step1.css setzt
         // input[type="text"][id*="search"] auf 15px !important, also (0,2,1).
@@ -130,10 +131,12 @@ describe('Was der Boden bisher verdeckt hat', () => {
         // wirken liess: 0,5rem sind 8 px, 0,53rem sind 8,48 px.
         const block = STYLES.slice(STYLES.indexOf('@media (max-width: 620px)',
             STYLES.indexOf('.arc-tile-label')));
-        const rem = [...block.matchAll(/font-size: ([0-9.]+)rem/g)].map(m => parseFloat(m[1]));
-        assert.ok(rem.length >= 4, `nur ${rem.length} Groessen gefunden`);
-        for (const r of rem) {
-            assert.ok(r * 16 >= 11, `${r}rem sind ${(r * 16).toFixed(2)} px`);
+        // Stufe 2 (07.10.2026): rem-Angaben stehen jetzt als px auf der Skala
+        const px = [...block.matchAll(/font-size: ([0-9.]+)(rem|px)/g)]
+            .map(m => parseFloat(m[1]) * (m[2] === 'rem' ? 16 : 1));
+        assert.ok(px.length >= 4, `nur ${px.length} Groessen gefunden`);
+        for (const r of px) {
+            assert.ok(r >= 11, `${r.toFixed(2)} px`);
         }
     });
 

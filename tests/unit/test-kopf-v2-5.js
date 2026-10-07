@@ -19,7 +19,7 @@ function teile(html) {
     const kopfB = html.indexOf('</header>', kopfA);
     const kopf = html.slice(kopfA, kopfB);
     const mA = kopf.indexOf('id="mainMenuDropdown"');
-    const mB = kopf.indexOf('<h1 class="header-title">');
+    const mB = kopf.indexOf('<div class="header-title">');
     return { kopf, menue: kopf.slice(mA, mB), ausserMenue: kopf.slice(0, mA) + kopf.slice(mB) };
 }
 

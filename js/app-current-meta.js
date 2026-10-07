@@ -280,6 +280,32 @@
         if (typeof window !== 'undefined') window.toggleHeatmapInfo = toggleHeatmapInfo;
 
         // Render Interactive Matchup Heatmap
+        /* Woran haengt die Zellfarbe? 'online' (Standard) oder 'major'.
+           Die Wahl steht am window und im Browser (heatmap_farbe_v1) —
+           nur eine Bequemlichkeit, deshalb in try/catch. */
+        function heatmapFarbQuelle() {
+            if (window.heatmapFarbe !== 'online' && window.heatmapFarbe !== 'major') {
+                let gemerkt = null;
+                try { gemerkt = localStorage.getItem('heatmap_farbe_v1'); } catch (e) { gemerkt = null; }
+                window.heatmapFarbe = gemerkt === 'major' ? 'major' : 'online';
+            }
+            return window.heatmapFarbe;
+        }
+        function setzeHeatmapFarbe(quelle) {
+            window.heatmapFarbe = quelle === 'major' ? 'major' : 'online';
+            try { localStorage.setItem('heatmap_farbe_v1', window.heatmapFarbe); } catch (e) { /* egal */ }
+            if (typeof renderMatchupHeatmap === 'function') renderMatchupHeatmap();
+        }
+        /* Der Wert, nach dem gefaerbt wird — oder null (keine Farbe). */
+        function heatmapFarbWert(quelle, onlineWr, mj) {
+            if (quelle !== 'major') return Number.isFinite(onlineWr) ? onlineWr : null;
+            const grenze = (typeof window.CONV_MIN_N === 'number') ? window.CONV_MIN_N : 20;
+            if (!mj || mj.wr == null || !Number.isFinite(Number(mj.wr))) return null;
+            if (!(mj.anzahl >= grenze)) return null;
+            return Number(mj.wr);
+        }
+        window.setzeHeatmapFarbe = setzeHeatmapFarbe;
+
         function renderMatchupHeatmap() {
             /* Die Praesenzdaten einmal holen, dann neu zeichnen.
              *
@@ -606,6 +632,14 @@
                    (Apostrophe). Ohne das faende die Major-Zeile nichts und
                    die Spalte waere still leer — der Fehler, der die
                    Tier-Liste am 01.09. Worlds nicht sehen liess. */
+                /* Heatmap-Farbe (Hausi 07.10.2026): umschaltbar zwischen
+                   den Online-Quoten und den Major-Quoten. Die Zahlen beider
+                   Quellen stehen weiter in jeder Zelle; umgeschaltet wird
+                   nur, WORAN die Farbe haengt. Major-Zellen unter der
+                   Stichprobengrenze (CONV_MIN_N) oder ohne Bilanz bleiben
+                   ohne Farbe — eine Farbe aus 6 Partien waere eine Aussage,
+                   die die Daten nicht tragen. */
+                const farbQuelle = heatmapFarbQuelle();
                 const majorReg = window._majorMatchupRegistry || {};
                 const majorLookup = new Map();
                 Object.keys(majorReg).forEach(a => {
@@ -648,7 +682,9 @@
                     const rowLabel = rIc
                         ? `<span style="display:inline-flex;align-items:center;gap:6px;">${rIc}<span>${rowDeck}</span></span>`
                         : rowDeck;
-                    tableHtml += `<tr><th class="heatmap-th-row" title="${escAttr(rowDeck)}">${rowLabel}</th>`;
+                    // Hausi 07.10.2026: Zeile und Zelle fuehren in die Deck-Analyse des Zeilendecks.
+                    const safeRowLink = escapeHtmlAttr(escapeJsStr(rowDeck));
+                    tableHtml += `<tr><th class="heatmap-th-row" title="${escAttr(rowDeck)}"><button type="button" class="heatmap-zeile-link" onclick="navigateToCurrentMetaWithDeck('${safeRowLink}')" aria-label="${escAttr(t('heatmap.zurAnalyse').replace('{deck}', rowDeck))}">${rowLabel}</button></th>`;
                     const rowLookup = rowLookupMaps.get(rowDeck);
                     
                     xDecks.forEach(colDeck => {
@@ -710,6 +746,9 @@
                                     : _G.quote(parsedWins, parsedLosses);
                             }
                             let bgColor, textColor;
+                            const mjF = (majorLookup.get(normalizeName(rowDeck)) || new Map())
+                                .get(normalizedColDeckMap.get(colDeck));
+                            const fw = heatmapFarbWert(farbQuelle, winRate, mjF);
                             
                             // Blau <-> Rot mit grauem Nullpunkt, nicht Gruen <-> Rot.
                             //
@@ -726,13 +765,17 @@
                             // auf Weiss um, was den Kontrast von der Zahl abhaengig
                             // machte. Getoente Zelle, feste Schrift: der Kontrast
                             // muss nie geprueft werden.
-                            if (winRate >= 55.0) {
-                                const intensity = Math.min((winRate - 55) / 20, 1);
+                            if (fw === null) {
+                                bgColor = 'var(--surface-2)';
+                                textColor = 'var(--ink-3)';
+                                var tdClass = 'heatmap-td heatmap-td-ohnefarbe';
+                            } else if (fw >= 55.0) {
+                                const intensity = Math.min((fw - 55) / 20, 1);
                                 bgColor = `rgba(42, 120, 214, ${0.12 + intensity * 0.34})`;
                                 textColor = 'var(--ink)';
                                 var tdClass = 'heatmap-td heatmap-td-fav';
-                            } else if (winRate <= 45.0) {
-                                const intensity = Math.min((45 - winRate) / 20, 1);
+                            } else if (fw <= 45.0) {
+                                const intensity = Math.min((45 - fw) / 20, 1);
                                 bgColor = `rgba(227, 73, 72, ${0.12 + intensity * 0.34})`;
                                 textColor = 'var(--ink)';
                                 var tdClass = 'heatmap-td heatmap-td-unfav';
@@ -749,7 +792,6 @@
                             // summieren sich die genannten Zahlen sichtbar auf.
                             const tooltip = `${parsedWins}W - ${parsedLosses}L - ${parsedDraws}U (${totalGames} ${t('heatmap.games')}) · ${t('heatmap.raw')} ${winRateRoh.toLocaleString((typeof getLang === 'function' && getLang() === 'en') ? 'en-US' : 'de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;  // UI-116: Dezimalkomma
                             const safeRow = escapeHtmlAttr(escapeJsStr(rowDeck));
-                            const safeCol = escapeHtmlAttr(escapeJsStr(colDeck));
                             // Inline sample-size below the WR. Cells with n<10 get a
                             // muted "low" tag so users can see at a glance which numbers
                             // are statistically thin (TrainerHill's confidence cue).
@@ -844,8 +886,8 @@
                                     ? ` \u00b7 ${t(mj.bilanzDa ? 'heatmap.majorNurRemis' : 'heatmap.majorOhneBilanz')
                                         .replace('{n}', String(mj.anzahl))}`
                                     : ` \u00b7 ${t('heatmap.majorFehlt')}`);
-                            const vollTip = tooltip + majorTip;
-                            tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${escAttr(vollTip)}" onclick="showToast('${safeRow} vs ${safeCol}: ${escapeHtmlAttr(escapeJsStr(vollTip))}', 'info', 5000)">${zellenHtml}</td>`;
+                            const vollTip = tooltip + majorTip + ' \u00b7 ' + t('heatmap.klickAnalyse');
+                            tableHtml += `<td class="${tdClass} heatmap-td-dyn${lowSample ? ' heatmap-td-thin' : ''}" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${escAttr(vollTip)}" onclick="navigateToCurrentMetaWithDeck('${safeRow}')">${zellenHtml}</td>`;
                         }
                     });
                     tableHtml += '</tr>';
@@ -982,6 +1024,11 @@
                              Er schaltet deshalb nur `hidden` um — siehe
                              toggleHeatmapInfo() weiter unten. */ ''}
                         <div class="heatmap-btn-row">
+                            <div class="heatmap-farbe" role="group" aria-label="${escAttr(t('heatmap.farbeLabel'))}">
+                                <span class="heatmap-farbe-label">${t('heatmap.farbeLabel')}</span>
+                                <button type="button" class="ds-btn heatmap-farbe-btn" aria-pressed="${farbQuelle === 'online' ? 'true' : 'false'}" onclick="setzeHeatmapFarbe('online');">${t('heatmap.onlineLabel')}</button>
+                                <button type="button" class="ds-btn heatmap-farbe-btn" aria-pressed="${farbQuelle === 'major' ? 'true' : 'false'}" onclick="setzeHeatmapFarbe('major');">${t('heatmap.majorLabel')}</button>
+                            </div>
                             <button class="ds-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
                                 ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
                             </button>

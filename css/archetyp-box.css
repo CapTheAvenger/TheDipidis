@@ -129,7 +129,7 @@
 .abx-rubrik-kopf h3 { margin: 0; font-size: var(--fs-md); color: var(--ink); }
 .abx-rubrik-zahl {
     display: inline-block; min-width: 22px; height: 22px; line-height: 22px;
-    padding: 0 6px; border-radius: 11px;
+    padding: 0 6px; border-radius: 10px;
     background: var(--bg-muted); color: var(--ink-2);
     font-size: var(--fs-xs); text-align: center; vertical-align: middle;
 }
@@ -177,11 +177,11 @@
     cursor: pointer; box-shadow: var(--e-1);
 }
 .abx-soll.is-voll { background: var(--solid-neutral); }
-.abx-bild .abx-herz { top: 6px; right: 6px; width: 28px; height: 28px; font-size: 15px; }
+.abx-bild .abx-herz { top: 6px; right: 6px; width: 28px; height: 28px; font-size: 14px; }
 
 .abx-marken { position: absolute; left: 6px; bottom: 6px; right: 44px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .abx-marke {
-    padding: 2px 8px; border-radius: 11px;
+    padding: 2px 8px; border-radius: 10px;
     background: var(--surface-1); color: var(--ink);
     font-size: var(--fs-xs); font-weight: 700;
     box-shadow: var(--e-1);
@@ -242,7 +242,7 @@
     border: 1.5px solid var(--line); border-radius: var(--r-md);
 }
 .abx-dialog-druck.is-drin { border-color: var(--solid-ok); }
-.abx-dialog-druck img, .abx-dialog-ohne { width: 52px; aspect-ratio: 63 / 88; object-fit: cover; border-radius: 4px; background: var(--bg-muted); }
+.abx-dialog-druck img, .abx-dialog-ohne { width: 52px; aspect-ratio: 63 / 88; object-fit: cover; border-radius: 6px; background: var(--bg-muted); }
 .abx-dialog-text { display: flex; flex-direction: column; min-width: 0; font-size: var(--fs-sm); }
 .abx-dialog-text span { color: var(--ink-3); font-size: var(--fs-xs); }
 .abx-dialog-text .abx-dialog-preis { color: inherit; font-weight: 600; }
@@ -331,7 +331,7 @@
 .abx-filter-knoepfe { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 240px; }
 .abx-filter {
     min-height: 36px; padding: 4px 12px;
-    border: 1.5px solid var(--line); border-radius: 18px;
+    border: 1.5px solid var(--line); border-radius: 14px;
     background: var(--surface-1); color: var(--ink-2);
     font-size: var(--fs-sm); font-weight: 700; cursor: pointer;
 }
@@ -373,7 +373,7 @@
 .abx-ergebnis-zeile.abx-warn { font-weight: 700; }
 
 /* Das Einfuegefeld: gross genug zum Arbeiten, 16 px gegen den iOS-Zoom beim Antippen. */
-.abx-liste textarea { min-height: 16em; font-size: 16px; line-height: 1.4; }
+.abx-liste textarea { min-height: 16em; font-size: 17px; line-height: 1.4; }
 
 /* Standard-Marke an der Kachel (Hausi, 03.10.2026): beim Durchblaettern sehen, ob eine Karte Standard ist. */
 .abx-legal { flex: 0 0 auto; padding: 1px 8px; border-radius: 999px; font-size: var(--fs-xs); font-weight: 700; line-height: 1.5; white-space: nowrap; }

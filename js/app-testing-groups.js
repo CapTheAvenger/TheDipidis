@@ -1199,7 +1199,7 @@ window.TestingGroups = (function () {
           <div class="tg-list-name">${_esc(g.name)}</div>
           <div class="tg-list-meta">
             <span class="tg-role tg-role-${g.role}">${_esc(t('tg.role.' + g.role))}</span>
-            · ${g.memberCount} ${_esc(t('tg.members'))}
+            · ${g.memberCount} ${_esc(t(Number(g.memberCount) === 1 ? 'tg.member' : 'tg.members'))}
             ${g.description ? '· ' + _esc(g.description) : ''}
           </div>
         </div>

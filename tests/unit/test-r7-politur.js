@@ -210,6 +210,6 @@ describe('FE-48 und UI-86', () => {
         const Q = roh('js/app-current-meta.js');
         assert.match(Q, /\$\{t\('heatmap\.even'\)\} \(45,1–54,9 %\)/);
         assert.match(Q, /\$\{t\('heatmap\.unfavorable'\)\} \(≤ 45 %\)/);
-        assert.match(Q, /\} else if \(winRate <= 45\.0\) \{/);
+        assert.match(Q, /\} else if \((?:winRate|fw) <= 45\.0\) \{/);
     });
 });

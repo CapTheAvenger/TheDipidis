@@ -15,13 +15,13 @@
 .tg-header h2,
 .tg-detail-title {
   margin: 0 0 4px;
-  font-size: 1.5rem;
+  font-size: 21px;
   font-weight: 700;
 }
 
 .tg-header p {
   margin: 0 0 16px;
-  font-size: 0.92rem;
+  font-size: 14px;
 }
 
 .tg-empty {
@@ -37,8 +37,8 @@
 .tg-input {
   padding: 8px 12px;
   border: 1px solid #d0dae5;
-  border-radius: 8px;
-  font-size: 0.92rem;
+  border-radius: 10px;
+  font-size: 14px;
   background: #fff;
 }
 .tg-input:focus {
@@ -49,11 +49,11 @@
 
 .tg-btn {
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #d0dae5;
   background: #fff;
   color: #2c3e50;
-  font-size: 0.88rem;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
@@ -75,7 +75,7 @@
   font-weight: 600;
   color: var(--dv-pos-ink);
 }
-.tg-btn-sm { padding: 4px 10px; font-size: 0.82rem; }
+.tg-btn-sm { padding: 4px 10px; font-size: 14px; }
 
 /* ── Group list view ────────────────────────────────────── */
 .tg-create-row {
@@ -102,14 +102,14 @@
 }
 .tg-list-main { flex: 1; min-width: 0; }
 .tg-list-name {
-  font-size: 1.02rem;
+  font-size: 17px;
   font-weight: 700;
   color: #1a2533;
   margin-bottom: 3px;
 }
 .tg-list-meta {
-  font-size: 0.82rem;
-  color: var(--ink-3);
+  font-size: 14px;
+  color: var(--ink-2);  /* M3-18: --ink-3 lag bei 2,99:1 */
 }
 
 /* ── Role pills ─────────────────────────────────────────── */
@@ -117,7 +117,7 @@
   display: inline-block;
   padding: 2px 9px;
   border-radius: 10px;
-  font-size: 0.72rem;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -194,7 +194,7 @@
 .tg-matchup-table {
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.82rem;
+  font-size: 14px;
   white-space: nowrap;
   /* table-layout: fixed — columns strictly honor the declared widths on
      the first row's cells (52px on thead th). Without this, the browser
@@ -235,7 +235,7 @@
   background: #1a2340;
   color: #fff;
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: 12px;
   height: 68px;
   min-width: var(--tg-col-width);
   width: var(--tg-col-width);
@@ -422,15 +422,15 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 14px;
   line-height: 1;
   padding: 2px 4px;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: background 0.15s;
 }
 .tg-deck-remove { color: #c0392b; }
 .tg-deck-remove:hover { background: #fdecea; }
-.tg-deck-rename { color: var(--dv-pos-ink); font-size: 0.82rem; }
+.tg-deck-rename { color: var(--dv-pos-ink); font-size: 14px; }
 .tg-deck-rename:hover { background: #e7f2fb; }
 
 /* ── Row filter bar ──────────────────────────────────────── */
@@ -449,16 +449,16 @@
   flex-wrap: wrap;
 }
 .tg-filter-header strong {
-  font-size: 0.88rem;
+  font-size: 14px;
   color: #1a2533;
   margin-right: 4px;
 }
 .tg-filter-header .tg-btn-sm {
   padding: 4px 10px;
-  font-size: 0.78rem;
+  font-size: 12px;
 }
 .tg-filter-count {
-  font-size: 0.78rem;
+  font-size: 12px;
   color: var(--ink-3);
   margin-left: auto;
 }
@@ -473,7 +473,7 @@
   border-radius: 14px;
   background: #fff;
   color: #55637a;
-  font-size: 0.78rem;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
@@ -574,7 +574,7 @@
 }
 .tg-matchup-table tfoot .tg-cell-wr {
   background: #eaf4ff;
-  font-size: 0.82rem;    /* matches body cell size for visual consistency */
+  font-size: 14px;    /* matches body cell size for visual consistency */
   padding: 6px 3px;
   white-space: nowrap;   /* "55.8%" must never wrap in the narrow cell */
 }
@@ -602,7 +602,7 @@
 }
 .tg-detail-title[ondblclick] { cursor: pointer; }
 .tg-rename-hint {
-  font-size: 0.82rem;
+  font-size: 14px;
   color: #9aa6b8;
   opacity: 0.35;   /* always subtly visible, hover raises */
   transition: opacity 0.15s;
@@ -619,7 +619,7 @@
   width: var(--tg-col-width) !important;
   background: #fff;
   font-variant-numeric: tabular-nums;
-  font-size: 0.86rem;
+  font-size: 14px;
 }
 .tg-cell-diag {
   background: #f4f7fc;
@@ -641,10 +641,10 @@
   margin: 0;
   border: 1px solid transparent;
   background: transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   text-align: center;
   font-weight: 700;
-  font-size: 0.86rem;
+  font-size: 14px;
   color: inherit;
   font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
@@ -688,10 +688,10 @@
   min-width: 22px;
   height: 22px;
   padding: 0 7px;
-  border-radius: 11px;
+  border-radius: 10px;
   background: #aa5a13;
   color: #fff;
-  font-size: 0.78rem;
+  font-size: 12px;
   font-weight: 800;
 }
 .tg-pending-section .tg-hint {
@@ -709,7 +709,7 @@
   padding: 10px 14px;
   background: #fff;
   border: 1px solid #f0e1bd;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 .tg-request-info { flex: 1; min-width: 0; }
 .tg-request-name {
@@ -718,7 +718,7 @@
   margin-bottom: 2px;
 }
 .tg-request-meta {
-  font-size: 0.82rem;
+  font-size: 14px;
   color: var(--ink-3);
   display: flex;
   align-items: center;
@@ -748,7 +748,7 @@
 }
 .tg-add-member-row .tg-input { flex: 1; min-width: 200px; }
 .tg-hint {
-  font-size: 0.78rem;
+  font-size: 12px;
   color: var(--ink-3);
   margin: 0 0 14px;
 }
@@ -756,7 +756,7 @@
 .tg-members-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 .tg-members-table th,
 .tg-members-table td {
@@ -768,13 +768,13 @@
   background: #f4f7fc;
   font-weight: 700;
   color: #4a5568;
-  font-size: 0.78rem;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 .tg-email {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-  font-size: 0.82rem;
+  font-size: 14px;
   color: #55637a;
 }
 .tg-role-select {
@@ -782,7 +782,7 @@
   border: 1px solid #d0dae5;
   border-radius: 6px;
   background: #fff;
-  font-size: 0.82rem;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -795,8 +795,8 @@
   padding: 10px 14px;
   background: #f9fafc;
   border: 1px solid #e8edf5;
-  border-radius: 8px;
-  font-size: 0.84rem;
+  border-radius: 10px;
+  font-size: 14px;
 }
 .tg-activity-row {
   display: flex;
@@ -814,7 +814,7 @@
 }
 .tg-activity-action {
   color: var(--dv-pos-ink);
-  font-size: 0.78rem;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   font-weight: 600;
@@ -826,7 +826,7 @@
 .tg-activity-time {
   margin-left: auto;
   color: #8b9bb0;
-  font-size: 0.76rem;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -835,13 +835,13 @@
   .tg-create-row { flex-direction: column; }
   .tg-detail-header { flex-direction: column; align-items: stretch; }
   .tg-detail-actions { margin-left: 0; }
-  .tg-matchup-table { font-size: 0.78rem; }
+  .tg-matchup-table { font-size: 12px; }
   /* Mobile thead: same upright layout as desktop, just tighter.
      Width comes from the shared --tg-col-width variable (set below
      in this breakpoint) so thead/tbody/tfoot stay in sync on mobile. */
   .tg-matchup-table thead th {
     height: 58px;
-    font-size: 0.64rem;
+    font-size: 11px;
   }
   .tg-corner, .tg-row-head {
     min-width: 140px !important;
@@ -852,7 +852,7 @@
      Without this the mobile thead would get the default 55px while
      body/tfoot got 40px → the same drift, just on small screens. */
   .tg-matchup-table { --tg-col-width: 40px; }
-  .tg-cell { font-size: 0.78rem; }
-  .tg-cell-input { font-size: 0.78rem; }
+  .tg-cell { font-size: 12px; }
+  .tg-cell-input { font-size: 12px; }
   .tg-members-table .tg-email { display: none; }
 }

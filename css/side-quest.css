@@ -28,17 +28,17 @@
 
 .side-quest-subtitle {
     margin: 0 0 0.25rem 0;
-    font-size: 0.95rem;
+    font-size: 14px;
 }
 
 .side-quest-updated {
     margin: 0;
-    font-size: 0.78rem;
+    font-size: 12px;
     opacity: 0.65;
 }
 
 .side-quest-status {
-    font-size: 0.85rem;
+    font-size: 14px;
     color: var(--ink-2);
     margin: 0.5rem 0;
 }
@@ -48,14 +48,14 @@
     text-align: center;
     color: var(--ink-2);
     border: 1px dashed #e0e0e0;
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--surface-2);
 }
 
 .side-quest-empty code {
     background: rgba(0,0,0,0.05);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -65,7 +65,7 @@
     padding: 0.8rem 0.9rem;
     background: var(--surface-1);
     border: 1px solid #e0e0e0;
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
 }
 .side-quest-filter-head {
@@ -76,12 +76,12 @@
 }
 .side-quest-filter-title {
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 14px;
     color: var(--ink);
 }
 .side-quest-filter-count {
     color: var(--ink-2);
-    font-size: 0.78rem;
+    font-size: 12px;
 }
 .side-quest-filter-clear {
     margin-left: auto;
@@ -90,7 +90,7 @@
     background: var(--surface-2);
     color: var(--ink);
     font: inherit;
-    font-size: 0.76rem;
+    font-size: 12px;
     font-weight: 600;
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
@@ -111,7 +111,7 @@
     background: rgba(95, 182, 255, 0.12);
     border: 1px solid rgba(95, 182, 255, 0.4);
     border-radius: 999px;
-    font-size: 0.82rem;
+    font-size: 14px;
     color: var(--ink);
 }
 .side-quest-filter-chip .tcg-pokemon-icon { width: 22px; height: 22px; }
@@ -121,7 +121,7 @@
     border: 0;
     background: transparent;
     color: var(--brand-ink);
-    font-size: 1rem;
+    font-size: 17px;
     line-height: 1;
     cursor: pointer;
     padding: 0 2px;
@@ -140,7 +140,7 @@
     background: var(--surface-2);
     color: var(--ink);
     font: inherit;
-    font-size: 0.92rem;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     text-align: left;
@@ -153,17 +153,17 @@
     align-items: center;
     justify-content: center;
     width: 1.5rem; height: 1.5rem;
-    border-radius: 7px;
+    border-radius: 6px;
     background: rgba(95, 182, 255, 0.16);
     color: var(--brand-ink);
-    font-size: 1.1rem;
+    font-size: 17px;
     font-weight: 700;
     flex: 0 0 auto;
 }
 .side-quest-filter-hint {
     margin: 0.45rem 0 0 0;
     color: var(--ink-2);
-    font-size: 0.72rem;
+    font-size: 12px;
 }
 .side-quest-filter-none {
     margin: 1rem 0;
@@ -184,7 +184,7 @@
     margin: 0 0 0.7rem 0;
     padding-bottom: 0.4rem;
     border-bottom: 1px solid #e0e0e0;
-    font-size: 0.95rem;
+    font-size: 14px;
     font-weight: 800;
     color: var(--ink-2);
 }
@@ -197,7 +197,7 @@
     box-shadow: 0 0 0 3px rgba(76, 209, 130, 0.18);
 }
 .side-quest-reg-count {
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 700;
     color: var(--ink-2);
     background: rgba(0, 0, 0, 0.05);
@@ -210,7 +210,7 @@
     align-items: center;
     padding: 1px 7px;
     border-radius: 999px;
-    font-size: 0.66rem;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.02em;
     color: var(--ink-2);
@@ -236,7 +236,7 @@
     background: rgba(150, 120, 255, 0.12);
     color: var(--brand-ink);
     font: inherit;
-    font-size: 0.86rem;
+    font-size: 14px;
     font-weight: 700;
     padding: 0.5rem 0.9rem;
     border-radius: 10px;
@@ -251,40 +251,40 @@
     border: 1px solid rgba(220, 80, 80, 0.4);
     background: rgba(255, 100, 100, 0.08);
     color: var(--tint-bad-ink);
-    font-size: 1rem;
+    font-size: 17px;
     line-height: 1;
     width: 2.1rem; height: 2.1rem;
-    border-radius: 9px;
+    border-radius: 10px;
     cursor: pointer;
     flex: 0 0 auto;
 }
 .side-quest-remove-btn:hover { background: rgba(255, 100, 100, 0.18); color: var(--tint-bad-ink); }
 
 .side-quest-import .side-quest-modal-body { display: flex; flex-direction: column; }
-.side-quest-import-hint { margin: 0 0 0.7rem 0; color: var(--ink-2); font-size: 0.84rem; line-height: 1.45; }
+.side-quest-import-hint { margin: 0 0 0.7rem 0; color: var(--ink-2); font-size: 14px; line-height: 1.45; }
 .side-quest-import-name {
     box-sizing: border-box; width: 100%;
     padding: 0.55rem 0.7rem; margin-bottom: 0.6rem;
-    border: 1px solid #e0e0e0; border-radius: 8px;
-    background: var(--surface-1); color: var(--ink); font: inherit; font-size: 0.9rem;
+    border: 1px solid #e0e0e0; border-radius: 10px;
+    background: var(--surface-1); color: var(--ink); font: inherit; font-size: 14px;
 }
 .side-quest-import-text {
     box-sizing: border-box; width: 100%; resize: vertical;
     min-height: 9rem;
     padding: 0.6rem 0.7rem;
-    border: 1px solid #e0e0e0; border-radius: 8px;
+    border: 1px solid #e0e0e0; border-radius: 10px;
     background: var(--surface-1); color: var(--ink);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.82rem; line-height: 1.4;
+    font-size: 14px; line-height: 1.4;
 }
 .side-quest-import-name:focus, .side-quest-import-text:focus {
     outline: none; border-color: #9678ff; box-shadow: 0 0 0 2px rgba(150, 120, 255, 0.2);
 }
-.side-quest-import-error { color: var(--tint-bad-ink); font-size: 0.82rem; margin: 0.5rem 0 0 0; }
+.side-quest-import-error { color: var(--tint-bad-ink); font-size: 14px; margin: 0.5rem 0 0 0; }
 .side-quest-import-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.9rem; }
 .side-quest-import-cancel, .side-quest-import-do {
     appearance: none; border: 1px solid #e0e0e0; font: inherit; font-weight: 700;
-    font-size: 0.86rem; padding: 0.5rem 1rem; border-radius: 9px; cursor: pointer;
+    font-size: 14px; padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer;
 }
 .side-quest-import-cancel { background: var(--surface-2); color: var(--ink); }
 .side-quest-import-do { background: #6f4fe0; border-color: #6f4fe0; color: #fff; }
@@ -330,7 +330,7 @@
 /* Share date shown where the old "#N" rank used to be (teams are sorted
    newest-first, so the date communicates freshness rather than a placement). */
 .side-quest-date {
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 600;
     color: var(--ink-2);
     letter-spacing: 0.01em;
@@ -339,13 +339,13 @@
 
 .side-quest-team-name {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 17px;
     font-weight: 600;
     color: var(--ink);
 }
 
 .side-quest-team-tourney {
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--ink-2);
     margin-top: 0.1rem;
 }
@@ -384,7 +384,7 @@
 }
 
 .side-quest-copy-label {
-    font-size: 0.7rem;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--ink-2);
@@ -393,7 +393,7 @@
 
 .side-quest-copy-code {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 1.05rem;
+    font-size: 17px;
     font-weight: 700;
     letter-spacing: 0.04em;
 }
@@ -402,7 +402,7 @@
     position: absolute;
     top: 0.5rem;
     right: 0.55rem;
-    font-size: 0.85rem;
+    font-size: 14px;
     opacity: 0.6;
 }
 
@@ -447,12 +447,12 @@
 
 .side-quest-mon-name {
     font-weight: 600;
-    font-size: 0.92rem;
+    font-size: 14px;
     color: var(--ink);
 }
 
 .side-quest-tera {
-    font-size: 0.65rem;
+    font-size: 11px;
     color: var(--brand-ink);  /* 29.08.2026: --accent ist eine Flaechenfarbe (#667eea); als Schrift 3,29:1. --brand-ink ist derselbe Ton in der Textfassung und dreht im Dunkelmodus mit. */
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -462,14 +462,14 @@
     display: flex;
     gap: 0.4rem;
     flex-wrap: wrap;
-    font-size: 0.72rem;
+    font-size: 12px;
     color: var(--ink-2);
     margin-bottom: 0.35rem;
 }
 
 .side-quest-evs,
 .side-quest-nature {
-    font-size: 0.7rem;
+    font-size: 11px;
     line-height: 1.35;
     color: var(--ink-2);
     margin-bottom: 0.2rem;
@@ -498,7 +498,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    font-size: 0.78rem;
+    font-size: 12px;
     line-height: 1.35;
     color: var(--ink);
 }
@@ -520,7 +520,7 @@
 
 .side-quest-strategy summary {
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 14px;
     font-weight: 600;
     color: var(--ink);
     user-select: none;
@@ -545,7 +545,7 @@
 .side-quest-strategy ul {
     margin: 0.5rem 0 0 1.1rem;
     padding: 0;
-    font-size: 0.85rem;
+    font-size: 14px;
     color: var(--ink);
     line-height: 1.45;
 }
@@ -572,7 +572,7 @@
     color: var(--brand-ink);
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 600;
     transition: background 120ms ease, transform 80ms ease;
 }
@@ -594,7 +594,7 @@
     border-radius: 50%;
     border: 1.5px solid var(--accent, #5fb6ff);
     color: var(--brand-ink);  /* 29.08.2026: --accent ist eine Flaechenfarbe (#667eea); als Schrift 3,29:1. --brand-ink ist derselbe Ton in der Textfassung und dreht im Dunkelmodus mit. */
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 700;
     font-style: normal;
     flex: 0 0 auto;
@@ -614,7 +614,7 @@
     color: var(--brand-ink);
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 600;
     transition: background 120ms ease, transform 80ms ease;
 }
@@ -633,7 +633,7 @@
 }
 
 .side-quest-claude-icon {
-    font-size: 0.95rem;
+    font-size: 14px;
     line-height: 1;
     flex: 0 0 auto;
 }
@@ -655,21 +655,21 @@
     color: var(--brand-ink);
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 600;
     transition: background 120ms ease, transform 80ms ease;
 }
 .side-quest-export-btn:hover { background: rgba(74, 144, 226, 0.18); }
 .side-quest-export-btn:active { transform: scale(0.98); }
-.side-quest-export-icon { font-size: 0.95rem; line-height: 1; flex: 0 0 auto; }
+.side-quest-export-icon { font-size: 14px; line-height: 1; flex: 0 0 auto; }
 
 .side-quest-export .side-quest-import-text {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.8rem;
+    font-size: 12px;
 }
 .side-quest-export-choose {
     margin: 0.6rem 0 0.35rem;
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 600;
     color: var(--ink);
 }
@@ -685,7 +685,7 @@
     border-radius: 10px;
     padding: 0.5rem 0.85rem;
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: background 120ms ease, transform 80ms ease;
@@ -754,14 +754,14 @@
 
 .side-quest-modal-title {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 17px;
     font-weight: 600;
     color: var(--ink);
 }
 
 .side-quest-modal-sub {
     margin: 0.2rem 0 0 0;
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--ink-2);
 }
 
@@ -769,7 +769,7 @@
     background: transparent;
     border: none;
     color: var(--ink-2);
-    font-size: 1.5rem;
+    font-size: 21px;
     line-height: 1;
     cursor: pointer;
     padding: 0.1rem 0.35rem;
@@ -786,13 +786,13 @@
     padding: 0.9rem 1.1rem 1.1rem 1.1rem;
     overflow-y: auto;
     color: var(--ink);
-    font-size: 0.88rem;
+    font-size: 14px;
     line-height: 1.5;
 }
 
 .side-quest-modal-body h4 {
     margin: 1.1rem 0 0.4rem 0;
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -830,7 +830,7 @@
 
 .side-quest-modal-role-text {
     display: block;
-    font-size: 0.84rem;
+    font-size: 14px;
     color: var(--ink);
 }
 
@@ -854,7 +854,7 @@
 
 .side-quest-modal-ai-note {
     margin: 1.2rem 0 0 0;
-    font-size: 0.72rem;
+    font-size: 12px;
     color: var(--ink-2);
     border-top: 1px dotted rgba(0, 0, 0, 0.1);
     padding-top: 0.6rem;
@@ -869,7 +869,7 @@
 
 .side-quest-mark-hint {
     margin: 0.5rem 0 0 0;
-    font-size: 0.76rem;
+    font-size: 12px;
     color: var(--ink-2);
 }
 
@@ -902,7 +902,7 @@
     width: 2rem;
     height: 2rem;
     padding: 0;
-    border-radius: 9px;
+    border-radius: 10px;
     /* 02.09.2026: stand fest auf #e0e0e0 — ein helles Grau als Ring auf
        einer Flaeche, die dreht. Die Schrift dieser Knoepfe ist ein
        Farb-Emoji und deshalb vom Modus unabhaengig; der Ring war es
@@ -910,7 +910,7 @@
     border: 1px solid var(--line);
     background: var(--surface-2);
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 14px;
     line-height: 1;
     filter: grayscale(0.55) opacity(0.7);
     transition: filter 120ms ease, background 120ms ease,
@@ -984,7 +984,7 @@
     color: var(--tint-ok-ink);
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 700;
     transition: background 120ms ease, transform 80ms ease;
 }
@@ -998,7 +998,7 @@
        hier waere ein drehendes Token falsch, --ink wuerde im Dunkeln
        weiss auf Hellgruen ergeben (1,75:1). Feste dunkle Schrift. */
     background: rgba(76, 209, 130, 0.85); color: #0b2a1a;
-    font-size: 0.7rem; font-weight: 800;
+    font-size: 11px; font-weight: 800;
 }
 
 /* ── Play modal (fullscreen overlay) ────────────────────────────── */
@@ -1037,12 +1037,12 @@
     border-bottom: 1px solid #e0e0e0;
     flex-shrink: 0;
 }
-.sq-play-title { margin: 0; font-size: 1rem; font-weight: 700; color: var(--ink); }
+.sq-play-title { margin: 0; font-size: 17px; font-weight: 700; color: var(--ink); }
 .sq-play-close {
     width: 2rem; height: 2rem; border-radius: 50%;
     background: var(--surface-2);
     border: 1px solid #e0e0e0;
-    color: var(--ink); font-size: 1.2rem; line-height: 1; cursor: pointer;
+    color: var(--ink); font-size: 21px; line-height: 1; cursor: pointer;
 }
 .sq-play-close:hover { background: rgba(95, 182, 255, 0.25); }
 
@@ -1057,8 +1057,8 @@
     .sq-play-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 
-.sq-play-col-title { margin: 0 0 0.4rem 0; font-size: 0.95rem; font-weight: 700; color: var(--ink); }
-.sq-play-col-hint { margin: 0 0 0.6rem 0; font-size: 0.78rem; color: var(--ink-2); }
+.sq-play-col-title { margin: 0 0 0.4rem 0; font-size: 14px; font-weight: 700; color: var(--ink); }
+.sq-play-col-hint { margin: 0 0 0.6rem 0; font-size: 12px; color: var(--ink-2); }
 
 .sq-play-mons { display: flex; flex-direction: column; gap: 0.45rem; }
 .sq-play-mon {
@@ -1070,28 +1070,28 @@
 }
 .sq-play-mon-head { display: flex; align-items: center; gap: 0.5rem; }
 .sq-play-mon-titleblock { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.sq-play-mon-name { font-weight: 700; font-size: 0.9rem; color: var(--ink); }
+.sq-play-mon-name { font-weight: 700; font-size: 14px; color: var(--ink); }
 
-.sq-play-mon-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; font-size: 0.8rem; }
-.sq-play-row-label { color: var(--ink-2); min-width: 5.2rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.sq-play-mon-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; font-size: 12px; }
+.sq-play-row-label { color: var(--ink-2); min-width: 5.2rem; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
 .sq-play-speed { display: inline-flex; align-items: baseline; gap: 0.4rem; }
-.sq-play-speed-actual { font-weight: 700; font-size: 1.05rem; color: var(--brand-ink); }
-.sq-play-speed-tail { color: var(--tint-ok-ink); font-weight: 600; font-size: 0.85rem; }
-.sq-play-speed-range { color: var(--ink-2); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78rem; }
+.sq-play-speed-actual { font-weight: 700; font-size: 17px; color: var(--brand-ink); }
+.sq-play-speed-tail { color: var(--tint-ok-ink); font-weight: 600; font-size: 14px; }
+.sq-play-speed-range { color: var(--ink-2); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
 .sq-play-speed-missing { color: var(--tint-bad-ink); }
 
 .sq-play-types, .sq-play-weaks { display: inline-flex; gap: 4px; flex-wrap: wrap; }
 .sq-play-type, .sq-play-weak {
     display: inline-flex; align-items: center; gap: 3px;
-    padding: 2px 7px; border-radius: 8px;
-    font-size: 0.7rem; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px;
+    font-size: 11px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.04em;
     color: #fff;
     box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
 }
 .sq-play-weak small { opacity: 0.85; font-weight: 600; }
 .sq-play-weak-4x { box-shadow: 0 0 0 2px #ffb347 inset, 0 1px 2px rgba(0,0,0,0.4) inset; }
-.sq-play-noweak { color: var(--ink-2); font-style: italic; font-size: 0.78rem; }
+.sq-play-noweak { color: var(--ink-2); font-style: italic; font-size: 12px; }
 
 /* Type-color palette (gen 6+ canonical hex) */
 .sq-play-type-normal   { background: #a8a878; }
@@ -1140,19 +1140,19 @@
     justify-content: center;
 }
 .sq-play-opp-empty:hover { background: rgba(95, 182, 255, 0.08); color: var(--brand-ink); }
-.sq-play-opp-empty-icon { font-size: 1.8rem; line-height: 1; opacity: 0.5; }
-.sq-play-opp-empty-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.sq-play-opp-empty-icon { font-size: 30px; line-height: 1; opacity: 0.5; }
+.sq-play-opp-empty-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
 
 .sq-play-opp-filled { cursor: default; }
-.sq-play-opp-name { font-size: 0.75rem; font-weight: 700; text-align: center; }
-.sq-play-opp-speed { font-size: 0.7rem; color: var(--ink-2); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.sq-play-opp-name { font-size: 12px; font-weight: 700; text-align: center; }
+.sq-play-opp-speed { font-size: 11px; color: var(--ink-2); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
 .sq-play-opp-clear {
     position: absolute; top: 4px; right: 4px;
     width: 1.2rem; height: 1.2rem; border-radius: 50%;
     background: rgba(245, 96, 96, 0.85);
     color: #fff; border: 0; cursor: pointer;
-    font-size: 0.7rem; font-weight: 700;
+    font-size: 11px; font-weight: 700;
     display: inline-flex; align-items: center; justify-content: center;
 }
 
@@ -1194,17 +1194,17 @@
     flex: 1;
     background: var(--surface-2);
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 0.5rem 0.7rem;
     color: var(--ink);
-    font-size: 0.9rem;
+    font-size: 14px;
     font-family: inherit;
 }
 .sq-play-picker-search:focus { outline: 2px solid #5fb6ff; outline-offset: 1px; }
 .sq-play-picker-close {
     width: 2rem; height: 2rem; border-radius: 50%;
     background: var(--surface-2); border: 1px solid #e0e0e0;
-    color: var(--ink); font-size: 1.2rem; line-height: 1; cursor: pointer;
+    color: var(--ink); font-size: 21px; line-height: 1; cursor: pointer;
 }
 
 .sq-play-picker-grid {
@@ -1217,7 +1217,7 @@
     -webkit-overflow-scrolling: touch;
 }
 .sq-play-picker-cell {
-    background: var(--surface-2); border: 1px solid #e0e0e0; border-radius: 8px;
+    background: var(--surface-2); border: 1px solid #e0e0e0; border-radius: 10px;
     padding: 0.35rem; cursor: pointer;
     display: flex; flex-direction: column; align-items: center; gap: 2px;
     color: var(--ink);
@@ -1234,7 +1234,7 @@
     position: absolute;
     top: 2px; left: 4px;
     color: var(--brand-ink);
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 900;
 }
 .sq-play-picker-cell-name {
@@ -1252,9 +1252,9 @@
     background: rgba(95, 182, 255, 0.12);
     border: 1px solid rgba(95, 182, 255, 0.4);
     color: var(--brand-ink);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 0.35rem 0.6rem;
-    font-size: 0.78rem; font-weight: 700;
+    font-size: 12px; font-weight: 700;
     cursor: pointer; font-family: inherit;
     display: inline-flex; align-items: center; gap: 4px;
     white-space: nowrap;
@@ -1303,7 +1303,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     line-height: 1.18;
-    font-size: 0.66rem;
+    font-size: 11px;
     min-height: 2.36em;
     color: var(--ink);
 }
@@ -1311,7 +1311,7 @@
     grid-column: 1 / -1;
     text-align: center;
     color: var(--ink-2);
-    font-size: 0.8rem;
+    font-size: 12px;
     padding: 1.2rem;
     margin: 0;
 }
@@ -1337,7 +1337,7 @@
     border: 1px solid rgba(76, 209, 130, 0.85);
     border-radius: 10px;
     padding: 0.4rem 0.8rem;
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 800;
     cursor: pointer;
     font-family: inherit;
@@ -1354,9 +1354,9 @@
     background: rgba(76, 209, 130, 0.18);
     color: var(--tint-ok-ink);
     border: 1px solid rgba(76, 209, 130, 0.5);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 0.3rem 0.55rem;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.02em;
     white-space: nowrap;
@@ -1383,7 +1383,7 @@
 .sq-play-ladder-head { display: flex; align-items: baseline; justify-content: space-between; }
 .sq-play-ladder-hint {
     margin: 0.2rem 0 0.45rem 0;
-    font-size: 0.72rem;
+    font-size: 12px;
     color: var(--ink-2);
 }
 .sq-play-ladder-rows {
@@ -1403,7 +1403,7 @@
     background: var(--surface-1);
     border: 1px solid #e8eaed;
     border-left: 3px solid transparent;
-    font-size: 0.78rem;
+    font-size: 12px;
     min-height: 28px;
 }
 .sq-play-ladder-yours { border-left-color: #5fb6ff; }
@@ -1411,7 +1411,7 @@
 
 .sq-play-ladder-rank {
     color: var(--ink-2);
-    font-size: 0.68rem;
+    font-size: 11px;
     font-weight: 700;
     text-align: right;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -1432,7 +1432,7 @@
     font-size: var(--fs-xs);
     font-weight: 800;
     padding: 1px 5px;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #fff;
     letter-spacing: 0.04em;
 }
@@ -1444,7 +1444,7 @@
     font-variant-numeric: tabular-nums;
     font-weight: 800;
     color: var(--ink);
-    font-size: 0.92rem;
+    font-size: 14px;
 }
 /* "~" prefix on opponent typical-speed numbers; "?" prefix when
  * the species isn't represented in the top-pool data. Replaces the
@@ -1475,8 +1475,8 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
-.sq-play-speed-mega { font-size: 0.9rem; margin-left: 5px; }
-.sq-play-speed-mega-range { font-weight: 600; background: rgba(193, 138, 255, 0.12); font-size: 0.78rem; }
+.sq-play-speed-mega { font-size: 14px; margin-left: 5px; }
+.sq-play-speed-mega-range { font-weight: 600; background: rgba(193, 138, 255, 0.12); font-size: 12px; }
 
 /* Full-width Mega sub-line under a ladder row — holds the post-Mega
  * Speed + range, one pill per form (X and Y both for dual megas).
@@ -1491,7 +1491,7 @@
     padding-left: 2.9rem;
 }
 .sq-play-ladder-megaline .sq-play-ladder-mega {
-    font-size: 0.68rem;
+    font-size: 11px;
     padding: 1px 6px;
 }
 .sq-play-ladder-megaline .sq-play-ladder-mega b { font-weight: 800; }
@@ -1507,7 +1507,7 @@
     text-align: right;
     color: var(--ink-2);
     font-variant-numeric: tabular-nums;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     white-space: nowrap;
 }
@@ -1515,7 +1515,7 @@
     text-align: right;
     color: var(--tint-ok-ink);
     font-variant-numeric: tabular-nums;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 600;
 }
 
@@ -1531,7 +1531,7 @@
     color: var(--brand-ink);
 }
 .sq-play-opp-speed-typ strong {
-    font-size: 0.95rem;
+    font-size: 14px;
     color: var(--brand-ink);
 }
 .sq-play-opp-speed-typ small {
@@ -1546,15 +1546,15 @@
     .sq-play-ladder-row {
         /* rank | icon | name | side | speed | range | tw */
         grid-template-columns: 1.1rem 1.4rem minmax(0, 1fr) 1.1rem 2.6rem 3.2rem 2.5rem;
-        font-size: 0.74rem;
+        font-size: 12px;
         min-height: 26px;
         gap: 4px;
         padding: 3px 5px;
     }
     .sq-play-ladder-row .tcg-pokemon-icon { width: 22px; height: 22px; }
-    .sq-play-ladder-speed { font-size: 0.86rem; }
-    .sq-play-ladder-range { font-size: 0.65rem; }
-    .sq-play-ladder-tw    { font-size: 0.68rem; }
+    .sq-play-ladder-speed { font-size: 14px; }
+    .sq-play-ladder-range { font-size: 11px; }
+    .sq-play-ladder-tw    { font-size: 11px; }
     .sq-play-ladder-hint  { display: none; }
 }
 
@@ -1572,7 +1572,7 @@
     margin: 0 0 1rem 0;
     background: var(--surface-2);
     border: 1px solid #e0e0e0;
-    border-radius: 11px;
+    border-radius: 10px;
 }
 .side-quest-subtab {
     appearance: none;
@@ -1581,9 +1581,9 @@
     color: var(--ink-2);
     font: inherit;
     font-weight: 700;
-    font-size: 0.86rem;
+    font-size: 14px;
     padding: 0.42rem 0.95rem;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     transition: background 120ms ease, color 120ms ease;
 }
@@ -1597,7 +1597,7 @@
 .sq-res-intro {
     margin: 0 0 0.8rem 0;
     color: var(--ink);
-    font-size: 0.85rem;
+    font-size: 14px;
     line-height: 1.45;
 }
 .sq-res-search {
@@ -1609,7 +1609,7 @@
     background: var(--surface-1);
     color: var(--ink);
     font: inherit;
-    font-size: 0.95rem;
+    font-size: 14px;
     margin-bottom: 0.7rem;
 }
 .sq-res-search:focus {
@@ -1629,7 +1629,7 @@
     background: var(--surface-2);
     color: var(--ink);
     font: inherit;
-    font-size: 0.8rem;
+    font-size: 12px;
     font-weight: 600;
     padding: 0.32rem 0.7rem;
     border-radius: 999px;
@@ -1650,11 +1650,11 @@
 .sq-res-count {
     margin: 0 0 0.5rem 0;
     color: var(--ink-2);
-    font-size: 0.74rem;
+    font-size: 12px;
 }
 .sq-res-status {
     color: var(--ink-2);
-    font-size: 0.88rem;
+    font-size: 14px;
     padding: 0.6rem 0;
 }
 
@@ -1668,7 +1668,7 @@
 }
 .sq-res-entry {
     border: 1px solid #e0e0e0;
-    border-radius: 9px;
+    border-radius: 10px;
     background: var(--surface-1);
     overflow: hidden;
 }
@@ -1696,11 +1696,11 @@
 .sq-res-name {
     color: var(--ink);
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: 14px;
 }
 .sq-res-name-alt {
     color: var(--ink-2);
-    font-size: 0.74rem;
+    font-size: 12px;
 }
 .sq-res-badges {
     display: inline-flex;
@@ -1712,7 +1712,7 @@
     padding: 1px 7px;
     border-radius: 999px;
     color: #fff;
-    font-size: 0.66rem;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.02em;
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
@@ -1723,24 +1723,24 @@
     background: rgba(120, 200, 120, 0.16);
     color: var(--tint-ok-ink);
     border: 1px solid rgba(120, 200, 120, 0.45);
-    font-size: 0.66rem;
+    font-size: 11px;
     font-weight: 700;
 }
 .sq-res-cat {
     color: var(--ink-2);
-    font-size: 0.68rem;
+    font-size: 11px;
     font-weight: 600;
 }
 .sq-res-chevron {
     color: var(--ink-2);
-    font-size: 0.7rem;
+    font-size: 11px;
     transition: transform 140ms ease;
 }
 .sq-res-entry.is-open .sq-res-chevron { transform: rotate(180deg); }
 .sq-res-effect {
     padding: 0 0.7rem 0.65rem 0.7rem;
     color: var(--ink);
-    font-size: 0.86rem;
+    font-size: 14px;
     line-height: 1.5;
 }
 
@@ -1763,14 +1763,14 @@
 }
 .sq-res-stufe:hover { text-decoration-style: solid; }
 .sq-res-stufe:focus-visible {
-    outline: 2px solid var(--brand, #3B4CCA); outline-offset: 2px; border-radius: 3px;
+    outline: 2px solid var(--brand, #3B4CCA); outline-offset: 2px; border-radius: 6px;
 }
 .sq-res-stufe-pct {
     display: inline-block;
     margin-left: 0.3em;
     padding: 0 0.32em;
     border: 1px solid var(--line, rgba(128,128,128,.35));
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.8em;
     font-variant-numeric: tabular-nums;
     opacity: .78;
@@ -1786,7 +1786,7 @@
     margin-top: -0.15rem;
 }
 .sq-res-stat {
-    font-size: 0.8rem;
+    font-size: 12px;
     color: var(--ink);
     white-space: nowrap;
 }
@@ -1816,14 +1816,14 @@
     padding-top: 0.6rem;
     border-top: 1px solid #e0e0e0;
     color: var(--ink-2);
-    font-size: 0.7rem;
+    font-size: 11px;
     line-height: 1.4;
 }
 
 /* ── Side Quest · Champions — Pokédex table ─────────────────────── */
 .sqp-intro {
     color: var(--ink);
-    font-size: 0.85rem;
+    font-size: 14px;
     line-height: 1.5;
     margin: 0 0 0.7rem;
 }
@@ -1833,13 +1833,13 @@
    OHNE_EINTRAG) — zieht die Quelle nach, ist die Zeile weg. */
 .sqp-luecke {
     color: var(--ink-2);
-    font-size: 0.8rem;
+    font-size: 12px;
     line-height: 1.5;
     margin: 0 0 0.7rem;
     padding: 0.5rem 0.7rem;
     border-left: 3px solid var(--line-strong);
     background: var(--surface-2);
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 10px 10px 0;
 }
 .sqp-search {
     width: 100%;
@@ -1850,7 +1850,7 @@
     background: var(--surface-1);
     color: var(--ink);
     font: inherit;
-    font-size: 0.95rem;
+    font-size: 14px;
     margin-bottom: 0.7rem;
 }
 .sqp-search:focus { outline: none; border-color: rgba(95, 182, 255, 0.6); }
@@ -1863,7 +1863,7 @@
 }
 .sqp-presets-label {
     color: var(--ink-2);
-    font-size: 0.74rem;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -1875,7 +1875,7 @@
     background: var(--surface-2);
     color: var(--ink);
     font: inherit;
-    font-size: 0.8rem;
+    font-size: 12px;
     font-weight: 600;
     padding: 0.36rem 0.72rem;
     border-radius: 999px;
@@ -1901,16 +1901,16 @@
     background: var(--surface-1);
     color: var(--ink);
     font: inherit;
-    font-size: 0.82rem;
+    font-size: 14px;
     padding: 0.4rem 1.8rem 0.4rem 0.7rem;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%239aa4b2' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.6rem center;
 }
-.sqp-count { color: var(--ink-2); font-size: 0.78rem; margin: 0 0 0.45rem; }
-.sqp-status { color: var(--ink-2); font-size: 0.9rem; padding: 1rem 0; }
+.sqp-count { color: var(--ink-2); font-size: 12px; margin: 0 0 0.45rem; }
+.sqp-status { color: var(--ink-2); font-size: 14px; padding: 1rem 0; }
 
 .sqp-table-wrap {
     overflow-x: auto;
@@ -1929,7 +1929,7 @@
     width: max-content;
     min-width: 100%;
     white-space: nowrap;
-    font-size: 0.82rem;
+    font-size: 14px;
     color: var(--ink);
 }
 /* Neutralise the global `table { display:block }` and
@@ -1953,7 +1953,7 @@
     top: 0;
     background: var(--surface-2);
     color: var(--ink-2);
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.02em;
@@ -1979,13 +1979,13 @@
 #sideQuestPokedexHost .sqp-table thead th.sqp-c-mon { background-color: var(--surface-2); z-index: 3; }
 #sideQuestPokedexHost .sqp-table tbody tr:hover td.sqp-c-mon { background-color: var(--surface-2); }
 .sqp-mon-name { display: block; font-weight: 700; }
-.sqp-mon-sub { display: block; color: var(--ink-2); font-size: 0.68rem; margin-top: 1px; }
+.sqp-mon-sub { display: block; color: var(--ink-2); font-size: 11px; margin-top: 1px; }
 
 .sqp-type {
     display: inline-block;
     padding: 0.12rem 0.45rem;
     border-radius: 6px;
-    font-size: 0.68rem;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.02em;
@@ -1998,14 +1998,14 @@
     display: block;
     color: var(--tint-warn-ink);
     font-weight: 800;
-    font-size: 0.8rem;
+    font-size: 12px;
     letter-spacing: 0.01em;
     line-height: 1.25;
 }
-#sideQuestPokedexHost .sqp-stat-top { display: block; font-size: 0.8rem; white-space: nowrap; }
+#sideQuestPokedexHost .sqp-stat-top { display: block; font-size: 12px; white-space: nowrap; }
 #sideQuestPokedexHost .sqp-stat-top b { font-weight: 600; color: var(--ink-2); }
-#sideQuestPokedexHost .sqp-stat-used { color: var(--brand-ink); font-weight: 600; font-size: 0.74rem; margin-left: 2px; }
-#sideQuestPokedexHost .sqp-stat small { display: block; color: var(--ink-2); font-size: 0.64rem; margin-top: 1px; }
+#sideQuestPokedexHost .sqp-stat-used { color: var(--brand-ink); font-weight: 600; font-size: 12px; margin-left: 2px; }
+#sideQuestPokedexHost .sqp-stat small { display: block; color: var(--ink-2); font-size: 11px; margin-top: 1px; }
 /* Legend keys mirror the cell colours exactly — that is the whole point. */
 .sqp-key { font-weight: 700; }
 .sqp-key-base { color: var(--tint-warn-ink); font-weight: 800; }
@@ -2016,7 +2016,7 @@
 
 .sqp-note, .sqp-attr {
     color: var(--ink-2);
-    font-size: 0.7rem;
+    font-size: 11px;
     line-height: 1.4;
     margin: 0.5rem 0 0;
 }
@@ -2039,7 +2039,7 @@
     background: var(--surface-2);
     color: var(--ink);
     font: inherit;
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 700;
     padding: 0.4rem 0.8rem;
     border-radius: 999px;
@@ -2065,7 +2065,7 @@
 }
 .sq-res-champ-note {
     color: var(--ink-2);
-    font-size: 0.72rem;
+    font-size: 12px;
     line-height: 1.3;
     flex: 1 1 12rem;
     min-width: 9rem;
@@ -2078,7 +2078,7 @@
 .sqp-caret {
     display: inline-block;
     color: var(--brand-ink);
-    font-size: 0.7rem;
+    font-size: 11px;
     margin-right: 0.3rem;
     transition: transform 120ms ease;
 }
@@ -2093,7 +2093,7 @@
     flex-direction: column;
     gap: 0.3rem;
     padding: 0.5rem 0.7rem 0.6rem;
-    font-size: 0.82rem;
+    font-size: 14px;
     color: var(--ink);
     white-space: normal;
     text-align: left;
@@ -2109,18 +2109,18 @@
     color: var(--tint-ok-ink);
     font-weight: 700;
     text-transform: uppercase;
-    font-size: 0.68rem;
+    font-size: 11px;
     letter-spacing: 0.03em;
 }
 .sqp-meta-evs { font-weight: 700; color: var(--ink); }
 .sqp-meta-nat { color: var(--ink); }
-.sqp-meta-n { color: var(--ink-2); font-size: 0.72rem; }
-.sqp-meta-pct { color: var(--brand-ink); font-weight: 700; font-size: 0.78rem; }
+.sqp-meta-n { color: var(--ink-2); font-size: 12px; }
+.sqp-meta-pct { color: var(--brand-ink); font-weight: 700; font-size: 12px; }
 /* In-game ladder provenance tag (replaces the "(n von total)" sample note
    when the build comes from the authoritative championsbattledata usage). */
 .sqp-meta-src {
     color: var(--tint-ok-ink);
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
 }
@@ -2157,19 +2157,19 @@
 .sqp-d-close {
     position: absolute; top: 8px; right: 10px;
     background: none; border: none; color: var(--ink-2);
-    font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 4px 8px;
-    border-radius: 8px;
+    font-size: 21px; line-height: 1; cursor: pointer; padding: 4px 8px;
+    border-radius: 10px;
 }
 .sqp-d-close:hover { color: var(--ink); background: var(--surface-2); }
 .sqp-d-head { display: flex; align-items: center; gap: 12px; padding-right: 28px; flex-wrap: wrap; }
-.sqp-d-name-main { font-size: 1.25rem; font-weight: 800; color: var(--ink); }
-.sqp-d-name-sub { display: block; color: var(--ink-2); font-size: 0.74rem; margin-top: 2px; }
+.sqp-d-name-main { font-size: 21px; font-weight: 800; color: var(--ink); }
+.sqp-d-name-sub { display: block; color: var(--ink-2); font-size: 12px; margin-top: 2px; }
 .sqp-d-types { display: flex; gap: 6px; margin-left: auto; }
 /* Defensive type matchups under the type badges (weak / immune / resist). */
 .sqp-fx { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 2px; }
 .sqp-fx-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .sqp-fx-lbl {
-    font-size: 0.76rem; font-weight: 800; color: var(--ink-2);
+    font-size: 12px; font-weight: 800; color: var(--ink-2);
     flex: 0 0 auto; min-width: 96px;
 }
 .sqp-fx-row.is-weak   .sqp-fx-lbl { color: var(--tint-bad-ink); }
@@ -2179,55 +2179,55 @@
 .sqp-fx-badge {
     display: inline-flex; align-items: center; gap: 3px;
     padding: 1px 7px; border-radius: 999px;
-    font-size: 0.72rem; font-weight: 700; color: #fff;
+    font-size: 12px; font-weight: 700; color: #fff;
     text-transform: capitalize;
 }
-.sqp-fx-mult { font-size: 0.64rem; font-weight: 800; opacity: 0.9; }
+.sqp-fx-mult { font-size: 11px; font-weight: 800; opacity: 0.9; }
 @media (max-width: 480px) { .sqp-fx-lbl { min-width: 100%; } }
 .sqp-d-searchwrap { position: relative; margin: 12px 0 8px; }
 .sqp-d-search {
     width: 100%; box-sizing: border-box;
-    background: var(--surface-1); border: 1px solid #e0e0e0; border-radius: 9px;
-    color: var(--ink); padding: 8px 11px; font-size: 0.9rem;
+    background: var(--surface-1); border: 1px solid #e0e0e0; border-radius: 10px;
+    color: var(--ink); padding: 8px 11px; font-size: 14px;
 }
 .sqp-d-search:focus { outline: none; border-color: rgba(95, 182, 255, 0.6); }
 .sqp-d-results {
     position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 5;
-    background: var(--surface-1); border: 1px solid #e0e0e0; border-radius: 9px;
+    background: var(--surface-1); border: 1px solid #e0e0e0; border-radius: 10px;
     box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.10));
     max-height: 260px; overflow-y: auto; padding: 4px;
 }
 .sqp-d-hit {
     display: block; width: 100%; text-align: left; cursor: pointer;
     background: none; border: none; color: var(--ink);
-    padding: 7px 9px; border-radius: 7px; font-size: 0.88rem;
+    padding: 7px 9px; border-radius: 6px; font-size: 14px;
 }
 .sqp-d-hit:hover { background: var(--surface-2); color: var(--ink); }
-.sqp-d-hit span { color: var(--ink-2); font-size: 0.78rem; margin-left: 4px; }
-.sqp-d-nohit { color: var(--ink-2); padding: 8px; font-size: 0.85rem; }
+.sqp-d-hit span { color: var(--ink-2); font-size: 12px; margin-left: 4px; }
+.sqp-d-nohit { color: var(--ink-2); padding: 8px; font-size: 14px; }
 .sqp-d-fmts { display: flex; align-items: center; gap: 8px; margin: 4px 0 12px; flex-wrap: wrap; }
 .sqp-d-fmt {
     background: var(--surface-2); border: 1px solid #e0e0e0; border-radius: 999px;
-    color: var(--ink); padding: 5px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    color: var(--ink); padding: 5px 14px; font-size: 14px; font-weight: 600; cursor: pointer;
 }
 .sqp-d-fmt:hover:not(:disabled) { border-color: #c8d0da; }
 .sqp-d-fmt.is-active { background: rgba(95, 182, 255, 0.14); border-color: #5fb6ff; color: var(--brand-ink); }
 .sqp-d-fmt:disabled { opacity: 0.35; cursor: default; }
-.sqp-d-season { color: var(--ink-2); font-size: 0.74rem; margin-left: auto; }
+.sqp-d-season { color: var(--ink-2); font-size: 12px; margin-left: auto; }
 .sqp-d-sec { margin-top: 14px; }
 .sqp-d-sec-title {
-    margin: 0 0 7px; color: var(--tint-ok-ink); font-size: 0.72rem; font-weight: 700;
+    margin: 0 0 7px; color: var(--tint-ok-ink); font-size: 12px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.04em;
 }
-.sqp-d-stats { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-.sqp-d-stats th { color: var(--ink-2); font-weight: 600; font-size: 0.68rem; text-align: right; padding: 2px 6px; }
+.sqp-d-stats { width: 100%; border-collapse: collapse; font-size: 14px; }
+.sqp-d-stats th { color: var(--ink-2); font-weight: 600; font-size: 11px; text-align: right; padding: 2px 6px; }
 .sqp-d-stats th:first-child { text-align: left; }
 .sqp-d-stats td { padding: 3px 6px; text-align: right; border-top: 1px solid #e0e0e0; }
 .sqp-d-st-lab { text-align: left !important; color: var(--ink-2); }
 .sqp-d-st-basebase { color: var(--tint-warn-ink); font-weight: 800; }
 .sqp-d-st-base { color: var(--ink); font-weight: 700; }
 .sqp-d-st-used { color: var(--brand-ink); font-weight: 700; }
-.sqp-d-st-range { color: var(--ink-2); font-size: 0.78rem; }
+.sqp-d-st-range { color: var(--ink-2); font-size: 12px; }
 /* Speed tiers under the stat table: the played Speed and the two
    modifiers Champions actually quantifies. Blue, because it is derived
    from the played value (same colour role as .sqp-d-st-used). */
@@ -2238,23 +2238,23 @@
     gap: 4px 14px;
     margin-top: 10px;
     padding: 8px 10px;
-    border-radius: 8px;
+    border-radius: 10px;
     background: rgba(95, 182, 255, 0.10);
-    font-size: 0.86rem;
+    font-size: 14px;
 }
-.sqp-st-title { color: var(--ink-2); font-weight: 700; font-size: 0.72rem;
+.sqp-st-title { color: var(--ink-2); font-weight: 700; font-size: 12px;
                 text-transform: uppercase; letter-spacing: 0.02em; }
 .sqp-st-item { white-space: nowrap; }
-.sqp-st-lab { color: var(--ink-2); font-size: 0.74rem; margin-right: 4px; }
+.sqp-st-lab { color: var(--ink-2); font-size: 12px; margin-right: 4px; }
 .sqp-st-item b { color: var(--brand-ink); font-weight: 800; }
-.sqp-st-note { flex-basis: 100%; color: var(--ink-2); font-size: 0.68rem; line-height: 1.35; }
+.sqp-st-note { flex-basis: 100%; color: var(--ink-2); font-size: 11px; line-height: 1.35; }
 
 .sqp-d-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin-top: 4px; }
 @media (max-width: 520px) { .sqp-d-grid { grid-template-columns: 1fr; } }
 .sqp-d-row {
     position: relative; display: flex; align-items: center; gap: 8px;
     padding: 4px 8px; border-radius: 6px; overflow: hidden;
-    font-size: 0.84rem; margin-bottom: 2px; background: var(--surface-2);
+    font-size: 14px; margin-bottom: 2px; background: var(--surface-2);
 }
 /* Silph-Scope-style gradient rather than a flat pale fill: at 5 % the
    old bar was nearly invisible against the row, so the proportion — the
@@ -2267,16 +2267,16 @@
     opacity: 0.22;
 }
 .sqp-d-name { position: relative; z-index: 1; color: var(--ink); flex: 1; }
-.sqp-d-extra { color: var(--ink-2); font-size: 0.74rem; }
-.sqp-d-pct { position: relative; z-index: 1; color: var(--brand-ink); font-weight: 700; font-size: 0.8rem; }
-.sqp-d-none { color: var(--ink-2); font-size: 0.88rem; padding: 10px 0; }
+.sqp-d-extra { color: var(--ink-2); font-size: 12px; }
+.sqp-d-pct { position: relative; z-index: 1; color: var(--brand-ink); font-weight: 700; font-size: 12px; }
+.sqp-d-none { color: var(--ink-2); font-size: 14px; padding: 10px 0; }
 
 /* Pokédex table format toggle (which format the "used" brackets show). */
 .sqp-fmt-toggle { display: inline-flex; align-items: center; gap: 6px; }
-.sqp-fmt-lbl { color: var(--ink-2); font-size: 0.74rem; }
+.sqp-fmt-lbl { color: var(--ink-2); font-size: 12px; }
 .sqp-fmt-btn {
     background: var(--surface-2); border: 1px solid #e0e0e0; border-radius: 999px;
-    color: var(--ink); padding: 4px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    color: var(--ink); padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
 }
 .sqp-fmt-btn:hover { border-color: #c8d0da; }
 .sqp-fmt-btn.is-active { background: rgba(95, 182, 255, 0.14); border-color: #5fb6ff; color: var(--brand-ink); }
@@ -2286,14 +2286,14 @@
 .sqp-d-de::before { content: "· "; color: var(--ink-2); }
 
 /* Teammate list (no % in-game — clean numbered rows). */
-.sqp-d-team { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: var(--surface-2); margin-bottom: 2px; font-size: 0.84rem; }
+.sqp-d-team { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: var(--surface-2); margin-bottom: 2px; font-size: 14px; }
 .sqp-d-team-rank { color: var(--ink-2); font-weight: 700; min-width: 1.1em; text-align: center; }
 
 /* Ability row in the detail overlay: name + % on top, effect text below. */
 .sqp-d-ability { flex-direction: column; align-items: stretch; gap: 3px; padding: 6px 8px; }
 .sqp-d-ab-top { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; }
 .sqp-d-ab-top .sqp-d-name { flex: 1; }
-.sqp-d-ab-fx { position: relative; z-index: 1; color: var(--ink-2); font-size: 0.76rem; line-height: 1.35; }
+.sqp-d-ab-fx { position: relative; z-index: 1; color: var(--ink-2); font-size: 12px; line-height: 1.35; }
 
 /* Mega ability badge in the detail header (the ability a Mega gets after
    evolving — shown by the name; the usage section lists the pre-mega base). */
@@ -2301,15 +2301,15 @@
     margin: 8px 0 2px; padding: 7px 11px;
     background: rgba(150, 120, 255, 0.10);
     border: 1px solid rgba(150, 120, 255, 0.35);
-    border-radius: 9px; font-size: 0.88rem;
+    border-radius: 10px; font-size: 14px;
 }
 .sqp-d-megaab-top { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
 .sqp-d-megaab-lbl {
-    color: var(--brand-ink); font-weight: 800; font-size: 0.68rem;
+    color: var(--brand-ink); font-weight: 800; font-size: 11px;
     text-transform: uppercase; letter-spacing: 0.03em;
 }
 .sqp-d-megaab-name { color: var(--ink); font-weight: 700; }
-.sqp-d-megaab-fx { color: var(--ink); font-size: 0.8rem; line-height: 1.35; margin-top: 4px; }
+.sqp-d-megaab-fx { color: var(--ink); font-size: 12px; line-height: 1.35; margin-top: 4px; }
 
 /* Mega-Faehigkeit ohne belegte Quelle: dieselbe Zeile, aber sichtbar
    zurueckgenommen — sie nennt eine Luecke, keine Eigenschaft. */
@@ -2324,48 +2324,48 @@
 /* Herkunft geerbter Nutzungsdaten (Mega-Form → Grundform + Stein). */
 .sqp-d-viabase {
     margin: 10px 0 0; padding: 6px 10px;
-    font-size: 0.8rem; line-height: 1.4;
+    font-size: 12px; line-height: 1.4;
     color: var(--ink-2, var(--ink));
     background: var(--surface-2, rgba(127, 127, 140, 0.10));
     border-left: 3px solid var(--accent, #7a5cff);
-    border-radius: 0 7px 7px 0;
+    border-radius: 0 6px 6px 0;
 }
 
 /* ── Team Builder (co-occurrence) ──────────────────────────────────────────── */
 .sqb { padding: 2px 0 8px; }
-.sqb-intro { font-size: 0.9rem; color: var(--ink); margin: 4px 0 12px; line-height: 1.4; }
+.sqb-intro { font-size: 14px; color: var(--ink); margin: 4px 0 12px; line-height: 1.4; }
 .sqb-team-bar {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    flex-wrap: wrap; padding: 8px; border-radius: 12px;
+    flex-wrap: wrap; padding: 8px; border-radius: 14px;
     background: rgba(52, 152, 219, 0.06); border: 1px solid rgba(52, 152, 219, 0.15);
 }
 .sqb-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.sqb-empty { font-size: 0.85rem; color: var(--ink-3); padding: 4px 2px; }
+.sqb-empty { font-size: 14px; color: var(--ink-3); padding: 4px 2px; }
 .sqb-chip {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 3px 8px 3px 4px; border-radius: 999px; cursor: pointer;
     background: var(--surface-1); border: 1px solid #cbd5e1; font-weight: 700; color: var(--ink);
-    font-size: 0.82rem;
+    font-size: 14px;
 }
 .sqb-chip:hover { border-color: #ef4444; }
 .sqb-chip .tcg-pokemon-icon { width: 26px; height: 26px; }
 .sqb-chip-x { color: var(--tint-bad-ink); font-weight: 900; margin-left: 2px; }
 .sqb-team-bar-meta { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-.sqb-count { font-size: 0.82rem; font-weight: 800; color: var(--ink); white-space: nowrap; }
+.sqb-count { font-size: 14px; font-weight: 800; color: var(--ink); white-space: nowrap; }
 .sqb-clear {
-    font-size: 0.78rem; font-weight: 700; color: var(--brand-ink); cursor: pointer;
+    font-size: 12px; font-weight: 700; color: var(--brand-ink); cursor: pointer;
     background: none; border: none; text-decoration: underline;
 }
 .sqb-searchwrap { margin: 12px 0 6px; }
 .sqb-search {
     width: 100%; box-sizing: border-box; padding: 11px 14px;
-    border-radius: 12px; border: 1px solid #d1d5db; font-size: 1rem; background: var(--surface-1);
+    border-radius: 14px; border: 1px solid #d1d5db; font-size: 17px; background: var(--surface-1);
 }
 .sqb-search:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52,152,219,0.15); }
-.sqb-sec { font-size: 0.82rem; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;
+.sqb-sec { font-size: 14px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;
     color: var(--tint-ok-ink); margin: 16px 0 2px; }
 .sqb-matching { color: var(--brand-ink); font-weight: 700; text-transform: none; letter-spacing: 0; }
-.sqb-hint { font-size: 0.78rem; color: var(--ink-3); margin: 0 0 8px; }
+.sqb-hint { font-size: 12px; color: var(--ink-3); margin: 0 0 8px; }
 .sqb-suggs { display: flex; flex-wrap: wrap; gap: 6px; }
 /* Zweiter Vorschlagsblock: Treffer der freien Suche, die auf keiner
    Partner-Liste der Auswahl stehen (25.08.2026). Bewusst ruhiger als
@@ -2381,15 +2381,15 @@
     display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
     padding: 4px 10px 4px 5px; border-radius: 999px;
     background: var(--surface-2); border: 1px solid #e2e8f0; color: var(--ink); font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 14px;
 }
 .sqb-sugg:hover { background: #dbeafe; border-color: #93c5fd; }
 .sqb-sugg .tcg-pokemon-icon { width: 30px; height: 30px; }
 .sqb-sugg-count {
-    font-size: 0.72rem; font-weight: 800; color: var(--brand-ink);
+    font-size: 12px; font-weight: 800; color: var(--brand-ink);
     background: rgba(3,105,161,0.1); border-radius: 999px; padding: 0 6px; min-width: 18px; text-align: center;
 }
-.sqb-none, .sqb-loading { font-size: 0.9rem; color: var(--ink-3); padding: 6px 2px; }
+.sqb-none, .sqb-loading { font-size: 14px; color: var(--ink-3); padding: 6px 2px; }
 
 /* Dritter Vorschlagsblock: „Gleicht Schwächen aus" (16.09.2026).
    ---------------------------------------------------------------
@@ -2407,7 +2407,7 @@
 .sqb-sec--gleich { color: var(--tint-bad-ink); margin-top: 18px; padding-top: 14px;
     border-top: 1px solid var(--line); }
 .sqb-gleich { display: flex; flex-direction: column; gap: 8px; }
-.sqb-gleich-gegen { margin: 0; font-size: 0.82rem; color: var(--ink-2); line-height: 1.5; }
+.sqb-gleich-gegen { margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.5; }
 .sqb-gleich-gegen b { color: var(--tint-bad-ink); font-weight: 900; }
 .sqb-sugg--gleich { background: var(--tint-ok); border-color: var(--line-strong); }
 .sqb-sugg--gleich:hover { background: var(--tint-ok); border-color: var(--tint-ok-ink); }
@@ -2421,21 +2421,21 @@
 .sqb-teams { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .sqb-team {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    flex-wrap: wrap; padding: 8px 10px; border-radius: 12px;
+    flex-wrap: wrap; padding: 8px 10px; border-radius: 14px;
     background: var(--surface-1); border: 1px solid #e5e7eb;
 }
 .sqb-team-mons { display: flex; gap: 2px; flex-wrap: wrap; }
 .sqb-team-mon .tcg-pokemon-icon { width: 34px; height: 34px; }
 .sqb-team-meta { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.sqb-team-name { font-size: 0.78rem; color: var(--brand-ink); font-weight: 600; max-width: 160px;
+.sqb-team-name { font-size: 12px; color: var(--brand-ink); font-weight: 600; max-width: 160px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sqb-code {
-    font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; font-weight: 800;
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px; font-weight: 800;
     letter-spacing: 0.06em; cursor: pointer; color: var(--tint-warn-ink);
-    background: var(--tint-warn); border: 1px solid var(--line-strong); border-radius: 8px; padding: 3px 8px;
+    background: var(--tint-warn); border: 1px solid var(--line-strong); border-radius: 10px; padding: 3px 8px;
 }
 .sqb-code.is-copied { color: var(--tint-ok-ink); border-color: var(--line-strong); background: var(--tint-ok); }
-.sqb-attr { font-size: 0.72rem; color: var(--ink-3); margin-top: 14px; }
+.sqb-attr { font-size: 12px; color: var(--ink-3); margin-top: 14px; }
 @media (max-width: 480px) {
     .sqb-team-name { max-width: 110px; }
     .sqb-team-bar-meta { margin-left: 0; width: 100%; justify-content: space-between; }
@@ -2461,11 +2461,11 @@
 .sqp-ev {
     display: flex; flex-direction: column; align-items: center;
     min-width: 34px; padding: 1px 3px;
-    border: 1px solid #d8dee7; border-radius: 5px;
+    border: 1px solid #d8dee7; border-radius: 6px;
     background: rgba(255, 255, 255, 0.75);
     line-height: 1.1;
 }
-.sqp-ev b { font-size: 0.78rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+.sqp-ev b { font-size: 12px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
 .sqp-ev small { font-size: var(--fs-xs); color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.02em; }
 .sqp-ev.is-zero { border-color: #eef2f7; background: transparent; }
 .sqp-ev.is-zero b, .sqp-ev.is-zero small { color: var(--ink-3); }
@@ -2475,13 +2475,13 @@
 .sqp-d-teamcell {
     position: relative; text-align: center;
     padding: 6px 2px 4px;
-    border: 1px solid #e7ebf1; border-radius: 8px;
+    border: 1px solid #e7ebf1; border-radius: 10px;
     background: var(--surface-2);
 }
 .sqp-d-teamrank {
     position: absolute; top: 2px; left: 2px;
     min-width: 15px; height: 15px; padding: 0 3px;
-    border-radius: 8px; background: var(--tint-info); color: var(--tint-info-ink);
+    border-radius: 10px; background: var(--tint-info); color: var(--tint-info-ink);
     font-size: var(--fs-xs); font-weight: 800; line-height: 15px;
 }
 .sqp-d-teamname {
@@ -2499,7 +2499,7 @@
     display: flex; align-items: baseline; gap: 8px;
     border-left: 3px solid #22d3ee; padding-left: 8px;
 }
-.sqp-d-sec-hint { color: var(--ink-3); font-size: 0.66rem; font-weight: 600; text-transform: none; }
+.sqp-d-sec-hint { color: var(--ink-3); font-size: 11px; font-weight: 600; text-transform: none; }
 
 .sqp-sprite--hero { width: 64px; height: 64px; object-fit: contain; flex: 0 0 64px; }
 
@@ -2532,7 +2532,7 @@
     border-top: 1px solid var(--line);
 }
 .sqb-setzen {
-    font-size: 0.92rem; font-weight: 800;
+    font-size: 14px; font-weight: 800;
     padding: 10px 20px; border-radius: 10px;
     border: 1px solid var(--solid-ok); background: var(--solid-ok); color: #fff;
     cursor: pointer;
@@ -2542,8 +2542,8 @@
 
 .sqb-bau-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .sqb-back {
-    font-size: 0.8rem; font-weight: 700; padding: 6px 12px;
-    border-radius: 8px; border: 1px solid var(--line-strong); background: var(--surface-1);
+    font-size: 12px; font-weight: 700; padding: 6px 12px;
+    border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surface-1);
     color: var(--ink-2); cursor: pointer;
 }
 .sqb-back:hover { border-color: var(--ink-3); }
@@ -2556,31 +2556,31 @@
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 .sqb-set {
-    border: 1px solid var(--line); border-radius: 12px;
+    border: 1px solid var(--line); border-radius: 14px;
     background: var(--surface-1); padding: 12px 14px;
 }
 .sqb-set-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .sqb-set-head .tcg-pokemon-icon { width: 34px; height: 34px; flex: 0 0 auto; }
 .sqb-set-title { display: flex; flex-direction: column; min-width: 0; }
-.sqb-set-title strong { font-size: 0.95rem; color: var(--ink); }
-.sqb-set-item { font-size: 0.78rem; color: var(--ink-3); }
+.sqb-set-title strong { font-size: 14px; color: var(--ink); }
+.sqb-set-item { font-size: 12px; color: var(--ink-3); }
 .sqb-edit {
     margin-left: auto; flex: 0 0 auto;
-    font-size: 0.76rem; font-weight: 700; padding: 5px 11px;
-    border-radius: 8px; border: 1px solid var(--brand); background: var(--surface-1);
+    font-size: 12px; font-weight: 700; padding: 5px 11px;
+    border-radius: 10px; border: 1px solid var(--brand); background: var(--surface-1);
     color: var(--brand-ink); cursor: pointer;
 }
 .sqb-edit:hover { background: var(--surface-2); }
 .sqb-set-grid {
     display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;
-    margin: 0; font-size: 0.82rem;
+    margin: 0; font-size: 14px;
 }
 .sqb-set-grid dt { color: var(--ink-3); font-weight: 700; }
 .sqb-set-grid dd { margin: 0; color: var(--ink-2); }
 .sqb-set-sp { font-variant-numeric: tabular-nums; }
 .sqb-warn {
-    font-size: 0.78rem; color: var(--vorbehalt); background: var(--vorbehalt-bg);
-    border: 1px solid var(--line); border-radius: 8px;
+    font-size: 12px; color: var(--vorbehalt); background: var(--vorbehalt-bg);
+    border: 1px solid var(--line); border-radius: 10px;
     padding: 7px 10px; margin: 10px 0 0;
 }
 
@@ -2591,12 +2591,12 @@
 .sqb-name {
     flex: 1 1 240px; min-width: 0;
     padding: 9px 12px; border-radius: 10px;
-    border: 1px solid var(--line-strong); font-size: 0.88rem;
+    border: 1px solid var(--line-strong); font-size: 14px;
 }
 .sqb-name:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(52,152,219,0.15); }
 .sqb-save-btns { display: flex; flex-wrap: wrap; gap: 8px; }
 .sqb-do-save, .sqb-do-active, .sqb-exp {
-    font-size: 0.84rem; font-weight: 800; padding: 9px 16px;
+    font-size: 14px; font-weight: 800; padding: 9px 16px;
     border-radius: 10px; cursor: pointer; border: 1px solid var(--line-strong);
     background: var(--surface-1); color: var(--ink-2);
 }
@@ -2610,7 +2610,7 @@
 .sqb-export-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .sqb-paste {
     width: 100%; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.78rem; line-height: 1.45;
+    font-size: 12px; line-height: 1.45;
     border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
     background: var(--surface-0); color: var(--ink-2); resize: vertical;
 }
@@ -2665,10 +2665,10 @@
     padding: 14px 18px; border-bottom: 1px solid var(--line);
     flex: 0 0 auto;
 }
-.sqb-modal-head h3 { margin: 0; font-size: 1rem; color: var(--ink); }
+.sqb-modal-head h3 { margin: 0; font-size: 17px; color: var(--ink); }
 .sqb-modal-x {
     margin-left: auto; border: none; background: none;
-    font-size: 1.5rem; line-height: 1; color: var(--ink-3); cursor: pointer;
+    font-size: 21px; line-height: 1; color: var(--ink-3); cursor: pointer;
 }
 .sqb-modal-x:hover { color: var(--tint-bad-ink); }
 .sqb-modal-body {
@@ -2681,13 +2681,13 @@
 }
 .sqb-field { display: flex; flex-direction: column; gap: 5px; }
 .sqb-field > span {
-    font-size: 0.76rem; font-weight: 800; text-transform: uppercase;
+    font-size: 12px; font-weight: 800; text-transform: uppercase;
     letter-spacing: 0.04em; color: var(--ink-3);
     display: flex; align-items: baseline; gap: 8px;
 }
 .sqb-field select {
-    padding: 8px 10px; border-radius: 9px; border: 1px solid var(--line-strong);
-    font-size: 0.86rem; background: var(--surface-1); color: var(--ink); width: 100%;
+    padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-strong);
+    font-size: 14px; background: var(--surface-1); color: var(--ink); width: 100%;
 }
 .sqb-moves { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
@@ -2706,7 +2706,7 @@
 .sqb-mv-info {
     display: flex; flex-direction: column; gap: 4px;
     padding: 6px 9px 7px;
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--surface-2, rgba(120, 140, 200, .08));
     border: 1px solid var(--line);
 }
@@ -2714,7 +2714,7 @@
 .sqb-mv-marken { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 .sqb-mv-kat, .sqb-mv-prio, .sqb-mv-flaeche {
     display: inline-block; padding: 0.12rem 0.45rem; border-radius: 6px;
-    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
     border: 1px solid var(--line-strong); color: var(--ink-2);
 }
 /* Der Vorrang ist der einzige Wert, den der Betreiber namentlich genannt
@@ -2727,10 +2727,10 @@
     color: var(--vorbehalt, #8a6d00);
 }
 .sqb-mv-zahlen {
-    font-size: 0.74rem; color: var(--ink-3);
+    font-size: 12px; color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
-.sqb-mv-text { margin: 0; font-size: 0.76rem; line-height: 1.35; color: var(--ink-2); }
+.sqb-mv-text { margin: 0; font-size: 12px; line-height: 1.35; color: var(--ink-2); }
 
 /* ── Die meistgespielte Verteilung ueber den Reglern ────────────────────
  *
@@ -2743,26 +2743,26 @@
  * gerade getan hat. */
 .sqb-vt { display: flex; flex-direction: column; gap: 5px; margin: 10px 0 12px; }
 .sqb-vt-titel {
-    font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+    font-size: 12px; font-weight: 800; text-transform: uppercase;
     letter-spacing: 0.04em; color: var(--ink-3);
 }
 .sqb-vt select {
-    padding: 8px 10px; border-radius: 9px; border: 1px solid var(--line-strong);
-    font-size: 0.86rem; background: var(--surface-1); color: var(--ink); width: 100%;
+    padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-strong);
+    font-size: 14px; background: var(--surface-1); color: var(--ink); width: 100%;
     font-variant-numeric: tabular-nums;
 }
 .sqb-budget {
     font-style: normal; font-weight: 800; font-variant-numeric: tabular-nums;
-    color: var(--tint-ok-ink); font-size: 0.8rem;
+    color: var(--tint-ok-ink); font-size: 12px;
 }
 .sqb-budget.is-full { color: var(--vorbehalt); }
 .sqb-field--sp .sqb-hint { margin: 0; }
 .sqb-sp-grid { display: flex; flex-direction: column; gap: 7px; }
 .sqb-sp-row { display: grid; grid-template-columns: 3.2rem 1fr 2.2rem; align-items: center; gap: 10px; }
-.sqb-sp-key { font-size: 0.74rem; font-weight: 800; color: var(--ink-3); letter-spacing: 0.03em; }
+.sqb-sp-key { font-size: 12px; font-weight: 800; color: var(--ink-3); letter-spacing: 0.03em; }
 .sqb-sp { width: 100%; accent-color: var(--brand); }
 .sqb-sp-val {
-    font-size: 0.8rem; font-weight: 800; color: var(--ink);
+    font-size: 12px; font-weight: 800; color: var(--ink);
     font-variant-numeric: tabular-nums; text-align: right;
 }
 .sqb-modal-foot {
@@ -2771,8 +2771,8 @@
     flex: 0 0 auto;
 }
 .sqb-reset, .sqb-done {
-    font-size: 0.84rem; font-weight: 800; padding: 8px 16px;
-    border-radius: 9px; cursor: pointer;
+    font-size: 14px; font-weight: 800; padding: 8px 16px;
+    border-radius: 10px; cursor: pointer;
     border: 1px solid var(--line-strong); background: var(--surface-1); color: var(--ink-2);
 }
 .sqb-done { border-color: var(--brand); background: var(--brand); color: #fff; }
@@ -2792,8 +2792,8 @@
 
 /* ── "Das spiele ich gerade" und "als eigenes uebernehmen" ──────────────── */
 .side-quest-active-btn, .side-quest-copyown-btn {
-    font-size: 0.76rem; font-weight: 800; padding: 6px 12px;
-    border-radius: 8px; cursor: pointer;
+    font-size: 12px; font-weight: 800; padding: 6px 12px;
+    border-radius: 10px; cursor: pointer;
     border: 1px solid var(--line-strong); background: var(--surface-1); color: var(--ink-2);
 }
 .side-quest-active-btn:hover, .side-quest-copyown-btn:hover { border-color: var(--ink-3); }
@@ -2801,7 +2801,7 @@
     border-color: var(--gold); background: var(--vorbehalt-bg); color: var(--vorbehalt);
 }
 .side-quest-myteams-empty {
-    font-size: 0.84rem; color: var(--ink-3); margin: 6px 0 0;
+    font-size: 14px; color: var(--ink-3); margin: 6px 0 0;
     padding: 12px 14px; border: 1px dashed var(--line-strong); border-radius: 10px;
     background: var(--surface-0);
 }
@@ -2831,7 +2831,7 @@
     background: var(--surface-2);
     color: var(--ink);
     font: inherit;
-    font-size: 0.8rem;
+    font-size: 12px;
     font-weight: 600;
     padding: 0.36rem 0.8rem;
     border-radius: 999px;
@@ -2848,7 +2848,7 @@
     background: var(--surface-2);
     color: var(--ink);
     font: inherit;
-    font-size: 0.8rem;
+    font-size: 12px;
     font-weight: 600;
     padding: 0.36rem 0.8rem;
     border-radius: 999px;
@@ -2908,7 +2908,7 @@
     justify-content: flex-start;
     padding: 0.6rem 0.4rem 0.5rem;
     border: 1px solid #e4e7ec;
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--surface-1, #fff);
     color: var(--ink);
     font: inherit;
@@ -2924,13 +2924,13 @@
 .sqp-kachel:focus-visible { outline: 2px solid #2e70c0; outline-offset: 2px; }
 .sqp-kachel-bild { width: 62px; height: 62px; object-fit: contain; }
 .sqp-kachel-nr {
-    font-size: 0.68rem;
+    font-size: 11px;
     font-variant-numeric: tabular-nums;
     color: var(--ink-3);
     letter-spacing: 0.02em;
 }
 .sqp-kachel-name {
-    font-size: 0.8rem;
+    font-size: 12px;
     font-weight: 600;
     line-height: 1.2;
     /* Lange Namen wie "Tauros (Paldea, Flammenvariante)" duerfen die
@@ -2942,7 +2942,7 @@
 }
 .sqp-kachel-typen { display: flex; flex-wrap: wrap; gap: 0.2rem; justify-content: center; }
 .sqp-kachel-rang {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 600;
     color: #2e70c0;
     font-variant-numeric: tabular-nums;
@@ -2954,7 +2954,7 @@
     appearance: none;
     border: none;
     background: transparent;
-    font-size: 1.05rem;
+    font-size: 17px;
     line-height: 1;
     padding: 0.15rem;
     cursor: pointer;
@@ -2963,7 +2963,7 @@
 }
 .sqp-stern:hover { color: #e0b84d; transform: scale(1.15); }
 .sqp-stern.is-an { color: #e6a817; text-shadow: 0 0 6px rgba(230, 168, 23, 0.45); }
-.sqp-stern:focus-visible { outline: 2px solid #2e70c0; outline-offset: 1px; border-radius: 4px; }
+.sqp-stern:focus-visible { outline: 2px solid #2e70c0; outline-offset: 1px; border-radius: 6px; }
 
 /* Herkunft im Detail */
 .sqp-herkunft {
@@ -2975,7 +2975,7 @@
 }
 .sqp-herkunft-titel {
     margin: 0 0 0.5rem;
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -2985,7 +2985,7 @@
 .sqp-herkunft-block:last-child { margin-bottom: 0; }
 .sqp-herkunft-label {
     display: block;
-    font-size: 0.74rem;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -2995,23 +2995,23 @@
 }
 .sqp-editionen { display: flex; flex-wrap: wrap; gap: 0.28rem; }
 .sqp-edition {
-    font-size: 0.74rem;
+    font-size: 12px;
     padding: 0.16rem 0.45rem;
     border-radius: 999px;
     background: var(--surface-1, #fff);
     border: 1px solid #e4e7ec;
     color: var(--ink);
 }
-.sqp-herkunft-leer { font-size: 0.78rem; color: var(--ink-3); }
+.sqp-herkunft-leer { font-size: 12px; color: var(--ink-3); }
 .sqp-go-zeile { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: baseline; }
-.sqp-go { font-size: 0.8rem; font-weight: 600; }
+.sqp-go { font-size: 12px; font-weight: 600; }
 .sqp-go.is-ja { color: #1f7a4d; }
 .sqp-go.is-unklar { color: #8a6d1f; cursor: help; }
 .sqp-go.is-mega { color: var(--ink-3); cursor: help; }
-.sqp-go-basis { font-size: 0.78rem; color: var(--ink-3); }
+.sqp-go-basis { font-size: 12px; color: var(--ink-3); }
 .sqp-herkunft-warnung {
     margin: 0.4rem 0 0;
-    font-size: 0.72rem;
+    font-size: 12px;
     line-height: 1.4;
     color: #8a6d1f;
     border-left: 2px solid #e0b84d;
@@ -3019,7 +3019,7 @@
 }
 .sqp-herkunft-quelle {
     margin: 0.3rem 0 0;
-    font-size: 0.68rem;
+    font-size: 11px;
     color: var(--ink-3);
     word-break: break-all;
 }
@@ -3027,32 +3027,32 @@
 @media (max-width: 520px) {
     .sqp-raster { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 0.4rem; }
     .sqp-kachel-bild { width: 52px; height: 52px; }
-    .sqp-kachel-name { font-size: 0.74rem; }
+    .sqp-kachel-name { font-size: 12px; }
 }
 
 /* ── Item-Nutzung und Attacken-Wirksamkeit (09.09.2026) ────────────── */
 .sqi { display: flex; flex-direction: column; }
-.sqi-intro { font-size: 0.9rem; color: var(--ink-3); margin: 0 0 0.6rem; }
+.sqi-intro { font-size: 14px; color: var(--ink-3); margin: 0 0 0.6rem; }
 .sqi-suche {
-    width: 100%; padding: 0.55rem 0.8rem; font: inherit; font-size: 0.92rem;
+    width: 100%; padding: 0.55rem 0.8rem; font: inherit; font-size: 14px;
     border: 1px solid #e0e0e0; border-radius: 10px; background: var(--surface-1, #fff);
     color: var(--ink); margin-bottom: 0.55rem;
 }
 .sqi-leiste { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
 .sqi-spacer { flex: 1 1 auto; }
 .sqi-leiste-label {
-    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.03em; color: var(--ink-3);
 }
 .sqi-sort, .sqi-fmt {
     appearance: none; border: 1px solid #e0e0e0; background: var(--surface-2);
-    color: var(--ink); font: inherit; font-size: 0.8rem; font-weight: 600;
+    color: var(--ink); font: inherit; font-size: 12px; font-weight: 600;
     padding: 0.34rem 0.72rem; border-radius: 999px; cursor: pointer;
 }
 .sqi-sort.is-active, .sqi-fmt.is-active {
     background: #2e70c0; border-color: #5b9cef; color: #fff;
 }
-.sqi-zaehler { font-size: 0.8rem; color: var(--ink-3); margin: 0 0 0.4rem; }
+.sqi-zaehler { font-size: 12px; color: var(--ink-3); margin: 0 0 0.4rem; }
 .sqi-liste { display: flex; flex-direction: column; gap: 1px; background: #e4e7ec;
     border: 1px solid #e4e7ec; border-radius: 10px; overflow: hidden; }
 .sqi-item { background: var(--surface-1, #fff); }
@@ -3064,34 +3064,34 @@
 }
 .sqi-kopf:hover { background: var(--surface-2); }
 .sqi-kopf:focus-visible { outline: 2px solid #2e70c0; outline-offset: -2px; }
-.sqi-name { font-weight: 600; font-size: 0.94rem; }
-.sqi-en { font-size: 0.78rem; color: var(--ink-3); }
-.sqi-zahl { font-size: 0.78rem; color: var(--ink-3); margin-left: auto; }
+.sqi-name { font-weight: 600; font-size: 14px; }
+.sqi-en { font-size: 12px; color: var(--ink-3); }
+.sqi-zahl { font-size: 12px; color: var(--ink-3); margin-left: auto; }
 .sqi-spitze {
-    font-size: 0.86rem; font-weight: 700; color: #2e70c0;
+    font-size: 14px; font-weight: 700; color: #2e70c0;
     font-variant-numeric: tabular-nums; min-width: 3.6rem; text-align: right;
 }
 .sqi-schmal {
-    font-size: 0.7rem; font-weight: 600; color: #1f7a4d;
+    font-size: 11px; font-weight: 600; color: #1f7a4d;
     background: #e8f5ee; border: 1px solid #b9e0cb;
     padding: 0.1rem 0.42rem; border-radius: 999px; cursor: help;
 }
 .sqi-wirkung {
-    margin: 0; padding: 0 0.85rem 0.55rem; font-size: 0.8rem; line-height: 1.45;
+    margin: 0; padding: 0 0.85rem 0.55rem; font-size: 12px; line-height: 1.45;
     color: var(--ink-3);
 }
 .sqi-traeger { padding: 0 0.85rem 0.8rem; }
 .sqi-nenner {
-    margin: 0 0 0.5rem; font-size: 0.74rem; line-height: 1.4; color: #8a6d1f;
+    margin: 0 0 0.5rem; font-size: 12px; line-height: 1.4; color: #8a6d1f;
     border-left: 2px solid #e0b84d; padding-left: 0.5rem;
 }
-.sqi-tab { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.sqi-tab { width: 100%; border-collapse: collapse; font-size: 14px; }
 /* Der dunkle Kopfbalken kam aus einer fremden th-Regel dieses
  * Stylesheets — gesehen am 09.09.2026: "POKÉMON" hell, die zwei
  * Zahlenspalten auf fast schwarzem Grund. Hier wird deshalb alles
  * ausdruecklich gesetzt statt geerbt. */
 .sqi-tab th {
-    text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.03em;
     color: var(--ink-3) !important;
     background: transparent !important;
@@ -3104,21 +3104,21 @@
 .sqi-mon { font-weight: 600; }
 .sqi-bar {
     display: inline-block; width: 54px; height: 4px; background: #e4e7ec;
-    border-radius: 2px; margin-right: 0.45rem; vertical-align: middle; position: relative;
+    border-radius: 6px; margin-right: 0.45rem; vertical-align: middle; position: relative;
 }
-.sqi-bar i { position: absolute; inset: 0 auto 0 0; background: #2e70c0; border-radius: 2px; }
-.sqi-status { font-size: 0.9rem; color: var(--ink-3); padding: 0.8rem; }
-.sqi-quelle { font-size: 0.72rem; color: var(--ink-3); margin: 0.7rem 0 0; }
+.sqi-bar i { position: absolute; inset: 0 auto 0 0; background: #2e70c0; border-radius: 6px; }
+.sqi-status { font-size: 14px; color: var(--ink-3); padding: 0.8rem; }
+.sqi-quelle { font-size: 12px; color: var(--ink-3); margin: 0.7rem 0 0; }
 
 /* Typwaehler und Wirksamkeitsmarken im Detail */
 .sqp-gegentyp { display: flex; align-items: center; gap: 0.5rem; margin: 0.7rem 0 0.3rem; }
 .sqp-gegentyp-lbl {
-    font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.03em; color: var(--ink-3);
 }
 .sqp-fx {
-    display: inline-block; margin-left: 0.4rem; font-size: 0.74rem; font-weight: 700;
-    padding: 0.05rem 0.36rem; border-radius: 4px; font-variant-numeric: tabular-nums;
+    display: inline-block; margin-left: 0.4rem; font-size: 12px; font-weight: 700;
+    padding: 0.05rem 0.36rem; border-radius: 6px; font-variant-numeric: tabular-nums;
 }
 .sqp-fx.is-stark { background: #e8f5ee; color: #1f7a4d; border: 1px solid #b9e0cb; }
 .sqp-fx.is-schwach { background: #fdeceb; color: #a8372a; border: 1px solid #f0c2bc; }
@@ -3169,7 +3169,7 @@
     background: var(--surface-2);
     color: var(--ink-2);
     font: inherit;
-    font-size: 0.85rem;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
@@ -3203,7 +3203,7 @@
     align-items: baseline;
     gap: 0.5rem;
     padding: 0.25rem 0;
-    font-size: 0.9rem;
+    font-size: 14px;
     font-weight: 700;
     color: var(--ink);
 }
@@ -3234,7 +3234,7 @@
     border: 1px solid var(--line);
     border-radius: 999px;
     background: var(--surface-2);
-    font-size: 0.85rem;
+    font-size: 14px;
     font-weight: 700;
     color: var(--ink-2);
     cursor: pointer;
@@ -3254,7 +3254,7 @@
     margin: 0.5rem 0 0 0;
     padding: 0.6rem 0.8rem;
     border-left: 3px solid var(--gold, #d8a22b);
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 10px 10px 0;
     background: rgba(216, 162, 43, 0.08);
     font-size: var(--fs-xs);
     line-height: 1.5;
@@ -3276,7 +3276,7 @@
 @media (max-width: 560px) {
     .side-quest-quellen-label { width: 100%; margin-bottom: 0.2rem; }
     .side-quest-quelle-btn { flex: 1 1 auto; text-align: center; }
-    .side-quest-major-turnier { font-size: 0.82rem; }
+    .side-quest-major-turnier { font-size: 14px; }
 }
 
 
@@ -3318,17 +3318,17 @@
     content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px;
     background: linear-gradient(90deg, #E3350D, #FFCB05, #4ecb8b, #3B4CCA, #5566e0, #a06ee0);
 }
-.sq-console .sq-brand { font-weight: 700; font-size: 14.5px; letter-spacing: .2px; }
+.sq-console .sq-brand { font-weight: 700; font-size: 14px; letter-spacing: .2px; }
 .sq-console .sq-brand span { color: var(--sq-accent2); }
 .sq-console .sq-meta { font-family: var(--sq-num); font-size: 11px; color: var(--sq-dim); }
 .sq-console .sq-spacer { flex: 1; }
 .sq-console .sq-seg {
     display: flex; background: var(--sq-deep); border: .8px solid var(--sq-line);
-    border-radius: 9px; padding: 2px;
+    border-radius: 10px; padding: 2px;
 }
 .sq-console .sq-seg button {
-    background: none; border: 0; color: var(--sq-dim); font: inherit; font-size: 11.5px;
-    padding: 6px 12px; border-radius: 7px; cursor: pointer; min-height: 32px;
+    background: none; border: 0; color: var(--sq-dim); font: inherit; font-size: 12px;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; min-height: 32px;
 }
 .sq-console .sq-seg button.on {
     background: rgba(85,102,224,.22); color: var(--sq-txt);
@@ -3380,21 +3380,21 @@
    into something you can navigate. The <em> on the right is where the
    tail note goes, so cutting a list never hides that it was cut. */
 .sq-console .sq-lbl {
-    font-size: 10px; text-transform: uppercase; letter-spacing: .09em; font-weight: 700;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .09em; font-weight: 700;
     color: var(--sq-accent2); display: flex; align-items: center; gap: 7px; margin: 0 0 9px;
 }
 .sq-console .sq-lbl::before {
-    content: ""; width: 3px; height: 11px; border-radius: 2px; background: var(--sq-accent2);
+    content: ""; width: 3px; height: 11px; border-radius: 6px; background: var(--sq-accent2);
 }
 .sq-console .sq-lbl em {
     margin-left: auto; font-style: normal; font-weight: 500; color: var(--sq-dim2);
-    font-size: 10px; text-transform: none; letter-spacing: 0;
+    font-size: 11px; text-transform: none; letter-spacing: 0;
 }
 
 .sq-console .sq-types { display: flex; flex-wrap: wrap; gap: 4px; }
 .sq-console .sq-types button {
     background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 6px;
-    color: var(--sq-dim); font: inherit; font-size: 10.5px; padding: 5px 8px;
+    color: var(--sq-dim); font: inherit; font-size: 11px; padding: 5px 8px;
     cursor: pointer; min-height: 30px;
 }
 .sq-console .sq-types button.on {
@@ -3406,7 +3406,7 @@
 .sq-console .sq-list { max-height: 74vh; overflow: auto; }
 .sq-console .sq-row {
     display: flex; align-items: center; gap: 9px;
-    padding: 7px 9px; border-radius: 11px; cursor: pointer;
+    padding: 7px 9px; border-radius: 10px; cursor: pointer;
 }
 .sq-console .sq-row:hover { background: rgba(255,255,255,.035); }
 .sq-console .sq-row.sel {
@@ -3416,21 +3416,21 @@
     font-family: var(--sq-num); font-size: 11px; color: var(--sq-dim2);
     width: 20px; text-align: right; flex: 0 0 20px;
 }
-.sq-console .sq-row .nm { font-size: 13px; font-weight: 600; }
-.sq-console .sq-row .sub { font-size: 10px; color: var(--sq-dim2); font-family: var(--sq-num); }
+.sq-console .sq-row .nm { font-size: 14px; font-weight: 600; }
+.sq-console .sq-row .sub { font-size: 11px; color: var(--sq-dim2); font-family: var(--sq-num); }
 .sq-console .sq-row .bar {
-    margin-left: auto; width: 44px; height: 5px; border-radius: 4px;
+    margin-left: auto; width: 44px; height: 5px; border-radius: 6px;
     background: var(--sq-deep); flex: 0 0 44px; overflow: hidden;
 }
 .sq-console .sq-row .bar i {
-    display: block; height: 100%; border-radius: 4px;
+    display: block; height: 100%; border-radius: 6px;
     background: linear-gradient(90deg, var(--sq-accent), var(--sq-accent2));
 }
 
 .sq-console .sq-head { display: flex; align-items: baseline; gap: 11px; margin-bottom: 12px; flex-wrap: wrap; }
-.sq-console .sq-head .rank { font-family: var(--sq-num); font-size: 15px; color: var(--sq-accent2); font-weight: 700; }
+.sq-console .sq-head .rank { font-family: var(--sq-num); font-size: 14px; color: var(--sq-accent2); font-weight: 700; }
 .sq-console .sq-head h2 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.01em; color: var(--sq-txt); }
-.sq-console .sq-head .de { color: var(--sq-dim2); font-size: 11.5px; }
+.sq-console .sq-head .de { color: var(--sq-dim2); font-size: 12px; }
 
 /* The bar row is the one motif the whole view is built from. */
 .sq-console .sq-item {
@@ -3440,7 +3440,7 @@
 .sq-console .sq-item .t {
     font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.sq-console .sq-item .t small { color: var(--sq-dim2); font-size: 10.5px; margin-left: 5px; }
+.sq-console .sq-item .t small { color: var(--sq-dim2); font-size: 11px; margin-left: 5px; }
 .sq-console .sq-track { height: 7px; border-radius: 6px; background: var(--sq-deep); overflow: hidden; }
 .sq-console .sq-track i {
     display: block; height: 100%; border-radius: 6px;
@@ -3453,9 +3453,9 @@
 .sq-console .sq-spread { display: grid; grid-template-columns: auto 1fr 44px; align-items: center; gap: 8px; padding: 3px 0; }
 .sq-console .sq-evs { display: flex; gap: 2px; }
 .sq-console .sq-ev {
-    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 5px;
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 6px;
     padding: 2px 5px; min-width: 27px; text-align: center;
-    font-family: var(--sq-num); font-size: 10px;
+    font-family: var(--sq-num); font-size: 11px;
 }
 .sq-console .sq-ev b { display: block; font-size: 11px; color: var(--sq-txt); font-weight: 600; }
 .sq-console .sq-ev span { color: var(--sq-dim2); font-size: var(--fs-xs); text-transform: uppercase; }
@@ -3466,9 +3466,9 @@
 .sq-console .sq-mates { display: flex; flex-wrap: wrap; gap: 4px; }
 .sq-console .sq-mate {
     background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 6px;
-    padding: 4px 8px; font-size: 11.5px; color: var(--sq-txt);
+    padding: 4px 8px; font-size: 12px; color: var(--sq-txt);
 }
-.sq-console .sq-empty { color: var(--sq-dim2); font-size: 11.5px; margin: 4px 0 0; }
+.sq-console .sq-empty { color: var(--sq-dim2); font-size: 12px; margin: 4px 0 0; }
 
 /* Teammates: sprite + rank, like the reference. Still not bars — the
    file carries pct: null for every entry, and a bar would claim a
@@ -3477,12 +3477,12 @@
 .sq-console .sq-mate {
     position: relative; display: flex; flex-direction: column; align-items: center;
     gap: 1px; padding: 6px 2px 4px;
-    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
-    font-size: 11.5px; color: var(--sq-txt);
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 10px;
+    font-size: 12px; color: var(--sq-txt);
 }
 .sq-console .sq-mate-rk {
     position: absolute; top: 2px; left: 3px;
-    min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
+    min-width: 14px; height: 14px; padding: 0 3px; border-radius: 6px;
     background: rgba(85,102,224,.28); color: #cfd6ff;
     font-family: var(--sq-num); font-size: var(--fs-xs); font-weight: 700; line-height: 14px;
     text-align: center;
@@ -3507,15 +3507,15 @@
    Karte auf 376px in 270px stand. */
 .sq-console .sq-in {
     width: 100%; background: var(--sq-deep); color: var(--sq-txt);
-    border: .8px solid var(--sq-line); border-radius: 8px;
+    border: .8px solid var(--sq-line); border-radius: 10px;
     font: inherit; font-size: 12px; padding: 7px 8px; min-height: 36px;
 }
 .sq-console .sq-in:focus-visible { outline: 2px solid var(--sq-accent); outline-offset: 1px; }
 .sq-console .sq-search { margin-bottom: 8px; }
 .sq-console .sq-btn {
     background: var(--sq-deep); color: var(--sq-txt);
-    border: .8px solid var(--sq-line); border-radius: 8px;
-    font: inherit; font-size: 11.5px; padding: 9px 12px; min-height: 44px;
+    border: .8px solid var(--sq-line); border-radius: 10px;
+    font: inherit; font-size: 12px; padding: 9px 12px; min-height: 44px;
     cursor: pointer; width: 100%;
 }
 .sq-console .sq-btn:hover { border-color: var(--sq-accent); }
@@ -3582,7 +3582,7 @@
 }
 .sq-console .sq-mu-rows { max-height: 72vh; overflow: auto; }
 .sq-console .sq-mu-row {
-    padding: 6px 8px; border-radius: 11px; cursor: pointer; min-height: 44px;
+    padding: 6px 8px; border-radius: 10px; cursor: pointer; min-height: 44px;
     border-top: .8px solid rgba(37,48,87,.5);
 }
 .sq-console .sq-mu-row:first-child { border-top: 0; }
@@ -3596,7 +3596,7 @@
 .sq-console .sq-mu-spd {
     display: flex; align-items: baseline; gap: 5px; font-family: var(--sq-num); font-size: 11px;
 }
-.sq-console .sq-mu-spd b { font-size: 12.5px; }
+.sq-console .sq-mu-spd b { font-size: 12px; }
 .sq-console .sq-mu-spd span {
     font-family: inherit; font-size: var(--fs-xs); letter-spacing: .02em;
 }
@@ -3611,26 +3611,26 @@
     font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--sq-dim2);
 }
 .sq-console .sq-mu-mv {
-    display: block; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .sq-console .sq-mu-eff {
     font-style: normal; font-family: var(--sq-num); font-size: var(--fs-xs);
-    margin-left: 5px; padding: 1px 4px; border-radius: 4px;
+    margin-left: 5px; padding: 1px 4px; border-radius: 6px;
     background: var(--sq-deep); color: var(--sq-dim);
 }
 .sq-console .sq-mu-eff.is-super { color: #6fdca0; }
 .sq-console .sq-mu-eff.is-resist { color: #ff8f7a; }
 .sq-console .sq-mu-eff.is-immune { color: var(--sq-dim2); }
 .sq-console .sq-mu-bar {
-    display: block; height: 5px; border-radius: 4px; background: var(--sq-deep);
+    display: block; height: 5px; border-radius: 6px; background: var(--sq-deep);
     overflow: hidden; margin: 3px 0 2px;
 }
-.sq-console .sq-mu-bar i { display: block; height: 100%; border-radius: 4px; }
+.sq-console .sq-mu-bar i { display: block; height: 100%; border-radius: 6px; }
 .sq-console .sq-mu-bar.is-deal i { background: linear-gradient(90deg, #3f9d72, #6fdca0); }
 .sq-console .sq-mu-bar.is-take i { background: linear-gradient(90deg, #b4483a, #ff8f7a); }
-.sq-console .sq-mu-pct { font-family: var(--sq-num); font-size: 10.5px; color: var(--sq-dim); }
+.sq-console .sq-mu-pct { font-family: var(--sq-num); font-size: 11px; color: var(--sq-dim); }
 .sq-console .sq-mu-ko {
-    font-family: var(--sq-num); font-size: 10px; margin-left: 6px; color: var(--sq-accent2);
+    font-family: var(--sq-num); font-size: 11px; margin-left: 6px; color: var(--sq-accent2);
 }
 .sq-console .sq-mu-ko.is-immune { color: var(--sq-dim2); }
 .sq-console .sq-mu-none { font-size: 11px; color: var(--sq-dim2); }
@@ -3638,7 +3638,7 @@
 /* Rechner */
 .sq-console .sq-grid-calc { grid-template-columns: 258px 258px minmax(0, 1fr); }
 @media (max-width: 1100px) { .sq-console .sq-grid-calc { grid-template-columns: 1fr; } }
-.sq-console .sq-speed { font-size: 12.5px; padding: 10px 12px; }
+.sq-console .sq-speed { font-size: 12px; padding: 10px 12px; }
 .sq-console .sq-speed.is-fast { box-shadow: inset 3px 0 0 #6fdca0, var(--sq-shadow); }
 .sq-console .sq-speed.is-slow { box-shadow: inset 3px 0 0 #ff8f7a, var(--sq-shadow); }
 .sq-console .sq-speed.is-tie { box-shadow: inset 3px 0 0 var(--sq-accent2), var(--sq-shadow); }
@@ -3672,7 +3672,7 @@
 .sq-console .sq-calc-pct { color: var(--sq-dim); }
 
 .sq-console .sq-note {
-    margin: 11px 0 0; font-size: 10.5px; line-height: 1.5; color: var(--sq-dim2);
+    margin: 11px 0 0; font-size: 11px; line-height: 1.5; color: var(--sq-dim2);
 }
 .sq-console .sq-note b { color: var(--sq-dim); }
 
@@ -3722,7 +3722,7 @@
     display: flex; flex-direction: column; gap: 12px; padding: 14px;
 }
 .sq-console .sq-team-hinweis {
-    margin: 0; color: var(--sq-dim); font-size: 11.5px; max-width: 78ch;
+    margin: 0; color: var(--sq-dim); font-size: 12px; max-width: 78ch;
 }
 
 /* Die Bank: ein Chip je Pokemon, angeklickt schaltet er sich aus dem
@@ -3745,7 +3745,7 @@
 .sq-console .sq-team-chip {
     display: inline-flex; align-items: center; gap: 6px;
     background: none; border: 0; padding: 5px 10px;
-    color: var(--sq-dim); font: inherit; font-size: 11.5px;
+    color: var(--sq-dim); font: inherit; font-size: 12px;
     cursor: pointer; transition: background .12s, color .12s;
 }
 .sq-console .sq-team-chipgruppe:hover { border-color: var(--sq-accent); }
@@ -3758,16 +3758,16 @@
     box-shadow: inset 0 0 0 .8px var(--sq-accent);
 }
 .sq-console .sq-team-chip-name small {
-    display: block; font-size: 10px; color: var(--sq-dim2); line-height: 1.2;
+    display: block; font-size: 11px; color: var(--sq-dim2); line-height: 1.2;
 }
 .sq-console .sq-team-chip-warn {
-    font-style: normal; font-size: 10px; text-transform: uppercase;
+    font-style: normal; font-size: 11px; text-transform: uppercase;
     letter-spacing: .06em; color: var(--sq-schlecht);
 }
 .sq-console .sq-team-chip-weg {
     background: none; border: 0; border-left: .8px solid var(--sq-line);
     line-height: 1; padding: 0 8px; color: var(--sq-dim2);
-    font: inherit; font-size: 13px; cursor: pointer;
+    font: inherit; font-size: 14px; cursor: pointer;
 }
 .sq-console .sq-team-chip-weg:hover { color: var(--sq-schlecht); }
 
@@ -3779,14 +3779,14 @@
     overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
 }
 .sq-console .sq-team-zaehler {
-    margin: 8px 0 0; font-family: var(--sq-num); font-size: 10.5px; color: var(--sq-dim2);
+    margin: 8px 0 0; font-family: var(--sq-num); font-size: 11px; color: var(--sq-dim2);
 }
 .sq-console .sq-team-zuviel { color: var(--sq-accent2); cursor: help; }
 
 .sq-console .sq-team-vorschlag { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
 .sq-console .sq-team-vorschlag button {
-    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
-    color: var(--sq-txt); font: inherit; font-size: 11.5px; padding: 4px 9px; cursor: pointer;
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 10px;
+    color: var(--sq-txt); font: inherit; font-size: 12px; padding: 4px 9px; cursor: pointer;
 }
 .sq-console .sq-team-vorschlag button:hover { border-color: var(--sq-accent); }
 
@@ -3847,11 +3847,11 @@
     border: .8px solid var(--sq-line); padding: 7px 8px; text-align: left; vertical-align: top;
 }
 .sq-console .sq-team-matrix thead th {
-    font-size: 10px; text-transform: uppercase; letter-spacing: .07em;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
     color: var(--sq-accent2); font-weight: 700; white-space: nowrap;
 }
 .sq-console .sq-team-matrix tbody th {
-    font-size: 11.5px; font-weight: 600; color: var(--sq-txt); white-space: nowrap;
+    font-size: 12px; font-weight: 600; color: var(--sq-txt); white-space: nowrap;
 }
 .sq-console .sq-team-matrix thead td { border: 0; }
 
@@ -3869,7 +3869,7 @@
 .sq-console .sq-team-zelle.is-leer { color: var(--sq-dim2); text-align: center; }
 
 .sq-console .sq-team-pfeil {
-    position: absolute; top: 6px; right: 7px; font-size: 10px; color: var(--sq-dim); cursor: help;
+    position: absolute; top: 6px; right: 7px; font-size: 11px; color: var(--sq-dim); cursor: help;
 }
 /* Wert und K.-o.-Zahl stehen NEBENEINANDER, nicht an den beiden
    Raendern: `1fr auto` schob sie auf einem breiten Schirm 1000 px
@@ -3883,7 +3883,7 @@
 }
 .sq-console .sq-team-deal i,
 .sq-console .sq-team-take i {
-    grid-column: 1 / -1; font-style: normal; font-size: 10px; text-transform: uppercase;
+    grid-column: 1 / -1; font-style: normal; font-size: 11px; text-transform: uppercase;
     letter-spacing: .06em; color: var(--sq-dim2);
 }
 .sq-console .sq-team-deal b { color: var(--sq-gut); font-weight: 700; }
@@ -3893,7 +3893,7 @@
    nicht nachrechnen. */
 .sq-console .sq-team-deal em,
 .sq-console .sq-team-take em {
-    grid-column: 1 / -1; font-style: normal; font-size: 10px; color: var(--sq-dim2);
+    grid-column: 1 / -1; font-style: normal; font-size: 11px; color: var(--sq-dim2);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* Immun ist nicht "trifft fuer fast nichts" — deshalb kein Zahlenwert
@@ -3912,13 +3912,13 @@
 }
 .sq-console .sq-team-deal u,
 .sq-console .sq-team-take u {
-    text-decoration: none; font-size: 10px; color: var(--sq-dim);
+    text-decoration: none; font-size: 11px; color: var(--sq-dim);
 }
 .sq-console .sq-team-take { margin-top: 4px; }
 
 @media (max-width: 700px) {
     .sq-console .sq-team { padding: 10px; }
-    .sq-console .sq-team-zelle { min-width: 104px; font-size: 10.5px; }
+    .sq-console .sq-team-zelle { min-width: 104px; font-size: 11px; }
 }
 
 /* ── DIE KAMPFLAGE IM SCHADENSRECHNER (16.09.2026) ───────────────────
@@ -3998,11 +3998,11 @@
    springt die Zeile bei jedem Klick um die Breite einer Ziffer. */
 .sq-console .sq-schnell-stufe {
     display: inline-flex; align-items: center; gap: 2px;
-    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 10px;
     padding: 1px 3px;
 }
 .sq-console .sq-schnell-stufe b {
-    font-size: 10px; letter-spacing: .04em; color: var(--sq-dim2);
+    font-size: 11px; letter-spacing: .04em; color: var(--sq-dim2);
     font-weight: 700; padding: 0 2px;
 }
 .sq-console .sq-schnell-stufe i {
@@ -4011,7 +4011,7 @@
 }
 .sq-console .sq-schnell-stufe button {
     background: none; border: none; color: var(--sq-dim2); cursor: pointer;
-    font-size: 13px; line-height: 1; padding: 3px 5px; border-radius: 6px;
+    font-size: 14px; line-height: 1; padding: 3px 5px; border-radius: 6px;
 }
 .sq-console .sq-schnell-stufe button:hover:not(:disabled) {
     color: var(--sq-txt); background: var(--sq-panel);
@@ -4025,7 +4025,7 @@
 /* Eine Wahlreihe (Status, KP, Schirm): genau einer ist an. */
 .sq-console .sq-schnell-w,
 .sq-console .sq-schnell-f {
-    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 10px;
     color: var(--sq-dim2); cursor: pointer; font-family: inherit;
     font-size: var(--fs-xs); font-weight: 700; line-height: 1;
     padding: 5px 8px; min-height: 26px;
@@ -4145,7 +4145,7 @@
 .sq-console .sq-kader-chip { position: relative; min-width: 0; }
 .sq-console .sq-kader-sprite {
     width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2px;
-    background: var(--sq-deep); border: 1.4px solid var(--sq-line); border-radius: 12px;
+    background: var(--sq-deep); border: 1.4px solid var(--sq-line); border-radius: 14px;
     padding: 6px 4px 5px; cursor: pointer; color: var(--sq-dim);
     font-size: var(--fs-xs); line-height: 1.25; text-align: center;
     transition: border-color .12s ease, color .12s ease;
@@ -4164,7 +4164,7 @@
     font-weight: 700;
 }
 .sq-console .sq-kader-marke, .sq-console .sq-kader-warn {
-    display: block; font-style: normal; font-size: 10px; letter-spacing: .04em;
+    display: block; font-style: normal; font-size: 11px; letter-spacing: .04em;
     text-transform: uppercase;
 }
 .sq-console .sq-kader-marke { color: var(--sq-accent2); }
@@ -4236,7 +4236,7 @@
    im Fluss würde sie die Schnellleiste und die halbe Seite nach unten
    schieben, sobald man tippt — und beim Löschen wieder zurück. Ein
    Feld, unter dem die Seite springt, ist kein Suchfeld. */
-.sq-console .sq-rech-pick { width: 100%; font-size: 13px; font-weight: 700; }
+.sq-console .sq-rech-pick { width: 100%; font-size: 14px; font-weight: 700; }
 .sq-console .sq-rech-combo { position: relative; }
 .sq-console .sq-rech-treffer {
     position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px);
@@ -4248,7 +4248,7 @@
 .sq-console .sq-rech-treffer[hidden] { display: none; }
 .sq-console .sq-rech-treff {
     display: flex; align-items: center; gap: 8px; width: 100%;
-    background: none; border: none; border-radius: 8px; cursor: pointer;
+    background: none; border: none; border-radius: 10px; cursor: pointer;
     color: var(--sq-dim); font-family: inherit; font-size: var(--fs-xs);
     padding: 5px 7px; text-align: left;
 }
@@ -4289,7 +4289,7 @@
     font-size: var(--fs-xs); color: var(--sq-dim2); text-transform: uppercase; letter-spacing: .12em;
 }
 .sq-console .sq-rech-tausch {
-    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 8px;
+    background: var(--sq-deep); border: .8px solid var(--sq-line); border-radius: 10px;
     color: var(--sq-dim); font-size: 14px; line-height: 1; padding: 5px 9px; cursor: pointer;
 }
 .sq-console .sq-rech-tausch:hover { color: var(--sq-txt); border-color: var(--sq-accent); }
@@ -4306,7 +4306,7 @@
 }
 .sq-console .sq-rech-zahl { font-family: var(--sq-num); font-variant-numeric: tabular-nums; }
 .sq-console .sq-rech-wuerfe {
-    margin-top: 6px; font-family: var(--sq-num); font-size: 10.5px; color: var(--sq-dim2);
+    margin-top: 6px; font-family: var(--sq-num); font-size: 11px; color: var(--sq-dim2);
     overflow-x: auto; white-space: nowrap; scrollbar-width: thin;
 }
 .sq-console .sq-rech-wuerfe u { text-decoration: none; color: var(--sq-dim); font-weight: 700; }
@@ -4340,7 +4340,7 @@
     display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(54px, 1fr) 96px 84px;
     gap: 10px; align-items: center; width: 100%; text-align: left;
     background: transparent; border: 0; border-top: .8px solid var(--sq-line);
-    padding: 8px 6px; color: var(--sq-txt); font: inherit; cursor: pointer; border-radius: 8px;
+    padding: 8px 6px; color: var(--sq-txt); font: inherit; cursor: pointer; border-radius: 10px;
 }
 .sq-console .sq-rech-mv:first-of-type { border-top: 0; }
 .sq-console .sq-rech-mv:hover { background: rgba(85,102,224,.10); }
@@ -4350,14 +4350,14 @@
 .sq-console .sq-rech-mv:focus-visible { outline: 2px solid var(--sq-accent); outline-offset: 1px; }
 .sq-console .sq-rech-mv-n {
     display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-    font-weight: 700; font-size: 13px; min-width: 0;
+    font-weight: 700; font-size: 14px; min-width: 0;
 }
 .sq-console .sq-rech-mv-n small {
     display: inline; font-size: .8em; color: var(--sq-dim); font-weight: 400;
 }
 .sq-console .sq-rech-bp,
 .sq-console .sq-rech-flag, .sq-console .sq-rech-eff {
-    font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: .03em;
+    font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .03em;
 }
 .sq-console .sq-rech-bp { font-family: var(--sq-num); font-weight: 500; color: var(--sq-dim); }
 .sq-console .sq-rech-flag {
@@ -4366,8 +4366,8 @@
 .sq-console .sq-rech-eff.is-super { color: var(--tint-bad-ink); }
 .sq-console .sq-rech-eff.is-resist { color: var(--tint-ok-ink); }
 .sq-console .sq-rech-eff.is-immune { color: var(--sq-dim2); }
-.sq-console .sq-rech-bar { height: 7px; border-radius: 99px; background: var(--sq-deep); overflow: hidden; }
-.sq-console .sq-rech-bar i { display: block; height: 100%; border-radius: 99px; }
+.sq-console .sq-rech-bar { height: 7px; border-radius: 999px; background: var(--sq-deep); overflow: hidden; }
+.sq-console .sq-rech-bar i { display: block; height: 100%; border-radius: 999px; }
 .sq-console .sq-rech-bar.is-deal i { background: var(--tint-ok-ink); }
 .sq-console .sq-rech-bar.is-take i { background: var(--tint-bad-ink); }
 .sq-console .sq-rech-pct {
@@ -4386,12 +4386,12 @@
     border-top: .8px solid var(--sq-line); padding: 7px 2px;
 }
 .sq-console .sq-verl-zeile:first-child { border-top: 0; }
-.sq-console .sq-verl-satz { font-size: 12.5px; line-height: 1.45; min-width: 0; }
+.sq-console .sq-verl-satz { font-size: 12px; line-height: 1.45; min-width: 0; }
 .sq-console .sq-verl-satz b { color: var(--sq-txt); }
 .sq-console .sq-verl-satz small { display: none; }
 .sq-console .sq-verl-lage { font-size: var(--fs-xs); color: var(--sq-dim); line-height: 1.45; }
 .sq-console .sq-verl-weg {
-    background: none; border: 0; color: var(--sq-dim2); font-size: 15px; line-height: 1;
+    background: none; border: 0; color: var(--sq-dim2); font-size: 14px; line-height: 1;
     cursor: pointer; padding: 2px 5px; border-radius: 6px;
 }
 .sq-console .sq-verl-weg:hover { color: var(--tint-bad-ink); background: var(--tint-bad); }
@@ -4399,8 +4399,8 @@
 /* Die Sätze hinter dem Aufklapper. */
 .sq-console .sq-rech-saetze > summary {
     cursor: pointer; list-style: none;
-    background: var(--sq-panel); border: .8px solid var(--sq-line); border-radius: 12px;
-    padding: 10px 13px; font-weight: 700; font-size: 13px;
+    background: var(--sq-panel); border: .8px solid var(--sq-line); border-radius: 14px;
+    padding: 10px 13px; font-weight: 700; font-size: 14px;
     display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
 }
 .sq-console .sq-rech-saetze > summary::-webkit-details-marker { display: none; }
@@ -4442,7 +4442,7 @@
        vom Textfeld nichts uebrig. */
     .sq-console .sq-kader-paste { grid-template-columns: minmax(0, 1fr); }
     .sq-console .sq-rech-vs { flex-direction: row; justify-content: space-between; }
-    .sq-console .sq-rech-satz { font-size: 15px; }
+    .sq-console .sq-rech-satz { font-size: 14px; }
     .sq-console .sq-verl-zeile { grid-template-columns: minmax(0, 1fr) 26px; }
     .sq-console .sq-verl-lage { grid-column: 1 / -1; }
     /* Bei 390 px teilen sich Auswahlfeld und Knopf die volle Breite —
@@ -4465,7 +4465,7 @@
    `tabular-nums`, damit die Zahlen in der Rasterzeile untereinander
    stehen und man zwei Kacheln ohne Lesen vergleichen kann. */
 .sq-console .sq-kader-ini {
-    display: block; font-size: 10px; letter-spacing: .04em;
+    display: block; font-size: 11px; letter-spacing: .04em;
     color: var(--sq-accent); font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -4498,7 +4498,7 @@
 .sq-console .sq-item-liste[hidden] { display: none; }
 .sq-console .sq-item-zeile {
     display: flex; align-items: center; gap: 8px; width: 100%;
-    background: none; border: none; border-radius: 8px; cursor: pointer;
+    background: none; border: none; border-radius: 10px; cursor: pointer;
     color: var(--sq-dim); font-family: inherit; font-size: var(--fs-xs);
     padding: 5px 7px; text-align: left;
 }

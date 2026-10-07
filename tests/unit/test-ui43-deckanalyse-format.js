@@ -39,7 +39,7 @@ const INDEX = R('index.html');
 const kopfDerAnalyse = () => {
     const a = INDEX.indexOf('<div id="current-analysis"');
     assert.ok(a >= 0, 'Reiter #current-analysis fehlt');
-    const h2 = INDEX.indexOf('<h2>', a);
+    const h2 = INDEX.indexOf('<h2', a);  // V2-13: erste h2 traegt role/aria-level
     return INDEX.slice(h2, INDEX.indexOf('</h2>', h2));
 };
 

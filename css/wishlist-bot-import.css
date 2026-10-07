@@ -35,12 +35,12 @@
 .wl-bot-import-title {
   margin: 0 0 12px;
   color: #667eea;
-  font-size: 1.25rem;
+  font-size: 21px;
 }
 
 .wl-bot-import-hint {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: 14px;
   color: #666;
   line-height: 1.45;
 }
@@ -49,12 +49,12 @@
   width: 100%;
   box-sizing: border-box;
   /* 16px keeps iOS Safari from zooming the viewport on focus. */
-  font-size: 16px;
+  font-size: 17px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   line-height: 1.45;
   padding: 10px 12px;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 10px;
   resize: vertical;
   background: #fff;
   color: #222;
@@ -69,10 +69,10 @@
 .wl-bot-import-error {
   margin-top: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff3cd;
   color: #856404;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -93,19 +93,19 @@
   align-items: center;
   gap: 10px;
   margin: 12px 0 4px;
-  font-size: 13px;
+  font-size: 14px;
   color: #444;
   font-weight: 600;
 }
 
 .wl-bot-import-qty select {
-  font-size: 16px;
+  font-size: 17px;
   /* 44px minimum touch target — this is the control that decides how many
      copies land on the list, so it must not be a 34px sliver on a phone. */
   min-height: 44px;
   padding: 10px 12px;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff;
   color: #222;
 }
@@ -119,7 +119,7 @@
 
 .wl-bot-import-stat {
   flex: 1 1 110px;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 10px 12px;
   text-align: center;
   line-height: 1.3;
@@ -134,7 +134,7 @@
   max-height: 240px;
   overflow: auto;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 12px;
 }
 
@@ -192,7 +192,7 @@
      where most of this site is used. */
   min-height: 44px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 11px 12px;
   font-size: 14px;
   font-weight: 700;
@@ -223,7 +223,7 @@
   .wl-bot-import-overlay { align-items: flex-start; padding-top: 12px; }
   .wl-bot-import-panel {
     padding: 16px;
-    border-radius: 12px;
+    border-radius: 14px;
     max-height: min(90vh, 90dvh);
   }
   .wl-bot-import-textarea { min-height: 7.5em; }

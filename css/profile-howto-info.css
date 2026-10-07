@@ -3,7 +3,7 @@
 .tutorial-schritte, .tutorial-liste { margin: 0 0 16px; padding-left: 1.4em; line-height: 1.55; }
 .tutorial-schritte li, .tutorial-liste li { margin-bottom: 8px; }
 .glossar { margin: 0; }
-.glossar dt { font-weight: 700; margin-top: 14px; scroll-margin-top: 90px; border-radius: 4px; }
+.glossar dt { font-weight: 700; margin-top: 14px; scroll-margin-top: 90px; border-radius: 6px; }
 .glossar dd { margin: 4px 0 0; line-height: 1.55; color: var(--text-main); }
 .glossar dt.glossar-markiert { background: color-mix(in srgb, var(--pokemon-red, #E3350D) 18%, transparent); }
 .glossar-i {
@@ -101,7 +101,7 @@
     gap: 28px;
     padding: 28px 28px 30px;
     margin: 0 0 24px;
-    border-radius: 18px;
+    border-radius: 14px;
     /* 29.08.2026: der Verlauf stand fest auf Weiss. Als background-IMAGE
        rutschte er durch jede Zaehlung, die nur backgroundColor liest. */
     background: linear-gradient(140deg, var(--surface-1) 0%, var(--surface-2) 100%);
@@ -115,7 +115,7 @@
 .feature-banner-img-grid,
 .feature-banner-img-hero,
 .feature-banner-img-asym {
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
     overflow: hidden;
     /* Phone-screenshot frame look. background-size: contain shows the
@@ -196,7 +196,7 @@
 }
 .feature-banner-eyebrow {
     display: inline-block;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -207,14 +207,14 @@
     margin-bottom: 12px;
 }
 .feature-banner-title {
-    font-size: 1.6rem;
+    font-size: 30px;
     font-weight: 900;
     color: var(--ink);
     margin: 0 0 8px;
     line-height: 1.15;
 }
 .feature-banner-tagline {
-    font-size: 1rem;
+    font-size: 17px;
     color: var(--ink-2);
     line-height: 1.55;
     margin: 0 0 18px;
@@ -230,7 +230,7 @@
 .feature-banner-bullets li {
     position: relative;
     padding-left: 22px;
-    font-size: 0.94rem;
+    font-size: 14px;
     line-height: 1.5;
     color: var(--ink);
 }
@@ -254,7 +254,7 @@
     background: rgba(255, 203, 5, 0.10);
     border-left: 3px solid var(--pokemon-yellow, #FFCB05);
     border-radius: 6px;
-    font-size: 0.88rem;
+    font-size: 14px;
     color: var(--tint-warn-ink);
     line-height: 1.5;
 }
@@ -273,7 +273,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 0.75rem;
+    font-size: 12px;
     padding: 14px;
     aspect-ratio: 16 / 9;
 }
@@ -284,7 +284,7 @@
     align-items: center;
     gap: 14px;
     margin: 36px 4px 18px;
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -324,13 +324,13 @@
 }
 .quickstart-step h3 {
     margin: 0 0 8px;
-    font-size: 1.05rem;
+    font-size: 17px;
     color: var(--brand-ink);
     font-weight: 800;
 }
 .quickstart-step p {
     margin: 0;
-    font-size: 0.88rem;
+    font-size: 14px;
     line-height: 1.55;
     color: var(--ink-2);
 }
@@ -340,13 +340,13 @@
     background: linear-gradient(135deg, #1e293b 0%, #3B4CCA 100%);
     color: #fff;
     padding: 40px 32px 36px;
-    border-radius: 20px;
+    border-radius: 999px;
     margin-bottom: 28px;
     box-shadow: 0 12px 32px rgba(59, 76, 202, 0.18);
 }
 .tutorial-hero-eyebrow {
     display: inline-block;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -363,7 +363,7 @@
     margin: 0 0 12px;
 }
 .tutorial-hero-tagline {
-    font-size: 1.05rem;
+    font-size: 17px;
     line-height: 1.55;
     color: rgba(255, 255, 255, 0.85);
     margin: 0 0 22px;
@@ -379,12 +379,12 @@
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 10px;
     padding: 14px 16px;
-    font-size: 0.88rem;
+    font-size: 14px;
     line-height: 1.4;
 }
 .tutorial-hero-killer strong {
     display: block;
-    font-size: 1rem;
+    font-size: 17px;
     color: #fde68a;
     margin-bottom: 4px;
 }
@@ -396,7 +396,7 @@
        verschwand. Deshalb steht hier eine eigene, dunkle Textfarbe. */
     color: var(--tint-warn-ink);
     background: linear-gradient(135deg, var(--tint-warn) 0%, var(--tint-warn) 100%);
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 28px 30px;
     margin: 28px 0;
     text-align: center;
@@ -405,13 +405,13 @@
 .tutorial-cta h2 {
     margin: 0 0 10px;
     color: var(--tint-warn-ink);
-    font-size: 1.4rem;
+    font-size: 21px;
     font-weight: 900;
 }
 .tutorial-cta p {
     margin: 0 0 16px;
     color: var(--tint-warn-ink);
-    font-size: 0.98rem;
+    font-size: 17px;
     line-height: 1.55;
 }
 
@@ -439,7 +439,7 @@
         grid-template-columns: 1fr;
     }
     .feature-banner-title {
-        font-size: 1.35rem;
+        font-size: 21px;
     }
 
     /* Multi-image grids inside mosaic / asymmetric — stack vertically so
@@ -485,7 +485,7 @@
         grid-template-columns: 1fr;
     }
     .tutorial-hero h1 {
-        font-size: 1.6rem;
+        font-size: 30px;
     }
 }
 
@@ -618,7 +618,7 @@
 .tutorial-chapter-intro {
     background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-1) 100%);
     border: 1px solid rgba(15, 23, 42, 0.06);
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 28px 30px 26px;
     margin: 0 0 28px;
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
@@ -633,7 +633,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -647,14 +647,14 @@
     color: var(--tint-warn-ink);
 }
 .tutorial-chapter-intro h2 {
-    font-size: 1.7rem;
+    font-size: 30px;
     font-weight: 900;
     color: var(--ink);
     margin: 0 0 12px;
     line-height: 1.18;
 }
 .tutorial-chapter-intro .chapter-lede {
-    font-size: 1rem;
+    font-size: 17px;
     color: var(--ink-2);
     line-height: 1.65;
     margin: 0 0 16px;
@@ -665,13 +665,13 @@
     padding: 14px 16px;
     background: rgba(59, 76, 202, 0.05);
     border-left: 3px solid var(--pokemon-blue, #3B4CCA);
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 .tutorial-chapter-intro .chapter-toc li {
-    font-size: 0.88rem;
+    font-size: 14px;
     color: var(--ink);
     line-height: 1.45;
     padding-left: 18px;
@@ -693,13 +693,13 @@
     align-items: baseline;
     gap: 14px;
     margin: 32px 4px 14px;
-    font-size: 1.25rem;
+    font-size: 21px;
     font-weight: 900;
     color: var(--ink);
     line-height: 1.2;
 }
 .tutorial-chapter-heading > span {
-    font-size: 0.85rem;
+    font-size: 14px;
     font-weight: 900;
     letter-spacing: 0.08em;
     color: var(--brand-ink);
@@ -711,7 +711,7 @@
 /* Narrative paragraph between banners — bigger line-height, easy on
    the eyes after a dense banner. */
 .tutorial-paragraph {
-    font-size: 1rem;
+    font-size: 17px;
     line-height: 1.7;
     color: var(--ink-2);
     margin: 0 4px 24px;
@@ -723,7 +723,7 @@
 .tutorial-paragraph code {
     background: rgba(15, 23, 42, 0.06);
     padding: 1px 6px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.92em;
 }
 
@@ -733,7 +733,7 @@
     background: linear-gradient(135deg, var(--tint-info) 0%, var(--surface-1) 100%);
     border: 1px solid rgba(59, 76, 202, 0.14);
     border-left: 4px solid var(--pokemon-blue, #3B4CCA);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 18px 22px;
     margin: 0 4px 24px;
 }
@@ -742,13 +742,13 @@
     color: var(--brand-ink);
     font-weight: 800;
     margin-bottom: 6px;
-    font-size: 0.95rem;
+    font-size: 14px;
 }
 .tutorial-callout p {
     margin: 0;
     color: var(--ink);
     line-height: 1.6;
-    font-size: 0.93rem;
+    font-size: 14px;
 }
 .tutorial-callout p + p {
     margin-top: 8px;
@@ -765,7 +765,7 @@
 /* Pull-quote — the big italic break between sections that puts
    the editorial finger on the key insight. */
 .tutorial-pullquote {
-    font-size: 1.25rem;
+    font-size: 21px;
     font-weight: 700;
     font-style: italic;
     color: var(--ink);
@@ -774,7 +774,7 @@
     margin: 28px 4px;
     border-left: 5px solid var(--pokemon-yellow, #FFCB05);
     background: rgba(255, 203, 5, 0.06);
-    border-radius: 0 12px 12px 0;
+    border-radius: 0 14px 14px 0;
     position: relative;
 }
 .tutorial-pullquote::before {
@@ -791,7 +791,7 @@
     display: block;
     margin-top: 10px;
     font-style: normal;
-    font-size: 0.85rem;
+    font-size: 14px;
     font-weight: 700;
     color: var(--ink-3);
     letter-spacing: 0.04em;
@@ -802,21 +802,21 @@
 .tutorial-chapter-wrap {
     background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     color: #f1f5f9;
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 24px 28px;
     margin: 28px 0 32px;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
 }
 .tutorial-chapter-wrap h3 {
     color: #fde68a;
-    font-size: 1.1rem;
+    font-size: 17px;
     margin: 0 0 10px;
     font-weight: 800;
 }
 .tutorial-chapter-wrap p {
     margin: 0 0 10px;
     line-height: 1.65;
-    font-size: 0.95rem;
+    font-size: 14px;
     color: #e2e8f0;
 }
 .tutorial-chapter-wrap p:last-child {
@@ -825,7 +825,7 @@
 .tutorial-chapter-wrap code {
     background: rgba(255, 255, 255, 0.08);
     padding: 1px 6px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 /* Tighten layout on narrow screens — paragraphs and callouts hug
@@ -835,18 +835,18 @@
         padding: 22px 18px;
     }
     .tutorial-chapter-intro h2 {
-        font-size: 1.35rem;
+        font-size: 21px;
     }
     .tutorial-chapter-heading {
-        font-size: 1.05rem;
+        font-size: 17px;
         gap: 10px;
     }
     .tutorial-paragraph {
-        font-size: 0.95rem;
+        font-size: 14px;
         line-height: 1.6;
     }
     .tutorial-pullquote {
-        font-size: 1.05rem;
+        font-size: 17px;
         padding: 18px 20px 18px 28px;
     }
     .tutorial-chapter-wrap {
@@ -907,13 +907,13 @@
     border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 .tutorial-mockup .mockup-title {
-    font-size: 0.82rem;
+    font-size: 14px;
     font-weight: 800;
     color: var(--ink);
     letter-spacing: 0.02em;
 }
 .tutorial-mockup .mockup-subtitle {
-    font-size: 0.72rem;
+    font-size: 12px;
     color: var(--ink-3);
     font-weight: 600;
 }
@@ -948,11 +948,11 @@
     position: relative;
 }
 .mockup-hub-tile .mockup-tile-icon {
-    font-size: 1.4rem;
+    font-size: 21px;
     line-height: 1;
 }
 .mockup-hub-tile .mockup-tile-title {
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
     line-height: 1.2;
@@ -989,7 +989,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     color: rgba(255, 255, 255, 0.7);
-    font-size: 1.8rem;
+    font-size: 30px;
 }
 .mockup-card-badge {
     position: absolute;
@@ -1007,7 +1007,7 @@
 }
 .mockup-card-badge--max  { top: -6px; right: -6px; background: #dc2626; }
 .mockup-card-badge--in   { top: -6px; left: -6px;  background: var(--solid-ok); }
-.mockup-card-badge--wish { bottom: -4px; right: -4px; background: #be185d; font-size: 0.7rem; }
+.mockup-card-badge--wish { bottom: -4px; right: -4px; background: #be185d; font-size: 11px; }
 .mockup-card-info {
     display: flex;
     flex-direction: column;
@@ -1015,7 +1015,7 @@
     min-width: 0;
 }
 .mockup-card-name {
-    font-size: 0.74rem;
+    font-size: 12px;
     font-weight: 800;
     color: #0f172a;
     line-height: 1.15;
@@ -1036,7 +1036,7 @@
     font-size: var(--fs-xs);
     font-weight: 800;
     padding: 3px 6px;
-    border-radius: 4px;
+    border-radius: 6px;
     background: var(--surface-2);
     color: var(--ink);
     border: 1px solid rgba(15, 23, 42, 0.08);
@@ -1059,7 +1059,7 @@
     gap: 6px;
 }
 .mockup-nav-heading {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -1068,14 +1068,14 @@
     align-items: center;
     gap: 6px;
 }
-.mockup-nav-heading .mockup-nav-icon { font-size: 1rem; }
+.mockup-nav-heading .mockup-nav-icon { font-size: 17px; }
 .mockup-nav-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
 }
 .mockup-nav-chip {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 700;
     padding: 4px 9px;
     border-radius: 999px;
@@ -1108,7 +1108,7 @@
 }
 .mockup-tier-card .mockup-tier-header {
     padding: 7px 10px;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.04em;
     color: #fff;
@@ -1128,17 +1128,17 @@
     gap: 10px;
     align-items: center;
     padding: 6px 10px;
-    font-size: 0.72rem;
+    font-size: 12px;
     border-top: 1px solid rgba(15, 23, 42, 0.05);
 }
 .mockup-tier-row:first-child { border-top: 0; }
 .mockup-tier-row-name { font-weight: 700; color: #0f172a; }
 .mockup-tier-row-share { font-weight: 700; color: var(--ink-3); }
 .mockup-tier-row-arrow {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     padding: 1px 5px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 .mockup-tier-row-arrow--up   { color: var(--tint-ok-ink); background: rgba(34, 197, 94, 0.12); }
 .mockup-tier-row-arrow--down { color: var(--tint-bad-ink); background: rgba(239, 68, 68, 0.12); }
@@ -1165,7 +1165,7 @@
 .mockup-deck-banner {
     background: var(--surface-1);
     border: 1px solid rgba(15, 23, 42, 0.08);
-    border-radius: 8px;
+    border-radius: 10px;
     position: relative;
     overflow: hidden;
     padding: 8px 10px 9px;
@@ -1192,7 +1192,7 @@
 }
 .mockup-deck-banner > * { position: relative; z-index: 1; }
 .mockup-deck-banner-name {
-    font-size: 0.74rem;
+    font-size: 12px;
     font-weight: 800;
     color: #0f172a;
     line-height: 1.15;
@@ -1213,7 +1213,7 @@
     align-items: center;
     gap: 4px;
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: var(--fs-xs);
     font-weight: 700;
     /* 29.08.2026: Grund war fest hell (weiss bzw. #fff3e0), die Schrift
@@ -1246,7 +1246,7 @@
 }
 .mockup-movers-block {
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     background: var(--surface-1);
 }
@@ -1296,7 +1296,7 @@
 }
 .mockup-vs-top8-block {
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     background: var(--surface-1);
 }
@@ -1367,7 +1367,7 @@
     grid-template-columns: 1fr 52px 56px;
     gap: 10px;
     padding: 6px 10px;
-    font-size: 0.74rem;
+    font-size: 12px;
     align-items: center;
     border-top: 1px solid rgba(15, 23, 42, 0.05);
 }
@@ -1380,7 +1380,7 @@
     font-size: var(--fs-xs);
     font-weight: 800;
     padding: 0 4px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 .mockup-comparison-row .mockup-row-rank small.up   { color: var(--tint-ok-ink); background: rgba(34, 197, 94, 0.12); }
 .mockup-comparison-row .mockup-row-rank small.down { color: var(--tint-bad-ink); background: rgba(239, 68, 68, 0.12); }
@@ -1405,7 +1405,7 @@
     .tutorial-mockup { padding: 14px 14px 16px; }
     .mockup-hub-tiles { gap: 8px; }
     .mockup-hub-tile { padding: 10px; }
-    .mockup-hub-tile .mockup-tile-title { font-size: 0.74rem; }
+    .mockup-hub-tile .mockup-tile-title { font-size: 12px; }
     .mockup-hub-tile .mockup-tile-desc  { font-size: var(--fs-xs); }
 }
 
@@ -1426,7 +1426,7 @@
     flex-direction: column;
     gap: 4px;
     background: var(--surface-1);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     border: 1px solid rgba(15, 23, 42, 0.06);
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
@@ -1460,7 +1460,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
@@ -1478,7 +1478,7 @@
     border-radius: 50%;
     background: #aa5a13;
     color: #fff;
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1494,7 +1494,7 @@
     gap: 3px;
 }
 .mockup-wt-card-name {
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 800;
     color: #0f172a;
     line-height: 1.1;
@@ -1518,7 +1518,7 @@
     color: #fff;
     padding: 3px 9px;
     border-radius: 6px;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 800;
     box-shadow: 0 1px 3px rgba(39, 174, 96, 0.25);
     margin: 1px 0;
@@ -1539,8 +1539,8 @@
     min-width: 0;
     padding: 2px 5px;
     border: 1.2px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.7rem;
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--ink-2);
     text-align: right;
@@ -1563,7 +1563,7 @@
     background: linear-gradient(135deg, var(--solid-ok), #15803d);
     color: #fff;
     text-align: center;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     line-height: 1.1;
     box-shadow: 0 1px 4px rgba(22, 163, 74, 0.30);
@@ -1581,7 +1581,7 @@
    ─────────────────────────────────────────────────────────── */
 .mockup-wt-export {
     background: linear-gradient(135deg, #1a1a2e, #16213e);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 14px 14px 12px;
     box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
 }
@@ -1593,7 +1593,7 @@
     margin-bottom: 10px;
 }
 .mockup-wt-export-title {
-    font-size: 0.92rem;
+    font-size: 14px;
     font-weight: 900;
 }
 .mockup-wt-export-count {
@@ -1601,7 +1601,7 @@
     color: #fff;
     padding: 3px 10px;
     border-radius: 999px;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 700;
 }
 .mockup-wt-export-row {
@@ -1611,7 +1611,7 @@
 }
 .mockup-wt-export-card {
     aspect-ratio: 5 / 7;
-    border-radius: 5px;
+    border-radius: 6px;
     overflow: hidden;
     position: relative;
     background-color: #2a2a3e;
@@ -1661,12 +1661,12 @@
     gap: 6px;
 }
 .mockup-form-label {
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 800;
     color: #0f172a;
 }
 .mockup-form-intro {
-    font-size: 0.74rem;
+    font-size: 12px;
     color: var(--ink-3);
     line-height: 1.5;
 }
@@ -1678,13 +1678,13 @@
 .mockup-form-checkbox {
     width: 18px;
     height: 18px;
-    border-radius: 4px;
+    border-radius: 6px;
     background: var(--pokemon-blue, #3B4CCA);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 900;
 }
 .mockup-form-input {
@@ -1692,21 +1692,21 @@
     border: 1px solid rgba(15, 23, 42, 0.18);
     border-radius: 6px;
     padding: 6px 10px;
-    font-size: 0.82rem;
+    font-size: 14px;
     color: var(--ink);
     font-weight: 600;
     min-width: 130px;
 }
 .mockup-form-input.is-narrow { min-width: 56px; }
 .mockup-form-help {
-    font-size: 0.7rem;
+    font-size: 11px;
     color: var(--ink-3);
     line-height: 1.5;
 }
 .mockup-form-help code {
     background: rgba(15, 23, 42, 0.06);
     padding: 1px 5px;
-    border-radius: 3px;
+    border-radius: 6px;
     font-size: 1em;
 }
 .mockup-form-help a { color: var(--pokemon-blue, #3B4CCA); font-weight: 700; }
@@ -1715,8 +1715,8 @@
     background: var(--pokemon-blue, #3B4CCA);
     color: #fff;
     padding: 8px 18px;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    border-radius: 10px;
+    font-size: 12px;
     font-weight: 800;
     box-shadow: 0 2px 6px rgba(59, 76, 202, 0.20);
 }
@@ -1740,8 +1740,8 @@
 .mockup-tg-bubble {
     max-width: 80%;
     padding: 9px 12px;
-    border-radius: 12px;
-    font-size: 0.78rem;
+    border-radius: 14px;
+    font-size: 12px;
     line-height: 1.45;
     color: #f8fafc;
     word-wrap: break-word;
@@ -1761,7 +1761,7 @@
 .mockup-tg-bubble code {
     background: rgba(255, 255, 255, 0.10);
     padding: 1px 5px;
-    border-radius: 3px;
+    border-radius: 6px;
     font-size: 0.95em;
 }
 .mockup-tg-bubble b { font-weight: 800; }
@@ -1800,7 +1800,7 @@
     padding: 6px 10px;
     background: linear-gradient(90deg, rgba(59, 76, 202, 0.12), rgba(59, 76, 202, 0.04));
     color: var(--pokemon-blue, #3B4CCA);
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.04em;
 }
@@ -1827,7 +1827,7 @@
     gap: 8px;
     align-items: center;
     padding: 6px 10px;
-    font-size: 0.72rem;
+    font-size: 12px;
     border-top: 1px solid rgba(15, 23, 42, 0.05);
 }
 .mockup-deck-row:nth-child(odd) { background: rgba(241, 245, 249, 0.5); }
@@ -1837,7 +1837,7 @@
     min-width: 0;
 }
 .mockup-deck-row-name b {
-    font-size: 0.74rem;
+    font-size: 12px;
     font-weight: 800;
     color: #0f172a;
     line-height: 1.2;
@@ -1853,14 +1853,14 @@
 }
 .mockup-deck-row-name .star {
     color: #f59e0b;
-    font-size: 0.7rem;
+    font-size: 11px;
     margin-right: 3px;
 }
 .mockup-deck-row-share {
     font-weight: 800;
     color: var(--tint-ok-ink);
     text-align: right;
-    font-size: 0.72rem;
+    font-size: 12px;
 }
 .mockup-deck-row-share.is-mid  { color: var(--tint-warn-ink); }
 .mockup-deck-row-share.is-low  { color: var(--ink-3); }
@@ -1868,13 +1868,13 @@
     color: #475569;
     font-weight: 700;
     text-align: right;
-    font-size: 0.7rem;
+    font-size: 11px;
 }
 .mockup-deck-row-price {
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
     text-align: right;
-    font-size: 0.7rem;
+    font-size: 11px;
 }
 .mockup-deck-section--rare .mockup-deck-rare-folded {
     padding: 6px 10px;
@@ -1885,7 +1885,7 @@
     border-top: 1px solid rgba(15, 23, 42, 0.05);
 }
 .mockup-deck-chevron {
-    font-size: 0.7rem;
+    font-size: 11px;
     color: inherit;
 }
 
@@ -1933,7 +1933,7 @@
     background: var(--surface-2);
     border: 1px solid rgba(15, 23, 42, 0.10);
     border-radius: 10px;
-    font-size: 0.74rem;
+    font-size: 12px;
     font-weight: 800;
     color: var(--ink);
     min-width: 0;
@@ -1956,7 +1956,7 @@
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
 }
 .mockup-builder-btn-icon {
-    font-size: 1rem;
+    font-size: 17px;
     line-height: 1;
 }
 .mockup-builder-btn-label {
@@ -2012,7 +2012,7 @@
 }
 .mockup-builder-hand-card {
     aspect-ratio: 5 / 7;
-    border-radius: 4px;
+    border-radius: 6px;
     background: linear-gradient(135deg, #1e40af, #3b4cca);
     position: relative;
     overflow: hidden;
@@ -2022,7 +2022,7 @@
     position: absolute;
     inset: 14% 16%;
     border: 1.5px solid rgba(255, 255, 255, 0.45);
-    border-radius: 4px;
+    border-radius: 6px;
 }
 .mockup-builder-hand-card.is-trainer { background: linear-gradient(135deg, #b91c1c, #ef4444); }
 .mockup-builder-hand-card.is-energy  { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
@@ -2055,7 +2055,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 800;
     color: #0f172a;
     margin-bottom: 8px;
@@ -2092,7 +2092,7 @@
 .mockup-deckgrid-card {
     background: var(--surface-1);
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     position: relative;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
@@ -2146,7 +2146,7 @@
 .mockup-deckgrid-info .name {
     font-weight: 800;
     color: #333;
-    font-size: 0.72rem;
+    font-size: 12px;
     line-height: 1.15;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2191,7 +2191,7 @@
     line-height: 17px;
     font-size: var(--fs-xs);
     font-weight: 800;
-    border-radius: 3px;
+    border-radius: 6px;
     background: var(--surface-2);
     color: var(--ink);
     border: 1px solid rgba(15, 23, 42, 0.08);
@@ -2215,8 +2215,8 @@
     padding: 8px 10px;
     background: rgba(241, 245, 249, 0.6);
     border: 1px dashed rgba(15, 23, 42, 0.18);
-    border-radius: 8px;
-    font-size: 0.7rem;
+    border-radius: 10px;
+    font-size: 11px;
     color: var(--ink-3);
     font-style: italic;
 }
@@ -2269,7 +2269,7 @@
     gap: 8px;
     padding: 7px 10px;
     align-items: center;
-    font-size: 0.74rem;
+    font-size: 12px;
     border-top: 1px solid rgba(15, 23, 42, 0.05);
 }
 .mockup-bs-row:nth-child(even) { background: rgba(241, 245, 249, 0.45); }
@@ -2277,7 +2277,7 @@
     font-weight: 800;
     color: #fff;
     background: #3f4a5c;   /* 29.08.2026: 4,04:1 -> 6,45:1 */
-    border-radius: 5px;
+    border-radius: 6px;
     text-align: center;
     padding: 2px 0;
     font-size: var(--fs-xs);
@@ -2306,7 +2306,7 @@
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
     text-align: right;
-    font-size: 0.74rem;
+    font-size: 12px;
     min-width: 48px;
     display: flex;
     flex-direction: column;
@@ -2317,7 +2317,7 @@
     font-size: var(--fs-xs);
     font-weight: 800;
     padding: 0 4px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 .mockup-bs-share small.up   { color: var(--tint-ok-ink); background: rgba(34, 197, 94, 0.12); }
 .mockup-bs-share small.down { color: var(--tint-bad-ink); background: rgba(239, 68, 68, 0.12); }
@@ -2339,7 +2339,7 @@
     font-size: var(--fs-xs);
     font-weight: 800;
     padding: 1px 5px;
-    border-radius: 3px;
+    border-radius: 6px;
     background: rgba(59, 76, 202, 0.10);
     color: var(--pokemon-blue, #3B4CCA);
     letter-spacing: 0.04em;
@@ -2354,8 +2354,8 @@
     padding: 7px 10px;
     background: linear-gradient(90deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.02));
     border: 1px solid rgba(34, 197, 94, 0.20);
-    border-radius: 8px;
-    font-size: 0.7rem;
+    border-radius: 10px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--tint-ok-ink);
     gap: 8px;
@@ -2363,7 +2363,7 @@
 .mockup-bs-sample b {
     color: var(--tint-ok-ink);
     font-weight: 800;
-    font-size: 0.82rem;
+    font-size: 14px;
 }
 
 /* ── Format Staples list — card-tile rows with inclusion bar ──── */
@@ -2380,7 +2380,7 @@
     padding: 6px 8px;
     background: var(--surface-1);
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
 }
 .mockup-staple-rank {
     font-weight: 800;
@@ -2392,7 +2392,7 @@
     aspect-ratio: 2.5 / 3.5;
     background-size: cover;
     background-position: center top;
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: #1e293b;
 }
 .mockup-staple-info {
@@ -2402,7 +2402,7 @@
     min-width: 0;
 }
 .mockup-staple-name {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     color: #0f172a;
     line-height: 1.15;
@@ -2432,7 +2432,7 @@
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
     text-align: right;
-    font-size: 0.72rem;
+    font-size: 12px;
 }
 
 /* Cooking toggle pill — Quick Overview ↔ Cooking */
@@ -2473,9 +2473,9 @@
     justify-content: space-between;
     background: var(--surface-1);
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 8px 12px;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 700;
     color: var(--ink);
 }
@@ -2509,8 +2509,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 6px 10px;
-    border-radius: 8px 8px 0 0;
-    font-size: 0.7rem;
+    border-radius: 10px 10px 0 0;
+    font-size: 11px;
     font-weight: 800;
     color: #fff;
     letter-spacing: 0.04em;
@@ -2521,7 +2521,7 @@
 .mockup-matchup-rows {
     border: 1px solid rgba(15, 23, 42, 0.10);
     border-top: 0;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 10px 10px;
     background: var(--surface-1);
     overflow: hidden;
 }
@@ -2531,7 +2531,7 @@
     gap: 8px;
     align-items: center;
     padding: 6px 10px;
-    font-size: 0.72rem;
+    font-size: 12px;
     border-top: 1px solid rgba(15, 23, 42, 0.05);
 }
 .mockup-matchup-row:first-child { border-top: 0; }
@@ -2545,9 +2545,9 @@
 }
 .mockup-matchup-wr {
     font-weight: 800;
-    font-size: 0.74rem;
+    font-size: 12px;
     padding: 2px 8px;
-    border-radius: 5px;
+    border-radius: 6px;
 }
 .mockup-matchup-wr.is-good { color: var(--tint-ok-ink); background: rgba(34, 197, 94, 0.14); }
 .mockup-matchup-wr.is-bad  { color: var(--tint-bad-ink); background: rgba(239, 68, 68, 0.14); }
@@ -2575,7 +2575,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     color: #475569;
     letter-spacing: 0.04em;
@@ -2587,7 +2587,7 @@
     gap: 8px;
     align-items: center;
     padding: 4px 0;
-    font-size: 0.72rem;
+    font-size: 12px;
 }
 .mockup-mcall-deck {
     font-weight: 800;
@@ -2601,7 +2601,7 @@
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
     font-variant-numeric: tabular-nums;
-    font-size: 0.74rem;
+    font-size: 12px;
 }
 .mockup-mcall-bar {
     height: 8px;
@@ -2630,7 +2630,7 @@
 }
 .mockup-tech-slots-label small { font-size: var(--fs-xs); }  /* UI-10: stand bei 9,3 px */
 .mockup-tech-slots-label {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     color: var(--tint-warn-ink);
     letter-spacing: 0.04em;
@@ -2639,7 +2639,7 @@
 .mockup-tech-slot {
     width: 36px;
     aspect-ratio: 2.5 / 3.5;
-    border-radius: 4px;
+    border-radius: 6px;
     background-size: cover;
     background-position: center top;
     background-color: #e2e8f0;
@@ -2668,13 +2668,13 @@
 }
 .mockup-aggression-card {
     border: 1.5px solid rgba(15, 23, 42, 0.12);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 8px;
     background: var(--surface-1);
     text-align: center;
 }
 .mockup-aggression-card .label {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     color: #0f172a;
     letter-spacing: 0.02em;
@@ -2707,18 +2707,18 @@
     padding: 6px 8px;
     background: var(--surface-1);
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
 }
 .mockup-techlist-check {
     width: 18px;
     height: 18px;
-    border-radius: 5px;
+    border-radius: 6px;
     background: var(--solid-ok);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.74rem;
+    font-size: 12px;
     font-weight: 800;
 }
 .mockup-techlist-check.is-empty {
@@ -2728,7 +2728,7 @@
 }
 .mockup-techlist-img {
     aspect-ratio: 2.5 / 3.5;
-    border-radius: 4px;
+    border-radius: 6px;
     background-size: cover;
     background-position: center top;
     background-color: #1e293b;
@@ -2740,7 +2740,7 @@
     min-width: 0;
 }
 .mockup-techlist-name {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     color: #0f172a;
     overflow: hidden;
@@ -2753,7 +2753,7 @@
     color: var(--tint-warn-ink);
     background: rgba(245, 158, 11, 0.14);
     padding: 1px 5px;
-    border-radius: 4px;
+    border-radius: 6px;
     letter-spacing: 0.04em;
     align-self: flex-start;
 }
@@ -2761,7 +2761,7 @@
     font-size: var(--fs-xs);
     font-weight: 800;
     padding: 2px 8px;
-    border-radius: 5px;
+    border-radius: 6px;
     color: #fff;
     background: #dc2626;
     letter-spacing: 0.04em;
@@ -2782,7 +2782,7 @@
 .mockup-techlab-target-img {
     width: 44px;
     aspect-ratio: 2.5 / 3.5;
-    border-radius: 5px;
+    border-radius: 6px;
     background-size: cover;
     background-position: center top;
     background-color: #1e293b;
@@ -2795,7 +2795,7 @@
     min-width: 0;
 }
 .mockup-techlab-target-name {
-    font-size: 0.84rem;
+    font-size: 14px;
     font-weight: 800;
     color: #0f172a;
 }
@@ -2807,7 +2807,7 @@
 }
 .mockup-techlab-rating {
     margin-left: auto;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     padding: 4px 10px;
     border-radius: 999px;
@@ -2821,13 +2821,13 @@
     align-items: center;
     gap: 6px;
     margin: 10px 0 6px;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     color: #475569;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
-.mockup-techlab-list-head .icon { font-size: 0.9rem; }
+.mockup-techlab-list-head .icon { font-size: 14px; }
 
 /* ── Past-Meta format picker — chip grid ──────────────────────── */
 .mockup-format-grid {
@@ -2840,8 +2840,8 @@
     padding: 8px 6px;
     background: var(--surface-1);
     border: 1.5px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
-    font-size: 0.7rem;
+    border-radius: 10px;
+    font-size: 11px;
     font-weight: 800;
     color: var(--ink);
     letter-spacing: 0.04em;
@@ -2871,7 +2871,7 @@
     display: flex;
     flex-direction: column;
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--surface-1);
     overflow: hidden;
 }
@@ -2880,7 +2880,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 7px 10px;
-    font-size: 0.72rem;
+    font-size: 12px;
     font-weight: 700;
     color: #0f172a;
     border-top: 1px solid rgba(15, 23, 42, 0.05);
@@ -2911,8 +2911,8 @@
     padding: 8px 12px;
     background: var(--surface-1);
     border: 1.5px solid var(--pokemon-blue, #3B4CCA);
-    border-radius: 8px;
-    font-size: 0.74rem;
+    border-radius: 10px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--ink);
     box-shadow: 0 0 0 3px rgba(59, 76, 202, 0.12);
@@ -2936,7 +2936,7 @@
     color: #f4f7fb;
 }
 .mockup-stat-card-title {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -2954,7 +2954,7 @@
     gap: 1px;
 }
 .mockup-stat-cell .value {
-    font-size: 1.1rem;
+    font-size: 17px;
     font-weight: 800;
     color: #fff;
     font-variant-numeric: tabular-nums;
@@ -2983,7 +2983,7 @@
     position: relative;
     background: var(--surface-1);
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
 }
 .mockup-cdb-card .img {
@@ -3004,7 +3004,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.78rem;
+    font-size: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 .mockup-cdb-card .heart.is-on { background: #d51674; color: #fff; }
@@ -3020,7 +3020,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 11px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 .mockup-cdb-card .price {
@@ -3034,7 +3034,7 @@
     font-size: var(--fs-xs);
     font-weight: 800;
     padding: 2px 4px;
-    border-radius: 4px;
+    border-radius: 6px;
     letter-spacing: 0.02em;
 }
 
@@ -3054,7 +3054,7 @@
     border: 1px solid rgba(15, 23, 42, 0.10);
     border-radius: 6px;
     padding: 6px 8px;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 700;
     color: var(--ink);
 }
@@ -3091,8 +3091,8 @@
     padding: 6px 10px;
     background: var(--surface-1);
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
-    font-size: 0.7rem;
+    border-radius: 10px;
+    font-size: 11px;
 }
 .mockup-bj-result {
     width: 26px;
@@ -3103,7 +3103,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 11px;
 }
 .mockup-bj-result.is-w { background: var(--solid-ok); }
 .mockup-bj-result.is-l { background: #dc2626; }
@@ -3144,7 +3144,7 @@
 }
 .mockup-binder-slot {
     aspect-ratio: 2.5 / 3.5;
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: rgba(245, 158, 11, 0.20);
     background-size: cover;
     background-position: center top;
@@ -3166,7 +3166,7 @@
     color: #fff;
     font-weight: 800;
     border-radius: inherit;
-    font-size: 1.4rem;
+    font-size: 21px;
 }
 .mockup-binder-slot .pr {
     position: absolute;
@@ -3179,7 +3179,7 @@
     font-size: var(--fs-xs);
     font-weight: 800;
     padding: 1px 2px;
-    border-radius: 3px;
+    border-radius: 6px;
     letter-spacing: 0.02em;
 }
 .mockup-binder-foot {
@@ -3212,7 +3212,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: 800;
     margin-left: -8px;
     border: 2px solid #fff;
@@ -3234,7 +3234,7 @@
 .mockup-trend {
     background: var(--surface-1);
     border: 1px solid rgba(15, 23, 42, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 10px;
 }
 .mockup-trend-bars {
@@ -3247,7 +3247,7 @@
 .mockup-trend-bars > span {
     flex: 1;
     background: linear-gradient(180deg, #6366f1, var(--pokemon-blue, #3B4CCA));
-    border-radius: 3px 3px 0 0;
+    border-radius: 6px 6px 0 0;
 }
 .mockup-trend-foot {
     display: flex;
@@ -3283,10 +3283,10 @@
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 0.7rem;
+    font-size: 11px;
 }
 .mockup-tg-bot-card .head .name {
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 800;
     color: #fff;
 }
@@ -3334,7 +3334,7 @@
 }
 .feature-banner-bullets .bullet-figure-caption {
     padding: 6px 12px 7px;
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--ink);
     background: var(--surface-1);
     border-top: 1px solid rgba(15, 23, 42, 0.06);
@@ -3350,7 +3350,7 @@
     text-align: center;
     background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
     color: var(--ink-3);
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 700;
     padding: 14px;
     letter-spacing: 0.03em;
@@ -3364,7 +3364,7 @@
     border-bottom-width: 3px;
 }
 #profile > .container > .header h2 {
-    font-size: 1.1rem;
+    font-size: 17px;
     margin-bottom: 2px;
 }
 #profile > .container > .header h2 img {
@@ -3372,7 +3372,7 @@
     height: 22px;
 }
 #profile > .container > .header p {
-    font-size: 0.8rem;
+    font-size: 12px;
     margin: 0;
 }
 

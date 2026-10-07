@@ -525,7 +525,7 @@
         var el = document.getElementById('qu-' + id);
         if (!el) return;
         el.open = true;
-        try { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) {
+        try { el.scrollIntoView({ block: 'start', behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') }); } catch (e) {
             el.scrollIntoView();
         }
     }

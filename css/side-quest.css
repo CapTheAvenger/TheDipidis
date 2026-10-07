@@ -365,6 +365,9 @@
     transition: background 120ms ease, transform 80ms ease;
     position: relative;
     min-width: 130px;
+    /* UI-120 (M3-14): das 📋 steht absolut rechts oben — Platz dafuer, sonst
+       lag es am Handy ueber dem Wort „Replica“. */
+    padding-right: 1.9rem;
 }
 
 .side-quest-copy-btn:hover {

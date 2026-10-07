@@ -1960,7 +1960,7 @@ const BASE_PATH = './data/';
                 }
             }
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });
         };
 
         function parseArchetypeSelection(archetype) {
@@ -2007,7 +2007,7 @@ const BASE_PATH = './data/';
                 setTimeout(function() { applyPendingCombinedArchetypeSelection(); }, 0);
             }
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });
         };
         
         // Navigate to City League Analysis with pre-selected deck
@@ -2278,7 +2278,7 @@ const BASE_PATH = './data/';
             };
 
             setTimeout(checkAndSelect, 100);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });
         };
         
         // CSV loading and parsing

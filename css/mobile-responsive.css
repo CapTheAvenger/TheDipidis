@@ -3131,3 +3131,23 @@
 }
 .qs-karte-werte dt { color: var(--ink-2); margin: 0; min-width: 0; }
 .qs-karte-werte dd { margin: 0; min-width: 0; padding: 0 4px; border-radius: 4px; text-align: left; }
+
+/* ── UI-120 (06.10.2026): Handy-Reste unter 11 px und Ziele unter 24 px ──
+ * Gemessen mit scripts/messe_ui120.js bei 390 px. Ohne Ausrufezeichen:
+ * die Kennung der Ansicht reicht als Gewicht. */
+@media (max-width: 640px) {
+    #current-meta .arc-tile-arrow { font-size: 11px; }
+    #city-league .trend-icon,
+    #city-league .city-league-info-table-count-change-mobile,
+    #city-league .city-league-info-table-placement-mobile { font-size: 11px; }
+    #meta-call .mc-rec-table .mc-rec-wr,
+    #meta-call .mc-rec-table .mc-rec-wr strong,
+    #meta-call .mc-rec-table .mc-rec-rank,
+    #meta-call .mc-rec-table .mc-rec-chevron,
+    #meta-call .mc-rec-table .mc-rec-day2,
+    #meta-call .mc-rec-table .mc-rec-day2 strong { font-size: 11px; }
+    #meta-call input[type="checkbox"] { min-width: 24px; min-height: 24px; }
+    #meta-call .mc-mct-haken { width: 24px; height: 24px; }
+    #meta-call .mc-runden-info { min-width: 24px; min-height: 24px; display: inline-flex; align-items: center; justify-content: center; }
+    #city-league .archetype-jump-link { display: inline-flex; align-items: center; min-height: 24px; }
+}

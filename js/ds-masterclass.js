@@ -307,7 +307,7 @@
                 esc(g.titel) + '</h4>' +
                 '<button type="button" class="mcl-schliessen">' + esc(T('schliessen')) + '</button></div>' + txt;
             verdrahte(buehne, g);
-            try { buehne.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }
+            try { buehne.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' }); } catch (e) { }
         }).catch(function (err) {
             console.warn('[DsMasterclass] ' + g.id + ' nicht geladen:', err && err.message);
             zeigeFehler(buehne, g);

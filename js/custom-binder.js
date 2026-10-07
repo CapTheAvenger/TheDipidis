@@ -535,7 +535,7 @@
         };
         cbRenderAbgleich();
         const el = document.getElementById('cbAbgleich');
-        if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });
     }
 
     function cbErledigtSet() {

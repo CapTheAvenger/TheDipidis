@@ -3079,7 +3079,7 @@
             
             if (shouldScrollToTop) {
                 // Scroll to top of cards section for filter/pagination changes.
-                document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.getElementById('cards').scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' });
             }
         }
 

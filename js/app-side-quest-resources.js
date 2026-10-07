@@ -612,7 +612,7 @@
                 // Nach dem Zeichnen scrollen, sonst gibt es das Ziel noch nicht.
                 setTimeout(() => {
                     const ziel = document.getElementById('szStufenTitel');
-                    if (ziel) ziel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                    if (ziel) ziel.scrollIntoView({ block: 'start', behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth') });
                 }, 120);
             });
         });

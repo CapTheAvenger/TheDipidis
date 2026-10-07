@@ -16,6 +16,18 @@
 })();
 
 // ============================================================================
+// UI-120 (M3-13): Scrollen respektiert „Bewegung reduzieren“. Ein ausdrueckliches
+// behavior:'smooth' im Aufruf schlaegt die CSS-Regel in styles.css — darum fragt
+// jeder Aufruf hier nach.
+// ============================================================================
+function scrollVerhalten() {
+    try {
+        return (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth';
+    } catch (e) { return 'smooth'; }
+}
+window.scrollVerhalten = scrollVerhalten;
+
+// ============================================================================
 // Reusable Debounce Utility
 // ============================================================================
 function debounce(fn, delay = 300) {

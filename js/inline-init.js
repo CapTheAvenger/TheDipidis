@@ -1045,7 +1045,7 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
                     setTimeout(() => tryFocus(attempt + 1), 100);
                     return;
                 }
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'center' });
                 // Flash highlight — 3 second amber ring
                 target.style.transition = 'box-shadow 0.4s ease';
                 target.style.boxShadow = '0 0 0 4px rgba(255, 203, 5, 0.85), 0 4px 18px rgba(15, 23, 42, 0.18)';

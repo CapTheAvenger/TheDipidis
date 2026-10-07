@@ -497,6 +497,55 @@
     return 99;
   }
 
+  /* UI-95 (06.10.2026): die Referenz-Listen liessen sich nur ansehen.
+     Jetzt „Liste kopieren“ im PTCGL-Format — Abschnitt nach Kartenart
+     (_typeRank, Join ueber Set + Nummer), Kopfzeilen zaehlen KARTEN, nicht
+     Zeilen (vgl. exportToPTCGL). Unbekannte Art steht bei den Pokemon, wie
+     im Export des Deckbaus. */
+  function _refAlsPtcgl(cards) {
+    const teile = { p: [], t: [], e: [] };
+    const summe = { p: 0, t: 0, e: 0 };
+    (cards || []).slice().sort((a, b) => {
+      const tr = _typeRank(a) - _typeRank(b);
+      return tr !== 0 ? tr : (b.count || 0) - (a.count || 0);
+    }).forEach(c => {
+      const n = c.count || 0;
+      if (n <= 0) return;
+      const rang = _typeRank(c);
+      const k = (rang >= 2 && rang <= 5) ? 't' : (rang === 6 || rang === 7) ? 'e' : 'p';
+      teile[k].push(`${n} ${c.name} ${String(c.set_code || '').toUpperCase()} ${c.set_number || ''}`.trim());
+      summe[k] += n;
+    });
+    const total = summe.p + summe.t + summe.e;
+    return `Pokémon: ${summe.p}\n${teile.p.join('\n')}\n\nTrainer: ${summe.t}\n${teile.t.join('\n')}`
+      + `\n\nEnergy: ${summe.e}\n${teile.e.join('\n')}\n\nTotal Cards: ${total}`;
+  }
+
+  function _kopierKnopf(kind) {
+    const de = (typeof getLang === 'function') ? getLang() === 'de' : true;
+    return `<div class="cm-ref-aktionen"><button type="button" class="btn btn-secondary btn-sm cm-ref-kopieren" data-ref="${kind}">${de ? 'Liste kopieren (PTCGL)' : 'Copy list (PTCGL)'}</button></div>`;
+  }
+
+  function _refKopieren(kind) {
+    const ref = kind === 'major' ? global.currentMetaBestMajor : global.currentMetaBestOnline;
+    if (!ref || !ref.cards) return;
+    const text = _refAlsPtcgl(ref.cards);
+    const de = (typeof getLang === 'function') ? getLang() === 'de' : true;
+    const n = (ref.cards || []).reduce((s, c) => s + (c.count || 0), 0);
+    const ok = () => { if (typeof global.showDeckShareToast === 'function') global.showDeckShareToast(de ? `Liste kopiert (${n} Karten).` : `List copied (${n} cards).`); };
+    const zeigen = () => { if (typeof global.showInputModal === 'function') global.showInputModal({ title: 'PTCGL', message: de ? 'Liste zum Kopieren:' : 'List to copy:', defaultValue: text, readonly: true, textarea: true }); };
+    try {
+      navigator.clipboard.writeText(text).then(ok).catch(zeigen);
+    } catch (e) { zeigen(); }
+  }
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('click', function (ev) {
+      const b = ev.target && ev.target.closest && ev.target.closest('.cm-ref-kopieren');
+      if (b) _refKopieren(b.dataset.ref);
+    });
+  }
+
   function _renderCardGrid(cards) {
     const sorted = cards.slice().sort((a, b) => {
       const tr = _typeRank(a) - _typeRank(b);
@@ -587,7 +636,7 @@
       majorBody.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${_escHtml(head)}${tail ? `<br><small>${_escHtml(tail)}</small>` : ''}</p>`;
     } else if (majorRes.status === 'fulfilled' && majorRes.value) {
       global.currentMetaBestMajor = majorRes.value;
-      majorBody.innerHTML = _renderRefHeader(majorRes.value, 'major') + _renderCardGrid(majorRes.value.cards);
+      majorBody.innerHTML = _renderRefHeader(majorRes.value, 'major') + _renderCardGrid(majorRes.value.cards) + _kopierKnopf('major');
     } else {
       global.currentMetaBestMajor = null;
       const deM2 = (typeof getLang === 'function') ? getLang() === 'de' : true;
@@ -605,7 +654,7 @@
 
     if (onlineRes.status === 'fulfilled' && onlineRes.value) {
       global.currentMetaBestOnline = onlineRes.value;
-      onlineBody.innerHTML = _renderRefHeader(onlineRes.value, 'online') + _renderCardGrid(onlineRes.value.cards);
+      onlineBody.innerHTML = _renderRefHeader(onlineRes.value, 'online') + _renderCardGrid(onlineRes.value.cards) + _kopierKnopf('online');
     } else {
       global.currentMetaBestOnline = null;
       const msg = onlineRes.status === 'rejected'
@@ -725,7 +774,7 @@
         ? `<span class="past-meta-best-record"${_oWpHinweis ? ` title="${_escHtml(_oWpHinweis)}"` : ''}>${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${_oWpStr}</span>`
         : '';
       return `
-        <div class="past-meta-best-header" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+        <div class="past-meta-best-header" style="background: var(--tint-info);">
           <div class="past-meta-best-headline">
             <span class="past-meta-best-place">${_escHtml(ref.place || '')}</span>
             <span class="past-meta-best-name">${_escHtml(ref.player || '')}</span>
@@ -798,7 +847,7 @@
         + 'field (largest example: 909 players, 17 lists). The typical build rests on '
         + 'that sample, not on the online meta.';
     return `
-      <div class="past-meta-best-header" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+      <div class="past-meta-best-header" style="background: var(--tint-info);">
         <div class="past-meta-best-headline">
           <span class="past-meta-best-name">${_escHtml(tournName || 'Limitless Online')}</span>
         </div>
@@ -1044,6 +1093,7 @@
     // zu greppen — ein Grep haette die falsche Quellenangabe "Tag 2"
     // auf der Online-Kachel nicht bemerkt.
     _renderRefHeader,
+    _refAlsPtcgl,
     _findSynthesizedOnlineBuild,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

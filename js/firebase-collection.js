@@ -3846,7 +3846,7 @@ function switchProfileTab(tabName) {
       const rect = nav.getBoundingClientRect();
       const alreadyVisible = rect.top >= 0 && rect.top < (window.innerHeight * 0.4);
       if (!alreadyVisible) {
-        nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        nav.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' });
       }
     }
   } catch (_e) { /* non-fatal — scroll is a nice-to-have */ }

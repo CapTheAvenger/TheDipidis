@@ -23,6 +23,20 @@
  * werden dafuer aus dem Text zurueckgelesen — deutsche Schreibweise mit
  * Punkt als Tausender- und Komma als Dezimaltrenner inklusive.
  */
+/* V2-16 (07.10.2026, Hausi): „die Winrate im Verhältnis zur Nutzung“.
+ * Geglaettet zum Mittel: (wert·n + mittel·k) / (n + k). k ist 10 % der
+ * Nutzung des meistgespielten Decks (Hausis Vorschlag als Massstab): ein
+ * Deck mit k Listen wird halb zum Mittel gezogen, eines mit dem
+ * Zehnfachen kaum. Nur fuer die Reihenfolge — die Zelle zeigt den Rohwert. */
+function rangGeglaettet(wert, n, mittel, k) {
+    if (wert == null || !isFinite(wert)) return null;
+    var nn = (n > 0 && isFinite(n)) ? n : 0;
+    if (!(k > 0) || mittel == null || !isFinite(mittel)) return wert;
+    return (wert * nn + mittel * k) / (nn + k);
+}
+if (typeof window !== 'undefined') window.rangGeglaettet = rangGeglaettet;
+if (typeof module !== 'undefined' && module.exports) module.exports = { rangGeglaettet: rangGeglaettet };
+
 (function () {
     'use strict';
 
@@ -105,7 +119,13 @@
         zeilen.sort(function (a, b) {
             var za = a.cells[i], zb = b.cells[i];
             var ta = za ? za.textContent : '', tb = zb ? zb.textContent : '';
-            var na = zahl(ta), nb = zahl(tb);
+            /* V2-16 (07.10.2026, Hausi): Win-Rate und Top-8-Quote sortieren
+               nach dem GEGLAETTETEN Wert (data-sortwert), angezeigt bleibt
+               die echte Zahl. Sonst steht ein Deck mit 32 Listen vor einem
+               mit 1.588. */
+            var sa = za && za.getAttribute('data-sortwert'), sb = zb && zb.getAttribute('data-sortwert');
+            var na = (sa != null && sa !== '') ? parseFloat(sa) : zahl(ta);
+            var nb = (sb != null && sb !== '') ? parseFloat(sb) : zahl(tb);
             var v;
             if (na === null && nb === null) {
                 v = String(ta).localeCompare(String(tb), 'de');
@@ -153,6 +173,8 @@
         if (!ziel || !ziel.closest) return null;
         var th = ziel.closest('th[data-rang-spalte]');
         if (!th) return null;
+        // V2-16: eine Spalte ohne role=button sortiert nicht (Listen = Share).
+        if (th.getAttribute('role') !== 'button') return null;
         var tab = th.closest('table.cm-rangliste');
         return tab ? { tab: tab, schluessel: th.getAttribute('data-rang-spalte') } : null;
     }

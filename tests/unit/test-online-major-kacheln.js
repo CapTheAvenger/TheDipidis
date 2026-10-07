@@ -445,7 +445,9 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
         // Der Schluessel steht an mehreren Stellen; die erste Fassung
         // dieses Tests ueberlebte deshalb, dass eine davon umbenannt wurde.
         // Geprueft wird die Variable, die BEIDE geteilten Kacheln fuettert.
-        assert.ok(/const majorLeer\s*=\s*L\('arc\.keinMajor'/.test(ohneKomm),
+        // V2-16 (07.10.2026): majorLeer unterscheidet „kein Major im Format"
+        // von „dieses Deck nicht auf Majors" — beide Texte haengen dran.
+        assert.ok(/const majorLeer\s*=\s*_formatHatMajor[\s\S]{0,120}L\('arc\.nichtAufMajors'[\s\S]{0,120}L\('arc\.keinMajor'/.test(ohneKomm),
             'der Text fuer "kein Major" haengt nicht mehr an majorLeer — dann '
             + 'steht dort 0,0 %, und "war nicht dabei" liest sich als '
             + '"hat nichts erreicht"');

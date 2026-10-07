@@ -102,6 +102,7 @@ const SHELL_ASSETS = [
   './js/journal-zuordnung.js',
   './js/matchup-glaettung.js',
   './js/rangliste-sortieren.js',
+  './js/tier-klappen.js',
   './js/ds-bildvorschau.js',
   './js/app-tier-meta.js',
   './js/app-city-league.js',

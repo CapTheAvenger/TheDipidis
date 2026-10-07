@@ -2342,10 +2342,13 @@
                     const schnittKopf = (_convSchnitt && Number.isFinite(_convSchnitt.expected))
                         ? ' (Ø ' + fmtPct(_convSchnitt.expected * 100, 1) + ')' : '';
                     const SPALTEN = [
-                        { k: 'name',     de: 'Deck',          en: 'Deck',        num: false },
+                        { k: 'name',     de: 'Deck',          en: 'Deck',        num: false, sortName: 'A–Z' },
                         { k: 'listen',   de: 'Listen',        en: 'Lists',       num: true,
                           tip: { de: 'gemeldete Decklisten aus den Limitless-Online-Turnieren', en: 'reported decklists from the Limitless online tournaments' } },
-                        { k: 'anteil',   de: 'Anteil',        en: 'Share',       num: true, hilf: 'share' },
+                        /* V2-16 (07.10.2026, Hausi): „nach Listen und nach Anteil ist das
+                           gleiche … reicht ja nur Share". Listen bleibt als Spalte, sortiert
+                           wird ueber Share. */
+                        { k: 'anteil',   de: 'Share',         en: 'Share',       num: true, hilf: 'share' },
                         /* Der Kopf traegt den vollen Namen der Konvention,
                            nicht den Hausnamen: die Spalte liest new_winrate
                            aus limitless_online_decks_comparison.csv, und das
@@ -2484,14 +2487,44 @@
                     reihen.sort((x, y) => (y.listen || 0) - (x.listen || 0)
                                        || (y.anteil || 0) - (x.anteil || 0));
 
+                    /* V2-16 (07.10.2026): Sortierwerte fuer Win-Rate und Top-8-Quote,
+                       geglaettet zum Mittel (rangGeglaettet, js/rangliste-sortieren.js).
+                       k = 10 % der Nutzung des meistgespielten Decks. */
+                    const _glatt = (typeof window !== 'undefined' && typeof window.rangGeglaettet === 'function')
+                        ? window.rangGeglaettet : null;
+                    const _mitWr = reihen.filter(r => r.wr != null && r.listen > 0);
+                    const _sumL = _mitWr.reduce((a, r) => a + r.listen, 0);
+                    const _wrMittel = _sumL > 0 ? _mitWr.reduce((a, r) => a + r.wr * r.listen, 0) / _sumL : null;
+                    const _kListen = 0.1 * Math.max(0, ...reihen.map(r => r.listen || 0));
+                    const _mitQ = reihen.filter(r => r.quote != null && r.antritteGew > 0);
+                    const _sumA = _mitQ.reduce((a, r) => a + r.antritteGew, 0);
+                    const _qMittel = (_convSchnitt && Number.isFinite(_convSchnitt.expected))
+                        ? _convSchnitt.expected * 100
+                        : (_sumA > 0 ? _mitQ.reduce((a, r) => a + r.quote * r.antritteGew, 0) / _sumA : null);
+                    const _kAntritte = 0.1 * Math.max(0, ...reihen.map(r => r.antritteGew || 0));
+                    const sortwert = (r, k) => {
+                        if (!_glatt) return null;
+                        if (k === 'wr' && r.wr != null) return _glatt(r.wr, r.listen, _wrMittel, _kListen);
+                        if (k === 'quote' && r.quote != null) return _glatt(r.quote, r.antritteGew, _qMittel, _kAntritte);
+                        return null;
+                    };
+                    const sortAttr = (r, k) => {
+                        const sw = sortwert(r, k);
+                        return sw != null ? ` data-sortwert="${sw.toFixed(4)}"` : '';
+                    };
+
                     const kopfZellen = SPALTEN_SICHTBAR.map(c => {
                         const txt = deR ? c.de : c.en;
                         const hilfstext = c.hilf ? term(c.hilf)
                                          : (c.tip ? (deR ? c.tip.de : c.tip.en) : '');
                         const voll = hilfstext + (c.zusatz ? ' ' + c.zusatz : '');
                         const beschriftet = voll ? hintTerm(txt, voll) : escapeHtml(txt);
-                        return `<th class="${c.num ? 'ds-num ' : ''}cm-rang-th" data-rang-spalte="${c.k}"
-                                    role="button" tabindex="0" aria-sort="${c.k === 'listen' ? 'descending' : 'none'}"
+                        /* V2-16: „Listen" sortiert nicht mehr eigens (gleich wie Share). */
+                        if (c.k === 'listen') {
+                            return `<th class="ds-num cm-rang-th" data-rang-spalte="${c.k}">${beschriftet}</th>`;
+                        }
+                        return `<th class="${c.num ? 'ds-num ' : ''}cm-rang-th" data-rang-spalte="${c.k}"${c.sortName ? ` data-sortier-name="${c.sortName}"` : ''}
+                                    role="button" tabindex="0" aria-sort="${c.k === 'anteil' ? 'descending' : 'none'}"
                                     title="${escapeHtml(deR ? 'Nach dieser Spalte sortieren' : 'Sort by this column')}">${
                                     beschriftet}<span class="cm-rang-pfeil" aria-hidden="true"></span></th>`;
                     }).join('');
@@ -2506,7 +2539,7 @@
                         <tr class="${r.duenn ? 'is-muted' : ''}${i >= SICHTBAR ? ' cm-rang-mehr' : ''}"${
                             i >= SICHTBAR ? ' hidden' : ''}>
                             <td class="ds-rank">${i + 1}</td>
-                            ${SPALTEN_SICHTBAR.map(c => `<td class="${c.num ? 'ds-num' : ''}">${zelle(r, c.k)}</td>`).join('')}
+                            ${SPALTEN_SICHTBAR.map(c => `<td class="${c.num ? 'ds-num' : ''}"${sortAttr(r, c.k)}>${zelle(r, c.k)}</td>`).join('')}
                         </tr>`).join('');
                     const versteckt = Math.max(0, reihen.length - SICHTBAR);
 
@@ -2610,7 +2643,7 @@
                                 return langText;
                             })()}</p>
                             <div class="mobile-table-scroll">
-                                <table class="ds-table cm-rangliste" data-rang-sortiert="listen" data-rang-richtung="ab">
+                                <table class="ds-table cm-rangliste" data-rang-sortiert="anteil" data-rang-richtung="ab">
                                     <thead><tr><th class="ds-rank">#</th>${kopfZellen}</tr></thead>
                                     <tbody>${zeilen}</tbody>
                                 </table>

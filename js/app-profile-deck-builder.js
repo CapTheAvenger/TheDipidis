@@ -943,7 +943,7 @@
 
     /* Schreibt das Deck als NEUES Deck ins Konto. Kein bestehendes Deck
      * wird angefasst: ohne `id` legt saveDeck() eines an. */
-    function saveToAccount(name) {
+    function saveToAccount(name, ordner) {
         const deck = ensureDeck();
         const karten = (deck.cards || []).filter(c => (c.count || 0) > 0);
         if (!karten.length) return { ok: false, grund: 'leer' };
@@ -958,6 +958,7 @@
             cards,
             totalCards: Object.values(cards).reduce((s, n) => s + n, 0),
         };
+        if (ordner) nutzlast.folder = ordner;
         window.saveDeck(nutzlast, { stumm: true });
         return { ok: true, karten: nutzlast.totalCards, name: nutzlast.name };
     }
@@ -975,7 +976,22 @@
             if (antwort === null || antwort === undefined || String(antwort).trim() === '') return { ok: false, grund: 'abgebrochen' };
             name = String(antwort).trim();
         }
-        const r = saveToAccount(name);
+        /* N2-10 (07.10.2026): dieselbe Ordnerwahl wie beim Speichern aus der
+           Deck-Analyse (chooseDeckFolderWithCreate, js/firebase-collection.js).
+           Abbrechen bricht das Speichern ab — wie dort. */
+        let ordner = '';
+        const ordnerWahl = (typeof window !== 'undefined' && typeof window.chooseDeckFolderWithCreate === 'function')
+            ? window.chooseDeckFolderWithCreate
+            : (typeof chooseDeckFolderWithCreate === 'function' ? chooseDeckFolderWithCreate : null);
+        if (ordnerWahl) {
+            const gewaehlt = await ordnerWahl({
+                title: (typeof window.t === 'function') ? window.t('deck.saveFolderTitle') : 'Ordner für das Deck',
+                currentFolder: '', includeNoFolder: true,
+            });
+            if (gewaehlt === null || gewaehlt === undefined) return { ok: false, grund: 'abgebrochen' };
+            ordner = gewaehlt;
+        }
+        const r = saveToAccount(name, ordner);
         if (r.ok) pulseToast(L.saveDone(r.name, r.karten));
         else if (r.grund === 'leer') pulseToast(L.saveEmpty);
         else pulseToast(L.saveNoAccount);

@@ -113,3 +113,15 @@ html[data-theme="dark"] .cb-seg-btn:not(.active) { color: var(--ink); border-col
 .abx-leer-box { padding: 12px 0; }
 #quellen .qu-abd th, #quellen .qu-abd td { font-size: 14px; }
 #quellen .qu-abd thead th { font-size: 12px; }
+
+/* V2-16 (07.10.2026, Hausi): Tier-Listen per Tipp auf die Überschrift zuklappen (Start: offen). */
+#current-meta .tier-section > h3.tier-klapp-kopf { cursor: pointer; user-select: none; }
+#current-meta .tier-section > h3.tier-klapp-kopf::after { content: " ▾"; font-size: 0.8em; opacity: 0.7; }
+#current-meta .tier-section.tier-zu > h3.tier-klapp-kopf::after { content: " ▸"; }
+#current-meta .tier-section.tier-zu > :not(h3) { display: none; }
+
+/* V2-16 (07.10.2026, Hausi): die Heatmap gibt es am Handy nicht auf der Meta-Seite —
+   Matchups je Deck stehen in der Deck-Analyse (Matchup-Tabelle, FE-62). */
+@media (max-width: 700px) {
+  #current-meta .ds-sec:has(#matchupHeatmapContainer) { display: none; }
+}

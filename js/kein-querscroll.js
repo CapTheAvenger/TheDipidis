@@ -195,7 +195,7 @@
                 b.type = 'button';
                 b.className = 'qs-sortieren-btn';
                 var st = th.getAttribute('aria-sort');
-                b.textContent = textOhneHilfe(th) + (st === 'descending' ? ' ▼' : st === 'ascending' ? ' ▲' : '');
+                b.textContent = (th.getAttribute('data-sortier-name') || textOhneHilfe(th)) + (st === 'descending' ? ' ▼' : st === 'ascending' ? ' ▲' : '');
                 if (st === 'descending' || st === 'ascending') b.setAttribute('aria-pressed', 'true');
                 b.addEventListener('click', function () { th.click(); });
                 leiste.appendChild(b);

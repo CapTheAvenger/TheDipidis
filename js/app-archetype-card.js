@@ -1045,7 +1045,13 @@
            Gegenteil — der Hinweis an der Kachel ist die einzige Stelle,
            an der "2.577" steht, und muss es deshalb bleiben. */
         const m = _major ? (_major[findKey(_major, name)] || null) : null;
-        const majorLeer = L('arc.keinMajor', de ? 'kein Major' : 'no major');
+        /* V2-16 (07.10.2026, Hausi: „in TEF-30C gab es schon ein Major"):
+           gibt es im Format Major-Daten, hat nur DIESES Deck keine — dann
+           heisst es „nicht auf Majors", nicht „kein Major". */
+        const _formatHatMajor = !!(_major && Object.keys(_major).length);
+        const majorLeer = _formatHatMajor
+            ? L('arc.nichtAufMajors', de ? 'nicht auf Majors' : 'not at majors')
+            : L('arc.keinMajor', de ? 'kein Major' : 'no major');
 
         /* BEFUND B1 (07.09.2026): DIE GRUNDGESAMTHEIT STEHT JETZT DA —
            UND ZWAR ALS DAS, WAS SIE IST.
@@ -1374,7 +1380,7 @@
                 '–',
                 esc(m
                     ? L('arc.day2Duenn', de ? 'zu wenige Antritte' : 'too few entries')
-                    : L('arc.keinMajor', de ? 'kein Major' : 'no major')),
+                    : majorLeer),
                 m
                     ? L('arc.day2DuennTip', de
                         ? 'Dieses Deck stand mit {d1} Antritten am Start — zu wenige für eine Quote.'

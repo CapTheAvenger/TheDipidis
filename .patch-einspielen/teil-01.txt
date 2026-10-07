@@ -1,0 +1,321 @@
+From d23695d10c11702c5648fd83d1c40bdc9de969a8 Mon Sep 17 00:00:00 2001|
+From: Claude <noreply@anthropic.com>|
+Date: Wed, 7 Oct 2026 05:37:13 +0000|
+Subject: [PATCH] =?UTF-8?q?V2-11:=20Raumwahl=20auch=20=C3=BCber=20der=20De?=|
+ =?UTF-8?q?ck-Analyse=20und=20ein=20Men=C3=BCpunkt=20Deck-Analyse=20(UI-11?=|
+ =?UTF-8?q?2=20Etappe=203),=20Knopfsystem=20Stufe=201=20(UI-118);=20bump-v?=|
+ =?UTF-8?q?ersion?=|
+MIME-Version: 1.0|
+Content-Type: text/plain; charset=UTF-8|
+Content-Transfer-Encoding: 8bit|
+|
+Entscheidungen Hausi 06.10. abends („Ja, so bauen“, „Ja, so weitermachen“).|
+|
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>|
+Claude-Session: https://claude.ai/code/session_01KZTh97MtJfz4ENqWx3xh9e|
+---|
+ css/knopfsystem.css                   |  44 +++++|
+ index.html                            | 269 +++++++++++++-------------|
+ js/ds-filter.js                       |  33 +++-|
+ js/ds-nav.js                          |   5 +-|
+ js/i18n.js                            |   4 +-|
+ js/inline-init.js                     |   4 +-|
+ service-worker.js                     |   5 +-|
+ tests/unit/test-r3-menuemarkierung.js |  13 +-|
+ tests/unit/test-ui112-ui118.js        |  85 ++++++++|
+ tests/unit/test-v2-8-vergleich.js     |   3 +-|
+ version.json                          |   2 +-|
+ 11 files changed, 320 insertions(+), 147 deletions(-)|
+ create mode 100644 css/knopfsystem.css|
+ create mode 100644 tests/unit/test-ui112-ui118.js|
+|
+diff --git a/css/knopfsystem.css b/css/knopfsystem.css|
+new file mode 100644|
+index 00000000..8bf1c8f0|
+--- /dev/null|
++++ b/css/knopfsystem.css|
+@@ -0,0 +1,44 @@|
++/* UI-118 Stufe 1 (Hausi 06.10.2026: „Ja, so weitermachen“, Vorschau V2-11):|
++ * ein Knopfsystem und klare Rangfolge. Primaer (Markenfarbe), Sekundaer|
++ * (Flaeche 2), auf Farbe (durchscheinend weiss, fuer farbige Baender wie die|
++ * Deckzeile), Pille (Filter). Radius 10 px, Hoehe 36 px, Schrift 600.|
++ *|
++ * Laedt als letzte Stilvorlage. Primaer/Sekundaer bewusst mit der|
++ * Spezifitaet EINER Klasse (:where), damit Zustaende wie .avg-mode-btn.active|
++ * und die farbigen Varianten (primary, success, tertiary-danger) gewinnen. */|
++:root { --knopf-h: 36px; --knopf-r: 10px; }|
++|
++/* Deckzeile Meine Decks: eine Art statt sechs Farben */|
++.saved-deck-item .deck-action-buttons .deck-action-btn,|
++.saved-deck-item .deck-action-buttons .deck-btn-mehr {|
++    background: rgba(255, 255, 255, 0.16);|
++    border: 1px solid rgba(255, 255, 255, 0.38);|
++    color: #fff;|
++    border-radius: var(--knopf-r);|
++    min-height: 32px;|
++    padding: 4px 12px;|
++    font-size: 13px;|
++    font-weight: 600;|
++}|
++.saved-deck-item .deck-action-buttons .deck-action-btn:hover { background: rgba(255, 255, 255, 0.28); }|
++|
++/* Primaer / Sekundaer ueberall gleich geformt */|
++.btn:where(.btn-primary), .btn-modern:where(.btn-primary, .primary, .success, .tertiary-danger) {|
++    border-radius: var(--knopf-r);|
++    min-height: var(--knopf-h);|
++    font-weight: 600;|
++}|
++.btn:where(.btn-secondary), .btn-modern:where(:not(.btn-primary, .primary, .success, .tertiary-danger)) {|
++    border-radius: var(--knopf-r);|
++    min-height: var(--knopf-h);|
++    background: var(--surface-2);|
++    color: var(--ink);|
++    border: 1px solid var(--line);|
++    font-weight: 600;|
++}|
++|
++/* Rangfolge: Seitentitel > Abschnitt > Tier-Kopf */|
++.deck-tier-title { font-size: 17px; }|
++|
++/* UI-112 Etappe 3: die Raumwahl ueber der Deck-Analyse sitzt dicht unter dem Kopf. */|
++.ds-filter.ds-filter-analyse { margin-top: 10px; }|
+diff --git a/index.html b/index.html|
+index 74692f61..b207e235 100644|
+--- a/index.html|
++++ b/index.html|
+@@ -111,3 +111,3 @@|
+     // und im Fussbereich der Seite.|
+-    window.APP_VERSION = '202610062025';|
++    window.APP_VERSION = '202610070536';|
+     (function() {|
+@@ -187,46 +187,48 @@|
+          darf sich auf die Variablen verlassen. -->|
+-    <link rel="stylesheet" href="css/tokens.css?v=202610062025" type="text/css">|
+-    <link rel="stylesheet" href="css/components.css?v=202610062025" type="text/css">|
+-    <link rel="stylesheet" href="css/ds-nav.css?v=202610062025">|
+-    <link rel="stylesheet" href="css/styles.css?v=202610062025" type="text/css">|
+-    <link rel="stylesheet" href="css/ui-components.css?v=202610062025" type="text/css">|
+-    <link rel="stylesheet" href="css/ds-share.css?v=202610062025">|
+-    <link rel="stylesheet" href="css/pokeball-menu.css?v=202610062025" type="text/css">|
+-    <link rel="stylesheet" href="css/dashboard-theme.css?v=202610062025" type="text/css">|
++    <link rel="stylesheet" href="css/tokens.css?v=202610070536" type="text/css">|
++    <link rel="stylesheet" href="css/components.css?v=202610070536" type="text/css">|
++    <link rel="stylesheet" href="css/ds-nav.css?v=202610070536">|
++    <link rel="stylesheet" href="css/styles.css?v=202610070536" type="text/css">|
++    <link rel="stylesheet" href="css/ui-components.css?v=202610070536" type="text/css">|
++    <link rel="stylesheet" href="css/ds-share.css?v=202610070536">|
++    <link rel="stylesheet" href="css/pokeball-menu.css?v=202610070536" type="text/css">|
++    <link rel="stylesheet" href="css/dashboard-theme.css?v=202610070536" type="text/css">|
+     <!-- Non-critical CSS: async load (tab-specific styles) -->|
+-    <link rel="stylesheet" href="css/auth-styles.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-header.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-filter-section.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/cards-tabs.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/city-league.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/anti-tech.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/tech-lab.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/tech-slots.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/profile-howto-info.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/masterclass.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/meta-call.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/side-quest.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ds-pocket.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/archetyp-box.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/quellen.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/admin.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/statuszustaende.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/tippziele.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/testing-groups.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/archetype-icons.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step1.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step2.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step3.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
+-    <link rel="stylesheet" href="css/ux-step4.css?v=202610062025" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/auth-styles.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/cards-header.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/cards-filter-section.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/cards-tabs.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/city-league.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/meta-card-analysis.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/current-meta-matchups.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/anti-tech.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/tech-lab.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/tech-slots.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/de-overview-tabs.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/profile-howto-info.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/masterclass.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/profile-deck-builder.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/kartentext-hinweis.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/meta-call.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/side-quest.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ds-pocket.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/archetyp-box.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/quellen.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/admin.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/statuszustaende.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/tippziele.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/testing-groups.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/archetype-icons.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step1.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step2.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step3.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
++    <link rel="stylesheet" href="css/ux-step4.css?v=202610070536" type="text/css" media="print" onload="this.media='all'">|
+     <!-- Mobile Responsive Optimization — SCHRITT 1 (Layout Umbrüche) -->|
+-    <link rel="stylesheet" href="css/mobile-responsive.css?v=202610062025" type="text/css">|
++    <link rel="stylesheet" href="css/mobile-responsive.css?v=202610070536" type="text/css">|
+     <!-- Escape Rope Close Buttons -->|
+-    <link rel="stylesheet" href="css/close-buttons.css?v=202610062025" type="text/css">|
+-    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202610062025" type="text/css">|
++    <link rel="stylesheet" href="css/close-buttons.css?v=202610070536" type="text/css">|
++    <link rel="stylesheet" href="css/wishlist-bot-import.css?v=202610070536" type="text/css">|
++    <!-- UI-118 Stufe 1: Knopfsystem, laedt zuletzt. -->|
++    <link rel="stylesheet" href="css/knopfsystem.css?v=202610070536" type="text/css">|
+     <!-- Mobile Drag & Drop polyfill for touch devices -->|
+@@ -472,4 +474,4 @@|
+          ?v=NNNN in dieser Datei, also zieht der Stempel jetzt mit. -->|
+-    <script src="js/pokemon-loading-screen.js?v=202610062025"></script>|
+-    <script src="js/csv-cache-interceptor.js?v=202610062025"></script>|
++    <script src="js/pokemon-loading-screen.js?v=202610070536"></script>|
++    <script src="js/csv-cache-interceptor.js?v=202610070536"></script>|
+     <a href="#main-content" class="skip-to-content" data-i18n="a11y.skip">Zum Inhalt springen</a>|
+@@ -580,5 +582,2 @@|
+                                 </button>|
+-                                <button id="menu-btn-city-league-analysis" class="menu-item menu-subitem" data-tab-id="city-league-analysis" onclick="switchTabAndUpdateMenu('city-league-analysis')" data-i18n="menu.cityLeagueAnalysis" role="menuitem">|
+-                                    <span class="menu-item-label">Deck Analysis (Japan)</span>|
+-                                </button>|
+                                 <button id="menu-btn-current-meta" class="menu-item menu-subitem" data-tab-id="current-meta" onclick="switchTabAndUpdateMenu('current-meta')" data-i18n="menu.currentMeta" role="menuitem">|
+@@ -586,4 +585,8 @@|
+                                 </button>|
++                                <!-- UI-112 Etappe 3 (Hausi 06.10.2026): ein Menuepunkt fuer die Deck-Analyse|
++                                     aller Raeume; Japan / Format / Vergangene Formate waehlt die Zeile oben|
++                                     in der Seite. city-league-analysis markiert diesen Punkt|
++                                     (MENUEPUNKT_ALIAS in js/inline-init.js). -->|
+                                 <button id="menu-btn-current-analysis" class="menu-item menu-subitem" data-tab-id="current-analysis" onclick="switchTabAndUpdateMenu('current-analysis')" data-i18n="menu.currentMetaAnalysis" role="menuitem">|
+-                                    <span class="menu-item-label">Deck Analysis (Global)</span>|
++                                    <span class="menu-item-label">Deck analysis</span>|
+                                 </button>|
+@@ -3997,8 +4000,8 @@|
+     <!-- Error tracking (must load before all other JS) -->|
+-    <script src="js/error-tracking.js?v=202610062025"></script>|
++    <script src="js/error-tracking.js?v=202610070536"></script>|
+ |
+-    <script src="js/inline-init.js?v=202610062025" defer></script>|
++    <script src="js/inline-init.js?v=202610070536" defer></script>|
+     <!-- Haelt die Seite hinter einem Vollbild an. Muss vor allen Modulen|
+          stehen, die ein Overlay oeffnen. -->|
+-    <script src="js/hintergrund-sperre.js?v=202610062025" defer></script>|
++    <script src="js/hintergrund-sperre.js?v=202610070536" defer></script>|
+ |
+@@ -4181,11 +4184,11 @@|
+     <!-- Utilities first (provides escapeHtml globally) -->|
+-    <script src="js/app-utils.js?v=202610062025" defer></script>|
+-    <script src="js/kein-querscroll.js?v=202610062025" defer></script>|
+-    <script src="js/i18n.js?v=202610062025" defer></script>|
++    <script src="js/app-utils.js?v=202610070536" defer></script>|
++    <script src="js/kein-querscroll.js?v=202610070536" defer></script>|
++    <script src="js/i18n.js?v=202610070536" defer></script>|
+     <!-- Firebase: credentials ? config ? globals ? auth ? collection -->|
+-    <script src="js/firebase-credentials.js?v=202610062025" defer></script>|
+-    <script src="js/firebase-config.js?v=202610062025" defer></script>|
+-    <script src="js/firebase-globals.js?v=202610062025" defer></script>|
+-    <script src="js/firebase-auth.js?v=202610062025" defer></script>|
+-    <script src="js/auth-ui-helpers.js?v=202610062025" defer></script>|
++    <script src="js/firebase-credentials.js?v=202610070536" defer></script>|
++    <script src="js/firebase-config.js?v=202610070536" defer></script>|
++    <script src="js/firebase-globals.js?v=202610070536" defer></script>|
++    <script src="js/firebase-auth.js?v=202610070536" defer></script>|
++    <script src="js/auth-ui-helpers.js?v=202610070536" defer></script>|
+     <!-- Zwei Decklisten nebeneinander. Muss VOR firebase-collection.js|
+@@ -4193,9 +4196,9 @@|
+          auf, sobald die Ansicht "Nebeneinander" gewaehlt wird. -->|
+-    <script src="js/deck-vergleich-nebeneinander.js?v=202610062025" defer></script>|
+-    <script src="js/firebase-collection.js?v=202610062025" defer></script>|
++    <script src="js/deck-vergleich-nebeneinander.js?v=202610070536" defer></script>|
++    <script src="js/firebase-collection.js?v=202610070536" defer></script>|
+     <!-- Wishlist import for the Telegram bot's card lists (paste, not upload). -->|
+-    <script src="js/wishlist-bot-import.js?v=202610062025" defer></script>|
++    <script src="js/wishlist-bot-import.js?v=202610070536" defer></script>|
+     <!-- TCG Showdown handoff — replaces the in-app Playtester.|
+          Standalone helper, no deps; only uses globals from other scripts. -->|
+-    <script src="js/tcg-showdown-link.js?v=202610062025" defer></script>|
++    <script src="js/tcg-showdown-link.js?v=202610070536" defer></script>|
+     <!-- Chart.js, PapaParse and localForage (IndexedDB wrapper) — self-hosted -->|
+@@ -4205,3 +4208,3 @@|
+     <!-- Card data cache layer (IndexedDB) -->|
+-    <script src="js/card-data-cache.js?v=202610062025" defer></script>|
++    <script src="js/card-data-cache.js?v=202610070536" defer></script>|
+     <!-- Offline prefetcher — warms the SW cache with every data file|
+@@ -4209,7 +4212,7 @@|
+          has the full dataset locally without per-tab warm-up. -->|
+-    <script src="js/offline-prefetch.js?v=202610062025" defer></script>|
++    <script src="js/offline-prefetch.js?v=202610070536" defer></script>|
+     <!-- App modules -->|
+-    <script src="js/deck-analysis-shared.js?v=202610062025" defer></script>|
+-    <script src="js/app-core.js?v=202610062025" defer></script>|
+-    <script src="js/app-price.js?v=202610062025" defer></script>|
++    <script src="js/deck-analysis-shared.js?v=202610070536" defer></script>|
++    <script src="js/app-core.js?v=202610070536" defer></script>|
++    <script src="js/app-price.js?v=202610070536" defer></script>|
+     <!-- Die Glaettung muss vor jedem Leser der Matchup-Zahlen stehen:|
+@@ -4220,18 +4223,18 @@|
+          Quote anzeigt — app-tier-meta, app-past-meta, ds-share. -->|
+-    <script src="js/win-rate-konvention.js?v=202610062025" defer></script>|
+-    <script src="js/journal-zuordnung.js?v=202610062025" defer></script>|
+-    <script src="js/matchup-glaettung.js?v=202610062025" defer></script>|
+-    <script src="js/rangliste-sortieren.js?v=202610062025" defer></script>|
+-    <script src="js/ds-bildvorschau.js?v=202610062025" defer></script>|
+-    <script src="js/app-tier-meta.js?v=202610062025" defer></script>|
+-    <script src="js/app-city-league.js?v=202610062025" defer></script>|
+-    <script src="js/app-deck-builder.js?v=202610062025" defer></script>|
+-    <script src="js/card-capability-engine.js?v=202610062025" defer></script>|
+-    <script src="js/tech-ideen.js?v=202610062025" defer></script>|
+-    <script src="js/app-tech-lab.js?v=202610062025" defer></script>|
+-    <script src="js/app-anti-tech.js?v=202610062025" defer></script>|
+-    <script src="js/app-meta-cards.js?v=202610062025" defer></script>|
+-    <script src="js/app-current-meta.js?v=202610062025" defer></script>|
+-    <script src="js/app-past-meta.js?v=202610062025" defer></script>|
+-    <script src="js/app-cards-db.js?v=202610062025" defer></script>|
++    <script src="js/win-rate-konvention.js?v=202610070536" defer></script>|
++    <script src="js/journal-zuordnung.js?v=202610070536" defer></script>|
++    <script src="js/matchup-glaettung.js?v=202610070536" defer></script>|
++    <script src="js/rangliste-sortieren.js?v=202610070536" defer></script>|
++    <script src="js/ds-bildvorschau.js?v=202610070536" defer></script>|
++    <script src="js/app-tier-meta.js?v=202610070536" defer></script>|
++    <script src="js/app-city-league.js?v=202610070536" defer></script>|
++    <script src="js/app-deck-builder.js?v=202610070536" defer></script>|
++    <script src="js/card-capability-engine.js?v=202610070536" defer></script>|
++    <script src="js/tech-ideen.js?v=202610070536" defer></script>|
++    <script src="js/app-tech-lab.js?v=202610070536" defer></script>|
++    <script src="js/app-anti-tech.js?v=202610070536" defer></script>|
++    <script src="js/app-meta-cards.js?v=202610070536" defer></script>|
++    <script src="js/app-current-meta.js?v=202610070536" defer></script>|
++    <script src="js/app-past-meta.js?v=202610070536" defer></script>|
++    <script src="js/app-cards-db.js?v=202610070536" defer></script>|
+     <!-- Fuellt die Frische-Chips aus data/data_stand.json, dem im Wochenlauf|
+@@ -4239,43 +4242,43 @@|
+          das die Fusszeile setzt. -->|
+-    <script src="js/ds-datenstand.js?v=202610062025" defer></script>|
+-    <script src="js/app-init.js?v=202610062025" defer></script>|
+-    <script src="js/app-current-meta-analysis.js?v=202610062025" defer></script>|
+-    <script src="js/app-features.js?v=202610062025" defer></script>|
+-    <script src="js/archetype-icons.js?v=202610062025" defer></script>|
+-    <script src="js/app-archetype-card.js?v=202610062025" defer></script>|
+-    <script src="js/app-meta-call.js?v=202610062025" defer></script>|
+-    <script src="js/app-deckempfehlung.js?v=202610062025" defer></script>|
+-    <script src="js/meta-analysis-hub.js?v=202610062025" defer></script>|
+-    <script src="js/app-testing-groups.js?v=202610062025" defer></script>|
+-    <script src="js/battle-journal.js?v=202610062025" defer></script>|
+-    <script src="js/meta-binder.js?v=202610062025" defer></script>|
+-    <script src="js/custom-binder.js?v=202610062025" defer></script>|
+-    <script src="js/archetyp-box.js?v=202610062025" defer></script>|
+-    <script src="js/draw-simulator.js?v=202610062025" defer></script>|
+-    <script src="js/app-calculator.js?v=202610062025" defer></script>|
+-    <script src="js/champions-namen.js?v=202610062025" defer></script>|
+-    <script src="js/qr-svg.js?v=202610062025" defer></script>|

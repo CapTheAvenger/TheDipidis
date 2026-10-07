@@ -2079,10 +2079,10 @@
                     } else {
                         // Multi-token: every token must match the haystack
                         // (or, for very short tokens, the dex number).
-                        matchesSearch = searchTokens.every(t =>
-                            haystack.includes(t) ||
-                            (dexNum !== '' && (dexNum === t || (t.length >= 3 && dexNum.includes(t))))
-                        );
+                        // N2-11 (07.10.2026): „Pikachu 25" fand 213 Karten — die 25 traf
+                        // jede Nummer mit 25 und Pikachus Pokédex-Nummer. Neben einem
+                        // Namen ist eine reine Zahl die KARTENNUMMER.
+                        matchesSearch = searchTokens.every(t => kartenSucheTokenPasst(t, haystack, cardNum, dexNum));
                     }
                     if (!matchesSearch) {
                         failedSearch++;
@@ -2948,6 +2948,12 @@
                    die Quelldatei traegt nur ihre Kopfzeile, weil die
                    japanische City League zwischen zwei Set-Rotationen
                    pausiert. Wortlaut wie in js/app-city-league.js. */
+                /* N-22 (07.10.2026): bei aktiver Suche ohne Treffer ein Tipp statt
+                   des allgemeinen Filtersatzes. */
+                const _suchFeld = document.getElementById('cardSearch');
+                if (_suchFeld && _suchFeld.value.trim()) {
+                    emptyDesc = _cdbT('cdb.suchTipp', 'Try the English or German name, without the set code.');
+                }
                 if (window._cdbLeerGrund === 'city-league-saisonpause') {
                     emptyTitle = _cdbLang === 'de' ? 'Saisonpause in Japan' : 'Off-season in Japan';
                     emptyDesc = _cdbLang === 'de'
@@ -4089,6 +4095,17 @@
             return teile.filter((t, i) => teile.indexOf(t) === i).join(' / ');
         }
         window.erhebungAnzeige = erhebungAnzeige;
+
+/** Ein Suchwort der Mehrwort-Suche: Zahl = Kartennummer (ohne fuehrende
+           Nullen), sonst Teilstring im Heuhaufen bzw. Pokédex-Nummer. */
+        function kartenSucheTokenPasst(t, haystack, cardNum, dexNum) {
+            if (/^\d+[a-z]?$/.test(t)) {
+                return String(cardNum || '').replace(/^0+/, '') === t.replace(/^0+/, '');
+            }
+            return haystack.includes(t)
+                || (dexNum !== '' && (dexNum === t || (t.length >= 3 && dexNum.includes(t))));
+        }
+        window.kartenSucheTokenPasst = kartenSucheTokenPasst;
 
         function kartenGespieltInListe(proArchetyp) {
             const liste = [];

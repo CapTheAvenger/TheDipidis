@@ -958,7 +958,7 @@
             cards,
             totalCards: Object.values(cards).reduce((s, n) => s + n, 0),
         };
-        window.saveDeck(nutzlast);
+        window.saveDeck(nutzlast, { stumm: true });
         return { ok: true, karten: nutzlast.totalCards, name: nutzlast.name };
     }
 

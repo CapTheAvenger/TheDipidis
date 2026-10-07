@@ -586,6 +586,38 @@ async function removeFromWishlist(cardId) {
   }
 }
 
+/* N-25 (07.10.2026): Entfernen ging nur ueber „−“ bis 0. Ein Knopf, der die
+   Karte ganz von der Wunschliste nimmt — mit Rueckfrage und Kartennamen. */
+async function wunschlisteKarteEntfernen(cardId, name) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const de = getLang() === 'de';
+  const ok = (typeof zeigeBestaetigung === 'function')
+    ? await zeigeBestaetigung({
+        titel: de ? 'Von der Wunschliste entfernen' : 'Remove from wishlist',
+        text: (de ? '„{n}“ ganz von der Wunschliste nehmen?' : 'Remove "{n}" from the wishlist?').replace('{n}', name || cardId),
+        ok: de ? 'Entfernen' : 'Remove', gefaehrlich: true })
+    : true;
+  if (!ok) return;
+  try {
+    await db.collection('users').doc(user.uid).update(
+      'wishlist', firebase.firestore.FieldValue.arrayRemove(cardId),
+      countFieldRef('wishlistCounts', cardId), firebase.firestore.FieldValue.delete()
+    );
+    window.userWishlist.delete(cardId);
+    if (window.userWishlistCounts) window.userWishlistCounts.delete(cardId);
+    showNotification(fcText('notif.wishlistRemoved', 'Removed from wishlist'), 'success');
+    if (typeof filterWishlist === 'function') filterWishlist();
+    else updateWishlistUI();
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
+    }
+  } catch (error) {
+    console.error('Error removing from wishlist:', error);
+  }
+}
+window.wunschlisteKarteEntfernen = wunschlisteKarteEntfernen;
+
 // Toggle wishlist
 async function toggleWishlist(cardId) {
   if (!window.userWishlist) {
@@ -843,7 +875,10 @@ async function saveDisplayName() {
 // keys present on the server (the user's actual reproduction
 // 2026-05-29 16:53). The mirror has the full intended deck state
 // after the in-memory mutations, so a full replace is what we want.
-function saveDeck(deckData) {
+function saveDeck(deckData, optionen) {
+  /* N2-10 (07.10.2026): der Profil-Builder meldet selbst, mit Namen und
+     Kartenzahl — zwei Meldungen gleichzeitig waren eine zu viel. */
+  const stumm = !!(optionen && optionen.stumm);
   const user = auth.currentUser;
   if (!user) {
     showNotification(fcText('notif.signInSaveDecks', 'Please sign in to save decks'), 'error');
@@ -872,7 +907,7 @@ function saveDeck(deckData) {
   else window.userDecks.unshift(localCopy);
   if (typeof _writeDeckBackup === 'function') _writeDeckBackup(user.uid, window.userDecks);
 
-  showNotification(isNew
+  if (!stumm) showNotification(isNew
     ? fcText('notif.deckSaved', 'Deck saved!')
     : fcText('notif.deckUpdated', 'Deck updated!'), 'success');
   if (typeof updateDecksUI === 'function') updateDecksUI();
@@ -1959,6 +1994,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             <div style="font-size: 0.75em; color: var(--ink-2);">${safeSetHtml} ${safeNumberHtml}</div>
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.75em; color: ${ownedCount > 0 ? '#4CAF50' : '#999'}; font-weight: 600;">✓ ${ownedCount}/${maxLabel}</span>
+              <button type="button" class="wunsch-entfernen" onclick="wunschlisteKarteEntfernen('${safeCardIdJs}', '${escapeHtml(safeNameJs)}')">${getLang()==='de' ? 'Entfernen ✕' : 'Remove ✕'}</button>
               <button onclick="addOwnedFromWishlist('${safeCardIdJs}')" style="background: #377e39; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; line-height: 1;" title="${escapeHtml(t('akt.addCollectionOwned').replace('{n}', ownedCount))}">+</button>
             </div>
             ${cmUrl
@@ -3085,7 +3121,7 @@ function updateDecksUI(offenHalten) {
             </div>
             <div style="display: flex; gap: 6px; align-items: center;">
               <span style="font-size: 0.85em; color: var(--ink-2); font-weight: 600;">${totalCards}/60</span>
-              <button onclick="openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="Compare this deck">Compare</button>
+              <button onclick="openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="${getLang()==='de' ? 'Dieses Deck vergleichen' : 'Compare this deck'}">Compare</button>
             </div>
           </div>
           <div class="my-deck-cards-grid">
@@ -3158,6 +3194,27 @@ function _persistDeckMutation(user, deck, firestorePayload) {
 // ============================================================
 // My Decks: Change Card Count (+/-)
 // ============================================================
+/** F2-10: kurze Meldung mit „Rückgängig“ (6 s). Eine zur Zeit. */
+function deckRueckgaengigAnbieten(text, rueckgaengig) {
+  const alt = document.getElementById('deckRueckgaengig');
+  if (alt) alt.remove();
+  const el = document.createElement('div');
+  el.id = 'deckRueckgaengig';
+  el.className = 'deck-rueckgaengig';
+  el.setAttribute('role', 'status');
+  const span = document.createElement('span');
+  span.textContent = text;
+  const knopf = document.createElement('button');
+  knopf.type = 'button';
+  knopf.textContent = getLang() === 'de' ? 'Rückgängig' : 'Undo';
+  knopf.onclick = function () { el.remove(); rueckgaengig(); };
+  el.appendChild(span);
+  el.appendChild(knopf);
+  document.body.appendChild(el);
+  setTimeout(function () { if (el.isConnected) el.remove(); }, 6000);
+}
+window.deckRueckgaengigAnbieten = deckRueckgaengigAnbieten;
+
 async function myDeckChangeCardCount(deckIndex, deckKey, delta) {
   const user = auth.currentUser;
   if (!user) return;
@@ -3168,8 +3225,12 @@ async function myDeckChangeCardCount(deckIndex, deckKey, delta) {
   const newCount = currentCount + delta;
 
   if (newCount <= 0) {
-    // Remove card entirely
+    // Remove card entirely — F2-10 (07.10.2026): mit Rueckgaengig, denn „−“
+    // bei einer Kopie loeschte ohne Rueckfrage, und die Zeile sprang weg.
     delete deck.cards[deckKey];
+    deckRueckgaengigAnbieten(
+      (getLang() === 'de' ? '„{k}“ aus dem Deck entfernt' : '"{k}" removed from the deck').replace('{k}', String(deckKey).split(' (')[0]),
+      function () { myDeckChangeCardCount(deckIndex, deckKey, currentCount); });
   } else if (newCount > 4 && !deckKey.toLowerCase().includes('energy')) {
     showNotification(getLang() === 'de' ? 'Maximal 4 Kopien erlaubt' : 'Max 4 copies allowed', 'warning');
     return;
@@ -4300,7 +4361,7 @@ function renderFolderNav() {
       const safeJs = escapeJsSingleQuoted(f);
       return `<span draggable="true" data-folder="${safe}" style="display:inline-flex;align-items:center;gap:0;background: var(--surface-2);border:1px solid var(--line);border-radius:20px;overflow:hidden;cursor:grab;transition:transform 0.15s,opacity 0.15s;">` +
         `<button onclick="filterDecksByFolder('${safeJs}')" style="padding:6px 10px 6px 14px;background:transparent;color: var(--ink);border:none;cursor:pointer;font-weight:600;font-size:0.85em;">${safe}</button>` +
-        `<button onclick="event.stopPropagation();deleteDeckFolder('${safeJs}')" title="Delete folder" style="padding:4px 10px 4px 4px;background:transparent;color: var(--ink-3);border:none;cursor:pointer;font-size:0.9em;line-height:1;">&times;</button>` +
+        `<button onclick="event.stopPropagation();deleteDeckFolder('${safeJs}')" title="${getLang()==='de' ? 'Ordner löschen' : 'Delete folder'}" style="padding:4px 10px 4px 4px;background:transparent;color: var(--ink-3);border:none;cursor:pointer;font-size:0.9em;line-height:1;">&times;</button>` +
         `</span>`;
     }).join('');
 

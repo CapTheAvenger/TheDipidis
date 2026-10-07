@@ -9106,7 +9106,7 @@ if (typeof window.addEventListener === 'function') {
                     : `${result.dataQuality.n_lists} Day-2-Listen`;
                 showToast(
                     `✓ ${archetype}: ${liveTotal}/60 Karten · `
-                    + `Core @ ${(result.coreThreshold * 100).toFixed(0)} % · `
+                    + `${(typeof getLang === 'function' && getLang() === 'en') ? 'Core cards from' : 'Kernkarten ab'} ${(result.coreThreshold * 100).toFixed(0)} % · `
                     + `${_basis}`,
                     'success', 4000
                 );

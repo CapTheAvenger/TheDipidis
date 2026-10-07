@@ -1312,7 +1312,7 @@
                 showDeckShareToast((typeof getLang === 'function' && getLang() === 'en') ? `PTCGL export copied! (${total} cards)` : `PTCGL-Liste kopiert (${total} Karten).`);
             }).catch(() => {
                 // Fallback: show in modal
-                showInputModal({ title: 'PTCGL Export', message: 'Copy this PTCGL deck list:', defaultValue: ptcglText, readonly: true, textarea: true });
+                showInputModal({ title: 'PTCGL Export', message: (typeof getLang === 'function' && getLang() === 'en') ? 'Copy this PTCGL deck list:' : 'Diese Liste in PTCGL einfügen:', defaultValue: ptcglText, readonly: true, textarea: true });
             });
         }
 

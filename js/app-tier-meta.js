@@ -1281,7 +1281,7 @@
                                 </div>
                                 <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
                                 <div class="tier-hero-stats">
-                                    <span class="stat-badge">${item.totalCount} ${t(item.totalCount === 1 ? 'cl.deckSingular' : 'cl.decks')}</span>
+                                    <span class="stat-badge">${item.totalCount} ${t(item.totalCount === 1 ? 'cl.deckSingular' : 'cl.decks')}${/* F-23 (07.10.2026): Anteil wie bei Global, Nenner = alle Listen des Zeitraums */ (clGesamtListen > 0) ? ' · ' + _dezimal((item.totalCount / clGesamtListen * 100).toFixed(1)) + ' %' : ''}</span>
                                     <span class="stat-badge rank-performance-hint" title="${escapeHtml(t('cl.heroRankHint'))}">${t('cl.heroAvgRank')} ${_dezimal(avgRankText)}</span>
                                 </div>
                             </div>

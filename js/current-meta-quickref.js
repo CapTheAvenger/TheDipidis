@@ -265,6 +265,15 @@
     return { ...best, cards: _consolidateCards(best.cards) };
   }
 
+  /* D2-12 (07.10.2026): die Prozentzahl neben der Bilanz ist die
+     Matchpunkte-Quote — ohne Namen las sie sich wie eine Win-Rate. Und das
+     Datum stand als ISO-Tag (2026-09-26) neben deutschen Daten. */
+  function _datumLesbar(roh) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(roh || '').trim());
+    if (!m || (typeof getLang === 'function' && getLang() === 'en')) return String(roh || '');
+    return m[3] + '.' + m[2] + '.' + m[1];
+  }
+
   // ── Best Online: typical build from latest online tournament ─────
   //
   // The online CSV is per-tournament aggregated (no player-level
@@ -630,7 +639,7 @@
         : `No major tournament in the ${v.formatKey || 'current'} format yet${v.firstLegal ? ` — first major from ${v.firstLegal}` : ''}.`;
       const tail = v.tournament_name
         ? (de
-            ? `Letztes Major des vorherigen Formats: ${v.tournament_name} (${v.tournament_date}) — siehe Past Meta.`
+            ? `Letztes Major des vorherigen Formats: ${v.tournament_name} (${_datumLesbar(v.tournament_date)}) — siehe Past Meta.`
             : `Last major of the previous format: ${v.tournament_name} (${v.tournament_date}) — see Past Meta.`)
         : '';
       majorBody.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${_escHtml(head)}${tail ? `<br><small>${_escHtml(tail)}</small>` : ''}</p>`;
@@ -685,7 +694,7 @@
       const _qWpVal = _qWK
         ? _qWK.KONVENTIONEN.matchpunkte.rechne(ref.wins || 0, ref.losses || 0, ref.ties || 0)
         : (_winRate(ref) * 100);
-      const _qWpStr = zahlKomma((Number.isFinite(_qWpVal) ? _qWpVal : 0)) + '%';
+      const _qWpStr = zahlKomma((Number.isFinite(_qWpVal) ? _qWpVal : 0)) + ' % ' + ((typeof getLang === 'function' && getLang() === 'en') ? 'points' : 'Punkte');
       const _qWpHinweis = _qWK ? _qWK.hinweis('matchpunkte') : '';
       const recordBlock = games > 0
         ? `<span class="past-meta-best-record"${_qWpHinweis ? ` title="${_escHtml(_qWpHinweis)}"` : ''}>${ref.wins || 0}-${ref.losses || 0}-${ref.ties || 0} · ${_qWpStr}</span>`
@@ -735,7 +744,7 @@
             <span class="past-meta-best-name">${_escHtml(ref.player_name || '')}</span>
             ${recordBlock}
           </div>
-          <div class="past-meta-best-sub" title="${_escHtml(_titelM)}">${_escHtml(tournName)} · ${_escHtml(ref.tournament_date)} · ${_escHtml(_tag2M)} · ${total} ${_escHtml(cardsLbl)}</div>
+          <div class="past-meta-best-sub" title="${_escHtml(_titelM)}">${_escHtml(tournName)} · ${_escHtml(_datumLesbar(ref.tournament_date))} · ${_escHtml(_tag2M)} · ${total} ${_escHtml(cardsLbl)}</div>
         </div>`;
     }
     // Online — REAL best-placed decklist (place + player + record) when the
@@ -767,7 +776,7 @@
         ? _oWK.KONVENTIONEN.matchpunkte.rechne(ref.wins || 0, ref.losses || 0, ref.ties || 0)
         : NaN;
       const _oWpStr = Number.isFinite(_oWpVal)
-        ? zahlKomma(_oWpVal) + '%'
+        ? zahlKomma(_oWpVal) + ' % ' + ((typeof getLang === 'function' && getLang() === 'en') ? 'points' : 'Punkte')
         : '';
       const _oWpHinweis = _oWK ? _oWK.hinweis('matchpunkte') : '';
       const recordBlock = (games > 0 && _oWpStr)
@@ -780,7 +789,7 @@
             <span class="past-meta-best-name">${_escHtml(ref.player || '')}</span>
             ${recordBlock}
           </div>
-          <div class="past-meta-best-sub">${_escHtml(tournName || 'Limitless Online')} · ${_escHtml(ref.tournament_date)} · ${total} ${_escHtml(cardsLbl)}</div>
+          <div class="past-meta-best-sub">${_escHtml(tournName || 'Limitless Online')} · ${_escHtml(_datumLesbar(ref.tournament_date))} · ${total} ${_escHtml(cardsLbl)}</div>
         </div>`;
     }
     /* WIE VIELE LISTEN STEHEN HINTER DIESEM "TYPISCHEN BUILD"?

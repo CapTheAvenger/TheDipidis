@@ -40,7 +40,7 @@ const WK = ladeKonvention();
 // Kanonisch gegen die Konvention nachgerechnet, nicht abgeschrieben.
 const ERWARTET = WK.KONVENTIONEN.matchpunkte.rechne(6, 2, 1);
 assert.ok(Math.abs(ERWARTET - (19 / 27) * 100) < 1e-9);
-const ERWARTET_STR = ERWARTET.toFixed(1).replace('.', ',') + '%'; // "70,4%"
+const ERWARTET_STR = ERWARTET.toFixed(1).replace('.', ',') + ' % Punkte'; // "70,4 % Punkte" (D2-12, 07.10.2026)
 
 function schneide(src, von, bis) {
     const a = src.indexOf(von);
@@ -73,7 +73,7 @@ describe('F24 (Past Meta) — MostSuccessfulList nennt die Konvention', () => {
         assert.doesNotMatch(r.wpHinweis, /Matchpunkte/, 'der alte Name steht wieder da');
         assert.match(r.recordBlock, /title="/, 'der Hinweis hängt nicht als title an der Zahl');
         assert.match(r.recordBlock, /Win %/);
-        assert.match(r.recordBlock, /6-2-1 · 70,4%/);
+        assert.match(r.recordBlock, /6-2-1 · 70,4 % Punkte/);
     });
 });
 
@@ -97,6 +97,6 @@ describe('F24 (Quickref) — Record-Block nennt die Konvention', () => {
         assert.match(r.wpHinweis, /\(3S \+ U\)/, 'der Hinweis nennt die Formel nicht mehr');
         assert.doesNotMatch(r.wpHinweis, /Matchpunkte/, 'der alte Name steht wieder da');
         assert.match(r.recordBlock, /title="/, 'der Hinweis hängt nicht als title an der Zahl');
-        assert.match(r.recordBlock, /6-2-1 · 70,4%/);
+        assert.match(r.recordBlock, /6-2-1 · 70,4 % Punkte/);
     });
 });

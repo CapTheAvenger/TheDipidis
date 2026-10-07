@@ -129,7 +129,7 @@ describe('F05 — die Best-Kachel weist ihre grosse Zahl als Meta-Anteil aus', (
         const html = answerHtml(model);
 
         const best = tileMit(html, 'Dragapult');
-        assert.match(best, /Erfolgreichstes Deck/, 'Dragapult ist nicht die Best-Kachel');
+        assert.match(best, /Höchste Top-8-Quote/, 'Dragapult ist nicht die Best-Kachel');
         assert.match(best, /Meta-Anteil/,
             'die grosse Zahl der Best-Kachel ist nicht als "Meta-Anteil" beschriftet');
 
@@ -143,7 +143,7 @@ describe('F05 — die Best-Kachel weist ihre grosse Zahl als Meta-Anteil aus', (
         const model = answerModel(ROWS);
         const html = answerHtml(model);
         const best = tileMit(html, 'Dragapult');
-        assert.match(best, /Most successful deck/);
+        assert.match(best, /Highest top-8 rate/);
         assert.match(best, /field share/);
     });
 });

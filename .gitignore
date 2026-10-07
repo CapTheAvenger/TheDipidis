@@ -144,3 +144,6 @@ backend/core/data/
 # altert. Lokal darf sie liegen — fuer die Abnahme im Browser.
 data/post_decklists.json
 .cache/
+
+# Auch ein Verweis (Symlink) namens node_modules gehoert nicht ins Repo (07.10.2026: hielt die Setwechsel-Probe an)
+/node_modules

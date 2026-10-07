@@ -2440,7 +2440,17 @@ function dsMarkenIndexBauen(daten) {
   });
   return mk;
 }
-function dsRotiertZaehlen(cards, index) {
+/* DA-41 (07.10.2026): eine Karte mit Marke H rotiert NICHT, wenn es einen Nachdruck
+   mit spaeterer Marke (I, J, …) gibt — dann bleibt sie mit jedem Druck legal (Beispiel:
+   Ultra Ball, Nachdruck MEG 131 und 30C 128). Die Nachdrucke kommen aus
+   `international_prints` der Kartendatenbank (Limitless, je Set-Nummer), nie ueber den
+   Namen. `drucke(set, nr)` liefert sie als ['SET-NR', …]; ohne Angabe zaehlt nur der Druck. */
+function dsMarkeVon(index, set, nr) {
+  const s = index[String(set).toUpperCase()];
+  if (!s) return '';
+  return s[nr] || s[String(nr).replace(/^0+/, '')] || '';
+}
+function dsRotiertZaehlen(cards, index, drucke) {
   let n = 0;
   if (!index || !cards) return 0;
   Object.keys(cards).forEach(function (key) {
@@ -2450,10 +2460,15 @@ function dsRotiertZaehlen(cards, index) {
     if (!m) return;
     const set = m[1].toUpperCase();
     const nr = m[2];
-    const s = index[set];
-    if (!s) return;
-    const marke = s[nr] || s[nr.replace(/^0+/, '')];
-    if (marke === DS_ROTIERT_MARKE) n += anz;
+    if (dsMarkeVon(index, set, nr) !== DS_ROTIERT_MARKE) return;
+    const andere = (typeof drucke === 'function' ? drucke(set, nr) : null) || [];
+    const bleibt = andere.some(function (p) {
+      const i = String(p).lastIndexOf('-');
+      if (i <= 0) return false;
+      const mk = dsMarkeVon(index, String(p).slice(0, i), String(p).slice(i + 1));
+      return !!mk && mk > DS_ROTIERT_MARKE;
+    });
+    if (!bleibt) n += anz;
   });
   return n;
 }
@@ -2468,7 +2483,24 @@ function dsRotationsZeile(cards) {
     }
     return '';
   }
-  const n = dsRotiertZaehlen(cards, _dsMarkenIndex);
+  // Ohne Kartendatenbank keine Nachdrucke — dann lieber noch nichts zeigen als zu viel.
+  if (!(window.cardIndexBySetNumber instanceof Map) || window.cardIndexBySetNumber.size === 0) {
+    if (!dsRotationsZeile._warte) {
+      dsRotationsZeile._warte = setInterval(function () {
+        if (window.cardIndexBySetNumber instanceof Map && window.cardIndexBySetNumber.size > 0) {
+          clearInterval(dsRotationsZeile._warte);
+          if (typeof updateDecksUI === 'function') updateDecksUI(true);
+        }
+      }, 1000);
+    }
+    return '';
+  }
+  const n = dsRotiertZaehlen(cards, _dsMarkenIndex, function (set, nr) {
+    const c = _lookupCardBySetNumber(set, nr);
+    return (c && c.international_prints)
+      ? String(c.international_prints).split(',').map(function (x) { return x.trim().toUpperCase(); }).filter(function (x) { return x.includes('-'); })
+      : [];
+  });
   if (!n) return '';
   const de = (typeof getLang !== 'function') || getLang() === 'de';
   const txt = de ? `rotiert im April: ${n} ${n === 1 ? 'Karte' : 'Karten'} (Marke ${DS_ROTIERT_MARKE})`

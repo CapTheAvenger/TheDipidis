@@ -2607,7 +2607,18 @@ const BASE_PATH = './data/';
         window.slugAusArchetypName = slugAusArchetypName;
         window.archetypNamenNachSlug = archetypNamenNachSlug;
 
-        async function _slugZuArchetypName(options) {
+        // DA-44: die Slug-Zuordnung aendert sich in einer Sitzung nicht — einmal laden.
+        let _slugZuNameVersprechen = null;
+        function _slugZuArchetypName(options) {
+            if (!_slugZuNameVersprechen) {
+                _slugZuNameVersprechen = _slugZuArchetypNameLaden(options).then(function (m) {
+                    if (!m) _slugZuNameVersprechen = null;
+                    return m;
+                });
+            }
+            return _slugZuNameVersprechen;
+        }
+        async function _slugZuArchetypNameLaden(options) {
             try {
                 // Komma-getrennt — loadCSV nimmt ';' an, deshalb direkt.
                 const labs = await fetchAndParseCSV(`${BASE_PATH}labs_tournament_decks.csv`, ',');
@@ -2910,7 +2921,32 @@ const BASE_PATH = './data/';
         }
         
 
-        // Async CSV fetch and parse using PapaParse with Web Worker
+        /* DA-44 (07.10.2026): dieselbe Datei wurde beim Start mehrfach geladen —
+           gemessen auf der Deck-Analyse: labs_tournament_decks.csv 6x, current_meta_card_data.csv
+           4x (drei Aufrufer mit forceRefresh, jeder mit eigenem ?t=). Der Text einer Datei
+           wird jetzt 60 s lang geteilt (gleiche Adresse ohne Abfrageteil); geparst wird
+           weiter je Aufrufer, damit niemand die Zeilen eines anderen veraendert. */
+        const _csvTextGeteilt = new Map();
+        const CSV_TEXT_TEILEN_MS = 60000;
+        function _csvTextHolen(url, timeoutMs) {
+            const basis = String(url).split('?')[0];
+            const alt = _csvTextGeteilt.get(basis);
+            if (alt && Date.now() - alt.t < CSV_TEXT_TEILEN_MS) return alt.p;
+            const ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+            const timer = setTimeout(function () { try { if (ctrl) ctrl.abort(); } catch (_) {} }, timeoutMs);
+            const p = fetch(url, ctrl ? { signal: ctrl.signal } : undefined).then(function (r) {
+                if (!r.ok) { const err = new Error('HTTP ' + r.status + ' ' + url); err.status = r.status; throw err; }
+                return r.text();
+            }).finally(function () { clearTimeout(timer); });
+            const eintrag = { p: p, t: Date.now() };
+            _csvTextGeteilt.set(basis, eintrag);
+            p.catch(function () { if (_csvTextGeteilt.get(basis) === eintrag) _csvTextGeteilt.delete(basis); });
+            setTimeout(function () { if (_csvTextGeteilt.get(basis) === eintrag) _csvTextGeteilt.delete(basis); }, CSV_TEXT_TEILEN_MS);
+            return p;
+        }
+        window._csvTextHolen = _csvTextHolen;
+
+        // Async CSV fetch and parse using PapaParse
         async function fetchAndParseCSV(url, delimiter = ';') {
             // Hard timeout so a stalled download (flaky mobile network, a
             // request that never gets a response) can't leave the promise
@@ -2932,8 +2968,8 @@ const BASE_PATH = './data/';
                     try { if (parser && typeof parser.abort === 'function') parser.abort(); } catch (_) {}
                     finish(reject, new Error('CSV load timed out after ' + TIMEOUT_MS + 'ms: ' + url));
                 }, TIMEOUT_MS);
-                Papa.parse(url, {
-                    download: true,
+                parser = { abort: function () {} };
+                _csvTextHolen(url, TIMEOUT_MS).then(function (text) { Papa.parse(text, {
                     header: true,
                     delimiter: delimiter,
                     worker: false,
@@ -2955,7 +2991,7 @@ const BASE_PATH = './data/';
                     error: function(err) {
                         finish(reject, err);
                     }
-                });
+                }); }, function (err) { finish(reject, err); });
             });
         }
         

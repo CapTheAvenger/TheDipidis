@@ -92,6 +92,33 @@ stand_neu_bauen() {
     git commit -q -m "$nachricht"
 }
 
+# SC-21 (07.10.2026, Hausi: „Tor nur bei Überschneidung"): nach einem
+# abgelehnten Push lief das ganze Tor (4–7 min) bei JEDER Runde neu — unter
+# Konkurrenz riss so das Job-Limit (Daily Price #145, Prize Pack #22), und
+# der Lauf ging verloren, ohne rot zu werden. Das Tor laeuft nach dem Rebase
+# nur noch, wenn die neuen main-Commits eine Datei beruehren, die dieser
+# Lauf selbst geaendert hat, oder Code/Ablaeufe. data_stand.json zaehlt
+# nicht (den baut stand_neu_bauen ohnehin neu). Der Deploy prueft main
+# danach weiter vollstaendig (deploy-pages.yml, test).
+tor_noetig() {
+    local eigene="$1" fremd="$2" f
+    while IFS= read -r f; do
+        [ -z "$f" ] && continue
+        case "$f" in data/data_stand.json) continue ;; esac
+        case "$f" in
+            js/*|css/*|scripts/*|tests/*|backend/*|prerender/*|.github/*|config/*|index.html|package.json|package-lock.json|requirements*.txt)
+                return 0 ;;
+        esac
+        if printf '%s\n' "$eigene" | grep -qxF -- "$f"; then return 0; fi
+    done <<< "$fremd"
+    return 1
+}
+
+# Der Stand, gegen den das Tor zuletzt gelaufen ist: die Basis des Laufs
+# (nicht der beim Skriptstart geholte main — der kann schon fremde Commits
+# tragen, die das erste Tor nie gesehen hat).
+basis="$(git merge-base HEAD "origin/$zweig" 2>/dev/null || true)"
+
 for versuch in 1 2 3 4 5; do
     if git push origin "HEAD:$zweig"; then
         echo "pushed=true" >> "$ausgabe"
@@ -119,12 +146,18 @@ for versuch in 1 2 3 4 5; do
         echo "::warning::push_nach_rebase: nach dem Neubau steht nichts Eigenes mehr vor origin/$zweig — nichts gepusht"
         exit 0
     fi
-    if [ -n "$tor" ]; then
+    fremd=""
+    [ -n "$basis" ] && fremd="$(git diff --name-only "$basis" "origin/$zweig" 2>/dev/null || true)"
+    eigene="$(git diff --name-only "origin/$zweig" HEAD 2>/dev/null || true)"
+    if [ -n "$tor" ] && [ -n "$basis" ] && ! tor_noetig "$eigene" "$fremd"; then
+        echo "Tor übersprungen (Versuch $versuch): die neuen main-Commits berühren nur andere Datendateien."
+    elif [ -n "$tor" ]; then
         if ! TOR_OHNE_INSTALL=1 bash scripts/tor_vor_dem_push.sh "$tor"; then
             echo "::error::push_nach_rebase: auf dem neuen Stand ist das Tor zu — nicht gepusht"
             exit 1
         fi
     fi
+    basis="$(git rev-parse "origin/$zweig")"
 done
 echo "::error::push_nach_rebase: nach 5 Versuchen aufgegeben"
 exit 1

@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-10-06 07:11:29+00:00",
+ "erzeugt": "2026-10-07 16:45:48+00:00",
  "format": "TEF-30C",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -21,16 +21,16 @@
  ],
  "ankerspieler_gesamt": 3865,
  "online_abdeckung": {
-  "schnappschuss": "2026-10-06",
-  "anteil_unbekannt": 2.56,
+  "schnappschuss": "2026-10-07",
+  "anteil_unbekannt": 2.55,
   "groesste_unbekannte": [
    {
     "deck": "Gengar",
-    "anteil": 0.53
+    "anteil": 0.51
    },
    {
     "deck": "Mega Charizard X",
-    "anteil": 0.23
+    "anteil": 0.24
    },
    {
     "deck": "Marnie's Grimmsnarl",
@@ -98,18 +98,18 @@
    "day2_geschrumpft": 20.43
   },
   {
-   "deck": "Lopunny Dusknoir",
-   "schluessel": "lopunnydusknoir",
-   "ankerspieler": 67,
-   "day2_roh": 20.9,
-   "day2_geschrumpft": 20.06
-  },
-  {
    "deck": "Rocket's Honchkrow",
    "schluessel": "rocketshonchkrow",
    "ankerspieler": 74,
    "day2_roh": 20.27,
    "day2_geschrumpft": 19.67
+  },
+  {
+   "deck": "Lopunny Dusknoir",
+   "schluessel": "lopunnydusknoir",
+   "ankerspieler": 69,
+   "day2_roh": 20.29,
+   "day2_geschrumpft": 19.65
   },
   {
    "deck": "Dragapult",
@@ -149,18 +149,18 @@
    "day2_geschrumpft": 24.78
   },
   {
+   "deck": "Mew Box",
+   "schluessel": "mewbox",
+   "ankerspieler": 17,
+   "day2_roh": 35.29,
+   "day2_geschrumpft": 24.38
+  },
+  {
    "deck": "Basic Box",
    "schluessel": "basicbox",
    "ankerspieler": 228,
    "day2_roh": 24.12,
    "day2_geschrumpft": 23.43
-  },
-  {
-   "deck": "Mew Box",
-   "schluessel": "mewbox",
-   "ankerspieler": 19,
-   "day2_roh": 31.58,
-   "day2_geschrumpft": 23.38
   },
   {
    "deck": "Alakazam Dusknoir",
@@ -226,18 +226,18 @@
    "day2_geschrumpft": 20.15
   },
   {
-   "deck": "Lopunny Dusknoir",
-   "schluessel": "lopunnydusknoir",
-   "ankerspieler": 67,
-   "day2_roh": 20.9,
-   "day2_geschrumpft": 20.06
-  },
-  {
    "deck": "Rocket's Honchkrow",
    "schluessel": "rocketshonchkrow",
    "ankerspieler": 74,
    "day2_roh": 20.27,
    "day2_geschrumpft": 19.67
+  },
+  {
+   "deck": "Lopunny Dusknoir",
+   "schluessel": "lopunnydusknoir",
+   "ankerspieler": 69,
+   "day2_roh": 20.29,
+   "day2_geschrumpft": 19.65
   },
   {
    "deck": "Cinccino",
@@ -343,11 +343,11 @@
   "B": {
    "turniere": 26,
    "empfehlung_mittel": 20.66,
-   "feld_mittel": 15.41,
-   "bestmoeglich_mittel": 39.17,
-   "vorsprung": 5.25,
+   "feld_mittel": 15.42,
+   "bestmoeglich_mittel": 39.27,
+   "vorsprung": 5.24,
    "vorsprung_standardfehler": 2.09,
-   "anteil_am_erreichbaren": 22.1,
+   "anteil_am_erreichbaren": 22.0,
    "median": 18.25,
    "quartil_unten": 13.91,
    "quartil_oben": 29.05,

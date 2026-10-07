@@ -13,8 +13,12 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a7e005ecdc0391d7fa65824,2026-08-19,PBL,122,Dragapult Dudunsparce,21.0
 6a7a215f2b308b6067b5051b,2026-08-18,PBL,163,Clefairy Ogerpon,30.0
 6a819f1978baaa6d1c22139a,2026-08-18,PBL,178,N's Zoroark,18.0
+6ac4144085920e4d25364c31,2026-10-06,30C,190,Dragapult,21.0
+6ab27720f127b1b52c27f7db,2026-10-06,30C,166,Dhelmise,28.0
+6abf3e36783097f8dcb75d2c,2026-10-06,30C,126,Dragapult,25.0
 6abaccb3783097f8dcb72d09,2026-10-05,30C,175,Seaking Festival Lead,21.0
 6ac2ee1185920e4d253640c4,2026-10-05,30C,141,Lopunny Dusknoir,21.0
+6abe7c95880ed327106e0e00,2026-10-05,30C,199,Dragapult,34.0
 6abf3e23880ed327106e18e2,2026-10-05,30C,134,Rocket's Honchkrow,28.0
 6abbc00b783097f8dcb735dd,2026-10-05,30C,236,Lucario Hariyama,28.0
 6ac1679085920e4d253633d5,2026-10-04,30C,138,Dragapult,18.0
@@ -94,10 +98,3 @@ sparkling-water,2026-09-12,30C,511,Festival Lead,34.0
 6a99789aab080c8c957f8ad7,2026-09-09,30C,128,Basic Box,19.0
 6aa127aea4272c53be64b8e3,2026-09-09,30C,101,Crustle,27.0
 6a98f8efab080c8c957f87af,2026-09-09,30C,156,Basic Box,28.0
-6a9f71b8a4272c53be64a95f,2026-09-09,30C,139,Mega Excadrill,30.0
-6a9cd456ab080c8c957fb85a,2026-09-09,30C,113,Ogerpon Meganium Arboliva,21.0
-6a9f32eba4272c53be64a4ad,2026-09-08,30C,132,Rocket's Honchkrow,19.0
-6a9eec66a4272c53be649d4e,2026-09-08,30C,142,Alakazam Dudunsparce,30.0
-6a99af5fab080c8c957f8edc,2026-09-08,30C,189,Slowking,24.0
-6a9c6e29ab080c8c957fb0e5,2026-09-08,30C,124,N's Zoroark,30.0
-6a9e3b3aab080c8c957fca1b,2026-09-08,30C,166,Mega Lucario,30.0

@@ -89,7 +89,7 @@
 .de-tab-block {
     background: var(--surface-2);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 10px;
     border-left-width: 4px;
     border-left-style: solid;
 }

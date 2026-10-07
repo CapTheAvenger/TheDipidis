@@ -1296,6 +1296,15 @@
             )).join('');
         }
         
+        function kartenSetsNeuesteZuerst(sets, ordnung) {
+            const o = ordnung || {};
+            const rang = s => o[s] || o[String(s).toUpperCase()] || o[String(s).toLowerCase()] || 0;
+            return sets.map((s, i) => ({ s, i, r: rang(s) }))
+                .sort((a, b) => (b.r - a.r) || (a.i - b.i))
+                .map(x => x.s);
+        }
+        window.kartenSetsNeuesteZuerst = kartenSetsNeuesteZuerst;
+
         async function populateSetFilter(cards) {
             const container = document.getElementById('setFilterOptions');
             if (!container) return;
@@ -1322,7 +1331,12 @@
                 });
                 
                 // Filter ordered sets to only include those that exist in cards (and are English)
-                const setsToShow = orderedSets.filter(set => availableSets.has(set));
+                let setsToShow = orderedSets.filter(set => availableSets.has(set));
+                /* UI-94 (Hausi 07.10.2026: „Neueste Sets zuerst“): die Mapping-Datei fuehrt
+                   neue Sets (PBL, 30C) am Ende — gemessen 07.10.: 30C stand als letztes. Die
+                   Reihenfolge kommt jetzt aus derselben Set-Ordnung wie die Kartenliste
+                   (window.setOrderMap, neuestes zuerst); Sets ohne Eintrag behalten ihren Platz. */
+                setsToShow = kartenSetsNeuesteZuerst(setsToShow, window.setOrderMap);
                 
                 devLog(`[Cards Tab] Showing ${setsToShow.length} English sets (newest first)`);
                 
@@ -1465,6 +1479,11 @@
             const getMetaTimestamp = (meta) => {
                 const code = normalizeMetaCode(meta);
                 const latest = code.includes('-') ? code.split('-').pop() : code;
+                /* UI-94: Formate ohne festes Datum (TEF-30C, TEF-MEM) landeten am Ende —
+                   zuerst die Set-Ordnung aus den Daten, erst dann die Datumstabelle. */
+                const ord = window.setOrderMap || {};
+                const rang = ord[latest] || ord[latest.toLowerCase()];
+                if (rang) return 1e13 + rang;
                 const dateStr = SET_RELEASE_DATES[latest] || SET_RELEASE_DATES[code] || SET_RELEASE_DATES.DEFAULT;
                 const ts = Date.parse(dateStr || '');
                 return Number.isNaN(ts) ? 0 : ts;
@@ -2818,6 +2837,14 @@
                     // Then by name
                     return (a.name || '').localeCompare(b.name || '');
                 });
+            } else if (sortOrder === 'price') {
+                /* UI-94 (Hausi 07.10.2026): nach Cardmarket-Trend, teuerste zuerst;
+                   Karten ohne Preis ans Ende (nicht als 0 € einsortiert). */
+                const preis = c => {
+                    const p = parseLocaleNumber(c && c.eur_price, 0);
+                    return (c && c.eur_price && p > 0) ? p : -1;
+                };
+                cards.sort((a, b) => (preis(b) - preis(a)) || (a.name || '').localeCompare(b.name || ''));
             } else if (sortOrder === 'pokedex') {
                 // Sort by National Pokédex number
                 // Non-Pokémon cards (Supporter/Item/Stadium/Tool/Energy) sort to the end
@@ -3602,7 +3629,7 @@
                    sie beim Namen genannt: eine Marke wuerde nur andeuten,
                    dass etwas nicht stimmt, und offenlassen, was. */
                 const _covDe = (typeof getLang === 'function' && getLang() === 'de');
-                const _erhebung = coverageStats.erhebung || '';
+                const _erhebung = (typeof erhebungAnzeige === 'function') ? erhebungAnzeige(coverageStats.erhebung) : (coverageStats.erhebung || '');
                 const _nenner = coverageStats.totalDecks || 0;
                 const _weitere = Array.isArray(coverageStats.weitereErhebungen)
                     ? coverageStats.weitereErhebungen : [];
@@ -3924,6 +3951,7 @@
                 let maxCount = 0;
                 let gedeckelt = false;
                 const archetypen = new Set();
+                const proArchetyp = new Map();   // UI-94 „Gespielt in“: Decks je Archetyp
 
                 filteredArchetypeKeys.forEach(archetypeKey => {
                     const groesse = erhebung.archetypen.get(archetypeKey);
@@ -3963,7 +3991,13 @@
                     }
                     maxCount = Math.max(maxCount, eintrag.maxCount || 0);
                     const archetype = archetypeKey.split('|')[1];
-                    if (archetype) archetypen.add(archetype);
+                    if (archetype) {
+                        archetypen.add(archetype);
+                        const pa = proArchetyp.get(archetype) || { decks: 0, groesse: 0 };
+                        pa.decks += Math.min(roh, groesse);
+                        pa.groesse += groesse;
+                        proArchetyp.set(archetype, pa);
+                    }
                 });
 
                 if (nenner <= 0) return null;
@@ -3974,6 +4008,7 @@
                     maxCount: maxCount,
                     gedeckelt: gedeckelt,
                     archetypen: archetypen,
+                    proArchetyp: proArchetyp,
                     prozent: (zaehler / nenner) * 100
                 };
             }
@@ -4039,9 +4074,50 @@
                 /* true genau dann, wenn innerhalb DIESER Erhebung die Summe
                  * ueber die Drucke die Archetypgroesse ueberstieg. Dann und
                  * nur dann ist der Wert eine Obergrenze. */
-                gedeckelt: gewaehlt.gedeckelt
+                gedeckelt: gewaehlt.gedeckelt,
+                /* UI-94 (Hausi 07.10.2026): „Gespielt in“ — je Archetyp Decks mit der Karte
+                 * und Archetypgroesse, groesster Anteil zuerst. Gleiche Erhebung und Filter
+                 * wie die Plakette. */
+                gespieltIn: (typeof kartenGespieltInListe === 'function') ? kartenGespieltInListe(gewaehlt.proArchetyp) : []
             };
         }
+
+        /* UI-100 N2-08 (07.10.2026): die Erhebung heisst „Quelle / Format“; wo
+           beide gleich sind, stand „City League / City League“. Einmal genuegt. */
+        function erhebungAnzeige(id) {
+            const teile = String(id || '').split(' / ').map(t => t.trim()).filter(Boolean);
+            return teile.filter((t, i) => teile.indexOf(t) === i).join(' / ');
+        }
+        window.erhebungAnzeige = erhebungAnzeige;
+
+        function kartenGespieltInListe(proArchetyp) {
+            const liste = [];
+            (proArchetyp instanceof Map ? proArchetyp : new Map()).forEach(function (v, name) {
+                if (!v || !v.groesse) return;
+                liste.push({ archetyp: name, decks: v.decks, groesse: v.groesse, prozent: v.decks / v.groesse * 100 });
+            });
+            /* Gemessen 07.10. (Ultra Ball): nach Prozent sortiert standen oben acht Archetypen mit
+               3–6 Decks und 100 % — die grossen Decks erst unter „+ 167 weitere“. Deshalb zuerst
+               die Zahl der Decks mit der Karte, dann der Anteil. */
+            return liste.sort(function (a, b) { return (b.decks - a.decks) || (b.prozent - a.prozent) || a.archetyp.localeCompare(b.archetyp); });
+        }
+        window.kartenGespieltInListe = kartenGespieltInListe;
+
+        /** Fuer das Kartendetail: „Gespielt in“ als HTML (leer, wenn nichts bekannt). */
+        function kartenGespieltInHtml(cardName) {
+            const st = calculateDynamicCoverage(cardName);
+            const liste = (st && st.gespieltIn) || [];
+            if (!liste.length) return '';
+            const de = (typeof getLang !== 'function') || getLang() === 'de';
+            const zeilen = liste.slice(0, 8).map(function (e) {
+                return '<li><span>' + escapeHtml(e.archetyp) + '</span><span class="zahl">'
+                    + _zahlNachSprache(e.prozent, 0) + ' % <small>(' + e.decks + '/' + e.groesse + ')</small></span></li>';
+            }).join('');
+            const mehr = liste.length > 8 ? '<li class="kgi-mehr">' + (de ? '+ ' + (liste.length - 8) + ' weitere' : '+ ' + (liste.length - 8) + ' more') + '</li>' : '';
+            return '<div class="karten-gespielt-in" onclick="event.stopPropagation()"><div class="kgi-titel">'
+                + (de ? 'Gespielt in' : 'Played in') + ' <small>' + escapeHtml(erhebungAnzeige(st.erhebung)) + '</small></div><ul>' + zeilen + mehr + '</ul></div>';
+        }
+        window.kartenGespieltInHtml = kartenGespieltInHtml;
 
         function openRaritySwitcherFromDB(cardName, set, number, anzeigeZiel) {
             // Create a deckKey format that openRaritySwitcher expects

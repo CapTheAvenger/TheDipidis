@@ -14,7 +14,7 @@
 
 /* ── Kopf ─────────────────────────────────────────────────────────── */
 .pk-quelle {
-    font-size: .82rem;
+    font-size: 14px;
     color: var(--text-muted, #6b7280);
     margin: 6px 0 0;
     line-height: 1.5;
@@ -28,7 +28,7 @@
     background: var(--tint-warn);
     color: var(--tint-warn-ink);
     border: 1px solid color-mix(in srgb, var(--tint-warn-ink) 35%, transparent);
-    font-size: .82rem;
+    font-size: 14px;
     font-weight: 600;
 }
 
@@ -44,11 +44,11 @@
        rund 30 px; das wird hier bewusst nicht geerbt. */
     min-height: 44px;
     padding: 0 16px;
-    border-radius: 22px;
+    border-radius: 999px;
     border: 1px solid var(--border-color, #d1d5db);
     background: var(--surface-1, #fff);
     color: var(--text-primary, #111827);
-    font-size: .92rem;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
 }
@@ -61,7 +61,7 @@
 /* ── Liste ────────────────────────────────────────────────────────── */
 .pk-stufe { margin-top: 22px; }
 .pk-stufe > h3 {
-    font-size: .95rem;
+    font-size: 14px;
     margin: 0 0 8px;
     display: flex;
     align-items: center;
@@ -98,7 +98,7 @@
     padding: 3px 8px;
     border-radius: 6px;
     font-weight: 700;
-    font-size: .82rem;
+    font-size: 14px;
     background: var(--text-primary, #111827);
     color: var(--surface-1, #fff);
 }
@@ -175,7 +175,7 @@
 .pk-fussnote {
     display: block;
     font-weight: 400;
-    font-size: .78rem;
+    font-size: 12px;
     color: var(--text-muted, #6b7280);
     margin-top: 2px;
 }
@@ -185,10 +185,10 @@
 .pk-rechnung {
     margin-top: 26px;
     padding: 14px 16px;
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--surface-2, #f3f4f6);
     color: var(--text-muted, #4b5563);
-    font-size: .84rem;
+    font-size: 14px;
     line-height: 1.6;
 }
 .pk-rechnung strong { color: var(--text-primary, #111827); }
@@ -196,8 +196,8 @@
 .pk-meldung {
     margin: 14px 0;
     padding: 12px 14px;
-    border-radius: 8px;
-    font-size: .9rem;
+    border-radius: 10px;
+    font-size: 14px;
     background: var(--surface-2, #f3f4f6);
     color: var(--text-primary, #111827);
 }
@@ -270,7 +270,7 @@
     min-height: 44px;
     min-width: 44px;
     padding: 0 14px;
-    border-radius: 22px;
+    border-radius: 999px;
     border: 1px solid var(--border-color, #d1d5db);
     /* --surface-2 statt --surface-1: der Knopf ist der EINZIGE Weg
        zurueck (die Zurueck-Geste kommt dazu, sieht man aber nicht), und
@@ -279,23 +279,23 @@
        Bedienelement. */
     background: var(--surface-2, #f1f3f7);
     color: var(--text-primary, #111827);
-    font-size: 1rem;
+    font-size: 17px;
     cursor: pointer;
 }
 .pk-overlay-kopf { text-align: center; }
 .pk-overlay-name {
     margin: 0 0 4px;
-    font-size: 1.05rem;
+    font-size: 17px;
     font-weight: 700;
     overflow-wrap: anywhere;
 }
-.pk-overlay-kopf p { margin: 0; font-size: .82rem; color: var(--text-muted, #6b7280); }
+.pk-overlay-kopf p { margin: 0; font-size: 14px; color: var(--text-muted, #6b7280); }
 
 /* HART. Siehe Kopf dieser Datei. */
 .pk-qr {
     background: #ffffff;
     padding: 10px;
-    border-radius: 8px;
+    border-radius: 10px;
     line-height: 0;
 }
 .pk-qr svg {
@@ -305,7 +305,7 @@
     display: block;
 }
 .pk-hell {
-    font-size: .82rem;
+    font-size: 14px;
     color: var(--text-muted, #6b7280);
     text-align: center;
     margin: 0;
@@ -335,13 +335,13 @@
     min-height: 44px;
     min-width: 44px;
     padding: 0 18px;
-    border-radius: 22px;
+    border-radius: 999px;
     border: 1px solid var(--border-color, #d1d5db);
     /* Eine Stufe abgesetzt vom Grund des Vollbilds, sonst liest sich
        der Knopf als Text (siehe .pk-schliessen). */
     background: var(--surface-2, #f1f3f7);
     color: var(--text-primary, #111827);
-    font-size: .95rem;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
 }
@@ -352,7 +352,7 @@
     color: var(--tint-bad-ink);
 }
 .pk-kopier-hinweis {
-    font-size: .78rem;
+    font-size: 12px;
     color: var(--text-muted, #6b7280);
     text-align: center;
 }
@@ -361,11 +361,11 @@
     width: 100%;
     max-width: 460px;
     margin: 4px 0 0;
-    font-size: .86rem;
+    font-size: 14px;
 }
 .pk-karten h4 {
     margin: 12px 0 6px;
-    font-size: .78rem;
+    font-size: 12px;
     letter-spacing: .06em;
     text-transform: uppercase;
     color: var(--text-muted, #6b7280);
@@ -388,7 +388,7 @@
 .pk-eigen {
     margin-top: 26px;
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid var(--border-color, #d1d5db);
     background: var(--surface-1, #fff);
     display: flex;
@@ -396,7 +396,7 @@
     gap: 10px;
 }
 .pk-eigen-titel {
-    font-size: 1.05rem;
+    font-size: 17px;
     font-weight: 700;
     color: var(--text-primary, #111827);
 }
@@ -406,12 +406,12 @@
     box-sizing: border-box;
     min-height: 12em;
     padding: 10px 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid var(--border-color, #d1d5db);
     background: var(--surface-2, #f3f4f6);
     color: var(--text-primary, #111827);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: .9rem;
+    font-size: 14px;
     line-height: 1.5;
     resize: vertical;
 }

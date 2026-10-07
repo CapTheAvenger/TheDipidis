@@ -285,6 +285,19 @@
                         'benannt, nicht geschätzt.'],
                 },
                 {
+                    id: 'luecken', auf: false, abdeckung: true,
+                    h: 'Was fehlt',
+                    p: ['Nicht jedes vergangene Format hat dieselben Daten. Die Tabelle wird beim ' +
+                        'Öffnen aus den Verzeichnissen der Daten gelesen, mit deren Stand — ' +
+                        'nicht von Hand gepflegt.',
+                        'Zwei Grundmengen bei Majors: Die Feldgröße kommt von der Turnierseite und ' +
+                        'zählt alle Spieler. Kartenanalysen und Deckanteile in „Vergangene Formate“ ' +
+                        'rechnen nur mit den veröffentlichten Decklisten. Beide Zahlen stimmen, ' +
+                        'beschreiben aber nicht dieselbe Menge — deshalb können Feldgröße und ' +
+                        'Listenzahl eines Turniers voneinander abweichen.'],
+                    leer: 'Die Verzeichnisse ließen sich gerade nicht laden — ohne sie steht hier keine Tabelle.',
+                },
+                {
                     id: 'rechtliches', auf: false,
                     h: 'Rechtliches',
                     p: ['Diese Seite ist ein privates Projekt und steht in keiner Verbindung ' +
@@ -446,6 +459,17 @@
                         'are named, not estimated.'],
                 },
                 {
+                    id: 'luecken', auf: false, abdeckung: true,
+                    h: 'What is missing',
+                    p: ['Not every past format has the same data. The table is read from the data ' +
+                        'directories when opened, with their timestamp — not maintained by hand.',
+                        'Two bases at Majors: the field size comes from the tournament page and ' +
+                        'counts every player. Card analyses and deck shares in "Past formats" only ' +
+                        'use the published decklists. Both numbers are right but describe ' +
+                        'different sets — so a tournament\'s field size and list count can differ.'],
+                    leer: 'The data directories could not be loaded just now — without them there is no table here.',
+                },
+                {
                     id: 'rechtliches', auf: false,
                     h: 'Legal',
                     p: ['This site is a private project and is not affiliated with The Pokémon ' +
@@ -480,6 +504,10 @@
                 teile.push('<p class="qu-p qu-leer">' + esc(a.leer) + '</p>');
             }
         }
+        if (a.abdeckung) {
+            teile.push('<div class="qu-abdeckung" id="quAbdeckung" data-leer="' + esc(a.leer || '') + '">'
+                + '<p class="qu-p qu-leer">' + esc(de() ? 'Wird geladen …' : 'Loading …') + '</p></div>');
+        }
         if (a.src && a.src.length) {
             teile.push('<dl class="qu-src">' + a.src.map(function (z) {
                 return '<dt>' + esc(z[0]) + '</dt><dd>' + esc(z[1]) + '</dd>';
@@ -499,6 +527,75 @@
                '</details>';
     }
 
+    /* DA-38 / DA-39 (Hausi 07.10.2026: Datenluecken nur hier, in
+       „Quellen & Methodik"). Gelesen werden die drei Verzeichnisse, die
+       auch die Ansichten selbst lesen — keine zweite, von Hand gefuehrte
+       Liste. Zeilen = Formate aus tournament_cards_manifest.json;
+       Spalten = gibt es Major-Decklisten / Matchups je Turnier.
+       Fehlt ein Verzeichnis, steht der Leertext da: geraten wird nicht. */
+    var ABDECKUNG_DATEIEN = {
+        formate: 'data/tournament_cards_manifest.json',
+        major: 'data/labs_tournament_decks_verzeichnis.json',
+        matchups: 'data/labs_matchups_je_turnier_verzeichnis.json',
+    };
+    function abdeckungZeilen(formate, major, matchups) {
+        var hatMajor = new Set((major && major.meta_keys) || []);
+        var hatMu = new Set((matchups && matchups.meta_keys) || []);
+        return ((formate && formate.meta_keys) || []).slice().sort().reverse().map(function (k) {
+            return { format: k, major: hatMajor.has(k), matchups: hatMu.has(k) };
+        });
+    }
+    function abdeckungHtml(zeilen, stand) {
+        var d = de();
+        var ja = d ? 'ja' : 'yes', nein = d ? 'fehlt' : 'missing';
+        var zelle = function (b) {
+            return '<td class="qu-abd-' + (b ? 'ja' : 'nein') + '">' + (b ? ja : nein) + '</td>';
+        };
+        var fehltMajor = zeilen.filter(function (z) { return !z.major; }).length;
+        var fehltMu = zeilen.filter(function (z) { return !z.matchups; }).length;
+        return '<p class="qu-p">' + esc(d
+                ? ('Stand der Verzeichnisse: ' + stand + '. Von ' + zeilen.length + ' Formaten fehlen bei '
+                   + fehltMajor + ' die Major-Decklisten und bei ' + fehltMu + ' die Matchups je Turnier.')
+                : ('Directory timestamp: ' + stand + '. Of ' + zeilen.length + ' formats, '
+                   + fehltMajor + ' have no Major decklists and ' + fehltMu + ' no per-tournament matchups.'))
+            + '</p>'
+            + '<div class="qu-abd-scroll"><table class="qu-abd">'
+            + '<thead><tr><th scope="col">' + (d ? 'Format' : 'Format') + '</th>'
+            + '<th scope="col">' + (d ? 'Major-Decklisten' : 'Major decklists') + '</th>'
+            + '<th scope="col">' + (d ? 'Matchups je Turnier' : 'Matchups per tournament') + '</th></tr></thead><tbody>'
+            + zeilen.map(function (z) {
+                return '<tr><th scope="row">' + esc(z.format) + '</th>' + zelle(z.major) + zelle(z.matchups) + '</tr>';
+            }).join('')
+            + '</tbody></table></div>';
+    }
+    function standText(isoListe) {
+        var t = isoListe.filter(Boolean).sort()[0];
+        if (!t) return de() ? 'unbekannt' : 'unknown';
+        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(t));
+        return m ? (de() ? m[3] + '.' + m[2] + '.' + m[1] : m[1] + '-' + m[2] + '-' + m[3]) : String(t);
+    }
+    function abdeckungFuellen() {
+        var ziel = document.getElementById('quAbdeckung');
+        if (!ziel || typeof fetch !== 'function') return;
+        var holen = function (pfad) {
+            return fetch(pfad, { cache: 'no-store' }).then(function (r) {
+                if (!r.ok) throw new Error(pfad + ' ' + r.status);
+                return r.json();
+            });
+        };
+        Promise.all([holen(ABDECKUNG_DATEIEN.formate), holen(ABDECKUNG_DATEIEN.major),
+                     holen(ABDECKUNG_DATEIEN.matchups)]).then(function (a) {
+            var el = document.getElementById('quAbdeckung');
+            if (!el) return;
+            var zeilen = abdeckungZeilen(a[0], a[1], a[2]);
+            if (!zeilen.length) throw new Error('keine Formate');
+            el.innerHTML = abdeckungHtml(zeilen, standText([a[0].generated, a[1].stand, a[2].stand]));
+        }).catch(function () {
+            var el = document.getElementById('quAbdeckung');
+            if (el) el.innerHTML = '<p class="qu-p qu-leer">' + esc(el.getAttribute('data-leer') || '') + '</p>';
+        });
+    }
+
     function render() {
         var host = document.getElementById('quellenHost');
         if (!host) return false;
@@ -506,6 +603,7 @@
         host.innerHTML =
             '<p class="qu-lead">' + esc(c.unter) + '</p>' +
             c.abschnitte.map(abschnittHtml).join('');
+        abdeckungFuellen();
         // Ueberschrift und Rueckweg liegen im HTML und werden hier
         // mitgezogen, damit ein Sprachwechsel nicht die halbe Seite
         // umstellt und die andere Haelfte stehen laesst.
@@ -555,5 +653,6 @@
         return (c && c.abschnitte ? c.abschnitte : []).map(function (a) { return a.id; });
     }
 
-    window.Quellen = { render: render, open: oeffne, ids: ids };
+    window.Quellen = { render: render, open: oeffne, ids: ids,
+        _abdeckungZeilen: abdeckungZeilen, _abdeckungHtml: abdeckungHtml };
 })();

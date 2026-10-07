@@ -987,7 +987,7 @@ html.is-signed-out [onclick*="radelist"]:hover {
   display: block;
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   margin: 0 auto;
 }
@@ -1029,7 +1029,7 @@ html.is-signed-out [onclick*="radelist"]:hover {
   background: var(--brand);
   color: var(--surface-1);
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 11px 16px;
   font-size: var(--fs-md);
   font-weight: 700;
@@ -1043,7 +1043,7 @@ html.is-signed-out [onclick*="radelist"]:hover {
   background: var(--brand-ink);
   color: var(--surface-1);
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 11px 16px;
   font-size: var(--fs-md);
   font-weight: 700;
@@ -1056,7 +1056,7 @@ html.is-signed-out [onclick*="radelist"]:hover {
   background: var(--surface-2);
   color: var(--ink-2);
   border: 1px solid var(--line-strong);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 11px 16px;
   font-size: var(--fs-md);
   font-weight: 600;

@@ -359,7 +359,7 @@ describe('Die Kachel haengt nicht an der Bildschirmbreite', () => {
             'die Zahlengroesse rechnet wieder mit vw — das ist die BILDSCHIRM-'
             + 'breite, nicht die der Kachel, und wird am Schreibtisch am groessten, '
             + 'wo am wenigsten Platz ist');
-        assert.ok(/font-size:\s*[\d.]+rem/.test(regel),
+        assert.ok(/font-size:\s*[\d.]+(rem|px)/.test(regel),
             'die Zahlengroesse ist nicht mehr fest gesetzt');
         // Rechtsbuendig ist keine Kosmetik: die Werte der beiden Zeilen
         // muessen an derselben Kante enden, sonst haengt "7,3 %" gegen

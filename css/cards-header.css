@@ -6,7 +6,7 @@
 .cards-header {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
     padding: 18px 28px;
-    border-radius: 16px;
+    border-radius: 14px;
     box-shadow: 0 6px 24px rgba(0,0,0,0.18);
     margin-bottom: 25px;
     border: none;
@@ -177,7 +177,7 @@
     gap: 4px;
     min-width: 64px;
     height: 56px;
-    border-radius: 12px;
+    border-radius: 14px;
     color: #f4f7fb;
     font-family: inherit;
     transition: background 0.18s ease, border-color 0.18s ease,
@@ -215,7 +215,7 @@
     flex: 0 0 auto;
 }
 .header-icon-label {
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.02em;
     line-height: 1;
@@ -289,10 +289,10 @@
     border: 1px solid rgba(255, 255, 255, 0.14);
     color: #fff;
     padding: 0 12px;
-    border-radius: 12px;
+    border-radius: 14px;
     font-weight: 800;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.04em;
     transition: background 0.18s ease, border-color 0.18s ease,
                 color 0.18s ease, transform 0.18s ease;
@@ -374,7 +374,7 @@
         height: 50px;
         padding: 5px 3px 4px;
         gap: 3px;
-        border-radius: 11px;
+        border-radius: 10px;
     }
     .header-icon-svg {
         width: 19px;
@@ -433,7 +433,7 @@
         height: 24px;
     }
     .header-icon-label {
-        font-size: 10px;
+        font-size: 11px;
     }
     .lang-toggle-btn {
         height: 54px;
@@ -499,14 +499,14 @@ html.is-standalone .container {
     color: var(--ink-3);
 }
 .cloud-sync-status .cloud-sync-detail {
-    font-size: 13px;
+    font-size: 14px;
     margin-top: 2px;
 }
 .cloud-sync-status .cloud-sync-btn {
     background: #1d4ed8;
     color: #fff;
     border: 0;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 8px 14px;
     font: 600 13px/1 system-ui, -apple-system, sans-serif;
     cursor: pointer;
@@ -555,7 +555,7 @@ html.is-standalone .container {
     align-items: center;
     gap: 6px;
     margin: 0;
-    font-size: 1.35rem;
+    font-size: 21px;
     white-space: nowrap;
 }
 #main-content > .cards-header .kopf-bluete {
@@ -593,7 +593,7 @@ html.is-standalone .container {
 @media (max-width: 640px) {
     #main-content > .cards-header { padding: 8px 10px; }
     #main-content > .cards-header .pokeball-btn { width: 36px; height: 36px; }
-    #main-content > .cards-header .header-title { font-size: 1.15rem; }
+    #main-content > .cards-header .header-title { font-size: 17px; }
     #main-content > .cards-header .header-flex-user {
         width: 100%;
         justify-content: space-between;

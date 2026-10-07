@@ -13,7 +13,7 @@
 #profile-deckbuilder { color: #e6ebf3; }
 
 .pdb-heading {
-    font-size: 1.25rem;
+    font-size: 21px;
     font-weight: 700;
     margin: 0 0 0.25rem 0;
 }
@@ -21,7 +21,7 @@
 .pdb-subtitle {
     margin: 0 0 1rem 0;
     color: #9fa9bb;
-    font-size: 0.9rem;
+    font-size: 14px;
     line-height: 1.45;
 }
 
@@ -92,7 +92,7 @@
     border-radius: 10px;
     color: #1a1f2c;
     padding: 0.65rem 0.85rem;
-    font-size: 0.95rem;
+    font-size: 14px;
     font-family: inherit;
     margin-bottom: 0.7rem;
 }
@@ -123,12 +123,12 @@
     max-width: 100%;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid #242b39;
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 0.25rem 0.5rem;
 }
 
 .pdb-chip-label {
-    font-size: 0.72rem;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #8c95a5;
@@ -144,7 +144,7 @@
     color: #b0b8c1;
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 600;
     padding: 0.25rem 0.7rem;
     transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
@@ -167,7 +167,7 @@
     justify-content: space-between;
     gap: 0.5rem;
     margin: 0.2rem 0 0.5rem 0;
-    font-size: 0.78rem;
+    font-size: 12px;
     color: #8c95a5;
 }
 
@@ -176,7 +176,7 @@
     border: none;
     color: #5fb6ff;
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: 12px;
     padding: 0;
     font-family: inherit;
 }
@@ -212,7 +212,7 @@
     flex-direction: column;
     background: rgba(255, 255, 255, 0.025);
     border: 1px solid #242b39;
-    border-radius: 9px;
+    border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
     transition: transform 110ms ease, border-color 110ms ease, box-shadow 110ms ease;
@@ -264,7 +264,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 14px;
     line-height: 1;
     opacity: 0.75;
     transition: background 110ms ease, opacity 110ms ease, color 110ms ease;
@@ -291,7 +291,7 @@
 }
 
 .pdb-result-cap-name {
-    font-size: 0.74rem;
+    font-size: 12px;
     font-weight: 600;
     color: #e6ebf3;
     line-height: 1.25;
@@ -302,7 +302,7 @@
 }
 
 .pdb-result-cap-set {
-    font-size: 0.66rem;
+    font-size: 11px;
     color: #8c95a5;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     white-space: nowrap;
@@ -325,7 +325,7 @@
 .pdb-empty {
     margin: 0.5rem 0;
     color: #8c95a5;
-    font-size: 0.88rem;
+    font-size: 14px;
     line-height: 1.5;
     text-align: center;
     padding: 1rem 0.5rem;
@@ -342,7 +342,7 @@
 
 .pdb-deck-title {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 17px;
     font-weight: 600;
     color: #e6ebf3;
     display: flex;
@@ -353,7 +353,7 @@
 }
 
 .pdb-deck-count {
-    font-size: 0.82rem;
+    font-size: 14px;
     color: #9fa9bb;
     font-weight: 500;
 }
@@ -363,10 +363,10 @@
     box-sizing: border-box;
     background: #ffffff;
     border: 1px solid #2a3140;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #1a1f2c;
     padding: 0.45rem 0.7rem;
-    font-size: 0.88rem;
+    font-size: 14px;
     font-family: inherit;
 }
 
@@ -387,7 +387,7 @@
 
 .pdb-deck-section-h {
     margin: 0 0 0.35rem 0;
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -403,7 +403,7 @@
     color: #e6ebf3;
     border-radius: 6px;
     padding: 0.05rem 0.45rem;
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 700;
 }
 
@@ -424,8 +424,8 @@
     padding: 0.35rem 0.55rem;
     background: rgba(255, 255, 255, 0.025);
     border: 1px solid #242b39;
-    border-radius: 8px;
-    font-size: 0.86rem;
+    border-radius: 10px;
+    font-size: 14px;
 }
 
 .pdb-deck-row-count {
@@ -446,7 +446,7 @@
 
 .pdb-deck-row-set {
     color: #8c95a5;
-    font-size: 0.74rem;
+    font-size: 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -479,14 +479,14 @@
 
 .pdb-section-h {
     margin: 0 0 0.35rem 0;
-    font-size: 0.95rem;
+    font-size: 14px;
     font-weight: 600;
     color: #e6ebf3;
 }
 
 .pdb-section-help {
     margin: 0 0 0.7rem 0;
-    font-size: 0.82rem;
+    font-size: 14px;
     color: #9fa9bb;
     line-height: 1.45;
 }
@@ -497,7 +497,7 @@
     cursor: pointer;
     user-select: none;
     list-style: none;
-    font-size: 0.9rem;
+    font-size: 14px;
     font-weight: 600;
     color: #e6ebf3;
     display: flex;
@@ -510,7 +510,7 @@
 .pdb-paste-summary::before {
     content: '▸';
     color: var(--accent, #5fb6ff);
-    font-size: 0.78rem;
+    font-size: 12px;
     transition: transform 120ms ease;
     display: inline-block;
 }
@@ -528,11 +528,11 @@
     box-sizing: border-box;
     background: #ffffff;
     border: 1px solid #2a3140;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #1a1f2c;
     padding: 0.6rem 0.75rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.84rem;
+    font-size: 14px;
     line-height: 1.45;
     margin-bottom: 0.7rem;
     resize: vertical;
@@ -559,13 +559,13 @@
 }
 
 .pdb-mulligan-label {
-    font-size: 0.78rem;
+    font-size: 12px;
     color: #9fa9bb;
     margin-bottom: 0.2rem;
 }
 
 .pdb-mulligan-value {
-    font-size: 1.3rem;
+    font-size: 21px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -575,14 +575,14 @@
 
 .pdb-mulligan-note {
     margin: 0.65rem 0 0 0;
-    font-size: 0.78rem;
+    font-size: 12px;
     color: #8c95a5;
     text-align: center;
 }
 
 .pdb-mulligan-warn {
     margin: 0 0 0.6rem 0;
-    font-size: 0.78rem;
+    font-size: 12px;
     color: #ffae74;
     text-align: center;
 }
@@ -599,7 +599,7 @@
     border-radius: 10px;
     padding: 0.55rem 0.95rem;
     color: #e6ebf3;
-    font-size: 0.85rem;
+    font-size: 14px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
     opacity: 0;
     pointer-events: none;
@@ -625,7 +625,7 @@
 .pdb-set-details {
     background: rgba(255, 255, 255, 0.025);
     border: 1px solid #242b39;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 0;
     overflow: hidden;
     flex: 0 0 100%;          /* always wraps onto its own row */
@@ -640,14 +640,14 @@
     user-select: none;
     list-style: none;
     color: #b0b8c1;
-    font-size: 0.82rem;
+    font-size: 14px;
 }
 
 .pdb-set-summary::-webkit-details-marker { display: none; }
 .pdb-set-summary::before {
     content: '▸';
     color: var(--accent, #5fb6ff);
-    font-size: 0.7rem;
+    font-size: 11px;
     transition: transform 120ms ease;
     display: inline-block;
 }
@@ -663,7 +663,7 @@
     background: rgba(255, 255, 255, 0.06);
     border-radius: 999px;
     padding: 0.1rem 0.55rem;
-    font-size: 0.74rem;
+    font-size: 12px;
 }
 
 .pdb-set-controls {
@@ -675,10 +675,10 @@
     box-sizing: border-box;
     background: #ffffff;
     border: 1px solid #2a3140;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #1a1f2c;
     padding: 0.4rem 0.65rem;
-    font-size: 0.85rem;
+    font-size: 14px;
     font-family: inherit;
 }
 
@@ -693,7 +693,7 @@
 
 .pdb-set-chip {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.74rem;
+    font-size: 12px;
     padding: 0.18rem 0.55rem;
 }
 
@@ -764,7 +764,7 @@
     background: rgba(20, 25, 35, 0.65);
     border: 1px solid #2a3140;
     color: #e6ebf3;
-    font-size: 1.3rem;
+    font-size: 21px;
     line-height: 1;
     cursor: pointer;
     z-index: 2;
@@ -800,7 +800,7 @@
 
 .pdb-zoom-name {
     margin: 0;
-    font-size: 1.15rem;
+    font-size: 17px;
     font-weight: 700;
     color: #e6ebf3;
     display: flex;
@@ -812,20 +812,20 @@
 .pdb-zoom-sub {
     margin: 0;
     color: #b0b8c1;
-    font-size: 0.88rem;
+    font-size: 14px;
 }
 
 .pdb-zoom-cap {
     margin: 0;
     color: #8c95a5;
-    font-size: 0.78rem;
+    font-size: 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .pdb-zoom-text {
     margin-top: 0.35rem;
     color: #d6dce7;
-    font-size: 0.86rem;
+    font-size: 14px;
     line-height: 1.5;
     border-top: 1px solid #242b39;
     padding-top: 0.7rem;
@@ -869,7 +869,7 @@
 }
 .pdb-menge-btn {
     font: inherit;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     min-height: 32px;
     border-radius: 6px;

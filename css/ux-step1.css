@@ -181,7 +181,7 @@ input[type="text"][placeholder*="search" i] {
     border: 2px solid var(--ui-input-border) !important;
     border-radius: var(--ui-input-radius) !important;
     padding: var(--ui-input-pad-y) var(--ui-input-pad-x) var(--ui-input-pad-y) 38px !important;
-    font-size: 15px !important;
+    font-size: 14px !important;
     line-height: 1.2;
     box-shadow: 0 1px 2px rgba(20, 30, 60, 0.04) !important;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;

@@ -145,7 +145,7 @@ describe('Eigene Box anlegen sieht aus wie ein Knopf (Hausi, 03.10.2026)', () =>
   });
   it('auch das Einfuegefeld (Deckliste einfuegen) ist ein Knopf und das Feld gross genug', () => {
     assert.match(QUELLE2, /<details class="abx-liste"[^>]*><summary class="btn btn-primary abx-eigen-knopf">/);
-    assert.match(CSS, /\.abx-liste textarea \{[^}]*min-height: 16em[^}]*font-size: 16px/);
+    assert.match(CSS, /\.abx-liste textarea \{[^}]*min-height: 16em[^}]*font-size: 1[6-9]px/);  // ab 16 px kein Zoom am iPhone; Stufe 2 (07.10.2026) zieht 16 auf 17
   });
   it('CSS blendet den Pfeil aus und setzt ein Plus davor', () => {
     assert.match(CSS, /summary\.abx-eigen-knopf \{[^}]*list-style: none/);

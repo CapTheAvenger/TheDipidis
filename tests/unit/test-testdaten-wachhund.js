@@ -157,6 +157,7 @@ function gleichheiten(datei) { return zeilenMit(datei, GLEICHHEIT); }
  * Eintrag laesst diesen Test fallen — genau das ist der Zweck.
  */
 const REGISTER = {
+    'test-v2-13.js': 'V2-13 (07.10.2026): liest die drei Verzeichnisse (tournament_cards_manifest.json, labs_tournament_decks_verzeichnis.json, labs_matchups_je_turnier_verzeichnis.json) und vergleicht die Tabelle „Was fehlt“ Zeile fuer Zeile gegen DIESELBEN Dateien — keine feste Zahl, kein Wochenwert. Eine Ungleichung: mindestens ein Format ohne Major-Daten (Vorpruefung gegen ein leeres Bestehen).',
     'test-da36-geteilte-abrufe.js': 'DA-36 (03.10.2026): nennt data/-Pfade nur als Abrufadressen fuer eine fetch-Attrappe; gelesen wird keine Datei aus data/, keine Zahl aus Daten. Ausgefuehrt wird js/csv-cache-interceptor.js. Keine Ungleichung an Live-Daten.',
     'test-da36-spielerdatei-erst-bei-bedarf.js': 'DA-36 (03.10.2026): nennt data/tournament_decklists_per_player.csv nur als Adresse, die eine Papa-Attrappe zaehlt; die Datei selbst wird nicht gelesen. Ausgefuehrt wird js/deck-builder-consistency.js. Keine Ungleichung an Live-Daten.',
     'test-r7-politur.js': 'Rutsch R6/R7 (03.10.2026): liest aus data/ nur die KOPFZEILE von pokemon_sets_mapping.csv (set_code,set_name), weil der Profil-Builder genau diese Spalten liest. Keine Zahl, keine Zeilenzahl, kein Wochenwert. Keine Ungleichung an Live-Daten.',

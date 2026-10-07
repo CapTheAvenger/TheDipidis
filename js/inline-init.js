@@ -652,6 +652,7 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'quellen-zuverlaessig':  'quellen',
         'quellen-trennung':      'quellen',
         'quellen-stand':         'quellen',
+        'quellen-luecken':       'quellen',
         'quellen-rechtliches':   'quellen',
         /* BEFUND (07.09.2026, live gemessen): der Abschnitt "Umfang" hat
            in js/app-quellen.js seit dem 02.09. die Kennung `umfang` und
@@ -966,7 +967,7 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
             // fehlt (aeltere zwischengespeicherte Fassung der Datei).
             const ABSCHNITTE = { quellen: 1, erklaerungen: 1, umfang: 1,
                                  begriffe: 1, zuverlaessig: 1, trennung: 1,
-                                 stand: 1, rechtliches: 1 };
+                                 stand: 1, luecken: 1, rechtliches: 1 };
             let erlaubt = ABSCHNITTE;
             try {
                 if (typeof window.Quellen.ids === 'function') {

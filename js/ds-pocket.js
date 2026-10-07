@@ -268,7 +268,7 @@
         var f = m.fenster || {};
         var s = '';
         s += '<div class="header">';
-        s += '<h2>' + esc(t('Side Quest · Pokémon TCG Pocket',
+        s += '<h2 role="heading" aria-level="1">' + esc(t('Side Quest · Pokémon TCG Pocket',
                             'Side Quest · Pokémon TCG Pocket')) + '</h2>';
         /* UI-90 (03.10.2026, Tiefenanalyse N-18): ein Satz Einordnung —
            Pocket ist ein eigenes Handyspiel, und der Musterweg war unklar. */

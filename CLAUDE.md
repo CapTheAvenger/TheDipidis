@@ -159,6 +159,13 @@ Drei Regeln sind daraus geworden:
    Die rollende Datei ist einen Lauf veraltet — die Ursache trotzdem
    beheben, sonst bleibt sie es. Gehalten von
    `tests/python/test_tor_rollt_rote_datei_zurueck.py`.
+   **Victory-Road-Scraper (07.10.2026):** eine umgebaute oder leere Quelle
+   macht den Wochenlauf NICHT mehr rot, wenn ein Bestand da ist: der
+   Scraper behaelt ihn, schreibt `_meta.quellenhinweis` mit Datum (der
+   Stempel `erzeugt_am` bleibt, die Frischepruefung sieht die Alterung)
+   und meldet `::warning::`. Rot bleibt nur ein Lauf ohne Bestand. Ladder-
+   Saisons („Season M-6") sind keine Turniere. Gehalten von
+   `tests/nebenbereiche/python/test_victory_road_verlaesslich.py`.
 2. **Champions-, Pocket- und Side-Quest-Tests liegen unter
    `tests/nebenbereiche/{unit,python}`** (Entscheidung Hausi, 29.09.2026)
    und laufen in `nebenbereiche-tests.yml`, nicht im Tor und nicht im

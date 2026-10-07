@@ -23,6 +23,11 @@ describe('FE-47 Rotations-Check je Deck', () => {
         assert.strictEqual(f.dsRotiertZaehlen({ 'X (pal 001)': 2 }, ix), 0, 'Kleinschreibung im Set zaehlt nicht');
         assert.strictEqual(f.dsRotiertZaehlen({ 'X (PAL 001)': 2 }, ix), 2, 'fuehrende Nullen');
         assert.strictEqual(f.dsRotiertZaehlen(deck, null), 0);
+        // DA-41: Nachdruck mit spaeterer Marke -> bleibt legal (Drucke ueber Set-Nummer)
+        const drucke = (set, nr) => (set === 'TWM' && nr === '129') ? ['TWM-129', 'MEG-131'] : [set + '-' + nr];
+        assert.strictEqual(f.dsRotiertZaehlen(deck, ix, drucke), 4);
+        const nurAlt = (set, nr) => (set === 'TWM' && nr === '129') ? ['TWM-129', 'PAL-185'] : [];
+        assert.strictEqual(f.dsRotiertZaehlen(deck, ix, nurAlt), 8, 'Nachdruck mit aelterer Marke rettet nicht');
     });
     it('steht in der Deckzeile unter Archetyp und Kartenzahl', () => {
         const i = src.indexOf('${dsRotationsZeile(deck.cards)}');

@@ -16479,6 +16479,7 @@ window.MetaCall = (function () {
       // Read-back verification: confirms the value is actually in storage
       // (catches private-mode browsers that accept setItem but discard).
       const verify = localStorage.getItem(SCENARIOS_STORAGE_KEY);
+      if (verify === payload) _szenAbgleichPlanen();
       if (verify !== payload) {
         const msg = 'read-back mismatch';
         console.error('[MetaCall] Scenario persist verification failed:', msg);
@@ -16492,6 +16493,30 @@ window.MetaCall = (function () {
       return false;
     }
   }
+
+  /* FE-44 (Hausi 07.10.2026: „Ja, ins Konto"): Szenarien samt Schaetzungen liegen
+     zusaetzlich unter users/{uid}/metaCall/szenarien, damit sie auf jedem Geraet da
+     sind. Abgleich statt Ueberschreiben: je Name gilt der neuere Stand (savedAt);
+     geloeschte Namen werden mit Zeitpunkt gemerkt (wie die Loeschmarken der Decks,
+     FE-18), sonst braechte ein anderes Geraet sie zurueck. Nichts wird ohne Loeschmarke
+     entfernt; der Browser-Speicher bleibt der Spiegel. */
+  const SZEN_GELOESCHT_KEY = 'metacall_scenarios_geloescht_v1';
+  function _szenGeloescht() {
+    try { return JSON.parse(localStorage.getItem(SZEN_GELOESCHT_KEY) || '{}') || {}; } catch (_) { return {}; }
+  }
+  function _szenMerkeGeloescht(name) {
+    const g = _szenGeloescht();
+    g[name] = new Date().toISOString();
+    try { localStorage.setItem(SZEN_GELOESCHT_KEY, JSON.stringify(g)); } catch (_) { /* Spiegel nur Zugabe */ }
+  }
+  // Abgleich mit dem Konto: js/metacall-konto.js (dieses Modul bleibt ohne Anmeldung,
+  // tests/unit/test-metacall-entkoppelt.js).
+  function _szenAbgleichPlanen() {
+    if (window.MetaCallKonto && typeof window.MetaCallKonto.planen === 'function') window.MetaCallKonto.planen();
+  }
+  document.addEventListener('metacall:szenarien-abgeglichen', function () {
+    try { refreshScenariosBar(); } catch (_) { /* Leiste evtl. noch nicht gezeichnet */ }
+  });
 
   function _snapshotState() {
     return {
@@ -16575,6 +16600,7 @@ window.MetaCall = (function () {
     if (!(await (window.zeigeBestaetigung ? window.zeigeBestaetigung({ text: _frage, gefaehrlich: true }) : confirm(_frage)))) return;
     const existing = _loadScenarios();
     delete existing[name];
+    _szenMerkeGeloescht(name);
     _writeScenarios(existing);
     _currentScenarioName = '';
     refreshScenariosBar();

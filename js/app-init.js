@@ -109,8 +109,13 @@
                 window.dispatchEvent(new CustomEvent('app:ui-ready'));
                 devLog('[Init] All resources settled. UI is ready.');
 
-                // Preload MetaCall CSV data in background so the tab opens instantly
-                setTimeout(() => { window.MetaCall?.preload?.(); }, 1500);
+                /* Meta-Call-Vorrat im Hintergrund, damit der Reiter sofort steht.
+                   DA-44 (07.10.2026): gemessen rund 35 MB (Karteneffekte 12 MB, Labs-Matchups
+                   10 MB, Online-Karten 7 MB, Spielerkontinuitaet 3 MB), die bis heute 1,5 s nach
+                   dem Start im Wettlauf mit der gerade offenen Seite luden. Jetzt: auf dem Meta
+                   Call sofort, sonst erst, wenn der Browser frei ist (fruehestens nach 12 s); bei
+                   Datensparmodus oder langsamer Verbindung erst beim Oeffnen des Reiters. */
+                metaCallVorratPlanen();
             } catch (e) {
                 console.error('[init] App initialization failed:', e);
             } finally {
@@ -119,4 +124,17 @@
             }
         });
         
+        function metaCallVorratPlanen() {
+            const los = function () { try { window.MetaCall?.preload?.(); } catch (_e) { /* nie blockieren */ } };
+            const aktiv = document.querySelector('.tab-content.active');
+            if (aktiv && aktiv.id === 'meta-call') { los(); return; }
+            const verbindung = navigator.connection;
+            if (verbindung && (verbindung.saveData || /(^|-)(2g|3g)$/.test(String(verbindung.effectiveType || '')))) return;
+            const frei = (typeof window.requestIdleCallback === 'function')
+                ? function (f) { window.requestIdleCallback(f, { timeout: 20000 }); }
+                : function (f) { setTimeout(f, 0); };
+            setTimeout(function () { frei(los); }, 12000);
+        }
+        window.metaCallVorratPlanen = metaCallVorratPlanen;
+
         // ========================================================================

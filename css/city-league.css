@@ -3564,3 +3564,7 @@
     box-shadow: inset 0 -2px 0 var(--space-gl), var(--e-1);
 }
 #current-analysis .cm-deckwahl #btn-deck-uebernehmen { width: auto; }
+/* V2-10: vor der Deckwahl ist der zweite Steuerblock leer (alles darin ist
+   .cm-nach-wahl) — ohne diese Regel stand dort ein leerer dunkler Balken. Nicht per display
+   (mobile-responsive.css setzt display mit Ausrufezeichen), sondern ohne Flaeche. */
+#current-analysis:not([data-cm-gewaehlt]) .controls:not(.cm-deckwahl) { padding: 0; border: 0; background: none; }

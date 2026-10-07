@@ -809,10 +809,11 @@
                                keine Bilanz vorlag \u2014 sie wird jetzt
                                mitgescrapt. Fehlt sie in einer Zeile, steht ein
                                Strich statt einer geschaetzten Zahl.
-                               Unter 10 Matches: kursiv. */
+                               Unter 20 Matches (CONV_MIN_N, DA-50): kursiv und grau. */
                             const mj = (majorLookup.get(normalizeName(rowDeck)) || new Map())
                                 .get(normalizedColDeckMap.get(colDeck));
-                            const majorDuenn = !!(mj && mj.anzahl < 10);
+                            // DA-50 (Hausi 06.10.): eine Grenze app-weit, 20 Matches (CONV_MIN_N).
+                            const majorDuenn = !!(mj && mj.anzahl < ((typeof window.CONV_MIN_N === 'number') ? window.CONV_MIN_N : 20));
                             const pctTxt = (v) => (typeof window.formatPercent === 'function')
                                 ? window.formatPercent(v) : Number(v).toFixed(1) + ' %';
                             const dk = majorDuenn ? ' heatmap-zelle-duenn' : '';

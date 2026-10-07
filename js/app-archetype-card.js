@@ -114,7 +114,10 @@
        Vertrauensintervall im Hinweis. 100 Partien ist die Grenze, ab der
        das 95-%-Intervall enger als ±10 Punkte wird — darunter wird die
        Zahl gedaempft dargestellt, aber sie steht da. */
-    const MAJOR_DUENN_PARTIEN = 100;
+    /* DA-50 (Hausi 06.10.2026): eine Grenze app-weit — 20 Matches wie
+       THIN_GAMES und CONV_MIN_N. Die 100 von oben bleiben als Begruendung
+       stehen; entschieden ist die eine Grenze. */
+    const MAJOR_DUENN_PARTIEN = (typeof window !== 'undefined' && typeof window.CONV_MIN_N === 'number') ? window.CONV_MIN_N : 20;
 
     /* Unter so vielen Antritten wird keine Day-2-Quote gezeigt.
      *

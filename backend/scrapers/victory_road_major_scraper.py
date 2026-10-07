@@ -46,7 +46,7 @@ import os
 import re
 import sys
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -96,6 +96,8 @@ TIEFE_VORGABE = 32
 # ein Turnier darf wachsen, verlieren darf es nichts.
 MINDEST_TURNIERE_IM_KALENDER = 5
 MINDEST_PLAETZE_JE_TURNIER = 8
+# So viele Wochenenden zurueck wird gesucht, bis ein Turnier Teams hergibt.
+MAX_WOCHENENDEN = 3
 
 
 # ── Kalender ─────────────────────────────────────────────────────────
@@ -211,6 +213,18 @@ def lies_kalender(html: str) -> List[Dict]:
     return eintraege
 
 
+# "Season M-6", "Season M-7" — die monatlichen LADDER-Saisons des Spiels.
+# Sie stehen im Kalender wie Turniere (Datum, Name, Link), haben aber keine
+# Platzierungstabelle: am 07.10.2026 endete Season M-6, wurde damit zum
+# "zuletzt gelaufenen Turnier", gab 0 Platzierungen her, und der Wochenlauf
+# #178 wurde rot. Das trifft JEDES Saisonende, nicht nur dieses.
+_LADDER_SAISON = re.compile(r"^\s*Season\s+[A-Za-z]+-\d+\b", re.I)
+
+
+def ist_ladder_saison(name: str) -> bool:
+    return bool(_LADDER_SAISON.match(name or ""))
+
+
 def letztes_wochenende(eintraege: List[Dict], heute: Optional[date] = None) -> List[Dict]:
     """Die Turniere des zuletzt GELAUFENEN Wochenendes.
 
@@ -228,6 +242,7 @@ def letztes_wochenende(eintraege: List[Dict], heute: Optional[date] = None) -> L
     heute = heute or date.today()
     gelaufen = [e for e in eintraege
                 if e.get("ende") and e.get("url")
+                and not ist_ladder_saison(e.get("name"))
                 and date.fromisoformat(e["ende"]) <= heute]
     if not gelaufen:
         return []
@@ -388,21 +403,8 @@ def hole_paste(pid: str, session=None, pause: float = 0.35) -> Optional[Dict]:
 
 # ── Zusammenbau ──────────────────────────────────────────────────────
 
-def baue(tiefe: int = TIEFE_VORGABE, heute: Optional[date] = None,
-         hole_html=safe_fetch_html, hole_paste_fn=hole_paste) -> Dict:
-    kal_html = hole_html(KALENDER_URL)
-    eintraege = lies_kalender(kal_html)
-    if len(eintraege) < MINDEST_TURNIERE_IM_KALENDER:
-        raise RuntimeError(
-            "Der Kalender gibt nur %d Zeilen her (erwartet mindestens %d) — "
-            "die Seite hat vermutlich ihren Aufbau geaendert."
-            % (len(eintraege), MINDEST_TURNIERE_IM_KALENDER))
-
-    majors = letztes_wochenende(eintraege, heute=heute)
-    if not majors:
-        raise RuntimeError("Im Kalender steht kein gelaufenes Turnier mit Seite.")
-
-    turniere, teams = [], []
+def _ziehe_wochenende(majors, tiefe, hole_html, hole_paste_fn, turniere, teams) -> None:
+    """Platzierungen und Teamlisten EINES Wochenendes; haengt an die Listen an."""
     for major in majors:
         try:
             html = hole_html(major["url"])
@@ -463,6 +465,37 @@ def baue(tiefe: int = TIEFE_VORGABE, heute: Optional[date] = None,
             "gezogen": gezogen,
         })
 
+
+def baue(tiefe: int = TIEFE_VORGABE, heute: Optional[date] = None,
+         hole_html=safe_fetch_html, hole_paste_fn=hole_paste) -> Dict:
+    kal_html = hole_html(KALENDER_URL)
+    eintraege = lies_kalender(kal_html)
+    if len(eintraege) < MINDEST_TURNIERE_IM_KALENDER:
+        raise RuntimeError(
+            "Der Kalender gibt nur %d Zeilen her (erwartet mindestens %d) — "
+            "die Seite hat vermutlich ihren Aufbau geaendert."
+            % (len(eintraege), MINDEST_TURNIERE_IM_KALENDER))
+
+    majors = letztes_wochenende(eintraege, heute=heute)
+    if not majors:
+        raise RuntimeError("Im Kalender steht kein gelaufenes Turnier mit Seite.")
+
+    turniere, teams = [], []
+    # Gab das juengste Wochenende KEIN Team her (Seite noch leer, Turnier
+    # ohne Teamlisten), geht es auf das davor — hoechstens so weit zurueck,
+    # wie MAX_WOCHENENDEN sagt. Der Scraper heisst "letztes Major MIT
+    # Teams", nicht "letzter Kalendereintrag".
+    bis = heute or date.today()
+    for _versuch in range(MAX_WOCHENENDEN):
+        if _versuch:
+            majors = letztes_wochenende(eintraege, heute=bis)
+            if not majors:
+                break
+        _ziehe_wochenende(majors, tiefe, hole_html, hole_paste_fn, turniere, teams)
+        if teams:
+            break
+        bis = min(date.fromisoformat(m["ende"]) for m in majors) - timedelta(days=1)
+
     teams.sort(key=lambda t: (t["turnier"], t["platz"]))
     for i, t in enumerate(teams, 1):
         t["rank"] = i
@@ -485,6 +518,44 @@ def baue(tiefe: int = TIEFE_VORGABE, heute: Optional[date] = None,
     }
 
 
+def behalte_bestand(ziel: str, grund: str, trocken: bool = False) -> int:
+    """Die Quelle hat sich geaendert oder gibt nichts her: Bestand BEHALTEN.
+
+    Bis 07.10.2026 endete das in `return 1` — und der Wochenlauf #178 war
+    rot, obwohl nichts kaputt war: die Schutzpruefung hatte richtig
+    verweigert, die Datei war unberuehrt, die Teams von gestern standen
+    noch da. Ein roter Lauf, der nichts zu reparieren hat, ist Laerm, und
+    wer taeglich Laerm bekommt, liest die echten Fehler nicht mehr.
+
+    Statt dessen wird der Befund DATIERT in die Datei geschrieben
+    (`_meta.quellenhinweis`) — "Datenluecken benennen und datieren, in den
+    Daten" — und als Warnung gemeldet. `erzeugt_am` bleibt unangetastet:
+    die Frischepruefung sieht weiter, dass der Bestand alt wird.
+
+    Gibt es noch keinen Bestand, ist das KEIN Quellumbau, sondern ein
+    Lauf ohne Ergebnis: dann bleibt es bei Rueckgabewert 1.
+    """
+    meldung = "%s: %s" % (os.path.basename(ziel), grund)
+    if not os.path.isfile(ziel):
+        logger.error("%s — und es gibt keinen Bestand, den man behalten koennte.", meldung)
+        return 1
+    with open(ziel, encoding="utf-8") as f:
+        bestand = json.load(f)
+    bestand.setdefault("_meta", {})["quellenhinweis"] = {
+        "datum": date.today().isoformat(),
+        "grund": grund,
+    }
+    if not trocken:
+        with open(ziel, "w", encoding="utf-8") as f:
+            json.dump(bestand, f, ensure_ascii=False, indent=1)
+    logger.warning("%s — Bestand vom %s bleibt stehen.", meldung,
+                   bestand["_meta"].get("erzeugt_am", "?"))
+    # GitHub Actions macht daraus eine Anmerkung am Lauf.
+    print("::warning::Victory Road: %s — Bestand vom %s bleibt stehen, Hinweis steht in der Datei."
+          % (meldung, bestand["_meta"].get("erzeugt_am", "?")))
+    return 0
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--tiefe", type=int, default=TIEFE_VORGABE,
@@ -494,7 +565,11 @@ def main() -> int:
     args = p.parse_args()
 
     logging.getLogger().setLevel(logging.INFO)
-    daten = baue(tiefe=args.tiefe)
+    ziel = os.path.join(AUSGABE_DIR, "victory_road_major_teams.json")
+    try:
+        daten = baue(tiefe=args.tiefe)
+    except RuntimeError as e:          # Seite umgebaut / kein Turnier mit Seite
+        return behalte_bestand(ziel, str(e), trocken=args.dry_run)
 
     for t in daten["_meta"]["turniere"]:
         logger.info("%s (%s): %d Platzierungen, %d mit Replika-Code, %d gezogen",
@@ -502,15 +577,15 @@ def main() -> int:
                     t["mit_replica_code"], t["gezogen"])
 
     if not daten["teams"]:
-        logger.error("Kein einziges Team gezogen — es wird NICHTS geschrieben.")
-        return 1
+        return behalte_bestand(
+            ziel, "Kein einziges Team gezogen (%d Turnier(e) gelesen, keines mit Teamlisten)"
+            % len(daten["_meta"]["turniere"]), trocken=args.dry_run)
 
     if args.dry_run:
         logger.info("dry-run: %d Teams, nichts geschrieben.", len(daten["teams"]))
         return 0
 
     os.makedirs(AUSGABE_DIR, exist_ok=True)
-    ziel = os.path.join(AUSGABE_DIR, "victory_road_major_teams.json")
     with open(ziel, "w", encoding="utf-8") as f:
         json.dump(daten, f, ensure_ascii=False, indent=1)
     logger.info("%d Teams -> %s", len(daten["teams"]), ziel)

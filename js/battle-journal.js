@@ -805,7 +805,7 @@
         if (pendingCount === 0) {
             els.pendingList.innerHTML = getEmptyStateBoxHtml({
                 title: escapeHtml(battleJournalText('bj.emptyState', 'No pending entries.')),
-                description: escapeHtml(battleJournalText('bj.emptyStateDesc', 'Everything is synced. Log a new match with the button below.')),
+                description: escapeHtml(battleJournalText('bj.emptyStateDesc', 'Everything is synced. Log a new match with "Save match".')),
                 icon: 'professor'
             });
             return;

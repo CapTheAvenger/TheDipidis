@@ -286,7 +286,10 @@
         s += '<p class="pk-quelle">' +
              esc(t('Gezählt aus ' + (m.turniere || 0) + ' Turnieren mit ' + (m.listen || 0) + ' Listen',
                    'Counted from ' + (m.turniere || 0) + ' tournaments with ' + (m.listen || 0) + ' lists')) +
-                 esc(' · ' + w.kuerzel + ' = ' + (w.lang ? w.lang + ', ' : '') + w.formel + ' · ' +
+                 /* N2-06 (07.10.2026): „S" stand hier fuer Siege und gleich danach fuer
+                    die Stufe S. Die Formel wird ausgeschrieben. */
+                 esc(' · ' + w.kuerzel + ' = ' + (w.lang ? w.lang + ', ' : '') +
+                     t('Siege ÷ alle Spiele (mit Unentschieden)', 'wins ÷ all games (incl. ties)') + ' · ' +
                      t('Stufe nach unserer Regel', 'tier by our rule'));
         if (m.quelle_url) {
             s += ' · <a href="' + esc(m.quelle_url) + '" target="_blank" rel="noopener">limitlesstcg.com</a>';

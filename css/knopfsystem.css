@@ -92,3 +92,24 @@ html[data-theme="dark"] .cb-seg-btn:not(.active) { color: var(--ink); border-col
     color: var(--surface-1);
     border-color: var(--ink);
 }
+
+/* V2-14 (07.10.2026) */
+.deck-rueckgaengig {
+    position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 10050;
+    display: flex; align-items: center; gap: 12px; max-width: calc(100vw - 32px);
+    padding: 10px 14px; border-radius: var(--r-md, 10px);
+    background: var(--ink); color: var(--surface-1); font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+}
+.deck-rueckgaengig button {
+    background: transparent; color: inherit; border: 1px solid currentColor; border-radius: 999px;
+    padding: 4px 12px; min-height: 32px; font: inherit; font-weight: 700; cursor: pointer;
+}
+.wunsch-entfernen {
+    margin-left: auto; background: transparent; border: 1px solid var(--line); color: var(--ink-2);
+    border-radius: 999px; padding: 2px 8px; min-height: 24px; font-size: 12px; cursor: pointer;
+}
+.wunsch-entfernen:hover { color: var(--ink); border-color: var(--ink-2); }
+.karten-knopf-legende { font-size: 12px; color: var(--ink-2); margin: 0 0 8px; }
+.abx-leer-box { padding: 12px 0; }
+#quellen .qu-abd th, #quellen .qu-abd td { font-size: 14px; }
+#quellen .qu-abd thead th { font-size: 12px; }

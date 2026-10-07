@@ -649,7 +649,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
         f({ MostConsistencyBuilder: MCB }, { dataQuality: DQ, coreThreshold: 0.9 },
           'Mega Excadrill', 60, (t) => { gezeigt = t; });
         assert.equal(gezeigt,
-            '✓ Mega Excadrill: 60/60 Karten · Core @ 90 % · 8 Day-2-Listen von 32 Piloten (797 Spieler)');
+            '✓ Mega Excadrill: 60/60 Karten · Kernkarten ab 90 % · 8 Day-2-Listen von 32 Piloten (797 Spieler)');   // F2-12 (07.10.2026)
         assert.ok(!/\b8 Listen ausgewertet\b/.test(gezeigt),
             'die alte, nackte Formulierung steht wieder da');
     });

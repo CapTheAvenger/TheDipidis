@@ -429,7 +429,8 @@ describe('ein getauschter Druck verliert seine Gruppe nicht', () => {
               name_de: 'Genesect-ex', type: 'Basic', count: 1 }
         ]);
         const html = binderDeckHtml({ id: 'mega-stalobor', titel: 'x' });
-        assert.equal(gruppeVon(html, 'Genesect-ex'), 'binderGrpOhne');
+        // F-25 (07.10.2026): die Kachel nennt den englischen Namen, wenn es ihn gibt
+        assert.equal(gruppeVon(html, 'Genesect ex'), 'binderGrpOhne');
     });
 
     it('Basis-Energie: „Metal Energy" und „Basic Metal Energy" sind dieselbe Karte', () => {
@@ -442,7 +443,7 @@ describe('ein getauschter Druck verliert seine Gruppe nicht', () => {
               name_de: 'Metall-Energie', type: 'Basic Energy', count: 8 }
         ]);
         const html = binderDeckHtml({ id: 'mega-stalobor', titel: 'x' });
-        assert.equal(gruppeVon(html, 'Metall-Energie'), 'binderGrpBasicEnergy');
+        assert.equal(gruppeVon(html, 'Metal Energy'), 'binderGrpBasicEnergy');   // F-25: englisch zuerst
     });
 
     /* Die beiden Sprachen einzeln — sonst traegt die eine die andere und
@@ -471,7 +472,8 @@ describe('ein getauschter Druck verliert seine Gruppe nicht', () => {
               type: 'Basic Energy', count: 8 }
         ]);
         const html = binderDeckHtml({ id: 'mega-stalobor', titel: 'x' });
-        assert.equal(gruppeVon(html, 'Metall-Energie'), 'binderGrpBasicEnergy');
+        // F-25 (07.10.2026): gefunden ueber den deutschen Namen, angezeigt mit dem englischen der Mappe
+        assert.equal(gruppeVon(html, 'Basic Metal Energy'), 'binderGrpBasicEnergy');
     });
 });
 

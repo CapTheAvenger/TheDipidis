@@ -265,6 +265,15 @@
     return { ...best, cards: _consolidateCards(best.cards) };
   }
 
+  /* D2-12 (07.10.2026): das Datum stand als ISO-Tag (2026-09-26) neben
+     deutschen Daten. Das Wort „Punkte“ hinter der Quote war auf der
+     Vergleichsseite drin und flog auf Hausis Wunsch wieder raus (Platz). */
+  function _datumLesbar(roh) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(roh || '').trim());
+    if (!m || (typeof getLang === 'function' && getLang() === 'en')) return String(roh || '');
+    return m[3] + '.' + m[2] + '.' + m[1];
+  }
+
   // ── Best Online: typical build from latest online tournament ─────
   //
   // The online CSV is per-tournament aggregated (no player-level
@@ -630,7 +639,7 @@
         : `No major tournament in the ${v.formatKey || 'current'} format yet${v.firstLegal ? ` — first major from ${v.firstLegal}` : ''}.`;
       const tail = v.tournament_name
         ? (de
-            ? `Letztes Major des vorherigen Formats: ${v.tournament_name} (${v.tournament_date}) — siehe Past Meta.`
+            ? `Letztes Major des vorherigen Formats: ${v.tournament_name} (${_datumLesbar(v.tournament_date)}) — siehe Past Meta.`
             : `Last major of the previous format: ${v.tournament_name} (${v.tournament_date}) — see Past Meta.`)
         : '';
       majorBody.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${_escHtml(head)}${tail ? `<br><small>${_escHtml(tail)}</small>` : ''}</p>`;
@@ -735,7 +744,7 @@
             <span class="past-meta-best-name">${_escHtml(ref.player_name || '')}</span>
             ${recordBlock}
           </div>
-          <div class="past-meta-best-sub" title="${_escHtml(_titelM)}">${_escHtml(tournName)} · ${_escHtml(ref.tournament_date)} · ${_escHtml(_tag2M)} · ${total} ${_escHtml(cardsLbl)}</div>
+          <div class="past-meta-best-sub" title="${_escHtml(_titelM)}">${_escHtml(tournName)} · ${_escHtml(_datumLesbar(ref.tournament_date))} · ${_escHtml(_tag2M)} · ${total} ${_escHtml(cardsLbl)}</div>
         </div>`;
     }
     // Online — REAL best-placed decklist (place + player + record) when the
@@ -780,7 +789,7 @@
             <span class="past-meta-best-name">${_escHtml(ref.player || '')}</span>
             ${recordBlock}
           </div>
-          <div class="past-meta-best-sub">${_escHtml(tournName || 'Limitless Online')} · ${_escHtml(ref.tournament_date)} · ${total} ${_escHtml(cardsLbl)}</div>
+          <div class="past-meta-best-sub">${_escHtml(tournName || 'Limitless Online')} · ${_escHtml(_datumLesbar(ref.tournament_date))} · ${total} ${_escHtml(cardsLbl)}</div>
         </div>`;
     }
     /* WIE VIELE LISTEN STEHEN HINTER DIESEM "TYPISCHEN BUILD"?

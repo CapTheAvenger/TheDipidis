@@ -177,6 +177,17 @@
     // pre-translated (de+en) from the generator; only the chrome
     // around it needs local strings. window.getLang() is the global
     // i18n switch ('en' | 'de', default 'en').
+    /* N2-15 / F-24 (07.10.2026): „Stand: 2026-10-03" — sonst steht ueberall
+       „03.10.2026". ISO-Tag (auch mit Uhrzeit) wird je Sprache lesbar; alles
+       andere bleibt, wie es kommt. */
+    function sqDatumLesbar(roh) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(roh || '').trim());
+        if (!m) return String(roh || '');
+        return (typeof getLang === 'function' && getLang() === 'en')
+            ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}.${m[2]}.${m[1]}`;
+    }
+    window.sqDatumLesbar = sqDatumLesbar;
+
     function uiLang() {
         return (typeof window.getLang === 'function' && window.getLang() === 'de') ? 'de' : 'en';
     }
@@ -470,7 +481,7 @@
         const subtitle = (uiLang() === 'de'
             ? (meta.subtitle_de || labels.subtitleFallback)
             : (meta.subtitle || labels.subtitleFallback)) || '';
-        const updated  = meta.last_updated || '';
+        const updated  = sqDatumLesbar(meta.last_updated || '');
         return `
             <div class="side-quest-intro">
                 <p class="side-quest-subtitle">${escapeHtml(subtitle)}</p>
@@ -1723,7 +1734,7 @@
 
         const stand = meta.erzeugt_am
             ? '<p class="side-quest-updated">' + escapeHtml(labels.lastUpdated) + ' '
-              + escapeHtml(meta.erzeugt_am) + '</p>'
+              + escapeHtml(sqDatumLesbar(meta.erzeugt_am)) + '</p>'
             : '';
         const quellLink = q.link
             ? '<p class="side-quest-quelle-link"><a href="' + escapeHtml(q.link)

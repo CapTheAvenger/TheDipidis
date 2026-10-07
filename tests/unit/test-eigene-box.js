@@ -218,7 +218,7 @@ describe('Rutsch Q: Umfang der Auswahl mit Kopien (Hausi, 03.10.2026)', () => {
   });
   it('Die Zeile steht ueber der Kartenliste und nutzt die sichtbare Auswahl', () => {
     assert.match(code, /auswahlUmfang\(sichtbareKarten\)/);
-    assert.match(code, /filterLeiste\(kontext, ohneFormate, gewaehlt, mitBoxName && !alleKarten\) \+ umfangZeile \+ hauptteil/);
+    assert.match(code, /filterLeiste\(kontext, ohneFormate, gewaehlt, mitBoxName && !alleKarten\) \+ umfangZeile\)? \+ hauptteil/);
   });
 });
 

@@ -259,6 +259,92 @@
         return pending[g.id];
     }
 
+    /* ---------- Pokémon-Namen (F-25, Hausi 07.10.2026) ----------
+     * Die Stuecke sind auf Deutsch geschrieben und nennen deutsche
+     * Pokémon-Namen („Katapuldra“), der Rest der Seite englische. Regel:
+     * „Englisch (Deutsch)“ beim ersten Vorkommen, danach englisch. Das
+     * Stueck selbst bleibt unveraendert (gekaufte Aufbereitung, von
+     * Skripten fortgeschrieben) — angeglichen wird beim Anzeigen. Quelle
+     * der Namen: data/pokemon_names_de.json (EN -> DE). */
+    var namenVersprechen = null;
+    function holeNamen() {
+        if (!namenVersprechen) {
+            namenVersprechen = fetch('data/pokemon_names_de.json', { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : {}; })
+                .catch(function () { return {}; });
+        }
+        return namenVersprechen;
+    }
+
+    /** Ersetzt in Texten deutsche Pokémon-Namen; gesehen = Set der schon
+     *  genannten Namen (erstes Vorkommen mit Klammer). Rein, getestet. */
+    function namenImText(text, deZuEn, muster, gesehen) {
+        return namenImTextRoh(text, deZuEn, muster, gesehen)
+            .replace(/\u0000 \([^()]*\)/g, '').replace(/\u0000/g, '');
+    }
+    function namenImTextRoh(text, deZuEn, muster, gesehen) {
+        return text.replace(muster, function (de, stelle, ganz) {
+            var en = deZuEn[de];
+            if (!en) return de;
+            /* Das Stueck schreibt oft schon „Katapuldra (Dragapult)“ (72-mal,
+               gemessen 07.10.). Dann wird daraus „Dragapult (Katapuldra)“ bzw.
+               spaeter nur „Dragapult“ — und die alte Klammer faellt weg. */
+            var paar = ' (' + en + ')';
+            if (ganz.substr(stelle + de.length, paar.length) === paar) {
+                var erstes = !gesehen.has(de);
+                gesehen.add(de);
+                return (erstes ? en + ' (' + de + ')' : en) + '\u0000';
+            }
+            /* In Zusammensetzungen („Stalobor-Deck“) keine Klammer mitten im
+               Wort — dort steht nur der englische Name. */
+            var weiter = ganz.charAt(stelle + de.length);
+            if (gesehen.has(de) || weiter === '-') return en;
+            gesehen.add(de);
+            return en + ' (' + de + ')';
+        });
+    }
+
+    function namenMuster(deZuEn) {
+        var namen = Object.keys(deZuEn).filter(function (n) { return n.length >= 4; })
+            .sort(function (a, b) { return b.length - a.length; })
+            .map(function (n) { return n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
+        if (!namen.length) return null;
+        return new RegExp('(?<![A-Za-zÄÖÜäöüß])(?:' + namen.join('|') + ')(?![a-zäöüß])', 'g');
+    }
+
+    function namenAngleichen(wurzel, enZuDe) {
+        if (!wurzel || !enZuDe) return;
+        var deZuEn = {};
+        Object.keys(enZuDe).forEach(function (en) {
+            var de = enZuDe[en];
+            if (de && de !== en) deZuEn[de] = en;
+        });
+        var muster = namenMuster(deZuEn);
+        if (!muster) return;
+        var gesehen = new Set();
+        var gang = document.createTreeWalker(wurzel, NodeFilter.SHOW_TEXT, {
+            acceptNode: function (n) {
+                var p = n.parentNode;
+                return (p && /^(SCRIPT|STYLE)$/.test(p.nodeName)) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+            }
+        });
+        var knoten = [];
+        while (gang.nextNode()) knoten.push(gang.currentNode);
+        knoten.forEach(function (n) {
+            var neu = namenImText(n.nodeValue, deZuEn, muster, gesehen);
+            if (neu !== n.nodeValue) n.nodeValue = neu;
+        });
+        Array.prototype.forEach.call(wurzel.querySelectorAll('[data-warum],[title]'), function (el) {
+            ['data-warum', 'title'].forEach(function (a) {
+                var v = el.getAttribute(a);
+                if (v) {
+                    var neu = namenImText(v, deZuEn, muster, new Set(Object.keys(deZuEn)));
+                    if (neu !== v) el.setAttribute(a, neu);
+                }
+            });
+        });
+    }
+
     /* ---------- Regal ---------- */
 
     function kachel(g) {
@@ -302,10 +388,12 @@
         if (!g || !buehne) return;
         buehne.hidden = false;
         buehne.innerHTML = '<p class="mcl-status">' + esc(T('laden')) + '</p>';
-        hole(g).then(function (txt) {
+        Promise.all([hole(g), holeNamen()]).then(function (erg) {
+            var txt = erg[0];
             buehne.innerHTML = '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' +
                 esc(g.titel) + '</h4>' +
                 '<button type="button" class="mcl-schliessen">' + esc(T('schliessen')) + '</button></div>' + txt;
+            namenAngleichen(buehne, erg[1]);
             verdrahte(buehne, g);
             try { buehne.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' }); } catch (e) { }
         }).catch(function (err) {
@@ -527,7 +615,7 @@
     function binderKarteHtml(k, meta, tim, timJetzt) {
         var w = (meta === 'alle') ? k.gesamt : (k.je_meta && k.je_meta[meta]);
         if (!w) return '';
-        var name = k.name_de || k.name;
+        var name = k.name || k.name_de;   // F-25 (07.10.2026): englisch wie der Rest der Seite
         var druck = (k.set || '') + (k.nummer ? '-' + k.nummer : '');
         var schluessel = binderDruck(k);
         var bild = k.bild || bildAdresse(druck);
@@ -587,6 +675,8 @@
             ' data-gruppe="' + esc(k.gruppe || '') + '">' +
             '<div class="mcl-bd-bild">' + kopf + zaehler + aceMarke + '</div>' +
             '<div class="mcl-bd-txt"><b>' + esc(name) + '</b>' +
+            /* F-25 (07.10.2026): englisch, der deutsche Name klein darunter */
+            (k.name_de && k.name_de !== name ? '<span class="mcl-bd-de">' + esc(k.name_de) + '</span>' : '') +
             '<span class="mcl-bd-druck">' + esc(druck) + '</span>' +
             '<span class="mcl-bd-zahlen">' + teile.join(' · ') + '</span>' +
             weitereMarke +
@@ -608,7 +698,7 @@
         };
         if (wie === 'name') {
             liste.sort(function (a, b) {
-                return String(a.name_de || a.name).localeCompare(String(b.name_de || b.name), 'de');
+                return String(a.name || a.name_de).localeCompare(String(b.name || b.name_de), 'de');   // F-25: englisch
             });
         } else if (wie === 'preis') {
             liste.sort(function (a, b) {
@@ -625,7 +715,7 @@
                 if (d) return d;
                 d = wert(b) - wert(a);
                 if (d) return d;
-                return String(a.name_de || a.name).localeCompare(String(b.name_de || b.name), 'de');
+                return String(a.name || a.name_de).localeCompare(String(b.name || b.name_de), 'de');   // F-25: englisch
             });
         } else {
             liste.sort(function (a, b) { return wert(b) - wert(a); });
@@ -767,7 +857,7 @@
             String((c.set || '') + '-' + (c.number || '')).toUpperCase();
         var setCode = String(c.set || '').toUpperCase();
         var nummer = String(c.number || '');
-        var name = c.name_de || c.name_en || (a && (a.name_de || a.name)) || schluessel;
+        var name = c.name_en || (a && a.name) || c.name_de || (a && a.name_de) || schluessel;   // F-25
         var nameEn = c.name_en || (a && a.name) || c.name_de || '';
         var bild = (k && k.bild) || bildAdresse(schluessel);
         var druckText = (setCode + ' ' + nummer).trim();
@@ -873,8 +963,8 @@
             if (!eintraege || !eintraege.length) return '';
             eintraege.sort(function (a, b) {
                 return (b.c.count || 0) - (a.c.count || 0) ||
-                    String(a.c.name_de || a.c.name_en || '').localeCompare(
-                        String(b.c.name_de || b.c.name_en || ''), 'de');
+                    String(a.c.name_en || a.c.name_de || '').localeCompare(
+                        String(b.c.name_en || b.c.name_de || ''), 'de');
             });
             var summe = eintraege.reduce(function (s, e) { return s + (e.c.count || 0); }, 0);
             var titel = grp ? T(BINDER_GRUPPE_TXT[grp]) : T('binderGrpOhne');
@@ -1755,6 +1845,10 @@
         _binderStandNeu: binderStandNeu,
         _binderTim: binderTim,
         _binderDeckKachelHtml: binderDeckKachelHtml,
-        _binderDruckTauschen: binderDruckTauschen
+        _binderDruckTauschen: binderDruckTauschen,
+        _namenImText: namenImText,
+        _namenImTextRoh: namenImTextRoh,
+        _namenMuster: namenMuster,
+        _namenAngleichen: namenAngleichen
     };
 })();

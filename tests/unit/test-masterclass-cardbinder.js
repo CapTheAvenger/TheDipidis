@@ -212,15 +212,15 @@ test('nach Preis sortiert steht die teuerste Karte oben, Karten ohne Preis unten
     assert.deepStrictEqual(s, ['teuer', 'billig', 'ohne']);
 });
 
-test('nach Name sortiert wird der DEUTSCHE Name genommen', () => {
+test('nach Name sortiert wird der ENGLISCHE Name genommen (F-25, Hausi 07.10.2026)', () => {
     const { binderSortiert } = lade('binderSortiert', 'binderDruck', 'binderGruppenRang');
-    /* Englisch waere Drilbur < Zubat; deutsch ist Rotomurf > Zubat
-     * nicht — also entscheidet, welcher Name benutzt wird. */
+    /* Englisch ist Drilbur < Zubat; deutsch waere Anorith < Rotomurf
+     * andersherum — also entscheidet, welcher Name benutzt wird. */
     const a = karte({ name: 'Drilbur', name_de: 'Rotomurf' });
     const b = karte({ name: 'Zubat', name_de: 'Anorith' });
     assert.deepStrictEqual(binderSortiert([a, b], 'alle', 'name').map((k) => k.name),
-        ['Zubat', 'Drilbur'],
-        'sortiert wurde nach dem englischen Namen');
+        ['Drilbur', 'Zubat'],
+        'sortiert wurde nach dem deutschen Namen');
 });
 
 /* ── 3 · Was nicht in den Daten steht, wird nicht behauptet ──────── */
@@ -244,9 +244,10 @@ test('ohne Preis steht ein Strich und kein Euro-Betrag', () => {
     assert.ok(html.includes('mcl-bd-kein'), 'der fehlende Preis ist nicht als fehlend gekennzeichnet');
 });
 
-test('die Kachel zeigt den deutschen Namen und den Druck', () => {
+test('die Kachel zeigt den englischen Namen, den deutschen darunter, und den Druck', () => {
     const { binderKarteHtml } = ladeKachel();
     const html = binderKarteHtml(karte({}), 'alle');
+    assert.ok(html.includes('<b>Drilbur</b>'), 'der englische Name steht nicht vorn:\n' + html);
     assert.ok(html.includes('Rotomurf'), 'der deutsche Name fehlt:\n' + html);
     assert.ok(html.includes('PBL-46'), 'der Druck fehlt:\n' + html);
     assert.ok(html.includes('2631'), 'die Zahl der Listen fehlt:\n' + html);
@@ -445,8 +446,8 @@ test('der Tim-Filter laesst nur Karten aus seinen Listen stehen', () => {
     const seine = karte({ name: 'seine', set: 'TEF', nummer: '113' });
     const fremde = karte({ name: 'fremde', set: 'SSP', nummer: '100' });
     const tim = { 'TEF-113': 4 };
-    assert.deepStrictEqual(fn([seine, fremde], 'alle', 'standard', false, tim).map((k) => k.name),
-        ['seine', 'fremde'], 'ohne Filter fehlt eine Karte');
+    assert.deepStrictEqual(fn([seine, fremde], 'alle', 'standard', false, tim).map((k) => k.name).sort(),
+        ['fremde', 'seine'], 'ohne Filter fehlt eine Karte');
     assert.deepStrictEqual(fn([seine, fremde], 'alle', 'standard', true, tim).map((k) => k.name),
         ['seine']);
     assert.deepStrictEqual(fn([seine, fremde], 'alle', 'standard', true, {}).map((k) => k.name),

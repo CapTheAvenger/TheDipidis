@@ -2630,9 +2630,16 @@
                 + rubrik('original', tx('abx.rubrikOriginal', null, 'Schon drin (Original)'), r.original, mitBoxName)
                 + rubrik('proxy', tx('abx.rubrikProxy', null, 'Als Proxy drin'), r.proxy, mitBoxName);
         }
+        // N-23 (07.10.2026): eine leere Box zeigte alle Filter und dreimal „Keine Karten.“ —
+        // jetzt nur der Weg hinein (Deckliste einfuegen, Karte von Hand).
+        const leereBox = !!(eine && !alleKarten && !zusammen && gesamt === 0);
+        if (leereBox) {
+            hauptteil = '<p class="abx-leer abx-leer-box">' + esc(tx('abx.leereBox', null,
+                'Diese Box ist noch leer — Deckliste einfügen oder eine Karte von Hand hinzufügen.')) + '</p>';
+        }
         // Eigene Box oben (nicht ans Ende): bei "Alle Boxen" liegen darunter ueber tausend Karten.
         wurzel.innerHTML = kopf + hinweis + aktionen + eigeneBoxBlock() + erg + liste + suche + (alleKarten ? '' : wiederBereich(gewaehlt, mitBoxName))
-            + filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName && !alleKarten) + umfangZeile + hauptteil;
+            + (leereBox ? '' : filterLeiste(kontext, ohneFormate, gewaehlt, mitBoxName && !alleKarten) + umfangZeile) + hauptteil;
     }
 
     function boxVon(boxId) {
@@ -3134,7 +3141,7 @@
         return '<details class="abx-liste"' + (r ? ' open' : '') + '><summary class="btn btn-primary abx-eigen-knopf">' + esc(tx('abx.listeKnopf', null, 'Deckliste einfügen')) + '</summary>'
             + '<label for="abxListe">' + esc(tx('abx.listeLabel', null, 'Deckliste (eine Karte je Zeile)')) + '</label>'
             + '<textarea id="abxListe" class="input-system" rows="10" spellcheck="false" placeholder="'
-            + esc(tx('abx.listePlatzhalter', null, '3 Mow Rotom (DRI 9)\n2 Rotom ex (PFL 29)\n4 Arven (OBF 186)')) + '"></textarea>'
+            + esc(tx('abx.listePlatzhalter', null, '3 Mow Rotom DRI 9\n2 Rotom ex PFL 29\n4 Arven OBF 186')) + '"></textarea>'
             + '<button type="button" class="btn btn-primary" onclick="ArchetypBox.listeEinfuegen()">'
             + esc(tx('abx.listeAbgleichen', null, 'Abgleichen und Fehlendes ergänzen')) + '</button>' + erg + '</details>';
     }

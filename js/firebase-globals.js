@@ -113,6 +113,10 @@ async function forceCloudSync() {
     // forcePull bypasses the "mirror is authoritative" short-circuit
     // so this button actually re-fetches from the server, the entire
     // point of the manual sync action.
+    // N2-17 (07.10.2026): ein Sync-Knopf fuer alles — auch wartende Journal-Matches.
+    if (typeof window.flushBattleJournalOutbox === 'function') {
+      try { await window.flushBattleJournalOutbox(); } catch (_) { /* Journal meldet selbst */ }
+    }
     if (typeof loadUserData === 'function') await loadUserData(user.uid);
     if (typeof loadUserDecks === 'function') await loadUserDecks(user.uid, { forcePull: true });
     var deckCount = (window.userDecks || []).length;

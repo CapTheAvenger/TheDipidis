@@ -2865,7 +2865,7 @@
                 `<div class="top256-entry">` +
                 `<span class="top256-count">${t.count}\u00d7</span>` +
                 `<span class="top256-tournament">${t.name}</span>` +
-                (t.date ? `<span class="top256-date">(${t.date})</span>` : '') +
+                (t.date ? `<span class="top256-date">(${(() => { const _d = (typeof parseEnglishTournamentDate === 'function') ? parseEnglishTournamentDate(t.date) : null; return _d ? _d.toLocaleDateString((typeof getLang === 'function' && getLang() === 'en') ? 'en-GB' : 'de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : t.date; })()})</span>` : '') +  /* F2-12 (07.10.2026): „(26th September 2026)" auf Deutsch */
                 `</div>`
             ).join('')
             + `<div class="top256-herkunft" style="margin-top:8px;font-size:0.72em;line-height:1.35;color:var(--ink-2, #555);">`
@@ -5542,7 +5542,12 @@
                     </section>`;
                 };
 
-                gridContainer.innerHTML = `<div class="meta-card-skeleton-wrap">
+                /* N2-14 (07.10.2026): L, P, ★, ♡ waren nur per title erklaert — auf dem
+                   Handy gar nicht. Eine Zeile ueber den Karten. */
+                const _knopfLegende = `<p class="karten-knopf-legende">${(typeof getLang === 'function' && getLang() === 'en')
+                    ? 'L = open on Limitless · P = add to proxies · ★ = change rarity · ♡ = wishlist'
+                    : 'L = auf Limitless öffnen · P = zu den Proxys · ★ = Change Rarity · ♡ = Wunschliste'}</p>`;
+                gridContainer.innerHTML = _knopfLegende + `<div class="meta-card-skeleton-wrap">
                     ${sectionHtml(`<i class="ds-usage-dot" data-usage="main" aria-hidden="true"></i> ${
                         t('cl.skelMain') || 'Main Cards'} <span class="meta-card-skeleton-hint">${
                         t('cl.skelMainHint') || '(staples + #1 Ace Spec)'}</span>`, mainItems)}

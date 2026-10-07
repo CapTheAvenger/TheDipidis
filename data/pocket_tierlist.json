@@ -4,7 +4,7 @@
   "quelle": "play.limitlesstcg.com",
   "quelle_url": "https://play.limitlesstcg.com/tournaments?game=POCKET&format=STANDARD",
   "quelle_hinweis": "Anteil und Siegquote sind gezählt, aus den Standings der Standardturniere auf Limitless. Die Stufe ist UNSERE Regel über diese beiden Zahlen (stufenregel), keine Einschätzung von Limitless. Die Oberfläche muss das anschreiben.",
-  "abgerufen": "2026-10-07T05:34:40+00:00",
+  "abgerufen": "2026-10-07T12:26:58+00:00",
   "fenster": {
    "von": "2026-09-23",
    "bis": "2026-10-07",
@@ -4629,72 +4629,72 @@
    },
    "pokemon": [
     {
-     "name": "Trapinch",
      "anzahl": 2,
-     "set": "B3",
-     "nummer": "076"
+     "name": "Trapinch",
+     "nummer": "076",
+     "set": "B3"
     },
     {
-     "name": "Flygon ex",
      "anzahl": 2,
-     "set": "B3",
-     "nummer": "126"
+     "name": "Flygon ex",
+     "nummer": "126",
+     "set": "B3"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Cyrus",
-     "anzahl": 2,
-     "set": "A2",
-     "nummer": "150"
+     "nummer": "150",
+     "set": "A2"
     },
     {
+     "anzahl": 2,
      "name": "Copycat",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 1,
      "name": "Juliana",
-     "anzahl": 1,
-     "set": "B3a",
-     "nummer": "071"
+     "nummer": "071",
+     "set": "B3a"
     },
     {
+     "anzahl": 2,
      "name": "Rare Candy",
-     "anzahl": 2,
-     "set": "A3",
-     "nummer": "144"
+     "nummer": "144",
+     "set": "A3"
     },
     {
+     "anzahl": 2,
      "name": "Lucky Ice Pop",
-     "anzahl": 2,
-     "set": "B2",
-     "nummer": "145"
+     "nummer": "145",
+     "set": "B2"
     },
     {
+     "anzahl": 2,
      "name": "Order Pad",
-     "anzahl": 2,
-     "set": "B4",
-     "nummer": "145"
+     "nummer": "145",
+     "set": "B4"
     },
     {
-     "name": "Poké Ball",
      "anzahl": 1,
-     "set": "P-A",
-     "nummer": "005"
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
     },
     {
-     "name": "Giant Cape",
      "anzahl": 2,
-     "set": "A2",
-     "nummer": "147"
+     "name": "Giant Cape",
+     "nummer": "147",
+     "set": "A2"
     }
    ],
    "energie": [

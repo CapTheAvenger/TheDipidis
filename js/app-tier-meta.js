@@ -1460,11 +1460,17 @@
 
                         const _komma = (x, n) => (getLang() === 'de'
                             ? x.toFixed(n).replace('.', ',') : x.toFixed(n));
+                        // V2-17 (DA-40): „M3“ war ein alter interner Name fuer das
+                        // vergangene Format der City League. Jetzt steht da, was es ist.
+                        const _vorLbl = getLang() === 'de' ? 'vorher' : 'prev.';
+                        const _vorTitel = escapeHtml(getLang() === 'de'
+                            ? 'Wert im vergangenen Format der City League (Vergangene Formate)'
+                            : 'Value in the previous City League format (Past formats)');
                         m3RankDisplay = Number.isFinite(previousR)
-                            ? `<span class="stat-compare-value">(M3: ${_komma(previousR, 1)})</span>`
+                            ? `<span class="stat-compare-value" title="${_vorTitel}">(${_vorLbl} ${_komma(previousR, 1)})</span>`
                             : '';
                         m3ShareDisplay = Number.isFinite(normalizedPreviousS)
-                            ? `<span class="stat-compare-value">(M3: ${_komma(normalizedPreviousS, 1)}%)</span>`
+                            ? `<span class="stat-compare-value" title="${_vorTitel}">(${_vorLbl} ${_komma(normalizedPreviousS, 1)}%)</span>`
                             : '';
                     }
 
@@ -2560,6 +2566,22 @@
                               + '. Only pairs checked one by one are matched — a similar name is not enough.')}</p>`
                         : '';
 
+                    // V2-17 (DA-51): der Rest ohne eigene Zeile steht unter der
+                    // Tabelle, nicht nur unter Quellen & Methodik. Dieselbe
+                    // Rechnung wie der Datenumfang (feldGroesseAusAnteilen).
+                    const _feldN = (typeof window.feldGroesseAusAnteilen === 'function')
+                        ? window.feldGroesseAusAnteilen(normalizedDecks.map(
+                            d => ({ anteil: d.share || 0, anzahl: d.new_count || 0 })))
+                        : 0;
+                    const _gelistetN = normalizedDecks.reduce((s, d) => s + (d.new_count || 0), 0);
+                    const sonstigeHtml = (_feldN > _gelistetN)
+                        ? `<p class="ds-note cm-rang-sonstige">${escapeHtml(deR
+                            ? 'Sonstige: ' + fmtPct((_feldN - _gelistetN) / _feldN * 100) + ' · '
+                              + fmtNumDS(_feldN - _gelistetN) + ' Listen ohne eigene Zeile (Limitless führt sie als „Other“).'
+                            : 'Others: ' + fmtPct((_feldN - _gelistetN) / _feldN * 100) + ' · '
+                              + fmtNumDS(_feldN - _gelistetN) + ' lists without a row of their own (filed as "Other" by Limitless).')}</p>`
+                        : '';
+
                     overallTop8Html = `
                         <div class="ds-panel cm-rangliste-block">
                             <!-- UI-23 (27.09.2026, Hausi): die zweite Ueberschrift
@@ -2656,6 +2678,7 @@
                                         data-weniger-text="${escapeHtml(deR ? 'Nur die Top ' + SICHTBAR + ' zeigen' : 'Show only the top ' + SICHTBAR)}">${
                                         escapeHtml(deR ? 'Alle ' + reihen.length + ' Decks zeigen' : 'Show all ' + reihen.length + ' decks')}</button>
                             </div>` : ''}
+                            ${sonstigeHtml}
                             ${offenHtml}
                         </div>`;
                 }

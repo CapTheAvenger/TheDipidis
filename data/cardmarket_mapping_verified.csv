@@ -1381,7 +1381,7 @@ CRI,21,,fingerprint_ambiguous,fingerprint_ambiguous(0 in band),886413,,2026-08-0
 CRI,22,886414,verified,"limitless-fingerprint 1.27EUR~1.28EUR (ratio 1.01, pool 4)",886414,yes,2026-08-01T16:21:10+00:00,https://limitlesstcg.com/cards/CRI/22
 CRI,29,886421,verified,"limitless-fingerprint 0.05EUR~0.05EUR (ratio 1.00, pool 2) [metric trend, agreeing: trend+avg]",886421,yes,2026-09-30T07:25:42+00:00,https://limitlesstcg.com/cards/CRI/29
 CRI,3,886395,verified,"limitless-fingerprint 0.7EUR~0.69EUR (ratio 1.01, pool 2)",886395,yes,2026-08-01T19:09:14+00:00,https://limitlesstcg.com/cards/CRI/3
-CRI,31,886424,verified,"limitless-fingerprint 0.03EUR~0.03EUR (ratio 1.00, pool 4) [metric avg30, agreeing: avg30]",886426,no,2026-10-07T04:39:22+00:00,https://limitlesstcg.com/cards/CRI/31
+CRI,31,,kollision,"limitless-fingerprint 0.03EUR~0.03EUR (ratio 1.00, pool 4) [metric avg30, agreeing: avg30] — Nummer 886424 ist per Hand an CRI-32 gepinnt (DA-52, 07.10.2026)",886426,no,2026-10-07T04:39:22+00:00,https://limitlesstcg.com/cards/CRI/31
 CRI,32,,no_price_on_page,,886424,,2026-08-09T10:51:47+00:00,https://limitlesstcg.com/cards/CRI/31
 CRI,33,,no_price_on_page,,886425,,2026-10-07T04:39:22+00:00,https://limitlesstcg.com/cards/CRI/31
 CRI,34,,no_price_on_page,,886424,,2026-10-07T04:39:22+00:00,https://limitlesstcg.com/cards/CRI/31

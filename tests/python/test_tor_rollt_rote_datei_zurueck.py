@@ -169,3 +169,43 @@ def test_testname_mit_leerzeichen_wird_erkannt(tmp_path):
     rc, aus = _tor(b)
     assert rc == 0, aus
     assert json.loads(_lies(b, "pokedex.json")) == ["a", "b", "c"]
+
+
+def test_da53_datenstand_der_zurueckgerollten_datei_bleibt_alt(tmp_path):
+    """DA-53 (07.10.2026): data_stand.json wird vor dem Tor gestempelt; die
+    zurueckgerollte Datei darf danach nicht den Zeitpunkt dieses Laufs tragen."""
+    b = _baum(tmp_path)
+    alt = {"erzeugt_am": "gestern", "dateien": {"pokedex.json": "2026-10-06T00:00:00+00:00",
+                                                 "preise.json": "2026-10-06T00:00:00+00:00"},
+           "inhalt_bis": {}, "leer": [], "ohne_stand": [], "inhaltsspalte_unlesbar": []}
+    (b / "data" / "data_stand.json").write_text(json.dumps(alt))
+    git(b, "add", "-A")
+    git(b, "commit", "-qm", "stand")
+    (b / "data" / "pokedex.json").write_text(json.dumps(["a"]))        # rot
+    (b / "data" / "preise.json").write_text(json.dumps({"x": 2.5}))    # gut
+    neu = json.loads(json.dumps(alt))
+    neu["dateien"] = {"pokedex.json": "2026-10-07T04:00:00+00:00", "preise.json": "2026-10-07T04:00:00+00:00"}
+    (b / "data" / "data_stand.json").write_text(json.dumps(neu))
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    stand = json.loads(_lies(b, "data_stand.json"))["dateien"]
+    assert stand["pokedex.json"] == "2026-10-06T00:00:00+00:00", "zurueckgerollte Datei behaelt den neuen Stempel"
+    assert stand["preise.json"] == "2026-10-07T04:00:00+00:00", "die gute Datei verliert ihren Stempel"
+
+
+def test_wz35_bei_zwei_commits_traegt_keiner_die_rote_datei(tmp_path):
+    """WZ-35 (07.10.2026): stehen zwei Commits vor main, stand die Ruecknahme
+    nur im obersten. Jetzt traegt kein Commit vor main die rote Datei."""
+    b = _baum(tmp_path)
+    git(b, "update-ref", "refs/remotes/origin/main", "HEAD")
+    (b / "data" / "pokedex.json").write_text(json.dumps(["a"]))
+    git(b, "commit", "-qam", "Auto: Lauf 1")
+    (b / "data" / "preise.json").write_text(json.dumps({"x": 2.5}))
+    git(b, "commit", "-qam", "Auto: Lauf 2")
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    for sha in git(b, "rev-list", "origin/main..HEAD").split():
+        geaendert = git(b, "show", "--name-only", "--format=", sha).split()
+        assert "data/pokedex.json" not in geaendert, (sha, geaendert)
+    botschaft = git(b, "log", "-1", "--format=%B")
+    assert "Lauf 1" in botschaft and "Lauf 2" in botschaft

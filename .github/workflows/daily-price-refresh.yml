@@ -51,7 +51,7 @@ concurrency:
 
 jobs:
   refresh:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # +15 min fuer das Tor vor dem Push (Kern-Suiten ~6,5 min im Deploy-Test, 29.09.2026)
     timeout-minutes: 45
 

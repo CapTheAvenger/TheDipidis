@@ -404,10 +404,32 @@ def apply_live_verification(mappings: list, data_dir: str):
         logger.warning("could not read %s (%s) — heuristic mapping unchanged", path, e)
         return 0, 0
 
+    # DA-52 (07.10.2026): eine bestaetigte Nummer, die per Hand an eine
+    # ANDERE Karte gepinnt ist, wird nicht uebernommen — sonst tragen zwei
+    # Karten dieselbe Nummer (CRI 31/32, Daily Price #144). Gemeldet, nicht
+    # geraten: die Zeile behaelt ihre bisherige Zuordnung.
+    pin_besitzer = {}
+    pin_pfad = os.path.join(data_dir, 'cardmarket_mapping_manual.csv')
+    if os.path.isfile(pin_pfad):
+        try:
+            with open(pin_pfad, encoding='utf-8-sig', newline='') as f:
+                for r in csv.DictReader(f):
+                    raw = (r.get('cardmarket_product_id') or '').strip()
+                    if raw.isdigit():
+                        pin_besitzer[int(raw)] = ((r.get('set') or '').strip().upper(),
+                                                  (r.get('number') or '').strip())
+        except Exception as e:  # noqa: BLE001
+            logger.warning("could not read %s (%s)", pin_pfad, e)
+
     corrected = confirmed = 0
     for row in mappings:
         pid = verified.get((row['set'], row['number']))
         if pid is None:
+            continue
+        besitzer = pin_besitzer.get(pid)
+        if besitzer and besitzer != (row['set'].upper(), row['number']):
+            logger.warning("::warning::verified %s %s -> %s skipped: product id is pinned "
+                           "to %s %s", row['set'], row['number'], pid, *besitzer)
             continue
         if int(row['cardmarket_product_id']) == pid:
             confirmed += 1

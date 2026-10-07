@@ -51,7 +51,7 @@ concurrency:
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # 30 min: the replica scrape is ~25 s + ~40 pokepaste fetches, but the
     # in-game usage scrape adds ~1000 throttled sequential requests
     # (championsbattledata, ~234 Pokémon × api+2 CSVs) which takes ~8–10 min

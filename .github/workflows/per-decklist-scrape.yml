@@ -83,7 +83,7 @@ concurrency:
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # 6 hours — accommodates a worst-case full TEF-POR + TEF-CRI backfill
     # (~12 tournaments × ~10 min each in degraded-network conditions). The
     # default --from-date 2026-04-01 caps the work to ~12 tournaments;

@@ -61,6 +61,36 @@ mkdir -p backend/core/data
 cp -al data/*.csv data/*.json backend/core/data/ 2>/dev/null \
     || cp -f data/*.csv data/*.json backend/core/data/ 2>/dev/null || true
 
+# SCHRUMPF-WAECHTER (WZ-38, Hausi 07.10.2026) — scripts/schrumpf_waechter.py.
+# Unter 0,75 des gestrigen Umfangs: Warnung. Unter 0,5: die Datei bleibt auf
+# dem Stand von gestern, der Rest geht durch. Vor den Suiten, damit sie den
+# Stand pruefen, der gepusht wird. TOR_OHNE_SCHRUMPF=1 schaltet das ab.
+schrumpf=""
+if [ "${TOR_OHNE_SCHRUMPF:-0}" != "1" ] && [ -f scripts/schrumpf_waechter.py ]; then
+    schrumpf="$(python3 scripts/schrumpf_waechter.py pruefen)"
+    if [ -n "$schrumpf" ]; then
+        echo "$schrumpf"
+        {
+            echo ""
+            echo "### Schrumpf-Waechter"
+            echo ""
+            echo "$schrumpf" | sed 's/^/- /'
+            echo ""
+            echo "STOPP-Dateien bleiben auf dem Stand von gestern (unter 0,5 des alten Umfangs)."
+        } >> "$zusammenfassung"
+        echo "$schrumpf" | grep -E '^(WARNUNG|STOPP):' | sed 's/^/::warning::Schrumpf-Waechter /'
+        # Steht der Commit schon, die zurueckgesetzten Dateien in ihn aufnehmen.
+        stopp_dateien="$(echo "$schrumpf" | sed -n 's/^STOPP: \([^ ]*\) .*/\1/p')"
+        if [ -n "$stopp_dateien" ] && git rev-parse -q --verify origin/main >/dev/null \
+           && [ -n "$(git rev-list origin/main..HEAD)" ]; then
+            # shellcheck disable=SC2086
+            git add -- $stopp_dateien
+            [ -f data/data_stand.json ] && git add -- data/data_stand.json
+            git commit -q --amend --no-edit || true
+        fi
+    fi
+fi
+
 rot=0
 laeufe=("js-kern|bash scripts/run-js-unit-tests.sh tests/unit"
         "py-kern|python3 -m pytest tests/python -q")
@@ -129,7 +159,17 @@ if [ -n "$rollback" ]; then
     # Steht der Commit schon (Lauf nach dem Rebase), die Rueckrollung in ihn aufnehmen.
     if git rev-parse -q --verify origin/main >/dev/null && [ -n "$(git rev-list origin/main..HEAD)" ]; then
         # shellcheck disable=SC2086
-        git add -A -- $rollback && git commit -q --amend --no-edit || true
+        git add -A -- $rollback || true
+        [ -f data/data_stand.json ] && git add -- data/data_stand.json
+        # WZ-35 (07.10.2026): liegen mehrere Commits vor main, stand die
+        # Ruecknahme nur im obersten — die Historie trug die rote Datei
+        # weiter. Dann alle Commits zu einem zusammenfassen (Botschaften bleiben).
+        if [ "$(git rev-list --count origin/main..HEAD)" -gt 1 ]; then
+            botschaft="$(git log --reverse --format='%B' origin/main..HEAD)"
+            git reset -q --soft origin/main && git commit -q -m "$botschaft" || true
+        else
+            git commit -q --amend --no-edit || true
+        fi
     fi
 fi
 

@@ -94,11 +94,11 @@ describe('N4 — die sechs Kacheln auf der Kachelseite', () => {
         }
     });
 
-    it('der Rueckweg zur Kachelseite schreibt die Adresse ebenfalls fort', () => {
+    it('der Rueckweg (seit V2-15 zur Startseite) schreibt die Adresse ebenfalls fort', () => {
         // Sonst stuende nach "← Uebersicht" die Adresse der Unteransicht
         // ueber der Kachelseite — dieselbe Luege, nur umgekehrt.
         assert.match(ohneKommentare(funktion(HUB, 'exitToHub')),
-            /wechsleReiter\('meta-analysis-hub'\)/);
+            /wechsleReiter\('current-meta'\)/);
     });
 });
 

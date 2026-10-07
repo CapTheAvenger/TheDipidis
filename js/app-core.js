@@ -1713,6 +1713,9 @@ const BASE_PATH = './data/';
 
         // Tab switching
         function switchTab(tabName) {
+            /* V2-15 (07.10.2026): die Kachelseite gibt es nicht mehr — wer sie
+               noch ruft (alter Link, exitToHub), landet auf der Startseite. */
+            if (tabName === 'meta-analysis-hub') tabName = 'current-meta';
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => tab.classList.remove('active'));
 

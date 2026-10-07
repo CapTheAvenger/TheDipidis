@@ -52,7 +52,8 @@ describe('Startseite — die Meta-Ansicht empfaengt', () => {
         const klassen = cm[1].trim().split(/\s+/);
         assert.ok(klassen.includes('tab-content'), 'tab-content fehlt: ' + cm[1]);
         assert.ok(klassen.includes('active'), 'active fehlt: ' + cm[1]);
-        assert.match(HTML, /<div id="meta-analysis-hub" class="tab-content(?: fs-scale)?">/);
+        // V2-15 (07.10.2026): die Kachelseite gibt es nicht mehr.
+        assert.doesNotMatch(HTML, /<div id="meta-analysis-hub"/);
     });
 
     it('genau ein Reiter ist beim Laden aktiv', () => {
@@ -60,27 +61,14 @@ describe('Startseite — die Meta-Ansicht empfaengt', () => {
         assert.strictEqual(n, 1);
     });
 
-    it('der Hub-Reiter existiert weiter — und bleibt erreichbar', () => {
-        // Die Zusage vom 18.08.2026 lautete: nichts loeschen, der Hub bleibt
-        // ueber das Pokeball-Menue erreichbar.
-        //
-        // Am 26.08.2026 hat der Nutzer den Menuepunkt umgewidmet: "Uebersicht"
-        // heisst jetzt "Startseite" und fuehrt dorthin, wo die Anwendung auch
-        // startet — weil zwei verschiedene Antworten auf "wo ist Zuhause"
-        // verwirren. Damit faellt der Menueweg zum Hub weg.
-        //
-        // Die Zusage bleibt trotzdem eingeloest: der Reiter existiert und ist
-        // per Deep-Link erreichbar (#hub / #uebersicht / #overview). Gepruefst
-        // wird deshalb die ERREICHBARKEIT, nicht mehr der eine Weg dorthin —
-        // sonst haette dieser Test die Entscheidung des Nutzers blockiert,
-        // statt ihre Folge zu sichern.
-        assert.match(HTML, /id="meta-analysis-hub"/);
-        const wege = [
-            /data-tab-id="meta-analysis-hub"/.test(HTML),               // Menue
-            /'hub':\s*'meta-analysis-hub'/.test(INLINE),                // Deep-Link
-        ];
-        assert.ok(wege.some(Boolean),
-            'der Hub-Reiter ist ueber keinen Weg mehr erreichbar — dann ist er geloescht, nur unsichtbar');
+    it('V2-15: die Kachelseite ist weg, ihre Kurzformen fuehren auf die Startseite', () => {
+        // Hausi, 07.10.2026: "brauchen wir den Bereich so ueberhaupt noch?
+        // ist es nicht einfacher … immer ueber das Startseiten Layout zu gehen?"
+        assert.doesNotMatch(HTML, /id="meta-analysis-hub"/);
+        assert.doesNotMatch(HTML, /data-tab-id="meta-analysis-hub"/);
+        ['hub', 'uebersicht', 'overview', 'meta-analysis-hub'].forEach(k => {
+            assert.match(INLINE, new RegExp("'" + k + "':\\s*'current-meta'"), '#' + k);
+        });
     });
 });
 
@@ -177,7 +165,8 @@ describe('Startseite — der Antwortblock steht im Hub, nicht darueber', () => {
      * wo die Frage "was ist gerade stark" wirklich gestellt wird. */
     it('der zweite Host ist weg, der Block ist es nicht', () => {
         assert.ok(!/id="metaAnswerTop"/.test(HTML), 'der zweite Host ist zurueck');
-        assert.match(HTML, /id="metaHubAnswer"/, 'der Block hat gar keinen Host mehr');
+        // V2-15 (07.10.2026): auch der Host im Hub ist mit der Kachelseite gegangen.
+        assert.doesNotMatch(HTML, /id="metaHubAnswer"/);
         const parken = read('docs/geparkte-features.md');
         assert.match(parken, /Was gerade läuft/);
     });

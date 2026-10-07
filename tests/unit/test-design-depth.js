@@ -136,11 +136,9 @@ describe('die Vergleichsdatei wird gelesen, wie sie geschrieben ist', () => {
 });
 
 describe('Ebene 1 auf der Einstiegsseite', () => {
-    it('der Host steht im HTML, vor den Kacheln', () => {
-        const answer = HTML.indexOf('id="metaHubAnswer"');
-        const tiles = HTML.indexOf('id="metaHubTileGrid"');
-        assert.ok(answer > -1, 'kein Host für die Antwort');
-        assert.ok(answer < tiles, 'die Antwort muss über den Kacheln stehen');
+    it('V2-15: die Kachelseite samt Antwort-Host ist weg', () => {
+        assert.equal(HTML.indexOf('id="metaHubAnswer"'), -1);
+        assert.equal(HTML.indexOf('id="metaHubTileGrid"'), -1);
     });
 
     it('rechnet über denselben Weg wie Current Meta', () => {

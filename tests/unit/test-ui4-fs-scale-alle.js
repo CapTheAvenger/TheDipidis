@@ -22,7 +22,7 @@ const MOBILE = fs.readFileSync(path.join(ROOT, 'css', 'mobile-responsive.css'), 
 describe('UI-4: Schriftskala in jeder Ansicht', () => {
     it('jede Ansicht traegt fs-scale', () => {
         const ansichten = [...INDEX.matchAll(/<div id="([a-z0-9-]+)" class="tab-content([^"]*)"/g)];
-        assert.equal(ansichten.length, 16, `erwartet 16 Ansichten, gefunden ${ansichten.length}`);
+        assert.equal(ansichten.length, 15, `erwartet 15 Ansichten (V2-15: Kachelseite weg), gefunden ${ansichten.length}`);
         const ohne = ansichten.filter(m => !/\bfs-scale\b/.test(m[2])).map(m => m[1]);
         assert.deepEqual(ohne, [], 'ohne Skala greift dort weiter der 12-px-Boden');
     });

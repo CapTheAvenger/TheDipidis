@@ -1,10 +1,70 @@
 {
  "_meta": {
   "title": "Victory Road — Replika-Sammlung",
-  "erzeugt_am": "2026-10-02",
+  "erzeugt_am": "2026-10-07",
   "quelle": "https://victoryroad.pro/champions-replica/",
-  "eintraege_mit_code": 84,
+  "eintraege_mit_code": 56,
   "team_count": 84,
+  "davon_auf_der_seite": 4,
+  "behalten_vom_bestand": 80,
+  "entfallen_nach_frist": 0,
+  "behalten_tage": 28,
+  "ohne_paste": 52,
+  "ohne_paste_codes": [
+   "9NNN3N8A4G",
+   "VE6L0UD1B2",
+   "TB0C85121Q",
+   "1PAN6UVF5B",
+   "5R8L6GD1TA",
+   "E4RSMQ5WGV",
+   "0RSMBR6WR8",
+   "NY9XG3PEHS",
+   "NXKJR60G45",
+   "DHLDFMXF8J",
+   "2X8YA35UHA",
+   "ETG9RJHL14",
+   "P7HUFL6SXM",
+   "S0W7F1F1HU",
+   "XSG89M6E4P",
+   "4JPCDSBRGH",
+   "EX9XBFDRDH",
+   "FMNPN7T0NJ",
+   "H8VRBRFXEC",
+   "X9L10UL8JM",
+   "U9LAHRDYTD",
+   "GBPUBW7UK9",
+   "MHD8VN8CXC",
+   "4EYRS19FTW",
+   "JTJQ3LCV5K",
+   "QMNWBAYCNN",
+   "G45B9S5R7H",
+   "8FV8TBKFQ6",
+   "WNU8A38RYN",
+   "BJ0R6F4VNF",
+   "MDXTLWPYQ4",
+   "5LJJ2GCBK3",
+   "UD523JVASY",
+   "B3P0DSYH06",
+   "U163UFVG9H",
+   "37T7MMB5RM",
+   "L3UMR0SKTD",
+   "02USVFLBYL",
+   "BRYQ42F0EG",
+   "EFC1AHAE60",
+   "F53ERXUPKQ",
+   "G4VTTVVB1H",
+   "VK5EYBN16M",
+   "3VTL67241W",
+   "VQQY2CHPB6",
+   "D2NNESJY2W",
+   "952A1FPCQL",
+   "88SS6FLWBS",
+   "1VG00P17DE",
+   "WDSKVB25L5",
+   "08DGXVMXNN",
+   "FH4H7J3X0Y"
+  ],
+  "ohne_paste_stand": "2026-10-07",
   "hat_ev": false,
   "hinweis": "Die verlinkten Listen sind Open Team Lists und fuehren keine EVs und IVs."
  },
@@ -237,7 +297,8 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-07"
   },
   {
    "rank": 2,
@@ -468,7 +529,8 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-07"
   },
   {
    "rank": 3,
@@ -698,7 +760,8 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-07"
   },
   {
    "rank": 4,
@@ -929,7 +992,8 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-07"
   },
   {
    "rank": 5,
@@ -1160,7 +1224,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 6,
@@ -1392,7 +1458,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 7,
@@ -1623,7 +1691,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 8,
@@ -1855,7 +1925,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 9,
@@ -2085,7 +2157,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 10,
@@ -2315,7 +2389,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 11,
@@ -2546,7 +2622,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 12,
@@ -2777,7 +2855,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 13,
@@ -3008,7 +3088,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 14,
@@ -3239,7 +3321,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 15,
@@ -3470,7 +3554,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 16,
@@ -3701,7 +3787,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 17,
@@ -3932,7 +4020,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 18,
@@ -4164,7 +4254,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 19,
@@ -4394,7 +4486,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 20,
@@ -4623,7 +4717,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 21,
@@ -4853,7 +4949,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 22,
@@ -5084,7 +5182,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 23,
@@ -5316,7 +5416,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 24,
@@ -5546,7 +5648,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 25,
@@ -5777,7 +5881,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 26,
@@ -6008,7 +6114,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 27,
@@ -6238,7 +6346,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 28,
@@ -6469,7 +6579,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 29,
@@ -6700,7 +6812,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 30,
@@ -6932,7 +7046,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 31,
@@ -7163,7 +7279,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 32,
@@ -7395,7 +7513,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 33,
@@ -7626,7 +7746,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 34,
@@ -7858,7 +7980,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 35,
@@ -8089,7 +8213,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 36,
@@ -8320,7 +8446,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 37,
@@ -8552,7 +8680,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 38,
@@ -8783,7 +8913,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 39,
@@ -9014,7 +9146,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 40,
@@ -9246,7 +9380,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 41,
@@ -9477,7 +9613,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 42,
@@ -9708,7 +9846,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 43,
@@ -9939,7 +10079,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 44,
@@ -10170,7 +10312,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 45,
@@ -10399,7 +10543,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 46,
@@ -10630,7 +10776,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 47,
@@ -10860,7 +11008,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 48,
@@ -11091,7 +11241,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 49,
@@ -11321,7 +11473,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 50,
@@ -11552,7 +11706,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 51,
@@ -11783,7 +11939,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 52,
@@ -12015,7 +12173,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 53,
@@ -12246,7 +12406,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 54,
@@ -12477,7 +12639,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 55,
@@ -12708,7 +12872,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 56,
@@ -12938,7 +13104,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 57,
@@ -13169,7 +13337,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 58,
@@ -13393,7 +13563,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 59,
@@ -13624,7 +13796,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 60,
@@ -13855,7 +14029,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 61,
@@ -14086,7 +14262,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 62,
@@ -14318,7 +14496,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 63,
@@ -14549,7 +14729,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 64,
@@ -14780,7 +14962,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 65,
@@ -15012,7 +15196,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 66,
@@ -15244,7 +15430,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 67,
@@ -15476,7 +15664,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 68,
@@ -15708,7 +15898,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 69,
@@ -15940,7 +16132,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 70,
@@ -16170,7 +16364,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 71,
@@ -16401,7 +16597,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 72,
@@ -16633,7 +16831,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 73,
@@ -16864,7 +17064,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 74,
@@ -17095,7 +17297,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 75,
@@ -17327,7 +17531,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 76,
@@ -17557,7 +17763,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 77,
@@ -17787,7 +17995,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 78,
@@ -18018,7 +18228,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 79,
@@ -18250,7 +18462,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 80,
@@ -18481,7 +18695,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 81,
@@ -18711,7 +18927,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 82,
@@ -18941,7 +19159,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 83,
@@ -19173,7 +19393,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   },
   {
    "rank": 84,
@@ -19404,7 +19626,9 @@
     }
    ],
    "hat_ev": false,
-   "quelle": "victory-road-replika"
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-02",
+   "nicht_mehr_auf_quelle": true
   }
  ]
 }

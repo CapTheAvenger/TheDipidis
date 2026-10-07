@@ -1,7 +1,7 @@
 {
  "_meta": {
   "title": "Letztes Major — Teams zum Nachbauen",
-  "erzeugt_am": "2026-10-06",
+  "erzeugt_am": "2026-10-07",
   "quelle": "https://victoryroad.pro/2027-season-calendar/",
   "quelle_pastes": "https://www.vrpastes.com/",
   "tiefe": 32,
@@ -14,7 +14,7 @@
     "format": "M-C OTS",
     "sieger": "Juan Salerno",
     "platzierungen_gesamt": 72,
-    "mit_replica_code": 0,
+    "mit_replica_code": 3,
     "mit_ots": 72,
     "gezogen": 32
    },
@@ -26,7 +26,7 @@
     "format": "M-C OTS",
     "sieger": "Michael Kelsch",
     "platzierungen_gesamt": 53,
-    "mit_replica_code": 0,
+    "mit_replica_code": 3,
     "mit_ots": 53,
     "gezogen": 32
    }
@@ -3124,7 +3124,7 @@
    "trainer": "Pedro Feitosa",
    "trainer_tag": "°v°",
    "preis": "$1,000 280 CP",
-   "replica_code": "",
+   "replica_code": "S8DVVRCDPE",
    "ots_url": "https://vrpastes.com/qFBulHaP",
    "paste_id": "qFBulHaP",
    "team_name": "Pedro H Soares Feitosa's 2027 Recife Regional Championships OTS",
@@ -5256,7 +5256,7 @@
    "trainer": "Yan Fernandes",
    "trainer_tag": "OldAmber",
    "preis": "$750 200 CP",
-   "replica_code": "",
+   "replica_code": "YWPGX07VVL",
    "ots_url": "https://vrpastes.com/Rj0g8sIh",
    "paste_id": "Rj0g8sIh",
    "team_name": "Yan Fernandes's 2027 Recife Regional Championships OTS",
@@ -10938,7 +10938,7 @@
    "trainer": "Tota Nambu",
    "trainer_tag": "X",
    "preis": "–",
-   "replica_code": "",
+   "replica_code": "X34342XC3Q",
    "ots_url": "https://www.vrpastes.com/K5yLI7uE",
    "paste_id": "K5yLI7uE",
    "team_name": "VR",
@@ -12124,7 +12124,7 @@
    "trainer": "Roxanne Joniau",
    "trainer_tag": "Midori",
    "preis": "–",
-   "replica_code": "",
+   "replica_code": "786CTUAM4G",
    "ots_url": "https://www.vrpastes.com/nq0TxqCR",
    "paste_id": "nq0TxqCR",
    "team_name": "Abzol VR",

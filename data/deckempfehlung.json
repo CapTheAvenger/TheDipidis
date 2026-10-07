@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-10-07 16:45:48+00:00",
+ "erzeugt": "2026-10-07 22:08:54+00:00",
  "format": "TEF-30C",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -22,7 +22,7 @@
  "ankerspieler_gesamt": 3865,
  "online_abdeckung": {
   "schnappschuss": "2026-10-07",
-  "anteil_unbekannt": 2.55,
+  "anteil_unbekannt": 2.52,
   "groesste_unbekannte": [
    {
     "deck": "Gengar",
@@ -42,7 +42,7 @@
    },
    {
     "deck": "Mega Zygarde",
-    "anteil": 0.12
+    "anteil": 0.11
    }
   ]
  },

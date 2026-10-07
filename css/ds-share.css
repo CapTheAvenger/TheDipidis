@@ -22,7 +22,8 @@
     display: inline-flex;
     align-items: center;
     gap: var(--s-1);
-    min-height: 30px;
+    /* V2-17 (UI-133): 32 px Zielhöhe am Handy (vorher 30). */
+    min-height: 32px;
     padding: 0 var(--s-3);
     border: 1px solid rgba(255, 255, 255, .28);
     border-radius: var(--r-sm);

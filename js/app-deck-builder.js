@@ -1,6 +1,23 @@
 // app-deck-builder.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
+/* V2-17 (UI-94, F-18 d): Am Handy blendet css/styles.css die Beschriftung der
+   Knoepfe im Kartendetail aus (.sc-action-label), uebrig bleiben ♡ + ★ ◈ L P €.
+   Jeder Knopf bekommt deshalb seine Beschriftung als title und aria-label. */
+window.scAktionenBenennen = function (panel) {
+    if (!panel || !panel.querySelectorAll) return 0;
+    let n = 0;
+    panel.querySelectorAll('.sc-action-btn').forEach(function (b) {
+        const l = b.querySelector('.sc-action-label');
+        const text = l ? String(l.textContent || '').trim() : '';
+        if (!text) return;
+        b.setAttribute('title', text);
+        b.setAttribute('aria-label', text);
+        n++;
+    });
+    return n;
+};
+
 // Bootstrap pending autosave payload from localStorage for optional restore flows.
 (function() {
     try {
@@ -5039,7 +5056,7 @@ if (typeof window.addEventListener === 'function') {
 
                 let btns = '';
                 // Wishlist
-                btns += `<button class="sc-action-btn sc-action-wishlist${isW ? ' active' : ''}" onclick="toggleWishlist('${safeCardId}'); setTimeout(()=>{const p=document.getElementById('singleCardActionsPanel'); if(p){const b=p.querySelector('.sc-action-wishlist'); const w=window.userWishlist&&window.userWishlist.has('${safeCardId}'); b.classList.toggle('active',w); b.querySelector('.sc-action-icon').textContent=w?'♥':'♡'; b.querySelector('.sc-action-label').textContent=w?t('action.wishlistActive'):t('action.wishlist');}},200);">
+                btns += `<button class="sc-action-btn sc-action-wishlist${isW ? ' active' : ''}" onclick="toggleWishlist('${safeCardId}'); setTimeout(()=>{const p=document.getElementById('singleCardActionsPanel'); if(p){const b=p.querySelector('.sc-action-wishlist'); const w=window.userWishlist&&window.userWishlist.has('${safeCardId}'); b.classList.toggle('active',w); b.querySelector('.sc-action-icon').textContent=w?'♥':'♡'; b.querySelector('.sc-action-label').textContent=w?t('action.wishlistActive'):t('action.wishlist'); if(window.scAktionenBenennen)window.scAktionenBenennen(p);}},200);">
                     <span class="sc-action-icon">${isW ? '♥' : '♡'}</span>
                     <span class="sc-action-label">${isW ? t('action.wishlistActive') : t('action.wishlist')}</span>
                 </button>`;
@@ -5083,6 +5100,7 @@ if (typeof window.addEventListener === 'function') {
                 </button>`;
 
                 panel.innerHTML = btns;
+                if (typeof window.scAktionenBenennen === 'function') window.scAktionenBenennen(panel);
                 modalContent.appendChild(panel);
                 // UI-94: in der Kartendatenbank zeigt das Kartendetail, in welchen Decks die Karte steckt.
                 const _alt = overlay.querySelector('.karten-gespielt-in');

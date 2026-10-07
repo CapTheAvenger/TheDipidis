@@ -176,11 +176,13 @@ def test_nichts_eigenes_ist_nichts_gepusht(tmp_path):
 
 
 def test_ein_zu_gebliebenes_tor_nach_dem_rebase_pusht_nichts(tmp_path):
+    # SC-21: das Tor laeuft nur noch, wenn main inzwischen Code oder eine
+    # eigene Datei geaendert hat — hier aendert der andere Lauf ein Skript.
     tmp = str(tmp_path)
     origin = _aufbau(tmp, tor_rc=1)
     a = _klon(tmp, "a", origin)
     b = _klon(tmp, "b", origin)
-    _schreiben(b, "data/b.csv", "kopf\nnacht=neu\nmitte\nlauf=alt\n", "B")
+    _schreiben(b, "scripts/neu.py", "print(1)\n", "B")
     _git(b, "push", "-q", "origin", "main")
     _schreiben(a, "data/a.csv", "x\n2\n", "A")
     rc, pushed, log = _push(a, tmp, tor="kern")
@@ -291,3 +293,55 @@ def test_der_sprites_ablauf_baut_das_manifest_nach_dem_rebase():
     assert "NACH_REBASE_BEFEHL=" in w and "build_champions_sprites.py --pruefen" in w, (
         "champions-sprites.yml baut das Manifest nach dem Rebase nicht neu (Befund 01.10.2026)")
     assert "NACH_REBASE_PFADE='images/champions data/champions_sprites.json'" in w
+
+
+# ── SC-21 (07.10.2026): Tor nach dem Rebase nur bei Überschneidung ─────
+
+def test_fremde_datendatei_ueberspringt_das_tor(tmp_path):
+    """Daily Price #145 / Prize Pack #22: jede Push-Runde liess das ganze
+    Tor neu laufen, bis das Job-Limit riss. Aendert main nur ANDERE
+    Datendateien, wird ohne neues Tor gepusht (das Tor hier ist zu — liefe
+    es, waere nichts gepusht)."""
+    tmp = str(tmp_path)
+    origin = _aufbau(tmp, tor_rc=1)
+    a = _klon(tmp, "a", origin)
+    b = _klon(tmp, "b", origin)
+    _schreiben(b, "data/b.csv", "kopf\nnacht=neu\nmitte\nlauf=alt\n", "B")
+    _git(b, "push", "-q", "origin", "main")
+    _schreiben(a, "data/a.csv", "x\n2\n", "A")
+    rc, pushed, log = _push(a, tmp, tor="kern")
+    assert rc == 0 and pushed == "pushed=true", log
+    assert "Tor übersprungen" in log, log
+    assert _auf_origin(tmp, origin, "data/a.csv") == "x\n2\n"
+    assert "nacht=neu" in _auf_origin(tmp, origin, "data/b.csv")
+
+
+def test_gleiche_datendatei_laesst_das_tor_laufen(tmp_path):
+    """Beruehrt main dieselbe Datei wie dieser Lauf, ist der gemischte
+    Stand ungeprueft — dann laeuft das Tor (hier zu: nichts gepusht)."""
+    tmp = str(tmp_path)
+    origin = _aufbau(tmp, tor_rc=1)
+    a = _klon(tmp, "a", origin)
+    b = _klon(tmp, "b", origin)
+    _schreiben(b, "data/b.csv", "kopf\nnacht=neu\nmitte\nlauf=alt\n", "B")
+    _git(b, "push", "-q", "origin", "main")
+    _schreiben(a, "data/b.csv", "kopf\nnacht=alt\nmitte\nlauf=neu\n", "A")
+    rc, pushed, log = _push(a, tmp, tor="kern")
+    assert rc != 0 and pushed == "pushed=false", log
+    assert "Tor übersprungen" not in log
+
+
+def test_tor_noetig_als_regel():
+    """Die Entscheidung selbst, ausgefuehrt: Code und Ablaeufe immer,
+    eigene Dateien immer, data_stand.json nie, fremde Daten nie."""
+    import re
+    quelle = open(SKRIPT).read()
+    fn = re.search(r"^tor_noetig\(\) \{.*?^\}", quelle, re.S | re.M).group(0)
+    def noetig(eigene, fremd):
+        r = subprocess.run(["bash", "-c", fn + '\ntor_noetig "$1" "$2"', "x", eigene, fremd])
+        return r.returncode == 0
+    assert noetig("data/a.csv", "js/app.js")
+    assert noetig("data/a.csv", ".github/workflows/x.yml")
+    assert noetig("data/a.csv\ndata/b.csv", "data/b.csv")
+    assert not noetig("data/a.csv\ndata/data_stand.json", "data/data_stand.json")
+    assert not noetig("data/a.csv", "data/c.csv\ndata/d.json")

@@ -294,8 +294,34 @@ def load_pools():
     return product_group, pools
 
 
-def besetzt_von(done, pid, eigener_schluessel):
-    """Welche ANDERE Karte traegt diese Produktnummer schon als bestaetigt?"""
+def gepinnte_nummern(pfad=None):
+    """Produktnummer -> (set, number) aus data/cardmarket_mapping_manual.csv.
+
+    DA-52 (07.10.2026, Daily Price #144): der Fingerabdruck gab CRI 31 die
+    886424 (vier Deoxys-Drucke zu je 0,03 EUR), die per Hand an CRI 32
+    gepinnt ist. Der Pruefer kannte nur andere BESTAETIGTE Zeilen, nicht die
+    Pins — der Zuordner setzte dann beide Karten auf dieselbe Nummer."""
+    pfad = pfad or os.path.join(os.path.dirname(OUT), 'cardmarket_mapping_manual.csv')
+    pins = {}
+    if not os.path.isfile(pfad):
+        return pins
+    with open(pfad, encoding='utf-8-sig', newline='') as f:
+        for r in csv.DictReader(f):
+            sc = (r.get('set') or '').strip().upper()
+            num = (r.get('number') or '').strip()
+            raw = (r.get('cardmarket_product_id') or '').strip()
+            if sc and num and raw.isdigit():
+                pins[raw] = (sc, num)
+    return pins
+
+
+def besetzt_von(done, pid, eigener_schluessel, pins=None):
+    """Welche ANDERE Karte traegt diese Produktnummer schon — bestaetigt
+    oder per Hand gepinnt?"""
+    gepinnt = (pins or {}).get(str(pid))
+    if gepinnt and (gepinnt[0], gepinnt[1]) != (str(eigener_schluessel[0]).upper(),
+                                               str(eigener_schluessel[1])):
+        return f"{gepinnt[0]}-{gepinnt[1]} (Pin)"
     for k, v in done.items():
         if k != eigener_schluessel and v.get('status') == 'verified' \
                 and str(v.get('verified_product_id')) == str(pid):
@@ -309,6 +335,7 @@ def limitless_verify(args):
     mapping, cards = load_rows()
     done = load_done()
     product_group, pools = load_pools()
+    pins = gepinnte_nummern()
 
     # Group ambiguous rows by (set, base_name); conflict groups first.
     groups = defaultdict(list)
@@ -391,7 +418,7 @@ def limitless_verify(args):
                     row_out['status'] = evidence.split('(')[0]
                     row_out['evidence'] = evidence
                 else:
-                    schon = besetzt_von(done, str(pid), key)
+                    schon = besetzt_von(done, str(pid), key, pins)
                     if schon:
                         # KOLLISION (27.09.2026, Lauf #16): BLW-59 bekam per
                         # Fingerabdruck (Pool 2, eine Kennzahl) dieselbe

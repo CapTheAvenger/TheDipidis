@@ -108,6 +108,52 @@ def stand_setzen(basis, dateien, sicherung, zuruck):
     nachschlagetabellen()
 
 
+STAND = "data/data_stand.json"
+
+
+def stand_nachziehen(basis, zurueck):
+    """DA-53 (07.10.2026): data_stand.json wird VOR dem Tor gestempelt. Eine
+    zurueckgerollte Datei behielte sonst den Zeitpunkt dieses Laufs, obwohl
+    sie den Stand von gestern traegt. Fuer jede zurueckgerollte Datei gelten
+    wieder die Angaben des Ausgangsstands (oder keine, wenn es dort keine gab)."""
+    if not zurueck or not os.path.exists(STAND):
+        return []
+    alt_roh = subprocess.run(["git", "show", f"{basis}:{STAND}"], capture_output=True, text=True)
+    try:
+        alt = json.loads(alt_roh.stdout) if alt_roh.returncode == 0 else {}
+        neu = json.load(open(STAND, encoding="utf-8"))
+    except ValueError:
+        return []
+    namen = {os.path.basename(f) for f in zurueck}
+    geaendert = []
+    for feld in ("dateien", "inhalt_bis"):
+        a, n = alt.get(feld) or {}, neu.get(feld)
+        if not isinstance(n, dict):
+            continue
+        for name in namen:
+            vorher = n.get(name)
+            if name in a:
+                n[name] = a[name]
+            else:
+                n.pop(name, None)
+            if n.get(name) != vorher:
+                geaendert.append(f"{feld}/{name}")
+    for feld in ("leer", "ohne_stand", "inhaltsspalte_unlesbar"):
+        a, n = alt.get(feld) or [], neu.get(feld)
+        if not isinstance(n, list):
+            continue
+        rest = [x for x in n if not any(name in str(x) for name in namen)]
+        rest += [x for x in a if any(name in str(x) for name in namen)]
+        if rest != n:
+            neu[feld] = rest
+            geaendert.append(feld)
+    if geaendert:
+        with open(STAND, "w", encoding="utf-8") as fh:
+            json.dump(neu, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
+    return geaendert
+
+
 def gruen(py, js):
     if py:
         r = sh(sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", *py)
@@ -162,6 +208,12 @@ def suchen(ordner, sicherung):
               "(unstabiler Test?). Nichts zurueckgerollt, aber gemeldet.")
         print("ZURUECK: ")
         return 3
+    if os.path.exists(STAND):
+        shutil.copyfile(STAND, os.path.join(sicherung, "data_stand.vorher.json"))
+    nachgezogen = stand_nachziehen(basis, zurueck)
+    if nachgezogen:
+        print("data_stand.json fuer die zurueckgerollten Dateien auf den Ausgangsstand gesetzt: "
+              + ", ".join(nachgezogen))
     print("ZURUECK: " + " ".join(zurueck))
     return 0
 
@@ -169,6 +221,9 @@ def suchen(ordner, sicherung):
 def zurueck(sicherung):
     m = json.load(open(os.path.join(sicherung, "manifest.json")))
     stand_setzen(m["basis"], m["kandidaten"], sicherung, False)
+    vorher = os.path.join(sicherung, "data_stand.vorher.json")
+    if os.path.exists(vorher):
+        shutil.copyfile(vorher, STAND)  # DA-53: auch den Datenstand wie der Lauf ihn baute
     print("Alle Dateien wieder auf dem Stand des Laufs.")
     return 0
 

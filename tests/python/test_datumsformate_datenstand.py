@@ -107,28 +107,29 @@ def test_die_city_league_dateien_haben_jetzt_ein_inhaltsdatum():
         assert B._als_iso_tag(wert) == wert, f"{datei}: {wert!r} ist kein ISO-Tag"
 
 
-def test_eine_unlesbare_spalte_wird_gemeldet_nicht_verschwiegen():
+def test_eine_unlesbare_spalte_wird_gemeldet_nicht_verschwiegen(tmp_path, monkeypatch):
     """Der Melder muss auf einer erfundenen kaputten Spalte anschlagen —
-    sonst waere sein leeres Ergebnis heute nichts wert."""
-    import csv
-    import tempfile
+    sonst waere sein leeres Ergebnis heute nichts wert.
 
-    verzeichnis = os.path.join(WURZEL, "data")
+    WZ-36 (07.10.2026): die Probedatei lag frueher in data/ des echten
+    Baums. Konnte sie nicht geloescht werden (Arbeitsplatz ohne Loeschrecht),
+    blieb sie liegen — und das Tor-Zurueckrollen haette sie als neue
+    Datendatei gesehen. Jetzt in einem Wegwerf-Baum."""
+    import csv
+
+    (tmp_path / "data").mkdir()
+    monkeypatch.setattr(B, "WURZEL", str(tmp_path))
     name = "_pruefung_unlesbare_spalte.csv"
-    pfad = os.path.join(verzeichnis, name)
-    try:
-        with open(pfad, "w", newline="", encoding="utf-8") as fh:
-            schreiber = csv.writer(fh, delimiter=";")
-            schreiber.writerow(["archetype", "date"])
-            schreiber.writerow(["Testdeck", "irgendwann"])
-            schreiber.writerow(["Testdeck", "auch nicht"])
-        treffer = B.unlesbare_inhaltsspalten({name: "date"})
-        assert treffer, "eine Spalte mit ausschliesslich unlesbaren Werten wird nicht gemeldet"
-        assert treffer[0][0] == name
-        assert treffer[0][2] == "irgendwann"
-    finally:
-        if os.path.exists(pfad):
-            os.remove(pfad)
+    with open(tmp_path / "data" / name, "w", newline="", encoding="utf-8") as fh:
+        schreiber = csv.writer(fh, delimiter=";")
+        schreiber.writerow(["archetype", "date"])
+        schreiber.writerow(["Testdeck", "irgendwann"])
+        schreiber.writerow(["Testdeck", "auch nicht"])
+    treffer = B.unlesbare_inhaltsspalten({name: "date"})
+    assert treffer, "eine Spalte mit ausschliesslich unlesbaren Werten wird nicht gemeldet"
+    assert treffer[0][0] == name
+    assert treffer[0][2] == "irgendwann"
+    assert not os.path.exists(os.path.join(WURZEL, "data", name)), "Probedatei im echten data/"
 
 
 def test_eine_fehlende_spalte_ist_kein_ausfall():

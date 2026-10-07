@@ -28,7 +28,8 @@ Ablauf `suchen`:
      dort im neuen Stand, damit `zurueck` alles herstellen kann.
 
 Rueckgabe 0 = Menge gefunden und angewendet (der Aufrufer prueft danach
-noch einmal ALLE Suiten), 2 = nicht heilbar, alles unveraendert.
+noch einmal ALLE Suiten), 2 = nicht heilbar, alles unveraendert,
+3 = beim zweiten Lauf von selbst gruen (unstabiler Test): nichts zurueckgerollt.
 """
 import json
 import os
@@ -65,7 +66,7 @@ def rote_zusicherungen(ordner):
             continue
         text = open(os.path.join(ordner, name), encoding="utf-8", errors="replace").read()
         vorher = (len(py), len(js))
-        py += re.findall(r"^FAILED (\S+?::\S+?)(?: - .*)?$", text, re.M)
+        py += re.findall(r"^FAILED (\S+?::.+?)(?: - .*)?$", text, re.M)
         js += re.findall(r"^✗ (\S+) —", text, re.M)
         if re.search(r"^ERROR ", text, re.M):
             unlesbar.append(name + ": Fehler beim Einsammeln")
@@ -101,6 +102,9 @@ def stand_setzen(basis, dateien, sicherung, zuruck):
             if os.path.exists(src):
                 os.makedirs(os.path.dirname(f), exist_ok=True)
                 shutil.copyfile(src, f)
+            elif os.path.exists(os.path.join(sicherung, "geloescht", f)) and os.path.exists(f):
+                os.remove(f)  # der Lauf hat die Datei geloescht: so wieder herstellen
+    sh("git", "reset", "-q", "--", *dateien) if dateien else None  # nichts Rotes im Index
     nachschlagetabellen()
 
 
@@ -126,10 +130,14 @@ def suchen(ordner, sicherung):
     if not kand or len(kand) > MAX_KANDIDATEN:
         print(f"Kein Datenbefund — {len(kand)} geaenderte Dateien unter data/ (1..{MAX_KANDIDATEN} noetig)")
         return 2
-    for f in kand:  # neuen Stand sichern
+    for f in kand:  # neuen Stand sichern (auch: geloescht)
         if os.path.exists(f):
             os.makedirs(os.path.dirname(os.path.join(sicherung, "neu", f)), exist_ok=True)
             shutil.copyfile(f, os.path.join(sicherung, "neu", f))
+        else:
+            ziel = os.path.join(sicherung, "geloescht", f)
+            os.makedirs(os.path.dirname(ziel), exist_ok=True)
+            open(ziel, "w").close()
     json.dump({"basis": basis, "kandidaten": kand, "zurueck": []},
               open(os.path.join(sicherung, "manifest.json"), "w"))
     stand_setzen(basis, kand, sicherung, True)
@@ -149,6 +157,11 @@ def suchen(ordner, sicherung):
     manifest = {"basis": basis, "kandidaten": kand, "zurueck": zurueck,
                 "rot": py + js}
     json.dump(manifest, open(os.path.join(sicherung, "manifest.json"), "w"), indent=1)
+    if not zurueck:
+        print("Kein Datenbefund — die Zusicherungen wurden beim zweiten Lauf von selbst gruen "
+              "(unstabiler Test?). Nichts zurueckgerollt, aber gemeldet.")
+        print("ZURUECK: ")
+        return 3
     print("ZURUECK: " + " ".join(zurueck))
     return 0
 

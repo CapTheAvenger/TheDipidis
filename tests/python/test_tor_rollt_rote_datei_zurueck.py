@@ -135,3 +135,37 @@ def test_nach_dem_commit_wird_der_commit_bereinigt(tmp_path):
     assert git(b, "status", "--porcelain", "data").strip() == "", "Arbeitsbaum nicht sauber"
     diff = git(b, "diff", "--name-only", "origin/main", "HEAD").split()
     assert diff == ["data/preise.json"], diff
+
+
+def test_geloeschte_gute_datei_bleibt_geloescht_die_rote_kommt_zurueck(tmp_path):
+    """Pruefagent 07.10.: eine im Lauf geloeschte Datei darf beim Heilen nicht wieder auftauchen."""
+    b = _baum(tmp_path)
+    (b / "data" / "extra.json").write_text("{}")
+    git(b, "add", "-A"); git(b, "commit", "-qm", "extra")
+    (b / "data" / "extra.json").unlink()
+    (b / "data" / "pokedex.json").write_text(json.dumps(["a"]))
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert not (b / "data" / "extra.json").exists(), "geloeschte unschuldige Datei kam zurueck"
+    assert json.loads(_lies(b, "pokedex.json")) == ["a", "b", "c"]
+
+
+def test_gestagte_rote_datei_bleibt_nicht_im_index(tmp_path):
+    b = _baum(tmp_path)
+    (b / "data" / "pokedex.json").write_text(json.dumps(["a"]))
+    git(b, "add", "data")
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert git(b, "diff", "--cached", "--name-only").strip() == "", "rote Fassung steht noch im Index"
+
+
+def test_testname_mit_leerzeichen_wird_erkannt(tmp_path):
+    b = _baum(tmp_path)
+    (b / "tests" / "python" / "test_param.py").write_text(
+        "import json, pytest\n@pytest.mark.parametrize('n', ['a b'])\n"
+        "def test_p(n):\n    assert len(json.load(open('data/pokedex.json'))) >= 2\n")
+    git(b, "add", "-A"); git(b, "commit", "-qm", "param")
+    (b / "data" / "pokedex.json").write_text(json.dumps(["a"]))
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert json.loads(_lies(b, "pokedex.json")) == ["a", "b", "c"]

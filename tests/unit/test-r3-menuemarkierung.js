@@ -202,12 +202,13 @@ function erwartung() {
 
 describe('R3 — Menuemarkierung je Reiter', () => {
 
-    it('das Markup hat die 16 Reiter, mit denen hier gerechnet wird', () => {
-        assert.equal(REITER.length, 16,
+    it('das Markup hat die 15 Reiter, mit denen hier gerechnet wird', () => {
+        // V2-15 (07.10.2026): 16 -> 15, die Kachelseite ist weg.
+        assert.equal(REITER.length, 15,
             'Die Zahl der Reiter hat sich geaendert (' + REITER.length + '): '
             + REITER.join(', ') + '. Dann muss die Erwartung unten neu '
             + 'gemessen werden, statt still weiterzulaufen.');
-        assert.ok(REITER.indexOf('meta-analysis-hub') >= 0);
+        assert.ok(REITER.indexOf('meta-analysis-hub') < 0);
         assert.ok(REITER.indexOf('admin') >= 0);
     });
 
@@ -258,10 +259,8 @@ describe('R3 — Menuemarkierung je Reiter', () => {
         assert.deepEqual(falsch, []);
     });
 
-    it('die Kachelseite markiert ihren eigenen Punkt, nicht den der Startseite', () => {
+    it('die Startseite markiert ihren eigenen Punkt (V2-15: keine Kachelseite mehr)', () => {
         const s = aufbau();
-        s.wechsle('meta-analysis-hub');
-        assert.deepEqual(s.markiert(), ['menu-btn-meta-analysis-hub']);
         s.wechsle('current-meta');
         assert.deepEqual(s.markiert(), ['menu-btn-current-meta'],
             'Die Startseite hat ihren eigenen Punkt; beide duerfen nicht auf '
@@ -376,15 +375,15 @@ describe('R3 — Tiefenlinks markieren denselben einen Punkt', () => {
         assert.deepEqual(schlecht, []);
     });
 
-    it('#hub, #uebersicht und #overview markieren den Punkt der Kachelseite', () => {
+    it('#hub, #uebersicht und #overview fuehren auf die Startseite und markieren sie (V2-15)', () => {
         const s = aufbau();
         ['hub', 'uebersicht', 'overview', 'meta-analysis-hub'].forEach(alias => {
             const sk = sandkasten();
             sk.gehZu('#' + alias);
             const reiter = sk.protokoll.menue[sk.protokoll.menue.length - 1];
-            assert.equal(reiter, 'meta-analysis-hub', '#' + alias);
+            assert.equal(reiter, 'current-meta', '#' + alias);
             s.wechsle(reiter);
-            assert.deepEqual(s.markiert(), ['menu-btn-meta-analysis-hub'],
+            assert.deepEqual(s.markiert(), ['menu-btn-current-meta'],
                 '#' + alias + ' laesst das Menue unmarkiert.');
         });
     });

@@ -63,7 +63,8 @@ const UNTER = eintraege(tabelle('PROFILE_SUBTAB_FOR_HASH'));
 describe('N2 — die Kachelseite hat drei Kurzformen, alle in derselben Tabelle', () => {
     it('#hub, #uebersicht und #overview stehen in HASH_ALIASES', () => {
         for (const k of ['hub', 'uebersicht', 'overview']) {
-            assert.strictEqual(ALIAS[k], 'meta-analysis-hub',
+            // V2-15 (07.10.2026): die Kachelseite ist weg, alle drei fuehren auf die Startseite.
+            assert.strictEqual(ALIAS[k], 'current-meta',
                 '#' + k + ' loest keinen Reiter auf — applyHash() steigt bei '
                 + '`if (!tabId) return` aus, und die falsche Adresse bleibt stehen');
         }

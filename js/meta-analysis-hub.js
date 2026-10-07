@@ -894,7 +894,9 @@
 
     function exitToHub() {
         clearAllSubNavHosts();
-        wechsleReiter('meta-analysis-hub');
+        /* V2-15 (07.10.2026): die Kachelseite ist weg, der Ruecksprung
+           fuehrt auf die Startseite. */
+        wechsleReiter('current-meta');
         /* BEFUND (07.09.2026, Runde 3): hier stand "The hub now HAS its own
            top-level entry, so highlight it" — und genau die gab es zu dem
            Zeitpunkt NICHT MEHR. Der Punkt, den der Kommentar meinte, war
@@ -914,7 +916,7 @@
            js/inline-init.js geladen ist. Faellt sie aus, geht
            wechsleReiter() auf switchTab() zurueck, und switchTab()
            fasst das Pokeball-Menue nicht an. */
-        setSideMenuActive('meta-analysis-hub');
+        setSideMenuActive('current-meta');
     }
 
     function isSubTab(tabId) {

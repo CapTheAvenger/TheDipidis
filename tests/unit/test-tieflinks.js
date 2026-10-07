@@ -92,7 +92,7 @@ describe('Tieflinks — jedes Ziel existiert wirklich', () => {
     it('die drei nachgetragenen Aliase sind da', () => {
         const t = tabelle('HASH_ALIASES');
         assert.match(t, /'side-quest':\s*'side-quest'/);
-        assert.match(t, /'meta-analysis-hub':\s*'meta-analysis-hub'/);
+        assert.match(t, /'meta-analysis-hub':\s*'current-meta'/);   // V2-15 (07.10.2026)
         assert.match(t, /'champions':\s*'side-quest'/);
     });
 

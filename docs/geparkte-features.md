@@ -362,3 +362,22 @@ schreiben:
 Eine Suite ohne diese zwei Punkte wäre schlechter als die leere Datei:
 sie sähe nach Prüfung aus und wäre wieder nur eine Behauptung.
 
+
+## 07.10.2026 — V2-15: Die Kachelseite „Meta & Deck-Analyse"
+
+Hausi: „brauchen wir den Bereich so überhaupt noch? ist es nicht einfacher
+und übersichtlicher einfach immer über das Startseiten Layout zu gehen?"
+
+Die Seite zeigte den Block „Was gerade läuft" (Online-Anteil aus Limitless,
+dieselbe Quelle wie die Startseite seit DA-33) und sechs Kacheln zu
+Unterseiten, die alle im Menü stehen. Entfernt wurden der Menüpunkt und das
+Markup des Reiters (`#meta-analysis-hub`, `#metaHubAnswer`,
+`#metaHubTileGrid`). `#hub`, `#uebersicht`, `#overview` und
+`#meta-analysis-hub` führen auf die Startseite (`current-meta`), ebenso
+`switchTab('meta-analysis-hub')` und `exitToHub()`.
+
+Geparkt, nicht gelöscht: `js/meta-analysis-hub.js` bleibt geladen. Ohne
+Hosts zeichnet es nichts (`renderAnswer`/`renderTiles` steigen aus), die
+Rechnung (`answerModel`, `anteileAusLimitless`) bleibt aufrufbar und
+getestet. Zurückholen heißt: den Reiter-Block aus dem Stand vor V2-15 in
+`index.html` einsetzen und die vier Aliase zurückstellen.

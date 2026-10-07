@@ -155,8 +155,9 @@ describe('Reitertitel und der letzte englische Knopf', () => {
         const CORE = ohneKomm(lies('js/app-core.js'));
         assert.match(CORE, /const ueberschriftEl = !menuLabelEl/);
         assert.match(CORE, /ueberschriftEl \? ueberschriftEl\.textContent\.trim\(\)/);
-        // Und die Ueberschrift, aus der er sich bedient, gibt es wirklich.
-        assert.match(lies('index.html'), /<div id="meta-analysis-hub"[\s\S]{0,600}?<h2[^>]*><span data-i18n="metaHub\.title"/);
+        // Die Kachelseite selbst ist seit V2-15 (07.10.2026) weg; der
+        // Rueckfall auf die Ueberschrift bleibt fuer Reiter ohne Menuepunkt (admin).
+        assert.match(lies('index.html'), /<div id="admin"[\s\S]{0,600}?<h2/);
     });
 
     it('kein fest verdrahteter englischer Knopftitel mehr im Profil-Deck', () => {

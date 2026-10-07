@@ -48,7 +48,7 @@ function toggleMenuCluster(clusterId) {
 }
 
 const MENU_CLUSTERS = {
-    meta:  ['meta-analysis-hub', 'city-league', 'city-league-analysis',
+    meta:  ['city-league', 'city-league-analysis',
             'current-meta', 'current-analysis', 'past-meta'],
     tools: ['proxy', 'calculator'],
 };
@@ -697,8 +697,8 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         // no longer has an element. switchTab then hid every tab and showed
         // none, so a shared link landed the user on a blank page. Send them
         // to the overview and say where the playtester went.
-        'playtester':            'meta-analysis-hub',
-        'sandbox':               'meta-analysis-hub',
+        'playtester':            'current-meta',
+        'sandbox':               'current-meta',
         'calculator':            'calculator',
         'probability':           'calculator',
         'wahrscheinlichkeit':    'calculator',
@@ -721,9 +721,9 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
         'side-quest':            'side-quest',
         'sidequest':             'side-quest',
         'champions':             'side-quest',
-        'meta-analysis-hub':     'meta-analysis-hub',
-        'hub':                   'meta-analysis-hub',
-        'uebersicht':            'meta-analysis-hub',
+        'meta-analysis-hub':     'current-meta',
+        'hub':                   'current-meta',
+        'uebersicht':            'current-meta',
         /* BEFUND (07.09.2026, live gemessen): #hub und #uebersicht
            oeffneten die Kachelseite, das englische #overview tat gar
            nichts — der vorher offene Reiter blieb stehen (gemessen von
@@ -736,7 +736,7 @@ try { document.documentElement.classList.add('is-signed-out'); } catch (e) {}
            HASH_ALIASES (der Tabelle, die entscheidet), und keine steht
            in PROFILE_SUBTAB_FOR_HASH (die Tabelle fuer Profil-Untertabs
            — 'meta-analysis-hub' ist keiner). */
-        'overview':              'meta-analysis-hub',
+        'overview':              'current-meta',
         // Admin — Datenluecken. Der EINZIGE Weg dorthin: die Seite steht
         // in keinem Menue. Kein Zugangsschutz, und die Seite sagt das
         // auch — sie zeigt nur, was uns fehlt.

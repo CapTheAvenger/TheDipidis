@@ -41,13 +41,18 @@ describe('N2-11: eine Zahl neben dem Namen ist die Kartennummer', () => {
 describe('F-25: Masterclass nennt Pokémon „Englisch (Deutsch)“', () => {
     const SRC = ohneKommentare(lies('js/ds-masterclass.js'));
     const ctx = {};
-    vm.runInNewContext(block(SRC, 'function namenImText(') + ';' + block(SRC, 'function namenMuster(') + ';this.t=namenImText;this.m=namenMuster;', ctx);
+    vm.runInNewContext(block(SRC, 'function namenImText(') + ';' + block(SRC, 'function namenImTextRoh(') + ';' + block(SRC, 'function namenMuster(') + ';this.t=namenImText;this.m=namenMuster;', ctx);
     const deZuEn = { Katapuldra: 'Dragapult', Stalobor: 'Excadrill' };
     it('erstes Vorkommen mit Klammer, danach englisch, Zusammensetzung ohne Klammer', () => {
         const gesehen = new Set();
         const m = ctx.m(deZuEn);
         assert.equal(ctx.t('Katapuldra greift an, Katapuldra fällt.', deZuEn, m, gesehen), 'Dragapult (Katapuldra) greift an, Dragapult fällt.');
         assert.equal(ctx.t('Das Stalobor-Deck und Stalobor.', deZuEn, ctx.m(deZuEn), gesehen), 'Das Excadrill-Deck und Excadrill (Stalobor).');
+    });
+    it('„Katapuldra (Dragapult)“ im Stück wird „Dragapult (Katapuldra)“, später „Dragapult“', () => {
+        const g = new Set();
+        assert.equal(ctx.t('Gegen Katapuldra (Dragapult) hilft das.', deZuEn, ctx.m(deZuEn), g), 'Gegen Dragapult (Katapuldra) hilft das.');
+        assert.equal(ctx.t('Wieder Katapuldra (Dragapult).', deZuEn, ctx.m(deZuEn), g), 'Wieder Dragapult.');
     });
     it('Teilwörter bleiben stehen', () => {
         assert.equal(ctx.t('Katapuldras', deZuEn, ctx.m(deZuEn), new Set()), 'Katapuldras');

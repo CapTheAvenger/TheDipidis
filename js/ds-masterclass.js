@@ -279,9 +279,22 @@
     /** Ersetzt in Texten deutsche Pokémon-Namen; gesehen = Set der schon
      *  genannten Namen (erstes Vorkommen mit Klammer). Rein, getestet. */
     function namenImText(text, deZuEn, muster, gesehen) {
+        return namenImTextRoh(text, deZuEn, muster, gesehen)
+            .replace(/\u0000 \([^()]*\)/g, '').replace(/\u0000/g, '');
+    }
+    function namenImTextRoh(text, deZuEn, muster, gesehen) {
         return text.replace(muster, function (de, stelle, ganz) {
             var en = deZuEn[de];
             if (!en) return de;
+            /* Das Stueck schreibt oft schon „Katapuldra (Dragapult)“ (72-mal,
+               gemessen 07.10.). Dann wird daraus „Dragapult (Katapuldra)“ bzw.
+               spaeter nur „Dragapult“ — und die alte Klammer faellt weg. */
+            var paar = ' (' + en + ')';
+            if (ganz.substr(stelle + de.length, paar.length) === paar) {
+                var erstes = !gesehen.has(de);
+                gesehen.add(de);
+                return (erstes ? en + ' (' + de + ')' : en) + '\u0000';
+            }
             /* In Zusammensetzungen („Stalobor-Deck“) keine Klammer mitten im
                Wort — dort steht nur der englische Name. */
             var weiter = ganz.charAt(stelle + de.length);
@@ -1834,6 +1847,7 @@
         _binderDeckKachelHtml: binderDeckKachelHtml,
         _binderDruckTauschen: binderDruckTauschen,
         _namenImText: namenImText,
+        _namenImTextRoh: namenImTextRoh,
         _namenMuster: namenMuster,
         _namenAngleichen: namenAngleichen
     };

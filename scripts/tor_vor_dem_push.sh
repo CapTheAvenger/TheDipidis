@@ -90,6 +90,49 @@ for lauf in "${laeufe[@]}"; do
     fi
 done
 
+# ROTE DATEI ZURUECKROLLEN (07.10.2026) — scripts/tor_rollback.py.
+# Ist etwas rot, sucht das Tor die Datendatei(en), die es brechen, laesst sie
+# auf dem Stand von gestern und prueft ALLE Suiten noch einmal. Gruen = der
+# Rest wird freigegeben, laut gemeldet. Nicht heilbar = rot wie bisher.
+# TOR_OHNE_ROLLBACK=1 schaltet das ab.
+rollback=""
+if [ "$rot" -ne 0 ] && [ "${TOR_OHNE_ROLLBACK:-0}" != "1" ] && [ -f scripts/tor_rollback.py ]; then
+    sicherung="$protokolle/rollback"
+    rm -rf "$sicherung"; mkdir -p "$sicherung"
+    mkdir -p "$protokolle/erstlauf" && cp "$protokolle"/*.log "$protokolle/erstlauf/" 2>/dev/null
+    if python3 scripts/tor_rollback.py suchen "$protokolle/erstlauf" "$sicherung"; then
+        rot2=0
+        for lauf in "${laeufe[@]}"; do
+            name="${lauf%%|*}"; befehl="${lauf#*|}"
+            bash -c "$befehl" > "$protokolle/$name.log" 2>&1 || rot2=1
+        done
+        if [ "$rot2" -eq 0 ]; then
+            rot=0
+            rollback="$(python3 -c "import json,sys;print(' '.join(json.load(open(sys.argv[1]))['zurueck']))" "$sicherung/manifest.json")"
+        else
+            python3 scripts/tor_rollback.py zurueck "$sicherung"
+            echo "Zurueckrollen heilt nicht alle Suiten — alles wieder wie der Lauf es baute."
+        fi
+    fi
+fi
+if [ -n "$rollback" ]; then
+    {
+        echo ""
+        echo "### ACHTUNG: Datei(en) auf dem Stand von gestern gelassen"
+        echo ""
+        echo "Diese Dateien machen Zusicherungen rot und werden NICHT gepusht (main behaelt die alte Fassung):"
+        for f in $rollback; do echo "- \`$f\`"; done
+        echo ""
+        echo "Ursache beheben, dann zieht der naechste Lauf sie nach. Die Daten sind einen Lauf veraltet."
+    } >> "$zusammenfassung"
+    for f in $rollback; do echo "::warning::Tor: $f bleibt auf dem alten Stand (macht Zusicherungen rot)"; done
+    # Steht der Commit schon (Lauf nach dem Rebase), die Rueckrollung in ihn aufnehmen.
+    if git rev-parse -q --verify origin/main >/dev/null && [ -n "$(git rev-list origin/main..HEAD)" ]; then
+        # shellcheck disable=SC2086
+        git add -A -- $rollback && git commit -q --amend --no-edit || true
+    fi
+fi
+
 if [ "$rot" -ne 0 ]; then
     {
         echo ""
@@ -113,5 +156,5 @@ if [ "$rot" -ne 0 ]; then
     echo "::error::Das Tor ist zu: Zusicherungen rot ($bereich) — nicht gepusht. Siehe Zusammenfassung."
     exit 1
 fi
-echo "Tor offen: alle Suiten gruen ($bereich)."
+echo "Tor offen: alle Suiten gruen ($bereich)${rollback:+ — nach Zurueckrollen von: $rollback}."
 exit 0

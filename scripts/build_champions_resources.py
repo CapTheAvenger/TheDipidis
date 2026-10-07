@@ -249,6 +249,42 @@ def load_verified():
     return out
 
 
+def waehle_de_name(key, cat, en, ov, vf, pa, korrektur, ergaenzung, bisher, konflikte):
+    """Deutscher Name aus den Quellen — ohne Seiteneffekt ausser `konflikte`.
+
+    Reihenfolge: manuelle Korrektur > Mehrheit (>= 2 gleiche Stimmen unter
+    PokeWiki `ov` / geprueft `vf` / PokéAPI `pa`) > bei Widerspruch OHNE
+    Mehrheit der bisherige Name aus der Datei (`bisher[(cat, en)]`) >
+    flagged Rueckfall PokéAPI -> PokeWiki -> geprueft -> Ergaenzung -> EN.
+
+    DER BISHERIGE NAME BLEIBT (07.10.2026, Champions Replica Scrape #147):
+    bei Dragon Scale und Macho Brace widersprachen sich PokeWiki
+    ("Drachenhaut", "Machoband") und PokéAPI ("Drachenschuppe",
+    "Machoschiene") — zwei Quellen, keine Mehrheit. Der Rueckfall nahm
+    PokéAPI, der Bau schrieb zwei geprueft-richtige Namen um, und das Tor
+    sperrte den ganzen Lauf. Eine Quelle, die sich eines Morgens anders
+    aeussert, darf einen bestehenden Namen nicht kippen. Neue Eintraege
+    ohne Vorgaenger nehmen weiter den Rueckfall; der Widerspruch bleibt in
+    `konflikte` und damit in der Ausgabe stehen.
+    """
+    if korrektur.get(key):
+        return korrektur[key]
+    stimmen = [x for x in (ov, vf, pa) if x]
+    if not stimmen:
+        return ergaenzung.get(key) or en
+    from collections import Counter
+    zaehler = Counter(re.sub(r"[^a-zäöüß0-9]", "", str(x or "").lower()) for x in stimmen)
+    oben, n = zaehler.most_common(1)[0]
+    if n >= 2:
+        return next(x for x in stimmen
+                    if re.sub(r"[^a-zäöüß0-9]", "", str(x or "").lower()) == oben)
+    if len(zaehler) > 1:
+        konflikte.append((cat, en, {"PokeWiki": ov, "PokeAPI": pa, "verified": vf}))
+        if bisher.get((cat, en)):
+            return bisher[(cat, en)]
+    return pa or ov or vf or ergaenzung.get(key) or en
+
+
 def main():
     print("Fetching Champions dataset (otterlyclueless/pokemon-champions-data) …")
     champ_items = fetch_json(f"{CHAMP_BASE}/items/items.json")
@@ -318,33 +354,25 @@ def main():
     entries = []
     conflicts = []   # names where the sources disagree (no majority)
 
+    # Bisherige Namen aus der Datei, die dieser Bau gleich ueberschreibt:
+    # ohne Mehrheit unter den Quellen gilt der bisherige (waehle_de_name).
+    bisher = {}
+    try:
+        for e in json.load(open(OUT, encoding="utf-8")).get("entries", []):
+            if e.get("de"):
+                bisher[(e.get("cat"), e.get("en"))] = e["de"]
+    except Exception:  # noqa: BLE001 — Altdatei fehlt oder ist kaputt: kein Vorgaenger
+        bisher = {}
+
     def name_key(s):
         return re.sub(r"[^a-zäöüß0-9]", "", str(s or "").lower())
 
     def pick_de(key, cat, en, v, pk):
-        """Cross-check German name across sources. No single source is
-        fully reliable (PokeWiki lists Weather Ball→'Meteorologe'; the
-        verified file had 'Wellenbrecher' for Wave Crash; PokeAPI has gaps
-        and old names). So: manual correction wins; otherwise a majority
-        vote among PokeWiki / PokeAPI / verified — only a value ≥2 sources
-        agree on is trusted. True conflicts are recorded (not guessed),
-        with a flagged fallback (PokeAPI official → PokeWiki → verified)."""
-        if corr.get(key):
-            return corr[key]
+        """Quellen gegenpruefen — siehe `waehle_de_name` (Mehrheit, sonst der
+        bisherige Name, sonst der markierte Rueckfall)."""
         ov = (ov_move if cat == "move" else ov_item if cat == "item" else {}).get(key)  # PokeWiki
-        vf = (v or {}).get("de_name")    # verified file
-        pa = pk.get("de_name")           # PokeAPI
-        srcs = [s for s in (ov, vf, pa) if s]
-        if not srcs:
-            return supp.get(key) or en
-        from collections import Counter
-        cnt = Counter(name_key(s) for s in srcs)
-        top, n = cnt.most_common(1)[0]
-        if n >= 2:
-            return next(s for s in srcs if name_key(s) == top)
-        if len(cnt) > 1:
-            conflicts.append((cat, en, {"PokeWiki": ov, "PokeAPI": pa, "verified": vf}))
-        return pa or ov or vf or supp.get(key) or en
+        return waehle_de_name(key, cat, en, ov, (v or {}).get("de_name"),
+                              pk.get("de_name"), corr, supp, bisher, conflicts)
 
     def build(cat, en, en_eff, demap, mtype="", stats=None, nachgetragen=False):
         key = norm(en)
@@ -704,8 +732,8 @@ def main():
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
     print(f"Wrote {OUT}\n  {len(entries)} entries  {counts}")
     if conflicts:
-        print(f"\n⚠ {len(conflicts)} name conflicts (no majority — using flagged fallback, "
-              f"confirm via NAME_CORRECTIONS):")
+        print(f"\n⚠ {len(conflicts)} name conflicts (no majority — the name already in the "
+              f"file stays, new entries use the flagged fallback; confirm via NAME_CORRECTIONS):")
         for cat, en, srcs in sorted(conflicts):
             print(f"  [{cat}] {en}: " + " | ".join(f"{k}={v}" for k, v in srcs.items() if v))
 

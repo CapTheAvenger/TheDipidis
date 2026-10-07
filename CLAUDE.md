@@ -147,6 +147,18 @@ Drei Regeln sind daraus geworden:
    Deploy UND das Tor des naechsten Wochenlaufs an. Seit 30.09.2026 gilt
    das auch fuer die sieben Handlaeufe. `tests/python/test_nebenbereiche_getrennt.py`
    haelt jeden neuen Schreiber fest.
+   **Rote Datei zurueckrollen (07.10.2026, `scripts/tor_rollback.py`):**
+   ist das Tor rot, sucht es die geaenderten Dateien unter `data/`, die die
+   roten Zusicherungen brechen (alle zurueck → gruen? dann Datei fuer Datei
+   die unschuldigen wieder frisch), laesst nur diese auf dem Stand von
+   gestern und prueft ALLE Suiten noch einmal. Gruen: der Rest wird gepusht,
+   die Zusammenfassung und `::warning::` nennen die Dateien. Nicht heilbar
+   (Code-Fehler, Absturz beim Einsammeln, auch mit allen Dateien rot):
+   zu wie bisher. `TOR_OHNE_ROLLBACK=1` schaltet ab. Grund: fuenf von sieben
+   roten Planlaeufen seit 25.09. waren eine datenabhaengige Zusicherung.
+   Die rollende Datei ist einen Lauf veraltet — die Ursache trotzdem
+   beheben, sonst bleibt sie es. Gehalten von
+   `tests/python/test_tor_rollt_rote_datei_zurueck.py`.
 2. **Champions-, Pocket- und Side-Quest-Tests liegen unter
    `tests/nebenbereiche/{unit,python}`** (Entscheidung Hausi, 29.09.2026)
    und laufen in `nebenbereiche-tests.yml`, nicht im Tor und nicht im

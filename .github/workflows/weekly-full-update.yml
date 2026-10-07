@@ -55,7 +55,7 @@ concurrency:
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Headroom: base scrapers ~30-60 min + matchup pass ~80 min for overall
     # filter alone (3250+ HTTP requests at 1.5s delay). Day-1 + Day-2
     # additional filters scale linearly. 300 min keeps a safety margin

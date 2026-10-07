@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   index:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # 271 sub-sitemaps at ~0.6s pace is ~3 min of waiting, but the files
     # are large and the first run hit the 30-min wall — give it room.
     # 30.09.2026: gemessen #2 50 min, #3 22 min, #4 nach 60 min abgebrochen

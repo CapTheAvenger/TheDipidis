@@ -36,7 +36,7 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # 760 pages at 1 s pace is ~13 min; leave room for retries and for a
     # later run that also covers the cards without a base URL.
     timeout-minutes: 60

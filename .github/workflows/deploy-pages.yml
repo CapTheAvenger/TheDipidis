@@ -45,7 +45,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -166,7 +166,7 @@ jobs:
           fi
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: test
     # Ein PR prueft, er liefert nicht aus.
     if: ${{ github.event_name != 'pull_request' }}
@@ -475,6 +475,19 @@ jobs:
           npm ci --no-audit --no-fund --omit=optional
           node prerender-meta-call.js ../_site
 
+      - name: 390-px-Pruefung (Warnung, haelt nichts an)
+        # WZ-31 (Hausi 07.10.2026: erst als Warnung). Misst die gebaute Seite
+        # bei 390 x 844: seitlicher Bildlauf und Text unter 11 px je Ansicht.
+        # continue-on-error + Skript gibt immer 0 zurueck: ein Befund ist eine
+        # ::warning:: und eine Zeile in der Zusammenfassung, kein roter Deploy.
+        working-directory: prerender
+        continue-on-error: true
+        timeout-minutes: 10
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+        run: node pruefe-390.js ../_site
+
       - name: Run cross-surface consistency tests against the built artifacts
         # The bot-deck-index.json only exists after generate-bot-deck-index.py
         # ran a few steps above, so cross-surface tests have to run here
@@ -520,7 +533,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     if: ${{ github.event_name != 'pull_request' }}
     steps:

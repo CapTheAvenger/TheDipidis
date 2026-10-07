@@ -84,8 +84,10 @@ const REITER_OHNE_MENUEPUNKT = ['admin'];
  *
  * @returns {Element|null} der Menuepunkt, oder null wenn es keinen gibt
  */
+/* UI-112 Etappe 3 (06.10.2026): Reiter, die sich einen Menuepunkt teilen. */
+const MENUEPUNKT_ALIAS = { 'city-league-analysis': 'current-analysis' };
 function menuepunktFuerReiter(tabId) {
-    const punkt = document.getElementById('menu-btn-' + tabId);
+    const punkt = document.getElementById('menu-btn-' + (MENUEPUNKT_ALIAS[tabId] || tabId));
     if (punkt) return punkt;
     if (REITER_OHNE_MENUEPUNKT.indexOf(tabId) === -1
         && typeof console !== 'undefined' && console && console.warn) {

@@ -47,7 +47,8 @@ describe('V2-8 Vergleichsrutsch', () => {
         assert.strictEqual(typeof win.dsFormatMarke, 'function');
         win.dsFormatMarke();
         assert.strictEqual(labels['menu-btn-current-meta'], 'TEF–30C Meta-Analyse');
-        assert.strictEqual(labels['menu-btn-current-analysis'], 'Deck-Analyse (TEF–30C)');
+        // UI-112 Etappe 3: ein Menuepunkt fuer alle Raeume, ohne Format.
+        assert.strictEqual(labels['menu-btn-current-analysis'], undefined);
         assert.strictEqual(win.DsNav.formatLabel('gl'), 'TEF–30C');
         assert.match(R('js/i18n.js'), /'dsFormatMarke'\]\.forEach/);
     });

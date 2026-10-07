@@ -506,8 +506,9 @@
         // Text aus i18n stehen.
         if (!f.label) return;
         var de = (typeof window.getLang !== 'function') || window.getLang() === 'de';
-        [['menu-btn-current-meta', de ? f.label + ' Meta-Analyse' : f.label + ' meta analysis'],
-         ['menu-btn-current-analysis', de ? 'Deck-Analyse (' + f.label + ')' : 'Deck analysis (' + f.label + ')']
+        // UI-112 Etappe 3: die Deck-Analyse ist ein Menuepunkt fuer alle Raeume
+        // (Raumwahl steht oben in der Seite) und traegt deshalb kein Format.
+        [['menu-btn-current-meta', de ? f.label + ' Meta-Analyse' : f.label + ' meta analysis']
         ].forEach(function (p) {
             var b = document.getElementById(p[0]);
             if (!b) return;

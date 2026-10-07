@@ -625,6 +625,22 @@ def save_to_csv(data: list, output_file: str):
         writer.writerows(data)
     logger.info("✓ %s Eintraege in %s gespeichert.", len(data), output_file)
 
+def ist_city_league(entry: dict) -> bool:
+    """DA-40 (07.10.2026): der Durchschnittsrang mischte City Leagues (meist 4-16
+    Plaetze) mit der Champions League (32 Plaetze und mehr) — ein 20. Platz beim
+    Major zog den Schnitt wie ein Absturz im Laden. Fuer den Rang zaehlen nur City
+    Leagues; Anteil und Anzahl zaehlen weiter alles."""
+    return str(entry.get('format') or 'City League (JP)').startswith('City League')
+
+
+def rang_schnitt(eintraege: list) -> float:
+    """Durchschnittsrang nur aus City Leagues; ohne City League der Schnitt aller."""
+    plaetze = [int(e.get('placement', 0)) for e in eintraege if ist_city_league(e) and int(e.get('placement', 0)) > 0]
+    if not plaetze:
+        plaetze = [int(e.get('placement', 0)) for e in eintraege if int(e.get('placement', 0)) > 0]
+    return sum(plaetze) / len(plaetze) if plaetze else 0
+
+
 def save_deck_statistics(data: list, output_file: str):
     stats_file = os.path.join(get_data_dir(), output_file.replace('.csv', '_deck_stats.csv'))
     deck_data = {}
@@ -636,16 +652,17 @@ def save_deck_statistics(data: list, output_file: str):
 
         if arch not in deck_data:
             deck_data[arch] = {'count': 0, 'placements': [], 'tournaments': set(),
-                               'formate': set()}
+                               'formate': set(), 'eintraege': []}
 
         deck_data[arch]['count'] += 1
         deck_data[arch]['placements'].append(place)
+        deck_data[arch]['eintraege'].append(entry)
         deck_data[arch]['tournaments'].add(t_info)
         deck_data[arch]['formate'].add(entry.get('format') or 'City League (JP)')
 
     stats_rows = []
     for arch, info in deck_data.items():
-        avg_place = sum(info['placements']) / len(info['placements']) if info['placements'] else 0
+        avg_place = rang_schnitt(info['eintraege'])
         stats_rows.append({
             'archetype': arch,
             # Mehrere Klassen sind moeglich, sobald ein Major mit im
@@ -681,12 +698,13 @@ def create_comparison_report(old_data: list, new_data: list, output_file: str):
             arch = entry.get('archetype', 'Unknown')
             place = int(entry.get('placement', 0))
             if arch not in stats:
-                stats[arch] = {'count': 0, 'placements': [], 'total_placement': 0}
+                stats[arch] = {'count': 0, 'placements': [], 'total_placement': 0, 'eintraege': []}
             stats[arch]['count'] += 1
             stats[arch]['placements'].append(place)
             stats[arch]['total_placement'] += place
+            stats[arch]['eintraege'].append(entry)
         for d in stats.values():
-            d['avg_placement'] = d['total_placement'] / d['count'] if d['count'] > 0 else 0
+            d['avg_placement'] = rang_schnitt(d['eintraege'])
             d['best_placement'] = min(d['placements']) if d['placements'] else 0
             d['meta_share'] = (d['count'] / total_decks * 100) if total_decks > 0 else 0  # NEU: Meta-Share
         return stats, total_decks

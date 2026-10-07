@@ -99,12 +99,9 @@ describe('N-25 / N2-10 / N2-17', () => {
     });
 });
 
-describe('F-23 / D2-10 / D2-12 / N-22', () => {
+describe('F-23 / N-22 (D2-10 entfällt: Hub-Seite geht in V2-15)', () => {
     it('Japan-Kachel nennt den Anteil', () => {
         assert.match(lies('js/app-tier-meta.js'), /\(item\.totalCount \/ clGesamtListen \* 100\)\.toFixed\(1\)/);
-    });
-    it('Hub-Kachel heißt „Höchste Top-8-Quote“', () => {
-        assert.match(lies('js/meta-analysis-hub.js'), /role = de \? 'Höchste Top-8-Quote'/);
     });
     it('Suche ohne Treffer gibt einen Tipp', () => {
         assert.match(lies('js/i18n.js'), /'cdb\.suchTipp':\s*'Englischen oder deutschen Namen probieren, ohne Setkürzel\.'/);

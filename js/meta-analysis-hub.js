@@ -518,7 +518,7 @@
             // es Platz 1 und Platz 2 nach Anteil sind.
             let role;
             if (d.role === 'best') {
-                role = de ? 'Höchste Top-8-Quote' : 'Highest top-8 rate';  // D2-10 (07.10.2026): die Intervalle der Spitze ueberlappen
+                role = de ? 'Erfolgreichstes Deck' : 'Most successful deck';
             } else {
                 // Der angezeigte Rang ist die ECHTE Anteils-Position des Decks
                 // (fieldRank aus der share-sortierten Liste), kein laufender
@@ -602,10 +602,7 @@
                     ? `${antritte} von ${gesamtAntritte} Antritten`
                     : `${antritte} of ${gesamtAntritte} entries`);
             const top8Bezug = ausLimitless
-                /* N2-16 (07.10.2026): 1.249 Limitless-Antritte neben 1.246 Turnier-Antritten
-                   lasen sich wie ein Tippfehler. Zwei Quellen, zwei Zahlen — die zweite sagt jetzt,
-                   woher sie kommt. */
-                ? (de ? ` (aus ${antritte} Antritten in den Top-8-Daten)` : ` (from ${antritte} entries in the top-8 data)`)
+                ? (de ? ` (${antritte} Turnier-Antritte)` : ` (${antritte} tournament entries)`)
                 : '';
             return `
                 <div class="ds-stat${cls}">

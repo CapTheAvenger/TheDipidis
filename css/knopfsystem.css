@@ -1,0 +1,44 @@
+/* UI-118 Stufe 1 (Hausi 06.10.2026: „Ja, so weitermachen“, Vorschau V2-11):
+ * ein Knopfsystem und klare Rangfolge. Primaer (Markenfarbe), Sekundaer
+ * (Flaeche 2), auf Farbe (durchscheinend weiss, fuer farbige Baender wie die
+ * Deckzeile), Pille (Filter). Radius 10 px, Hoehe 36 px, Schrift 600.
+ *
+ * Laedt als letzte Stilvorlage. Primaer/Sekundaer bewusst mit der
+ * Spezifitaet EINER Klasse (:where), damit Zustaende wie .avg-mode-btn.active
+ * und die farbigen Varianten (primary, success, tertiary-danger) gewinnen. */
+:root { --knopf-h: 36px; --knopf-r: 10px; }
+
+/* Deckzeile Meine Decks: eine Art statt sechs Farben */
+.saved-deck-item .deck-action-buttons .deck-action-btn,
+.saved-deck-item .deck-action-buttons .deck-btn-mehr {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    color: #fff;
+    border-radius: var(--knopf-r);
+    min-height: 32px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.saved-deck-item .deck-action-buttons .deck-action-btn:hover { background: rgba(255, 255, 255, 0.28); }
+
+/* Primaer / Sekundaer ueberall gleich geformt */
+.btn:where(.btn-primary), .btn-modern:where(.btn-primary, .primary, .success, .tertiary-danger) {
+    border-radius: var(--knopf-r);
+    min-height: var(--knopf-h);
+    font-weight: 600;
+}
+.btn:where(.btn-secondary), .btn-modern:where(:not(.btn-primary, .primary, .success, .tertiary-danger)) {
+    border-radius: var(--knopf-r);
+    min-height: var(--knopf-h);
+    background: var(--surface-2);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    font-weight: 600;
+}
+
+/* Rangfolge: Seitentitel > Abschnitt > Tier-Kopf */
+.deck-tier-title { font-size: 17px; }
+
+/* UI-112 Etappe 3: die Raumwahl ueber der Deck-Analyse sitzt dicht unter dem Kopf. */
+.ds-filter.ds-filter-analyse { margin-top: 10px; }

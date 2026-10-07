@@ -80,6 +80,17 @@
         'past-meta':    '#past-meta .header',
     };
 
+    /* UI-112 Etappe 3 (Hausi 06.10.2026: „Ja, so bauen“): dieselbe Raumwahl
+       Japan · Format · Vergangene Formate steht auch ueber der Deck-Analyse.
+       Ein Klick fuehrt in die Deck-Analyse des gewaehlten Raums; Vergangene
+       Formate ist selbst eine Deck-Analyse (past-meta). Nur die Raumwahl —
+       die Formatwahl der Japan-Analyse bleibt, wo sie ist. */
+    var ANALYSE = {
+        'city-league-analysis': { raum: 'jp', anker: '#city-league-analysis #tab-decks > .header' },
+        'current-analysis':     { raum: 'gl', anker: '#current-analysis .header' },
+    };
+    var ZIEL_ANALYSE = { jp: 'city-league-analysis', gl: 'current-analysis', past: 'past-meta' };
+
     function de() {
         return (typeof window.getLang === 'function' && window.getLang() === 'de');
     }
@@ -158,7 +169,7 @@
         }).join('\u241e');
     }
 
-    function baueZeile(raum) {
+    function baueZeile(raum, analyse) {
         var d = de();
         var wrap = document.createElement('div');
         wrap.className = 'ds-filter';
@@ -185,18 +196,23 @@
                 var fl = window.DsNav.formatLabel('gl');
                 if (fl) b.textContent = '\ud83c\udf10 ' + fl;
             }
+            var ziel = analyse ? ZIEL_ANALYSE[r.key] : r.tab;
             b.addEventListener('click', function () {
                 if (r.key === raum.key) return;
                 if (typeof window.switchTabAndUpdateMenu === 'function') {
-                    window.switchTabAndUpdateMenu(r.tab);
+                    window.switchTabAndUpdateMenu(ziel);
                 } else if (typeof window.switchTab === 'function') {
-                    window.switchTab(r.tab);
+                    window.switchTab(ziel);
                 }
             });
             seg.appendChild(b);
         });
         g1.appendChild(seg);
         wrap.appendChild(g1);
+        if (analyse) {
+            wrap.classList.add('ds-filter-analyse');
+            return wrap;
+        }
 
         var f = formate(raum);
         /* UI-12 (27.09.2026, Hausi): in Global gibt es keine Formatwahl —
@@ -286,6 +302,17 @@
     function zeichne() {
         horcheAufQuellen();
         var tab = aktiverTab();
+        if (ANALYSE[tab]) {
+            var ra = null;
+            for (var k = 0; k < RAEUME.length; k++) if (RAEUME[k].key === ANALYSE[tab].raum) ra = RAEUME[k];
+            var ak = document.querySelector(ANALYSE[tab].anker);
+            if (!ra || !ak || !ak.parentElement) return;
+            var altA = ak.parentElement.querySelector(':scope > .ds-filter');
+            var neuA = baueZeile(ra, true);
+            if (altA) ak.parentElement.replaceChild(neuA, altA);
+            else ak.parentElement.insertBefore(neuA, ak.nextSibling);
+            return;
+        }
         var raum = raumFuerTab(tab);
         if (!raum) return;
         var anker = document.querySelector(ANKER[tab]);

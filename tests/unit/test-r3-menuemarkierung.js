@@ -89,6 +89,13 @@ assert.ok(AUSNAHMEN_QUELLE,
 const AUSNAHMEN = [...vm.runInNewContext(
     AUSNAHMEN_QUELLE + ' REITER_OHNE_MENUEPUNKT;')];
 
+/* UI-112 Etappe 3 (Hausi 06.10.2026): Reiter, die sich einen Menuepunkt
+   teilen — die Deck-Analyse hat EINEN Punkt, Japan waehlt die Raumzeile
+   oben in der Seite. Auch dieser Hebel steht unten fest. */
+const ALIAS_QUELLE = (INIT.match(/const MENUEPUNKT_ALIAS\s*=\s*\{[^}]*\};/) || [])[0];
+assert.ok(ALIAS_QUELLE, 'MENUEPUNKT_ALIAS steht nicht mehr in js/inline-init.js.');
+const ALIAS = Object.assign({}, vm.runInNewContext(ALIAS_QUELLE + ' MENUEPUNKT_ALIAS;'));
+
 /** Die Gruppentabelle — syncMenuClustersForTab() liest sie. */
 const CLUSTER_QUELLE = (INIT.match(/const MENU_CLUSTERS\s*=\s*\{[\s\S]*?\n\};/) || [])[0];
 assert.ok(CLUSTER_QUELLE, 'MENU_CLUSTERS steht nicht mehr in js/inline-init.js.');
@@ -163,6 +170,7 @@ function aufbau() {
 
     vm.runInContext([
         AUSNAHMEN_QUELLE,
+        ALIAS_QUELLE,
         CLUSTER_QUELLE,
         ausschnitt(INIT, 'function menuepunktFuerReiter(tabId)'),
         EXPORT_QUELLE,
@@ -213,7 +221,8 @@ describe('R3 — Menuemarkierung je Reiter', () => {
            voraus. Ein zweiter Eintrag ist zu begruenden, nicht
            nachzutragen. */
         assert.deepEqual(AUSNAHMEN, ['admin']);
-        const ohnePunkt = REITER.filter(r => !MENUE.some(p => p.id === 'menu-btn-' + r));
+        assert.deepEqual(ALIAS, { 'city-league-analysis': 'current-analysis' });
+        const ohnePunkt = REITER.filter(r => !ALIAS[r] && !MENUE.some(p => p.id === 'menu-btn-' + r));
         assert.deepEqual(ohnePunkt, ['admin'],
             'Diese Reiter haben keinen Menuepunkt im Markup. Steht ein Reiter '
             + 'hier, aber nicht in REITER_OHNE_MENUEPUNKT, bleibt das Menue '
@@ -243,7 +252,7 @@ describe('R3 — Menuemarkierung je Reiter', () => {
             s.markiert().forEach(id => {
                 const p = MENUE.find(x => x.id === id);
                 if (!p) { falsch.push(r + ' -> ' + id + ' (kein Menuepunkt)'); return; }
-                if (p.ziel !== r) falsch.push(r + ' -> ' + id + ' oeffnet ' + p.ziel);
+                if (p.ziel !== (ALIAS[r] || r)) falsch.push(r + ' -> ' + id + ' oeffnet ' + p.ziel);
             });
         });
         assert.deepEqual(falsch, []);

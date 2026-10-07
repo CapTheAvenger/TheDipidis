@@ -125,7 +125,7 @@
    "PLS 130"
   ]
  },
- "champions_teams": 76,
+ "champions_teams": 102,
  "champions_ueber_grenze": 0,
  "empty_files": {
   "labs_tournament_decks__unsorted.csv": true
@@ -151,7 +151,7 @@
   "price_data.csv": 20601,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-10-07 09:43 UTC",
+ "generated": "2026-10-07 16:00 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,

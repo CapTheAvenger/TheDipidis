@@ -22,7 +22,6 @@
   ],
   "aus_teams": [
    "Alakazam",
-   "Altaria",
    "Audino",
    "Basculegion-F",
    "Decidueye-Hisui",
@@ -46,11 +45,12 @@
    "Tsareena",
    "Zoroark-Hisui"
   ],
-  "aus_teams_count": 24,
+  "aus_teams_count": 23,
   "aus_teams_ohne_werte": [],
   "geschlechtsformen": [],
   "geschlechtsformen_count": 0,
   "aus_nutzung": [
+   "Altaria",
    "Arboliva",
    "Bellibolt",
    "Cinderace",
@@ -86,7 +86,7 @@
    "Vileplume",
    "Wigglytuff"
   ],
-  "aus_nutzung_count": 34,
+  "aus_nutzung_count": 35,
   "aus_nutzung_ohne_werte": []
  },
  "smogonKeys": [

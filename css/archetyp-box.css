@@ -379,3 +379,24 @@
 .abx-legal { flex: 0 0 auto; padding: 1px 8px; border-radius: 999px; font-size: var(--fs-xs); font-weight: 700; line-height: 1.5; white-space: nowrap; }
 .abx-legal-standard { background: var(--tint-ok); color: var(--tint-ok-ink); }
 .abx-legal-expanded { background: var(--surface-2, var(--surface-1)); color: var(--ink-2); border: 1px solid var(--line); }
+
+/* FE-64 (09.10.2026): gewuenschtes Artwork je Druck — zaehlt nicht als vorhanden. */
+.abx-dialog-text .abx-artwork-btn {
+    align-self: flex-start;
+    margin-top: 4px;
+    min-height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    background: none;
+    color: var(--ink-2);
+    font: inherit;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.abx-dialog-text .abx-artwork-btn:hover { color: var(--ink); border-color: var(--ink-3); }
+.abx-dialog-text .abx-artwork-btn.is-an { border-color: var(--brand); color: var(--brand-ink); }
+.abx-dialog-druck.is-artwork { box-shadow: inset 0 0 0 1.5px var(--brand); }
+.abx-artwork-zeile { color: var(--brand-ink); font-size: var(--fs-xs); font-weight: 600; }

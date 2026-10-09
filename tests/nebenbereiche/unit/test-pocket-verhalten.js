@@ -719,3 +719,50 @@ describe('Pocket: ein Deck ohne Stufe', () => {
             + 'der Liste nackt da');
     });
 });
+
+// ── FE-65 (09.10.2026): Filter nach Energietyp ───────────────────────
+// Hausi suchte ein Metall-Deck und fand keins. Quelle ist das gespeicherte
+// Feld `energie`; ein Deck mit zwei Energien steht unter beiden Typen.
+describe('FE-65: Pocket-Tierliste nach Energie filtern', () => {
+    const zeilenZahl = (html) => (html.match(/class="pk-zeile"/g) || []).length;
+    const zaehlung = {};
+    DATEN.decks.forEach(d => (d.energie || []).forEach(e => { zaehlung[e] = (zaehlung[e] || 0) + 1; }));
+
+    it('je vorkommendem Typ ein Chip mit der Zahl der Decks, dazu „Alle“', async () => {
+        const u = await gezeichnet(DATEN);
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.match(html, new RegExp('data-pk-energie=""[^>]*>Alle <span class="pk-chip-zahl">' + DATEN.decks.length + '<'));
+        Object.keys(zaehlung).forEach(e => {
+            assert.match(html, new RegExp('data-pk-energie="' + e + '"[^>]*>[^<]+ <span class="pk-chip-zahl">' + zaehlung[e] + '<'),
+                'Chip fuer ' + e + ' fehlt oder zaehlt falsch');
+        });
+        assert.equal((html.match(/data-pk-energie="/g) || []).length, Object.keys(zaehlung).length + 1);
+    });
+
+    it('ein Klick auf einen Typ zeigt genau dessen Decks — auch die mit zwei Energien', async () => {
+        const u = await gezeichnet(DATEN);
+        const typ = Object.keys(zaehlung).find(e => DATEN.decks.some(d => (d.energie || []).length > 1 && d.energie.includes(e)))
+            || Object.keys(zaehlung)[0];
+        klick(u.knoten, 'data-pk-energie', typ);
+        const html = u.knoten.pocketListe.innerHTML;
+        assert.equal(zeilenZahl(html), zaehlung[typ], 'Filter ' + typ + ' zeigt die falsche Zahl Decks');
+        DATEN.decks.forEach((d, i) => {
+            const drin = html.includes('data-pk-deck="' + i + '"');
+            assert.equal(drin, (d.energie || []).includes(typ), d.name + ' steht falsch im Filter ' + typ);
+        });
+        klick(u.knoten, 'data-pk-energie', '');
+        assert.equal(zeilenZahl(u.knoten.pocketListe.innerHTML), DATEN.decks.length, '„Alle“ bringt nicht alle zurueck');
+    });
+
+    it('jede Zeile nennt ihre Energie (deutsch)', async () => {
+        const u = await gezeichnet(DATEN);
+        const DE = { Grass: 'Pflanze', Fire: 'Feuer', Water: 'Wasser', Lightning: 'Elektro',
+                     Psychic: 'Psycho', Fighting: 'Kampf', Darkness: 'Finsternis', Metal: 'Metall' };
+        const zeilen = u.knoten.pocketListe.innerHTML.split('class="pk-zeile"').slice(1);
+        zeilen.forEach(z => {
+            const i = Number((z.match(/data-pk-deck="(\d+)"/) || [])[1]);
+            const erw = (DATEN.decks[i].energie || []).map(e => DE[e] || e).join('/');
+            if (erw) assert.ok(z.includes('class="pk-fussnote"') && z.includes('>' + erw + ' · '), DATEN.decks[i].name + ': Energie fehlt in der Zeile');
+        });
+    });
+});

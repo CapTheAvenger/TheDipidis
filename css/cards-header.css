@@ -612,3 +612,15 @@ html.is-standalone .container {
     #main-content > .cards-header #user-menu .header-icon-btn,
     #main-content > .cards-header #user-menu .user-info { width: 100%; }
 }
+
+/* UI-134 (Hausi 09.10.2026, Festlegung B geaendert): am Desktop stehen die
+   sechs Kurzwahl-Knoepfe direkt neben „The Dipidis“ statt rechts ueber der
+   Bluetenschicht, in der sie schlecht lesbar waren. Die Bluete bleibt rechts.
+   Am Handy (bis 640 px) bleibt alles wie bisher: zweite Zeile ueber die
+   ganze Breite. */
+@media (min-width: 641px) {
+    #main-content > .cards-header .header-flex-row {
+        justify-content: flex-start;
+        gap: 10px 20px;
+    }
+}

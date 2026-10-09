@@ -421,3 +421,32 @@
     background: var(--tint-warn);
     color: var(--tint-warn-ink);
 }
+
+/* ── FE-65 (09.10.2026): Filter nach Energietyp ──────────────────────
+ * Umbrechende Chip-Reihe ueber den Stufen, nie seitlich scrollen
+ * (Festlegung A). 36 px hoch wie die uebrigen Knoepfe (UI-118). */
+.pk-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 16px 0 4px;
+}
+.pk-chip {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 999px;
+    background: var(--surface-1, #fff);
+    color: var(--text-primary, #111827);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+.pk-chip:hover { border-color: var(--text-muted, #9ca3af); }
+.pk-chip:focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+.pk-chip.is-an {
+    background: var(--text-primary, #111827);
+    color: var(--surface-1, #fff);
+    border-color: var(--text-primary, #111827);
+}
+.pk-chip-zahl { opacity: .7; font-size: 12px; }

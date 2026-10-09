@@ -1,0 +1,43 @@
+meta,tournaments_used,tournament_count,my_deck_slug,my_deck_name,my_deck_player_count,my_deck_total_wins,my_deck_total_losses,my_deck_total_ties,my_deck_overall_win_pct,opponent_deck_slug,opponent_deck_name,vs_count,vs_win_pct,vs_wins,vs_losses,vs_ties,day_filter,scraped_at,ist_spiegel,tagesfilter_quelle
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,gardevoir-ex-sv,Gardevoir,6,50.0,3,3,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,n-zoroark,N's Zoroark,2,66.67,1,0,1,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,dragapult-ex,Dragapult,2,16.67,0,1,1,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,dragapult-dusknoir,Dragapult Dusknoir,2,50.0,1,1,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,gholdengo-ex,Gholdengo,2,16.67,0,1,1,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,raging-bolt-ogerpon,Raging Bolt Ogerpon,2,0.0,0,2,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,tera-box,Tera Box,2,50.0,1,1,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,toedscruel-ex,Toedscruel,1,100.0,1,0,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,blissey-ex,Blissey,1,100.0,1,0,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,dragapult-charizard,Dragapult Charizard,1,0.0,0,1,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,roaring-moon-ex,Roaring Moon,1,100.0,1,0,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,joltik-box,Joltik Box,1,100.0,1,0,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-dudunsparce,Archaludon Dudunsparce,3,10,11,3,45.83,gholdengo-dudunsparce,Gholdengo Dudunsparce,1,0.0,0,1,0,overall,2026-10-09T06:51:34.762622+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,gardevoir-ex-sv,Gardevoir,16,43.75,6,7,3,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,raging-bolt-ogerpon,Raging Bolt Ogerpon,5,66.67,3,1,1,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,joltik-box,Joltik Box,3,44.44,1,1,1,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,dragapult-charizard,Dragapult Charizard,3,33.33,1,2,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,flareon-noctowl,Flareon Noctowl,3,44.44,1,1,1,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,dragapult-ex,Dragapult,3,100.0,3,0,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,n-zoroark,N's Zoroark,2,50.0,1,1,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,tera-box,Tera Box,1,100.0,1,0,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,gholdengo-ex,Gholdengo,1,0.0,0,1,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,gholdengo-dudunsparce,Gholdengo Dudunsparce,1,0.0,0,1,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,pidgeot-control,Pidgeot Control,1,0.0,0,1,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,dragapult-iron-thorns,Dragapult Iron Thorns,1,100.0,1,0,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,charizard-noctowl,Charizard Noctowl,1,0.0,0,1,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-ex,Archaludon,6,18,18,6,47.62,charizard-pidgeot,Charizard Pidgeot,1,0.0,0,1,0,overall,2026-10-09T06:51:36.540241+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-zoroark,Archaludon Zoroark,2,9,7,4,51.67,raging-bolt-ogerpon,Raging Bolt Ogerpon,6,83.33,5,1,0,overall,2026-10-09T06:51:38.343075+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-zoroark,Archaludon Zoroark,2,9,7,4,51.67,flareon-noctowl,Flareon Noctowl,3,66.67,2,1,0,overall,2026-10-09T06:51:38.343075+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-zoroark,Archaludon Zoroark,2,9,7,4,51.67,dragapult-ex,Dragapult,3,44.44,1,1,1,overall,2026-10-09T06:51:38.343075+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-zoroark,Archaludon Zoroark,2,9,7,4,51.67,gholdengo-dragapult,Gholdengo Dragapult,2,16.67,0,1,1,overall,2026-10-09T06:51:38.343075+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-zoroark,Archaludon Zoroark,2,9,7,4,51.67,gardevoir-ex-sv,Gardevoir,2,50.0,1,1,0,overall,2026-10-09T06:51:38.343075+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-zoroark,Archaludon Zoroark,2,9,7,4,51.67,dragapult-dusknoir,Dragapult Dusknoir,1,33.33,0,0,1,overall,2026-10-09T06:51:38.343075+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-zoroark,Archaludon Zoroark,2,9,7,4,51.67,poison-archaludon,Poison Archaludon,1,33.33,0,0,1,overall,2026-10-09T06:51:38.343075+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-zoroark,Archaludon Zoroark,2,9,7,4,51.67,joltik-box,Joltik Box,1,0.0,0,1,0,overall,2026-10-09T06:51:38.343075+00:00,nein,abfrage
+SVI-JTG,33,1,archaludon-zoroark,Archaludon Zoroark,2,9,7,4,51.67,dragapult-charizard,Dragapult Charizard,1,0.0,0,1,0,overall,2026-10-09T06:51:38.343075+00:00,nein,abfrage
+SVI-JTG,33,1,azumarill-ssp,Azumarill,1,1,6,1,16.67,gardevoir-ex-sv,Gardevoir,2,0.0,0,2,0,overall,2026-10-09T06:51:40.126856+00:00,nein,abfrage
+SVI-JTG,33,1,azumarill-ssp,Azumarill,1,1,6,1,16.67,n-zoroark,N's Zoroark,2,50.0,1,1,0,overall,2026-10-09T06:51:40.126856+00:00,nein,abfrage
+SVI-JTG,33,1,azumarill-ssp,Azumarill,1,1,6,1,16.67,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-10-09T06:51:40.126856+00:00,nein,abfrage
+SVI-JTG,33,1,azumarill-ssp,Azumarill,1,1,6,1,16.67,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,0.0,0,1,0,overall,2026-10-09T06:51:40.126856+00:00,nein,abfrage
+SVI-JTG,33,1,azumarill-ssp,Azumarill,1,1,6,1,16.67,froslass-munkidori,Froslass Munkidori,1,0.0,0,1,0,overall,2026-10-09T06:51:40.126856+00:00,nein,abfrage
+SVI-JTG,33,1,azumarill-ssp,Azumarill,1,1,6,1,16.67,poison-archaludon,Poison Archaludon,1,33.33,0,0,1,overall,2026-10-09T06:51:40.126856+00:00,nein,abfrage

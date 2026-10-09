@@ -3,12 +3,12 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-10-07T21:32:53",
+    "lastScrapedAt": "2026-10-09T06:31:02",
     "lastScrapedCount": 124,
     "lastBackfilledAt": "2026-05-05T13:19:27",
     "lastBackfillCount": 342,
     "lastHarvestedFrom": "city_league_archetype_scraper",
-    "lastHarvestedAt": "2026-10-06T06:25:52"
+    "lastHarvestedAt": "2026-10-09T06:24:19"
   },
   "archetypes": {
     "Dragapult": [
@@ -2266,6 +2266,26 @@
     "Ceruledge Armarouge": [
       "ceruledge",
       "armarouge"
+    ],
+    "Mega Zygarde Cinderace": [
+      "zygarde-mega",
+      "cinderace"
+    ],
+    "Barbaracle Ogerpon-Cornerstone": [
+      "barbaracle",
+      "ogerpon-cornerstone"
+    ],
+    "Mega Froslass Mew": [
+      "froslass-mega",
+      "mew"
+    ],
+    "Mega Gengar Dragapult": [
+      "gengar-mega",
+      "dragapult"
+    ],
+    "Mega Gengar Mega Kangaskhan": [
+      "gengar-mega",
+      "kangaskhan-mega"
     ]
   }
 }

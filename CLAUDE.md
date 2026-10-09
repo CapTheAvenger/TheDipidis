@@ -159,6 +159,25 @@ Drei Regeln sind daraus geworden:
    Die rollende Datei ist einen Lauf veraltet — die Ursache trotzdem
    beheben, sonst bleibt sie es. Gehalten von
    `tests/python/test_tor_rollt_rote_datei_zurueck.py`.
+   **Zusammengehoerige Dateien (SC-29, 09.10.2026):** die erste Feldprobe
+   rollte `champions_usage.json` zurueck und liess den daraus gebauten
+   Pokedex frisch — der zweite Durchlauf fiel an „Anteil 58.1 statt 74.4"
+   und „datenluecken.json ist veraltet" um, das Tor blieb zu (Usage #114,
+   Replica #150). Zwei Sicherungen, aus zwei Chats am selben Vormittag:
+   `FAMILIEN` (alle `data/champions_*` + `opgg_champions_moves.json` rollen
+   nur gemeinsam, PR #955) und das Orakel aus Konsistenztests (jede
+   Testdatei, die ZWEI der geaenderten Dateien nennt; was schon mit allem
+   auf alt rot ist, ist Altbefund; PR #956) — die Familie faengt Tests, die
+   ihre Dateien nicht beim Namen nennen, das Orakel faengt Kopplungen
+   ausserhalb der Familie. `data/datenluecken.json` wird nach jedem
+   Umschalten neu erzeugt; die Zusammenfassung nennt, was im ERSTEN
+   Durchlauf rot war. Jeder Tor-Schritt heisst `id: tor`, schreibt
+   `rollback=` nach GITHUB_OUTPUT und sichert `$RUNNER_TEMP/tor` (erstlauf/,
+   rollback/neu/) als Artefakt `tor-<run_id>`, sobald das Tor rot war oder
+   etwas zurueckgerollt hat. Jeder Job jeder Ablaufdatei traegt
+   `timeout-minutes` (SC-28: `sprachreinheit` und `visual-nonmeta` hingen
+   1,5 h ohne Grenze). Gehalten von `test_tor_rollt_rote_datei_zurueck.py`
+   (8x sc29) und `test_nebenbereiche_getrennt.py` (Zeitgrenze, Sicherung).
    **Victory-Road-Scraper (07.10.2026):** eine umgebaute oder leere Quelle
    macht den Wochenlauf NICHT mehr rot, wenn ein Bestand da ist: der
    Scraper behaelt ihn, schreibt `_meta.quellenhinweis` mit Datum (der
@@ -502,6 +521,20 @@ Ausweg: *„GitHub access to this repository is not enabled for this
 session. Use add_repo to request access."* Ein `add_repo`-Werkzeug stand
 in dieser Sitzung nicht in der Werkzeugliste — deshalb bleibt es bei dem,
 was gemessen geht.
+
+**NACHGEMESSEN 09.10.2026 (SC-29/WZ-39): `add_repo` gibt es in der
+Cloud-Sitzung, und es traegt.** `mcp__claude-code-remote__add_repo`
+(owner `CapTheAvenger`, repo `TheDipidis`, access `push`) haengt das Repo an
+die Sitzung; danach: `gh api repos/CapTheAvenger/TheDipidis/actions/runs`,
+`.../runs/<id>/jobs`, `check-runs/<job>/annotations` → **200, 15.000
+Aufrufe/h** (vorher 403), `git clone --depth 1` → geht (145 MB, ~3 min),
+`git push --dry-run origin <zweig>` → **geht**. Grenzen: das Job-Protokoll
+(`.../jobs/<id>/logs`) leitet auf `*.blob.core.windows.net` um, das der
+Proxy blockt (auch aus der Geraete-VM) — die Zusammenfassung eines Laufs
+liest Chrome auf `github.com/.../actions/runs/<id>` (mit `<details>`
+aufgeklappt); die unauthentifizierte API aus Chrome/Geraete-VM hat 60
+Aufrufe/h je IP und ist nach einer Inventur erschoepft. Ob der Push
+Ablaufdateien schreiben darf, zeigt der erste echte Push (NICHT GEPRUEFT).
 
 **Was daraus folgt — die Reihenfolge, nicht die Religion:**
 

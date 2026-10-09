@@ -141,17 +141,17 @@
   "champions_type_chart.json": 183,
   "cm_expansions.csv": 785,
   "japanese_cards_database.csv": 1076,
-  "online_api_archetypes.csv": 21537,
-  "online_api_cards_TEF-30C.csv": 86457,
-  "online_api_matchups_TEF-30C.csv": 25864,
-  "online_api_tournaments.csv": 494,
+  "online_api_archetypes.csv": 21626,
+  "online_api_cards_TEF-30C.csv": 89212,
+  "online_api_matchups_TEF-30C.csv": 26815,
+  "online_api_tournaments.csv": 496,
   "opgg_champions_moves.json": 2072,
   "pokemon_go_liste.json": 981,
   "pokemon_go_shiny.json": 1001,
   "price_data.csv": 20601,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-10-08 09:43 UTC",
+ "generated": "2026-10-09 09:43 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -164,13 +164,13 @@
  },
  "kartentext_de_gefuellt": 14638,
  "price_integrity": {
-  "duplicate_idproducts": 82,
+  "duplicate_idproducts": 80,
   "match_methods": {
    "live-verified": 5553,
    "manual-pin": 78,
    "priced-by-all": 121,
-   "priced-by-date": 745,
-   "unique": 11070
+   "priced-by-date": 748,
+   "unique": 11067
   },
   "nonempty_eur_price": 20588,
   "verified_collision_owners": {},

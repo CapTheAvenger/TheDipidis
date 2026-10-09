@@ -30,6 +30,15 @@ Ablauf `suchen`:
 Rueckgabe 0 = Menge gefunden und angewendet (der Aufrufer prueft danach
 noch einmal ALLE Suiten), 2 = nicht heilbar, alles unveraendert,
 3 = beim zweiten Lauf von selbst gruen (unstabiler Test): nichts zurueckgerollt.
+
+SC-29, 09.10.2026 (Usage #114, Replica #150): die erste Feldprobe rollte
+champions_usage zurueck und liess den daraus GEBAUTEN Pokedex frisch — der
+zweite Durchlauf fiel an „Anteil 58.1 statt 74.4" um. Zwei Sicherungen:
+FAMILIEN (die Champions-Dateien rollen nur gemeinsam, PR #955) und das
+Orakel aus KONSISTENZTESTS (jede Testdatei, die zwei geaenderte Dateien
+nennt; Altbefunde zaehlen nicht, PR #956). Das Luecken-Inventar wird nach
+jedem Umschalten neu erzeugt; Konsole und Manifest nennen, was im ERSTEN
+Durchlauf rot war.
 """
 import json
 import os
@@ -106,6 +115,72 @@ def einheiten(dateien):
 
 
 LUECKEN = "scripts/datenluecken.py"
+TESTORDNER_KERN = ("tests/unit", "tests/python")
+TESTORDNER_NEBEN = ("tests/nebenbereiche/unit", "tests/nebenbereiche/python")
+
+
+def bereich_aus_protokollen(ordner):
+    """`alle`, wenn das Tor die Nebenbereiche gefahren hat (js-neben.log liegt vor)."""
+    return "alle" if os.path.exists(os.path.join(ordner, "js-neben.log")) else "kern"
+
+
+def konsistenztests(kand, bereich):
+    """KONSISTENZTESTS ALS ORAKEL (SC-29, 09.10.2026, zweiter Teil).
+
+    Die Familie oben faengt die Champions-Dateien. Dieselbe Bauart gibt es
+    aber ueberall, wo ein Bauer aus einer Datei eine zweite macht: eine
+    Zusicherung, die beide GEGENEINANDER haelt, ist im ersten Durchlauf
+    gruen (beide frisch) und kippt erst, wenn eine Haelfte zurueckgeht.
+    Deshalb nimmt die Suche jede Testdatei ins Orakel, die ZWEI oder mehr
+    der geaenderten Dateien im Quelltext nennt. Rueckgabe (py, js)."""
+    namen = {os.path.basename(f) for f in kand}
+    if len(namen) < 2:
+        return [], []
+    ordner = TESTORDNER_KERN + (TESTORDNER_NEBEN if bereich == "alle" else ())
+    py, js = [], []
+    for o in ordner:
+        if not os.path.isdir(o):
+            continue
+        for n in sorted(os.listdir(o)):
+            if not n.startswith("test") or not n.endswith((".py", ".js")):
+                continue
+            pfad = os.path.join(o, n)
+            try:
+                text = open(pfad, encoding="utf-8", errors="replace").read()
+            except OSError:
+                continue
+            if sum(1 for name in namen if name in text) >= 2:
+                (py if n.endswith(".py") else js).append(pfad)
+    return py, js
+
+
+def genannt_in(dateien, test_pfade):
+    """Welche der Dateien nennt eine der Testdateien (Pfad ohne ::-Knoten)?"""
+    texte = []
+    for t in test_pfade:
+        try:
+            texte.append(open(t.split("::", 1)[0], encoding="utf-8", errors="replace").read())
+        except OSError:
+            continue
+    return {f for f in dateien if any(os.path.basename(f) in tx for tx in texte)}
+
+
+def altbefunde(py_extra, js_extra):
+    """Im Zustand „alles alt": welche Konsistenztests sind JETZT schon rot?
+    Die sind ein Altbefund auf main und zaehlen nicht als Orakel — sonst
+    machte ein alter roter Test jedes Zurueckrollen unmoeglich."""
+    rot = []
+    if py_extra:
+        r = sh(sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", *py_extra)
+        if r.returncode != 0:
+            rot += sorted({m.split("::", 1)[0] for m in re.findall(r"^FAILED (\S+)", r.stdout, re.M)})
+            if not rot:
+                rot += list(py_extra)  # Absturz beim Einsammeln: alle abziehen
+    for datei in js_extra:
+        r = sh("node", "--test", datei)
+        if r.returncode != 0 or re.search(r"^not ok ", r.stdout, re.M):
+            rot.append(datei)
+    return rot
 
 
 def luecken_neu():
@@ -195,11 +270,11 @@ def stand_nachziehen(basis, zurueck):
 
 def gruen(py, js):
     if py:
-        r = sh(sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", *py)
+        r = sh(sys.executable, "-m", "pytest", "-q", "-x", "-p", "no:cacheprovider", *py)
         if r.returncode != 0:
             return False
-    for datei in js:
-        r = sh("node", "--test", datei)
+    if js:
+        r = sh("node", "--test", *js)  # ein Aufruf: node faehrt die Dateien parallel
         if r.returncode != 0 or re.search(r"^not ok ", r.stdout, re.M):
             return False
     return True
@@ -210,6 +285,7 @@ def suchen(ordner, sicherung):
     if unlesbar or not (py or js):
         print("Kein Datenbefund — nicht zurueckgerollt: " + ("; ".join(unlesbar) or "keine rote Zusicherung benennbar"))
         return 2
+    print("Rot im ersten Durchlauf: " + " ".join(py + js))
     basis = ausgangsstand()
     kand = kandidaten(basis)
     if not kand or len(kand) > MAX_KANDIDATEN:
@@ -225,7 +301,7 @@ def suchen(ordner, sicherung):
             open(ziel, "w").close()
     if os.path.exists("data/datenluecken.json"):  # SC-29: so, wie der Lauf es baute
         shutil.copyfile("data/datenluecken.json", os.path.join(sicherung, "datenluecken.vorher.json"))
-    json.dump({"basis": basis, "kandidaten": kand, "zurueck": []},
+    json.dump({"basis": basis, "kandidaten": kand, "zurueck": [], "rot": py + js},
               open(os.path.join(sicherung, "manifest.json"), "w"))
     stand_setzen(basis, kand, sicherung, True)
     if not gruen(py, js):
@@ -234,16 +310,46 @@ def suchen(ordner, sicherung):
         print(f"Kein Datenbefund — auch mit allen {len(kand)} Dateien auf dem Stand von {basis} bleiben "
               f"{len(py) + len(js)} Zusicherung(en) rot")
         return 2
+    # Das Orakel der Minimierung: die roten Tests PLUS die Konsistenztests,
+    # abzueglich dessen, was schon im Zustand „alles alt" rot ist.
+    py_extra, js_extra = konsistenztests(kand, bereich_aus_protokollen(ordner))
+    py_extra = [p for p in py_extra if p not in {x.split("::", 1)[0] for x in py}]
+    js_extra = [j for j in js_extra if j not in js]
+    alt = altbefunde(py_extra, js_extra)
+    if alt:
+        print("Altbefund (schon mit allen Dateien alt rot, zaehlt nicht als Orakel): " + " ".join(alt))
+    py_extra = [p for p in py_extra if p not in alt]
+    js_extra = [j for j in js_extra if j not in alt]
+    orakel_py, orakel_js = py + py_extra, js + js_extra
+    if py_extra or js_extra:
+        print("Konsistenztests im Orakel: " + " ".join(py_extra + js_extra))
+
     zurueck = list(kand)
-    for einheit in einheiten(kand):
+    alle_einheiten = einheiten(kand)
+    # Erst alle Einheiten, die kein roter Test nennt, gemeinsam frisch: meist
+    # unschuldig, und ein Durchlauf statt einer je Einheit.
+    verdaechtig = genannt_in(kand, py + js)
+    unschuldig = [e for e in alle_einheiten if not any(f in verdaechtig for f in e)]
+    flach = [f for e in unschuldig for f in e]
+    if flach:
+        stand_setzen(basis, flach, sicherung, False)
+        if gruen(orakel_py, orakel_js):
+            zurueck = [x for x in zurueck if x not in flach]
+        else:
+            stand_setzen(basis, flach, sicherung, True)
+            unschuldig = []  # einzeln probieren
+    for einheit in alle_einheiten:
+        if einheit in unschuldig:
+            continue
         rest = [x for x in zurueck if x not in einheit]
         stand_setzen(basis, einheit, sicherung, False)
-        if gruen(py, js):
+        if gruen(orakel_py, orakel_js):
             zurueck = rest
         else:
             stand_setzen(basis, einheit, sicherung, True)
     manifest = {"basis": basis, "kandidaten": kand, "zurueck": zurueck,
-                "rot": py + js}
+                "rot": py + js, "konsistenztests": py_extra + js_extra, "altbefund": alt,
+                "einheiten": [e for e in alle_einheiten if len(e) > 1]}
     json.dump(manifest, open(os.path.join(sicherung, "manifest.json"), "w"), indent=1)
     if not zurueck:
         luecken_zurueck(sicherung)

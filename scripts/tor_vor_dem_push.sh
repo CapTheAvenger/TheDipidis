@@ -127,10 +127,12 @@ done
 # Rest wird freigegeben, laut gemeldet. Nicht heilbar = rot wie bisher.
 # TOR_OHNE_ROLLBACK=1 schaltet das ab.
 rollback=""
+rollback_versucht=0
 if [ "$rot" -ne 0 ] && [ "${TOR_OHNE_ROLLBACK:-0}" != "1" ] && [ -f scripts/tor_rollback.py ]; then
     sicherung="$protokolle/rollback"
     rm -rf "$sicherung"; mkdir -p "$sicherung"
     mkdir -p "$protokolle/erstlauf" && cp "$protokolle"/*.log "$protokolle/erstlauf/" 2>/dev/null
+    rollback_versucht=1
     if python3 scripts/tor_rollback.py suchen "$protokolle/erstlauf" "$sicherung"; then
         rot2=0
         for lauf in "${laeufe[@]}"; do
@@ -161,6 +163,33 @@ if [ "$rot" -ne 0 ] && [ "${TOR_OHNE_ROLLBACK:-0}" != "1" ] && [ -f scripts/tor_
         fi
     fi
 fi
+# WAS IM ERSTEN DURCHLAUF ROT WAR (SC-29, 09.10.2026): nach dem Zurueckrollen
+# zeigen Protokoll und Zusammenfassung sonst nur den ZWEITEN Durchlauf — die
+# Ursache, wegen der eine Datei alt bleibt, waere unsichtbar. Hier wird sie
+# benannt, geheilt oder nicht.
+if [ "$rollback_versucht" -eq 1 ]; then
+    erstlauf_rot="$(grep -hE '^✗|^FAILED' "$protokolle"/erstlauf/*.log 2>/dev/null | head -40 || true)"
+    {
+        echo ""
+        echo "### Rot im ERSTEN Durchlauf (vor dem Zurueckrollen)"
+        echo '```'
+        echo "${erstlauf_rot:-keine benennbare Zusicherung}"
+        echo '```'
+        if [ -f "$protokolle/rollback/manifest.json" ]; then
+            python3 - "$protokolle/rollback/manifest.json" <<'PY'
+import json, sys
+m = json.load(open(sys.argv[1]))
+for k, t in (("kandidaten", "geaendert in diesem Lauf"), ("zurueck", "auf dem Stand von gestern gelassen"),
+             ("einheiten", "Familien (rollen nur gemeinsam)"),
+             ("konsistenztests", "Konsistenztests im Orakel"), ("altbefund", "Altbefund, nicht als Orakel gezaehlt")):
+    v = m.get(k) or []
+    if v:
+        print(f"- {t}: " + ", ".join("`" + (" + ".join(x) if isinstance(x, list) else x) + "`" for x in v))
+PY
+        fi
+    } >> "$zusammenfassung"
+    echo "$erstlauf_rot" | grep -E '^✗|^FAILED' | head -20 | sed 's/^/::warning::Tor, erster Durchlauf: /' || true
+fi
 if [ -n "$rollback" ]; then
     {
         echo ""
@@ -172,6 +201,7 @@ if [ -n "$rollback" ]; then
         echo "Ursache beheben, dann zieht der naechste Lauf sie nach. Die Daten sind einen Lauf veraltet."
     } >> "$zusammenfassung"
     for f in $rollback; do echo "::warning::Tor: $f bleibt auf dem alten Stand (macht Zusicherungen rot)"; done
+    [ -n "${GITHUB_OUTPUT:-}" ] && echo "rollback=$rollback" >> "$GITHUB_OUTPUT"
     # Steht der Commit schon (Lauf nach dem Rebase), die Rueckrollung in ihn aufnehmen.
     if git rev-parse -q --verify origin/main >/dev/null && [ -n "$(git rev-list origin/main..HEAD)" ]; then
         # shellcheck disable=SC2086

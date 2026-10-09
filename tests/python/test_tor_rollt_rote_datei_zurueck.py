@@ -221,7 +221,15 @@ def test_wz35_bei_zwei_commits_traegt_keiner_die_rote_datei(tmp_path):
 # Luecken-Inventar — nicht heilbar, ganzer Lauf verworfen. Die Zusammenfassung
 # zeigte dazu nur die Meldungen des ZWEITEN Laufs.
 
+# Die Dateinamen stehen NICHT im Testtext, sondern in _quellen.py: seit dem
+# zweiten Teil von SC-29 nimmt die Suche jede Testdatei ins Orakel, die zwei
+# geaenderte Dateien nennt — damit waere der Fall unten auch OHNE Familie
+# geheilt, und die Gegenprobe der Familie bewiese nichts mehr. Ein Test, der
+# seine Dateien ueber ein Hilfsmodul liest, ist fuer das Orakel unsichtbar;
+# genau dafuer bleibt die Familie noetig.
 FAMILIE_TEST = '''import json
+
+from _quellen import ABGELEITET, NUTZUNG
 
 
 def lies(n):
@@ -229,18 +237,21 @@ def lies(n):
 
 
 def test_nutzung_ohne_kaputt():
-    assert "kaputt" not in lies("{nutzung}")
+    assert "kaputt" not in lies(NUTZUNG)
 
 
 def test_abgeleitet_passt_zur_nutzung():
-    assert lies("{abgeleitet}")["anteil"] == lies("{nutzung}")["anteil"]
+    assert lies(ABGELEITET)["anteil"] == lies(NUTZUNG)["anteil"]
 '''
 
 
 def _familienbaum(tmp_path, nutzung, abgeleitet):
     b = _baum(tmp_path)
-    (b / "tests" / "python" / "test_familie.py").write_text(
-        FAMILIE_TEST.replace("{nutzung}", nutzung).replace("{abgeleitet}", abgeleitet))
+    (b / "tests" / "python" / "_quellen.py").write_text(
+        f"NUTZUNG = {nutzung!r}\nABGELEITET = {abgeleitet!r}\n")
+    (b / "tests" / "python" / "conftest.py").write_text(
+        "import os, sys\nsys.path.insert(0, os.path.dirname(__file__))\n")
+    (b / "tests" / "python" / "test_familie.py").write_text(FAMILIE_TEST)
     (b / "data" / nutzung).write_text(json.dumps({"anteil": 74.4}))
     (b / "data" / abgeleitet).write_text(json.dumps({"anteil": 74.4}))
     git(b, "add", "-A"); git(b, "commit", "-qm", "familie")
@@ -302,3 +313,95 @@ def test_sc29_luecken_inventar_wird_nach_dem_zurueckrollen_neu_erzeugt(tmp_path)
     assert rc == 0, aus
     assert json.loads(_lies(b, "pokedex.json")) == ["a", "b", "c"]
     assert json.loads(_lies(b, "datenluecken.json")) == {"n": 3}, "Inventar nicht neu erzeugt"
+
+
+# ── SC-29, zweiter Teil (09.10.2026): KONSISTENZTESTS ALS ORAKEL ─────────
+#
+# Dieselbe Bauart wie die Champions-Familie gibt es ueberall, wo ein Bauer aus
+# einer Datei eine zweite macht. Hier OHNE Familie: nutzung.json (rot),
+# kader.json (daraus gebaut, selbst gruen) und ein Test, der beide
+# gegeneinander haelt und beide Dateien im Quelltext NENNT — den nimmt die
+# Suche ins Orakel, und kader geht mit zurueck. Verfaelschungsprobe
+# 09.10.2026: gegen die Skripte vor diesem Teil 3 der 4 Zusicherungen rot.
+
+def _baum_sc29(tmp_path, mit_inventar=False):
+    b = _baum(tmp_path)
+    (b / "data" / "nutzung.json").write_text(json.dumps({"wert": 1}))
+    (b / "data" / "kader.json").write_text(json.dumps({"wert": 1}))
+    (b / "tests" / "python" / "test_nutzung.py").write_text(
+        "import json\n\ndef test_nutzung_ohne_fehlerspalte():\n"
+        "    assert 'kaputt' not in json.load(open('data/nutzung.json'))\n")
+    (b / "tests" / "python" / "test_kader_konsistenz.py").write_text(
+        "import json\n\ndef test_kader_passt_zur_nutzung():\n"
+        "    k = json.load(open('data/kader.json'))\n"
+        "    n = json.load(open('data/nutzung.json'))\n"
+        "    assert k['wert'] == n['wert'], f\"Anteil {k['wert']} statt {n['wert']}\"\n")
+    if mit_inventar:
+        (b / "scripts" / "datenluecken.py").write_text(
+            "import json\nn = json.load(open('data/nutzung.json'))['wert']\n"
+            "json.dump({'n': n}, open('data/datenluecken.json', 'w'))\n")
+        (b / "data" / "datenluecken.json").write_text(json.dumps({"n": 1}))
+        (b / "tests" / "python" / "test_inventar.py").write_text(
+            "import json\n\ndef test_inventar_stimmt_mit_dem_erzeuger_ueberein():\n"
+            "    n = json.load(open('data/nutzung.json'))['wert']\n"
+            "    assert json.load(open('data/datenluecken.json')) == {'n': n}, 'datenluecken.json ist veraltet'\n")
+    git(b, "add", "-A")
+    git(b, "commit", "-qm", "sc29 basis")
+    # Der Lauf: nutzung frisch UND kaputt, kader daraus frisch gebaut (konsistent).
+    (b / "data" / "nutzung.json").write_text(json.dumps({"wert": 2, "kaputt": True}))
+    (b / "data" / "kader.json").write_text(json.dumps({"wert": 2}))
+    if mit_inventar:
+        (b / "data" / "datenluecken.json").write_text(json.dumps({"n": 2}))
+    (b / "data" / "preise.json").write_text(json.dumps({"x": 2.5}))    # unschuldig, geht durch
+    return b
+
+
+def test_sc29_konsistenztest_im_orakel_rollt_den_partner_mit_zurueck(tmp_path):
+    b = _baum_sc29(tmp_path)
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert json.loads(_lies(b, "nutzung.json")) == {"wert": 1}, "rote Datei nicht zurueckgerollt"
+    assert json.loads(_lies(b, "kader.json")) == {"wert": 1}, (
+        "die aus der roten Datei gebaute Datei blieb frisch — der Fehler vom 09.10.2026, ohne Familie")
+    assert json.loads(_lies(b, "preise.json")) == {"x": 2.5}, "unschuldige Datei wurde mitgerollt"
+    zurueck = aus.split("ZURUECK:")[-1].split("\n")[0]
+    assert "data/kader.json" in zurueck and "data/nutzung.json" in zurueck, zurueck
+    assert "test_kader_konsistenz.py" in aus.split("Konsistenztests im Orakel:")[-1].split("\n")[0]
+
+
+def test_sc29_inventar_passt_nach_dem_zurueckrollen_zum_endstand(tmp_path):
+    b = _baum_sc29(tmp_path, mit_inventar=True)
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert json.loads(_lies(b, "datenluecken.json")) == {"n": 1}, (
+        "das Inventar traegt noch den frischen Stand, obwohl seine Quelle zurueckging")
+    assert "data/datenluecken.json" not in aus.split("ZURUECK:")[-1].split("\n")[0], (
+        "ein neu erzeugtes Inventar ist nicht ‚zurueckgerollt'")
+
+
+def test_sc29_zusammenfassung_nennt_den_ersten_durchlauf_auch_nach_dem_heilen(tmp_path):
+    """Geheilt heisst nicht erledigt: die Ursache, wegen der eine Datei alt
+    bleibt, muss in Zusammenfassung und Protokoll stehen."""
+    b = _baum_sc29(tmp_path)
+    zf = tmp_path / "summary.md"
+    e = dict(os.environ, TOR_OHNE_INSTALL="1", RUNNER_TEMP=str(b / "tmp"), GITHUB_STEP_SUMMARY=str(zf))
+    r = subprocess.run(["bash", "scripts/tor_vor_dem_push.sh", "kern"], cwd=str(b), env=e,
+                       capture_output=True, text=True, timeout=300)
+    assert r.returncode == 0, r.stdout + r.stderr
+    text = zf.read_text()
+    assert "Rot im ERSTEN Durchlauf" in text
+    assert "test_nutzung.py::test_nutzung_ohne_fehlerspalte" in text, text
+    assert "Konsistenztests im Orakel" in text and "test_kader_konsistenz.py" in text, text
+    assert "::warning::Tor, erster Durchlauf: FAILED tests/python/test_nutzung.py" in r.stdout
+
+
+def test_sc29_ohne_konsistenztest_geht_der_partner_durch(tmp_path):
+    """Gegenprobe: ohne einen Test, der kader und nutzung gegeneinander haelt,
+    gibt es keinen Grund, kader zurueckzurollen — die frische Datei geht durch."""
+    b = _baum_sc29(tmp_path)
+    git(b, "rm", "-q", "tests/python/test_kader_konsistenz.py")
+    git(b, "commit", "-qm", "ohne konsistenztest")   # die Datenaenderungen bleiben ungestaged
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert json.loads(_lies(b, "kader.json")) == {"wert": 2}, "kader wurde ohne Grund zurueckgerollt"
+    assert json.loads(_lies(b, "nutzung.json")) == {"wert": 1}

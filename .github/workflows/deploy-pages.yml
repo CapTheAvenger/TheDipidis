@@ -46,6 +46,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -167,6 +168,7 @@ jobs:
 
   build:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     needs: test
     # Ein PR prueft, er liefert nicht aus.
     if: ${{ github.event_name != 'pull_request' }}
@@ -534,6 +536,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     needs: build
     if: ${{ github.event_name != 'pull_request' }}
     steps:

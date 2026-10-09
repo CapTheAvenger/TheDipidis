@@ -57,7 +57,7 @@ jobs:
     # (championsbattledata, ~234 Pokémon × api+2 CSVs) which takes ~8–10 min
     # on its own. Generous headroom against a slow host.
     # +15 min fuer das Tor vor dem Push (Kern-Suiten ~6,5 min im Deploy-Test, 29.09.2026)
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repo
@@ -556,7 +556,21 @@ jobs:
           node-version: '20'
 
       - name: Tor vor dem Push
+        id: tor
         run: bash scripts/tor_vor_dem_push.sh alle
+
+      # TOR-PROTOKOLLE SICHERN (SC-29, 09.10.2026): nach einem Zurueckrollen zeigt
+      # das Schrittprotokoll nur den zweiten Durchlauf; erstlauf/*.log und
+      # rollback/neu/ (die frische Fassung jeder zurueckgerollten Datei) liegen nur
+      # hier. Nur wenn es etwas zu lesen gibt: Tor rot oder Datei zurueckgerollt.
+      - name: Tor-Protokolle sichern
+        if: ${{ always() && (steps.tor.outcome == 'failure' || steps.tor.outputs.rollback != '') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tor-${{ github.run_id }}
+          path: ${{ runner.temp }}/tor
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Commit + push
         id: commit

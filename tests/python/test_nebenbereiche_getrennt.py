@@ -245,3 +245,67 @@ def test_die_tor_regel_beisst():
     assert not tor_und_push_befunde("p.yml", ablauf("always()", "tor", "${{ always() && steps.tor.outcome == 'success' }}"))
     assert tor_und_push_befunde("p.yml", ablauf("inputs.x", None, None))
     assert not tor_und_push_befunde("p.yml", ablauf(None, None, None))
+
+
+# ── SC-28 / SC-29 (09.10.2026): JEDER JOB HAT EINE ZEITGRENZE, JEDES TOR EINE SICHERUNG ──
+#
+# Bei PR #952 hingen `visual-nonmeta` und `sprachreinheit` ueber 1,5 Stunden
+# ohne Ergebnis (Median dieser Laeufe: 1,1 bzw. 1,6 Minuten); beide Jobs
+# hatten kein `timeout-minutes`, ebenso vier weitere Ablaeufe und alle drei
+# Jobs des Deploys. `test_das_tor_hat_node_und_zeit` oben prueft nur Tor-Jobs
+# und nimmt bei fehlendem Schluessel stillschweigend 360 an — genau die Luecke.
+# Verfaelschungsprobe 09.10.2026: `timeout-minutes` aus ace-spec-reparatur.yml
+# entfernt → rot; `id: tor` aus kartentexte.yml entfernt → rot.
+
+def test_jeder_job_jeder_ablaufdatei_hat_eine_zeitgrenze():
+    ohne = []
+    for name, roh, y in _alle_ablaeufe():
+        for job_name, job in (y.get("jobs") or {}).items():
+            if "timeout-minutes" not in (job or {}):
+                ohne.append(f"{name}: Job {job_name}")
+    assert not ohne, ("Jobs ohne timeout-minutes — ein haengender Laeufer blockiert sonst "
+                      "stundenlang (SC-28):\n  " + "\n  ".join(ohne))
+
+
+def test_jedes_tor_sichert_seine_protokolle():
+    """Nach einem Zurueckrollen zeigt das Schrittprotokoll nur den zweiten
+    Durchlauf (SC-29). `erstlauf/*.log` und `rollback/neu/` liegen nur in
+    `$RUNNER_TEMP/tor` — ohne Artefakt sind sie weg, sobald der Laeufer weg
+    ist. Der Schritt haengt an `steps.tor`: das Tor braucht dafuer `id: tor`
+    und schreibt `rollback=` in GITHUB_OUTPUT (scripts/tor_vor_dem_push.sh)."""
+    probleme = []
+    for name, roh, y in _alle_ablaeufe():
+        if not _schreibt_nach_main(roh) or name == "weekly-full-update.yml":
+            continue  # Proben ohne Push (setwechsel-probe) und der Wochenlauf (sichert data/ komplett)
+        for job_name, job in (y.get("jobs") or {}).items():
+            schritte = (job or {}).get("steps") or []
+            tore = [i for i, s in enumerate(schritte)
+                    if "scripts/tor_vor_dem_push.sh" in str(s.get("run", ""))]
+            if not tore:
+                continue
+            i_tor = tore[0]
+            if schritte[i_tor].get("id") != "tor":
+                probleme.append(f"{name}/{job_name}: Tor-Schritt ohne `id: tor`")
+            sicherung = [s for s in schritte[i_tor + 1:]
+                         if "upload-artifact" in str(s.get("uses", ""))
+                         and "/tor" in str((s.get("with") or {}).get("path", ""))]
+            if not sicherung:
+                probleme.append(f"{name}/{job_name}: kein Schritt, der $RUNNER_TEMP/tor als Artefakt sichert")
+                continue
+            bedingung = str(sicherung[0].get("if") or "")
+            if "always()" not in bedingung or "steps.tor.outcome" not in bedingung:
+                probleme.append(f"{name}/{job_name}: Sicherung laeuft nicht nach einem roten Tor "
+                                f"(`if` ist {bedingung!r}, braucht always() und steps.tor.outcome)")
+    assert not probleme, "\n".join(probleme)
+
+
+def test_das_tor_meldet_das_zurueckrollen_als_ausgabe():
+    """Der Sicherungsschritt oben liest `steps.tor.outputs.rollback`; das Tor
+    muss den Wert also schreiben — sonst ist die Bedingung immer falsch und
+    ein geheilter Lauf hinterlaesst nichts zum Nachlesen."""
+    with open(os.path.join(WURZEL, "scripts", "tor_vor_dem_push.sh"), encoding="utf-8") as f:
+        tor = _ohne_kommentare(f.read())
+    assert re.search(r'echo "rollback=\$rollback" >> "\$GITHUB_OUTPUT"', tor), (
+        "scripts/tor_vor_dem_push.sh schreibt `rollback=` nicht nach GITHUB_OUTPUT")
+    assert "erstlauf" in tor and "Rot im ERSTEN Durchlauf" in tor, (
+        "das Tor nennt den ersten Durchlauf nicht mehr in der Zusammenfassung")

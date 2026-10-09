@@ -641,6 +641,44 @@ def unmoegliche_bloecke(pokemon):
     return befunde
 
 
+CSV_VERSUCHE_JE_FORMAT = 3
+
+
+def _ref_datum(ref):
+    """'09_10_2026' -> (2026, 10, 9); ohne Datum -> (0, 0, 0)."""
+    m = re.match(r"^(\d{2})_(\d{2})_(\d{4})$", str(ref.get("date") or ""))
+    return (int(m.group(3)), int(m.group(2)), int(m.group(1))) if m else (0, 0, 0)
+
+
+def csv_kandidaten(refs):
+    """Je Format die CSV-Verweise in der Reihenfolge, in der sie geholt werden.
+
+    SC-30 (09.10.2026): die API fuehrt je Pokemon rund 58 Verweise — die
+    Saison-Gesamtdateien ("Current", ohne Datum) und dazu je Tag eine
+    Momentaufnahme (`daily: true`, M6/M7 …). Bis hierher holte der Scraper
+    ALLE und behielt die letzte erfolgreiche; weil die Gesamtdateien in der
+    Liste zuletzt stehen, war das Ergebnis dasselbe wie jetzt — nur mit
+    rund 10.400 Anfragen je Lauf, die mit 404 endeten (gemessen Lauf #114:
+    10.418), drei Minuten und einem Drosselungsrisiko ohne Nutzen.
+
+    Reihenfolge: erst die Gesamtdateien ohne Datum, dann die Momentaufnahmen
+    von der juengsten zur aeltesten. Geholt wird je Format bis zum ersten
+    Treffer (hoechstens CSV_VERSUCHE_JE_FORMAT Versuche).
+    """
+    je_format = {}
+    for ref in refs or []:
+        fmt = (ref.get("format") or "").strip().lower()
+        if not fmt or not ref.get("path"):
+            continue
+        je_format.setdefault(fmt, []).append(ref)
+    out = {}
+    for fmt, liste in je_format.items():
+        gesamt = [r for r in liste if not r.get("daily") and not r.get("date")]
+        taeglich = sorted([r for r in liste if r not in gesamt], key=_ref_datum, reverse=True)
+        out[fmt] = gesamt + taeglich
+    return out
+
+
 def scrape_pokemon(slug):
     """Return (display_name, record, fehlt) — fehlt=True heisst: die Quelle
     kennt diesen Slug nicht (HTTP 404).
@@ -669,20 +707,17 @@ def scrape_pokemon(slug):
 
     rec = {"name": en_name, "slug": slug}
     forms = {}
-    for csv_ref in data.get("battleDataCsvs", []):
-        fmt = (csv_ref.get("format") or "").strip().lower()  # 'doubles'/'singles'
-        path = csv_ref.get("path")
-        season = csv_ref.get("season")
-        if not fmt or not path:
-            continue
-        try:
-            text = fetch_text(f"{BASE}/{path}")
-        except Exception as e:  # noqa: BLE001
-            print(f"  WARN {slug}/{fmt}: csv fetch failed ({e})")
-            continue
-        s = summarize_csv(text)
-        s["season"] = season
-        forms[fmt] = s
+    for fmt, kandidaten in csv_kandidaten(data.get("battleDataCsvs", [])).items():
+        for csv_ref in kandidaten[:CSV_VERSUCHE_JE_FORMAT]:
+            try:
+                text = fetch_text(f"{BASE}/{csv_ref['path']}")
+            except Exception as e:  # noqa: BLE001
+                print(f"  WARN {slug}/{fmt}: csv fetch failed ({e})")
+                continue
+            s = summarize_csv(text)
+            s["season"] = csv_ref.get("season")
+            forms[fmt] = s
+            break
     if not forms:
         return None, None, False
     rec.update(forms)

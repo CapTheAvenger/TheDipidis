@@ -209,3 +209,96 @@ def test_wz35_bei_zwei_commits_traegt_keiner_die_rote_datei(tmp_path):
         assert "data/pokedex.json" not in geaendert, (sha, geaendert)
     botschaft = git(b, "log", "-1", "--format=%B")
     assert "Lauf 1" in botschaft and "Lauf 2" in botschaft
+
+
+# --- SC-29 (09.10.2026) -----------------------------------------------------
+# Champions Replica Scrape #150 (Lauf 37882102698) blieb rot, obwohl das Tor
+# eine "heilende" Menge fand: es rollte champions_usage.json und
+# champions_resources.json zurueck, liess aber champions_pokedex.json (aus der
+# Nutzungsdatei gebaut) auf dem neuen Stand. Die Suche prueft nur die zuerst
+# roten Zusicherungen; der Gesamtlauf danach fand den Widerspruch
+# ("Mega Baxcalibur: Anteil 58.1 statt 74.4") und das veraltete
+# Luecken-Inventar — nicht heilbar, ganzer Lauf verworfen. Die Zusammenfassung
+# zeigte dazu nur die Meldungen des ZWEITEN Laufs.
+
+FAMILIE_TEST = '''import json
+
+
+def lies(n):
+    return json.load(open("data/" + n))
+
+
+def test_nutzung_ohne_kaputt():
+    assert "kaputt" not in lies("{nutzung}")
+
+
+def test_abgeleitet_passt_zur_nutzung():
+    assert lies("{abgeleitet}")["anteil"] == lies("{nutzung}")["anteil"]
+'''
+
+
+def _familienbaum(tmp_path, nutzung, abgeleitet):
+    b = _baum(tmp_path)
+    (b / "tests" / "python" / "test_familie.py").write_text(
+        FAMILIE_TEST.replace("{nutzung}", nutzung).replace("{abgeleitet}", abgeleitet))
+    (b / "data" / nutzung).write_text(json.dumps({"anteil": 74.4}))
+    (b / "data" / abgeleitet).write_text(json.dumps({"anteil": 74.4}))
+    git(b, "add", "-A"); git(b, "commit", "-qm", "familie")
+    # der Lauf: neue Nutzung bricht eine Zusicherung, die abgeleitete Datei passt zu ihr
+    (b / "data" / nutzung).write_text(json.dumps({"anteil": 58.1, "kaputt": 1}))
+    (b / "data" / abgeleitet).write_text(json.dumps({"anteil": 58.1}))
+    return b
+
+
+def test_sc29_abgeleitete_champions_datei_rollt_mit_zurueck(tmp_path):
+    b = _familienbaum(tmp_path, "champions_usage.json", "champions_pokedex.json")
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert json.loads(_lies(b, "champions_usage.json")) == {"anteil": 74.4}
+    assert json.loads(_lies(b, "champions_pokedex.json")) == {"anteil": 74.4}, \
+        "abgeleitete Datei blieb neu — Widerspruch zur zurueckgerollten Nutzung"
+
+
+def test_sc29_verfaelschung_ohne_familie_bleibt_es_rot(tmp_path):
+    """Gegenprobe: dieselben Dateien ausserhalb einer Familie — einzeln
+    zurueckgerollt, Gesamtlauf rot (das alte Verhalten aus Lauf #150)."""
+    b = _familienbaum(tmp_path, "nutzung.json", "abgeleitet.json")
+    rc, aus = _tor(b)
+    assert rc == 1, aus
+
+
+def test_sc29_zusammenfassung_zeigt_die_meldungen_des_ersten_laufs(tmp_path):
+    b = _familienbaum(tmp_path, "nutzung.json", "abgeleitet.json")
+    zf = tmp_path / "zusammenfassung.md"
+    zf.write_text("")
+    e = dict(os.environ, TOR_OHNE_INSTALL="1", RUNNER_TEMP=str(b / "tmp"), GITHUB_STEP_SUMMARY=str(zf))
+    r = subprocess.run(["bash", "scripts/tor_vor_dem_push.sh", "kern"], cwd=str(b), env=e,
+                       capture_output=True, text=True, timeout=300)
+    assert r.returncode == 1, r.stdout + r.stderr
+    text = zf.read_text()
+    rot = text.split("Rot — die Meldungen")[-1]
+    assert "test_nutzung_ohne_kaputt" in rot, "die Meldung des ERSTEN Laufs fehlt:\n" + text
+    assert "Zweiter Lauf" in text and "test_abgeleitet_passt_zur_nutzung" in text, \
+        "der zweite Lauf nach dem Zurueckrollen wird nicht benannt:\n" + text
+
+
+LUECKEN_ERZEUGER = '''import json
+n = len(json.load(open("data/pokedex.json")))
+json.dump({"n": n}, open("data/datenluecken.json", "w"))
+'''
+
+
+def test_sc29_luecken_inventar_wird_nach_dem_zurueckrollen_neu_erzeugt(tmp_path):
+    b = _baum(tmp_path)
+    (b / "scripts" / "datenluecken.py").write_text(LUECKEN_ERZEUGER)
+    (b / "tests" / "python" / "test_luecken.py").write_text(
+        "import json\n\ndef test_inventar_aktuell():\n"
+        "    assert json.load(open('data/datenluecken.json'))['n'] == len(json.load(open('data/pokedex.json')))\n")
+    (b / "data" / "datenluecken.json").write_text(json.dumps({"n": 3}))
+    git(b, "add", "-A"); git(b, "commit", "-qm", "luecken")
+    (b / "data" / "pokedex.json").write_text(json.dumps(["a"]))     # rot
+    (b / "data" / "datenluecken.json").write_text(json.dumps({"n": 1}))  # passt zum Lauf
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert json.loads(_lies(b, "pokedex.json")) == ["a", "b", "c"]
+    assert json.loads(_lies(b, "datenluecken.json")) == {"n": 3}, "Inventar nicht neu erzeugt"

@@ -39,7 +39,22 @@ import subprocess
 import sys
 
 MAX_KANDIDATEN = 80
-NIE_ZURUECK = {"data/data_stand.json"}  # abgeleitet, wird nach dem Rebase neu gebaut
+# abgeleitet: data_stand.json wird nach dem Rebase neu gebaut, das
+# Luecken-Inventar nach jedem Zurueckrollen (SC-29, siehe LUECKEN).
+NIE_ZURUECK = {"data/data_stand.json", "data/datenluecken.json"}
+
+# FAMILIEN (SC-29, 09.10.2026): Dateien, die im selben Lauf auseinander
+# gebaut werden, rollen nur GEMEINSAM zurueck. Lauf #150 (Champions Replica
+# Scrape) liess champions_usage.json und champions_resources.json alt, den
+# daraus gebauten champions_pokedex.json aber neu — die Suche prueft nur die
+# zuerst roten Zusicherungen, der Gesamtlauf danach fand den Widerspruch
+# ("Mega Baxcalibur: Anteil 58.1 statt 74.4"), und der ganze Tag war weg.
+# Die Champions-Bauer lesen sich kreuz und quer (Pokedex <- Nutzung,
+# Kader, Namen; Ressourcen <- Nutzung, op.gg; Merkmale <- Ressourcen),
+# deshalb ist die Familie das ganze Champions-Datenpaket.
+FAMILIEN = [
+    ("champions", re.compile(r"^data/(champions_[^/]+|opgg_champions_moves\.json)$")),
+]
 
 
 def sh(*cmd, **kw):
@@ -78,6 +93,29 @@ def rote_zusicherungen(ordner):
     return sorted(set(py)), sorted(set(js)), unlesbar
 
 
+def einheiten(dateien):
+    """Kandidaten zu Einheiten buendeln: eine Familie ist EINE Einheit."""
+    familien, einzeln = {}, []
+    for f in dateien:
+        name = next((n for n, muster in FAMILIEN if muster.match(f)), None)
+        if name:
+            familien.setdefault(name, []).append(f)
+        else:
+            einzeln.append([f])
+    return [familien[n] for n in sorted(familien)] + einzeln
+
+
+LUECKEN = "scripts/datenluecken.py"
+
+
+def luecken_neu():
+    """SC-29: data/datenluecken.json ist aus den Daten abgeleitet. Nach jedem
+    Umschalten neu erzeugen, sonst ist es nach dem Zurueckrollen veraltet
+    (test_datenluecken.py: "datenluecken.json ist veraltet")."""
+    if os.path.exists(LUECKEN):
+        sh(sys.executable, LUECKEN)
+
+
 def nachschlagetabellen():
     os.makedirs("backend/core/data", exist_ok=True)
     for f in os.listdir("data"):
@@ -106,6 +144,7 @@ def stand_setzen(basis, dateien, sicherung, zuruck):
                 os.remove(f)  # der Lauf hat die Datei geloescht: so wieder herstellen
     sh("git", "reset", "-q", "--", *dateien) if dateien else None  # nichts Rotes im Index
     nachschlagetabellen()
+    luecken_neu()
 
 
 STAND = "data/data_stand.json"
@@ -184,26 +223,30 @@ def suchen(ordner, sicherung):
             ziel = os.path.join(sicherung, "geloescht", f)
             os.makedirs(os.path.dirname(ziel), exist_ok=True)
             open(ziel, "w").close()
+    if os.path.exists("data/datenluecken.json"):  # SC-29: so, wie der Lauf es baute
+        shutil.copyfile("data/datenluecken.json", os.path.join(sicherung, "datenluecken.vorher.json"))
     json.dump({"basis": basis, "kandidaten": kand, "zurueck": []},
               open(os.path.join(sicherung, "manifest.json"), "w"))
     stand_setzen(basis, kand, sicherung, True)
     if not gruen(py, js):
         stand_setzen(basis, kand, sicherung, False)
+        luecken_zurueck(sicherung)
         print(f"Kein Datenbefund — auch mit allen {len(kand)} Dateien auf dem Stand von {basis} bleiben "
               f"{len(py) + len(js)} Zusicherung(en) rot")
         return 2
     zurueck = list(kand)
-    for f in list(kand):
-        rest = [x for x in zurueck if x != f]
-        stand_setzen(basis, [f], sicherung, False)
+    for einheit in einheiten(kand):
+        rest = [x for x in zurueck if x not in einheit]
+        stand_setzen(basis, einheit, sicherung, False)
         if gruen(py, js):
             zurueck = rest
         else:
-            stand_setzen(basis, [f], sicherung, True)
+            stand_setzen(basis, einheit, sicherung, True)
     manifest = {"basis": basis, "kandidaten": kand, "zurueck": zurueck,
                 "rot": py + js}
     json.dump(manifest, open(os.path.join(sicherung, "manifest.json"), "w"), indent=1)
     if not zurueck:
+        luecken_zurueck(sicherung)
         print("Kein Datenbefund — die Zusicherungen wurden beim zweiten Lauf von selbst gruen "
               "(unstabiler Test?). Nichts zurueckgerollt, aber gemeldet.")
         print("ZURUECK: ")
@@ -218,9 +261,16 @@ def suchen(ordner, sicherung):
     return 0
 
 
+def luecken_zurueck(sicherung):
+    vorher = os.path.join(sicherung, "datenluecken.vorher.json")
+    if os.path.exists(vorher):
+        shutil.copyfile(vorher, "data/datenluecken.json")
+
+
 def zurueck(sicherung):
     m = json.load(open(os.path.join(sicherung, "manifest.json")))
     stand_setzen(m["basis"], m["kandidaten"], sicherung, False)
+    luecken_zurueck(sicherung)  # SC-29: das Inventar wie der Lauf es baute
     vorher = os.path.join(sicherung, "data_stand.vorher.json")
     if os.path.exists(vorher):
         shutil.copyfile(vorher, STAND)  # DA-53: auch den Datenstand wie der Lauf ihn baute

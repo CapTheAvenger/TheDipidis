@@ -86,6 +86,7 @@ if [ "${TOR_OHNE_SCHRUMPF:-0}" != "1" ] && [ -f scripts/schrumpf_waechter.py ]; 
             # shellcheck disable=SC2086
             git add -- $stopp_dateien
             [ -f data/data_stand.json ] && git add -- data/data_stand.json
+        [ -f data/datenluecken.json ] && git add -- data/datenluecken.json  # SC-29: neu erzeugt
             git commit -q --amend --no-edit || true
         fi
     fi
@@ -142,6 +143,21 @@ if [ "$rot" -ne 0 ] && [ "${TOR_OHNE_ROLLBACK:-0}" != "1" ] && [ -f scripts/tor_
         else
             python3 scripts/tor_rollback.py zurueck "$sicherung"
             echo "Zurueckrollen heilt nicht alle Suiten — alles wieder wie der Lauf es baute."
+            # SC-29 (09.10.2026): die Meldungen des ERSTEN Laufs sind die
+            # Ursache; der zweite Lauf zeigt nur, was nach dem Zurueckrollen
+            # nicht zusammenpasste. Lauf #150 zeigte ausschliesslich den
+            # zweiten und fuehrte damit auf die falsche Spur.
+            zweitlauf="$(grep -hE '^✗|^FAILED' "$protokolle"/*.log 2>/dev/null | head -20 || true)"
+            cp "$protokolle/erstlauf/"*.log "$protokolle/" 2>/dev/null
+            {
+                echo ""
+                echo "### Zurueckrollen versucht — Zweiter Lauf blieb rot"
+                echo ""
+                echo "Die Meldungen unten stammen aus dem ERSTEN Lauf (die Ursache). Im zweiten Lauf, nach dem Zurueckrollen, waren rot:"
+                echo '```'
+                echo "$zweitlauf"
+                echo '```'
+            } >> "$zusammenfassung"
         fi
     fi
 fi
@@ -161,6 +177,7 @@ if [ -n "$rollback" ]; then
         # shellcheck disable=SC2086
         git add -A -- $rollback || true
         [ -f data/data_stand.json ] && git add -- data/data_stand.json
+        [ -f data/datenluecken.json ] && git add -- data/datenluecken.json  # SC-29: neu erzeugt
         # WZ-35 (07.10.2026): liegen mehrere Commits vor main, stand die
         # Ruecknahme nur im obersten — die Historie trug die rote Datei
         # weiter. Dann alle Commits zu einem zusammenfassen (Botschaften bleiben).

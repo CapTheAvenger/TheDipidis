@@ -200,11 +200,54 @@
         return null;
     }
 
+    /* UI-134 (Hausi 08./09.10.2026, Festlegung B geaendert): am Desktop
+       stehen die sechs Kurzwahl-Knoepfe nicht mehr ueber der Bluetenschicht
+       im Kopf, sondern links in der Menuezeile vor Meta. Am Handy und
+       bis 768 px bleibt alles wie bisher (dort ist die Menuezeile die
+       untere Leiste, die Knoepfe stehen im Kopf). Verschoben wird der
+       EINE vorhandene Knotenbaum — keine zweite Kopie, also nie zwei
+       Bedienelemente fuer dasselbe; Kennungen und Klicks bleiben. */
+    var KURZWAHL_MQ = '(min-width: 769px)';
+    var kurzwahlAnker = null;
+
+    function kurzwahlZurueck() {
+        var el = document.querySelector('.header-flex-user');
+        if (el && kurzwahlAnker && kurzwahlAnker.parentNode && el.parentNode !== kurzwahlAnker.parentNode) {
+            kurzwahlAnker.parentNode.insertBefore(el, kurzwahlAnker);
+            el.classList.remove('ds-nav-kurzwahl');
+        }
+        var sep = document.querySelector('.ds-nav-kurzwahl-sep');
+        if (sep) sep.remove();
+    }
+
+    function kurzwahlPlatzieren() {
+        var host = document.getElementById('dsNavHost');
+        var el = document.querySelector('.header-flex-user');
+        if (!host || !el) return;
+        if (!kurzwahlAnker) {
+            kurzwahlAnker = document.createComment('kurzwahl');
+            el.parentNode.insertBefore(kurzwahlAnker, el);
+        }
+        var desktop = !!(window.matchMedia && window.matchMedia(KURZWAHL_MQ).matches);
+        if (!desktop) { kurzwahlZurueck(); return; }
+        if (el.parentNode !== host) {
+            host.insertBefore(el, host.firstChild);
+            el.classList.add('ds-nav-kurzwahl');
+        }
+        if (!host.querySelector('.ds-nav-kurzwahl-sep')) {
+            var sep = document.createElement('span');
+            sep.className = 'ds-nav-sep ds-nav-kurzwahl-sep';
+            sep.setAttribute('aria-hidden', 'true');
+            el.insertAdjacentElement('afterend', sep);
+        }
+    }
+
     function render() {
         var host = document.getElementById('dsNavHost');
         var bar  = document.getElementById('dsTabbarHost');
         if (!host) return;
         var L = LABELS[lang()];
+        kurzwahlZurueck();   // sonst loescht innerHTML die Knoepfe
 
         host.innerHTML = GROUPS.map(function (g, i) {
             /* Der Trenner steht vor dem ERSTEN abgesetzten Ziel, nicht
@@ -245,6 +288,7 @@
                 }
             });
         });
+        kurzwahlPlatzieren();
     }
 
     function syncActive(tabId) {
@@ -445,6 +489,12 @@
 
     function boot() {
         render();
+        if (window.matchMedia) {
+            var mq = window.matchMedia(KURZWAHL_MQ);
+            var neu = function () { kurzwahlPlatzieren(); };
+            if (mq.addEventListener) mq.addEventListener('change', neu);
+            else if (mq.addListener) mq.addListener(neu);
+        }
 
         // switchTab umschließen statt anfassen: app-core.js bleibt
         // unverändert, und diese Datei ist ohne Rückbau entfernbar.

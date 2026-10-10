@@ -21625,3 +21625,43 @@ tournament_id;date;meta;players;archetype_id;archetype_name;lists;lists_total;sh
 6abf3e58880ed327106e18e4;2026-10-08;TEF-30C;133;archaludon-ex;Archaludon;1;133;0.007519;0;2;0;2;0.0;mitUnentschieden;pairings
 6abf3e58880ed327106e18e4;2026-10-08;TEF-30C;133;mega-darkrai-ex;Mega Darkrai;1;133;0.007519;0;1;0;1;0.0;mitUnentschieden;pairings
 6abf3e58880ed327106e18e4;2026-10-08;TEF-30C;133;mega-starmie-ex;Mega Starmie;1;133;0.007519;0;7;0;7;0.0;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;dragapult-ex;Dragapult;11;118;0.09322;32;38;0;70;0.457143;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;basic-box-m;Basic Box;7;118;0.059322;12;18;0;30;0.4;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;lopunny-dudunsparce;Lopunny Dudunsparce;7;118;0.059322;15;18;0;33;0.454545;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;festival-lead;Festival Lead;7;118;0.059322;13;21;0;34;0.382353;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;sharpedo-toxtricity;Sharpedo Toxtricity;6;118;0.050847;11;15;2;28;0.392857;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;mega-excadrill-ex;Mega Excadrill;6;118;0.050847;10;18;0;28;0.357143;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;lopunny-dusknoir;Lopunny Dusknoir;6;118;0.050847;19;14;1;34;0.558824;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;n-zoroark;N's Zoroark;4;118;0.033898;14;13;1;28;0.5;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;hops-trevenant;Hop's Trevenant;4;118;0.033898;13;13;0;26;0.5;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;ogerpon-meganium-hydrapple;Ogerpon Meganium Hydrapple;4;118;0.033898;11;8;1;20;0.55;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;alakazam-dusknoir;Alakazam Dusknoir;4;118;0.033898;7;11;0;18;0.388889;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;dhelmise-pbl;Dhelmise;4;118;0.033898;7;15;0;22;0.318182;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;grimmsnarl-froslass;Grimmsnarl Froslass;4;118;0.033898;9;20;0;29;0.310345;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;other;Other;4;118;0.033898;2;14;0;16;0.125;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;dragapult-dusknoir;Dragapult Dusknoir;3;118;0.025424;8;12;0;20;0.4;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;slowking-scr;Slowking;3;118;0.025424;8;11;0;19;0.421053;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;lucario-hariyama;Lucario Hariyama;3;118;0.025424;6;5;0;11;0.545455;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;alakazam-dudunsparce;Alakazam Dudunsparce;3;118;0.025424;5;7;0;12;0.416667;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;dragapult-dudunsparce;Dragapult Dudunsparce;2;118;0.016949;15;4;0;19;0.789474;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;beedrill-ex-cri;Beedrill;2;118;0.016949;7;4;1;12;0.583333;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;dragapult-blaziken;Dragapult Blaziken;2;118;0.016949;5;4;0;9;0.555556;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;starmie-dusknoir;Starmie Dusknoir;2;118;0.016949;5;5;0;10;0.5;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;rockets-honchkrow;Rocket's Honchkrow;2;118;0.016949;4;9;0;13;0.307692;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;mega-lucario-ex;Mega Lucario;2;118;0.016949;3;4;0;7;0.428571;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;zygarde-barbaracle;Zygarde Barbaracle;1;118;0.008475;6;3;0;9;0.666667;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;crustle-dri;Crustle;1;118;0.008475;5;2;0;7;0.714286;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;flareon-ex;Flareon;1;118;0.008475;4;4;0;8;0.5;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;seaking-pre;Seaking Festival Lead;1;118;0.008475;4;3;0;7;0.571429;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;okidogi-barbaracle;Okidogi Barbaracle;1;118;0.008475;3;2;0;5;0.6;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;rocket-mewtwo-ex;Rocket's Mewtwo;1;118;0.008475;2;3;0;5;0.4;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;ursaluna-lunatone;Ursaluna Lunatone;1;118;0.008475;2;6;0;8;0.25;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;ogerpon-meganium-arboliva;Ogerpon Meganium Arboliva;1;118;0.008475;2;3;0;5;0.4;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;hop-zacian;Hop's Zacian;1;118;0.008475;1;2;0;3;0.333333;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;mega-darkrai-ex;Mega Darkrai;1;118;0.008475;1;1;0;2;0.5;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;mega-starmie-ex;Mega Starmie;1;118;0.008475;1;7;0;8;0.125;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;toxtricity-box;Toxtricity Box;1;118;0.008475;0;1;0;1;0.0;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;sinistcha-ogerpon;Sinistcha Ogerpon;1;118;0.008475;0;3;0;3;0.0;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;toucannon-pbl;Toucannon;1;118;0.008475;0;2;0;2;0.0;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;ethan-typhlosion;Ethan's Typhlosion;1;118;0.008475;0;2;0;2;0.0;mitUnentschieden;pairings
+6ac86d5785920e4d25367576;2026-10-09;TEF-30C;118;mega-venusaur-ex;Mega Venusaur;1;118;0.008475;0;1;0;1;0.0;mitUnentschieden;pairings

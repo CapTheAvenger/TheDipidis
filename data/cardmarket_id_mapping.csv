@@ -22,33 +22,33 @@
 30C,21,907628,live-verified,Greninja ex
 30C,22,907629,unique,Wishiwashi
 30C,23,907656,priced-by-date(30↔31),Pikachu
-30C,24,907652,priced-by-date(30↔31),Pikachu
-30C,25,907659,priced-by-date(30↔31),Pikachu
+30C,24,907659,priced-by-date(30↔31),Pikachu
+30C,25,907652,priced-by-date(30↔31),Pikachu
 30C,26,907631,priced-by-date(30↔31),Pikachu
 30C,27,907637,priced-by-date(30↔31),Pikachu
 30C,28,907658,priced-by-date(30↔31),Pikachu
-30C,29,907632,priced-by-date(30↔31),Pikachu
-30C,30,907644,priced-by-date(30↔31),Pikachu
-30C,31,907650,priced-by-date(30↔31),Pikachu
+30C,29,907644,priced-by-date(30↔31),Pikachu
+30C,30,907650,priced-by-date(30↔31),Pikachu
+30C,31,907632,priced-by-date(30↔31),Pikachu
 30C,32,907634,priced-by-date(30↔31),Pikachu
 30C,33,907645,priced-by-date(30↔31),Pikachu
-30C,34,907648,priced-by-date(30↔31),Pikachu
-30C,35,907630,priced-by-date(30↔31),Pikachu
-30C,36,907651,priced-by-date(30↔31),Pikachu
-30C,37,907646,priced-by-date(30↔31),Pikachu
+30C,34,907630,priced-by-date(30↔31),Pikachu
+30C,35,907646,priced-by-date(30↔31),Pikachu
+30C,36,907648,priced-by-date(30↔31),Pikachu
+30C,37,907651,priced-by-date(30↔31),Pikachu
 30C,38,907640,priced-by-date(30↔31),Pikachu
 30C,39,907635,priced-by-date(30↔31),Pikachu
 30C,40,907643,priced-by-date(30↔31),Pikachu
 30C,41,907654,priced-by-date(30↔31),Pikachu
 30C,42,907653,priced-by-date(30↔31),Pikachu
 30C,43,907636,priced-by-date(30↔31),Pikachu
-30C,44,907649,priced-by-date(30↔31),Pikachu
-30C,45,907655,priced-by-date(30↔31),Pikachu
+30C,44,907655,priced-by-date(30↔31),Pikachu
+30C,45,907649,priced-by-date(30↔31),Pikachu
 30C,46,907638,priced-by-date(30↔31),Pikachu
 30C,47,907639,priced-by-date(30↔31),Pikachu
-30C,48,907633,priced-by-date(30↔31),Pikachu
-30C,49,907657,priced-by-date(30↔31),Pikachu
-30C,50,907647,priced-by-date(30↔31),Pikachu
+30C,48,907647,priced-by-date(30↔31),Pikachu
+30C,49,907633,priced-by-date(30↔31),Pikachu
+30C,50,907657,priced-by-date(30↔31),Pikachu
 30C,51,907642,priced-by-date(30↔31),Pikachu
 30C,52,907939,priced-by-date(30↔31),Pikachu
 30C,53,907660,priced-by-date(4↔4),Pikachu ex
@@ -1395,7 +1395,7 @@ BLW,24,279762,live-verified,Darumaka
 BLW,25,279763,live-verified,Darmanitan
 BLW,26,279764,live-verified,Reshiram
 BLW,27,279766,live-verified,Oshawott
-BLW,28,279765,priced-by-date(2↔3),Oshawott
+BLW,28,279766,priced-by-date(2↔3),Oshawott
 BLW,29,279767,live-verified,Dewott
 BLW,30,279768,live-verified,Dewott
 BLW,31,279769,live-verified,Samurott
@@ -4654,9 +4654,9 @@ DS,34,276797,unique,Castform
 DS,35,276825,priced-by-date(10↔10),Ditto
 DS,36,276824,priced-by-date(10↔10),Ditto
 DS,37,276827,priced-by-date(10↔10),Ditto
-DS,38,276798,priced-by-date(10↔10),Ditto
-DS,39,276800,priced-by-date(10↔10),Ditto
-DS,40,276799,priced-by-date(10↔10),Ditto
+DS,38,276800,priced-by-date(10↔10),Ditto
+DS,39,276798,priced-by-date(10↔10),Ditto
+DS,40,276803,priced-by-date(10↔10),Ditto
 DS,43,276806,unique,Golbat
 DS,44,276807,unique,Hariyama
 DS,45,276808,unique,Illumise
@@ -4668,7 +4668,7 @@ DS,52,276815,unique,Rapidash
 DS,55,276818,unique,Skarmory
 DS,56,276819,unique,Volbeat
 DS,60,276823,unique,Cubone
-DS,61,276803,priced-by-date(10↔10),Ditto
+DS,61,276799,priced-by-date(10↔10),Ditto
 DS,62,276826,priced-by-date(10↔10),Ditto
 DS,63,276801,priced-by-date(10↔10),Ditto
 DS,64,276802,priced-by-date(10↔10),Ditto
@@ -5834,7 +5834,7 @@ EVS,197,574255,live-verified,Duraludon V
 EVS,198,574256,live-verified,Duraludon V
 EVS,199,574257,live-verified,Aroma Lady
 EVS,200,574258,live-verified,Copycat
-EVS,201,574281,priced-by-date(3↔3),Gordie
+EVS,201,574259,priced-by-date(3↔3),Gordie
 EVS,202,574260,live-verified,Raihan
 EVS,203,574261,live-verified,Zinnia's Resolve
 EVS,204,574262,live-verified,Leafeon VMAX
@@ -5856,7 +5856,7 @@ EVS,219,574277,live-verified,Duraludon VMAX
 EVS,220,574278,live-verified,Duraludon VMAX
 EVS,221,574279,live-verified,Aroma Lady
 EVS,222,574280,live-verified,Copycat
-EVS,223,574259,priced-by-date(3↔3),Gordie
+EVS,223,574281,priced-by-date(3↔3),Gordie
 EVS,224,574282,live-verified,Raihan
 EVS,225,574283,live-verified,Zinnia's Resolve
 EVS,226,574284,unique,Froslass
@@ -8474,7 +8474,7 @@ LOT,183,365817,live-verified,Mina
 LOT,184,365818,unique,Mixed Herbs
 LOT,185,365819,unique,Moomoo Milk
 LOT,186,365820,live-verified,Morty
-LOT,187,450048,priced-by-all(3↔3),Net Ball
+LOT,187,365821,priced-by-all(3↔3),Net Ball
 LOT,187a,450048,live-verified,Net Ball
 LOT,188,365822,live-verified,Professor Elm's Lecture
 LOT,188a,451213,priced-by-date(3↔7),Professor Elm's Lecture
@@ -9263,7 +9263,7 @@ N1,1,274401,unique,Ampharos
 N1,2,274402,unique,Azumarill
 N1,3,274403,unique,Bellossom
 N1,4,274404,live-verified,Feraligatr
-N1,5,274405,priced-by-date(2↔2),Feraligatr
+N1,5,274404,priced-by-date(2↔2),Feraligatr
 N1,6,274406,unique,Heracross
 N1,7,274407,unique,Jumpluff
 N1,8,274408,unique,Kingdra
@@ -9888,8 +9888,8 @@ OBF,56,725136,live-verified,Froakie
 OBF,57,725137,live-verified,Frogadier
 OBF,58,725138,unique,Wiglett
 OBF,59,725139,unique,Wugtrio
-OBF,60,725141,priced-by-date(2↔2),Finizen
-OBF,61,725140,priced-by-date(2↔2),Finizen
+OBF,60,725140,priced-by-date(2↔2),Finizen
+OBF,61,725141,priced-by-date(2↔2),Finizen
 OBF,62,727118,live-verified,Palafin
 OBF,63,725143,unique,Magnemite
 OBF,64,725144,unique,Magneton
@@ -9902,8 +9902,8 @@ OBF,70,725150,unique,Thundurus
 OBF,71,725151,unique,Toxel
 OBF,72,725152,live-verified,Toxtricity
 OBF,73,725153,unique,Pawmot ex
-OBF,74,725154,priced-by-date(3↔3),Tadbulb
-OBF,75,725156,priced-by-date(3↔3),Tadbulb
+OBF,74,725156,priced-by-date(3↔3),Tadbulb
+OBF,75,725154,priced-by-date(3↔3),Tadbulb
 OBF,76,725155,priced-by-date(3↔3),Tadbulb
 OBF,77,725157,live-verified,Bellibolt
 OBF,78,725158,priced-by-date(3↔3),Bellibolt
@@ -10009,8 +10009,8 @@ OBF,177,725257,unique,Gumshoos
 OBF,178,725258,unique,Skwovet
 OBF,179,725259,unique,Greedent ex
 OBF,180,725260,live-verified,Lechonk
-OBF,181,725262,priced-by-date(4↔4),Lechonk
-OBF,182,725261,priced-by-date(4↔4),Lechonk
+OBF,181,725261,priced-by-date(4↔4),Lechonk
+OBF,182,725262,priced-by-date(4↔4),Lechonk
 OBF,183,725263,live-verified,Oinkologne
 OBF,184,725264,priced-by-date(2↔2),Oinkologne
 OBF,185,725265,unique,Flamigo
@@ -10361,8 +10361,8 @@ PAF,226,751773,live-verified,Pawmi
 PAF,227,751774,priced-by-date(3↔3),Clive
 PAF,228,751775,unique,Judge
 PAF,229,751776,live-verified,Nemona
-PAF,230,751778,priced-by-date(4↔4),Paldean Student
-PAF,231,751777,priced-by-date(4↔4),Paldean Student
+PAF,230,751777,priced-by-date(4↔4),Paldean Student
+PAF,231,751778,priced-by-date(4↔4),Paldean Student
 PAF,232,751779,live-verified,Mew ex
 PAF,233,751780,live-verified,Gardevoir ex
 PAF,234,751781,live-verified,Charizard ex
@@ -10496,8 +10496,8 @@ PAL,116,715591,live-verified,Rockruff
 PAL,117,715592,live-verified,Lycanroc ex
 PAL,118,715593,unique,Passimian
 PAL,119,715594,unique,Falinks
-PAL,120,715595,priced-by-date(3↔3),Nacli
-PAL,121,715596,priced-by-date(3↔3),Nacli
+PAL,120,715596,priced-by-date(3↔3),Nacli
+PAL,121,715595,priced-by-date(3↔3),Nacli
 PAL,122,715597,unique,Naclstack
 PAL,123,715598,live-verified,Garganacl
 PAL,124,715599,priced-by-date(2↔2),Glimmet
@@ -10678,8 +10678,8 @@ PAR,21,740497,unique,Simisear
 PAR,22,740498,unique,Volcanion
 PAR,23,740499,unique,Fuecoco
 PAR,24,740500,unique,Crocalor
-PAR,25,740501,priced-by-date(2↔3),Charcadet
-PAR,26,740502,priced-by-date(2↔3),Charcadet
+PAR,25,740502,priced-by-date(2↔3),Charcadet
+PAR,26,740501,priced-by-date(2↔3),Charcadet
 PAR,27,740503,live-verified,Armarouge ex
 PAR,28,740504,live-verified,Iron Moth
 PAR,29,740505,live-verified,Chi-Yu
@@ -11633,8 +11633,8 @@ PLF,49,280927,unique,Sableye
 PLF,50,280928,unique,Beldum
 PLF,51,280929,unique,Metang
 PLF,52,280930,unique,Metagross
-PLF,54,280933,priced-by-date(2↔2),Yamask
-PLF,55,280932,priced-by-date(2↔2),Yamask
+PLF,54,280932,priced-by-date(2↔2),Yamask
+PLF,55,280933,priced-by-date(2↔2),Yamask
 PLF,56,280934,live-verified,Cofagrigus
 PLF,57,280935,live-verified,Cofagrigus
 PLF,58,280936,unique,Nidoking
@@ -12753,10 +12753,10 @@ RS,60,275707,priced-by-date(2↔3),Mudkip
 RS,61,275709,unique,Numel
 RS,62,275710,unique,Phanpy
 RS,63,275711,live-verified,Poochyena
-RS,64,275711,priced-by-date(3↔3),Poochyena
+RS,64,275712,priced-by-date(3↔3),Poochyena
 RS,65,275713,priced-by-date(3↔3),Poochyena
-RS,66,275714,priced-by-date(3↔3),Ralts
-RS,67,275715,priced-by-date(3↔3),Ralts
+RS,66,275715,priced-by-date(3↔3),Ralts
+RS,67,275714,priced-by-date(3↔3),Ralts
 RS,68,275716,priced-by-date(3↔3),Ralts
 RS,69,275717,unique,Shroomish
 RS,70,275718,live-verified,Skitty
@@ -13655,7 +13655,7 @@ SP,35,487069,unique,Decidueye
 SP,36,487074,unique,Arctozolt
 SP,37,487079,live-verified,Hydreigon
 SP,38,487084,unique,Kangaskhan
-SP,39,549406,priced-by-all(4↔5),Pikachu
+SP,39,491189,priced-by-all(4↔5),Pikachu
 SP,40,491194,live-verified,Hatenna
 SP,41,491199,unique,Flareon
 SP,42,659064,priced-by-all(7↔7),Eevee
@@ -13741,7 +13741,7 @@ SP,123,573858,live-verified,Galarian Articuno
 SP,124,573859,live-verified,Galarian Zapdos
 SP,125,573860,live-verified,Galarian Moltres
 SP,126,568798,unique,Galarian Slowpoke
-SP,127,491204,priced-by-all(7↔7),Eevee
+SP,127,568799,priced-by-all(7↔7),Eevee
 SP,128,568800,unique,Eiscue
 SP,129,568801,unique,Umbreon
 SP,130,572539,live-verified,Ice Rider Calyrex V
@@ -13751,8 +13751,8 @@ SP,133,576732,live-verified,Lance's Charizard V
 SP,134,576733,live-verified,Dark Sylveon V
 SP,135,576734,unique,Zacian LV.X
 SP,137,576736,live-verified,Light Toxtricity
-SP,139,576739,priced-by-date(4↔5),Pikachu V-UNION
-SP,140,576738,priced-by-date(4↔5),Pikachu V-UNION
+SP,139,576738,priced-by-date(4↔5),Pikachu V-UNION
+SP,140,576739,priced-by-date(4↔5),Pikachu V-UNION
 SP,141,576741,priced-by-date(4↔5),Pikachu V-UNION
 SP,142,576740,priced-by-date(4↔5),Pikachu V-UNION
 SP,143,604984,priced-by-all(6↔8),Pikachu V
@@ -13786,7 +13786,7 @@ SP,171,580168,unique,Latias
 SP,172,583199,unique,Tepig
 SP,173,583200,unique,Blitzle
 SP,174,583201,unique,Espeon
-SP,175,568799,priced-by-all(7↔7),Eevee
+SP,175,557975,priced-by-all(7↔7),Eevee
 SP,176,583203,live-verified,Hoopa V
 SP,178,569233,live-verified,Professor's Research
 SP,179,583204,live-verified,Flareon V
@@ -13800,7 +13800,7 @@ SP,186,606600,unique,Lucario
 SP,187,606601,unique,Liepard
 SP,188,606602,unique,Bibarel
 SP,189,609463,live-verified,Flapple
-SP,190,557975,priced-by-all(7↔7),Eevee
+SP,190,491204,priced-by-all(7↔7),Eevee
 SP,191,606748,unique,Leafeon
 SP,192,606749,unique,Glaceon
 SP,194,604996,unique,Leafeon V
@@ -13932,8 +13932,8 @@ SS,23,275800,unique,Steelix
 SS,24,275801,unique,Umbreon
 SS,25,275802,unique,Vaporeon
 SS,26,275803,unique,Wobbuffet
-SS,27,275804,priced-by-date(2↔2),Anorith
-SS,28,275805,priced-by-date(2↔2),Anorith
+SS,27,275805,priced-by-date(2↔2),Anorith
+SS,28,275804,priced-by-date(2↔2),Anorith
 SS,29,275806,unique,Arbok
 SS,30,275807,unique,Azumarill
 SS,31,275808,unique,Azurill
@@ -14050,8 +14050,8 @@ SSH,41,436359,unique,Cloyster
 SSH,42,436364,live-verified,Krabby
 SSH,43,436369,priced-by-date(2↔2),Krabby
 SSH,44,436374,unique,Kingler
-SSH,45,436384,priced-by-date(2↔2),Goldeen
-SSH,46,436379,priced-by-date(2↔2),Goldeen
+SSH,45,436379,priced-by-date(2↔2),Goldeen
+SSH,46,436384,priced-by-date(2↔2),Goldeen
 SSH,47,436389,unique,Seaking
 SSH,48,436394,live-verified,Lapras
 SSH,49,436399,live-verified,Lapras V
@@ -14203,7 +14203,7 @@ SSH,195,437069,live-verified,Zacian V
 SSH,196,437074,live-verified,Zamazenta V
 SSH,197,437079,live-verified,Snorlax V
 SSH,198,437084,live-verified,Cramorant V
-SSH,199,437124,priced-by-date(3↔3),Bede
+SSH,199,437089,priced-by-date(3↔3),Bede
 SSH,200,437094,live-verified,Marnie
 SSH,201,437134,priced-by-all(3↔5),Professor's Research
 SSH,202,437099,live-verified,Team Yell Grunt
@@ -14211,7 +14211,7 @@ SSH,203,437104,live-verified,Lapras VMAX
 SSH,204,437109,live-verified,Morpeko VMAX
 SSH,205,437114,live-verified,Stonjourner VMAX
 SSH,206,427236,priced-by-all(2↔3),Snorlax VMAX
-SSH,207,437089,priced-by-date(3↔3),Bede
+SSH,207,437124,priced-by-date(3↔3),Bede
 SSH,208,437129,live-verified,Marnie
 SSH,209,448168,priced-by-all(3↔5),Professor's Research
 SSH,210,437139,live-verified,Team Yell Grunt
@@ -14773,8 +14773,8 @@ SVI,12,702309,unique,Gogoat
 SVI,13,689763,live-verified,Sprigatito
 SVI,14,702310,unique,Floragato
 SVI,15,702311,live-verified,Meowscarada
-SVI,16,702313,priced-by-all(4↔4),Tarountula
-SVI,17,702312,priced-by-all(4↔4),Tarountula
+SVI,16,702312,priced-by-all(4↔4),Tarountula
+SVI,17,702313,priced-by-all(4↔4),Tarountula
 SVI,18,702314,priced-by-all(4↔4),Tarountula
 SVI,19,702315,live-verified,Spidops ex
 SVI,20,702317,priced-by-date(2↔2),Smoliv
@@ -14784,8 +14784,8 @@ SVI,23,702319,live-verified,Arboliva
 SVI,24,702320,live-verified,Toedscool
 SVI,25,702321,priced-by-all(3↔3),Toedscool
 SVI,26,702322,unique,Toedscruel
-SVI,27,702324,priced-by-date(2↔2),Capsakid
-SVI,28,702323,priced-by-date(2↔2),Capsakid
+SVI,27,702323,priced-by-date(2↔2),Capsakid
+SVI,28,702324,priced-by-date(2↔2),Capsakid
 SVI,29,702325,live-verified,Scovillain
 SVI,30,702326,priced-by-date(2↔2),Growlithe
 SVI,31,702327,priced-by-date(2↔2),Growlithe
@@ -14897,8 +14897,8 @@ SVI,136,702430,priced-by-date(2↔2),Maschiff
 SVI,137,702432,live-verified,Mabosstiff
 SVI,138,702433,live-verified,Bombirdier
 SVI,139,702434,unique,Forretress
-SVI,140,702435,priced-by-date(2↔2),Varoom
-SVI,141,702436,priced-by-date(2↔2),Varoom
+SVI,140,702436,priced-by-date(2↔2),Varoom
+SVI,141,702435,priced-by-date(2↔2),Varoom
 SVI,142,702437,priced-by-date(1↔2),Revavroom
 SVI,143,702439,live-verified,Iron Treads ex
 SVI,144,702440,unique,Chansey
@@ -15058,7 +15058,7 @@ SVP,41,720943,unique,Paldean Wooper
 SVP,42,715756,unique,Houndstone
 SVP,43,715757,live-verified,Eevee
 SVP,44,715758,live-verified,Charmander
-SVP,45,844367,priced-by-all(3↔6),Paradise Resort
+SVP,45,783445,priced-by-all(3↔6),Paradise Resort
 SVP,46,720944,unique,Bulbasaur
 SVP,47,720945,live-verified,Charmander
 SVP,48,720946,unique,Squirtle
@@ -15097,10 +15097,10 @@ SVP,80,751805,unique,Crocalor
 SVP,81,751806,priced-by-all(2↔3),Skeledirge ex
 SVP,82,690963,priced-by-all(2↔2),Quaxly
 SVP,83,751808,unique,Quaxwell
-SVP,84,782681,priced-by-all(2↔3),Quaquaval ex
+SVP,84,751809,priced-by-all(2↔3),Quaquaval ex
 SVP,86,751810,live-verified,Mabosstiff ex
 SVP,87,751812,unique,Sprigatito ex
-SVP,88,751813,priced-by-all(3↔10),Pikachu
+SVP,88,740411,priced-by-all(3↔10),Pikachu
 SVP,89,760231,live-verified,Feraligatr
 SVP,90,760232,live-verified,Metang
 SVP,91,692236,priced-by-date(2↔4),Koraidon
@@ -15564,8 +15564,8 @@ TEU,111,369040,unique,Alolan Ninetales
 TEU,112,369041,unique,Mimikyu
 TEU,114,369042,live-verified,Alolan Exeggutor
 TEU,115,369043,priced-by-date(2↔2),Alolan Exeggutor
-TEU,116,369045,priced-by-date(2↔2),Dratini
-TEU,117,369044,priced-by-date(2↔2),Dratini
+TEU,116,369044,priced-by-date(2↔2),Dratini
+TEU,117,369045,priced-by-date(2↔2),Dratini
 TEU,118,369046,unique,Dragonair
 TEU,119,369047,unique,Dragonite
 TEU,121,369048,live-verified,Pidgey
@@ -15719,8 +15719,8 @@ TM,97,279627,unique,Mew
 TM,98,279628,live-verified,Yanmega
 TM,99,279630,priced-by-date(2↔3),Darkrai & Cresselia LEGEND
 TM,100,279629,priced-by-date(2↔3),Darkrai & Cresselia LEGEND
-TM,101,279632,priced-by-date(2↔3),Palkia & Dialga LEGEND
-TM,102,279631,priced-by-date(2↔3),Palkia & Dialga LEGEND
+TM,101,279631,priced-by-date(2↔3),Palkia & Dialga LEGEND
+TM,102,279632,priced-by-date(2↔3),Palkia & Dialga LEGEND
 TM,FOUR,279530,unique,Alph Lithograph
 TR,1,274054,live-verified,Dark Alakazam
 TR,2,274072,priced-by-date(2↔2),Dark Arbok
@@ -16362,8 +16362,8 @@ UF,N,276632,priced-by-date(28↔28),Unown
 UF,O,276645,priced-by-date(28↔28),Unown
 UF,P,276637,priced-by-date(28↔28),Unown
 UF,Q,276620,priced-by-date(28↔28),Unown
-UF,R,276628,priced-by-date(28↔28),Unown
-UF,S,276634,priced-by-date(28↔28),Unown
+UF,R,276634,priced-by-date(28↔28),Unown
+UF,S,276628,priced-by-date(28↔28),Unown
 UF,T,276642,priced-by-date(28↔28),Unown
 UF,U,276619,priced-by-date(28↔28),Unown
 UF,V,276636,priced-by-date(28↔28),Unown
@@ -16421,7 +16421,7 @@ UL,47,279203,unique,Cherubi
 UL,48,279204,priced-by-date(1↔2),Chinchou
 UL,49,279205,priced-by-date(1↔2),Horsea
 UL,50,279206,live-verified,Larvitar
-UL,51,279207,priced-by-date(2↔3),Larvitar
+UL,51,279206,priced-by-date(2↔3),Larvitar
 UL,52,279208,unique,Magmar
 UL,53,279209,unique,Mankey
 UL,54,279210,unique,Misdreavus
@@ -16681,8 +16681,8 @@ UNM,22,387942,unique,Magmortar
 UNM,23,387947,unique,Numel
 UNM,24,387952,unique,Camerupt
 UNM,26,387962,unique,Victini
-UNM,27,387967,priced-by-date(2↔2),Litwick
-UNM,28,387972,priced-by-date(2↔2),Litwick
+UNM,27,387972,priced-by-date(2↔2),Litwick
+UNM,28,387967,priced-by-date(2↔2),Litwick
 UNM,29,387977,unique,Lampent
 UNM,30,387982,unique,Chandelure
 UNM,31,387987,unique,Fletchinder
@@ -16739,8 +16739,8 @@ UNM,88,388247,unique,Munna
 UNM,89,388252,unique,Musharna
 UNM,90,388257,unique,Elgyem
 UNM,91,388267,unique,Beheeyem
-UNM,92,388272,priced-by-date(2↔2),Honedge
-UNM,93,388262,priced-by-date(2↔2),Honedge
+UNM,92,388262,priced-by-date(2↔2),Honedge
+UNM,93,388272,priced-by-date(2↔2),Honedge
 UNM,94,388277,unique,Doublade
 UNM,95,388282,unique,Aegislash
 UNM,96,388287,unique,Mareanie
@@ -17185,7 +17185,7 @@ VIV,175,512585,live-verified,Drapion V
 VIV,176,512590,live-verified,Steelix V
 VIV,177,512595,live-verified,Aegislash V
 VIV,178,512600,live-verified,Togekiss V
-VIV,179,512605,priced-by-date(3↔3),Allister
+VIV,179,512670,priced-by-date(3↔3),Allister
 VIV,180,512675,priced-by-date(3↔3),Bea
 VIV,181,512615,live-verified,Beauty
 VIV,182,512685,priced-by-date(3↔4),Leon
@@ -17198,7 +17198,7 @@ VIV,188,512650,live-verified,Pikachu VMAX
 VIV,189,512655,live-verified,Coalossal VMAX
 VIV,190,512660,live-verified,Aegislash VMAX
 VIV,191,512665,live-verified,Togekiss VMAX
-VIV,192,512670,priced-by-date(3↔3),Allister
+VIV,192,512605,priced-by-date(3↔3),Allister
 VIV,193,512610,priced-by-date(3↔3),Bea
 VIV,194,512680,priced-by-date(3↔3),Beauty
 VIV,195,512620,priced-by-date(3↔4),Leon

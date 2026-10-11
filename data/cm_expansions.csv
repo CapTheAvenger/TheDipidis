@@ -43,7 +43,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6495,,CSV8C: Brilliant Fantasy,2026-02-17,,264
 5589,TEF,Temporal Forces,2024-01-11,tcg,263
 5198,,VSTAR Universe,2022-10-28,,262
-4328,EVS,Evolving Skies,2021-06-10,tcg,260
+4328,EVS,Evolving Skies,2021-06-10,tcg,261
 6416,,CSV7C: Blade Awakening,2025-12-08,,259
 6595,,CSV9.5C: Terastal Gathering,2026-05-28,,259
 5201,CRZ,Crown Zenith,2022-11-04,tcg,256
@@ -65,8 +65,8 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6310,,CSVE2C: Battle Party Shining Dream Set 1,2025-09-30,,232
 1745,SUM,Sun & Moon,2016-11-09,tcg,228
 3199,DAA,Darkness Ablaze,2020-05-20,tcg,227
+3484,VIV,Vivid Voltage,2020-09-01,tcg,224
 1824,BUS,Burning Shadows,2017-06-29,tcg,222
-3484,VIV,Vivid Voltage,2020-09-01,tcg,222
 6408,,CS1DC: Dynamax Clash V Starter Deck,2024-07-24,,222
 6329,,,2025-02-06,,220
 2320,CES,Celestial Storm,2018-05-11,tcg,219
@@ -74,7 +74,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6297,,CS1aC: Dynamax Clash - Thunder,2024-07-24,,217
 1678,BKT,BREAKthrough,2015-10-18,tcg,216
 2065,UPR,Ultra Prism,2017-12-14,tcg,215
-4170,,,2021-04-01,,212
+4170,,,2021-04-01,,214
 6343,,CSM1cC: Storming Emergence - Abundant,2024-11-14,,212
 1523,BS,Base Set,0000-00-00,tcg,211
 5204,PPS1,Play! Pokémon Prize Pack Series One,2022-11-10,pps,211
@@ -83,9 +83,9 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 5328,,Pokémon Card 151,2023-04-05,,210
 3630,SHF,Shining Fates,2020-12-10,tcg,208
 5802,SCR,Stellar Crown,2024-06-28,tcg,208
+6604,,30th Celebration Indonesian & Thai,2026-06-02,,207
 3675,BST,Battle Styles,2020-12-15,tcg,206
 6342,,CSM1bC: Storming Emergence - Verdant,2024-11-14,,204
-6604,,30th Celebration Indonesian & Thai,2026-06-02,,203
 6311,,CSVE1C: Battle Party Dream Together Set 1,2025-04-24,,202
 5431,PPS3,Play! Pokémon Prize Pack Series Three,2023-08-02,pps,201
 6298,,CS1bC: Dynamax Clash - Flame,2024-07-24,,199
@@ -131,6 +131,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 1582,XY,XY,0000-00-00,tcg,168
 6193,,CSV1C: Eternal Birth,2025-01-03,,167
 1564,SV,Supreme Victors,0000-00-00,tcg,166
+6393,,,2025-11-19,,166
 6110,,CSV3C: Fearless Terastal,2025-04-16,,165
 6169,,CSV4C: Bonus Round,2025-06-11,,165
 6230,,Pokémon Card Gym Promo MEGA Vol. 1,2025-07-25,,164
@@ -191,7 +192,6 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6092,,The Glory of Team Rocket,2025-03-21,,132
 1579,PLF,Plasma Freeze,0000-00-00,tcg,131
 4251,,Grass Lurantis GX Deck,2021-03-17,,131
-6393,,,2025-11-19,,131
 1527,BS2,Base Set 2,0000-00-00,tcg,130
 6299,PFL,Phantasmal Flames,2025-09-04,tcg,130
 1584,FFI,Furious Fists,0000-00-00,tcg,129
@@ -230,6 +230,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 1544,RG,EX FireRed & LeafGreen,0000-00-00,tcg,117
 3600,,Sword & Shield Starter Decks: Grass,2020-12-02,,117
 3801,,Alter Genesis,2021-03-15,,117
+5834,,,2024-07-23,,117
 6427,,Nihil Zero,2025-12-22,,117
 3836,,Double Blaze,2021-03-15,,116
 5216,,Scarlet ex,2022-12-09,,116
@@ -365,7 +366,6 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4973,,Time Gazer,2022-03-04,,88
 4974,,Space Juggler,2022-03-04,,88
 6314,,CSM1.5C: Battle Elite,2024-11-14,,88
-5834,,,2024-07-23,,87
 3219,,Explosive Flame Walker,2020-05-25,,86
 3284,,VMAX Rising,2020-06-08,,86
 3886,,Champion Road,2021-03-17,,86

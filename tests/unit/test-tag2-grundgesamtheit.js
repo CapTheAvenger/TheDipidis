@@ -82,9 +82,12 @@ function erhebe(tid) {
     const cont = CONT.filter(r => String(r.tournament_id || '').trim() === tid);
     const day2 = cont.filter(r => String(r.day2 || '').trim() === '1');
     const labs = LABS.filter(r => String(r.tournament_id || '').trim() === tid);
+    const day2Plaetze = [...new Set(day2.map(r => zahl(r.place)))]
+        .filter(p => p > 0).sort((a, b) => a - b);
     return {
         tid,
         plaetze,
+        day2Plaetze,
         listen: plaetze.length,
         contZeilen: cont.length,
         day2: day2.length,
@@ -221,15 +224,66 @@ describe('Die Listen-CSV fuehrt genau das Day-2-Feld', () => {
         }
     });
 
-    it('jedes Turnier: die Plaetze laufen lueckenlos von 1 bis n', () => {
-        for (const e of ERHEBUNG) {
-            assert.equal(e.plaetze[0], 1, `Turnier ${e.tid}: erster Platz ist nicht 1`);
-            assert.equal(e.plaetze[e.plaetze.length - 1], e.plaetze.length,
-                `Turnier ${e.tid}: letzter Platz ${e.plaetze[e.plaetze.length - 1]} `
-                + `bei ${e.plaetze.length} Listen — Luecke im Cut`);
-            e.plaetze.forEach((p, i) => assert.equal(p, i + 1,
-                `Turnier ${e.tid}: Luecke bei Platz ${i + 1}`));
+    /* WARUM HIER NICHT MEHR "LUECKENLOS VON 1 BIS n" STEHT (13.10.2026,
+       Wochenlauf #182, Regional Louisville 0076).
+       ===============================================================
+       Die Quelle selbst hat das Loch: limitlesstcg.com/tournaments/581
+       fuehrt 547 Day-2-Spieler mit Liste, Plaetze 1..548 — Platz 534
+       fehlt dort (nachgemessen in Chrome, 13.10.2026), und labs fuehrt
+       fuer denselben Spieler keine day2-Zeile mit Platz. Zwei Quellen,
+       ein Loch: das ist ein Spieler, der nicht veroeffentlicht wird
+       (Disqualifikation, Widerspruch) — kein Datenverlust.
+
+       "Lueckenlos von 1 bis n" nagelte eine EIGENSCHAFT DER QUELLE fest,
+       die sie nicht garantiert, und hielt den Wochenlauf an, ohne dass
+       etwas fehlte. Die Aussage, die wirklich zaehlt, ist eine GLEICHUNG
+       ZWISCHEN ZWEI DATEIEN: die Plaetze mit Liste sind GENAU die
+       Day-2-Plaetze aus player_continuity.csv. Ein Day-2-Platz ohne
+       Liste ist verloren (rot), eine Liste ohne Day-2-Zeile ist ein
+       Geisterspieler (rot), ein Loch in beiden ist die Quelle (gruen).
+       Dieselbe Regel wie beim Gleichheitszeichen darunter: verloren ist
+       ein Fehler, ein Loch der Quelle nicht. */
+    function plaetzeGegenDay2(e) {
+        const fehler = [];
+        if (e.plaetze[0] !== 1) fehler.push(`Turnier ${e.tid}: erster Platz ist nicht 1`);
+        const day2 = new Set(e.day2Plaetze);
+        const liste = new Set(e.plaetze);
+        const nurListe = e.plaetze.filter(p => !day2.has(p));
+        const nurDay2 = e.day2Plaetze.filter(p => !liste.has(p));
+        if (nurListe.length) {
+            fehler.push(`Turnier ${e.tid}: Liste(n) auf Platz `
+                + `${nurListe.slice(0, 5).join(', ')} ohne day2-Zeile mit Platz in `
+                + `player_continuity.csv — Geisterspieler`);
         }
+        if (nurDay2.length) {
+            fehler.push(`Turnier ${e.tid}: Day-2-Platz `
+                + `${nurDay2.slice(0, 5).join(', ')} ohne Liste — verloren`);
+        }
+        return fehler;
+    }
+
+    it('jedes Turnier: die Plaetze mit Liste sind genau die Day-2-Plaetze', () => {
+        for (const e of ERHEBUNG) {
+            assert.deepEqual(plaetzeGegenDay2(e), []);
+        }
+    });
+
+    it('Verfaelschungsprobe: verlorene Liste und Geisterspieler fallen auf, ein Loch der Quelle nicht', () => {
+        // Das Loch der Quelle (13.10.2026): Platz 534 in KEINER Datei.
+        assert.deepEqual(plaetzeGegenDay2({
+            tid: 'quelle', plaetze: [1, 2, 3, 5], day2Plaetze: [1, 2, 3, 5] }), []);
+        // Verloren: Day-2-Platz 4 hat keine Liste.
+        assert.match(plaetzeGegenDay2({
+            tid: 'verloren', plaetze: [1, 2, 3, 5], day2Plaetze: [1, 2, 3, 4, 5] }).join('\n'),
+            /Day-2-Platz 4 ohne Liste — verloren/);
+        // Geisterspieler: Liste auf Platz 6, den es im Day-2-Feld nicht gibt.
+        assert.match(plaetzeGegenDay2({
+            tid: 'geist', plaetze: [1, 2, 3, 6], day2Plaetze: [1, 2, 3] }).join('\n'),
+            /Platz 6 ohne day2-Zeile/);
+        // Und der erste Platz ist 1.
+        assert.match(plaetzeGegenDay2({
+            tid: 'start', plaetze: [2, 3], day2Plaetze: [2, 3] }).join('\n'),
+            /erster Platz ist nicht 1/);
     });
 
     /* WARUM HIER KEIN GLEICHHEITSZEICHEN MEHR STEHT (22.09.2026).

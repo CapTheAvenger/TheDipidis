@@ -94,6 +94,7 @@ from turnier_legalitaet import zweiter_freitag_nach
 from tournament_scraper_JH import (
     get_tournament_info,
     _resolve_labs_tournament_id,
+    _labs_datum_fuer,
     _parse_iso_date,
     _derive_meta_from_date_JH,
     _clean_deck_name,
@@ -104,6 +105,7 @@ from tournament_scraper_JH import (
     # 16.960 Zeilen das rohe Quelldatum 2026-06-10 statt des
     # belegten 2026-06-12. Siehe Kommentar bei t_date_raw.
     _datum_mit_override,
+    _load_date_overrides,
 )
 
 setup_console_encoding()
@@ -816,6 +818,25 @@ def scrape_one_tournament(
     # + player_continuity). Empty string when no mapping known.
     labs_tid = _resolve_labs_tournament_id(t_name, t_date_iso, tid_lim)
 
+    # DAS DATUM DER LABS-DATEI (13.10.2026, Wochenlauf #181). Ist das
+    # Turnier bei labs bekannt, traegt die Zeile DEREN Datum — den ersten
+    # Turniertag. Limitless nennt bei dreitaegigen Regionals den Samstag
+    # (Baltimore 19.09., Louisville 10.10.), labs den Freitag; die Seite
+    # darf dasselbe Ereignis nicht je nach Reiter an zwei Tagen zeigen
+    # (tests/python/test_per_decklist_datum_override.py). Vorher brauchte
+    # jedes solche Turnier einen Datums-Override von Hand. Ohne labs-Treffer
+    # bleibt das Quelldatum stehen — erfunden wird nichts.
+    # REIHENFOLGE: Override > Labs > Quelle. Eine hinterlegte Datumskorrektur
+    # (data/labs_tournament_id_overrides.json) ist eine belegte Entscheidung
+    # und gewinnt auch gegen die Labs-Datei — die kann einen Lauf lang noch
+    # das alte Datum fuehren (Befund Pruefagent 13.10.2026).
+    if labs_tid and not _hat_datums_override(tid_lim):
+        labs_datum = _labs_datum_fuer(labs_tid)
+        if labs_datum and labs_datum != t_date_iso:
+            logger.info("  Datum: labs %s fuehrt %s, die Quelle %s — die Zeilen "
+                        "tragen das labs-Datum", labs_tid, labs_datum, t_date_iso)
+            t_date_iso = labs_datum
+
     rows_std = parse_standings_rows(t_url)
     if not rows_std:
         logger.info("  No standings rows for %s — skipping", tid_lim)
@@ -1235,6 +1256,90 @@ def _datum_nachtragen_kern(ziel: str, trocken: bool = False) -> Dict:
     return bericht
 
 
+def _hat_datums_override(limitless_tid: str) -> bool:
+    """Fuehrt data/labs_tournament_id_overrides.json fuer dieses Limitless-
+    Turnier ein korrigiertes Datum? Dann gilt das — vor Labs, vor Quelle."""
+    return str(limitless_tid or '').strip() in _load_date_overrides()
+
+
+def labs_datum_abgleichen(ziel: str, trocken: bool = False) -> Dict:
+    """Die Datumsspalte des Bestands an die Labs-Datei angleichen — ohne Netz.
+
+    WARUM ES DAS GIBT (13.10.2026, Wochenlauf #181)
+
+    `tests/python/test_per_decklist_datum_override.py` verlangt, dass
+    data/labs_tournament_decks.csv und diese Datei dasselbe Turnier am
+    selben Tag nennen. Die Labs-Datei fuehrt den ERSTEN Turniertag; ihr
+    Datum kann sich zwischen zwei Laeufen aendern (Namensabgleich gegen
+    die Kartendaten, hinterlegte Korrektur — siehe
+    labs_tournament_scraper.py, „Das letzte Wort hat die hinterlegte
+    Korrektur"). Eine Zeile hier wird dagegen EINMAL geschrieben und nie
+    wieder angeschaut. Baltimore (22.09.2026) hat das dreimal
+    hintereinander rot gemacht: „0072: per_player=2026-09-18
+    labs=2026-09-19".
+
+    Deshalb laeuft dieser Abgleich am Ende JEDES Scrape-Laufs (und auf
+    Wunsch von Hand): je Zeile mit `tournament_id` gilt das Datum, das die
+    Labs-Datei fuer diese Kennung fuehrt. Zeilen ohne Kennung oder ohne
+    Labs-Eintrag bleiben unberuehrt — erfunden wird nichts.
+
+    WAS ANGEFASST WIRD: ausschliesslich `tournament_date`. Alle uebrigen
+    Spalten werden vor und nach dem Abgleich Zelle fuer Zelle verglichen;
+    weichen sie ab, wird NICHTS geschrieben. Zeilen, deren Limitless-Turnier
+    eine hinterlegte Datumskorrektur hat, bleiben stehen (Override > Labs).
+    """
+    kopf, zeilen = _bestand_lesen(ziel)
+    bericht: Dict = {
+        'zeilen_vorher': len(zeilen),
+        'zeilen_nachher': len(zeilen),
+        'geaendert': 0,
+        'je_turnier': {},
+        'geschrieben': False,
+    }
+    if not zeilen or 'tournament_id' not in kopf or 'tournament_date' not in kopf:
+        return bericht
+
+    andere = [k for k in kopf if k != 'tournament_date']
+    abdruck_vorher = [tuple(z.get(k, '') for k in andere) for z in zeilen]
+
+    aufgeloest: Dict[str, str] = {}
+
+    def _labs_datum(tid: str) -> str:
+        if tid not in aufgeloest:
+            iso = _labs_datum_fuer(tid)
+            if not re.match(r'^\d{4}-\d{2}-\d{2}$', iso or ''):
+                iso = ''
+            aufgeloest[tid] = iso
+        return aufgeloest[tid]
+
+    for z in zeilen:
+        tid = (z.get('tournament_id') or '').strip()
+        if not tid:
+            continue
+        # Override > Labs: eine hinterlegte Datumskorrektur bleibt stehen.
+        if _hat_datums_override(z.get('limitless_tournament_id') or ''):
+            continue
+        soll = _labs_datum(tid)
+        alt = (z.get('tournament_date') or '').strip()
+        if not soll or alt == soll:
+            continue
+        z['tournament_date'] = soll
+        bericht['geaendert'] += 1
+        bericht['je_turnier'].setdefault(tid, {'von': alt, 'auf': soll, 'zeilen': 0})
+        bericht['je_turnier'][tid]['zeilen'] += 1
+
+    abdruck_nachher = [tuple(z.get(k, '') for k in andere) for z in zeilen]
+    if len(zeilen) != bericht['zeilen_vorher'] or abdruck_nachher != abdruck_vorher:
+        bericht['fehler'] = ('der Abgleich haette ausserhalb von '
+                             'tournament_date etwas veraendert')
+        return bericht
+
+    if bericht['geaendert'] and not trocken:
+        _schreibe_atomar(ziel, kopf, zeilen)
+        bericht['geschrieben'] = True
+    return bericht
+
+
 def turnier_id_nachtragen(ziel: str, datenverzeichnis=None,
                           trocken: bool = False) -> Dict:
     """`--turnier-id-nachtragen`: leere `tournament_id` nachziehen — ohne Netz.
@@ -1356,6 +1461,31 @@ def _lauf_turnier_id(ziel: str, trocken: bool = False) -> int:
         return 0
     if b['geschrieben']:
         print(f"geschrieben: {ziel}")
+    return 0
+
+
+def _lauf_labs_datum(ziel: str, trocken: bool = False) -> int:
+    """CLI-Huelle um `labs_datum_abgleichen` — misst, meldet, schreibt."""
+    b = labs_datum_abgleichen(ziel, trocken=trocken)
+    if not b['zeilen_vorher']:
+        print(f"::error::{ziel} hat keine Zeilen — nichts abzugleichen.")
+        return 1
+    if b.get('fehler'):
+        print(f"::error::{b['fehler']} — es wird nichts geschrieben.")
+        return 1
+    print(f"{b['zeilen_vorher']} Zeile(n) im Bestand.")
+    if not b['je_turnier']:
+        print("  jede Zeile mit Kennung traegt schon das Datum der Labs-Datei — "
+              "nichts zu tun.")
+        return 0
+    for tid, e in sorted(b['je_turnier'].items()):
+        print(f"  Turnier {tid}: {e['von']} -> {e['auf']} ({e['zeilen']} Zeilen)")
+    print(f"  geaenderte Zellen: {b['geaendert']} — ausschliesslich in "
+          f"tournament_date (alle uebrigen Spalten Zelle fuer Zelle geprueft)")
+    if trocken:
+        print("Probelauf — es wird nichts geschrieben.")
+        return 0
+    print("geschrieben." if b['geschrieben'] else "nichts geschrieben.")
     return 0
 
 
@@ -1489,9 +1619,18 @@ def main():
                          'belegtes Datum fuehrt. Nur diese eine Spalte wird '
                          'angefasst; alle uebrigen werden vor und nach dem '
                          'Lauf Zelle fuer Zelle verglichen.')
+    ap.add_argument('--labs-datum-abgleichen', action='store_true',
+                    dest='labs_datum_abgleichen',
+                    help='Ohne Netz: im vorhandenen Bestand die Spalte '
+                         'tournament_date jeder Zeile mit tournament_id auf '
+                         'das Datum setzen, das data/labs_tournament_decks*.csv '
+                         'fuer diese Kennung fuehrt (laeuft am Ende jedes '
+                         'Scrape-Laufs von selbst). Nur diese eine Spalte '
+                         'wird angefasst.')
     ap.add_argument('--trocken', action='store_true',
                     help='Nur berichten, nichts schreiben (mit '
-                         '--bilanzen-nachtragen oder --datum-nachtragen).')
+                         '--bilanzen-nachtragen, --datum-nachtragen oder '
+                         '--labs-datum-abgleichen).')
     args = ap.parse_args()
 
     data_dir = get_data_dir()
@@ -1506,6 +1645,15 @@ def main():
             if os.path.exists(im_repo):
                 ziel = im_repo
         return _lauf_datum(ziel, args.trocken)
+
+    if args.labs_datum_abgleichen:
+        # Reiner Dateilauf wie --datum-nachtragen: kein Netz.
+        ziel = out_path
+        if args.output == OUTPUT_FILE:
+            im_repo = os.path.join(_PROJECT_ROOT, 'data', OUTPUT_FILE)
+            if os.path.exists(im_repo):
+                ziel = im_repo
+        return _lauf_labs_datum(ziel, args.trocken)
 
     if args.turnier_id_nachtragen:
         # Reiner Dateilauf wie --datum-nachtragen: kein Netz.
@@ -1698,6 +1846,24 @@ def main():
             total_rows += len(rows)
 
     logger.info("Done — %d rows total → %s", total_rows, out_path)
+
+    # Am Ende jedes Laufs: das Datum jeder Zeile mit Kennung ist das der
+    # Labs-Datei (siehe labs_datum_abgleichen). Auch fuer Zeilen aus
+    # frueheren Laeufen — die Labs-Datei kann ihr Datum seither geaendert
+    # haben, die Zeile hier nicht.
+    if os.path.exists(out_path):
+        b = labs_datum_abgleichen(out_path)
+        if b.get('fehler'):
+            logger.error("Labs-Datumsabgleich NICHT geschrieben: %s", b['fehler'])
+            print(f"::error::per_decklist_scraper: {b['fehler']}")
+            return 1
+        if b['geaendert']:
+            logger.info("Labs-Datumsabgleich: %d Zeile(n) in %d Turnier(en) auf das "
+                        "Datum der Labs-Datei gesetzt: %s", b['geaendert'],
+                        len(b['je_turnier']), b['je_turnier'])
+            print(f"::notice::per_decklist_scraper: {b['geaendert']} Zeile(n) tragen "
+                  f"jetzt das Datum der Labs-Datei — "
+                  + ", ".join(f"{t}: {v['von']} → {v['auf']}" for t, v in b['je_turnier'].items()))
     return 0
 
 

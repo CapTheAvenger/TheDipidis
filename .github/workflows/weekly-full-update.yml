@@ -1338,7 +1338,18 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
             cp /tmp/js.log /tmp/py.log data/ 2>/dev/null || true
             echo "gruen=false" >> "$GITHUB_OUTPUT"
+            # JEDE ROTE ZEILE AUCH ALS ANNOTATION (13.10.2026, Lauf #181).
+            # Die Zusammenfassung oben sieht nur, wer bei GitHub angemeldet
+            # ist — die Mail, die Lauf-Seite ohne Anmeldung und die
+            # API-Abfrage (check-runs/<job>/annotations) zeigen nur die
+            # Annotationen. Lauf #181 kostete deshalb erst einen Umweg ueber
+            # einen angemeldeten Browser, bevor die vier roten Namen
+            # ueberhaupt lesbar waren.
+            # GitHub zeigt hoechstens 10 ::error::-Annotationen je Schritt:
+            # die Sammelzeile zuerst, dann bis zu neun rote Zeilen.
             echo "::error::Die frischen Daten machen Zusicherungen rot — nicht gepusht. Siehe Zusammenfassung."
+            grep -hE '^✗|^FAILED' /tmp/js.log /tmp/py.log 2>/dev/null \
+              | head -9 | sed 's/^/::error::Tor: /' || true
             exit 1
           fi
           echo "gruen=true" >> "$GITHUB_OUTPUT"

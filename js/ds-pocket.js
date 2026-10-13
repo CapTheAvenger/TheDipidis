@@ -309,6 +309,42 @@
         return s;
     }
 
+    var ENERGIE_DE = { Grass: 'Pflanze', Fire: 'Feuer', Water: 'Wasser', Lightning: 'Elektro',
+                       Psychic: 'Psycho', Fighting: 'Kampf', Darkness: 'Finsternis', Metal: 'Metall' };
+    // Reihenfolge der Typen wie im Spiel; nur Typen, die in der Datei vorkommen, werden gezeigt.
+    var ENERGIE_REIHE = ['Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal'];
+
+    /* FE-65 (Hausi 08./09.10.2026): Filter nach Energietyp. Quelle ist das
+       gespeicherte Feld `energie` je Deck (dieselbe Zeile „Energie: …“ wie
+       im Deck-Dialog). Ein Deck mit zwei Energien steht unter beiden Typen
+       (gemessen 09.10.: 3 von 42 Decks). Farblos/Drache kommen als
+       Deck-Energie nicht vor (Pocket-Regel, siehe energie_verboten). */
+    var energieFilter = null;
+
+    function energieChips() {
+        var decks = daten.decks || [];
+        var zahl = {};
+        decks.forEach(function (d) { (d.energie || []).forEach(function (e) { zahl[e] = (zahl[e] || 0) + 1; }); });
+        var typen = ENERGIE_REIHE.filter(function (e) { return zahl[e]; })
+            .concat(Object.keys(zahl).filter(function (e) { return ENERGIE_REIHE.indexOf(e) < 0; }));
+        if (!typen.length) return '';
+        if (energieFilter && !zahl[energieFilter]) energieFilter = null;
+        function chip(wert, text, n) {
+            var an = (wert || null) === energieFilter;
+            return '<button type="button" class="pk-chip' + (an ? ' is-an' : '') + '" data-pk-energie="' + esc(wert) +
+                '" aria-pressed="' + (an ? 'true' : 'false') + '">' + esc(text) +
+                ' <span class="pk-chip-zahl">' + n + '</span></button>';
+        }
+        return '<div class="pk-chips" role="group" aria-label="' + esc(t('Nach Energie filtern', 'Filter by energy')) + '">' +
+            chip('', t('Alle', 'All'), decks.length) +
+            typen.map(function (e) { return chip(e, t(ENERGIE_DE[e] || e, e), zahl[e]); }).join('') +
+            '</div>';
+    }
+
+    function passtZumFilter(d) {
+        return !energieFilter || (d.energie || []).indexOf(energieFilter) >= 0;
+    }
+
     /* EINE DECKZEILE. */
     function zeile(d) {
         var i = (daten.decks || []).indexOf(d);
@@ -316,9 +352,10 @@
         s += '<span class="pk-marke">' + esc(d.tier || '?') + '</span>';
         s += spriteHtml(d);
         s += '<span class="pk-name">' + esc(d.name);
-        var fuss = [prozent(d.anteil) + t(' der Listen', ' of lists'),
+        var erg = (d.energie || []).map(function (e) { return t(ENERGIE_DE[e] || e, e); }).join('/');
+        var fuss = (erg ? [erg] : []).concat([prozent(d.anteil) + t(' der Listen', ' of lists'),
                     wr().kuerzel + ' ' + prozent(d.quote),
-                    d.listen + t(' Listen', ' lists')];
+                    d.listen + t(' Listen', ' lists')]);
         if (!d.code) fuss.push(t('ohne Scan-Code', 'no scan code'));
         s += '<span class="pk-fussnote" title="' + esc(wrTitel()) + '">' + esc(fuss.join(' · ')) + '</span>';
         s += '</span><span class="pk-pfeil" aria-hidden="true">›</span></button>';
@@ -326,9 +363,9 @@
     }
 
     function liste() {
-        var decks = (daten.decks || []).slice();
+        var decks = (daten.decks || []).filter(passtZumFilter);
         var ordnung = stufenOrdnung();
-        var s = '';
+        var s = energieChips();
         ordnung.forEach(function (stufe) {
             // Die Reihenfolge innerhalb einer Stufe kommt aus der Datei:
             // nach Anteil, gezählt — keine erfundene Rangfolge.
@@ -538,8 +575,6 @@
                            esc(nr) + '</span></li>';
                 }).join('') + '</ul>';
         }
-        var ENERGIE_DE = { Grass: 'Pflanze', Fire: 'Feuer', Water: 'Wasser', Lightning: 'Elektro',
-                           Psychic: 'Psycho', Fighting: 'Kampf', Darkness: 'Finsternis', Metal: 'Metall' };
         var energie = (d.energie || []).map(function (e) { return t(ENERGIE_DE[e] || e, e); });
         return '<div class="pk-karten">' +
                block(t('Pokémon', 'Pokémon'), d.pokemon) +
@@ -894,6 +929,8 @@
         reiter.dataset.pkVerdrahtet = '1';
 
         reiter.addEventListener('click', function (ev) {
+            var chip = ev.target.closest('[data-pk-energie]');
+            if (chip) { energieFilter = chip.getAttribute('data-pk-energie') || null; zeichne(); return; }
             var z = ev.target.closest('[data-pk-deck]');
             if (z) { oeffne(Number(z.getAttribute('data-pk-deck'))); return; }
             var k = ev.target.closest('[data-pk-kopieren]');

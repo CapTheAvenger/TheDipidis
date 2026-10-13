@@ -525,6 +525,23 @@
         });
     }
 
+    /**
+     * FE-64 (Hausi 08./09.10.2026): den gewuenschten Druck einer Karte merken,
+     * OHNE dass sie als vorhanden zaehlt. Status und Drucke bleiben, wie sie
+     * sind — „Fehlt“ bleibt „Fehlt“. druck = {id, set, number, bild} oder null
+     * (Wunsch zuruecknehmen).
+     */
+    function artworkSetzen(box, id, druck) {
+        return karteAendern(box, id, function (k) {
+            if (druck && druck.id) {
+                k.artwork = { id: druck.id, set: druck.set, number: druck.number, bild: druck.bild || '' };
+            } else {
+                delete k.artwork;
+            }
+            return k;
+        });
+    }
+
     /** Karte von Hand dazu. Liegt sie (oder ein anderer Druck davon) schon drin, passiert nichts. */
     function manuellHinzufuegen(box, eintrag, heute) {
         if (!eintrag || !eintrag.id) return { box: box, hinzugefuegt: false };
@@ -1411,6 +1428,7 @@
                 eintrag.status = vorlage.status;
                 eintrag.drucke = (vorlage.drucke || []).map(function (d) { return Object.assign({}, d); });
             }
+            if (vorlage && vorlage.artwork) eintrag.artwork = Object.assign({}, vorlage.artwork);   // FE-64
             karten.push(eintrag);
             hinzu.push(eintrag);
             geaendert = true;
@@ -1428,7 +1446,7 @@
         deckzeilenAus: deckzeilenAus,
         istBasisEnergie: istBasisEnergie, groessteAnzahl: groessteAnzahl, standardEintraege: standardEintraege, basisEnergieNummer: basisEnergieNummer, BASIS_ENERGIE_SVE: BASIS_ENERGIE_SVE, artVon: artVon, markenVonKarte: markenVonKarte, istSpielbox: istSpielbox, spielboxBefuellen: spielboxBefuellen, spielboxAbgleichen: spielboxAbgleichen, istAutoSpielbox: istAutoSpielbox, SPIELBOX_AUTO_ID: SPIELBOX_AUTO_ID, SPIELBOX_NAME: SPIELBOX_NAME, preisVon: preisVon, markenIndex: markenIndex, KOPIEN_MAX: KOPIEN_MAX, ALLE_KARTEN: ALLE_KARTEN,
         kartenId, gleicheKarte, neueBox, abgleichen, rubriken, zaehlen, proxyListe,
-        statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, verschiedeneKarten, sammlungsBedarf, druckeSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
+        statusSetzen, drinSetzen, auffuellen, reinlegen, zusammenfassen, verschiedeneKarten, sammlungsBedarf, druckeSetzen, artworkSetzen, drin, normiert, gefordertVon, umfang, anzeigeName,
         manuellHinzufuegen, neueEigeneBox, istEigen, deckzeilenLesen, listeEinlegen, namenVertragen, entfernen, wiederAufnehmen, draussenLassen, filterPasst, sortieren, ELEMENTE,
         markenKontext, basisEnergieRegel, formatPasst, imFormatGespielt, boxStufe, hauptkartenDerBox, chipReihe, KERN_SCHWELLE, formateNachDatum, blockVorRotation, druckIn, druckLegal, anteilIn, META_SCHWELLE, formateZuordnen,
         anzahlWieUebersicht,
@@ -2235,9 +2253,14 @@
                 + '" aria-pressed="' + (s === status ? 'true' : 'false') + '" onclick="ArchetypBox.status('
                 + arg + ',\'' + s + '\')">' + esc(text) + '</button>';
         }).join('');
-        const bild = k.bild
-            ? '<img src="' + esc(k.bild) + '" alt="' + esc(k.name) + '" loading="lazy" referrerpolicy="no-referrer">'
+        // FE-64: ein festgelegtes Artwork zeigt sein Bild; der Status bleibt davon unberuehrt.
+        const art = k.artwork && k.artwork.id ? k.artwork : null;
+        const bildUrl = (art && art.bild) || k.bild;
+        const bild = bildUrl
+            ? '<img src="' + esc(bildUrl) + '" alt="' + esc(k.name) + '" loading="lazy" referrerpolicy="no-referrer">'
             : '<div class="abx-kein-bild">' + esc(k.set + ' ' + k.number) + '</div>';
+        const artZeile = art
+            ? '<div class="abx-artwork-zeile">' + esc(tx('abx.artworkZeile', { druck: art.set + ' ' + art.number }, 'Artwork: {druck}')) + '</div>' : '';
         const anteil = (k.anteil != null && k.inDaten !== false && !k.manuell)
             ? '<span class="abx-anteil">' + esc(prozent(k.anteil)) + '</span>' : '';
         const sollTitel = tx('abx.sollTitel', { n: soll }, 'Höchstens {n}× in einer Liste gespielt — tippen, um {n} in die Box zu legen');
@@ -2266,6 +2289,7 @@
             + (marken.length ? '<div class="abx-marken">' + marken.join('') + '</div>' : '') + '</div>'
             + '<div class="abx-text">' + boxZeile + '<div class="abx-name" title="' + esc(k.name) + '">' + esc(k.name) + '</div>'
             + '<div class="abx-druck"><span>' + esc(k.set + ' ' + k.number) + druckZusatz + '</span>' + legalMarke(k) + anteil + '</div>'
+            + artZeile
             + (eintrag.formatZeile ? '<div class="abx-formatzeile">' + esc(eintrag.formatZeile) + '</div>' : '') + '</div>'
             + '<div class="abx-segmente" role="group" aria-label="' + esc(tx('abx.statusAria', null, 'Status in der Box')) + '">' + knoepfe + '</div>'
             + '<div class="abx-zeile2">'
@@ -2767,13 +2791,17 @@
                 ? tx('abx.druckeSumme', { n: summe, soll: k.gefordert }, 'In der Box: {n} · höchstens gespielt: {soll}')
                 : tx('abx.druckeSummeOhne', { n: summe }, 'In der Box: {n}')) + '</p>' + preisKopf
             + '<div class="abx-dialog-liste">' + dialogZustand.liste.map(function (x, i) {
-                return '<div class="abx-dialog-druck' + (x.n > 0 ? ' is-drin' : '') + '">'
+                const istArt = dialogZustand.artwork === x.id;
+                return '<div class="abx-dialog-druck' + (x.n > 0 ? ' is-drin' : '') + (istArt ? ' is-artwork' : '') + '">'
                     + (x.bild ? '<img src="' + esc(x.bild) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<div class="abx-dialog-ohne"></div>')
                     + '<div class="abx-dialog-text"><strong>' + esc(x.set + ' ' + x.number) + '</strong>'
                     + (x.rarity ? '<span>' + esc(x.rarity) + '</span>' : '')
                     + (preise[i]
                         ? '<span class="abx-dialog-preis">' + esc(euro(preise[i].trend)) + (preise[i].ab != null ? ' <small>' + esc(tx('abx.preisAb', { p: euro(preise[i].ab) }, 'ab {p}')) + '</small>' : '') + '</span>'
                         : '<span class="abx-dialog-preis abx-dialog-preis-fehlt">' + esc(tx('abx.preisKein', null, 'kein Preis')) + '</span>')
+                    + '<button type="button" class="abx-artwork-btn' + (istArt ? ' is-an' : '') + '" aria-pressed="' + (istArt ? 'true' : 'false')
+                    + '" onclick="ArchetypBox._artwork(' + i + ')">'
+                    + esc(istArt ? tx('abx.artworkGewaehlt', null, '✓ Artwork') : tx('abx.artworkFestlegen', null, 'Artwork wählen')) + '</button>'
                     + '</div>'
                     + '<div class="abx-dialog-zahl">'
                     + '<button type="button" class="abx-mini" onclick="ArchetypBox._druck(' + i + ',-1)" aria-label="'
@@ -2917,7 +2945,8 @@
         const box = boxVon(boxId);
         const roh = box && (box.karten || []).find(function (x) { return x.id === id; });
         if (!roh) return;
-        dialogZustand = { boxId: boxId, id: id, liste: druckeDerKarte(normiert(roh)) };
+        dialogZustand = { boxId: boxId, id: id, liste: druckeDerKarte(normiert(roh)),
+            artwork: roh.artwork && roh.artwork.id ? roh.artwork.id : null };
         let d = el('abxDruckDialog');
         if (!d) {
             d = document.createElement('div');
@@ -2937,6 +2966,14 @@
         dialogZeichnen();
     }
 
+    /** FE-64: Artwork im Dialog waehlen bzw. wieder abwaehlen (wirkt erst mit „Übernehmen“). */
+    function artworkWaehlen(i) {
+        if (!dialogZustand || !dialogZustand.liste[i]) return;
+        const x = dialogZustand.liste[i];
+        dialogZustand.artwork = dialogZustand.artwork === x.id ? null : x.id;
+        dialogZeichnen();
+    }
+
     function druckAendern(i, delta) {
         if (!dialogZustand || !dialogZustand.liste[i]) return;
         const x = dialogZustand.liste[i];
@@ -2948,7 +2985,8 @@
         const d = el('abxDruckDialog');
         if (uebernehmen && dialogZustand) {
             const z = dialogZustand;
-            aendern(z.boxId, function (b) { return druckeSetzen(b, z.id, z.liste); });
+            const art = z.artwork ? z.liste.find(function (x) { return x.id === z.artwork; }) : null;
+            aendern(z.boxId, function (b) { return artworkSetzen(druckeSetzen(b, z.id, z.liste), z.id, art); });
         }
         dialogZustand = null;
         if (d) d.classList.add('d-none');
@@ -3301,6 +3339,7 @@
         sammlungSetzen: sammlungSetzen,
         druckeSchliessen: druckeSchliessen,
         _druck: druckAendern,
+        _artwork: artworkWaehlen,
         entfernen: entfernenKarte,
         loeschen: loeschen,
         aktualisieren: aktualisieren,

@@ -703,6 +703,7 @@ def _parse_iso_date(date_str: str) -> str:
 
 _LABS_ID_LOOKUP_CACHE = None
 _LABS_ID_INDEX_CACHE: Optional[Dict[str, Tuple[str, str]]] = None
+_LABS_ID_ROHNAMEN_CACHE: Optional[Dict[str, str]] = None
 _LABS_ID_OVERRIDES_CACHE = None
 
 
@@ -841,12 +842,13 @@ def _build_labs_id_lookup() -> dict:
     Abgleich (siehe ``_resolve_labs_tournament_id``): je Turnierkennung
     Name und Datum. Beide Caches werden zusammen gebaut und zusammen
     geleert (``_LABS_ID_LOOKUP_CACHE = None``)."""
-    global _LABS_ID_LOOKUP_CACHE, _LABS_ID_INDEX_CACHE
+    global _LABS_ID_LOOKUP_CACHE, _LABS_ID_INDEX_CACHE, _LABS_ID_ROHNAMEN_CACHE
     if _LABS_ID_LOOKUP_CACHE is not None:
         return _LABS_ID_LOOKUP_CACHE
 
     lookup = {}
     index: Dict[str, Tuple[str, str]] = {}   # labs_tid -> (norm_name, iso_date)
+    rohnamen: Dict[str, str] = {}            # labs_tid -> tournament_name, wie labs ihn schreibt
     data_dir = get_data_dir()
     try:
         for fname in os.listdir(data_dir):
@@ -866,6 +868,7 @@ def _build_labs_id_lookup() -> dict:
                             lookup[key] = tid
                         if tid not in index:
                             index[tid] = key
+                            rohnamen[tid] = name
             except Exception as e:
                 logger.warning(f"[labs-id-lookup] Could not read {fname}: {e}")
     except FileNotFoundError:
@@ -873,6 +876,7 @@ def _build_labs_id_lookup() -> dict:
 
     _LABS_ID_LOOKUP_CACHE = lookup
     _LABS_ID_INDEX_CACHE = index
+    _LABS_ID_ROHNAMEN_CACHE = rohnamen
     logger.info(f"[labs-id-lookup] indexed {len(lookup)} tournaments")
     return lookup
 
@@ -891,14 +895,50 @@ LABS_ABGLEICH_TAGE = 3
 LABS_ABGLEICH_AEHNLICHKEIT = 0.8
 
 
+def _namens_tokens(norm: str) -> set:
+    """Die tragenden Woerter eines normalisierten Namens: keine Jahreszahlen,
+    keine Kuerzel unter drei Zeichen (die Normalisierung hat Boilerplate und
+    US-Staaten schon entfernt)."""
+    return {t for t in (norm or "").split() if len(t) >= 3 and not t.isdigit()}
+
+
 def _labs_namen_aehnlich(a: str, b: str) -> bool:
-    """Zwei normalisierte Turniernamen meinen denselben Ort."""
+    """Zwei normalisierte Turniernamen meinen denselben Ort.
+
+    Drei Wege, alle am Bestand gemessen (13.10.2026):
+      1. aehnliche Schreibweise — "lousville"/"louisville" 0,947,
+         "sevilla"/"seville" 0,857 (difflib);
+      2. der eine Name steckt im anderen — "naic 2026 new orleans" traegt
+         "new orleans", "laic 2025 26 sao paulo" traegt "sao paulo",
+         "euic 2026 london" traegt "london": jede International
+         Championship brauchte bisher jedes Jahr einen Override von Hand
+         (518, 517, 516, 463, 462, 461), obwohl die Stadt in beiden Namen
+         steht;
+      3. beide sind die Weltmeisterschaft (die Normalisierung laesst von
+         "World Championships 2026" nur die Jahreszahl uebrig, von "World
+         Championship San Francisco" nur die Stadt — gemeinsam ist das
+         Wort "world", das `_normalize_tournament_name_for_match` streicht;
+         deshalb reicht der Aufrufer die Rohnamen mit).
+    Fremde Staedte liegen weit darunter (lexington/louisville 0,211,
+    frankfurt/brisbane 0,35); das Datumsfenster und die Eindeutigkeit
+    (genau ein Kandidat) stehen ohnehin davor."""
     if not a or not b:
         return False
     if a == b:
         return True
     import difflib  # noqa: PLC0415
-    return difflib.SequenceMatcher(None, a, b).ratio() >= LABS_ABGLEICH_AEHNLICHKEIT
+    if difflib.SequenceMatcher(None, a, b).ratio() >= LABS_ABGLEICH_AEHNLICHKEIT:
+        return True
+    ta, tb = _namens_tokens(a), _namens_tokens(b)
+    return bool(ta) and bool(tb) and (ta <= tb or tb <= ta)
+
+
+_WELTMEISTERSCHAFT = re.compile(r"\bworld\b")
+
+
+def _beide_weltmeisterschaft(roh_a: str, roh_b: str) -> bool:
+    return bool(_WELTMEISTERSCHAFT.search((roh_a or "").lower())
+                and _WELTMEISTERSCHAFT.search((roh_b or "").lower()))
 
 
 def _labs_kandidaten_im_fenster(name: str, date_str: str) -> List[Tuple[str, str]]:
@@ -923,7 +963,8 @@ def _labs_kandidaten_im_fenster(name: str, date_str: str) -> List[Tuple[str, str
             continue
         if abstand > LABS_ABGLEICH_TAGE:
             continue
-        if _labs_namen_aehnlich(norm, labs_norm):
+        if _labs_namen_aehnlich(norm, labs_norm) or _beide_weltmeisterschaft(
+                name, (_LABS_ID_ROHNAMEN_CACHE or {}).get(tid, "")):
             treffer.append((tid, labs_iso))
     return treffer
 

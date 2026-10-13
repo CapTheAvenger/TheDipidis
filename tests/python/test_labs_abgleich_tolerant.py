@@ -339,3 +339,67 @@ def test_ein_datums_override_gewinnt_gegen_die_labs_datei(pds, jh_echt, monkeypa
     b = pds.labs_datum_abgleichen(ziel)
     assert b["geaendert"] == 1, b
     assert [z["tournament_date"] for z in _lesen(ziel)] == ["2026-10-11", "2026-10-09"]
+
+
+# ── 5. Abkuerzungen und die Weltmeisterschaft (13.10.2026, Nachtrag) ───────
+#
+# Jede International Championship brauchte bisher JEDES JAHR einen Override
+# von Hand (NAIC/EUIC/LAIC 2024–2026: 518, 517, 516, 463, 462, 461), ebenso
+# Worlds (515, 500) — obwohl bei den ICs die Stadt in beiden Namen steht und
+# bei Worlds beide Namen "World" tragen. Die naechste LAIC kommt im November.
+
+def test_ic_mit_abkuerzung_wird_ueber_die_stadt_erkannt(jh, monkeypatch, tmp_path):
+    _labs_schreiben(str(tmp_path), [
+        ("0090", "International Championship São Paulo", "2026-11-20", "3000"),
+        ("0091", "Regional Championship Lima", "2026-11-21", "900"),
+    ])
+    _zeige_auf(jh, monkeypatch, str(tmp_path))
+    assert jh._resolve_labs_tournament_id(
+        "LAIC 2026–27, São Paulo – Limitless", "2026-11-21", "600") == "0090"
+
+
+def test_worlds_ohne_stadt_wird_ueber_die_klasse_erkannt(jh, monkeypatch, tmp_path):
+    _labs_schreiben(str(tmp_path), [
+        ("0092", "World Championship Honolulu", "2027-08-13", "800"),
+    ])
+    _zeige_auf(jh, monkeypatch, str(tmp_path))
+    assert jh._resolve_labs_tournament_id(
+        "World Championships 2027 – Limitless", "2027-08-14", "700") == "0092"
+    # ... aber ein Regional in derselben Stadt am selben Wochenende ist
+    # nicht die Weltmeisterschaft.
+    _labs_schreiben(str(tmp_path), [
+        ("0093", "Regional Championship Honolulu", "2027-08-13", "800"),
+    ])
+    _zeige_auf(jh, monkeypatch, str(tmp_path))
+    assert jh._resolve_labs_tournament_id(
+        "World Championships 2027 – Limitless", "2027-08-14", "700") == ""
+
+
+def test_jeder_bisherige_override_fall_loest_sich_von_selbst(jh, monkeypatch):
+    """Gegen den ECHTEN Bestand mit geleerten Overrides: alle Faelle, fuer
+    die data/labs_tournament_id_overrides.json angelegt wurde, loesen sich
+    jetzt ohne die Datei. Ein Fall, dessen Labs-Turnier nicht mehr im
+    Bestand liegt (Archivierung), wird uebersprungen, nicht rot."""
+    _zeige_auf(jh, monkeypatch, os.path.join(WURZEL, "data"))
+    jh._build_labs_id_lookup()
+    bekannt = set((jh._LABS_ID_INDEX_CACHE or {}).keys())
+    faelle = [
+        ("NAIC 2026, New Orleans – Limitless", "2026-06-10", "518", "0070"),
+        ("EUIC 2026, London – Limitless", "2026-02-13", "517", "0054"),
+        ("LAIC 2025–26, São Paulo – Limitless", "2025-11-21", "516", "0046"),
+        ("World Championships 2026 – Limitless", "2026-08-28", "515", "0071"),
+        ("World Championships 2025 – Limitless", "2025-08-15", "500", "0035"),
+        ("NAIC 2025, New Orleans – Limitless", "2025-06-13", "463", "0034"),
+        ("Special Event Sevilla – Limitless", "2025-04-26", "469", "0027"),
+        ("EUIC 2025, London – Limitless", "2025-02-21", "462", "0020"),
+        ("LAIC 2024–25, São Paulo – Limitless", "2024-11-15", "461", "0009"),
+        ("Regional Baltimore, MD – Limitless", "2026-09-19", "577", "0072"),
+        ("Regional Lousville, KY – Limitless", "2026-10-10", "581", "0076"),
+    ]
+    geprueft = 0
+    for name, datum, lid, soll in faelle:
+        if soll not in bekannt:
+            continue
+        assert jh._resolve_labs_tournament_id(name, datum, lid) == soll, (name, datum)
+        geprueft += 1
+    assert geprueft >= 8, f"nur {geprueft} Faelle im Bestand — Vorpruefung"

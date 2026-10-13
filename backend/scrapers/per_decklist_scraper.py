@@ -105,6 +105,7 @@ from tournament_scraper_JH import (
     # 16.960 Zeilen das rohe Quelldatum 2026-06-10 statt des
     # belegten 2026-06-12. Siehe Kommentar bei t_date_raw.
     _datum_mit_override,
+    _load_date_overrides,
 )
 
 setup_console_encoding()
@@ -825,7 +826,11 @@ def scrape_one_tournament(
     # (tests/python/test_per_decklist_datum_override.py). Vorher brauchte
     # jedes solche Turnier einen Datums-Override von Hand. Ohne labs-Treffer
     # bleibt das Quelldatum stehen — erfunden wird nichts.
-    if labs_tid:
+    # REIHENFOLGE: Override > Labs > Quelle. Eine hinterlegte Datumskorrektur
+    # (data/labs_tournament_id_overrides.json) ist eine belegte Entscheidung
+    # und gewinnt auch gegen die Labs-Datei — die kann einen Lauf lang noch
+    # das alte Datum fuehren (Befund Pruefagent 13.10.2026).
+    if labs_tid and not _hat_datums_override(tid_lim):
         labs_datum = _labs_datum_fuer(labs_tid)
         if labs_datum and labs_datum != t_date_iso:
             logger.info("  Datum: labs %s fuehrt %s, die Quelle %s — die Zeilen "
@@ -1251,6 +1256,12 @@ def _datum_nachtragen_kern(ziel: str, trocken: bool = False) -> Dict:
     return bericht
 
 
+def _hat_datums_override(limitless_tid: str) -> bool:
+    """Fuehrt data/labs_tournament_id_overrides.json fuer dieses Limitless-
+    Turnier ein korrigiertes Datum? Dann gilt das — vor Labs, vor Quelle."""
+    return str(limitless_tid or '').strip() in _load_date_overrides()
+
+
 def labs_datum_abgleichen(ziel: str, trocken: bool = False) -> Dict:
     """Die Datumsspalte des Bestands an die Labs-Datei angleichen — ohne Netz.
 
@@ -1274,7 +1285,8 @@ def labs_datum_abgleichen(ziel: str, trocken: bool = False) -> Dict:
 
     WAS ANGEFASST WIRD: ausschliesslich `tournament_date`. Alle uebrigen
     Spalten werden vor und nach dem Abgleich Zelle fuer Zelle verglichen;
-    weichen sie ab, wird NICHTS geschrieben.
+    weichen sie ab, wird NICHTS geschrieben. Zeilen, deren Limitless-Turnier
+    eine hinterlegte Datumskorrektur hat, bleiben stehen (Override > Labs).
     """
     kopf, zeilen = _bestand_lesen(ziel)
     bericht: Dict = {
@@ -1303,6 +1315,9 @@ def labs_datum_abgleichen(ziel: str, trocken: bool = False) -> Dict:
     for z in zeilen:
         tid = (z.get('tournament_id') or '').strip()
         if not tid:
+            continue
+        # Override > Labs: eine hinterlegte Datumskorrektur bleibt stehen.
+        if _hat_datums_override(z.get('limitless_tournament_id') or ''):
             continue
         soll = _labs_datum(tid)
         alt = (z.get('tournament_date') or '').strip()

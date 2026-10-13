@@ -277,14 +277,65 @@ def test_der_abgleich_schreibt_nichts_wenn_alles_stimmt(pds, jh_echt, monkeypatc
     assert os.path.getmtime(ziel) == stempel
 
 
+def _ohne_kommentare(quelltext: str) -> str:
+    """Kommentarzeilen raus — sonst macht ein Kommentar, der den Aufruf
+    nennt, die Probe blind (CLAUDE.md, 13./14.09.2026)."""
+    zeilen = [z for z in quelltext.splitlines() if not z.lstrip().startswith("#")]
+    return "\n".join(zeilen)
+
+
 def test_der_lauf_endet_mit_dem_abgleich():
     """Ein vorhandener Aufruf, als Text: main() ruft labs_datum_abgleichen
     NACH der Scrape-Schleife auf — sonst kippt die Labs-Datei ihr Datum und
-    der Bestand hier bleibt stehen (Baltimore, dreimal am 22.09.2026)."""
+    der Bestand hier bleibt stehen (Baltimore, dreimal am 22.09.2026).
+    Verfaelschungsprobe (Pruefagent 13.10.2026): der Aufruf auskommentiert
+    muss rot sein — deshalb werden Kommentarzeilen vor der Suche entfernt."""
     with open(PDS_QUELLE, encoding="utf-8-sig") as f:
-        s = f.read()
+        roh = f.read()
+    s = _ohne_kommentare(roh)
+    assert len(s) > len(roh) * 0.3, "das Ausschneiden hat zu viel entfernt"
     anfang = s.index("def main():")
     schleife = s.index("rows = scrape_one_tournament(t, card_db, args.delay, continuity_records)", anfang)
-    aufruf = s.index("labs_datum_abgleichen(out_path)", schleife)
-    assert aufruf > schleife
-    assert "--labs-datum-abgleichen" in s, "der Schalter fuer den Bestand fehlt"
+    aufruf = s.find("b = labs_datum_abgleichen(out_path)", schleife)
+    assert aufruf > schleife, "main() ruft labs_datum_abgleichen nach der Schleife nicht auf"
+    assert "'--labs-datum-abgleichen'" in s, "der Schalter fuer den Bestand fehlt"
+
+
+def test_das_fenster_ist_drei_tage_und_nicht_mehr(jh):
+    """Die 3 ist gemessen (ein Tag Abstand bei dreitaegigen Regionals, zwei
+    Tage Reserve) — und sie ist die Grenze, hinter der zwei verschiedene
+    Turniere derselben Stadt moeglich werden. Ein stilles Verbreitern
+    bliebe sonst gruen (Pruefagent 13.10.2026)."""
+    assert jh.LABS_ABGLEICH_TAGE == 3
+    assert jh.LABS_ABGLEICH_AEHNLICHKEIT == 0.8
+
+
+# ── 4. Override > Labs > Quelle ────────────────────────────────────────────
+
+def test_ein_datums_override_gewinnt_gegen_die_labs_datei(pds, jh_echt, monkeypatch, tmp_path):
+    """Befund Pruefagent 13.10.2026: die Labs-Datei kann einen Lauf lang
+    noch das alte Datum fuehren, waehrend die Korrektur schon hinterlegt ist.
+    Dann gilt die Korrektur — im Scrape-Weg UND im Abgleich des Bestands."""
+    _labs_schreiben(str(tmp_path), [LOUISVILLE_LABS])
+    _zeige_auf(jh_echt, monkeypatch, str(tmp_path))
+    monkeypatch.setattr(jh_echt, "_DATE_OVERRIDES_CACHE",
+                        {"581": {"tournament_date": "2026-10-11", "reason": "Probe"}})
+    # Scrape-Weg: die Quelle sagt 10.10., der Override 11.10., labs 09.10.
+    zeile = _turnier_scrapen(pds, monkeypatch, LOUISVILLE_LIMITLESS[0],
+                             "10th October 2026", "581")
+    assert zeile["tournament_id"] == "0076"
+    assert zeile["tournament_date"] == "2026-10-11", (
+        "das Labs-Datum hat die hinterlegte Korrektur ueberschrieben")
+    # Bestand: die Zeile mit Override bleibt, die ohne wird angeglichen.
+    ziel = str(tmp_path / "bestand.csv")
+    _bestand(ziel, [
+        {"tournament_id": "0076", "limitless_tournament_id": "581",
+         "tournament_name": LOUISVILLE_LIMITLESS[0], "tournament_date": "2026-10-11",
+         "place": "1", "player_name": "Riley McKay", "card_name": "A", "wins": "12"},
+        {"tournament_id": "0076", "limitless_tournament_id": "582",
+         "tournament_name": "Irgendwas", "tournament_date": "2026-10-10",
+         "place": "2", "player_name": "B", "card_name": "B", "wins": "11"},
+    ])
+    b = pds.labs_datum_abgleichen(ziel)
+    assert b["geaendert"] == 1, b
+    assert [z["tournament_date"] for z in _lesen(ziel)] == ["2026-10-11", "2026-10-09"]

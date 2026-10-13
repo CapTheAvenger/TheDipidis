@@ -1345,9 +1345,11 @@ jobs:
             # Annotationen. Lauf #181 kostete deshalb erst einen Umweg ueber
             # einen angemeldeten Browser, bevor die vier roten Namen
             # ueberhaupt lesbar waren.
-            grep -hE '^✗|^FAILED' /tmp/js.log /tmp/py.log 2>/dev/null \
-              | head -20 | sed 's/^/::error::Tor: /' || true
+            # GitHub zeigt hoechstens 10 ::error::-Annotationen je Schritt:
+            # die Sammelzeile zuerst, dann bis zu neun rote Zeilen.
             echo "::error::Die frischen Daten machen Zusicherungen rot — nicht gepusht. Siehe Zusammenfassung."
+            grep -hE '^✗|^FAILED' /tmp/js.log /tmp/py.log 2>/dev/null \
+              | head -9 | sed 's/^/::error::Tor: /' || true
             exit 1
           fi
           echo "gruen=true" >> "$GITHUB_OUTPUT"

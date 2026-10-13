@@ -172,8 +172,8 @@ describe('W2 — die getippte Zahl wird als dieselbe Konvention eingesetzt (UI-6
         const n = 10000 - s - u;
         const id = eindeutig(s, n, u, 55, 0.05);
         assert.equal(id, 'ohneUnentschieden',
-            'die getippte Zahl wird nicht als S/(S+N) eingesetzt — dann steht in der '
-            + 'Begegnungsliste wieder eine andere Zahl, als der Nutzer eingetragen hat');
+            'die getippte Zahl wird nicht als W/(W+L) eingesetzt — dann steht in der '
+            + 'Matchup-Liste wieder eine andere Zahl, als der Nutzer eingetragen hat');
 
         /* Und die Probe aufs Exempel an der Stelle, an der es auffaellt:
            _anzeigeQuote ist das, was jede Anzeige des Reiters aus der
@@ -261,7 +261,7 @@ describe('W2 — auf dem geteilten Bild steht die Konvention sichtbar', () => {
         // Bei einem Feld aus genau einer Paarung ist avgWR = pWin·100.
         const id = eindeutig(55, 35, 10, avgWR, 0.05);
         assert.equal(id, 'mitUnentschieden',
-            'die Spalte auf dem Bild rechnet nicht mehr „Siege je gespielter Partie"');
+            'die Spalte auf dem Bild rechnet nicht mehr „Wins je gespielter Partie"');
 
         // Der gezeichnete Spaltenkopf.
         const gemalt = [];
@@ -325,7 +325,7 @@ describe('W2 — der Geheimtipp-Satz nennt die Konvention seiner Zahl', () => {
         const satz = ctx._wrVollname(
             '{wr} % Win Rate bei {where} bei nur {share} Field-Share vor Ort', id);
         assert.ok(satz.includes(WK.kurz(id)), 'der Satz traegt den Namen nicht: ' + satz);
-        assert.ok(!/Win Rate/i.test(satz), 'der Hausname steht noch im Satz: ' + satz);
+        assert.ok(!/Win Rate(?!\s+inkl\.)/i.test(satz), 'der Hausname steht noch im Satz: ' + satz);
 
         // Und in englischer Oberflaeche der englische Name.
         const En = konventionen('en');

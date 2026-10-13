@@ -243,7 +243,7 @@ describe('Build-vs: Herkunft wird beim Einsammeln festgehalten', () => {
             'die belegte Herkunft gewinnt — sie ist da, unabhaengig davon, '
             + 'dass die Heuristik dieselbe Karte auch gefunden hat');
         assert.ok(raus.paarungen.has('attack.ignores_effects→ability.ko_prevention'),
-            'die benannte Paarung bleibt nachschlagbar');
+            'die benannte Matchup bleibt nachschlagbar');
         assert.ok(raus.targets.has('Toucannon') && raus.targets.has('Slowking'),
             'keine Zielangabe geht verloren');
         assert.strictEqual(raus.cardId, 'PBL|42', 'fehlende Angaben werden ergaenzt');
@@ -277,7 +277,7 @@ describe('Build-vs: der Stand der Regelbasis wird gelesen, nicht geraten', () =>
         return { f: new Function('fetch', code)(fetchStub), gerufen };
     }
 
-    it('uebernimmt Version, Datum und Zahl der Paarungen aus der Datei', async () => {
+    it('uebernimmt Version, Datum und Zahl der Matchups aus der Datei', async () => {
         const { f, gerufen } = ladeStandHelfer({
             version: '0.1', generated_at: '2026-05-15',
             interactions: [1, 2, 3, 4, 5]
@@ -359,7 +359,7 @@ describe('Build-vs: Kopf und "keine Daten" stehen in der Liste', () => {
         assert.ok(html.includes('card_capability_interactions.json'), html.slice(0, 300));
         assert.ok(html.includes('v0.1'), 'Version steht da');
         assert.ok(html.includes('15.05.2026'), 'das Alter der Datenbasis steht da');
-        assert.ok(html.includes('5 Paarungen'), 'die Abdeckung steht daneben');
+        assert.ok(html.includes('5 Matchups'), 'die Abdeckung steht daneben');
     });
 
     it('jede Zeile traegt ihre Einordnung sichtbar, nicht im Tooltip', () => {
@@ -546,7 +546,7 @@ describe('Warum-Dialog: die Luecke wird geschrieben, nicht verschwiegen', () => 
         // i18n-Wortlaute wie in js/i18n.js (deutsch), damit der Test
         // den ausgelieferten Satz sieht und nicht einen Platzhalter.
         const woerter = {
-            'buildInfo.techIdeenOhne': 'Nichts gefunden gegen: {liste}. Die Regelbasis kennt {n} Paarungen vom {datum} — diese Matchups sind nicht abgedeckt.',
+            'buildInfo.techIdeenOhne': 'Nichts gefunden gegen: {liste}. Die Regelbasis kennt {n} Matchups vom {datum} — diese Matchups sind nicht abgedeckt.',
             'buildInfo.techIdeenOhneEintrag': '{name} ({wr}, {n} Matches)'
         };
         new Function('_ohne', 'stand', 'wrap', 'document', 't', 'getLang', 'zahlKomma', code)(
@@ -684,10 +684,10 @@ describe('Tech-Ideen: Herkunft und Luecke kommen aus dem Baustein selbst', () =>
         const v = erg.gegner[0].vorschlaege[0];
         assert.strictEqual(v.karte, 'Crustle');
         assert.strictEqual(v.beleg, 'paarung',
-            'die Wirkung steht als Paarung in der Regelbasis');
+            'die Wirkung steht als Matchup in der Regelbasis');
         assert.strictEqual(v.quelleDatei, 'data/card_capability_interactions.json');
         assert.strictEqual(v.paarung, 'attack.ignores_effects→ability.ko_prevention',
-            'die Paarung wird beim Namen genannt und bleibt nachschlagbar');
+            'die Matchup wird beim Namen genannt und bleibt nachschlagbar');
         assert.strictEqual(v.partien, 358,
             'die Stichprobe des Matchups reist mit — sonst kann die '
             + 'Oberflaeche sie nicht hinschreiben');
@@ -738,7 +738,7 @@ describe('Tech-Ideen: Herkunft und Luecke kommen aus dem Baustein selbst', () =>
 // unbeantworteten Kategorien aendert sich mit jedem Scraperlauf, das
 // VERHALTEN nicht.
 // ─────────────────────────────────────────────────────────────────────
-describe('Build-vs: eine Bedrohung ohne Konter wird benannt, nicht verschluckt', () => {
+describe('Build-vs: eine Bedrohung ohne Counter wird benannt, nicht verschluckt', () => {
 
     const INTEL = {
         threats: {
@@ -820,7 +820,7 @@ describe('Build-vs: eine Bedrohung ohne Konter wird benannt, nicht verschluckt',
 
     const POOL = [{ key: 'Y|2', name: 'Kieran' }];
 
-    it('die Kategorie ohne Konter steht mit Namen unter der Liste', async () => {
+    it('die Kategorie ohne Counter steht mit Namen unter der Liste', async () => {
         const { html } = await lauf(INTEL, ['Dragapult'], POOL);
         assert.ok(html.includes('keine bekannte Antwort'),
             `der Satz fehlt: ${html.slice(-600)}`);
@@ -853,7 +853,7 @@ describe('Build-vs: eine Bedrohung ohne Konter wird benannt, nicht verschluckt',
         const { html } = await lauf(nur, ['Dragapult'], POOL);
         assert.ok(html.includes('keine bekannte Antwort'), 'der richtige Satz steht da');
         assert.ok(!html.includes('keine Daten'),
-            'zu diesem Ziel LIEGT etwas vor — es fehlt nur der Konter');
+            'zu diesem Ziel LIEGT etwas vor — es fehlt nur der Counter');
         /* Hier steht KEINE Kartenzeile in der Liste — taucht der Name
            trotzdem auf, dann aus dem Hinweis selbst. Ohne diese
            Zusicherung ueberlebt ein Mutant, der die Ziele aus dem

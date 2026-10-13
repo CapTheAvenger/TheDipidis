@@ -106,7 +106,7 @@
         var sp = gz(d.ankerspieler_gesamt);
         var wieviel = namen.length <= 3
             ? namen.join(de() ? ' und ' : ' and ')
-            : (de() ? namen.length + ' Präsenzturniere' : namen.length + ' in-person tournaments');
+            : (de() ? namen.length + ' Majors' : namen.length + ' in-person tournaments');
         // Die Mindestspielerzahl haengt am Format und gehoert deshalb
         // hierher, nicht auf die Methodikseite: sie ist der Nenner
         // dieser Empfehlung, keine allgemeine Regel.
@@ -120,7 +120,7 @@
             // kein Praesenzturnier") und die Folge ("also die davor")
             // sind dieselbe Aussage, einmal gesagt reicht.
             return (de()
-                ? sicher(d.format) + ' hatte noch kein Präsenzturnier. Basis: '
+                ? sicher(d.format) + ' hatte noch kein Major. Basis: '
                   + wieviel + ' aus den Formaten davor, ' + sp + ' Spieler'
                 : 'No in-person tournament in ' + sicher(d.format) + ' yet. Basis: '
                   + wieviel + ' from the formats before, ' + sp + ' players') + zusatz + '.';
@@ -166,7 +166,7 @@
         return de()
             ? 'Und trotzdem: von je vier Spielern dieses Decks scheitern rund '
               + gz(Math.round((100 - v.empfehlung_mittel) / 25)) + ' an Day 1 — '
-              + pz(100 - v.empfehlung_mittel, 0) + ' % der Antritte, gemittelt über '
+              + pz(100 - v.empfehlung_mittel, 0) + ' % der Listen, gemittelt über '
               + gz(v.turniere) + ' Turniere.'
             : 'And still: about ' + gz(Math.round((100 - v.empfehlung_mittel) / 25))
               + ' in 4 players on this deck fall short of Day 2 — '
@@ -241,7 +241,7 @@
         +     '<div class="ds-stat">'
         +       '<div class="ds-stat-value">' + pz(e.day2_geschrumpft) + ' %</div>'
         +       '<div class="ds-stat-label">'
-                  + (de() ? 'Day-2-Rate bisher' : 'Day 2 rate so far') + '</div>'
+                  + (de() ? 'Day-2-Conversion bisher' : 'Day 2 rate so far') + '</div>'
         +       '<div class="ds-stat-context">'
                   + (de() ? 'aus ' : 'from ') + gz(e.ankerspieler) + ' '
                   + (de() ? 'Spielern' : 'players') + '</div>'

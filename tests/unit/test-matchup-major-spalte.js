@@ -184,7 +184,7 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
             assert.ok(/Major[- ][Mm]atches/.test(z),
                 'die Legende loest die Partienspalte nicht auf');
         }
-        const deL = leg.find(z => /Siege/.test(z));
+        const deL = leg.find(z => /Wins/.test(z));
         assert.ok(deL, 'keine deutsche Legende gefunden');
         /* SEIT DEM 08.09.2026 STEHT DIE RECHNUNG ALS PLATZHALTER DA.
            Vorher las die Legende "WR = Win Rate (Siege ÷ entschiedene
@@ -205,16 +205,16 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
         }
     });
 
-    it('der Spaltenkopf nennt die Rechnung und die Unentschieden', () => {
+    it('der Spaltenkopf nennt die Rechnung und die Ties', () => {
         const i18n = lies(path.join('js', 'i18n.js'));
         const eintraege = [...i18n.matchAll(/'arc\.colMajorTip':\s*'([^']*)'/g)].map(x => x[1]);
         assert.strictEqual(eintraege.length, 2, 'der Hinweis fehlt in einer Sprache');
         for (const s2 of eintraege) {
             assert.ok(!/Matchpunkte|match points/i.test(s2),
                 'der Kopf behauptet weiter Matchpunkte — die Spalte rechnet '
-                + 'seit dem 03.09.2026 S/(S+N)');
+                + 'seit dem 03.09.2026 W/(W+L)');
             assert.ok(/entschiedene|decided/i.test(s2),
-                'der Kopf sagt nicht, dass die Unentschieden aussen vor bleiben — '
+                'der Kopf sagt nicht, dass die Ties aussen vor bleiben — '
                 + 'das ist der ganze Unterschied zwischen zwei der drei '
                 + 'Hauskonventionen');
             assert.ok(/links|left/i.test(s2),
@@ -239,7 +239,7 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
         }
     });
 
-    it('eine Paarung ohne entschiedene Partie sagt genau das', () => {
+    it('eine Matchup ohne entschiedene Partie sagt genau das', () => {
         /* LIVE GEFUNDEN AM 03.09.2026, nach dem Merge von PR #640.
            25 der 769 Paarungen stehen auf 0-0-1: eine einzige Partie, die
            unentschieden endete. In der Spalte steht dort zu Recht ein
@@ -255,7 +255,7 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
         const e = [...i18n.matchAll(/'arc\.muMajorNurRemis':\s*'([^']*)'/g)].map(x => x[1]);
         assert.strictEqual(e.length, 2, 'der Hinweis fehlt in einer Sprache');
         for (const s2 of e) {
-            assert.ok(/unentschieden|drawn/i.test(s2),
+            assert.ok(/Ties|unentschieden|drawn/i.test(s2),
                 'der Hinweis nennt den Grund nicht: ' + s2.slice(0, 70));
             assert.ok(/\{b\}/.test(s2),
                 'der Hinweis zeigt die Bilanz nicht, die den Grund belegt');
@@ -287,7 +287,7 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
             majorSiege: 0, majorNiederlagen: 0, majorUnentschieden: 40,
         }), true);
         assert.strictEqual(remis.art, 'nur-remis');
-        assert.ok(/unentschieden/i.test(remis.titel),
+        assert.ok(/Ties|unentschieden/i.test(remis.titel),
             'der Satz nennt den Grund nicht: ' + remis.titel.slice(0, 80));
         assert.strictEqual(remis.inhalt, '–');
 
@@ -312,7 +312,7 @@ describe('Beide Spalten heissen WR, weil beide WR rechnen', () => {
         assert.strictEqual(e.length, 2, 'der Hinweis fehlt in einer Sprache');
         const z = PZ.praesenzZelle(paarung({ majorAnzahl: 40, majorBilanzDa: false }), true);
         assert.strictEqual(z.inhalt, '–',
-            'eine Paarung ohne Bilanz zeigt keinen Strich mehr');
+            'eine Matchup ohne Bilanz zeigt keinen Strich mehr');
         assert.ok(!/\d/.test(z.inhalt), 'in der Zelle steht eine geschaetzte Zahl');
     });
 });
@@ -346,7 +346,7 @@ describe('Die Zahl kommt aus der Bilanz, nicht aus vs_win_pct', () => {
             + 'als 100 % neben einer geglaetteten Online-Zahl, und der '
             + 'Vergleich nebeneinander ist genau der Zweck der Zelle');
         assert.ok(/niederlagen/.test(rumpf) && /siege/.test(rumpf),
-            'Siege und Niederlagen kommen im Register nicht mehr vor');
+            'Wins und Losses kommen im Register nicht mehr vor');
     });
 
     it('die Karte zeigt majorWr, nicht die Matchpunkte', () => {
@@ -374,10 +374,10 @@ describe('Die Partienzahl steht daneben', () => {
         assert.ok(/arc-mu-major-n[^>]*>–</.test(ohnePaarung),
             'eine fehlende Praesenzpaarung wird nicht mehr als fehlend gezeigt — '
             + 'eine 0 liest sich als "nie gewonnen"');
-        assert.ok(!/>0</.test(ohnePaarung), 'aus "keine Paarung" ist eine 0 geworden');
+        assert.ok(!/>0</.test(ohnePaarung), 'aus "kein Matchup" ist eine 0 geworden');
     });
 
-    it('duenne Paarungen werden markiert', () => {
+    it('duenne Matchups werden markiert', () => {
         /* Die Schwelle heisst seit dem 07.09.2026 MIN_PRAESENZ_PARTIEN
            und ist von 10 auf 30 gestiegen — dieselbe Zahl, ab der
            ueberhaupt ein Prozentwert erscheint. Geprueft wird die
@@ -387,28 +387,28 @@ describe('Die Partienzahl steht daneben', () => {
             majorSiege: 8, majorNiederlagen: 1, majorUnentschieden: 0,
         }), true);
         assert.ok(/arc-mu-major-duenn/.test(duenn),
-            'die Markierung fuer duenne Paarungen ist weg');
+            'die Markierung fuer duenne Matchups ist weg');
         const dick = PZ.praesenzZellen(paarung({
             majorAnzahl: 52, majorBilanzDa: true, majorWr: 45.5, majorWrRoh: 45.5,
             majorSiege: 21, majorNiederlagen: 23, majorUnentschieden: 8,
         }), true);
         assert.ok(!/arc-mu-major-duenn/.test(dick),
-            'eine belastbare Paarung wird faelschlich als duenn markiert');
+            'eine belastbare Matchup wird faelschlich als duenn markiert');
         const css = ohneKomm(lies(path.join('css', 'styles.css')));
         assert.ok(/\.arc-mu-major-duenn\s*\{[^}]*font-style/.test(css),
             'die Markierung fehlt im Stylesheet');
     });
 
-    it('fehlende Paarungen zeigen einen Strich, keine Null', () => {
+    it('fehlende Matchups zeigen einen Strich, keine Null', () => {
         const z = PZ.praesenzZelle(paarung({}), true);
         assert.strictEqual(z.art, 'fehlt');
         assert.strictEqual(z.inhalt, '–',
             'eine fehlende Praesenzpaarung wird nicht mehr als fehlend gezeigt — '
             + 'eine 0 liest sich als "nie gewonnen"');
-        assert.ok(/Keine Präsenz-Matches/.test(z.titel),
-            'der Hinweis fuer fehlende Paarungen ist weg');
+        assert.ok(/Keine Matches vor Ort/.test(z.titel),
+            'der Hinweis fuer fehlende Matchups ist weg');
         assert.ok(/arc\.muMajorFehlt/.test(karte),
-            'der i18n-Schluessel fuer fehlende Paarungen ist weg');
+            'der i18n-Schluessel fuer fehlende Matchups ist weg');
     });
 });
 
@@ -432,7 +432,7 @@ describe('Die Zahlen hinter der Spalte', () => {
         kopf.forEach((k, i) => { o[k] = (c[i] || '').trim(); }); return o; })
         .filter(r => r.day_filter === 'overall');
 
-    it('die Quelle fuehrt je Paarung eine Bilanz', () => {
+    it('die Quelle fuehrt je Matchup eine Bilanz', () => {
         /* DIESE ZUSICHERUNG STAND BIS ZUM 03.09.2026 ANDERSHERUM da: sie
            verlangte, dass die Datei KEINE Bilanz fuehrt, mit dem Hinweis
            "wenn sie es doch tut, ist die ganze Begruendung hinfaellig".
@@ -456,7 +456,7 @@ describe('Die Zahlen hinter der Spalte', () => {
            in der Spalte daneben steht. */
         const mit = rows.filter(r => String(r.vs_wins || '').trim() !== '');
         assert.ok(mit.length >= 20,
-            `nur ${mit.length} Paarungen tragen eine Bilanz — zu wenig fuer `
+            `nur ${mit.length} Matchups tragen eine Bilanz — zu wenig fuer `
             + 'eine Spalte, die eine Win Rate verspricht');
         const spiegel = (r) => r.my_deck_name === r.opponent_deck_name;
         const schief = mit.filter((r) => {
@@ -467,7 +467,7 @@ describe('Die Zahlen hinter der Spalte', () => {
             return (w + l + t2) !== (parseInt(r.vs_count, 10) || 0);
         });
         assert.strictEqual(schief.length, 0,
-            `${schief.length} von ${mit.length} Paarungen haben eine Bilanz, die `
+            `${schief.length} von ${mit.length} Matchups haben eine Bilanz, die `
             + 'nicht zu vs_count passt, z. B. '
             + (schief[0] ? `${schief[0].my_deck_name} vs ${schief[0].opponent_deck_name}: `
                 + `${schief[0].vs_wins}-${schief[0].vs_losses}-${schief[0].vs_ties} `
@@ -492,14 +492,14 @@ describe('Die Zahlen hinter der Spalte', () => {
            Tautologie. */
         const sp = rows.filter(r => r.my_deck_name === r.opponent_deck_name
             && String(r.vs_wins || '').trim() !== '');
-        assert.ok(sp.length >= 5, `nur ${sp.length} Spiegelpaarungen gefunden`);
+        assert.ok(sp.length >= 5, `nur ${sp.length} Mirror-Matchupen gefunden`);
         for (const r of sp) {
             const w = parseInt(r.vs_wins, 10) || 0;
             const l = parseInt(r.vs_losses, 10) || 0;
             const t2 = parseInt(r.vs_ties, 10) || 0;
             const c = parseInt(r.vs_count, 10) || 0;
             assert.strictEqual(w, l,
-                `${r.my_deck_name} im Spiegel: ${w} Siege gegen ${l} Niederlagen — `
+                `${r.my_deck_name} im Spiegel: ${w} Wins gegen ${l} Losses — `
                 + 'im Spiegel muessen sie gleich sein, sonst schlaegt ein Deck sich selbst');
             assert.strictEqual(w + l + t2, 2 * c,
                 `${r.my_deck_name} im Spiegel: ${w}-${l}-${t2} bei vs_count=${c} — `
@@ -527,7 +527,7 @@ describe('Die Zahlen hinter der Spalte', () => {
             return Math.abs(((3 * w + t2) / (3 * g)) * 100 - zahl(r.vs_win_pct)) > 0.02;
         });
         assert.strictEqual(daneben.length, 0,
-            `${daneben.length} von ${mit.length} Paarungen: die Bilanz ergibt nicht `
+            `${daneben.length} von ${mit.length} Matchups: die Bilanz ergibt nicht `
             + 'die Prozentzahl derselben Zeile'
             + (daneben[0] ? `, z. B. ${daneben[0].my_deck_name} vs `
                 + `${daneben[0].opponent_deck_name}: ${daneben[0].vs_wins}-`
@@ -535,7 +535,7 @@ describe('Die Zahlen hinter der Spalte', () => {
                 + `${daneben[0].vs_win_pct} %` : ''));
     });
 
-    it('den Fall "alle unentschieden" gibt es wirklich', () => {
+    it('den Fall "alle Ties" gibt es wirklich', () => {
         /* Die Vorkehrung dafuer (arc.muMajorNurRemis) ist oben zugesichert.
            Hier steht, dass sie nicht fuer einen erfundenen Fall gebaut
            wurde: am 03.09.2026 waren es 25 von 769 Paarungen, jede mit
@@ -547,18 +547,18 @@ describe('Die Zahlen hinter der Spalte', () => {
                 && (parseInt(r.vs_count, 10) || 0) > 0;
         });
         assert.ok(nurRemis.length > 0,
-            'keine Paarung ohne entschiedene Partie mehr in der Datei — die '
+            'kein Matchup ohne entschiedene Partie mehr in der Datei — die '
             + 'Vorkehrung waere dann tot; sie kostet nichts und bleibt richtig, '
             + 'aber diese Zusicherung belegt nichts mehr');
         for (const r of nurRemis) {
             assert.strictEqual(parseInt(r.vs_ties, 10) || 0,
                 (parseInt(r.vs_count, 10) || 0) * (r.my_deck_name === r.opponent_deck_name ? 2 : 1),
-                `${r.my_deck_name} vs ${r.opponent_deck_name}: ohne Siege und `
-                + 'Niederlagen muessen alle Partien Unentschieden sein');
+                `${r.my_deck_name} vs ${r.opponent_deck_name}: ohne Wins und `
+                + 'Losses muessen alle Partien Ties sein');
         }
     });
 
-    it('beide Richtungen einer Paarung ergaenzen sich zu 100 Prozent', () => {
+    it('beide Richtungen einer Matchup ergaenzen sich zu 100 Prozent', () => {
         /* GEFUNDEN AM 03.09.2026 beim Ansehen der Heatmap: Dragapult gegen
            Mega Excadrill steht auf 51,6 %, Mega Excadrill gegen Dragapult
            auf 48,4 %. Das ist kein Zufall, sondern eine Eigenschaft der
@@ -600,11 +600,11 @@ describe('Die Zahlen hinter der Spalte', () => {
             }
         }
         assert.ok(geprueft >= 50,
-            `nur ${geprueft} Paarungen liegen in beiden Richtungen vor`);
+            `nur ${geprueft} Matchups liegen in beiden Richtungen vor`);
         assert.strictEqual(schief.length, 0,
-            `${schief.length} von ${geprueft} Paarungen sind nicht spiegelbildlich, `
+            `${schief.length} von ${geprueft} Matchups sind nicht spiegelbildlich, `
             + `z. B. ${schief[0] || ''} — dann ist mindestens eine Bilanz der `
-            + 'falschen Paarung zugeordnet');
+            + 'falschen Matchup zugeordnet');
     });
 
     it('Win Rate und Matchpunkte sind wirklich zwei Zahlen', () => {
@@ -614,7 +614,7 @@ describe('Die Zahlen hinter der Spalte', () => {
            liegen die beiden Zahlen systematisch auseinander. */
         const mit = rows.filter(r => String(r.vs_wins || '').trim() !== ''
             && (parseInt(r.vs_count, 10) || 0) >= 10);
-        assert.ok(mit.length >= 10, 'zu wenige belastbare Paarungen fuer die Probe');
+        assert.ok(mit.length >= 10, 'zu wenige belastbare Matchups fuer die Probe');
         const abstaende = mit.map((r) => {
             const w = parseInt(r.vs_wins, 10) || 0;
             const l = parseInt(r.vs_losses, 10) || 0;
@@ -624,29 +624,29 @@ describe('Die Zahlen hinter der Spalte', () => {
         const median = abstaende[Math.floor(abstaende.length / 2)];
         assert.ok(median > 0.5,
             `die Bilanz-Win-Rate weicht im Median nur ${median.toFixed(2)} Punkte `
-            + 'von vs_win_pct ab — dann fuehrt die Quelle doch S/(S+N), und die '
+            + 'von vs_win_pct ab — dann fuehrt die Quelle doch W/(W+L), und die '
             + 'Kommentare im Haus, die vs_win_pct Matchpunkte nennen, sind falsch');
     });
 
-    it('genug Paarungen tragen einen Wert', () => {
+    it('genug Matchups tragen einen Wert', () => {
         const mega = rows.filter(r => r.my_deck_name === 'Mega Excadrill');
         assert.ok(mega.length >= 10,
             `nur ${mega.length} Praesenzpaarungen fuer Mega Excadrill — unter 10 `
             + 'waere die Spalte mehr Strich als Zahl');
     });
 
-    it('duenne Paarungen sind die Mehrheit, nicht die Ausnahme', () => {
+    it('duenne Matchups sind die Mehrheit, nicht die Ausnahme', () => {
         // Das ist der Grund fuer die Partienzahl-Spalte: wer sie nicht sieht,
         // liest 100,0 % aus zwei Partien wie 100,0 % aus zweihundert.
         const mit = rows.filter(r => (parseInt(r.vs_count || '0', 10) || 0) > 0);
         const duenn = mit.filter(r => (parseInt(r.vs_count, 10) || 0) < 10);
         assert.ok(duenn.length / mit.length > 0.3,
-            `nur ${duenn.length} von ${mit.length} Paarungen liegen unter 10 `
+            `nur ${duenn.length} von ${mit.length} Matchups liegen unter 10 `
             + 'Partien — wenn das dauerhaft so bleibt, koennte die Markierung '
             + 'strenger werden');
     });
 
-    it('vs_win_pct sind Matchpunkte, nicht S/(S+N)', () => {
+    it('vs_win_pct sind Matchpunkte, nicht W/(W+L)', () => {
         // Dieselbe Zusage wie an der Heatmap. Wenn die Quelle die Konvention
         // wechselt, sind BEIDE Hinweise falsch.
         const decks = lies(path.join('data', 'labs_tournament_decks_TEF-PBL.csv'))
@@ -928,7 +928,7 @@ describe('Die Schwelle steht sichtbar unter der Tabelle', () => {
     it('liegt eine Zeile darunter, steht der Satz mit Schwelle und Anzahl da', () => {
         const html = tabelle([DICK, DUENN]);
         assert.ok(/arc-mu-note-praesenz/.test(html), 'die Zeile fehlt ganz');
-        assert.ok(/ab 30 Präsenz-Matches/.test(html), 'die Schwelle wird nicht genannt');
+        assert.ok(/ab 30 Matches vor Ort/.test(html), 'die Schwelle wird nicht genannt');
         assert.ok(/3,3 Punkte/.test(html),
             'die Begründung der Schwelle steht nicht daneben');
         assert.ok(/1 von 2 Zeilen/.test(html),

@@ -280,7 +280,7 @@ describe('Datei → Formel → nachgerechnet', () => {
                     }
                 }
                 assert.ok(geprueft > 0,
-                    `${b.datei} hat keine Zeile mit Unentschieden — dann prueft der `
+                    `${b.datei} hat keine Zeile mit Ties — dann prueft der `
                     + 'Vergleich der drei Konventionen nichts');
                 const anteil = treffer / geprueft;
                 assert.ok(anteil <= KOINZIDENZ_BAND,
@@ -293,7 +293,7 @@ describe('Datei → Formel → nachgerechnet', () => {
 
 describe('Dieselbe Formel ist noch keine Vergleichbarkeit', () => {
 
-    it('S/(S+N+U) haengt am Unentschieden-Anteil, S/(S+N) nicht', () => {
+    it('S/(S+N+U) haengt am Ties-Share, W/(W+L) nicht', () => {
         // Dieselbe Spielstaerke (2 Siege je Niederlage), zwei Felder.
         const wenigU = W.KONVENTIONEN.mitUnentschieden.rechne(200, 100, 3);
         const vielU  = W.KONVENTIONEN.mitUnentschieden.rechne(200, 100, 33);
@@ -407,8 +407,8 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
         const papier = chip(44.1, 254);                       // Vorgabe: mitUnentschieden
         const paar   = chip(47.9, 234, 'ohneUnentschieden');
         assert.match(papier, /title="/, 'der Papier-Chip traegt keinen Hinweis');
-        assert.match(papier, /S \/ \(S \+ N \+ U\)/, 'der Papier-Chip nennt seine Formel nicht');
-        assert.match(paar, /S \/ \(S \+ N\)/, 'der Paar-Chip nennt seine Formel nicht');
+        assert.match(papier, /W \/ \(W \+ L \+ T\)/, 'der Papier-Chip nennt seine Formel nicht');
+        assert.match(paar, /W \/ \(W \+ L\)/, 'der Paar-Chip nennt seine Formel nicht');
         // Und die Zahl selbst steht unveraendert da.
         assert.match(papier, /WR 44 % · 254/);
         assert.match(paar, /WR 48 % · 234/);
@@ -417,7 +417,7 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
                               paar.match(/title="([^"]*)"/)[1]);
     });
 
-    it('die Begegnungsliste ist entfernt (UI-62) — der Chip bleibt der Ort der Konventions-Hinweise', () => {
+    it('die Matchup-Liste ist entfernt (UI-62) — der Chip bleibt der Ort der Konventions-Hinweise', () => {
         assert.ok(!MC.includes('mc-enc-wr'), 'die Begegnungszeile ist zurueck');
     });
 
@@ -435,7 +435,7 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
             new Function('window', lies('js', 'win-rate-konvention.js'))(win);
             const titel = new Function('window', '_mcIstDeutsch',
                 stueck + '\nreturn titel;')(win, () => sprache === 'de');
-            assert.match(titel, /S \/ \(S \+ N\)/, sprache + ': keine Formel im Hinweis');
+            assert.match(titel, /W \/ \(W \+ L\)/, sprache + ': keine Formel im Hinweis');
             assert.match(titel, muster, sprache + ': die Konvention wird nicht benannt');
             assert.doesNotMatch(titel, /Win %/,
                 sprache + ': der Hinweis nennt die Groesse wieder "Win %" — das ist '
@@ -470,7 +470,7 @@ describe('Die Anzeige nennt, nach welcher Formel gerechnet ist', () => {
             // Namen (UI-16). S/(S+N+U) steht nur noch, wo keine Bilanz da
             // ist, und nennt ihren Unterschied im Namen.
             assert.match(M.kurz('ohneUnentschieden'), /^(Win Rate|Win rate)$/);
-            assert.match(M.kurz('mitUnentschieden'), /inkl\. Unentschieden|incl\. ties/);
+            assert.match(M.kurz('mitUnentschieden'), /inkl\. Ties|incl\. ties/);
         }
     });
 });

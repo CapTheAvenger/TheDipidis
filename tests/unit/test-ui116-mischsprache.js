@@ -21,7 +21,7 @@ describe('UI-116: deutsche Bedienwoerter', () => {
     const t = woerter();
     it('Woerterbuch geladen', () => { assert.ok(t && t.de && t.en, 'translations nicht gefunden'); });
     const SOLL = {
-        'profile.tradelist': 'Tauschliste', 'tg.title': 'Testgruppen', 'menu.groupMeta': 'Meta & Tier-Listen',
+        'profile.tradelist': 'Tauschliste', 'tg.title': 'Testing Groups', 'menu.groupMeta': 'Meta & Tier-Listen',
         'a11y.skip': 'Zum Inhalt springen', 'cardType.aceSpec': 'ACE SPEC',
         'bj.editEntry': 'Bearbeiten', 'bj.deleteEntry': 'Löschen', 'bj.copyEntry': 'Kopieren',
     };

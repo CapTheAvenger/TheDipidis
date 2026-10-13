@@ -101,7 +101,7 @@
                     src: [
                         ['🌐 Global · Online + Majors',
                          'Limitless Online (limitlesstcg.com) — gemeldete Online-Turniere und ' +
-                         'Präsenzturniere ab Regional-Größe.'],
+                         'Turniere vor Ort ab Regional-Größe.'],
                         ['🇯🇵 Japan · City League',
                          'limitlesstcg.com/jp — gemeldete City-League-Ergebnisse.'],
                         ['📦 Vergangene Formate',
@@ -170,7 +170,7 @@
                     p: ['Die Meta-Ansicht zählt zweimal unabhängig voneinander — beide Male ' +
                         'aus den Limitless-Online-Turnieren: einmal die gemeldeten Decklisten, ' +
                         'wie Limitless sie auf seiner Deck-Übersicht ausweist, einmal die ' +
-                        'gewichteten Antritte, die wir selbst aus den Endständen der einzelnen ' +
+                        'gewichteten Listen, die wir selbst aus den Endständen der einzelnen ' +
                         'Turniere zählen.'],
                     umfang: true,
                     leer: 'Der Umfang steht erst zur Verfügung, wenn die Meta-Ansicht in ' +
@@ -180,16 +180,16 @@
                     id: 'begriffe', auf: false,
                     h: 'Was die Begriffe heißen',
                     dl: [
-                        ['Anteil',
+                        ['Share',
                          'Wie oft ein Deck gespielt wurde, gemessen an allen gewichteten ' +
-                         'Antritten im Zeitfenster.'],
-                        ['Gewichteter Antritt',
+                         'Listen im Zeitfenster.'],
+                        ['Gewichtete Liste',
                          'Ein Turnierstart, gewichtet nach Größe des Turniers. Ein Regional ' +
                          'zählt mehr als ein Online-Cup mit 20 Leuten.'],
-                        ['Top-8-Quote',
-                         'Wie oft ein Deck aus diesen Antritten in die Top 8 kam.'],
+                        ['Top-8-Conversion',
+                         'Wie oft ein Deck aus diesen Listen in die Top 8 kam.'],
                         ['„…-mal so oft wie der Schnitt“',
-                         'Die Top-8-Quote des Decks im Vergleich zu der eines ' +
+                         'Die Top-8-Conversion des Decks im Vergleich zu der eines ' +
                          'durchschnittlichen Decks mit erkanntem Archetyp. Der ' +
                          'Vergleichswert ist geglättet, die Quote daneben ist roh — bei ' +
                          'kleinen Stichproben gehen beide Zahlen deshalb auseinander.'],
@@ -215,14 +215,14 @@
                         // im Nenner, nicht als halber Sieg im Zähler.
                         ['{quote} ({formel})',
                          // DA-47 (05.10.2026, Entscheidung Hausi): S/(S+N).
-                         'Gewonnene Matches geteilt durch entschiedene (Siege + ' +
-                         'Niederlagen). Unentschieden zählen nicht mit — so ist die ' +
+                         'Gewonnene Matches geteilt durch entschiedene (Wins + ' +
+                         'Losses). Ties zählen nicht mit — so ist die ' +
                          'Zahl online und auf Majors vergleichbar, obwohl dort viel ' +
-                         'häufiger unentschieden gespielt wird. Beispiel: 6.430 Siege, ' +
-                         '6.666 Niederlagen und 110 Unentschieden ergeben ' +
+                         'häufiger Ties gespielt werden. Beispiel: 6.430 Wins, ' +
+                         '6.666 Losses und 110 Ties ergeben ' +
                          '6.430 / 13.096 = 49,1 %.'],
                         ['Tier',
-                         'Gruppierung nach Anteil und Erfolg. Die Schwellen stehen in der ' +
+                         'Gruppierung nach Share und Erfolg. Die Schwellen stehen in der ' +
                          'Tier-Liste selbst.'],
                         // Am 31.08.2026 von der Startseite hierher gezogen:
                         // dort standen sie als Erklaersaetze mitten zwischen
@@ -234,10 +234,10 @@
                          'Meta — keine Zusage, sondern die beste Wette, die die Daten hergeben.'],
                         ['„schafft Day 2“',
                          'Wie oft ein Spieler mit diesem Deck über den ersten Tag hinauskommt, ' +
-                         'gerechnet über die ausgewerteten Präsenzturniere. Daneben steht ' +
+                         'gerechnet über die ausgewerteten Majors. Daneben steht ' +
                          'derselbe Wert für ein beliebiges Deck — ohne diesen Vergleich sagt ' +
                          'die Zahl nichts.'],
-                        ['„Day-2-Rate bisher“',
+                        ['„Day-2-Conversion bisher“',
                          'Der tatsächlich beobachtete Wert dieses Decks, geschrumpft: Decks mit ' +
                          'wenigen Spielern werden Richtung Durchschnitt korrigiert. Deshalb ' +
                          'weicht er von der Aussicht daneben ab.'],
@@ -246,7 +246,7 @@
                          'Spieler es gespielt haben. Darunter ist die Quote Rauschen. Die ' +
                          'Schwelle hängt am Format und steht deshalb bei der Empfehlung selbst.'],
                         ['„% vom Meta sind neu“',
-                         'Der Anteil des Metas, für den es noch keine Präsenzdaten gibt — ' +
+                         'Der Anteil des Metas, für den es noch keine Daten vor Ort gibt — ' +
                          'meist frisch gebaute Decks aus dem Online-Fenster. Gegen sie ist der ' +
                          'Pick ungetestet, weil sie in keinem ausgewerteten Turnier vorkamen.'],
                     ],
@@ -271,7 +271,7 @@
                     id: 'trennung', auf: false,
                     h: 'Was getrennt bleibt',
                     p: ['Japan, Global und Past werden getrennt geführt und nie miteinander ' +
-                        'gemischt. Es sind verschiedene Kartenpools, verschiedene Spielerfelder ' +
+                        'gemischt. Es sind verschiedene Kartenpools, verschiedene Metas ' +
                         'und verschiedene Zeiträume; eine gemeinsame Zahl daraus wäre keine.',
                         'Jede Ansicht sagt im Ausweis, in welchem dieser drei Räume sie steht.'],
                 },
@@ -290,10 +290,10 @@
                     p: ['Nicht jedes vergangene Format hat dieselben Daten. Die Tabelle wird beim ' +
                         'Öffnen aus den Verzeichnissen der Daten gelesen, mit deren Stand — ' +
                         'nicht von Hand gepflegt.',
-                        'Zwei Grundmengen bei Majors: Die Feldgröße kommt von der Turnierseite und ' +
+                        'Zwei Grundmengen bei Majors: Die Spielerzahl kommt von der Turnierseite und ' +
                         'zählt alle Spieler. Kartenanalysen und Deckanteile in „Vergangene Formate“ ' +
                         'rechnen nur mit den veröffentlichten Decklisten. Beide Zahlen stimmen, ' +
-                        'beschreiben aber nicht dieselbe Menge — deshalb können Feldgröße und ' +
+                        'beschreiben aber nicht dieselbe Menge — deshalb können Spielerzahl und ' +
                         'Listenzahl eines Turniers voneinander abweichen.'],
                     leer: 'Die Verzeichnisse ließen sich gerade nicht laden — ohne sie steht hier keine Tabelle.',
                 },

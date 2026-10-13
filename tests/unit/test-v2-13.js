@@ -105,7 +105,7 @@ describe('Kartendatenbank', () => {
         ctx.sortiere(k);
         assert.deepEqual(k.map((c) => c.name), ['C', 'B', 'A', 'D']);
     });
-    it('„Gespielt in“: meiste Decks zuerst, dann Anteil', () => {
+    it('„Gespielt in“: meiste Decks zuerst, dann Share', () => {
         const ctx = {};
         vm.runInNewContext(block(KARTEN, 'function kartenGespieltInListe(') + ';this.f=kartenGespieltInListe;', ctx);
         // Map aus dem Kontext — instanceof prueft gegen das Map desselben Realms
@@ -114,10 +114,10 @@ describe('Kartendatenbank', () => {
         assert.deepEqual(Array.from(l, (e) => e.archetyp), ['Zoroark', 'Gardevoir', 'Klein']);
         assert.ok(l[0].prozent > l[1].prozent);
     });
-    it('Auswahl kennt Preis und Meta-Anteil', () => {
+    it('Auswahl kennt Preis und Meta-Share', () => {
         const html = lies('index.html');
         assert.match(html, /<option value="price"/);
-        assert.match(lies('js/i18n.js'), /'cards\.sortByCoverage':\s*'Nach Meta-Anteil'/);
+        assert.match(lies('js/i18n.js'), /'cards\.sortByCoverage':\s*'Nach Meta-Share'/);
     });
 });
 

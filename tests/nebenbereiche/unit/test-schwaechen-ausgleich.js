@@ -317,7 +317,7 @@ describe('Der Block im Builder', () => {
         const txt = de[0];
         assert.ok(/Schadensmodell/.test(txt),
             'der Hinweis nennt das Modell nicht — dann liest sich die Zahl wie ein Spielergebnis');
-        assert.ok(/Siegquoten/.test(txt),
+        assert.ok(/Win Rates/.test(txt),
             'der Hinweis sagt nicht, dass es keine Siegquoten gibt');
     });
 

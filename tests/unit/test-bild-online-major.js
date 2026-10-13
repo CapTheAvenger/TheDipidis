@@ -64,7 +64,7 @@ describe('Die Praesenzzahlen erreichen das Bild', () => {
         // erste Fassung blieb gruen, als die Bedingung auf `false` gesetzt
         // wurde — `spec.majorShare` stand ja weiter im isFinite() daneben.
         for (const [wachter, wo] of [
-            ['hatMajorShare\n                ? \'Major \'', 'Anteil'],
+            ['hatMajorShare\n                ? \'Major \'', 'Share'],
             ['hatMajorWr\n                ? \'Major \'', 'Win Rate'],
         ]) {
             assert.ok(bildK.indexOf(wachter.replace(/\\n/g, '\n')) > 0,
@@ -95,7 +95,7 @@ describe('Die Praesenzzahlen erreichen das Bild', () => {
         const treffer = (bildK.match(/Major: keine Daten/g) || []).length;
         assert.ok(treffer >= 2,
             `"Major: keine Daten" steht nur ${treffer}× im Bild — erwartet `
-            + 'mindestens zwei (Anteil und Win Rate). Ohne den Text stuende '
+            + 'mindestens zwei (Share und Win Rate). Ohne den Text stuende '
             + 'dort nichts, und "war nicht dabei" saehe aus wie ein Fehler');
     });
 });
@@ -131,7 +131,7 @@ describe('Das Bild zeigt dieselbe Groesse wie die Karte', () => {
             + 'gemeldet wurde — und das Bild ist die Fassung, die die Seite '
             + 'verlaesst');
         assert.ok(/num\(convQuote, 2\) \+ ' %'/.test(bildK),
-            'die rohe Top-8-Quote steht nicht mehr gross im Bild');
+            'die rohe Top-8-Conversion steht nicht mehr gross im Bild');
     });
 
     it('der Feldschnitt steht daneben, roh wie die Quote', () => {
@@ -144,7 +144,7 @@ describe('Das Bild zeigt dieselbe Groesse wie die Karte', () => {
     });
 
     it('die Beschriftungen nennen die Herkunft', () => {
-        for (const s of ['Anteil am Meta · online', 'Top-8-Quote · online']) {
+        for (const s of ['Share am Meta · online', 'Top-8-Conversion · online']) {
             assert.ok(bild.indexOf(s) > 0,
                 `die Beschriftung "${s}" fehlt — dann steht im Bild eine Zahl `
                 + 'ohne ihre Herkunft neben einer, die eine hat');
@@ -170,11 +170,11 @@ describe('Der Nenner in der Seitenspalte ist richtig benannt', () => {
        gegenstandslos — sie haette eine Zeile bewacht, die es nicht gibt.
        An ihre Stelle tritt die schaerfere: die Zahl darf nicht
        zurueckkommen, ohne dass jemand diesen Absatz liest. */
-    it('die Summe aller Antritte steht nicht mehr auf dem Bild', () => {
+    it('die Summe aller Listen steht nicht mehr auf dem Bild', () => {
         assert.ok(bildK.indexOf('spec.totalBrought') < 0,
             'die Zeile mit der Antrittssumme ist zurueck. Sie hatte auf dem '
-            + 'Bild keinen Bezugspunkt — weder „Meta gesamt" noch „Antritte '
-            + 'mit Top-8-Schnitt" sagte einem Leser, wovon 12.331 der Nenner '
+            + 'Bild keinen Bezugspunkt — weder „Meta gesamt" noch „Listen '
+            + 'mit Top Cut" sagte einem Leser, wovon 12.331 der Nenner '
             + 'sein soll. Wenn sie wiederkommt, braucht sie die Zahl daneben, '
             + 'auf die sie sich bezieht.');
         assert.ok(!/Meta gesamt|Meta total/.test(bildK),
@@ -190,7 +190,7 @@ describe('Der Nenner in der Seitenspalte ist richtig benannt', () => {
         const iB = kopf.indexOf('total_brought_weighted');
         assert.ok(iB >= 0,
             'die Spalte total_brought_weighted gibt es nicht mehr — die '
-            + 'Beschriftung "Antritte mit Top-8-Schnitt" gehoert dann neu bewertet');
+            + 'Beschriftung "Listen mit Top Cut" gehoert dann neu bewertet');
         let summe = 0;
         for (const z of L.slice(1)) {
             const v = parseFloat((z.split(';')[iB] || '0').replace(',', '.'));
@@ -204,10 +204,10 @@ describe('Der Nenner in der Seitenspalte ist richtig benannt', () => {
            Datei — nicht ein Deckel, den der naechste Dienstag reisst. */
         assert.ok(summe > 1000,
             `die Summe liegt bei ${Math.round(summe)} — zu wenig, um als `
-            + '"Antritte auf Turnieren mit Top-8-Schnitt" eine Aussage zu sein');
+            + '"Listen auf Turnieren mit Top Cut" eine Aussage zu sein');
         const zeilen = L.length - 1;
         assert.ok(summe < zeilen * 2000,
-            `${Math.round(summe)} gewichtete Antritte auf ${zeilen} Zeilen — `
+            `${Math.round(summe)} gewichtete Listen auf ${zeilen} Zeilen — `
             + 'im Schnitt ueber 2.000 je Deck. Dann zaehlt die Spalte etwas '
             + 'anderes, als die Beschriftung behauptet');
     });

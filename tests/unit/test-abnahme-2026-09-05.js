@@ -221,7 +221,7 @@ describe('Meta Call: die Paar-Aggregation an der echten Datei', () => {
 
 describe('Meta Call: jede Quote trägt ihren Nenner', () => {
 
-    it('der Nenner der Online-Paarung wird nicht mehr weggeworfen', () => {
+    it('der Nenner der Online-Matchup wird nicht mehr weggeworfen', () => {
         // total_games steht in derselben CSV-Zeile.
         assert.match(METACALL, /_matchupMap\[dk\]\[ok\] = \{ pWin, pTie, pLoss, partien, quote, roh \};/);
     });
@@ -231,13 +231,13 @@ describe('Meta Call: jede Quote trägt ihren Nenner', () => {
         assert.match(METACALL, /partien: \(metaBase\.partien \|\| 0\) \+ js\.total/);
     });
 
-    it('die Begegnungsliste zeigt ihn an', () => {
+    it('die Matchup-Liste zeigt ihn an', () => {
         // Aus genau diesen Zeilen entsteht die Day-2-Chance. Ohne
         // Partienzahl war "WR 13 %" von "WR 73 %" nicht zu unterscheiden.
         /* UI-62 (02.10.2026): die Begegnungsliste ist entfernt (Hausi:
            ohne Mehrwert). Die Quote mit Nenner steht weiter in der Tabelle
            „Das Meta und deine Chancen" (_wrChip, unten geprueft). */
-        assert.ok(!METACALL.includes('mc-encounter-row'), 'die Begegnungsliste ist wieder da');
+        assert.ok(!METACALL.includes('mc-encounter-row'), 'die Matchup-Liste ist wieder da');
     });
 
     it('ein Paar ohne Messung bekommt keine Verschiebung und sagt es', () => {
@@ -357,9 +357,9 @@ describe('Grundgesamtheiten: Spieler sind keine Turniere', () => {
         // sagt `day2_ueberhaupt_erreicht: 43` von `turniere: 44` — also
         // 2,3 %. Faktor 33.
         assert.ok(!/% der Turniere ist nach Day 1 Schluss/.test(EMPFEHLUNG),
-            'der Satz behauptet wieder einen Turnier-Anteil');
+            'der Satz behauptet wieder einen Turnier-Share');
         assert.match(EMPFEHLUNG, /Spielern dieses Decks scheitern/);
-        assert.match(EMPFEHLUNG, /% der Antritte, gemittelt über/);
+        assert.match(EMPFEHLUNG, /% der Listen, gemittelt über/);
     });
 
     it('der Satz trägt seinen Nenner', () => {
@@ -388,7 +388,7 @@ describe('Grundgesamtheiten: Spieler sind keine Turniere', () => {
            darunter "Major: not played · Online 86.7% share". Dieselbe
            Zahl, zwei Beschriftungen, eine davon falsch. */
         assert.match(BAUER, /const _y2 = !!acePick\.quelle_text;/);
-        assert.match(BAUER, /parts\.push\(`Präsenz \$\{/);
+        assert.match(BAUER, /parts\.push\(`Major \$\{/);
         assert.match(BAUER, /if \(!_y2\) parts\.push\(`Online /);
     });
 

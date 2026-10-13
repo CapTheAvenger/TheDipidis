@@ -84,10 +84,10 @@ describe('UI-62: Aufbau und Texte', () => {
         assert.equal(vorkommen.length, 2);
         assert.ok(vorkommen.every(v => v === 'Journal'), vorkommen.join('|'));
     });
-    it('Bilanz heisst ueberall W–L–T (auch deutsch) und die Zelle schreibt Wins–Losses–Ties', () => {
-        assert.match(QUELLE, /L\('Bilanz W–L–T', 'Record W–L–T'\)/);
+    it('Bilanz heisst ueberall W-L-T (auch deutsch) und die Zelle schreibt Wins–Losses–Ties', () => {
+        assert.match(QUELLE, /L\('Bilanz W-L-T', 'Record W-L-T'\)/);
         for (const alt of ['S–N–U', 'S–U–N', 'Bilanz S–']) {
-            assert.ok(!QUELLE.includes(alt), alt + ' ist zurueck — die Reihenfolge heisst immer W–L–T');
+            assert.ok(!QUELLE.includes(alt), alt + ' ist zurueck — die Reihenfolge heisst immer W-L-T');
             for (const d of ['app-archetype-card.js', 'app-current-meta-analysis.js'])
                 assert.ok(!lies('js', d).includes(alt), alt + ' in ' + d);
         }

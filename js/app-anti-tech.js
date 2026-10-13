@@ -910,7 +910,7 @@
          * eine kurze Liste fuer "es gibt nicht mehr". */
         const st = _regelstand || { version: null, datum: null, paarungen: 0 };
         const kopf = _tf('antiTech.belegKopf',
-            'Regelbasis: {datei}{version} · Stand {datum} · {n} Paarungen. '
+            'Regelbasis: {datei}{version} · Stand {datum} · {n} Matchups. '
           + 'Alles darüber hinaus ist aus Kartentexten abgeleitet und als unbelegt gekennzeichnet.')
             .replace('{datei}', BELEG_QUELLE.replace(/^data\//, ''))
             .replace('{version}', st.version ? ' v' + st.version : '')
@@ -944,7 +944,7 @@
                 _tf('antiTech.belegOhneAntwort', 'keine bekannte Antwort') + ': '
                 + _tf('antiTech.belegOhneAntwortSatz',
                      '{liste} — diese Bedrohung spielt das Zieldeck, aber in diesem Format '
-                   + 'kennt die Bedrohungsdatei keinen Konter dagegen. Die Kategorie fehlt '
+                   + 'kennt die Bedrohungsdatei keinen Counter dagegen. Die Kategorie fehlt '
                    + 'nicht, sie ist unbeantwortet.')
                     .replace('{liste}', ohneAntwortText.join(' · ')))}</div>`
             : '';

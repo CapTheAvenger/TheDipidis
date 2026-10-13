@@ -311,13 +311,13 @@ describe('oeffneMitDeck: der Wunsch überlebt den Ladevorgang', () => {
         assert.ok(ctx.__gerufen.gescrollt > 0, 'es wird nirgendwohin gesprungen');
     });
 
-    it('sagt es, wenn zu dem Deck keine Anteile vorliegen', () => {
+    it('sagt es, wenn zu dem Deck keine Shares vorliegen', () => {
         /* Eine Aussage, keine Panne — und besser als ein leerer Block,
            in dem der Nutzer den Fehler bei sich sucht. */
         const ctx = umgebung({ shareList: [{ name: 'Dragapult' }] });
         ctx.oeffneMitDeck('Gibt Es Nicht');
         assert.equal(ctx.__gerufen.deck, null);
-        assert.match(String(ctx.__gerufen.meldung), /keine Anteile/);
+        assert.match(String(ctx.__gerufen.meldung), /keine Shares/);
     });
 
     it('gibt nach einer halben Minute auf', () => {

@@ -149,11 +149,11 @@ describe('die Praesenzspalten verschwinden, wenn sie leer waeren', () => {
 
     it('und der Satz darunter sagt, warum', () => {
         const html = tabelleMit([zeile('A'), zeile('B'), zeile('C')])('X', {});
-        assert.match(html, /Präsenzturniere sind hier nicht dabei/,
+        assert.match(html, /Majors sind hier nicht dabei/,
             'die Legende erklaert die fehlende Spalte nicht');
     });
 
-    it('eine einzige Paarung mit Zahlen haelt beide Spalten', () => {
+    it('eine einzige Matchup mit Zahlen haelt beide Spalten', () => {
         const html = tabelleMit([
             zeile('A'), zeile('B'),
             zeile('C', { majorWr: 48.5, majorWrRoh: 47.0, majorSiege: 14,

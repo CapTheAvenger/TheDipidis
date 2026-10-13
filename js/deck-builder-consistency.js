@@ -1662,7 +1662,7 @@
       trace.push({
         phase: 4, decision: 'tech_gleichstand',
         faelle: gleichstaende,
-        detail: 'Bei identischem Anteil entscheidet die Reihenfolge des '
+        detail: 'Bei identischem Share entscheidet die Reihenfolge des '
               + 'ersten Auftretens — das ist eine Setzung, keine Wertung. '
               + 'Wer hier draussen steht, ist nicht schlechter belegt als '
               + 'der, der drin steht. Genau diese Karten sind es wert, von '
@@ -2122,10 +2122,10 @@
     const feld    = Number.isFinite(d.feldgroesse) && d.feldgroesse > 0 ? d.feldgroesse : null;
     let satz = kopf;
     if (piloten !== null) {
-      satz += de ? ` von ${zahl(piloten)} Piloten` : ` from ${zahl(piloten)} pilots`;
+      satz += de ? ` von ${zahl(piloten)} Spielern` : ` from ${zahl(piloten)} pilots`;
     }
     if (feld !== null) {
-      satz += de ? ` (${zahl(feld)} Spieler)` : ` (${zahl(feld)} players)`;
+      satz += de ? ` (${zahl(feld)} Spieler im Turnier)` : ` (${zahl(feld)} players)`;
     }
     return satz;
   }
@@ -2144,16 +2144,16 @@
     if (de) {
       let t = online > 0
         ? `Gemischte Grundlage: ${zahl(online)} der ${nL} Listen kommen aus `
-          + 'Online-Turnieren, wo JEDE Liste des Feldes veroeffentlicht wird. '
+          + 'Online-Turnieren, wo JEDE Liste des Turniers veroeffentlicht wird. '
           + 'Der Rest kommt von limitlesstcg.com, das Decklisten erst ab '
           + 'Day 2 zeigt'
         : 'Limitless veroeffentlicht Decklisten erst ab Day 2. Der Bau steht '
-          + 'deshalb auf dem Top Cut, nicht auf dem ganzen Feld';
+          + 'deshalb auf dem Top Cut, nicht auf dem ganzen Meta';
       if (piloten !== null) {
         t += ` — ${zahl(piloten)} Spieler haben diesen Archetyp gespielt, `
            + `veroeffentlicht sind ${nL} ihrer Listen`;
       }
-      if (feld !== null) t += `, bei ${zahl(feld)} Spielern im Feld`;
+      if (feld !== null) t += `, bei ${zahl(feld)} Spielern im Turnier`;
       return t + '.';
     }
     let t = online > 0

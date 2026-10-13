@@ -253,7 +253,7 @@ describe('B3/F6.18b — eine Abdeckung ueber 100 % gibt es nicht', () => {
         ]
     };
 
-    it('der Anteil bleibt bei hoechstens 100 %', async () => {
+    it('der Share bleibt bei hoechstens 100 %', async () => {
         const { w } = await laden(ZWEI_QUELLEN, { archetypen: ['Dragapult'] });
         const r = w.calculateDynamicCoverage('Dreepy');
         assert.ok(r, 'kein Ergebnis');
@@ -296,16 +296,16 @@ describe('B3/F6.18b — eine Abdeckung ueber 100 % gibt es nicht', () => {
         assert.deepEqual(r.weitereErhebungen, []);
         assert.equal(r.deckCount, 18);
         assert.equal(r.totalDecks, 20);
-        assert.ok(Math.abs(r.percentage - 90) < 1e-9, 'Anteil: ' + r.percentage);
+        assert.ok(Math.abs(r.percentage - 90) < 1e-9, 'Share: ' + r.percentage);
     });
 
-    it('auch ohne gesetzten Filter bleibt der Anteil bei hoechstens 100 %', async () => {
+    it('auch ohne gesetzten Filter bleibt der Share bei hoechstens 100 %', async () => {
         const { w } = await laden(ZWEI_QUELLEN);
         const r = w.calculateDynamicCoverage('Dreepy');
         assert.ok(r.percentage <= 100, 'ungefiltert: ' + r.percentage + ' %');
     });
 
-    it('mehrere Drucke derselben Karte zaehlen weiter zusammen', async () => {
+    it('mehrere Prints derselben Karte zaehlen weiter zusammen', async () => {
         // Die Zusammenlegung ueber Drucke ist gewollt (Kommentar
         // "SUM-merged"): wer die Karte in irgendeinem Druck spielt,
         // zaehlt. Innerhalb EINER Erhebung, und nur ueber den Nenner
@@ -317,7 +317,7 @@ describe('B3/F6.18b — eine Abdeckung ueber 100 % gibt es nicht', () => {
             ]
         }, { archetypen: ['Dragapult'] });
         const r = w.calculateDynamicCoverage('Boss’s Orders');
-        assert.equal(r.deckCount, 11, 'die beiden Drucke muessen zusammengezaehlt werden');
+        assert.equal(r.deckCount, 11, 'die beiden Prints muessen zusammengezaehlt werden');
         assert.equal(r.totalDecks, 20);
         assert.equal(r.gedeckelt, false);
     });
@@ -325,7 +325,7 @@ describe('B3/F6.18b — eine Abdeckung ueber 100 % gibt es nicht', () => {
 
 /* ══ B1 und B4 — zwei Zustaende, die nichts ueber sich sagten ═══════ */
 
-describe('B1/F6.16b — "Standard-Druck" sagt, wenn es gerade nicht zusammenlegt', () => {
+describe('B1/F6.16b — "Standard-Print" sagt, wenn es gerade nicht zusammenlegt', () => {
     /* Die Regel selbst, ausgefuehrt: die eine Zeile, die den Hinweis
      * setzt, mit allen vier Kombinationen. */
     function regel(standardDruck, suche) {
@@ -336,28 +336,28 @@ describe('B1/F6.16b — "Standard-Druck" sagt, wenn es gerade nicht zusammenlegt
         return w._cdbDruckHinweis;
     }
 
-    it('nur bei Standard-Druck UND aktiver Suche', () => {
+    it('nur bei Standard-Print UND aktiver Suche', () => {
         assert.equal(regel(true, 'charizard'), true,
             'genau hier wird die Zusammenlegung uebersprungen — und genau hier sagte es '
             + 'bisher niemand');
-        assert.equal(regel(true, ''), false, 'ohne Suche legt Standard-Druck wirklich zusammen');
-        assert.equal(regel(false, 'charizard'), false, '"Alle Drucke" verspricht nichts anderes');
+        assert.equal(regel(true, ''), false, 'ohne Suche legt Standard-Print wirklich zusammen');
+        assert.equal(regel(false, 'charizard'), false, '"Alle Prints" verspricht nichts anderes');
         assert.equal(regel(false, ''), false);
     });
 
     it('die Ergebniszeile traegt den Grund, in beiden Sprachen', () => {
         const de = zeichne([{ set: 'ASC', number: '1', name: 'A' }], { druckHinweis: true, sprache: 'de' });
-        assert.match(de.ergebnisZeile, /alle Drucke/,
-            'die Zeile sagt nicht, warum "Standard-Druck" nichts zusammenlegt: '
+        assert.match(de.ergebnisZeile, /alle Prints/,
+            'die Zeile sagt nicht, warum "Standard-Print" nichts zusammenlegt: '
             + JSON.stringify(de.ergebnisZeile));
         const en = zeichne([{ set: 'ASC', number: '1', name: 'A' }], { druckHinweis: true, sprache: 'en' });
         assert.match(en.ergebnisZeile, /every print/);
-        assert.ok(!/alle Drucke/.test(en.ergebnisZeile), 'deutscher Satz im englischen Modus');
+        assert.ok(!/alle Prints/.test(en.ergebnisZeile), 'deutscher Satz im englischen Modus');
     });
 
     it('ohne Suche steht der Satz nicht da', () => {
         const r = zeichne([{ set: 'ASC', number: '1', name: 'A' }], { druckHinweis: false, sprache: 'de' });
-        assert.ok(!/alle Drucke/.test(r.ergebnisZeile), 'ein Hinweis ohne Anlass: ' + r.ergebnisZeile);
+        assert.ok(!/alle Prints/.test(r.ergebnisZeile), 'ein Hinweis ohne Anlass: ' + r.ergebnisZeile);
     });
 
     it('und er steht auch dann da, wenn NULL Karten uebrig bleiben', () => {
@@ -367,7 +367,7 @@ describe('B1/F6.16b — "Standard-Druck" sagt, wenn es gerade nicht zusammenlegt
          * meisten fehlt — der Knopf blieb hervorgehoben, das Ergebnis leer,
          * und niemand sagte, dass beide Ansichten gerade dasselbe tun. */
         const de = zeichne([], { druckHinweis: true, sprache: 'de' });
-        assert.match(de.ergebnisZeile, /alle Drucke/,
+        assert.match(de.ergebnisZeile, /alle Prints/,
             'der leere Treffer nennt den Grund nicht: ' + JSON.stringify(de.ergebnisZeile));
         const en = zeichne([], { druckHinweis: true, sprache: 'en' });
         assert.match(en.ergebnisZeile, /every print/, en.ergebnisZeile);
@@ -375,7 +375,7 @@ describe('B1/F6.16b — "Standard-Druck" sagt, wenn es gerade nicht zusammenlegt
 
     it('ein leeres Ergebnis ohne Druckhinweis bleibt bei der reinen Zahl', () => {
         const r = zeichne([], { druckHinweis: false, sprache: 'de' });
-        assert.ok(!/alle Drucke/.test(r.ergebnisZeile),
+        assert.ok(!/alle Prints/.test(r.ergebnisZeile),
             'ein Hinweis ohne Anlass: ' + r.ergebnisZeile);
     });
 });

@@ -190,7 +190,7 @@ describe('Der Datenumfang — von der Startseite nach Quellen & Methodik', () =>
         api.ergaenze({ staplesArchetypen: 60 });
         const z = api.saetze(true).join(' | ');
         assert.match(z, /26\.319 gemeldete Decklisten/);
-        assert.match(z, /8\.130 gewichtete Turnier-Antritte/);
+        assert.match(z, /8\.130 gewichtete Turnier-Listen/);
         assert.match(z, /475 Turniere/);
         assert.match(z, /14\.026 Spieler/);
         assert.match(z, /59\.910 Matches/);
@@ -204,7 +204,7 @@ describe('Der Datenumfang — von der Startseite nach Quellen & Methodik', () =>
            waere keine Kuerzung, sondern ein Verlust gewesen. Der Review
            hat genau das beanstandet, weil docs/geparkte-features.md
            "das ist kein Parken, das ist ein Umzug" behauptete. */
-        assert.match(TIER, /top8Anteil/, 'der Anteil wird nicht mehr gerechnet');
+        assert.match(TIER, /top8Anteil/, 'der Share wird nicht mehr gerechnet');
         assert.match(TIER, /\.slice\(0, 8\)/);
         const F = new Function('window', 'sessionStorage', 'Date', 'zahlKomma',
             UMFANG + '\nreturn window.DsDatenumfang;');
@@ -214,7 +214,7 @@ describe('Der Datenumfang — von der Startseite nach Quellen & Methodik', () =>
         const z = w.DsDatenumfang.saetze(true).join(' | ');
         assert.match(z, /acht größten Archetypen/);
         assert.match(z, /Top 8 Archetypes/);
-        assert.match(z, /61 % des Feldes/);
+        assert.match(z, /61 % des Metas/);
     });
 });
 

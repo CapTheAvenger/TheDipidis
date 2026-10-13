@@ -99,7 +99,7 @@ function tileMit(html, name) {
     return hit;
 }
 
-describe('F04 — der angezeigte Rang ist die echte Anteils-Position', () => {
+describe('F04 — der angezeigte Rang ist die echte Shares-Position', () => {
     it('das zweitgrößte Deck trägt "Rang 2", nicht "Rang 1"', () => {
         const { answerModel, answerHtml } = build('de');
         const model = answerModel(ROWS);
@@ -122,16 +122,16 @@ describe('F04 — der angezeigte Rang ist die echte Anteils-Position', () => {
     });
 });
 
-describe('F05 — die Best-Kachel weist ihre grosse Zahl als Meta-Anteil aus', () => {
-    it('die Best-Kachel nennt "Meta-Anteil", die anderen "des Metas"', () => {
+describe('F05 — die Best-Kachel weist ihre grosse Zahl als Meta-Share aus', () => {
+    it('die Best-Kachel nennt "Meta-Share", die anderen "des Metas"', () => {
         const { answerModel, answerHtml } = build('de');
         const model = answerModel(ROWS);
         const html = answerHtml(model);
 
         const best = tileMit(html, 'Dragapult');
         assert.match(best, /Erfolgreichstes Deck/, 'Dragapult ist nicht die Best-Kachel');
-        assert.match(best, /Meta-Anteil/,
-            'die grosse Zahl der Best-Kachel ist nicht als "Meta-Anteil" beschriftet');
+        assert.match(best, /Meta-Share/,
+            'die grosse Zahl der Best-Kachel ist nicht als "Meta-Share" beschriftet');
 
         // Die Meistgespielt-Kacheln behalten die knappe Beschriftung.
         const exc = tileMit(html, 'Mega Excadrill');

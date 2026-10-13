@@ -1908,8 +1908,8 @@
                 ? zahlLokal(x, 0) : String(Math.round(x));
             const nenner = hatBilanz
                 ? (de
-                    ? `Nenner: ${zahl(n)} Matches (Bilanz ${zahl(w)}–${zahl(l)}–${zahl(u)}, W–L–T).`
-                    : `Denominator: ${zahl(n)} games (record ${zahl(w)}–${zahl(l)}–${zahl(u)}, W–L–T).`)
+                    ? `Nenner: ${zahl(n)} Matches (Bilanz ${zahl(w)}–${zahl(l)}–${zahl(u)}, W-L-T).`
+                    : `Denominator: ${zahl(n)} games (record ${zahl(w)}–${zahl(l)}–${zahl(u)}, W-L-T).`)
                 : (de
                     ? 'Nenner: die Bilanzspalten dieser Zeile fehlen — ohne sie ist die Grundgesamtheit nicht nachzählbar.'
                     : 'Denominator: this row carries no record columns — without them the base cannot be counted.');
@@ -1939,12 +1939,12 @@
                dieselbe Zahl wie Tier-Karte und Heatmap. */
             const kurzName = cmaQuotenName('ohneUnentschieden');
             const kurzFormel = (WK && WK.hol('ohneUnentschieden') && WK.hol('ohneUnentschieden').formel)
-                || 'S / (S + N)';
+                || 'W / (W + L)';
             const winProzentName = (WK && WK.kurz('matchpunkte')) || 'Win %';
             const winProzentFormel = (WK && WK.hol('matchpunkte') && WK.hol('matchpunkte').formel)
                 || '(3S + U) / (3 · Matches)';
             return de
-                ? `${kurzName} = ${kurzFormel}: Siege ÷ entschiedene Matches, Unentschieden `
+                ? `${kurzName} = ${kurzFormel}: Wins ÷ entschiedene Matches, Ties `
                   + `zählen nicht mit. NICHT „${winProzentName}“ — `
                   + `so heißt bei Limitless die Matchpunkte-Konvention ${winProzentFormel}, `
                   + `und die wird hier nicht gerechnet. ${nenner} Quelle: data/limitless_online_decks.csv, `
@@ -2080,7 +2080,7 @@
                 ? zahlLokal(x, 0) : String(Math.round(x));
             if (!(partien > 0)) {
                 return de
-                    ? 'Keine Paarung dieses Decks gegen die Ränge 1–20 in '
+                    ? 'Kein Matchup dieses Decks gegen die Ränge 1–20 in '
                       + 'data/limitless_online_decks_matchups.csv — deshalb steht hier ein Strich.'
                     : 'No pairing of this deck against ranks 1–20 in '
                       + 'data/limitless_online_decks_matchups.csv — hence the dash.';
@@ -2090,12 +2090,12 @@
                Partienzahl. Ungesagt war das eine Auslassung. */
             const spiegelSatz = spiegel > 0
                 ? (de
-                    ? ` Die Spiegelpaarung zählt mit: ${zahl(spiegel)} der ${zahl(partien)} Matches. `
+                    ? ` Das Mirror-Matchup zählt mit: ${zahl(spiegel)} der ${zahl(partien)} Matches. `
                       + `Sie liegt per Bauart bei 50 % und zieht den Schnitt entsprechend zur Mitte.`
                     : ` The mirror is included: ${zahl(spiegel)} of the ${zahl(partien)} games. `
                       + `By construction it sits at 50 % and pulls the average towards the middle.`)
                 : (de
-                    ? ' Eine Spiegelpaarung ist nicht dabei.'
+                    ? ' Ein Mirror-Matchup ist nicht dabei.'
                     : ' No mirror pairing is included.');
             /* BEFUND B6 (07.09.2026): ZWEI RECHENWEGE IN EINER ANSICHT.
                Dieser Schnitt ist ROH — er mittelt die Spalte win_rate
@@ -2167,18 +2167,18 @@
                 const gewichtungGroesser = Math.abs(dGewichtung) > Math.abs(dGlaettung);
                 const spannePaarungen = (s.kleinstePaarung != null && s.groesstePaarung != null)
                     ? (de
-                        ? ` Die Paarungen sind hier ${zahl(s.kleinstePaarung)} bis `
-                          + `${zahl(s.groesstePaarung)} Partien groß.`
+                        ? ` Die Matchups sind hier ${zahl(s.kleinstePaarung)} bis `
+                          + `${zahl(s.groesstePaarung)} Matches groß.`
                         : ` Pairings here range from ${zahl(s.kleinstePaarung)} to `
                           + `${zahl(s.groesstePaarung)} games.`)
                     : '';
                 const ursache = de
                     ? (gewichtungGroesser
                         ? ` Der größere Teil kommt also von der GEWICHTUNG, nicht von der `
-                          + `Glättung: hier wiegt jede Paarung nach ihren Partien, im `
+                          + `Glättung: hier wiegt jedes Matchup nach seinen Matches, im `
                           + `Zellenmittel zählt jede gleich.${spannePaarungen}`
                         : ` Der größere Teil kommt hier von der GLÄTTUNG: bei so dünnen `
-                          + `Paarungen zieht der Prior die Zellen sichtbar zur Mitte.`
+                          + `Matchups zieht der Prior die Zellen sichtbar zur Mitte.`
                           + `${spannePaarungen}`)
                     : (gewichtungGroesser
                         ? ` So the larger part comes from the WEIGHTING, not from the `
@@ -2189,7 +2189,7 @@
                           + `${spannePaarungen}`);
                 glaettungSatz = (de
                     ? ` Dieser Schnitt ist ROH (Spalte win_rate) und PARTIENGEWICHTET. Die `
-                      + `Matchup-Tabelle der Archetyp-Karte darüber zeigt dieselben Paarungen `
+                      + `Matchup-Tabelle der Archetyp-Karte darüber zeigt dieselben Matchups `
                       + `GEGLÄTTET (js/matchup-glaettung.js, Beta-Binomial mit K = ${zahl(kWert)}); `
                       + `ein einfaches Mittel über jene Zellen ergibt ${zahl2(zellenMittel)} % `
                       + `statt ${zahl2(wert)} %. Davon ${pp(dGlaettung)} Punkte durch die `
@@ -2205,7 +2205,7 @@
             } else if (kWert) {
                 glaettungSatz = de
                     ? ` Dieser Schnitt ist ROH (Spalte win_rate) und PARTIENGEWICHTET. Die `
-                      + `Matchup-Tabelle der Archetyp-Karte darüber zeigt dieselben Paarungen `
+                      + `Matchup-Tabelle der Archetyp-Karte darüber zeigt dieselben Matchups `
                       + `GEGLÄTTET (js/matchup-glaettung.js, Beta-Binomial mit K = ${zahl(kWert)}) `
                       + `und ungewichtet nebeneinander; ein Mittel über jene Zellen ergibt `
                       + `deshalb nicht diese Zahl.`
@@ -2219,8 +2219,8 @@
                     : ' This average is RAW (column win_rate) and GAME-WEIGHTED.';
             }
             return (de
-                ? `Partiengewichteter Schnitt über ${zahl(paarungen)} Paarungen gegen die Ränge 1–20. `
-                  + `Nenner: ${zahl(partien)} Matches (Summe total_games dieser Paarungen). `
+                ? `Matchgewichteter Schnitt über ${zahl(paarungen)} Matchups gegen die Ränge 1–20. `
+                  + `Nenner: ${zahl(partien)} Matches (Summe total_games dieser Matchups). `
                   + `Quelle: data/limitless_online_decks_matchups.csv (win_rate, total_games); `
                   + `die Ränge aus data/limitless_online_decks.csv (Spalte rank). `
                   + `Zeitraum: Gesamtstand des letzten Scraper-Laufs, nicht nach Datum eingegrenzt.`
@@ -4161,7 +4161,7 @@
                gibt es nicht". */
             const _st = _uvRegelstand || { version: null, datum: null, paarungen: 0 };
             const _kopf = _uvText('antiTech.belegKopf',
-                'Regelbasis: {datei}{version} · Stand {datum} · {n} Paarungen. '
+                'Regelbasis: {datei}{version} · Stand {datum} · {n} Matchups. '
               + 'Alles darüber hinaus ist aus Kartentexten abgeleitet und als unbelegt gekennzeichnet.')
                 .replace('{datei}', UV_BELEG_QUELLE.replace(/^data\//, ''))
                 .replace('{version}', _st.version ? ' v' + _st.version : '')
@@ -4503,7 +4503,7 @@
             const q = 'data/limitless_online_decks_matchups.csv';
             if (quelle === 'nicht-geladen') {
                 return de
-                    ? `Die Gegner-Paarungen sind auf dieser Seite noch nicht geladen (${q}). `
+                    ? `Die Gegner-Matchups sind auf dieser Seite noch nicht geladen (${q}). `
                       + `Über die Gegner von „${archetype}“ sagt die leere Auswahl deshalb nichts — `
                       + `das ist ein Ladezustand, kein Befund über das Deck.`
                     : `Opponent pairings have not been loaded on this page yet (${q}). `
@@ -4518,7 +4518,7 @@
                       + `Hence nothing for “${archetype}” — that tests the file, not the deck.`;
             }
             return de
-                ? `Für „${archetype}“ stehen in ${q} keine Gegner-Paarungen. Deshalb ist die Auswahl leer — es ist kein Ladefehler.`
+                ? `Für „${archetype}“ stehen in ${q} keine Gegner-Matchups. Deshalb ist die Auswahl leer — es ist kein Ladefehler.`
                 : `No opponent pairings for “${archetype}” in ${q}. That is why the list is empty — not a loading error.`;
         }
 
@@ -4618,7 +4618,7 @@
                und muss deshalb auch auf den Wegen gefuellt werden, die
                weiter unten vorzeitig zurueckkehren (A-F4.25/A-F4.26). */
             const gegner = fuelleCurrentMetaGegnerauswahl(archetype);
-            devLog(`[Current Meta] Gegnerauswahl ${archetype}: ${gegner.liste.length} Paarungen (Quelle: ${gegner.quelle})`);
+            devLog(`[Current Meta] Gegnerauswahl ${archetype}: ${gegner.liste.length} Matchups (Quelle: ${gegner.quelle})`);
             
             // Find the matchup tables directly from the loaded HTML content (1:1 same as Current Meta Tab)
             const currentMetaContent = document.getElementById('currentMetaContent');
@@ -4675,7 +4675,7 @@
                 if (worstTable) worstTable.innerHTML = _leer;
                 if (titleEl) {
                     titleEl.textContent = _de
-                        ? `${archetype} — keine Gegner-Paarungen in data/limitless_online_decks_matchups.csv`
+                        ? `${archetype} — keine Gegner-Matchups in data/limitless_online_decks_matchups.csv`
                         : `${archetype} — no opponent pairings in data/limitless_online_decks_matchups.csv`;
                 }
                 matchupsSection.classList.remove('d-none');
@@ -4825,12 +4825,12 @@
                 const _WK = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
                 const _kName = cmaQuotenName('ohneUnentschieden');
                 const _kFormel = (_WK && _WK.hol('ohneUnentschieden') && _WK.hol('ohneUnentschieden').formel)
-                    || 'S / (S + N)';
+                    || 'W / (W + L)';
                 const _wpName = (_WK && _WK.kurz('matchpunkte')) || 'Win %';
                 const _wpFormel = (_WK && _WK.hol('matchpunkte') && _WK.hol('matchpunkte').formel)
                     || '(3S + U) / (3 · Matches)';
                 const _herkunft = _de
-                    ? `${_kName} = ${_kFormel}: Siege ÷ entschiedene Partien, Unentschieden bleiben ganz außen vor — so gerechnet von Limitless. NICHT „${_wpName}“: so heißt dort die Matchpunkte-Konvention ${_wpFormel}. Bilanz ${record} aus ${Number.isFinite(_spiele) ? _spiele : totalGames} Partien. Quelle: data/limitless_online_decks_matchups.csv (Spalten win_rate, record, total_games), Gesamtstand des letzten Scraper-Laufs — nicht nach Datum eingegrenzt.`
+                    ? `${_kName} = ${_kFormel}: Wins ÷ entschiedene Matches, Ties bleiben ganz außen vor — so gerechnet von Limitless. NICHT „${_wpName}“: so heißt dort die Matchpunkte-Konvention ${_wpFormel}. Bilanz ${record} aus ${Number.isFinite(_spiele) ? _spiele : totalGames} Matches. Quelle: data/limitless_online_decks_matchups.csv (Spalten win_rate, record, total_games), Gesamtstand des letzten Scraper-Laufs — nicht nach Datum eingegrenzt.`
                     : `${_kName} = ${_kFormel}: wins ÷ decided games, ties left out entirely — as reported by Limitless. NOT “${_wpName}”: that is the label for the match-points convention ${_wpFormel}. Record ${record} from ${Number.isFinite(_spiele) ? _spiele : totalGames} games. Source: data/limitless_online_decks_matchups.csv (columns win_rate, record, total_games), cumulative for the latest scraper run — not narrowed by date.`;
                 detailsEl.innerHTML = `
                     <h4 style="margin-top: 0; color: var(--ink);">${t('matchup.vsTitle').replace('{n}', escapeHtml(opponent))}</h4>

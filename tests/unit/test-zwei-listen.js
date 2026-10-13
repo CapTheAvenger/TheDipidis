@@ -126,7 +126,7 @@ describe('Zwei Listen nebeneinander', () => {
 
         /* Und die Behauptung, die den Fehler ausgelöst hat, direkt
            nachgerechnet: 5-2-2 hat 17 Punkte, nicht 19. */
-        assert.strictEqual(3 * 5 + 2, 17, 'die Punkteregel ist nicht mehr Sieg 3 / Unentschieden 1');
+        assert.strictEqual(3 * 5 + 2, 17, 'die Punkteregel ist nicht mehr Win 3 / Tie 1');
         assert.strictEqual(3 * 6 + 1, 19, '6-2-1 ergibt keine 19 Punkte mehr');
     });
 
@@ -150,13 +150,13 @@ describe('Zwei Listen nebeneinander', () => {
     it('die Randfälle stimmen', () => {
         const f = faltung();
         assert.ok(Math.abs(f([{ fieldShare: 1, wr: 100 }], (o) => o.wr) - 100) < 1e-6,
-            'bei 100 % Siegquote ist die volle Punktzahl nicht sicher');
+            'bei 100 % Win Rate ist die volle Punktzahl nicht sicher');
         assert.ok(f([{ fieldShare: 1, wr: 0 }], (o) => o.wr) < 1e-9,
-            'bei 0 % Siegquote kommen trotzdem 19 Punkte heraus');
+            'bei 0 % Win Rate kommen trotzdem 19 Punkte heraus');
         /* Nur Unentschieden: neun Runden mal ein Punkt sind neun —
            das reicht für 19 nie, egal wie gut die Quote wäre. */
         assert.ok(f([{ fieldShare: 1, wr: 100 }], (o) => o.wr, 1) < 1e-9,
-            'aus lauter Unentschieden entstehen 19 Punkte');
+            'aus lauter Ties entstehen 19 Punkte');
         /* Quoten ausserhalb 0..100 duerfen die Rechnung nicht sprengen —
            `userWr` wird oben mit einem Bonus verrechnet und ist deshalb
            nicht garantiert im Band. */
@@ -210,10 +210,10 @@ describe('Zwei Listen nebeneinander', () => {
            Unentschieden einen Punkt bringt. Ein fester Text ohne
            Platzhalter hieße: die Zahl steht nirgends. */
         assert.ok(/uvTag2Fuss[\s\S]{0,300}\{u\}/.test(I18N),
-            'der Fußtext nennt die gemessene Unentschiedenquote nicht');
+            'der Fußtext nennt die gemessene Tie-Quote nicht');
         assert.match(QUELLE, /uvTag2Fuss'\)\.replace\('\{u\}'/,
             'der Platzhalter im Fußtext wird nicht gefüllt');
-        assert.ok(/Auf Präsenzturnieren wird viel öfter unentschieden gespielt/.test(I18N),
+        assert.ok(/Auf Majors wird viel öfter ein Tie gespielt/.test(I18N),
             'der deutsche Hinweis auf die höhere Präsenzquote fehlt');
         assert.ok(/Live events tie far more often/.test(I18N),
             'der englische Hinweis auf die höhere Präsenzquote fehlt');
@@ -246,7 +246,7 @@ describe('Zwei Listen nebeneinander', () => {
         /* Die Stuetzzeile — erwartete Siege — muss unter JEDER Spalte
            stehen, sonst ist sie eine Zierde an einer Stelle. */
         assert.strictEqual((block.match(/uvTag2Siege/g) || []).length, 3,
-            'die erwarteten Siege stehen nicht unter allen drei Spalten');
+            'die erwarteten Wins stehen nicht unter allen drei Spalten');
     });
 
     it('die Zahlen fluchten untereinander', () => {
@@ -299,7 +299,7 @@ describe('Zwei Listen nebeneinander', () => {
         assert.match(QUELLE, /const pDelta\s*=\s*auf1\(pUser\) - auf1\(pVanilla\)/,
             'die Prozentspalte bildet die Differenz weiterhin ungerundet');
         assert.match(QUELLE, /const sDelta\s*=\s*auf1\(sUser\) - auf1\(sVanilla\)/,
-            'die erwarteten Siege bilden die Differenz weiterhin ungerundet');
+            'die erwarteten Wins bilden die Differenz weiterhin ungerundet');
         assert.ok(!/signed\(sUser - sVanilla\)/.test(QUELLE),
             'die alte ungerundete Differenz steht noch in der Ausgabe');
     });
@@ -371,7 +371,7 @@ describe('Zwei Listen nebeneinander', () => {
         }
     });
 
-    it('die Unentschiedenquote wird gemessen und nicht geraten', () => {
+    it('die Tie-Quote wird gemessen und nicht geraten', () => {
         /* Sie ist die größte Stellschraube: ein Unentschieden bringt
            einen Punkt, und die Chance auf Tag 2 hängt an Punkten. Eine
            feste Zahl im Quelltext wäre hier der größte Fehler. */

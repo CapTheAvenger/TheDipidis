@@ -245,18 +245,18 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
             ['Tier 1 fasst höchstens 111 Decks', 'T1_MAX'],
             ['Tier 2 höchstens 112', 'T2_MAX'],
             ['Tier 3 höchstens 113', 'T3_MAX'],
-            ['114,0 % Anteil', 'T1_MIN_SHARE'],
+            ['114,0 % Share', 'T1_MIN_SHARE'],
             ['115,0 % Win Rate', 'T1_MIN_WR'],
             ['mindestens 116 % der Listenzahl', 'MINDEST_ANTEIL_GROESSTER'],
             ['Vorwert von 121 Listen', 'TIER_SCORE.PRIOR_LISTEN'],
-            ['Anteil (bis 122 %', 'TIER_SCORE.ANTEIL_DECKEL'],
+            ['Share (bis 122 %', 'TIER_SCORE.ANTEIL_DECKEL'],
             ['Gewicht 123,0)', 'TIER_SCORE.ANTEIL_GEWICHT'],
             ['über 50 (bis +124 pp', 'TIER_SCORE.WR_DECKEL'],
             ['Gewicht 125,0;', 'TIER_SCORE.WR_GEWICHT'],
             ['ab 126 Matches je Deck', 'TIER_SCORE.LABS_MIN_PARTIEN'],
             ['bis +127 pp', 'TIER_SCORE.LABS_WR_DECKEL'],
             ['Gewicht 128,0)', 'TIER_SCORE.LABS_WR_GEWICHT'],
-            ['Day-2-Quote (bis 129,00', 'TIER_SCORE.TAG2_DECKEL'],
+            ['Day-2-Conversion (bis 129,00', 'TIER_SCORE.TAG2_DECKEL'],
             ['Gewicht 131)', 'TIER_SCORE.TAG2_GEWICHT'],
             ['hier 132 von 133 Listen', 'minCountThreshold / _maxCount']
         ];
@@ -283,7 +283,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
     // ───────────────────────────────────────────────────────────
     it('B2: Anteilsdeckel und -gewicht im Satz sind die gemessenen', () => {
         const s = satz('de');
-        assert.ok(s.includes('Anteil (bis ' + de(GEMESSEN.anteilDeckel, 0) + ' %, Gewicht '
+        assert.ok(s.includes('Share (bis ' + de(GEMESSEN.anteilDeckel, 0) + ' %, Gewicht '
             + de(GEMESSEN.anteilGewicht, 1) + ')'),
             'gemessen: Deckel ' + GEMESSEN.anteilDeckel + ', Gewicht '
             + GEMESSEN.anteilGewicht + '\n' + s);
@@ -310,7 +310,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
 
     it('B2: Tag-2-Deckel und -Gewicht im Satz sind die gemessenen', () => {
         const s = satz('de');
-        assert.ok(s.includes('Day-2-Quote (bis ' + de(GEMESSEN.tag2Deckel, 2)
+        assert.ok(s.includes('Day-2-Conversion (bis ' + de(GEMESSEN.tag2Deckel, 2)
             + ', Gewicht ' + de(GEMESSEN.tag2Gewicht, 0) + ')'),
             'gemessen: Deckel ' + GEMESSEN.tag2Deckel + ', Gewicht '
             + GEMESSEN.tag2Gewicht + '\n' + s);
@@ -336,7 +336,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
         assert.ok(s.includes('Tier 1 fasst höchstens ' + T.T1_MAX + ' Decks'), s);
         assert.ok(s.includes('Tier 2 höchstens ' + T.T2_MAX), s);
         assert.ok(s.includes('Tier 3 höchstens ' + T.T3_MAX), s);
-        assert.ok(s.includes(de(T.T1_MIN_SHARE, 1) + ' % Anteil'), s);
+        assert.ok(s.includes(de(T.T1_MIN_SHARE, 1) + ' % Share'), s);
         assert.ok(s.includes(de(T.T1_MIN_WR, 1) + ' % Win Rate'), s);
     });
 
@@ -344,7 +344,7 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
        Rangfolge rechnet mit S/(S+N) — der Zahl, die auf der Tier-Karte
        steht —, und die heisst auf der ganzen Seite „Win-Rate". „Win %"
        bleibt den Matchpunkten vorbehalten und darf hier NICHT stehen. */
-    it('Win-Raten heissen "Win-Rate" (S/(S+N)), nicht "Win %"', () => {
+    it('Win-Raten heissen "Win-Rate" (W/(W+L)), nicht "Win %"', () => {
         const d = satz('de'), e = satz('en');
         assert.ok(d.includes('Win Rate'), 'deutsche Fassung');
         assert.ok(/win rate/i.test(e), 'englische Fassung');
@@ -375,15 +375,15 @@ describe('Grundlage der Tier-Einteilung im laufenden Meta (C6 / F15.19-F15.24, B
         assert.match(s, /Tier 1 fasst höchstens/, 'der Rest des Satzes bleibt');
     });
 
-    it('fehlt die Turnierdatei, sagt der Satz das — statt einen Anteil zu erklaeren, den es nicht gab', () => {
+    it('fehlt die Turnierdatei, sagt der Satz das — statt einen Share zu erklaeren, den es nicht gab', () => {
         const s = satz('de', 313.8, 3138, null);
         assert.match(s, /KEINE Turnierdatei/);
-        assert.ok(!s.includes('Day-2-Quote (bis'), 'der fehlende Anteil wird nicht beschrieben');
+        assert.ok(!s.includes('Day-2-Conversion (bis'), 'der fehlende Share wird nicht beschrieben');
         assert.match(satz('en', 313.8, 3138, null), /No tournament file/);
     });
 
-    it('erklaert, warum ein hoeherer Anteil weiter unten stehen kann', () => {
-        assert.match(satz('de'), /höherem Anteil unter einem mit niedrigerem/);
+    it('erklaert, warum ein hoeherer Share weiter unten stehen kann', () => {
+        assert.match(satz('de'), /höherem Share unter einem mit niedrigerem/);
         assert.match(satz('en'), /higher share can sit below/);
     });
 

@@ -381,7 +381,7 @@ def ausgabe(turniere, tabelle, ab, bis, offen, jetzt):
                           "die Spielerzahl.",
         "stufenregel": STUFENREGEL,
         "quoten_konvention": "mitUnentschieden",
-        "quoten_formel": "S / (S + N + U)",
+        "quoten_formel": "W / (W + L + T)",   # UI-138 (13.10.2026): Win/Loss/Tie, so steht es auf der Seite
         "liste_hinweis": "Je Deck die gespielte Liste mit der besten Bilanz im "
                          "Fenster (Siege minus Niederlagen, dann Siege, dann die "
                          "jüngere). Ergibt sie keinen gültigen Code, die nächste — "

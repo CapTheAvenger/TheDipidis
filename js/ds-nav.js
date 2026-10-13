@@ -162,7 +162,7 @@
               // Schnappschuss schlicht fehlt. Zwei verschiedene Zustaende
               // brauchen zwei verschiedene Saetze.
               luecke: 'Schnappschuss fehlt — nicht erhoben',
-              entries: 'gewichtete Antritte', since: 'in Person legal seit' },
+              entries: 'gewichtete Listen', since: 'in Person legal seit' },
         en: { format: 'Format', source: 'Source', sample: 'Sample',
               window: 'Window', stamp: 'Updated', pause: 'Off-season — no current data',
               luecke: 'Snapshot missing — never collected',

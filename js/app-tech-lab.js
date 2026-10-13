@@ -169,7 +169,7 @@
     function _belegKopfHtml() {
         const st = _regelstand || { version: null, datum: null, paarungen: 0 };
         const kopf = _tf('techLab.belegKopf',
-            'Regelbasis: {datei}{version} · Stand {datum} · {n} Paarungen. '
+            'Regelbasis: {datei}{version} · Stand {datum} · {n} Matchups. '
           + 'Alles darüber hinaus ist aus Kartentexten abgeleitet und als unbelegt gekennzeichnet.')
             .replace('{datei}', BELEG_QUELLE.replace(/^data\//, ''))
             .replace('{version}', st.version ? ' v' + st.version : '')

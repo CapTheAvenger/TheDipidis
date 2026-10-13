@@ -109,7 +109,7 @@ describe('Die Quelle wird richtig gelesen', () => {
         const rumpf = ohneKomm.slice(i, ohneKomm.indexOf('function load()', i));
         assert.ok(/fetch\(\s*base\s*\+\s*MAJOR_VERZ_URL/.test(rumpf),
             'das Verzeichnis wird nicht mehr abgefragt — dann steht bei jedem '
-            + 'Seitenaufruf eines Formats ohne Präsenzturnier eine 404 in der Konsole');
+            + 'Seitenaufruf eines Formats ohne Major eine 404 in der Konsole');
         const iVerz = rumpf.indexOf('MAJOR_VERZ_URL');
         const iCsv = rumpf.indexOf('labs_tournament_decks_${key}.csv');
         assert.ok(iVerz > 0 && iCsv > iVerz,
@@ -121,11 +121,11 @@ describe('Die Quelle wird richtig gelesen', () => {
     it('die Major-Win-Rate wird gerechnet, nicht aus win_pct gelesen', () => {
         assert.ok(!/r\.win_pct/.test(ohneKomm),
             'die Spalte `win_pct` der Labs-Datei wird gelesen — sie fuehrt '
-            + 'MATCHPUNKTE (3S+U)/3n, waehrend die Online-Seite Siege durch '
+            + 'MATCHPUNKTE (3S+U)/3n, waehrend die Online-Seite Wins durch '
             + 'Partien rechnet. Bei Dragapult sind das 4,0 pp Unterschied, '
             + 'und die Kachel stellte zwei Skalen nebeneinander');
         assert.ok(/siege\s*\/\s*e\.partien|e\.siege\s*\/\s*e\.partien/.test(ohneKomm),
-            'die Win Rate wird nicht mehr als Siege durch alle Partien gerechnet');
+            'die Win Rate wird nicht mehr als Wins durch alle Partien gerechnet');
     });
 });
 
@@ -163,7 +163,7 @@ describe('Der CSV-Teiler zaehlt Anfuehrungszeichen', () => {
         assert.ok(i > 0,
             'der zeichenweise Teiler ist weg — mit blossem split() verschiebt '
             + 'sich ab dem ersten Feld mit eingebettetem Komma jede Spalte um '
-            + 'eins (gemessen: Day-2-Quote des Feldes 404,5 % statt 18,2 %)');
+            + 'eins (gemessen: Day-2-Conversion des Feldes 404,5 % statt 18,2 %)');
         const rumpf = ohneKomm.slice(i, i + 800);
         assert.ok(/inAnf\s*=\s*!inAnf/.test(rumpf),
             'der Teiler zaehlt die Anfuehrungszeichen nicht mehr');
@@ -180,7 +180,7 @@ describe('Der CSV-Teiler zaehlt Anfuehrungszeichen', () => {
         assert.ok(/teile\(/.test(rumpf), 'parseCsv benutzt den Teiler nicht');
     });
 
-    it('die Feld-Day-2-Quote bleibt eine Quote', () => {
+    it('die Feld-Day-2-Conversion bleibt eine Quote', () => {
         // Der Wert, an dem der Fehler aufgefallen ist. Ueber 100 ist keine
         // Quote, sondern ein Hinweis, dass Spalten verrutscht sind.
         let d1 = 0, d2 = 0;
@@ -189,7 +189,7 @@ describe('Der CSV-Teiler zaehlt Anfuehrungszeichen', () => {
         }
         const quote = d1 > 0 ? (d2 / d1) * 100 : 0;
         assert.ok(quote > 5 && quote < 60,
-            `Feld-Day-2-Quote ${quote.toFixed(1)} % — ausserhalb jedes plausiblen `
+            `Feld-Day-2-Conversion ${quote.toFixed(1)} % — ausserhalb jedes plausiblen `
             + 'Bereichs. Bei 404,5 % waren die Spalten um eins verschoben');
     });
 });
@@ -224,7 +224,7 @@ describe('Was die beiden Spalten an den echten Daten zeigen', () => {
             + 'finden ihre Online-Zeile — die Schluessel sind auseinandergelaufen');
     });
 
-    it('der Anteil unterscheidet sich stark genug, dass die Spalte sich lohnt', () => {
+    it('der Share unterscheidet sich stark genug, dass die Spalte sich lohnt', () => {
         const paare = Object.keys(major).filter(k => online[k] && online[k].share > 1)
             .map(k => Math.abs(major[k].share - online[k].share));
         const gross = paare.filter(x => x >= 2).length;
@@ -240,7 +240,7 @@ describe('Was die beiden Spalten an den echten Daten zeigen', () => {
         assert.ok(o && m, 'Dragapult fehlt in einer der beiden Quellen');
         assert.ok(m.share > o.share * 2,
             `Dragapult bringt am Major nicht mehr das Mehrfache seines `
-            + `Online-Anteils (online ${o.share.toFixed(1)} %, Major ${m.share.toFixed(1)} %)`);
+            + `Online-Shares (online ${o.share.toFixed(1)} %, Major ${m.share.toFixed(1)} %)`);
     });
 
     it('die Remisquote am Major ist um ein Vielfaches hoeher als online', () => {
@@ -258,7 +258,7 @@ describe('Was die beiden Spalten an den echten Daten zeigen', () => {
         const i = ohneKomm.indexOf("arc.wrTipMajor");
         assert.ok(i > 0, 'der Major-Teil des Win-Rate-Hinweises ist verschwunden');
         const hinweis = ohneKomm.slice(i, i + 700);
-        assert.ok(/unentschieden/.test(hinweis) && /\{u\}/.test(hinweis),
+        assert.ok(/Ties|unentschieden/.test(hinweis) && /\{u\}/.test(hinweis),
             'der Hinweis nennt die Remisquote nicht mehr — '
             + `am Major enden ${quote.toFixed(1)} % der Partien unentschieden, online 1,3 %, `
             + 'und das kostet die Major-Spalte rund fuenf Punkte ohne jede '
@@ -491,7 +491,7 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
             + '"es gibt ueberhaupt Partien"');
     });
 
-    it('die Matchzahl steht NICHT mehr auf der Win-Rate-Kachel, die Stueckzahl weiter auf der Anteil-Kachel', () => {
+    it('die Matchzahl steht NICHT mehr auf der Win-Rate-Kachel, die Stueckzahl weiter auf der Share-Kachel', () => {
         // UI-17 (27.09.2026, Hausi): „aus X Matches" in der normalen Kachel
         // weg — fuer Enduser ohne Erklaerung verwirrend. Die Zahl steht im
         // Hinweis der Kachel und im erzeugten Bild. Vom 02.09. bis
@@ -506,12 +506,12 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
         assert.ok(j > 0, "tileGeteilt('rep') fehlt");
         const r2 = ohneKomm.slice(j, j + 400);
         assert.ok(/fmtGanz\(d\.count\)/.test(r2),
-            'die Online-Stueckzahl fehlt auf der Anteil-Kachel');
+            'die Online-Stueckzahl fehlt auf der Share-Kachel');
         assert.ok(/fmtGanz\(m\.antritte\)/.test(r2),
-            'die Major-Stueckzahl fehlt auf der Anteil-Kachel');
+            'die Major-Stueckzahl fehlt auf der Share-Kachel');
     });
 
-    it('auf der Kachelflaeche steht kein "Antritte" und kein "Partien"', () => {
+    it('auf der Kachelflaeche steht kein "Listen" und kein "Partien"', () => {
         // "also das antritte da kannst du weglassen, also das wort antritte
         //  ... und statt partien Matches wie ueberall woanders auch"
         // Die Zahl bleibt, das Wort geht. Geprueft werden die Bausteine, die
@@ -520,7 +520,7 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
         for (const tot of ['arc.quelleMajorN', 'arc.quelleMajorA']) {
             assert.ok(!ohneKomm.includes(tot),
                 `${tot} ist zurueck — dieser Schluessel trug "Major · {n} `
-                + 'Antritte" bzw. "Major · {n} Partien" auf die Kachelflaeche');
+                + 'Listen" bzw. "Major · {n} Partien" auf die Kachelflaeche');
         }
         const i18n = fs.readFileSync(path.join(wurzel, 'js', 'i18n.js'), 'utf8');
         for (const tot of ['arc.quelleMajorN', 'arc.quelleMajorA']) {
@@ -556,28 +556,28 @@ describe('Fehlende Major-Daten werden als fehlend gezeigt', () => {
             + 'Zahl ohne jede Angabe, wie sicher sie ist');
     });
 
-    it('der Anteil wird auch ohne Mindestzahl gezeigt', () => {
+    it('der Share wird auch ohne Mindestzahl gezeigt', () => {
         // Er ruht auf Antritten, nicht auf Partien: "1 von 797" ist eine
         // belastbare Aussage, 24,4 % aus 45 Partien nicht.
         const i = ohneKomm.indexOf("tileGeteilt('rep'");
-        assert.ok(i > 0, 'die Anteils-Kachel ist nicht mehr geteilt');
+        assert.ok(i > 0, 'die Shares-Kachel ist nicht mehr geteilt');
         const rumpf = ohneKomm.slice(i, i + 400);
         assert.ok(!/MIN_MAJOR_PARTIEN/.test(rumpf),
-            'der Anteil haengt jetzt auch an der Partien-Mindestzahl — '
-            + 'er ruht aber auf Antritten und ist auch bei einem Antritt richtig');
+            'der Share haengt jetzt auch an der Partien-Mindestzahl — '
+            + 'er ruht aber auf Listen und ist auch bei einem Liste richtig');
     });
 });
 
 describe('Top-8 und Day 2 bleiben getrennt', () => {
 
-    it('die Top-8-Quote ist als online beschriftet', () => {
+    it('die Top-8-Conversion ist als online beschriftet', () => {
         // UI-26 (27.09.2026): „Online Top 8-Quote (Ø …)" — online steht vorn.
         assert.ok(/Online Top 8-Quote/.test(quelle),
-            'die Top-8-Quote sagt nicht mehr, dass sie aus Online-Turnieren stammt');
+            'die Top-8-Conversion sagt nicht mehr, dass sie aus Online-Turnieren stammt');
     });
 
-    it('die Day-2-Quote ist als Major beschriftet und hat keine Online-Seite', () => {
-        assert.ok(/Day-2-Quote \(Major\)/.test(quelle),
+    it('die Day-2-Conversion ist als Major beschriftet und hat keine Online-Seite', () => {
+        assert.ok(/Day-2-Conversion \(Major\)/.test(quelle),
             'die Day-2-Kachel fehlt oder sagt ihre Herkunft nicht');
         // `indexOf("tile('day2'")` findet AUCH `tileGeteilt('day2'` —
         // die erste Fassung dieses Tests ueberlebte deshalb die Mutation.
@@ -590,7 +590,7 @@ describe('Top-8 und Day 2 bleiben getrennt', () => {
             + 'in Wahrheit "diese Groesse existiert dort nicht" gilt');
     });
 
-    it('es gibt keine Major-Top-8-Quote', () => {
+    it('es gibt keine Major-Top-8-Conversion', () => {
         // Ein Major vergibt acht Cut-Plaetze: 22 von 27 Decks stehen dort
         // auf null. Eine solche Spalte saehe aus wie ein Befund.
         let nullen = 0, gesamt = 0;

@@ -247,7 +247,7 @@ describe('B2 — die Unterzeile trennt Rechengroessen von Turnierrahmen', () => 
         const z = baueZeilen(FRANKFURT, true).rahmen();
         assert.match(z, /2\.700 Spieler/);
         assert.match(z, /geht nicht in diese Chance ein/);
-        assert.match(z, /Runden, Punkteziel, Meta-Anteilen und Paarungen/);
+        assert.match(z, /Runden, Punkteziel, Meta-Shares und Matchups/);
     });
 
     it('auch bei einem einzigen Spieler liest sich die Karte richtig', () => {
@@ -402,7 +402,7 @@ describe('B4 — der Banner nennt das Mischungsverhaeltnis, nicht nur die Quelle
 
     it('das Verhaeltnis Papier zu Online steht als Zahl da', () => {
         const html = baueChip();
-        assert.match(html, /80 % Papier/);
+        assert.match(html, /80 % vor Ort/);
         assert.match(html, /45 % Day 2/);
         assert.match(html, /35 % Day 1/);
         assert.match(html, /20 % Online/);
@@ -410,7 +410,7 @@ describe('B4 — der Banner nennt das Mischungsverhaeltnis, nicht nur die Quelle
 
     it('DA-48: ohne echte Day-1-Karte nennt der Satz die Major-Gesamtpaarung', () => {
         const html = baueChip({ day1: {} });
-        assert.match(html, /80\s%\sPapier \(Major gesamt\) · 20\s%\sOnline/);
+        assert.match(html, /80\s%\svor Ort \(Major gesamt\) · 20\s%\sOnline/);
         assert.doesNotMatch(html, /Day 1/);
     });
 
@@ -432,21 +432,21 @@ describe('B4 — der Banner nennt das Mischungsverhaeltnis, nicht nur die Quelle
 
     it('die Verschiebung aus Predictor 5.3 steht mit Vorzeichen daneben', () => {
         const html = baueChip({ adjust: { megaexcadrill: 6.8234 } });
-        assert.match(html, /Predictor 5\.3 für Mega Excadrill: \+6,82 pp/);
+        assert.match(html, /Prediction 5\.3 für Mega Excadrill: \+6,82 pp/);
     });
 
     it('eine negative Verschiebung wird als solche gezeigt', () => {
         const html = baueChip({ adjust: { megaexcadrill: -4.1 } });
-        assert.match(html, /Predictor 5\.3 für Mega Excadrill: −4,10 pp/);
+        assert.match(html, /Prediction 5\.3 für Mega Excadrill: −4,10 pp/);
     });
 
     it('ohne Verschiebung fuer das Deck steht dort nichts — keine erfundene Null', () => {
         const html = baueChip({ adjust: { dragapult: 3.2 } });
-        assert.ok(!/Predictor 5\.3/.test(html));
+        assert.ok(!/Predict(or|ion) 5\.3/.test(html));
     });
 
     it('ohne gewaehltes Deck bleibt der Zusatz ebenfalls weg', () => {
-        assert.ok(!/Predictor 5\.3/.test(baueChip({ deck: '', adjust: { megaexcadrill: 6.8 } })));
+        assert.ok(!/Predict(or|ion) 5\.3/.test(baueChip({ deck: '', adjust: { megaexcadrill: 6.8 } })));
     });
 
     it('der Titel sagt, dass die Gewichte Nennwerte sind und neu verteilt werden', () => {
@@ -467,7 +467,7 @@ describe('B4 — der Banner nennt das Mischungsverhaeltnis, nicht nur die Quelle
     });
 });
 
-describe('M-11 — die gemischte Paarung wird mit den Quellgewichten nachgerechnet', () => {
+describe('M-11 — die gemischte Matchup wird mit den Quellgewichten nachgerechnet', () => {
     const W2 = quellKonstante('MATCHUP_BLEND_WEIGHT_DAY2');
     const W1 = quellKonstante('MATCHUP_BLEND_WEIGHT_DAY1');
     const WO = quellKonstante('MATCHUP_BLEND_WEIGHT_ONLINE');
@@ -618,7 +618,7 @@ describe('M-05 — die Randwerte selbst gelten noch als gueltig', () => {
     it('genau rounds*3 Punkte sind erreichbar — 24 bei 8 Runden', () => {
         const k = baueKlemme({ rounds: 8 })('day2Points', 24, false);
         assert.equal(k.wert, 24);
-        assert.equal(k.geklemmt, false, '8 Siege sind 24 Punkte; wer sie als unerreichbar meldet, rechnet falsch');
+        assert.equal(k.geklemmt, false, '8 Wins sind 24 Punkte; wer sie als unerreichbar meldet, rechnet falsch');
         assert.equal(baueKlemme({ rounds: 9 })('day2Points', 27, false).geklemmt, false);
     });
 

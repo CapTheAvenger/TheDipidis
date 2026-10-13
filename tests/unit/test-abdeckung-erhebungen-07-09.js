@@ -242,7 +242,7 @@ describe('Abdeckung — eine Zahl stammt aus EINER Erhebung', () => {
         });
     });
 
-    it('auch ueber MEHRERE Archetypen bleibt der Anteil bei hoechstens 100 %', async () => {
+    it('auch ueber MEHRERE Archetypen bleibt der Share bei hoechstens 100 %', async () => {
         /* Der frueher hier stehende zweite Gurt `Math.min(100, ...)` ist
          * entfallen: die Schranke folgt jetzt aus dem Bau, weil jeder
          * Zaehler gegen die Groesse SEINES Archetyps in DERSELBEN Erhebung
@@ -279,7 +279,7 @@ describe('Abdeckung — eine Zahl stammt aus EINER Erhebung', () => {
 /* ══ Die Nennung statt der Marke ═══════════════════════════════════ */
 
 describe('Abdeckung — abweichende Erhebungen werden beim Namen genannt', () => {
-    it('jede abweichende Erhebung steht mit Bruch und Anteil im Ergebnis', async () => {
+    it('jede abweichende Erhebung steht mit Bruch und Share im Ergebnis', async () => {
         const w = await laden(DREI_ERHEBUNGEN, { archetypen: ['Dragapult'] });
         const r = w.calculateDynamicCoverage('Dreepy');
         const namen = r.weitereErhebungen.map(x => x.name).sort();
@@ -289,7 +289,7 @@ describe('Abdeckung — abweichende Erhebungen werden beim Namen genannt', () =>
         const turnier = r.weitereErhebungen.find(x => x.name === 'Tournament / TEF-PBL');
         assert.equal(turnier.deckCount, 11);
         assert.equal(turnier.totalDecks, 22);
-        assert.ok(Math.abs(turnier.percentage - 50) < 1e-9, 'Anteil: ' + turnier.percentage);
+        assert.ok(Math.abs(turnier.percentage - 50) < 1e-9, 'Share: ' + turnier.percentage);
     });
 
     it('Erhebungen, die dasselbe sagen, werden nicht aufgezaehlt', async () => {
@@ -326,7 +326,7 @@ describe('Abdeckung — abweichende Erhebungen werden beim Namen genannt', () =>
 /* ══ Die Marke bedeutet jetzt genau eine Sache ══════════════════════ */
 
 describe('Abdeckung — die ≤-Marke steht nur fuer eine echte Obergrenze', () => {
-    it('mehrere Drucke IN EINER Erhebung ueber der Archetypgroesse: Marke', async () => {
+    it('mehrere Prints IN EINER Erhebung ueber der Archetypgroesse: Marke', async () => {
         /* Live gemessen: 9 von 5.351 Erhebung-Karte-Archetyp-Faellen, alle
          * in "Tournament / TEF-PBL" (z. B. Slowking / slowpoke 12 bei 11
          * Decks). Ein Deck spielt zwei Drucke und zaehlt zweimal. */
@@ -354,7 +354,7 @@ describe('Abdeckung — die ≤-Marke steht nur fuer eine echte Obergrenze', () 
         assert.equal(w.calculateDynamicCoverage('Meowth ex').gedeckelt, false);
     });
 
-    it('mehrere Drucke unterhalb der Archetypgroesse zaehlen weiter zusammen', async () => {
+    it('mehrere Prints unterhalb der Archetypgroesse zaehlen weiter zusammen', async () => {
         const w = await laden({
             'current_meta_card_data.csv': [
                 zeile('Meta Live', 'Dragapult', 'Boss’s Orders', 'PAL', 6, 20),
@@ -362,7 +362,7 @@ describe('Abdeckung — die ≤-Marke steht nur fuer eine echte Obergrenze', () 
             ]
         }, { archetypen: ['Dragapult'] });
         const r = w.calculateDynamicCoverage('Boss’s Orders');
-        assert.equal(r.deckCount, 11, 'die beiden Drucke muessen zusammengezaehlt werden');
+        assert.equal(r.deckCount, 11, 'die beiden Prints muessen zusammengezaehlt werden');
         assert.equal(r.totalDecks, 20);
         assert.equal(r.gedeckelt, false);
     });
@@ -421,7 +421,7 @@ describe('Abdeckung — der Wortlaut der Plakette', () => {
         assert.match(sichtbar, /Current Meta \/ Meta Live/,
             'die Plakette sagt sichtbar nicht, aus welcher Erhebung ihre Zahl stammt. '
             + 'Sichtbar: ' + JSON.stringify(sichtbar));
-        assert.match(sichtbar, /45,0% Coverage/, 'Anteil fehlt oder traegt einen Punkt: ' + sichtbar);
+        assert.match(sichtbar, /45,0% Coverage/, 'Share fehlt oder traegt einen Punkt: ' + sichtbar);
     });
 
     it('der Titel nennt Erhebung und Nenner im Satz, auf Deutsch', () => {
@@ -436,7 +436,7 @@ describe('Abdeckung — der Wortlaut der Plakette', () => {
         assert.match(html, /45\.0% Coverage/, 'englischer Modus mit Komma: ' + html);
     });
 
-    it('die abweichenden Erhebungen werden mit Bruch und Anteil genannt', () => {
+    it('die abweichenden Erhebungen werden mit Bruch und Share genannt', () => {
         const de = plakette(PLAKETTE_STATS, 'de');
         assert.match(de, /Weitere Erhebungen:/, de);
         assert.match(de, /Tournament \/ TEF-PBL 2\/8 \(25,0 %\)/,
@@ -458,13 +458,13 @@ describe('Abdeckung — der Wortlaut der Plakette', () => {
         assert.match(mit, /≤/, 'die Marke fehlt, obwohl gedeckelt wurde: ' + mit);
         assert.match(mit, /≤ 100,0% Coverage/,
             'die Marke steht nicht vor der Zahl, auf die sie sich bezieht: ' + mit);
-        assert.match(mit, /Mehrere Drucke dieser Karte wurden zusammengezählt/, mit);
+        assert.match(mit, /Mehrere Prints dieser Karte wurden zusammengezählt/, mit);
         assert.match(mit, /Obergrenze/, mit);
     });
 
     it('der Satz zur Obergrenze nennt den Grund, nicht nur das Wort', () => {
         const mit = plakette(Object.assign({}, PLAKETTE_STATS, { gedeckelt: true }), 'de');
-        assert.match(mit, /mindestens ein Deck spielt zwei Drucke/,
+        assert.match(mit, /mindestens ein Deck spielt zwei Prints/,
             '"Obergrenze" allein sagt nicht, warum: ' + mit);
         const en = plakette(Object.assign({}, PLAKETTE_STATS, { gedeckelt: true }), 'en');
         assert.match(en, /at least one deck plays two prints/, en);

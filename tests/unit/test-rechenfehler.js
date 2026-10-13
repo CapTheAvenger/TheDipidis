@@ -516,7 +516,7 @@ describe('Starthand-Simulator: eine Hand ohne Basis-Pokemon gibt es nicht', () =
 // ───────────────────────────────────────────────────────────────────
 // 4. Binomial statt Poisson
 // ───────────────────────────────────────────────────────────────────
-describe('Begegnungen: dieselbe Verteilung wie die Day-2-Kette daneben', () => {
+describe('Matchups: dieselbe Verteilung wie die Day-2-Kette daneben', () => {
     const MC = lies('js/app-meta-call.js');
     const block = schnitt(MC, '  function binomialP(k, n, p) {',
         "  if (typeof window !== 'undefined') window._mcBinomialP = binomialP;", 'binomialP');
@@ -572,17 +572,17 @@ describe('Begegnungen: dieselbe Verteilung wie die Day-2-Kette daneben', () => {
         assert.equal(Math.round(poisson(1, 3.6) * 1000) / 10, 9.8);
     });
 
-    it('die Begegnungsliste ist entfernt — und mit ihr jeder poissonP-Aufruf', () => {
+    it('die Matchup-Liste ist entfernt — und mit ihr jeder poissonP-Aufruf', () => {
         /* UI-62 (02.10.2026): Hausi hat die Liste „Erwartete Begegnungen"
            gestrichen (ohne Mehrwert). Die Sperre gegen poissonP bleibt. */
         assert.ok(!MC.includes('poissonP('), 'poissonP ist zurueck');
-        assert.ok(!MC.includes('mc-encounter-row'), 'die Begegnungsliste ist zurueck');
+        assert.ok(!MC.includes('mc-encounter-row'), 'die Matchup-Liste ist zurueck');
     });
 
     it('und die Ueberschrift nennt die Verteilung, die gerechnet wird', () => {
         const I = lies('js/i18n.js');
         assert.ok(!/Poisson-Approximation/.test(I), 'die alte Ueberschrift ist zurueck');
-        assert.match(I, /Erwartete Begegnungen \(binomial, \{r\} Runden\)/);
+        assert.match(I, /Erwartete Matchups \(binomial, \{r\} Runden\)/);
         assert.match(I, /Expected encounters \(binomial, \{r\} rounds\)/);
         assert.ok(/t\('mc\.encounters'\)\.replace\('\{r\}'/.test(MC),
             'der Platzhalter {r} wird nicht gefuellt');

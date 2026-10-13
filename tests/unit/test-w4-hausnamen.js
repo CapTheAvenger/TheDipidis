@@ -210,7 +210,7 @@ describe('W4 — kein Hausname mehr fuer eine Quote', () => {
             'die Predictor-6.2-Zeile traegt wieder einen Hausnamen: ' + zeile.trim());
         assert.match(zeile, /WinRateKonvention\.kurz\('mitUnentschieden'\)/,
             'der Name wird nicht mehr zur Laufzeit aus dem Modul geholt');
-        assert.match(zeile, /S \/ \(S \+ N \+ U\)/,
+        assert.match(zeile, /W \/ \(W \+ L \+ T\)/,
             'ohne das Modul faellt die Zeile nicht mehr auf die Formel zurueck');
     });
 

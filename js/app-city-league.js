@@ -1306,8 +1306,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                       + ohneNamen[0].bezeichnung + '” is the scraper\u2019s placeholder label.';
             }
             satz += de
-                ? ' Eine Teilnehmerzahl steht ebenfalls nicht darin: die erfassten Platzierungen '
-                  + 'sind das, was gescrapt wurde, nicht die Feldgröße.'
+                ? ' Eine Spielerzahl steht ebenfalls nicht darin: die erfassten Platzierungen '
+                  + 'sind das, was gescrapt wurde, nicht die Spielerzahl.'
                 : ' Nor does it carry a field size: the recorded placements are what was scraped, '
                   + 'not how many players entered.';
             return satz;

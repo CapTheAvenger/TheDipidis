@@ -35,9 +35,9 @@
     <h2 class="tutorial-chapter-heading" id="wo-was"><span>2</span> Wo finde ich was?</h2>
     <p class="tutorial-paragraph">Unten (am Handy) bzw. oben steht die Reiterleiste:</p>
     <ul class="tutorial-liste">
-        <li><strong>Meta</strong> — die Startseite: Anteile, Win Rates, <a href="#glossar-tier" data-glossar="tier">Tiers</a>, <a href="#glossar-matchup" data-glossar="matchup">Matchups</a>.</li>
+        <li><strong>Meta</strong> — die Startseite: Shares, Win Rates, <a href="#glossar-tier" data-glossar="tier">Tiers</a>, <a href="#glossar-matchup" data-glossar="matchup">Matchups</a>.</li>
         <li><strong>Deck-Analyse</strong> — ein Archetyp im Detail: Karten, Kopienzahlen, Turnierlisten.</li>
-        <li><strong>Meta Call</strong> — eine Vorhersage, welche Decks bei deinem nächsten Turnier zu erwarten sind, und wie deine Chance auf <a href="#glossar-day2" data-glossar="day2">Day 2</a> dagegen steht.</li>
+        <li><strong>Meta Call</strong> — eine Prediction, welche Decks bei deinem nächsten Turnier zu erwarten sind, und wie deine Chance auf <a href="#glossar-day2" data-glossar="day2">Day 2</a> dagegen steht.</li>
         <li><strong>Champions</strong> und <strong>Pocket</strong> — zwei andere Pokémon-Spiele, siehe <a href="#glossar-champions" data-glossar="champions">Glossar</a>.</li>
     </ul>
     <p class="tutorial-paragraph">Alles Weitere öffnet <strong>☰ Menü</strong> neben dem Logo: Profil mit Meine Decks, Wunschliste, Sammlung und Battle Journal, „Deck bauen“, Kartendatenbank, Vergangene Formate, Japan (City League), Proxy-Drucker, Rechner, diese Seite und „Quellen &amp; Methodik“ — dort steht, woher jede Zahl kommt.</p>
@@ -69,31 +69,31 @@
         <dd>Standard ist das Turnierformat mit den neuesten Sets (siehe Format). Expanded erlaubt deutlich ältere Karten. Die Seite wertet Standard aus; in der Archetyp-Box zeigt der Filter „Nur Expanded“ die Karten, die im Standard nicht mehr erlaubt sind.</dd>
 
         <dt id="glossar-online-major">Online · Major</dt>
-        <dd><strong>Online</strong>: gemeldete Online-Turniere auf Limitless. <strong>Major</strong>: Präsenzturniere ab Regional-Größe. Beide stehen oft nebeneinander, weil sich Decks online und vor Ort unterschiedlich schlagen.</dd>
+        <dd><strong>Online</strong>: gemeldete Online-Turniere auf Limitless. <strong>Major</strong>: Turniere vor Ort ab Regional-Größe. Beide stehen oft nebeneinander, weil sich Decks online und vor Ort unterschiedlich schlagen.</dd>
 
-        <dt id="glossar-anteil">Anteil</dt>
-        <dd>Wie oft ein Deck gespielt wurde, gemessen an allen Antritten der Quelle. Online steht der Anteil an allen Limitless-Online-Antritten seit Formatbeginn.</dd>
+        <dt id="glossar-anteil">Share</dt>
+        <dd>Wie oft ein Deck gespielt wurde, gemessen an allen Listen der Quelle. Online steht der Share an allen Limitless-Online-Listen seit Formatbeginn.</dd>
 
         <dt id="glossar-win-rate">Win Rate (WR)</dt>
-        <dd>Wie oft ein Deck gewinnt. Auf den Deck-Kacheln und in der Heatmap: Siege geteilt durch entschiedene Matches, S/(S+N) — Unentschieden zählen nicht mit, damit Online und Major vergleichbar sind. An anderen Stellen stehen andere Rechnungen (mit Unentschieden im Nenner, oder Matchpunkte); jede Quote nennt ihre Formel im Hinweis daneben.</dd>
+        <dd>Wie oft ein Deck gewinnt. Auf den Deck-Kacheln und in der Heatmap: Wins geteilt durch entschiedene Matches, W/(W+L) — Ties zählen nicht mit, damit Online und Major vergleichbar sind. An anderen Stellen stehen andere Rechnungen (mit Ties im Nenner, oder Matchpunkte); jede Quote nennt ihre Formel im Hinweis daneben.</dd>
 
         <dt id="glossar-matchup">Matchup (MU) · Heatmap</dt>
-        <dd>Wie ein Deck gegen ein bestimmtes anderes Deck abschneidet. Die Heatmap zeigt das für alle häufigen Paarungen: je Zelle die Win Rate online und Major, darunter „M“ = Zahl der Matches. Kursiv heißt: unter 10 Matches, also unsicher.</dd>
+        <dd>Wie ein Deck gegen ein bestimmtes anderes Deck abschneidet. Die Heatmap zeigt das für alle häufigen Matchups: je Zelle die Win Rate online und Major, darunter „M“ = Zahl der Matches. Kursiv heißt: unter 10 Matches, also unsicher.</dd>
 
-        <dt id="glossar-top-8">Top 8 · Top-8-Quote</dt>
-        <dd>Die besten acht eines Turniers. Die Top-8-Quote sagt, wie oft ein Deck aus seinen Antritten dort ankam.</dd>
+        <dt id="glossar-top-8">Top 8 · Top-8-Conversion</dt>
+        <dd>Die besten acht eines Turniers. Die Top-8-Conversion sagt, wie oft ein Deck aus seinen Listen dort ankam.</dd>
 
-        <dt id="glossar-day2">Day 2 · Day-2-Quote</dt>
-        <dd>Große Präsenzturniere (Regionals, Internationals) laufen über zwei Tage; nur wer am ersten Tag genug Siege sammelt, spielt am zweiten. Die Day-2-Quote sagt, wie oft ein Deck das schafft.</dd>
+        <dt id="glossar-day2">Day 2 · Day-2-Conversion</dt>
+        <dd>Große Majors (Regionals, Internationals) laufen über zwei Tage; nur wer am ersten Tag genug Wins sammelt, spielt am zweiten. Die Day-2-Conversion sagt, wie oft ein Deck das schafft — gemessen, nach dem Turnier. Die <strong>Day-2-Chance</strong> im Meta Call ist die Prediction derselben Zahl vor dem Turnier.</dd>
 
         <dt id="glossar-tier">Tier · Rogue</dt>
-        <dd>Tiers gruppieren Decks nach Anteil und Erfolg (Tier 1 = die stärksten und meistgespielten). Rogue sind seltene Decks außerhalb der Tiers — oft mit wenigen Ergebnissen, deshalb steht dort bei kleinen Zahlen die Bilanz statt einer Quote.</dd>
+        <dd>Tiers gruppieren Decks nach Share und Erfolg (Tier 1 = die stärksten und meistgespielten). Rogue sind seltene Decks außerhalb der Tiers — oft mit wenigen Ergebnissen, deshalb steht dort bei kleinen Zahlen die Bilanz statt einer Quote.</dd>
 
-        <dt id="glossar-bilanz">Bilanz (S–N–U)</dt>
-        <dd>Siege – Niederlagen – Unentschieden, immer in dieser Reihenfolge.</dd>
+        <dt id="glossar-bilanz">Bilanz (W-L-T)</dt>
+        <dd>Wins – Losses – Ties, immer in dieser Reihenfolge.</dd>
 
         <dt id="glossar-turniertypen">Turniertypen</dt>
-        <dd><strong>League Challenge</strong> und <strong>League Cup</strong>: kleine lokale Turniere. <strong>Regional</strong>: großes Präsenzturnier mit Day 2. <strong>Special Event</strong>: große Turniere außerhalb der Regionals. <strong>International</strong>: die Kontinentalmeisterschaften (z. B. EUIC, NAIC). <strong>Worlds</strong>: die Weltmeisterschaft.</dd>
+        <dd><strong>League Challenge</strong> und <strong>League Cup</strong>: kleine lokale Turniere. <strong>Regional</strong>: großes Major mit Day 2. <strong>Special Event</strong>: große Turniere außerhalb der Regionals. <strong>International</strong>: die Kontinentalmeisterschaften (z. B. EUIC, NAIC). <strong>Worlds</strong>: die Weltmeisterschaft.</dd>
 
         <dt id="glossar-city-league">City League</dt>
         <dd>Die Turnierserie in Japan. Japan bekommt neue Sets früher; die City League zeigt deshalb, welche Decks bald auch hier wichtig werden können.</dd>
@@ -120,7 +120,7 @@
         <dd><strong>BO1/BO3</strong>: ein Spiel bzw. bis zu drei Spiele je Match. <strong>Mulligan</strong>: kein Basis-Pokémon auf der Starthand, neu mischen. <strong>Brick</strong>: eine Hand, mit der du nichts Sinnvolles spielen kannst. <strong>No-Show</strong>: der Gegner ist nicht erschienen.</dd>
 
         <dt id="glossar-meta-call">Meta Call</dt>
-        <dd>Die Vorhersage für ein kommendes Turnier: welche Decks wie häufig zu erwarten sind und wie dein Deck dagegen auf Day 2 kommt. Turniertyp und eigene Schätzungen kannst du anpassen.</dd>
+        <dd>Die Prediction für ein kommendes Turnier: welche Decks wie häufig zu erwarten sind und wie dein Deck dagegen auf Day 2 kommt. Turniertyp und eigene Schätzungen kannst du anpassen.</dd>
 
         <dt id="glossar-archetyp-box">Archetyp-Box</dt>
         <dd>Eine Kartenliste je Archetyp für deine echte Sammlung: welche Karten in die Box gehören, welche du hast und welche fehlen. Anlegen über Vergangene Formate → Kartenübersicht → „Zu Archetyp-Box hinzufügen“.</dd>

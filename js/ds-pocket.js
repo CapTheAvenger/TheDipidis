@@ -229,7 +229,7 @@
             kuerzel: (K && K.kuerzel(id)) || 'WR*',
             lang: (K && K.kurz(id)) || '',
             formel: (K && K.kurzHinweis && K.kurzHinweis(id)) ||
-                    ((daten && daten._meta && daten._meta.quoten_formel) || 'S / (S + N + U)')
+                    ((daten && daten._meta && daten._meta.quoten_formel) || 'W / (W + L + T)')
         };
     }
 
@@ -252,7 +252,7 @@
     function regelText(m) {
         var zeilen = (m.stufenregel || []).map(function (r) {
             var teile = [];
-            if (r.anteil_ab != null) teile.push(t('Anteil ab ', 'share from ') + prozent(r.anteil_ab));
+            if (r.anteil_ab != null) teile.push(t('Share ab ', 'share from ') + prozent(r.anteil_ab));
             if (r.quote_ab != null) teile.push(wr().kuerzel + t(' ab ', ' from ') + prozent(r.quote_ab));
             return r.stufe + ': ' + (teile.length ? teile.join(t(' und ', ' and '))
                                                  : t('alle übrigen ab ', 'all others from ') +
@@ -289,7 +289,7 @@
                  /* N2-06 (07.10.2026): „S" stand hier fuer Siege und gleich danach fuer
                     die Stufe S. Die Formel wird ausgeschrieben. */
                  esc(' · ' + w.kuerzel + ' = ' + (w.lang ? w.lang + ', ' : '') +
-                     t('Siege ÷ alle Spiele (mit Unentschieden)', 'wins ÷ all games (incl. ties)') + ' · ' +
+                     t('Wins ÷ alle Spiele (mit Ties)', 'wins ÷ all games (incl. ties)') + ' · ' +
                      t('Stufe nach unserer Regel', 'tier by our rule'));
         if (m.quelle_url) {
             s += ' · <a href="' + esc(m.quelle_url) + '" target="_blank" rel="noopener">limitlesstcg.com</a>';

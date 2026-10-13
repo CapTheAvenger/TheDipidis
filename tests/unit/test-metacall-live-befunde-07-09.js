@@ -223,7 +223,7 @@ describe('M2 — Spielerzahl, Runden und Punkteziel werden geklemmt', () => {
 
     it('Day-2-Punkte 99 sind in 8 Runden nicht erreichbar — Deckel bei 24', () => {
         const k = baueKlemme({ rounds: 8 })('day2Points', 99, true);
-        assert.equal(k.wert, 24, 'ein Sieg zaehlt 3, also 8 x 3 = 24');
+        assert.equal(k.wert, 24, 'ein Win zaehlt 3, also 8 x 3 = 24');
         assert.equal(k.geklemmt, true);
         assert.match(k.grund, /nicht erreichbar/);
     });
@@ -450,7 +450,7 @@ describe('M4 — "Mein Deck" schweigt nicht mehr, wenn die Eingabe nicht passt',
         fn('Blubb');
         assert.deepEqual(protokoll.uebernommen, []);
         assert.equal(protokoll.status.length, 1);
-        assert.match(protokoll.status[0], /steht nicht im prognostizierten Meta/);
+        assert.match(protokoll.status[0], /steht nicht im Meta der Prediction/);
         assert.match(protokoll.status[0], /3 Decks/);
     });
 
@@ -539,7 +539,7 @@ describe('M6 — Frankfurt, 26.09.2026, TEF-PBL, 2.700 Spieler, Mega Excadrill',
         assert.equal(k.geklemmt, false);
     });
 
-    it('sein Ziel — 5 Siege plus ein Unentschieden, also 16 Punkte in 8 Runden — geht durch', () => {
+    it('sein Ziel — 5 Wins plus ein Tie, also 16 Punkte in 8 Runden — geht durch', () => {
         const k = baueKlemme({ rounds: 8 })('day2Points', 16, false);
         assert.equal(k.wert, 16);
         assert.equal(k.geklemmt, false);
@@ -557,7 +557,7 @@ describe('M6 — Frankfurt, 26.09.2026, TEF-PBL, 2.700 Spieler, Mega Excadrill',
     });
 });
 
-describe('M6 — die Prognose schreibt ihre Stichprobe an', () => {
+describe('M6 — die Prediction schreibt ihre Stichprobe an', () => {
     /* Der Dateiname der Umfangsdatei steht seit dem 07.09.2026 in einer
        Konstante (Befund B1: im Tooltip stand ein Pfad, den es nicht
        gibt). Der Wert wird HIER AUS DER QUELLE gelesen, damit die

@@ -75,7 +75,7 @@ function csv(rel, sep) {
     });
 }
 
-describe('Die Quelle rechnet Siege durch alle Partien', () => {
+describe('Die Quelle rechnet Wins durch alle Partien', () => {
 
     it('unsere gespeicherte Quote ist S/(S+N+U), nicht die halbe-Punkte-Formel', () => {
         // Der Beleg des Betreibers, an unseren eigenen Zahlen nachgerechnet.
@@ -105,7 +105,7 @@ describe('Die Quelle rechnet Siege durch alle Partien', () => {
            leer. */
         const mitU = zeilen.filter(r => zahl(r.ties) > 0).length;
         assert.ok(mitU >= 3,
-            `nur ${mitU} der zwanzig groessten Bilanzen fuehren Unentschieden — `
+            `nur ${mitU} der zwanzig groessten Bilanzen fuehren Ties — `
             + 'dann ist S/(S+N+U) von der halbe-Punkte-Formel nicht zu unterscheiden');
 
         let sMit = 0, sHalb = 0;
@@ -125,7 +125,7 @@ describe('Die Quelle rechnet Siege durch alle Partien', () => {
             + 'genauso gut — dann sagt dieser Test nichts mehr aus');
     });
 
-    it('die Labs-Spalte win_pct sind Matchpunkte, keine Siegquote', () => {
+    it('die Labs-Spalte win_pct sind Matchpunkte, keine Win Rate', () => {
         // Wer sie ungeprueft neben eine Siegquote stellt, vergleicht Skalen.
         const zeilen = csv(path.join('data', 'labs_tournament_decks.csv'), ',')
             .filter(r => zahl(r.wins) + zahl(r.losses) + zahl(r.ties) >= 50);
@@ -153,8 +153,8 @@ describe('Die vierte Konvention steht nirgends mehr in einer Anzeige', () => {
 
     it('das Glossar erklaert Win Rate richtig', () => {
         const q = lies(path.join('js', 'app-quellen.js'));
-        assert.ok(!/Unentschieden\s+halb\s+gez(ä|ae)hlt/.test(ohneKomm(q)),
-            'das Glossar definiert Win Rate wieder als "Unentschieden halb '
+        assert.ok(!/Ties\s+halb\s+gez(ä|ae)hlt/.test(ohneKomm(q)),
+            'das Glossar definiert Win Rate wieder als "Ties halb '
             + 'gezaehlt" — das ist die vierte, erfundene Konvention, die '
             + 'js/win-rate-konvention.js ausdruecklich nicht auffuehrt. Die '
             + 'Stelle, die den Widerspruch aufloesen soll, beschriebe ihn selbst');
@@ -173,23 +173,23 @@ describe('Die vierte Konvention steht nirgends mehr in einer Anzeige', () => {
         const eintrag = q.slice(i, i + 700);
         // DA-47 (05.10.2026): Win-Rate = S/(S+N) — der Eintrag sagt, dass
         // Unentschieden NICHT mitzaehlen, und rechnet es vor.
-        assert.ok(/Unentschieden zählen nicht mit|Ties are ' \+\s*'left out|Ties are left out/.test(eintrag),
-            'der Eintrag sagt nicht, dass Unentschieden nicht mitzaehlen');
+        assert.ok(/Ties zählen nicht mit|Ties are ' \+\s*'left out|Ties are left out/.test(eintrag),
+            'der Eintrag sagt nicht, dass Ties nicht mitzaehlen');
     });
 
-    it('die Fun-Event-Spalte rechnet keine halben Siege', () => {
+    it('die Fun-Event-Spalte rechnet keine halben Wins', () => {
         const mc = ohneKomm(lies(path.join('js', 'app-meta-call.js')));
         assert.ok(!/agg\.wins\s*\+\s*0\.5\s*\*\s*agg\.ties/.test(mc),
             'die Spalte "Win %" der Fun-Event-Empfehlungen rechnet wieder '
             + '(S + 0,5·U) / Partien. Gemessen liegt das Ø 2,52 pp neben der '
             + 'Datei-Spalte, die es angeblich nachbildet, und es belohnt '
-            + 'Unentschieden: alle 14 Epochen sortieren sich um, groesster '
+            + 'Ties: alle 14 Epochen sortieren sich um, groesster '
             + 'Sprung 18 Plaetze');
         assert.ok(/const winPct = games > 0 \? agg\.wins \/ games \* 100 : 0;/.test(mc),
-            'die Spalte rechnet nicht mehr Siege durch alle Partien');
+            'die Spalte rechnet nicht mehr Wins durch alle Partien');
     });
 
-    it('kein Anzeigepfad im Frontend rechnet halbe Siege', () => {
+    it('kein Anzeigepfad im Frontend rechnet halbe Wins', () => {
         // Breit gesucht, damit die naechste Stelle nicht wieder jahrelang
         // unbemerkt bleibt. win-rate-konvention.js darf die Formel nennen —
         // dort steht sie als Warnung, nicht als Rechnung.
@@ -203,7 +203,7 @@ describe('Die vierte Konvention steht nirgends mehr in einer Anzeige', () => {
             }
         }
         assert.deepStrictEqual(treffer, [],
-            'diese Dateien zaehlen ein Unentschieden wieder als halben Sieg: '
+            'diese Dateien zaehlen ein Tie wieder als halben Win: '
             + treffer.join(', '));
     });
 });

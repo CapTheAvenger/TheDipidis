@@ -206,7 +206,7 @@ window.MetaCall = (function () {
      Zuwachs nicht. */
   const BELEGTE_FELDQUOTEN = {
     unentschiedenPraesenz: {
-      was:        'Anteil unentschiedener Matches im Praesenzfeld',
+      was:        'Anteil unentschiedener Matches im Meta vor Ort',
       datei:      'data/labs_tournament_matchups_TEF-PBL.csv',
       auswahl:    "day_filter='overall', Zeilen mit vs_wins/vs_losses",
       fenster:    'TEF-PBL',
@@ -2778,7 +2778,7 @@ window.MetaCall = (function () {
       .replace(/Querétaro|QuerÃ©taro|Queretaro/i, 'Querétaro');
     return cleaned
       .replace(/^Regional Championship\s+/i, '')
-      .replace(/^International Championship\s+/i, 'IC ')
+      .replace(/^International Championship\s+/i, 'International ')
       .replace(/^World Championship[s]?\s+/i, 'Worlds ')
       .replace(/^Special Event\s+/i, '')
       .trim();
@@ -3870,7 +3870,7 @@ window.MetaCall = (function () {
       + `fuellt die Spalte aus den Platzierungen (812 der 4.713 Zeilen, `
       + `davon 74 groesser 0; der Rest ist leer statt 0). Der Term `
       + `oben ist aber auf eine Groesse in der Naehe der `
-      + `Day-1-zu-Day-2-Konversion kalibriert, die Top-Cut-Quote hat `
+      + `Day-1-zu-Day-2-Konversion kalibriert, die Top-8-Conversion hat `
       + `Median 0 und Maximum 0,5 — er wuerde ein Deck MIT Top-8-Platz `
       + `schlechter stellen als eines ohne. Deshalb steht `
       + `T8_SPALTE_KALIBRIERT auf false. Faellt diese Meldung weg, hat `
@@ -6552,7 +6552,7 @@ window.MetaCall = (function () {
             _shareList.sort((a, b) => b.ladderShare - a.ladderShare);
             _fensterMeta = meta;
             console.info(
-              '[MetaCall] Online-Anteile aus dem %d-Tage-Fenster %s bis %s (%d Decks). Kumulativ steht als ladderShareKumulativ daneben.',
+              '[MetaCall] Online-Shares aus dem %d-Tage-Fenster %s bis %s (%d Decks). Kumulativ steht als ladderShareKumulativ daneben.',
               tage, meta.fenster_von, meta.fenster_bis, umfang
             );
           }
@@ -7252,7 +7252,7 @@ window.MetaCall = (function () {
                   .sort((a, b) => b.share - a.share).slice(0, 6);
                 console.log(
                   `[Predictor 6.2] Mehrmeta-Leistung: Schnitt ${prevFmtKey} = ` +
-                  `${_lastMetaAvgWinRate.toFixed(2)} % ${(typeof window !== 'undefined' && window.WinRateKonvention && window.WinRateKonvention.kurz('mitUnentschieden')) || 'S / (S + N + U)'} / ` +
+                  `${_lastMetaAvgWinRate.toFixed(2)} % ${(typeof window !== 'undefined' && window.WinRateKonvention && window.WinRateKonvention.kurz('mitUnentschieden')) || 'W / (W + L + T)'} / ` +
                   `${(_lastMetaAvgDay2Conv * 100).toFixed(1)} % Day 2. ` +
                   `Boden 0.85: ${stark.map(x => x.name).join(', ') || 'keins'}. ` +
                   `Boden 0.55: ${schwach.map(x => x.name).join(', ') || 'keins'}.`
@@ -8433,7 +8433,7 @@ window.MetaCall = (function () {
               '[MetaCall] Day-1-Matchupkarte verworfen fuer ' + _kopieVonOverall.join(', ')
               + ' — sie ist Paar fuer Paar identisch mit Overall, also keine '
               + 'Day-1-Auswahl. Ohne das Verwerfen wuerden die Day-2-Spiele '
-              + 'doppelt gewichtet (0,45 als Day 2 + ihr Anteil in 0,35 als '
+              + 'doppelt gewichtet (0,45 als Day 2 + ihr Share in 0,35 als '
               + '"Day 1"). Ursache: das geratene Flag &d1 im Labs-Scraper.'
             );
           }
@@ -8909,7 +8909,7 @@ window.MetaCall = (function () {
         .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
         .slice(0, 5)
         .map(([k, v]) => `${k} ${v > 0 ? '+' : ''}${v.toFixed(1)}pp`);
-      console.info('[MetaCall] predictor 5.3 — Schub in S/(S+N) fuer',
+      console.info('[MetaCall] predictor 5.3 — Schub in W/(W+L) fuer',
         count, 'Decks berechnet. Groesste:', top.join(', '),
         ohneBilanz ? `· ${ohneBilanz} ohne Online-Bilanz uebersprungen` : '');
     }
@@ -10402,9 +10402,9 @@ window.MetaCall = (function () {
   function _d2ConvHerkunft() {
     return _mcIstDeutsch()
       ? `Gelesen aus der Spalte ${D2CONV_SPALTE} der Major-Datei `
-        + `(nicht selbst aus Day-2- durch Day-1-Antritten gerechnet), `
+        + `(nicht selbst aus Day-2- durch Day-1-Listen gerechnet), `
         + `rangewichtet über die Turniere; gezählt werden nur Turniere mit `
-        + `mindestens ${D2CONV_MIN_ANTRITTE} Antritten dieses Decks.`
+        + `mindestens ${D2CONV_MIN_ANTRITTE} Listen dieses Decks.`
       : `Read from the ${D2CONV_SPALTE} column of the major file (not `
         + `recomputed from Day 2 over Day 1 entries), rank-weighted across `
         + `tournaments; only tournaments with at least `
@@ -10413,7 +10413,7 @@ window.MetaCall = (function () {
   /** Der kurze Zusatz, der neben die Zahl selbst passt. */
   function _d2ConvKurz() {
     return _mcIstDeutsch()
-      ? ` · ab ${D2CONV_MIN_ANTRITTE} Antritten`
+      ? ` · ab ${D2CONV_MIN_ANTRITTE} Listen`
       : ` · from ${D2CONV_MIN_ANTRITTE} entries`;
   }
 
@@ -10629,7 +10629,7 @@ window.MetaCall = (function () {
     return _mcIstDeutsch()
       ? `ABWEICHEND von der Vorgabe (${STANDARD_RUNDEN} Runden): gerechnet `
         + `wird mit ${r} Runden und einem Day-2-Ziel von ${ziel} Punkten. `
-        + `Jede Zahl auf dieser Seite — erwartete Siege, Day-2-Chance, `
+        + `Jede Zahl auf dieser Seite — erwartete Wins, Day-2-Chance, `
         + `Rangfolge — beruht darauf.`
       : `DIFFERENT from the default (${STANDARD_RUNDEN} rounds): everything `
         + `is computed with ${r} rounds and a Day 2 target of ${ziel} `
@@ -11329,7 +11329,7 @@ window.MetaCall = (function () {
     const klasse = q == null ? '' : (q >= 55 ? 'is-gut' : (q <= 45 ? 'is-schlecht' : 'is-mittel'));
     let titel;
     if (z.wr == null) {
-      titel = L('Für diese Paarung liegen keine Matches vor — du kannst eine Zahl eintragen.',
+      titel = L('Für dieses Matchup liegen keine Matches vor — du kannst eine Zahl eintragen.',
         'No matches recorded for this pairing — you can enter a number.');
     } else {
       titel = (hand != null ? L('Von dir eingetragen. ', 'Entered by you. ') : '')
@@ -11401,9 +11401,9 @@ window.MetaCall = (function () {
         <td class="mc-mct-an"></td>
         <td class="mc-mct-deck"><span class="mc-deck-name">${esc(t('mc.junkDecks'))}</span></td>
         <td class="mc-mct-online" ${lab(L('Online', 'Online'))}><span class="mc-cell-dash">—</span></td>
-        <td class="mc-mct-prog" ${lab(L('Prognose', 'Forecast'))}><span class="mc-mct-prognose">${_mcPct(deck.finalShare, 1)}</span></td>
+        <td class="mc-mct-prog" ${lab(L('Prediction', 'Prediction'))}><span class="mc-mct-prognose">${_mcPct(deck.finalShare, 1)}</span></td>
         <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}><span class="mc-cell-dash">—</span></td>
-        <td class="mc-mct-enc" ${lab(L('Begegnungen', 'Encounters'))}><span class="mc-mct-enc-zahl mc-enc-${encTier}">∅ ${_mcNum(lambda, 2)}</span><span class="mc-mct-spieler" title="${esc(t('mc.tipPlayers'))}">≈ ${zahlLokal(deck.count)} ${esc(L('Spieler', 'players'))}</span></td>
+        <td class="mc-mct-enc" ${lab(L('Matchups', 'Encounters'))}><span class="mc-mct-enc-zahl mc-enc-${encTier}">∅ ${_mcNum(lambda, 2)}</span><span class="mc-mct-spieler" title="${esc(t('mc.tipPlayers'))}">≈ ${zahlLokal(deck.count)} ${esc(L('Spieler', 'players'))}</span></td>
         <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}><span class="mc-cell-dash" title="${esc(L('Sammelquote über alle übrigen Decks', 'Pooled rate over all other decks'))}">—</span></td>
         <td class="mc-mct-d2" ${lab(L('Day-2 mit diesem Deck', 'Day 2 with this deck'))}><span class="mc-cell-dash">—</span></td>
         <td class="mc-mct-bil" ${lab(L('Bilanz', 'Record'))}><span class="mc-cell-dash">—</span></td>
@@ -11443,9 +11443,9 @@ window.MetaCall = (function () {
         istMein ? `<span class="mc-mct-mein-marke">${esc(L('dein Deck', 'your deck'))}</span>` : ''}</span>${toggle}</div></td>
       <td class="mc-mct-online" ${lab(L('Online', 'Online'))}>${online.wert == null ? '<span class="mc-cell-dash">—</span>'
         : `<span class="mc-mct-onlinezahl">${_mcPct(online.wert, 1)}</span>${online.listen ? `<span class="mc-mct-listen">${zahlLokal(online.listen)} ${esc(L('Listen', 'lists'))}</span>` : ''}`}</td>
-      <td class="mc-mct-prog" ${lab(L('Prognose', 'Forecast'))}>${isCustom ? '<span class="mc-cell-dash">—</span>' : _mctPrognoseZelle(progZahl, online)}</td>
+      <td class="mc-mct-prog" ${lab(L('Prediction', 'Prediction'))}>${isCustom ? '<span class="mc-cell-dash">—</span>' : _mctPrognoseZelle(progZahl, online)}</td>
       <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}>${personalCell}</td>
-      <td class="mc-mct-enc" ${lab(L('Begegnungen', 'Encounters'))}><span class="mc-mct-enc-zahl mc-enc-${encTier}">∅ ${_mcNum(lambda, 2)}</span><span class="mc-mct-spieler" title="${esc(t('mc.tipPlayers'))}">≈ ${zahlLokal(deck.count)} ${esc(L('Spieler', 'players'))}</span></td>
+      <td class="mc-mct-enc" ${lab(L('Matchups', 'Encounters'))}><span class="mc-mct-enc-zahl mc-enc-${encTier}">∅ ${_mcNum(lambda, 2)}</span><span class="mc-mct-spieler" title="${esc(t('mc.tipPlayers'))}">≈ ${zahlLokal(deck.count)} ${esc(L('Spieler', 'players'))}</span></td>
       <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}>${_mctZelleWr(z, L, isCustom ? '' : deck.name)}</td>
       <td class="mc-mct-d2" ${lab(L('Day-2 mit diesem Deck', 'Day 2 with this deck'))}>${_mctZelleDay2(z)}</td>
       <td class="mc-mct-bil" ${lab(L('Bilanz', 'Record'))}>${_mctZelleBilanz(z, L)}</td>
@@ -11467,9 +11467,9 @@ window.MetaCall = (function () {
       <td class="mc-mct-deck"><div class="mc-mct-deckzeile">${_mctSternKnopf(d.name, L)}<span class="mc-deck-name">${_mcIconHtml(d.name)}<span class="mc-mct-name">${esc(d.name)}</span></span></div></td>
       <td class="mc-mct-online" ${lab(L('Online', 'Online'))}>${online.wert == null ? '<span class="mc-cell-dash">—</span>'
         : `<span class="mc-mct-onlinezahl">${_mcPct(online.wert, 1)}</span>`}</td>
-      <td class="mc-mct-prog" ${lab(L('Prognose', 'Forecast'))}>${_mctPrognoseZelle(d.onlineShare, online)}</td>
+      <td class="mc-mct-prog" ${lab(L('Prediction', 'Prediction'))}>${_mctPrognoseZelle(d.onlineShare, online)}</td>
       <td class="mc-mct-est" ${lab(L('Deine Schätzung', 'Your estimate'))}><span class="mc-cell-dash" title="${esc(L('Erst ins Meta nehmen (Haken links)', 'Add to the meta first (tick on the left)'))}">—</span></td>
-      <td class="mc-mct-enc" ${lab(L('Begegnungen', 'Encounters'))}><span class="mc-mct-in-sonstige">${esc(L('in „Sonstige"', 'in "Others"'))}</span></td>
+      <td class="mc-mct-enc" ${lab(L('Matchups', 'Encounters'))}><span class="mc-mct-in-sonstige">${esc(L('in „Sonstige"', 'in "Others"'))}</span></td>
       <td class="mc-mct-wrz" ${lab(_mctWrKopf(L))}>${_mctZelleWr(z, L, d.name)}</td>
       <td class="mc-mct-d2" ${lab(L('Day-2 mit diesem Deck', 'Day 2 with this deck'))}>${_mctZelleDay2(z)}</td>
       <td class="mc-mct-bil" ${lab(L('Bilanz', 'Record'))}>${_mctZelleBilanz(z, L)}</td>
@@ -11550,24 +11550,24 @@ window.MetaCall = (function () {
     const tage = _prognoseDatei && _prognoseAktiv && _prognoseDatei.meta
       ? Number(_prognoseDatei.meta.vorlauf_tage) || null : null;
     return `<tr>
-      <th class="mc-mct-an" title="${esc(L('Haken: dieses Deck steht einzeln im Meta und bekommt eine eigene Paarung. Ohne Haken zählt es zu „Sonstige".',
+      <th class="mc-mct-an" title="${esc(L('Haken: dieses Deck steht einzeln im Meta und bekommt ein eigenes Matchup. Ohne Haken zählt es zu „Sonstige".',
         'Tick: this deck is listed individually and gets its own pairing. Unticked it counts as "Others".'))}">${esc(L('Im Meta', 'In meta'))}</th>
       ${th('deck', 'mc-mct-deck', L('Deck', 'Deck'), L('☆ wählt dein Deck', '☆ picks your deck'))}
       ${th('online', 'mc-mct-online', tage ? L('Online (' + tage + ' Tage)', 'Online (' + tage + ' days)') : L('Online', 'Online'),
-        L('Anteil an den Online-Listen — gemessen, keine Prognose.', 'Share of online lists — measured, not a forecast.'))}
-      ${th('prognose', 'mc-mct-prog', L('Prognose vor Ort', 'Forecast on site'),
-        L('Erwarteter Anteil im Turnierlokal mit Bandbreite. Die großen Decks legen vor Ort erfahrungsgemäß zu.',
+        L('Share an den Online-Listen — gemessen, keine Prediction.', 'Share of online lists — measured, not a forecast.'))}
+      ${th('prognose', 'mc-mct-prog', L('Prediction vor Ort', 'Forecast on site'),
+        L('Erwarteter Share im Turnierlokal mit Bandbreite. Die großen Decks legen vor Ort erfahrungsgemäß zu.',
           'Expected share at the venue with range. Big decks usually gain on site.'))}
       <th class="mc-mct-est" title="${esc(t('mc.headerPersonalTooltip'))}">${esc(L('Deine Schätzung', 'Your estimate'))}</th>
-      ${th('enc', 'mc-mct-enc', L('Begegnungen (' + _settings.rounds + ' R.)', 'Encounters (' + _settings.rounds + ' r.)'),
+      ${th('enc', 'mc-mct-enc', L('Matchups (' + _settings.rounds + ' R.)', 'Encounters (' + _settings.rounds + ' r.)'),
         t('mc.headerAvgEncTooltip').replace('{n}', _settings.rounds))}
       ${th('wr', 'mc-mct-wrz', _mctWrKopf(L),
-        L('Dein Deck gegen dieses Deck (Unentschieden zählen mit). Erscheint, sobald du mit ☆ ein Deck wählst. Zahl eintippen, um sie mit deinem Wissen zu überschreiben; Feld leeren gibt den gemessenen Wert zurück.',
+        L('Dein Deck gegen dieses Deck (Ties zählen mit). Erscheint, sobald du mit ☆ ein Deck wählst. Zahl eintippen, um sie mit deinem Wissen zu überschreiben; Feld leeren gibt den gemessenen Wert zurück.',
           'Your deck against this deck (ties count). Appears once you pick a deck with ☆. Type a number to override it with your own knowledge; clear the field to get the measured value back.'))}
       ${th('day2', 'mc-mct-d2', L('Day-2 mit diesem Deck', 'Day 2 with this deck'),
         L('Chance auf ' + _settings.day2Points + ' Punkte in ' + _settings.rounds + ' Runden, wenn DU dieses Deck gegen genau dieses Meta spielst.',
           'Chance of ' + _settings.day2Points + ' points in ' + _settings.rounds + ' rounds if YOU play this deck against exactly this meta.'))}
-      ${th('bilanz', 'mc-mct-bil', L('Bilanz W–L–T', 'Record W–L–T'),
+      ${th('bilanz', 'mc-mct-bil', L('Bilanz W-L-T', 'Record W-L-T'),
         L('Erwartete Wins – Losses – Ties mit diesem Deck.', 'Expected wins – losses – ties with this deck.'))}
     </tr>`;
   }
@@ -11580,8 +11580,8 @@ window.MetaCall = (function () {
     const mae = Number(mo.mae_mittel);
     return `<p class="mc-mct-quelle">${esc(L(
       'Online: ' + datum(m.online_von) + '–' + datum(m.online_bis) + ', ' + zahlLokal(Number(m.online_listen) || 0)
-        + ' Listen (' + (m.fenster || '') + '). Prognose: an ' + anker + ' Regionals geprüft, liegt im Mittel '
-        + (Number.isFinite(mae) ? _mcNum(mae, 1) : '–') + ' Prozentpunkte daneben. Paarungen und Day-2 aus gezählten Matches.',
+        + ' Listen (' + (m.fenster || '') + '). Prediction: an ' + anker + ' Regionals geprüft, liegt im Mittel '
+        + (Number.isFinite(mae) ? _mcNum(mae, 1) : '–') + ' Prozentpunkte daneben. Matchups und Day-2 aus gezählten Matches.',
       'Online: ' + (m.online_von || '') + ' to ' + (m.online_bis || '') + ', ' + zahlLokal(Number(m.online_listen) || 0)
         + ' lists (' + (m.fenster || '') + '). Forecast: checked against ' + anker + ' regionals, off by '
         + (Number.isFinite(mae) ? _mcNum(mae, 1) : '–') + ' percentage points on average. Pairings and Day 2 from counted matches.'))}</p>`;
@@ -11689,7 +11689,7 @@ window.MetaCall = (function () {
         ? L('deine Schätzungen ', 'your estimates ')
           + _mcNum(b.summeEigen + b.summeCustom, 1) + _mcPz()
         : '',
-      L('Prognose ', 'forecast ') + _mcNum(b.summeModell, 1) + _mcPz(),
+      L('Prediction ', 'forecast ') + _mcNum(b.summeModell, 1) + _mcPz(),
       L('Sonstige ', 'Others ') + _mcNum(b.junk, 1) + _mcPz(),
     ].filter(Boolean);
 
@@ -11701,7 +11701,7 @@ window.MetaCall = (function () {
       warnung = `<span class="mc-feld-summe-warnung">${esc(L(
         'Deine Einträge ergeben zusammen ' + _mcNum(b.eingetragen, 1) + ' %, das Meta damit '
         + _mcNum(b.normiertVon, 1) + ' %. Mehr als 100 % kann ein Meta nicht haben — '
-        + 'alle Anteile sind deshalb proportional auf 100 % heruntergerechnet. Dein Verhältnis '
+        + 'alle Shares sind deshalb proportional auf 100 % heruntergerechnet. Dein Verhältnis '
         + 'zwischen den Decks bleibt dabei erhalten, die Zahlen, mit denen gerechnet wird, sind aber '
         + 'kleiner als das, was du eingetragen hast.',
         'Your entries add up to ' + _mcNum(b.eingetragen, 1) + '%, the meta to '
@@ -11924,7 +11924,7 @@ window.MetaCall = (function () {
   function _day2RahmenZeile() {
     const n = zahlLokal(_settings.totalPlayers);
     return _mcIstDeutsch()
-      ? `Turnierrahmen: ${n} ${t('mc.labelPlayers')} — geht nicht in diese Chance ein. Sie folgt aus Runden, Punkteziel, Meta-Anteilen und Paarungen.`
+      ? `Turnierrahmen: ${n} ${t('mc.labelPlayers')} — geht nicht in diese Chance ein. Sie folgt aus Runden, Punkteziel, Meta-Shares und Matchups.`
       : `Tournament frame: ${n} ${t('mc.labelPlayers')} — not an input to this chance. It follows from rounds, target points, meta shares and matchups.`;
   }
 
@@ -12148,12 +12148,12 @@ window.MetaCall = (function () {
      der drei Konventionen, und welche, sähe niemand. */
   function _evQuotenName() {
     const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
-    return (W && typeof W.kurz === 'function') ? W.kurz('ohneUnentschieden') : 'S / (S + N)';
+    return (W && typeof W.kurz === 'function') ? W.kurz('ohneUnentschieden') : 'W / (W + L)';
   }
   function _evQuotenKuerzel() {
     const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
     const k = (W && typeof W.kuerzel === 'function') ? W.kuerzel('ohneUnentschieden') : '';
-    return k || 'S / (S + N)';
+    return k || 'W / (W + L)';
   }
 
   /* Der Satz, der sagt, was die Zahl NICHT ist.
@@ -12172,7 +12172,7 @@ window.MetaCall = (function () {
      eine Beschriftung. Der englische Satz holt den Namen deshalb zur
      Laufzeit aus dem Modul. */
   function _evAbgrenzungDe() {
-    return ' Die gezeigte Quote führt die Unentschieden nicht im Nenner; '
+    return ' Die gezeigte Quote führt die Ties nicht im Nenner; '
          + 'das ist NICHT die Größe, die Limitless "Win %" nennt.';
   }
   function _evAbgrenzungEn() {
@@ -12292,7 +12292,7 @@ window.MetaCall = (function () {
        (title) an den Zeilen geworden — die Seite soll nicht erzaehlen. */
     const hinweis = esc(_evL(
       'In Klammern: ' + _evQuotenKuerzel() + ' gegen dieses Deck und wie oft du ihm in dem Meta '
-        + 'begegnest, das du erwartest. Sortiert danach, wie stark die Paarung dein Ergebnis zieht.',
+        + 'begegnest, das du erwartest. Sortiert danach, wie stark das Matchup dein Ergebnis zieht.',
       'In brackets: ' + _evQuotenKuerzel() + ' against that deck and how often you meet it in the '
         + 'meta you expect. Sorted by how strongly the pairing pulls your result.'));
     if (schlecht.length) {
@@ -12310,7 +12310,7 @@ window.MetaCall = (function () {
   function _evUmfangZeile(r) {
     if (_evUmfang === 'top8') {
       return (r && r.gegner < EV_TOP_N)
-        ? _evL('Nur ' + r.gegner + ' Gegner haben Paarungen mit diesem Deck — mehr gibt es nicht.',
+        ? _evL('Nur ' + r.gegner + ' Gegner haben Matchups mit diesem Deck — mehr gibt es nicht.',
                'Only ' + r.gegner + ' opponents have pairings with this deck — there are no more.')
         : _evL('Was-wäre-wenn für einen harten Tisch: nur die ' + EV_TOP_N + ' größten Gegner '
                + 'deines erwarteten Metas, untereinander gewichtet.',
@@ -12318,13 +12318,13 @@ window.MetaCall = (function () {
                + 'you expect, weighted among themselves.');
     }
     if (_evUmfang === 'einzel') {
-      return _evL('Eine einzelne Paarung — kein Turnierschnitt, sondern die Quote gegen genau '
+      return _evL('Ein einzelnes Matchup — kein Turnierschnitt, sondern die Quote gegen genau '
                   + 'dieses Deck.',
                   'A single pairing — not a tournament average, but the rate against exactly '
                   + 'this deck.');
     }
-    return _evL('Alle Gegner deines erwarteten Metas, zu denen Paarungen vorliegen — jeder mit '
-                + 'dem Anteil, mit dem die Tabelle oben rechnet (Prognose oder deine Schätzung).',
+    return _evL('Alle Gegner deines erwarteten Metas, zu denen Matchups vorliegen — jeder mit '
+                + 'dem Share, mit dem die Tabelle oben rechnet (Prediction oder deine Schätzung).',
                 'Every opponent of the meta you expect that we have pairings for — each weighted '
                 + 'by the share the table above works with (forecast or your estimate).');
   }
@@ -12357,7 +12357,7 @@ window.MetaCall = (function () {
   <div class="metacall-panel-title">${esc(titel)}
     <span class="mc-ev-deckname">${_mcIconHtml(_settings.myDeck)}${esc(_settings.myDeck)}</span></div>
   <p class="mc-uebersicht-leer">${esc(_evL(
-    'Zu ' + _settings.myDeck + ' liegt gegen keinen Gegner deines erwarteten Metas eine gemessene Paarung vor.',
+    'Zu ' + _settings.myDeck + ' liegt gegen keinen Gegner deines erwarteten Metas ein gemessenes Matchup vor.',
     'There is no measured pairing for ' + _settings.myDeck + ' against any opponent of the meta you expect.'))}</p>
 </div>`;
     }
@@ -12446,7 +12446,7 @@ window.MetaCall = (function () {
       <span class="mc-ev-kontext">${esc(bandText + duennText + abdeckungText)}</span>
     </div>
     <div class="mc-ev-kachel">
-      <span class="mc-ev-label">${esc(_evL('Erwartete Siege', 'Expected wins'))}</span>
+      <span class="mc-ev-label">${esc(_evL('Erwartete Wins', 'Expected wins'))}</span>
       <span class="mc-ev-wert">${_mcNum(siege, 1)}</span>
       <span class="mc-ev-kontext">${esc(_evL(
         _mcNum(sUnten, 1) + ' bis ' + _mcNum(sOben, 1) + ' in ' + runden + ' Runden',
@@ -12460,9 +12460,9 @@ window.MetaCall = (function () {
         'from ' + _settings.day2Points + ' points after ' + runden + ' rounds'))}</span>
     </div>
     <div class="mc-ev-kachel mc-ev-kachel-bilanz">
-      <span class="mc-ev-label">${esc(_evL('Erwartete Bilanz W–L–T', 'Expected record W–L–T'))}</span>
+      <span class="mc-ev-label">${esc(_evL('Erwartete Bilanz W-L-T', 'Expected record W-L-T'))}</span>
       <span class="mc-ev-wert mc-ev-bilanz"><span style="color:var(--tint-ok-ink)">${_mcNum(d2.expWin, 1)}</span>–<span style="color:var(--tint-bad-ink)">${_mcNum(d2.expLoss, 1)}</span>–<span style="color:#f39c12">${_mcNum(d2.expTie, 1)}</span></span>
-      <span class="mc-ev-kontext">${esc(_evL('Siege – Niederlagen – Unentschieden', 'Wins – Losses – Ties'))}</span>
+      <span class="mc-ev-kontext">${esc(_evL('Wins – Losses – Ties', 'Wins – Losses – Ties'))}</span>
     </div>
   </div>`;
 
@@ -12476,13 +12476,13 @@ window.MetaCall = (function () {
       : '';
 
     const fuss = _evL(
-      'Gerechnet wird <strong>Anteil × ' + _evQuotenName() + '</strong>, aufsummiert über alle Gegner '
-      + 'deines erwarteten Metas, zu denen eine Quote vorliegt. Die Anteile sind die der Tabelle '
-      + 'oben — also Prognose, oder deine Schätzung, wo du eine eingetragen hast. Die Quoten kommen aus derselben Kette wie die Begegnungsliste im '
-      + 'Ergebnis: Papier und Online gemischt (80 / 20), geglättet, mit deinem Journal und deinen '
-      + 'eigenen Werten. „Sonstige" und Paarungen ohne Daten bleiben draußen und werden nicht mit '
+      'Gerechnet wird <strong>Share × ' + _evQuotenName() + '</strong>, aufsummiert über alle Gegner '
+      + 'deines erwarteten Metas, zu denen eine Quote vorliegt. Die Shares sind die der Tabelle '
+      + 'oben — also Prediction, oder deine Schätzung, wo du eine eingetragen hast. Die Quoten kommen aus derselben Kette wie die Matchup-Liste im '
+      + 'Ergebnis: vor Ort und Online gemischt (80 / 20), geglättet, mit deinem Journal und deinen '
+      + 'eigenen Werten. „Sonstige" und Matchups ohne Daten bleiben draußen und werden nicht mit '
       + '50 % aufgefüllt — darum steht die Abdeckung daneben. Das Band ist ±1,96 '
-      + 'Standardabweichungen aus der Streuung der einzelnen Paarungen; es nimmt die Anteile als '
+      + 'Standardabweichungen aus der Streuung der einzelnen Matchups; es nimmt die Shares als '
       + 'bekannt an.' + _evAbgrenzungDe() + eigenSatz,
       'The sum is <strong>share × ' + _evQuotenName() + '</strong> over every opponent of the meta you '
       + 'expect that we have a rate for. The shares are those of the table '
@@ -12574,7 +12574,7 @@ window.MetaCall = (function () {
       const de = _mcIstDeutsch();
       if (typeof window.showToast === 'function') {
         window.showToast(de
-          ? `Zu „${gesucht}" liegen im Meta Call keine Anteile vor — wähle dein Deck oben von Hand.`
+          ? `Zu „${gesucht}" liegen im Meta Call keine Shares vor — wähle dein Deck oben von Hand.`
           : `No shares on record for "${gesucht}" in the Meta Call — pick your deck above by hand.`,
           'info', 6000);
       }
@@ -13055,7 +13055,7 @@ window.MetaCall = (function () {
      jeder anderen Quote auch. */
   function _frozenWrHinweis() {
     const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
-    return W ? W.hinweis('mitUnentschieden') : 'S / (S + N + U)';
+    return W ? W.hinweis('mitUnentschieden') : 'W / (W + L + T)';
   }
 
   /* ZWEI TEXTE HABEN DEN UMBAU NICHT MITGEMACHT (07.09.2026,
@@ -13092,7 +13092,7 @@ window.MetaCall = (function () {
     const name = W ? W.kurz('mitUnentschieden') : '';
     const roh = String(text == null ? '' : text);
     if (!name) return roh;
-    return roh.replace(/Win\s?%|Siege\s+je\s+Match|Wins\s+per\s+game/gi, name);
+    return roh.replace(/Win\s?%|(?:Siege|Wins)\s+je\s+Match|Wins\s+per\s+game/gi, name);
   }
 
   function renderFrozenRecommendationsPanel() {
@@ -13191,11 +13191,11 @@ window.MetaCall = (function () {
    * welches Turnier in die Quote eingeht. */
   function _frozenD2Hinweis() {
     return _mcIstDeutsch()
-      ? 'Summe der Day-2-Antritte geteilt durch die Summe der Day-1-Antritte '
+      ? 'Summe der Day-2-Listen geteilt durch die Summe der Day-1-Listen '
         + 'über alle Turniere dieser Epoche — selbst gerechnet, ohne '
         + 'Mindeststichprobe je Turnier. Der Empfehlungsblock oben liest '
         + 'stattdessen die Spalte ' + D2CONV_SPALTE + ' und zählt nur Turniere '
-        + 'mit mindestens ' + D2CONV_MIN_ANTRITTE + ' Antritten; für dasselbe '
+        + 'mit mindestens ' + D2CONV_MIN_ANTRITTE + ' Listen; für dasselbe '
         + 'Deck stehen deshalb zwei verschiedene Zahlen.'
       : 'Sum of Day 2 entries divided by the sum of Day 1 entries across all '
         + 'tournaments of this era — computed here, with no per-tournament '
@@ -13287,8 +13287,8 @@ window.MetaCall = (function () {
     const mo = (_prognoseDatei && _prognoseDatei.modell) || {};
     const n = Number(mo.anker) || 0;
     return _mcIstDeutsch()
-      ? 'Die Meta-Anteile kommen aus der Meta-Prognose: Online-Stand plus die Verschiebung zur Spitze, '
-        + 'die an ' + n + ' Regionals gemessen wurde. Die Paarungen darunter:'
+      ? 'Die Meta-Shares kommen aus der Meta-Prediction: Online-Stand plus die Verschiebung zur Spitze, '
+        + 'die an ' + n + ' Regionals gemessen wurde. Die Matchups darunter:'
       : 'Meta shares come from the meta forecast: online standing plus the shift towards the top '
         + 'measured at ' + n + ' regionals. Pairings below:';
   }
@@ -13437,7 +13437,7 @@ window.MetaCall = (function () {
     // prediction once a fresh major has arrived. Surfaces the accuracy
     // story so the user can tune trust over time.
     const accuracySuffix = _lastAccuracyReport
-      ? ` <span class="mc-predictor-banner-accuracy" title="Mean Absolute Error of the prediction made ${_formatDDMM(_lastAccuracyReport.baselineDate)} vs the major on ${_formatDDMM(_lastAccuracyReport.majorDate)}">Letzte Prognose-Accuracy: ø ${String(_lastAccuracyReport.mae).replace('.', ',')} pp Abweichung</span>`
+      ? ` <span class="mc-predictor-banner-accuracy" title="Mean Absolute Error of the prediction made ${_formatDDMM(_lastAccuracyReport.baselineDate)} vs the major on ${_formatDDMM(_lastAccuracyReport.majorDate)}">Letzte Prediction-Accuracy: ø ${String(_lastAccuracyReport.mae).replace('.', ',')} pp Abweichung</span>`
       : '';
 
     /* BEFUND (07.09.2026, M6): der Betreiber spielt am 26.09.2026 in
@@ -13474,7 +13474,7 @@ window.MetaCall = (function () {
            waere sie es. Der Name steht in EINER Konstante, die auch der
            Ladepfad benutzt — damit koennen die beiden nicht mehr
            auseinanderlaufen. */
-        return ` <span class="mc-predictor-banner-stichprobe" title="Umfang der Online-Stichprobe, aus der die Anteilsspalte kommt. Direkt aus ${FENSTER_META_DATEI} — nicht gerechnet.">Online-Stichprobe: ${zahlLokal(n)} Decks aus ${zahlLokal(tage)} Tagen${spanne}</span>`;
+        return ` <span class="mc-predictor-banner-stichprobe" title="Umfang der Online-Stichprobe, aus der die Share-Spalte kommt. Direkt aus ${FENSTER_META_DATEI} — nicht gerechnet.">Online-Stichprobe: ${zahlLokal(n)} Decks aus ${zahlLokal(tage)} Tagen${spanne}</span>`;
       }
       return ' <span class="mc-predictor-banner-stichprobe" style="color:var(--tint-warn-ink,#b8860b)" title="Ohne gültiges Tagesfenster gilt der Kumulativstand — der reicht weiter zurück und reagiert träger auf frische Verschiebungen.">Online-Stichprobe: kein gültiges Tagesfenster — es gilt der Kumulativstand</span>';
     })();
@@ -13504,16 +13504,16 @@ window.MetaCall = (function () {
         && Object.keys(_majorMatchupMapDay1).length > 0;
       const kern = _echtesDay1
         ? (_mcIstDeutsch()
-          ? `Gewichtung der Paarungen: ${pz(papier)} Papier (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
+          ? `Gewichtung der Matchups: ${pz(papier)} vor Ort (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
           : `Matchup weighting: ${pz(papier)} paper (${pz(MATCHUP_BLEND_WEIGHT_DAY2)} Day 2 · ${pz(MATCHUP_BLEND_WEIGHT_DAY1)} Day 1) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} online`)
         : (_mcIstDeutsch()
-          ? `Gewichtung der Paarungen: ${pz(papier)} Papier (Major gesamt) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
+          ? `Gewichtung der Matchups: ${pz(papier)} vor Ort (Major gesamt) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} Online`
           : `Matchup weighting: ${pz(papier)} paper (major overall) · ${pz(MATCHUP_BLEND_WEIGHT_ONLINE)} online`);
       const deck = _settings.myDeck || '';
       const adj  = deck ? (_deckWRAdjustment[normalize(deck)] || 0) : 0;
       const schub = adj
         ? (_mcIstDeutsch()
-            ? ` · Predictor 5.3 für ${deck}: ${adj > 0 ? '+' : '−'}${_mcNum(Math.abs(adj), 2)} pp`
+            ? ` · Prediction 5.3 für ${deck}: ${adj > 0 ? '+' : '−'}${_mcNum(Math.abs(adj), 2)} pp`
             : ` · Predictor 5.3 for ${deck}: ${adj > 0 ? '+' : '−'}${_mcNum(Math.abs(adj), 2)} pp`)
         : '';
       /* DER TOOLTIP NANNTE DIE GROESSE NICHT, DIE ER BESCHREIBT
@@ -13527,7 +13527,7 @@ window.MetaCall = (function () {
          die Formel kommt aus js/win-rate-konvention.js. */
       const konv = (typeof window !== 'undefined' && window.WinRateKonvention)
         ? window.WinRateKonvention.KONVENTIONEN.ohneUnentschieden.formel
-        : 'S / (S + N)';
+        : 'W / (W + L)';
       /* AUCH DER NAME KOMMT AUS DEM MODUL (07.09.2026, Nachpruefung).
          Die Formel holte sich dieser Satz schon von dort, den Namen
          dahinter hat er abgeschrieben: "(Siegquote ohne
@@ -13537,7 +13537,7 @@ window.MetaCall = (function () {
          Namen fuer dieselbe Groesse zurueckgelassen. */
       const konvNameRoh = (typeof window !== 'undefined' && window.WinRateKonvention)
         ? window.WinRateKonvention.kurz('ohneUnentschieden')
-        : (_mcIstDeutsch() ? 'Siegquote ohne Unentschieden' : 'Win share excluding ties');
+        : (_mcIstDeutsch() ? 'Win Rate ohne Ties' : 'Win share excluding ties');
       /* Der Name steht mitten im Satz. Im Deutschen ist er ein
          Substantiv und bleibt gross; im Englischen wird er klein
          geschrieben, wie jedes andere Wort an dieser Stelle. Der Name
@@ -13547,7 +13547,7 @@ window.MetaCall = (function () {
         ? konvNameRoh
         : konvNameRoh.charAt(0).toLowerCase() + konvNameRoh.slice(1);
       const titel = _mcIstDeutsch()
-        ? 'Nennwerte des Paarungs-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Predictor-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Metas vergleichbar: auf Papier enden rund 11 % der Matches unentschieden, online rund 1 %, und eine Quote, die Unentschieden im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird nur auf Paarungen ohne Major-Messung aufgeschlagen — wo die Major-Paarung schon in der Mischung steht, zählte sie sonst doppelt.'
+        ? 'Nennwerte des Matchup-Mixes. Fehlt für ein Deckpaar eine Quelle, werden die verbleibenden Gewichte auf 100 % hochgerechnet. Der Prediction-5.3-Wert ist die gemessene Differenz zwischen dem Abschneiden des Decks beim letzten Major und seinem Abschneiden in den Limitless-Online-Turnieren — beide Seiten in der Konvention ' + konv + ' (' + konvName + '). Nur diese Konvention ist zwischen den beiden Metas vergleichbar: vor Ort enden rund 11 % der Matches als Tie, online rund 1 %, und eine Quote, die Ties im Nenner führt, misst dann vor allem diesen Unterschied. Die Differenz wird nur auf Matchups ohne Major-Messung aufgeschlagen — wo die Major-Matchup schon in der Mischung steht, zählte sie sonst doppelt.'
         : 'Nominal weights of the matchup mix. When a source is missing for a pair, the remaining weights are renormalised to 100 %. The Predictor 5.3 value is the measured gap between how the deck did at the last major and how it does in Limitless online tournaments — both sides in the ' + konv + ' convention (' + konvName + '). Only that convention is comparable across the two metas: about 11 % of matches on paper end in a tie versus about 1 % online, so any rate that keeps ties in the denominator would mostly measure that difference. The gap is only added to pairs without a major measurement \u2014 where the major pairing is already in the mix it would count twice.';
       return ` <span class="mc-predictor-banner-gewichtung" title="${esc(titel)}">${esc(kern + schub)}</span>`;
     })();
@@ -13727,15 +13727,15 @@ window.MetaCall = (function () {
       const _tz = (_labsB && _labsB.turniere && _labsB.turniere.size) || 0;
       const _tzWort = _de ? (_tz === 1 ? 'Turnier' : 'Turniere') : (_tz === 1 ? 'event' : 'events');
       const _papierText = _pPapier > 0
-        ? zahlLokal(_pPapier) + (_de ? ' auf Präsenzturnieren' : ' at in-person events')
+        ? zahlLokal(_pPapier) + (_de ? ' auf Majors' : ' at in-person events')
           + (_tz ? ' (' + _tz + ' ' + _tzWort + ')' : '')
-        : (_de ? 'keine Präsenz-Matches im laufenden Format'
+        : (_de ? 'keine Matches vor Ort im laufenden Format'
                : 'no in-person matches in the current format');
       tiles.push(_intelStatTile(
         _de ? 'Gezählte Matches im Format' : 'Matches counted this format',
         _pOnline > 0
           ? zahlLokal(_pOnline) + (_de ? ' online' : ' online')
-          : zahlLokal(_pPapier) + (_de ? ' Präsenz' : ' in person'),
+          : zahlLokal(_pPapier) + (_de ? ' vor Ort' : ' in person'),
         _pOnline > 0 ? _papierText : ''
       ));
     }
@@ -13949,7 +13949,7 @@ window.MetaCall = (function () {
    * dafuer reserviert. Im Meta Call rechnet keine angezeigte Zahl so —
    * deshalb steht der Name hier nirgends. */
   const _WR_HAUSNAME =
-    /Win[\s-]?Rates?|Winrates?|Win\s?%|Matchup-Win|Matchup win|Siegquoten?|Siegraten?|Gewinnraten?|Siege je Match|Wins per game/gi;
+    /Win[\s-]?Rates?(?!\s+inkl\.)|Winrates?|Win\s?%|Matchup-Win|Matchup win|Siegquoten?|Siegraten?|Gewinnraten?|Siege je Match|Wins je Match|Wins per game/gi;
 
   function _wrVollname(text, konventionId) {
     const W = (typeof window !== 'undefined') ? window.WinRateKonvention : null;
@@ -13996,7 +13996,7 @@ window.MetaCall = (function () {
     return _mcIstDeutsch()
       ? `${wasA} und ${wasB} meinen dieselbe Größe: ${name} (${k.formel}). `
         + 'Was du einträgst, ist genau die Zahl, die links daneben steht — '
-        + 'Unentschieden zählen in beiden nicht mit.'
+        + 'Ties zählen in beiden nicht mit.'
       : `${wasA} and ${wasB} mean the same thing: ${name} (${k.formel}). `
         + 'What you enter is exactly the number shown next to it — ties count in neither.';
   }
@@ -15729,7 +15729,7 @@ window.MetaCall = (function () {
     if (val > max) {
       return { wert: max, geklemmt: true,
                grund: key === 'day2Points'
-                 ? `${g.name}: ${zahlLokal(val)} sind in ${zahlLokal(Number(_settings.rounds) || 0)} Runden nicht erreichbar — auf ${zahlLokal(max)} gesetzt (ein Sieg zählt 3).`
+                 ? `${g.name}: ${zahlLokal(val)} sind in ${zahlLokal(Number(_settings.rounds) || 0)} Runden nicht erreichbar — auf ${zahlLokal(max)} gesetzt (ein Win zählt 3).`
                  : `${g.name}: ${zahlLokal(val)} liegt über dem Höchstwert — auf ${zahlLokal(max)} gesetzt.` };
     }
     if (!nurMax && val < g.min) {
@@ -16209,7 +16209,7 @@ window.MetaCall = (function () {
       const treffer = list.filter(d => d.name.toLowerCase().includes(trimmed.toLowerCase()));
       _setzeMyDeckStatus(treffer.length > 0
         ? `„${trimmed}" ist noch kein vollständiger Deckname. Gemeint: ${treffer.slice(0, 3).map(d => d.name).join(', ')}${treffer.length > 3 ? ' …' : ''}`
-        : `„${trimmed}" steht nicht im prognostizierten Meta — dort stehen ${zahlLokal(list.length)} Decks. Nur diese lassen sich wählen.`);
+        : `„${trimmed}" steht nicht im Meta der Prediction — dort stehen ${zahlLokal(list.length)} Decks. Nur diese lassen sich wählen.`);
     }
   }
 
@@ -16735,7 +16735,7 @@ window.MetaCall = (function () {
           const modeTag = h.predictorMode === 'B' ? 'B' : 'A';
           return `<li class="mc-scenario-hist-row">
             <span class="mc-scenario-hist-date">${dt}</span>
-            <span class="mc-scenario-hist-mode" title="Predictor mode">${modeTag}</span>
+            <span class="mc-scenario-hist-mode" title="Prediction mode">${modeTag}</span>
             <span class="mc-scenario-hist-top">${top3 || '—'}</span>
           </li>`;
         }).join('');

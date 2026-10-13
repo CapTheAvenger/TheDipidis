@@ -63,7 +63,7 @@ function fensterBlock() {
 
 
 describe('Online-Fenster (14 Tage) im Meta Call', () => {
-    it('§1b liest das Fenster und ersetzt den Ladder-Anteil', () => {
+    it('§1b liest das Fenster und ersetzt den Ladder-Share', () => {
       assert.ok(QUELLE.includes('limitless_online_fenster.csv'),
         'die Fensterdatei wird nicht geladen');
       assert.ok(QUELLE.includes('limitless_online_fenster_meta.json'),
@@ -102,13 +102,13 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
         'die Warnung sagt nicht, worauf zurueckgefallen wird');
     });
 
-    it('die Siegquote wird NICHT aus dem Fenster genommen', () => {
+    it('die Win Rate wird NICHT aus dem Fenster genommen', () => {
       const block = fensterBlock();
       assert.ok(!/onlineWinPct\s*=/.test(block),
         'onlineWinPct wird im Fensterblock ueberschrieben — aus zwei kumulativen '
         + 'Quoten laesst sich die Fensterquote nicht rekonstruieren');
       assert.ok(block.includes('bleibt deshalb kumulativ'),
-        'der Kommentar erklaert nicht, warum die Siegquote kumulativ bleibt');
+        'der Kommentar erklaert nicht, warum die Win Rate kumulativ bleibt');
     });
 
     it('der Kommentar traegt die gemessene Tabelle und den Grund', () => {
@@ -164,7 +164,7 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
         // Die Zeile muss beide Spalten fuehren — sonst ist die Tabelle
         // halb, und der Leser sieht nur eine Seite des Vergleichs.
         assert.ok(/\d+,\d\d % kumulativ/.test(zeile),
-          `${deck}: die Zeile nennt keinen kumulativen Anteil — ${zeile.trim()}`);
+          `${deck}: die Zeile nennt keinen kumulativen Share — ${zeile.trim()}`);
         assert.ok(/\d+,\d\d % im Fenster/.test(zeile),
           `${deck}: die Zeile nennt keinen Fensteranteil — ${zeile.trim()}`);
       }
@@ -192,11 +192,11 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
       });
       assert.ok(belege.length > 0,
         'kein einziges Deck liegt im Fenster deutlich unter seinem kumulativen '
-        + 'Anteil — dann traegt der ganze Abschnitt nicht mehr, und der Kommentar '
+        + 'Share — dann traegt der ganze Abschnitt nicht mehr, und der Kommentar '
         + 'gehoert neu gemessen');
 
       assert.ok(/ladderPctDamped/.test(block),
-        'der Kommentar nennt nicht, wo der Anteil in die Prognose eingeht');
+        'der Kommentar nennt nicht, wo der Share in die Prediction eingeht');
       assert.ok(block.includes('keine Schaetzung') || block.includes('Subtraktion'),
         'der Kommentar sagt nicht, dass das Fenster gemessen und nicht geschaetzt ist');
     });
@@ -210,7 +210,7 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
         const treffer = (I18N.match(new RegExp("'" + key.replace('.', '\\.') + "'", 'g')) || []).length;
         assert.strictEqual(treffer, 2, `${key} fehlt in einer der beiden Sprachen`);
       }
-      assert.ok(/'mc\.intelOnlineShareFenster':\s*'Online-Anteil \(\{tage\} Tage\)'/.test(I18N),
+      assert.ok(/'mc\.intelOnlineShareFenster':\s*'Online-Share \(\{tage\} Tage\)'/.test(I18N),
         'die deutsche Beschriftung nennt die Tage nicht dynamisch');
     });
 
@@ -328,7 +328,7 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
        denen keines gestiegen war — jeder KONTER dieser drei haette
        einen Aufschlag bekommen. */
     assert.ok(/function _kumulativAnteil\(d\)/.test(QUELLE),
-      'der Helfer fuer den kumulativen Anteil fehlt');
+      'der Helfer fuer den kumulativen Share fehlt');
     assert.ok(QUELLE.includes('_trendSignal(ladderPctKum, majBaselinePct)'),
       'das Major-Trendsignal rechnet Fenster gegen Kumulativ');
     assert.ok(QUELLE.includes('_trendSignal(ladderPctKum, weightedBaselinePct)')
@@ -342,7 +342,7 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
       'ohne Fenster liefert der Helfer nicht denselben Wert wie vorher');
   });
 
-  it('die Trendkachel liest dieselbe Uhr wie der Anteil', () => {
+  it('die Trendkachel liest dieselbe Uhr wie der Share', () => {
     /* BEFUND beim Ansehen der ausgelieferten Seite (05.09.2026): neben
        "Online-Anteil (14 Tage) 6,4 %" stand "Trend (7 Tage) -0,0 %".
        `d.trend` ist die Wochenbewegung des KUMULATIVSTANDS und damit um
@@ -381,10 +381,10 @@ describe('Online-Fenster (14 Tage) im Meta Call', () => {
        Zusage haelt die Trennung fest, damit sie nicht versehentlich
        faellt. */
     assert.ok(/0\.10 \* trendPct/.test(QUELLE),
-      'der Trendterm der Prognose wurde mitgeaendert — das ist eine '
+      'der Trendterm der Prediction wurde mitgeaendert — das ist eine '
       + 'Modelaenderung und braucht ihre eigene Messung');
     const block = fensterBlock();
     assert.ok(!/trendPct/.test(block),
-      '§1b fasst den Prognose-Trendterm an');
+      '§1b fasst den Prediction-Trendterm an');
   });
 });

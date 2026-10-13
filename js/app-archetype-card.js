@@ -951,7 +951,7 @@
        deshalb in die Ueberschrift selbst. */
     function day2Label() {
         const de = isDe();
-        const grund = L('arc.day2Label', de ? 'Day-2-Quote (Major)' : 'Day 2 rate (major)');
+        const grund = L('arc.day2Label', de ? 'Day-2-Conversion (Major)' : 'Day 2 rate (major)');
         const fremd = majorFormatFremd();
         return fremd ? grund.replace(/\)$/, ' · ' + fremd + ')') : grund;
     }
@@ -1092,7 +1092,7 @@
            mehr, als die Rechnung hergibt. */
         const _otherRund = fmtGanz(Math.round((_oFeld.other || 0) / 100) * 100);
         const rep = d
-            ? tileGeteilt('rep', 'neutral', L('arc.repLabel', de ? 'Anteil' : 'Share'),
+            ? tileGeteilt('rep', 'neutral', L('arc.repLabel', de ? 'Share' : 'Share'),
                 `${esc(fmt(d.share))} %`,
                 /* Rechts steht, worauf der Anteil ruht: online die Listen
                    dieses Decks UEBER der Grundgesamtheit des Onlinefeldes,
@@ -1121,7 +1121,7 @@
                    macht (siehe praesenzNote weiter unten). */
                 (_oFeld.listen
                     ? (de
-                        ? 'Anteil am Online-Meta: der Bruch {n} / {g}. Gezählt ist davon nur der Zähler (Spalte count in data/limitless_online_decks.csv). Der Nenner steht in KEINER Spalte — er ist aus den Anteilen derselben Datei HOCHGERECHNET: {s} Listen sind namentlich gelistet und tragen zusammen {a} % der Anteile, den Rest führt Limitless als „Other“. Daraus ≈ {g} Listen{u}. Unter „Other“ liegen danach rund {r} Listen ({g} − {s} = {o}{c}) — auch diese Zahl ist nicht gezählt. NICHT dieselbe Größe wie der Meta-Anteil auf der Startseite: der zählt Antritte an Online-Turnieren aus data/online_tournament_top8_decks.csv. {mj}'
+                        ? 'Share am Online-Meta: der Bruch {n} / {g}. Gezählt ist davon nur der Zähler (Spalte count in data/limitless_online_decks.csv). Der Nenner steht in KEINER Spalte — er ist aus den Shares derselben Datei HOCHGERECHNET: {s} Listen sind namentlich gelistet und tragen zusammen {a} % der Shares, den Rest führt Limitless als „Other“. Daraus ≈ {g} Listen{u}. Unter „Other“ liegen danach rund {r} Listen ({g} − {s} = {o}{c}) — auch diese Zahl ist nicht gezählt. NICHT dieselbe Größe wie der Meta-Share auf der Startseite: der zählt Listen an Online-Turnieren aus data/online_tournament_top8_decks.csv. {mj}'
                         : 'Share of the online field: the fraction {n} / {g}. Only the numerator is counted (column count in data/limitless_online_decks.csv). The base appears in NO column — it is EXTRAPOLATED from the file\u2019s own shares: {s} lists are named and carry {a} % of the shares between them, the remainder is what Limitless groups as \u201cOther\u201d. Hence ≈ {g} lists{u}. \u201cOther\u201d is then about {r} lists ({g} − {s} = {o}{c}) — that figure is not counted either. NOT the same quantity as the meta share on the home page: that one counts entries at online tournaments from data/online_tournament_top8_decks.csv. {mj}')
                         .replace('{u}', _spanneSatz)
                         .replace('{c}', _otherSpanneSatz)
@@ -1131,19 +1131,19 @@
                         .replace('{o}', fmtGanz(_oFeld.other))
                         .replace(/\{g\}/g, fmtGanz(_oFeld.listen))
                     : (de
-                        ? '{n} Listen im Meta online. Die Grundgesamtheit, gegen die Limitless diesen Anteil rechnet, steht nicht in data/limitless_online_decks.csv und ließ sich aus den Anteilen der Datei nicht eingrenzen — deshalb steht hier keine. {mj}'
+                        ? '{n} Listen im Meta online. Die Grundgesamtheit, gegen die Limitless diesen Share rechnet, steht nicht in data/limitless_online_decks.csv und ließ sich aus den Shares der Datei nicht eingrenzen — deshalb steht hier keine. {mj}'
                         : '{n} lists in the online field. The base Limitless computes this share against is not in data/limitless_online_decks.csv and could not be bracketed from the file\u2019s shares — so none is given. {mj}'))
                     .replace('{n}', fmtGanz(d.count))
                     .replace('{mj}', m
                         ? L('arc.repTipMajor', de
-                            ? 'Auf Präsenzturnieren {a} von {g} Antritten.'
+                            ? 'Auf Majors {a} von {g} Listen.'
                             : 'At in-person events {a} of {g} entries.')
                             .replace('{a}', fmtGanz(m.antritte))
                             .replace('{g}', fmtGanz(_majorFeld().antritte))
                         : L('arc.repTipOhne', de
-                            ? 'Für dieses Format gibt es noch kein Präsenzturnier mit diesem Deck.'
+                            ? 'Für dieses Format gibt es noch kein Major mit diesem Deck.'
                             : 'No in-person event with this deck in this format yet.')))
-            : tile('rep', 'tie', L('arc.repLabel', de ? 'Anteil' : 'Share'), '–',
+            : tile('rep', 'tie', L('arc.repLabel', de ? 'Share' : 'Share'), '–',
                 esc(L('arc.noData', de ? 'keine Daten' : 'no data')));
 
         /* ── BEFUND B3 (07.09.2026): EINE DATEI, ZWEI MAJOR-QUOTEN ──
@@ -1240,13 +1240,13 @@
                    Unentschieden. Ohne diesen Satz liest sich das als
                    Leistungseinbruch — und das waere falsch. */
                 L('arc.wrTip2', de
-                    ? 'Siege geteilt durch entschiedene Matches (ohne Unentschieden), auf beiden Seiten gleich gerechnet — so sind Online und Major vergleichbar. Online aus {n} Matches, davon {uo} % unentschieden. {mj}'
+                    ? 'Wins geteilt durch entschiedene Matches (ohne Ties), auf beiden Seiten gleich gerechnet — so sind Online und Major vergleichbar. Online aus {n} Matches, davon {uo} % Ties. {mj}'
                     : 'Wins divided by decided matches (ties left out), same on both sides — so online and major compare. Online from {n} matches, {uo} % of them ties. {mj}')
                     .replace('{n}', fmtGanz(d.partien))
                     .replace('{uo}', fmt(dRemis))
                     .replace('{mj}', (m && m.partien > 0)
                         ? L('arc.wrTipMajor', de
-                            ? 'Major aus {p} Matches, davon {u} % unentschieden. Bei dieser Matchzahl liegt der Wert auf ±{k} Punkte genau.'
+                            ? 'Major aus {p} Matches, davon {u} % Ties. Bei dieser Matchzahl liegt der Wert auf ±{k} Punkte genau.'
                             : 'Major from {p} matches, {u} % of them ties. At this sample the value is accurate to ±{k} points.')
                             .replace('{p}', fmtGanz(m.partien))
                             .replace('{u}', fmt(m.remisQuote))
@@ -1302,7 +1302,7 @@
                „Online Top 8-Quote (Ø 6,6 %)" —, nicht mehr als eigene
                Zeile darunter. */
             ? tile('conv', toneFor(c.perfPct),
-                L('arc.convLabel4', de ? 'Online Top 8-Quote' : 'Online top-8 rate')
+                L('arc.convLabel4', de ? 'Online Top-8-Conversion' : 'Online top-8 rate')
                     + (schnitt != null ? ' (Ø ' + fmt(schnitt) + ' %)' : ''),
                 `${esc(fmt(quote))} %`,
                 '',
@@ -1314,10 +1314,10 @@
                 // wenn man es nicht dazuschreibt — also steht es im Hinweis.
                 (_convGezaehlt
                     ? L('arc.convTip3', de
-                        ? '{t} von {b} Antritten auf Turnieren mit Top-8-Schnitt.'
+                        ? '{t} von {b} Listen auf Turnieren mit Top Cut.'
                         : '{t} of {b} entries at events with a top-8 cut.')
                     : L('arc.convTip2', de
-                        ? '{t} von {b} gewichteten Antritten auf Turnieren mit Top-8-Schnitt.'
+                        ? '{t} von {b} gewichteten Listen auf Turnieren mit Top Cut.'
                         : '{t} of {b} weighted entries at events with a top-8 cut.'))
                     /* fmtGewichtet schreibt ganze Zahlen ohne
                        Nachkomma — gezaehlte Antritte sind ganze
@@ -1325,10 +1325,10 @@
                     .replace('{t}', fmtGewichtet(c.top8))
                     .replace('{b}', fmtGewichtet(c.brought))
                 + (c.thin ? ' ' + L('arc.convThin2', de
-                    ? 'Kleine Stichprobe — die Quote steht auf wenigen Antritten und schwankt stark.'
+                    ? 'Kleine Stichprobe — die Quote steht auf wenigen Listen und schwankt stark.'
                     : 'Small sample — the rate rests on few entries and swings hard.') : ''),
                 arrow(c.perfPct))
-            : tile('conv', 'tie', L('arc.convLabel4', de ? 'Online Top 8-Quote' : 'Online top-8 rate'),
+            : tile('conv', 'tie', L('arc.convLabel4', de ? 'Online Top-8-Conversion' : 'Online top-8 rate'),
                 '–',
                 esc(L('arc.convMissing', de ? 'zu wenig Daten' : 'not enough data')),
                 /* Der Satz zeigt auf die Kachel darueber, und die rechnet
@@ -1370,7 +1370,7 @@
                         .replace('{s}', fmt(feld.day2Quote))
                     : ''),
                 L('arc.day2Tip', de
-                    ? '{d2} von {d1} Antritten haben Day 2 erreicht. Nur Präsenzturniere — online gibt es kein Day 2.'
+                    ? '{d2} von {d1} Listen haben Day 2 erreicht. Nur Majors — online gibt es kein Day 2.'
                     : '{d2} of {d1} entries made Day 2. In-person events only — online has no Day 2.')
                     .replace('{d2}', fmtGanz(m.day2))
                     .replace('{d1}', fmtGanz(m.day1)),
@@ -1379,15 +1379,15 @@
                 day2Label(),
                 '–',
                 esc(m
-                    ? L('arc.day2Duenn', de ? 'zu wenige Antritte' : 'too few entries')
+                    ? L('arc.day2Duenn', de ? 'zu wenige Listen' : 'too few entries')
                     : majorLeer),
                 m
                     ? L('arc.day2DuennTip', de
-                        ? 'Dieses Deck stand mit {d1} Antritten am Start — zu wenige für eine Quote.'
+                        ? 'Dieses Deck stand mit {d1} Listen am Start — zu wenige für eine Quote.'
                         : 'This deck had {d1} entries — too few for a rate.')
                         .replace('{d1}', fmtGanz(m.day1))
                     : L('arc.day2OhneTip', de
-                        ? 'Für dieses Format gibt es noch kein Präsenzturnier mit diesem Deck. Day 2 ist eine reine Präsenzgröße.'
+                        ? 'Für dieses Format gibt es noch kein Major mit diesem Deck. Day 2 ist eine Größe, die es nur vor Ort gibt.'
                         : 'No in-person event with this deck in this format yet. Day 2 is in-person only.'));
 
         /* DER ZEITRAUMSATZ STEHT NICHT MEHR AUF DER KARTE (11.09.2026).
@@ -1515,9 +1515,9 @@
         // DA-47: die Kachel rechnet S / (S + N) aus wins/losses derselben Datei.
         const quoteName = (WK && WK.kurz('ohneUnentschieden'))
             || ((WK && WK.hol('ohneUnentschieden') && WK.hol('ohneUnentschieden').formel)
-                || 'S / (S + N)');
+                || 'W / (W + L)');
         const online = de
-            ? `Anteil, ${quoteName} und Top-8-Quote: data/limitless_online_decks.csv und `
+            ? `Share, ${quoteName} und Top-8-Conversion: data/limitless_online_decks.csv und `
               + 'data/online_tournament_top8_decks.csv — Gesamtstand des Online-Metas, '
               + 'ohne Turnierdatum je Zeile.'
             : `Share, ${quoteName} and top-8 rate: data/limitless_online_decks.csv and `
@@ -1535,7 +1535,7 @@
                   + `${z.turniere} ${z.turniere === 1 ? 'event' : 'events'} ${spanne}.`;
         } else {
             major = de
-                ? 'Für dieses Format liegt kein Präsenzturnier-Auszug vor.'
+                ? 'Für dieses Format liegt kein Major-Auszug vor.'
                 : 'No in-person event extract for this format.';
         }
         const fenster = (variante === 'embed')
@@ -1609,7 +1609,7 @@
                 art: 'fehlt',
                 inhalt: '–',
                 titel: L('arc.muMajorFehlt', de
-                    ? 'Keine Präsenz-Matches für diese Paarung.'
+                    ? 'Keine Matches vor Ort für dieses Matchup.'
                     : 'No in-person matches for this pairing.'),
             };
         }
@@ -1636,7 +1636,7 @@
                 art: 'ohne-bilanz',
                 inhalt: '–',
                 titel: mitQuote(L('arc.muMajorOhneBilanz', de
-                    ? '{n} Präsenz-Matches, aber ohne Bilanz in der Quelle — ohne Siege und Niederlagen lässt sich keine {quote} ({formel}) bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'
+                    ? '{n} Matches vor Ort, aber ohne Bilanz in der Quelle — ohne Wins und Losses lässt sich keine {quote} ({formel}) bilden. Deshalb steht hier ein Strich statt einer geschätzten Zahl.'
                     : '{n} in-person matches, but the source row carries no record — without wins and losses there is no {quote} ({formel}) to show. Hence the dash instead of an estimate.'), 'ohneUnentschieden')
                     .replace('{n}', String(n)) + spiegelSatz,
             };
@@ -1649,10 +1649,10 @@
                 art: 'unter-schwelle',
                 inhalt: esc(bilanz),
                 titel: (de
-                    ? `Bilanz ${bilanz} (W–L–T) aus ${n} Präsenz-Matches. Unter ${MIN_PRAESENZ_PARTIEN} Matches steht hier kein Prozentwert: `
+                    ? `Bilanz ${bilanz} (W-L-T) aus ${n} Matches vor Ort. Unter ${MIN_PRAESENZ_PARTIEN} Matches steht hier kein Prozentwert: `
                       + `bei ${n} Matches verschiebt ein einziges Match die Quote um ${fmt(100 / n)} Punkte. `
                       + `Die Bilanz sagt dasselbe, ohne eine Genauigkeit zu behaupten, die die Stichprobe nicht trägt.`
-                    : `Record ${bilanz} (W–L–T) from ${n} in-person matches. Below ${MIN_PRAESENZ_PARTIEN} matches no percentage is shown: `
+                    : `Record ${bilanz} (W-L-T) from ${n} in-person matches. Below ${MIN_PRAESENZ_PARTIEN} matches no percentage is shown: `
                       + `at ${n} matches a single match moves the rate by ${fmt(100 / n)} points. `
                       + `The record says the same without claiming a precision the sample cannot carry.`)
                     + spiegelSatz,
@@ -1666,7 +1666,7 @@
                 art: 'nur-remis',
                 inhalt: '–',
                 titel: mitQuote(L('arc.muMajorNurRemis', de
-                    ? '{n} Präsenz-Matches, alle unentschieden ({b}). Die {quote} ({formel}) zählt Siege gegen entschiedene Matches — entschieden ist hier keine. Ein Wert stünde für nichts.'
+                    ? '{n} Matches vor Ort, alle Ties ({b}). Die {quote} ({formel}) zählt Wins gegen entschiedene Matches — entschieden ist hier keine. Ein Wert stünde für nichts.'
                     : '{n} in-person matches, all drawn ({b}). The {quote} ({formel}) counts wins against decided matches — none here were decided. A number would stand for nothing.'), 'ohneUnentschieden')
                     .replace('{n}', String(n)).replace('{b}', bilanz) + spiegelSatz,
             };
@@ -1676,7 +1676,7 @@
             art: 'quote',
             inhalt: esc(fmt(m.majorWr)) + ' %',
             titel: L('arc.muMajorTip', de
-                ? '{w} aus {n} Präsenz-Matches (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Siege ÷ entschiedene Matches, mit demselben Ausgleich für dünne Paarungen. Roh {r} %.'
+                ? '{w} aus {n} Matches vor Ort (Bilanz {b}). Dieselbe Rechnung wie die Spalte links: Wins ÷ entschiedene Matches, mit demselben Ausgleich für dünne Matchups. Roh {r} %.'
                 : '{w} from {n} in-person matches (record {b}). Same calculation as the column on the left: wins ÷ decided matches, with the same allowance for thin pairings. Raw {r} %.')
                 .replace('{w}', fmt(m.majorWr) + ' %')
                 .replace('{n}', String(n))
@@ -1718,13 +1718,13 @@
         const de = isDe();
         return hatMajor
             ? mitQuote(L('arc.muLegende', de
-                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden · Major-WR = dieselbe Rechnung auf Präsenzturnieren, Major-Matches die Matches dahinter'
+                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Wins / Losses / Ties · Major-WR = dieselbe Rechnung auf Majors, Major-Matches die Matches dahinter'
                 : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties · Major-WR = the same calculation at in-person events, Major matches the matches behind it'), 'ohneUnentschieden')
             /* Ohne Praesenzdaten sagt EIN Satz, was zwei leere
                Spalten nicht gesagt haetten: dass es sie gibt und
                dass hier keine anfallen. */
             : mitQuote(L('arc.muLegendeOhneMajor', de
-                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Siege / Niederlagen / Unentschieden. Präsenzturniere sind hier nicht dabei — für dieses Deck liegen in diesem Format keine vor.'
+                ? 'WR = {quote} ({formel}) · M = Matches · W/L/T = Wins / Losses / Ties. Majors sind hier nicht dabei — für dieses Deck liegen in diesem Format keine vor.'
                 : 'WR = {quote} ({formel}) · M = matches · W/L/T = wins / losses / ties. In-person events are not included — there are none for this deck in this format.'), 'ohneUnentschieden');
     }
 
@@ -1796,7 +1796,7 @@
                         + (m.wins == null ? '?' : m.wins) + '–' + (m.losses == null ? '?' : m.losses)
                         + '–' + (m.ties == null ? '?' : m.ties)
                         + (de ? ' (roh ' : ' (raw ') + fmt(m.winRateRoh) + ' %'
-                        + (de ? '; Unentschieden zählen nicht mit)' : '; ties are left out)'))
+                        + (de ? '; Ties zählen nicht mit)' : '; ties are left out)'))
                     }">${esc(fmt(m.winRate))} %</td>
                     <td class="arc-mu-n${m.thin ? ' arc-mu-n-low' : ''}">${m.games}</td>
                     <td class="arc-mu-w">${m.wins == null ? '–' : m.wins}</td>
@@ -1826,10 +1826,10 @@
                Arbeitspaket. Zweisprachig inline ueber getLang(), wie es
                das Projekt an Dutzenden Stellen macht. */
             ? `<p class="arc-mu-note arc-mu-note-praesenz">${esc((de
-                ? 'Major-WR: erst ab {n} Präsenz-Matches als Prozentwert. Darunter steht die Bilanz (W–L–T) '
+                ? 'Major-WR: erst ab {n} Matches vor Ort als Prozentwert. Darunter steht die Bilanz (W-L-T) '
                   + 'und daneben die Matchzahl — bei {n} Matches verschiebt ein einziges Match die Quote '
                   + 'schon um {p} Punkte, darunter entsprechend mehr. Betroffen hier: {k} von {g} Zeilen.'
-                : 'Major WR: shown as a percentage only from {n} in-person matches. Below that you get the record (W–L–T) '
+                : 'Major WR: shown as a percentage only from {n} in-person matches. Below that you get the record (W-L-T) '
                   + 'next to the match count — at {n} matches a single match already moves the rate by {p} points, '
                   + 'and more below. Affected here: {k} of {g} rows.')
                 .replace(/\{n\}/g, String(MIN_PRAESENZ_PARTIEN))
@@ -1856,18 +1856,18 @@
                         <!-- T, nicht U. Gemeldet am 01.09.2026: "wenn man bei
                              der Tierliste die Matchups aufklappt, dann auf
                              jeden Fall Win-Loss-Tie nutzen und nicht
-                             Win-Loss-Unentschieden." W und L standen schon
+                             Win-Loss-Ties." W und L standen schon
                              englisch da; ein deutsches U dazwischen war ein
                              Bruch mitten in einer dreispaltigen Bilanz. Die
                              Szene sagt ohnehin Tie. -->
                         <th title="${esc(mitQuote(de
-                            ? 'Unentschieden (Tie) — sie zählen in der {quote} ({formel}) dieser Tabelle nicht mit'
+                            ? 'Ties — sie zählen in der {quote} ({formel}) dieser Tabelle nicht mit'
                             : 'ties — they do not count in this table\'s {quote} ({formel})', 'ohneUnentschieden'))}">T</th>
                         <!-- DIE PRAESENZSPALTE HEISST JETZT AUCH WR, WEIL SIE
                              DASSELBE RECHNET. Bis zum 03.09.2026 hiess sie
                              "Major-P": sie zeigte die Matchpunktquote
-                             (3S+U)/(3M) der Labs-Datei, weil je Paarung keine
-                             Bilanz vorlag und sich ohne die Unentschieden
+                             (3S+U)/(3M) der Labs-Datei, weil je Matchup keine
+                             Bilanz vorlag und sich ohne die Ties
                              nichts umrechnen liess. Zwei Spalten mit
                              demselben Namen und zwei Rechnungen waeren der
                              Fehler gewesen, den diese Seite seit Wochen
@@ -1878,20 +1878,20 @@
                              Gleiches benutzen". Der richtige Weg dorthin war
                              nicht, die Beschriftung zu aendern, sondern die
                              Zahl: der Scraper holt seit PR #639 die Bilanz je
-                             Paarung mit, und die Spalte rechnet nun S/(S+N)
-                             mit demselben 20-Partien-Prior wie links. Gleicher
+                             Matchup mit, und die Spalte rechnet nun W/(W+L)
+                             mit demselben 20-Matches-Prior wie links. Gleicher
                              Name, gleiche Rechnung.
 
                              "Major-Matches" statt "Major-M": ausgeschrieben,
                              wo Platz ist. WR bleibt abgekuerzt, weil es in
                              der Szene der stehende Begriff ist. -->
                         ${!hatMajor ? '' : `                        <th title="${esc(quotenHinweis('ohneUnentschieden') + '  ' + L('arc.colMajorTip', de
-                            ? 'Präsenzturniere: Siege ÷ entschiedene Matches (Unentschieden bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Präsenzturnieren statt online.'
+                            ? 'Majors: Wins ÷ entschiedene Matches (Ties bleiben außen vor) — dieselbe Rechnung und dieselbe Glättung wie die WR-Spalte links, nur auf den Majors statt online.'
                             : 'In-person events: wins ÷ decided matches (ties left out) — the same calculation and the same smoothing as the WR column on the left, just measured at in-person events instead of online.'))}"
                             data-quote-konvention="ohneUnentschieden">${
                             esc(L('arc.colMajor', 'Major-WR') + majorMuFremd())}</th>
                         <th title="${esc(L('arc.colMajorN', de
-                            ? 'Präsenz-Matches dieser Paarung'
+                            ? 'Matches vor Ort dieses Matchups'
                             : 'in-person matches for this pairing'))}">${
                             esc(L('arc.colMajorNKurz', de ? 'Major-Matches' : 'Major matches'))}</th>`}
                     </tr></thead>
@@ -2040,7 +2040,7 @@
            dort steht die Heatmap ohnehin daneben. */
         const metaBtn = `<button type="button" class="arc-meta" data-deck="${esc(name)}"
                     title="${esc(L('arc.gotoMetaCallTip', de
-                        ? 'Im Meta Call öffnen — dort wird jede Paarung dieses Decks mit dem Anteil gewichtet, den du für dein nächstes Turnier erwartest'
+                        ? 'Im Meta Call öffnen — dort wird jedes Matchup dieses Decks mit dem Share gewichtet, den du für dein nächstes Turnier erwartest'
                         : 'Open in the Meta Call — there every pairing of this deck is weighted by the share you expect at your next tournament'))}">
                     ${esc(L('arc.gotoMetaCall', de
                         ? 'Gegen das Meta →' : 'Vs. the meta →'))}
@@ -2286,17 +2286,17 @@
             /* Der Hinweis steht VORN, nicht in einer Fussnote: er
                aendert, wie man jede Major-Zahl auf der Seite liest. */
             html += '<p><strong>' + esc(de
-                ? 'Die Präsenzzahlen stammen aus einem anderen Format: ' + fremd + '.'
+                ? 'Die Zahlen vor Ort stammen aus einem anderen Format: ' + fremd + '.'
                 : 'The in-person figures come from a different format: ' + fremd + '.')
                 + '</strong> ' + esc(de
-                ? 'Online läuft bereits das aktuelle Format. Major-Anteil, Major-WR und Day-2-Quote vergleichen deshalb zwei verschiedene Kartenpools — dort steht der Formatschlüssel jeweils daneben.'
+                ? 'Online läuft bereits das aktuelle Format. Major-Share, Major-WR und Day-2-Conversion vergleichen deshalb zwei verschiedene Kartenpools — dort steht der Formatschlüssel jeweils daneben.'
                 : 'Online already runs the current format. Major share, major WR and the Day 2 rate therefore compare two different card pools — the format key is shown next to each of them.')
                 + '</p>';
         }
         html += '<p>' + esc(zeitraumText()) + '</p>';
         html += '<p>' + esc(legendeText(hatMajor)) + '</p>';
         html += '<p>' + esc(de
-            ? 'Der Knopf „Top ' + MU_VORSCHAU + ' Matchups anzeigen“ zeigt bis zu ' + MU_VORSCHAU + ' Paarungen: hat ein Deck mehr Gegner, je zur Hälfte die mit den meisten Begegnungen über und unter 50 %, danach nach Quote sortiert. Nicht die besten und schlechtesten — eine Paarung, die man zweimal trifft, zählt für die Vorbereitung weniger als eine, die ständig kommt. „Alle" zeigt dann die vollständige Liste.'
+            ? 'Der Knopf „Top ' + MU_VORSCHAU + ' Matchups anzeigen“ zeigt bis zu ' + MU_VORSCHAU + ' Matchups: hat ein Deck mehr Gegner, je zur Hälfte die mit den meisten Matchups über und unter 50 %, danach nach Quote sortiert. Nicht die besten und schlechtesten — ein Matchup, das man zweimal trifft, zählt für die Vorbereitung weniger als eine, die ständig kommt. „Alle" zeigt dann die vollständige Liste.'
             : 'The button “Show top ' + MU_VORSCHAU + ' matchups” shows up to ' + MU_VORSCHAU + ' pairings: if a deck has more opponents, half of them the most-played above 50 %, half the most-played below, then sorted by rate. Not the best and worst — a pairing you meet twice matters less for preparation than one you meet constantly. “All” then shows the full list.')
             + '</p>';
         return html;

@@ -2935,7 +2935,7 @@
                beiden Ausgaengen angehaengt. */
             const druckSatz = (typeof window !== 'undefined' && window._cdbDruckHinweis)
                 ? ((typeof getLang === 'function' && getLang() === 'de')
-                    ? ' \u00b7 Bei aktiver Suche zeigen beide Ansichten alle Drucke, damit die gesuchte Karte nicht wegf\u00e4llt.'
+                    ? ' \u00b7 Bei aktiver Suche zeigen beide Ansichten alle Prints, damit die gesuchte Karte nicht wegf\u00e4llt.'
                     : ' \u00b7 While a search is active both views show every print, so the searched card is not hidden.')
                 : '';
 
@@ -3657,9 +3657,9 @@
                 const obergrenzeMarke = coverageStats.gedeckelt ? '\u2264\u2009' : '';
                 const obergrenzeSatz = coverageStats.gedeckelt
                     ? (_covDe
-                        ? ' · Mehrere Drucke dieser Karte wurden zusammengezählt und ergeben '
+                        ? ' · Mehrere Prints dieser Karte wurden zusammengezählt und ergeben '
                           + 'mehr Decks, als der Archetyp hat: mindestens ein Deck spielt zwei '
-                          + 'Drucke. Angezeigt ist die Obergrenze.'
+                          + 'Prints. Angezeigt ist die Obergrenze.'
                         : ' · Several prints of this card were added up and exceed the '
                           + 'archetype size: at least one deck plays two prints. The value '
                           + 'shown is an upper bound.')
@@ -3698,7 +3698,7 @@
                     </div>
                     <div class="card-database-button-row">
                         ${priceButton}
-                        <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRarityFromCardDbButton(this);}" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}" role="button" tabindex="0" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Open print variants for ${displayName}` : `Drucke von ${displayName} zeigen`}">
+                        <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRarityFromCardDbButton(this);}" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}" role="button" tabindex="0" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Open print variants for ${displayName}` : `Prints von ${displayName} zeigen`}">
                             ${displayRarity}
                         </div>
                     </div>

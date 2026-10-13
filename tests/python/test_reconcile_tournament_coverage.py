@@ -165,3 +165,49 @@ def test_ordinal_date_matches_iso_date(tmp_path):
     _write_labs(d, "TEF-CRI", [("0069", "Special Event Turin", iso, "2032")])
     _write_cards(d, "TEF-CRI", [("540", "Special Event Turin", ordinal)])
     assert rec.find_coverage_gaps(d, grace_days=3) == []
+
+
+# ── Datum ±DATUM_TOLERANZ_TAGE (13.10.2026, Wochenlauf #181) ─────────────────
+#
+# labs fuehrt den ERSTEN Turniertag, die Kartendaten (limitless) bei
+# dreitaegigen Regionals den Samstag. Lauf #181 meldete "Regional
+# Championship Louisville (2026-10-09) is missing", obwohl die Kartenseite
+# dasselbe Turnier als "Regional Lousville, KY – Limitless" (Tippfehler der
+# Quelle) auf dem 10.10. fuehrte. Ein Tag Abstand ist dasselbe Ereignis.
+
+def test_louisville_ein_tag_versetzt_und_vertippt_ist_keine_luecke(tmp_path):
+    d = str(tmp_path)
+    _write_format_window(d, current="30C", oldest="TEF")
+    labs_tag = datetime.utcnow() - timedelta(days=10)
+    _write_labs(d, "TEF-30C", [("0076", "Regional Championship Louisville",
+                                labs_tag.strftime("%Y-%m-%d"), "2927")])
+    _write_cards(d, "TEF-30C", [("581", "Regional Lousville, KY – Limitless",
+                                 (labs_tag + timedelta(days=1)).strftime("%Y-%m-%d"))])
+    assert rec.find_coverage_gaps(d, grace_days=3) == []
+
+
+def test_das_fenster_ist_genau_so_breit_wie_im_scraper(tmp_path):
+    """Verfaelschungsprobe und Kopplung zugleich: ausserhalb des Fensters
+    bleibt es eine Luecke, und das Fenster ist dasselbe wie
+    LABS_ABGLEICH_TAGE im Scraper — zwei verschiedene Fenster wuerden
+    Luecken melden, die der Scraper laengst aufgeloest hat (oder umgekehrt).
+    """
+    hier = os.path.dirname(os.path.abspath(__file__))
+    wurzel = os.path.normpath(os.path.join(hier, "..", ".."))
+    quelle = open(os.path.join(wurzel, "backend", "scrapers", "tournament_scraper_JH.py"),
+                  encoding="utf-8-sig").read()
+    import re as _re
+    m = _re.search(r"^LABS_ABGLEICH_TAGE\s*=\s*(\d+)", quelle, _re.M)
+    assert m, "LABS_ABGLEICH_TAGE fehlt in tournament_scraper_JH.py"
+    assert int(m.group(1)) == rec.DATUM_TOLERANZ_TAGE
+
+    d = str(tmp_path)
+    _write_format_window(d, current="30C", oldest="TEF")
+    labs_tag = datetime.utcnow() - timedelta(days=20)
+    _write_labs(d, "TEF-30C", [("0076", "Regional Championship Louisville",
+                                labs_tag.strftime("%Y-%m-%d"), "2927")])
+    zu_weit = labs_tag + timedelta(days=rec.DATUM_TOLERANZ_TAGE + 1)
+    _write_cards(d, "TEF-30C", [("581", "Regional Louisville, KY – Limitless",
+                                 zu_weit.strftime("%Y-%m-%d"))])
+    gaps = rec.find_coverage_gaps(d, grace_days=3)
+    assert len(gaps) == 1 and "Louisville" in gaps[0]

@@ -49,6 +49,10 @@ COMMA = ","
 
 # Ignore tiny local events that may legitimately live on one surface only.
 MAJOR_MIN_PLAYERS = 200
+# Dasselbe Fenster wie LABS_ABGLEICH_TAGE in tournament_scraper_JH.py
+# (dort begruendet). Hier dupliziert, weil dieses Skript ohne den Scraper
+# laeuft; tests/python/test_reconcile_tournament_coverage.py haelt beide gleich.
+DATUM_TOLERANZ_TAGE = 3
 
 
 class NotChecked(Exception):
@@ -265,7 +269,16 @@ def _gaps_for_pair(fmt, labs_path, cards_path, grace_days, overrides):
 
         flat = _norm_name(name)
         tokens = _token_key(name)
-        same_day = cards_by_date.get(dobj.date(), [])
+        # "Same day" heisst hier: hoechstens DATUM_TOLERANZ_TAGE entfernt.
+        # labs fuehrt den ersten Turniertag, die Kartendaten (limitless) bei
+        # dreitaegigen Regionals den Samstag (Baltimore 18./19.09.2026,
+        # Louisville 09./10.10.2026). Ein Tag Abstand ist deshalb dasselbe
+        # Ereignis, kein Loch — Lauf #181 meldete Louisville als Luecke,
+        # obwohl beide Seiten es hatten.
+        same_day = [
+            e for delta in range(-DATUM_TOLERANZ_TAGE, DATUM_TOLERANZ_TAGE + 1)
+            for e in cards_by_date.get(dobj.date() + timedelta(days=delta), [])
+        ]
 
         # Layer 1 — same date plus a shared city token. This is the one that
         # does the work: the date already pins the event down, and the token

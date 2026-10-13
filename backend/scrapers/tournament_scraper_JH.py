@@ -702,6 +702,7 @@ def _parse_iso_date(date_str: str) -> str:
 
 
 _LABS_ID_LOOKUP_CACHE = None
+_LABS_ID_INDEX_CACHE: Optional[Dict[str, Tuple[str, str]]] = None
 _LABS_ID_OVERRIDES_CACHE = None
 
 
@@ -834,12 +835,18 @@ def _build_labs_id_lookup() -> dict:
     Used by save_csv_files to enrich the overview CSV with the matching
     labs tournament_id so the Meta Call frontend can cross-reference
     cards-CSV rows against labs-CSV rows without re-resolving names at
-    runtime. Cached — labs CSVs don't change mid-scrape."""
-    global _LABS_ID_LOOKUP_CACHE
+    runtime. Cached — labs CSVs don't change mid-scrape.
+
+    Nebenher entsteht ``_LABS_ID_INDEX_CACHE`` fuer den toleranten
+    Abgleich (siehe ``_resolve_labs_tournament_id``): je Turnierkennung
+    Name und Datum. Beide Caches werden zusammen gebaut und zusammen
+    geleert (``_LABS_ID_LOOKUP_CACHE = None``)."""
+    global _LABS_ID_LOOKUP_CACHE, _LABS_ID_INDEX_CACHE
     if _LABS_ID_LOOKUP_CACHE is not None:
         return _LABS_ID_LOOKUP_CACHE
 
     lookup = {}
+    index: Dict[str, Tuple[str, str]] = {}   # labs_tid -> (norm_name, iso_date)
     data_dir = get_data_dir()
     try:
         for fname in os.listdir(data_dir):
@@ -857,14 +864,78 @@ def _build_labs_id_lookup() -> dict:
                         key = (_normalize_tournament_name_for_match(name), _parse_iso_date(date_str))
                         if key not in lookup:
                             lookup[key] = tid
+                        if tid not in index:
+                            index[tid] = key
             except Exception as e:
                 logger.warning(f"[labs-id-lookup] Could not read {fname}: {e}")
     except FileNotFoundError:
         logger.warning("[labs-id-lookup] data dir missing; lookup will be empty")
 
     _LABS_ID_LOOKUP_CACHE = lookup
+    _LABS_ID_INDEX_CACHE = index
     logger.info(f"[labs-id-lookup] indexed {len(lookup)} tournaments")
     return lookup
+
+
+# Toleranz des Abgleichs — gemessen, nicht gegriffen (13.10.2026):
+#   * Datum: labs fuehrt den ERSTEN Turniertag, limitless den Samstag. Bei
+#     dreitaegigen Regionals (Baltimore 18./19.09., Louisville 09./10.10.)
+#     liegt genau ein Tag dazwischen; zwei Tage Reserve fuer ein Turnier,
+#     das eine Quelle auf den letzten Tag legt. Nie mehr als drei — zwei
+#     Majors in derselben Stadt innerhalb von drei Tagen gibt es nicht.
+#   * Name: "Lousville" (limitless, Tippfehler der Quelle) gegen
+#     "Louisville" (labs) hat die Aehnlichkeit 0,947; "Seville" gegen
+#     "Sevilla" 0,857. Zwei verschiedene Staedte desselben Wochenendes
+#     ("frankfurt" / "brisbane", 26.09.2026) liegen bei 0,25.
+LABS_ABGLEICH_TAGE = 3
+LABS_ABGLEICH_AEHNLICHKEIT = 0.8
+
+
+def _labs_namen_aehnlich(a: str, b: str) -> bool:
+    """Zwei normalisierte Turniernamen meinen denselben Ort."""
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    import difflib  # noqa: PLC0415
+    return difflib.SequenceMatcher(None, a, b).ratio() >= LABS_ABGLEICH_AEHNLICHKEIT
+
+
+def _labs_kandidaten_im_fenster(name: str, date_str: str) -> List[Tuple[str, str]]:
+    """[(labs_tid, labs_iso_date)] aller Labs-Turniere, deren Name aehnlich
+    ist und deren Datum hoechstens LABS_ABGLEICH_TAGE entfernt liegt."""
+    norm = _normalize_tournament_name_for_match(name)
+    iso = _parse_iso_date(date_str)
+    if not norm or not re.match(r"^\d{4}-\d{2}-\d{2}$", iso or ""):
+        return []
+    _build_labs_id_lookup()
+    try:
+        soll = datetime.strptime(iso, "%Y-%m-%d")
+    except ValueError:
+        return []
+    treffer: List[Tuple[str, str]] = []
+    for tid, (labs_norm, labs_iso) in (_LABS_ID_INDEX_CACHE or {}).items():
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", labs_iso or ""):
+            continue
+        try:
+            abstand = abs((datetime.strptime(labs_iso, "%Y-%m-%d") - soll).days)
+        except ValueError:
+            continue
+        if abstand > LABS_ABGLEICH_TAGE:
+            continue
+        if _labs_namen_aehnlich(norm, labs_norm):
+            treffer.append((tid, labs_iso))
+    return treffer
+
+
+def _labs_datum_fuer(labs_tid: str) -> str:
+    """Das Datum, unter dem die Labs-Datei dieses Turnier fuehrt ('' wenn
+    unbekannt). Die Decklisten-Datei uebernimmt es, damit beide Dateien
+    dasselbe Ereignis am selben Tag nennen
+    (tests/python/test_per_decklist_datum_override.py)."""
+    _build_labs_id_lookup()
+    eintrag = (_LABS_ID_INDEX_CACHE or {}).get(str(labs_tid or "").strip())
+    return eintrag[1] if eintrag else ""
 
 
 def _resolve_labs_tournament_id(name: str, date_str: str, cards_tid: str = "") -> str:
@@ -872,7 +943,22 @@ def _resolve_labs_tournament_id(name: str, date_str: str, cards_tid: str = "") -
     that corresponds to a limitlesstcg.com tournament (3-digit). Manual
     overrides in labs_tournament_id_overrides.json win over the name-
     based match — they exist precisely because the names diverge.
-    Returns '' if no match — caller writes empty cell."""
+    Returns '' if no match — caller writes empty cell.
+
+    DREI STUFEN (seit 13.10.2026, Wochenlauf #181):
+      1. der hinterlegte Override (cards_tid),
+      2. der exakte Treffer (normalisierter Name, Datum),
+      3. der TOLERANTE Treffer: aehnlicher Name, Datum hoechstens
+         LABS_ABGLEICH_TAGE entfernt — und GENAU EIN Kandidat.
+    Stufe 3 gibt es, weil Stufe 2 bei jedem grossen Regional riss:
+    Baltimore (22.09.2026, "Regional Baltimore, MD" 19.09. gegen
+    "Regional Championship Baltimore" 18.09.) wurde von Hand mit einem
+    Override geheilt — und Louisville (13.10.2026, "Regional Lousville,
+    KY" 10.10. gegen "Regional Championship Louisville" 09.10.) riss
+    an derselben Stelle wieder: 547 Day-2-Listen ohne Kennung, ohne
+    Bilanz, Tor zu, nichts gepusht. Eine Reparatur, die beim naechsten
+    Turnier einen Handgriff braucht, ist keine. Mehrdeutig (zwei
+    Kandidaten) bleibt leer und wird gemeldet — geraten wird nicht."""
     cards_tid = str(cards_tid or "").strip()
     overrides = _load_labs_id_overrides()
     if cards_tid and cards_tid in overrides:
@@ -881,7 +967,19 @@ def _resolve_labs_tournament_id(name: str, date_str: str, cards_tid: str = "") -
         return ""
     lookup = _build_labs_id_lookup()
     key = (_normalize_tournament_name_for_match(name), _parse_iso_date(date_str))
-    return lookup.get(key, "")
+    exakt = lookup.get(key, "")
+    if exakt:
+        return exakt
+    kandidaten = _labs_kandidaten_im_fenster(name, date_str)
+    if len(kandidaten) == 1:
+        tid, labs_iso = kandidaten[0]
+        logger.info("[labs-id-lookup] %r (%s) tolerant aufgeloest: labs %s (%s)",
+                    name, _parse_iso_date(date_str), tid, labs_iso)
+        return tid
+    if len(kandidaten) > 1:
+        logger.warning("[labs-id-lookup] %r (%s) ist mehrdeutig: %s — bleibt leer",
+                       name, _parse_iso_date(date_str), kandidaten)
+    return ""
 
 
 

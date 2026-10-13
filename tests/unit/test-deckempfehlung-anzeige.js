@@ -52,6 +52,13 @@ function laden() {
 const DATEN = JSON.parse(
     fs.readFileSync(path.join(ROOT, 'data', 'deckempfehlung.json'), 'utf8'));
 
+/** Dieselbe Maskierung wie sicher() im Modul — die Karte schreibt so. */
+function maskiert(s) {
+    return String(s === null || s === undefined ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 describe('Deckempfehlung: das Modul laedt und liefert eine Karte', () => {
     it('exportiert genau eine globale Schnittstelle', () => {
         const { modul } = laden();
@@ -64,8 +71,27 @@ describe('Deckempfehlung: das Modul laedt und liefert eine Karte', () => {
     it('rendert die echten Daten aus data/deckempfehlung.json', () => {
         const { modul } = laden();
         const html = modul._baue(DATEN);
-        assert.ok(html.includes(DATEN.empfehlung.deck),
+        // Die Karte schreibt den Namen HTML-sicher (sicher() im Modul).
+        // Wochenlauf #181 (13.10.2026): die Empfehlung kippte auf ein Deck
+        // mit Apostroph ("N's Zoroark"), die Karte schrieb N&#39;s — und
+        // diese Zusicherung suchte den ROHEN Namen. Rot, Tor zu, nichts
+        // gepusht, ohne dass irgendetwas kaputt war. Gesucht wird deshalb
+        // genau das, was die Karte schreibt.
+        assert.ok(html.includes(maskiert(DATEN.empfehlung.deck)),
             'der Name des empfohlenen Decks steht nicht in der Karte');
+    });
+
+    it('ein Deckname mit Apostroph steht HTML-sicher in der Karte', () => {
+        // Verfaelschungsprobe fuer die Zusicherung darueber: mit dem rohen
+        // Namen waere dieser Fall rot, mit dem maskierten ist er gruen —
+        // und die Karte darf den Apostroph weder roh noch gar nicht zeigen.
+        const { modul } = laden();
+        const daten = Object.assign({}, DATEN, {
+            empfehlung: Object.assign({}, DATEN.empfehlung, { deck: "N's Zoroark" }),
+        });
+        const html = modul._baue(daten);
+        assert.ok(html.includes('N&#39;s Zoroark'), 'der Apostroph ist nicht maskiert');
+        assert.ok(!html.includes("N's Zoroark"), 'der rohe Apostroph steht im Markup');
     });
 });
 

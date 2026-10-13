@@ -93,7 +93,7 @@
     },
     "tournament_cards_data_cards_TEF-30C.csv": {
       "min_date": "2026-09-26",
-      "max_date": "2026-10-03"
+      "max_date": "2026-10-10"
     },
     "tournament_cards_data_cards_TEF-CRI.csv": {
       "min_date": "2026-06-06",
@@ -108,6 +108,6 @@
       "max_date": "2026-05-30"
     }
   },
-  "total_rows": 467108,
-  "generated": "2026-10-09T06:31:01.543080"
+  "total_rows": 468588,
+  "generated": "2026-10-13T11:34:12.083241"
 }

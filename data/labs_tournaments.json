@@ -1,5 +1,13 @@
 [
   {
+    "tournament_id": "0076",
+    "tournament_name": "Regional Championship Louisville",
+    "tournament_date": "2026-10-09",
+    "tournament_type": "regional",
+    "country": "US",
+    "total_players": 2918
+  },
+  {
     "tournament_id": "0075",
     "tournament_name": "Regional Championship Recife",
     "tournament_date": "2026-10-03",
@@ -126,13 +134,5 @@
     "tournament_type": "regional",
     "country": "US",
     "total_players": 2734
-  },
-  {
-    "tournament_id": "0076",
-    "tournament_name": "Regional Championship Louisville",
-    "tournament_date": "",
-    "tournament_type": "special",
-    "country": "",
-    "total_players": 0
   }
 ]

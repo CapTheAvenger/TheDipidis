@@ -4,7 +4,7 @@
   "quelle": "play.limitlesstcg.com",
   "quelle_url": "https://play.limitlesstcg.com/tournaments?game=POCKET&format=STANDARD",
   "quelle_hinweis": "Anteil und Siegquote sind gezählt, aus den Standings der Standardturniere auf Limitless. Die Stufe ist UNSERE Regel über diese beiden Zahlen (stufenregel), keine Einschätzung von Limitless. Die Oberfläche muss das anschreiben.",
-  "abgerufen": "2026-10-13T05:37:16+00:00",
+  "abgerufen": "2026-10-13T14:23:10+00:00",
   "fenster": {
    "von": "2026-09-29",
    "bis": "2026-10-13",
@@ -634,72 +634,72 @@
    },
    "pokemon": [
     {
+     "anzahl": 2,
      "name": "Swablu",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "196"
+     "nummer": "196",
+     "set": "B1"
     },
     {
-     "name": "Mega Altaria ex",
      "anzahl": 1,
-     "set": "B1",
-     "nummer": "102"
+     "name": "Mega Altaria ex",
+     "nummer": "102",
+     "set": "B1"
     },
     {
+     "anzahl": 2,
      "name": "Froakie",
-     "anzahl": 2,
-     "set": "A1",
-     "nummer": "087"
+     "nummer": "087",
+     "set": "A1"
     },
     {
+     "anzahl": 2,
      "name": "Greninja",
-     "anzahl": 2,
-     "set": "A1",
-     "nummer": "089"
+     "nummer": "089",
+     "set": "A1"
     },
     {
-     "name": "Chingling",
      "anzahl": 2,
-     "set": "B1",
-     "nummer": "109"
+     "name": "Chingling",
+     "nummer": "109",
+     "set": "B1"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 2,
      "name": "Copycat",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
-     "name": "Cyrus",
      "anzahl": 1,
-     "set": "A2",
-     "nummer": "150"
+     "name": "Cyrus",
+     "nummer": "150",
+     "set": "A2"
     },
     {
+     "anzahl": 2,
      "name": "Poké Ball",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "005"
+     "nummer": "005",
+     "set": "P-A"
     },
     {
+     "anzahl": 2,
      "name": "Rare Candy",
-     "anzahl": 2,
-     "set": "A3",
-     "nummer": "144"
+     "nummer": "144",
+     "set": "A3"
     },
     {
-     "name": "Lucky Egg",
      "anzahl": 2,
-     "set": "B3",
-     "nummer": "148"
+     "name": "Lucky Egg",
+     "nummer": "148",
+     "set": "B3"
     }
    ],
    "energie": [
@@ -946,84 +946,84 @@
    },
    "pokemon": [
     {
+     "anzahl": 2,
      "name": "Swablu",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "196"
+     "nummer": "196",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Mega Altaria ex",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "102"
+     "nummer": "102",
+     "set": "B1"
     },
     {
+     "anzahl": 2,
      "name": "Eevee",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "184"
+     "nummer": "184",
+     "set": "B1"
     },
     {
+     "anzahl": 2,
      "name": "Espeon",
-     "anzahl": 2,
-     "set": "B3a",
-     "nummer": "020"
+     "nummer": "020",
+     "set": "B3a"
     },
     {
+     "anzahl": 2,
      "name": "Darkrai",
-     "anzahl": 2,
-     "set": "B2b",
-     "nummer": "040"
+     "nummer": "040",
+     "set": "B2b"
     },
     {
-     "name": "Igglybuff",
      "anzahl": 1,
-     "set": "A4a",
-     "nummer": "059"
+     "name": "Igglybuff",
+     "nummer": "059",
+     "set": "A4a"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 2,
      "name": "Copycat",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Sabrina",
-     "anzahl": 1,
-     "set": "A1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "A1"
     },
     {
-     "name": "Poké Ball",
      "anzahl": 2,
-     "set": "P-A",
-     "nummer": "005"
+     "name": "Poké Ball",
+     "nummer": "005",
+     "set": "P-A"
     },
     {
+     "anzahl": 1,
      "name": "Field Blower",
-     "anzahl": 1,
-     "set": "B3",
-     "nummer": "147"
+     "nummer": "147",
+     "set": "B3"
     },
     {
+     "anzahl": 1,
      "name": "Small Balloon",
-     "anzahl": 1,
-     "set": "B3b",
-     "nummer": "064"
+     "nummer": "064",
+     "set": "B3b"
     },
     {
-     "name": "Training Area",
      "anzahl": 1,
-     "set": "B2",
-     "nummer": "153"
+     "name": "Training Area",
+     "nummer": "153",
+     "set": "B2"
     }
    ],
    "energie": [
@@ -1177,90 +1177,90 @@
    },
    "pokemon": [
     {
+     "anzahl": 2,
      "name": "Caterpie",
-     "anzahl": 2,
-     "set": "B3b",
-     "nummer": "001"
+     "nummer": "001",
+     "set": "B3b"
     },
     {
+     "anzahl": 2,
      "name": "Metapod",
-     "anzahl": 2,
-     "set": "B3b",
-     "nummer": "002"
+     "nummer": "002",
+     "set": "B3b"
     },
     {
+     "anzahl": 2,
      "name": "Butterfree",
-     "anzahl": 2,
-     "set": "B3b",
-     "nummer": "003"
+     "nummer": "003",
+     "set": "B3b"
     },
     {
+     "anzahl": 1,
      "name": "Treecko",
-     "anzahl": 1,
-     "set": "B3",
-     "nummer": "005"
+     "nummer": "005",
+     "set": "B3"
     },
     {
+     "anzahl": 1,
      "name": "Grovyle",
-     "anzahl": 1,
-     "set": "B3",
-     "nummer": "006"
+     "nummer": "006",
+     "set": "B3"
     },
     {
-     "name": "Mega Sceptile ex",
      "anzahl": 1,
-     "set": "B3",
-     "nummer": "008"
+     "name": "Mega Sceptile ex",
+     "nummer": "008",
+     "set": "B3"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 1,
      "name": "Sabrina",
-     "anzahl": 1,
-     "set": "A1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "A1"
     },
     {
+     "anzahl": 1,
      "name": "Cyrus",
-     "anzahl": 1,
-     "set": "A2",
-     "nummer": "150"
+     "nummer": "150",
+     "set": "A2"
     },
     {
+     "anzahl": 1,
      "name": "Copycat",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Erika",
-     "anzahl": 1,
-     "set": "A1",
-     "nummer": "219"
+     "nummer": "219",
+     "set": "A1"
     },
     {
+     "anzahl": 2,
      "name": "Quick-Grow Extract",
-     "anzahl": 2,
-     "set": "B1a",
-     "nummer": "067"
+     "nummer": "067",
+     "set": "B1a"
     },
     {
-     "name": "Leaf Cape",
      "anzahl": 1,
-     "set": "A3",
-     "nummer": "147"
+     "name": "Leaf Cape",
+     "nummer": "147",
+     "set": "A3"
     },
     {
-     "name": "Fragrant Forest",
      "anzahl": 2,
-     "set": "B3",
-     "nummer": "153"
+     "name": "Fragrant Forest",
+     "nummer": "153",
+     "set": "B3"
     }
    ],
    "energie": [
@@ -1292,78 +1292,78 @@
    },
    "pokemon": [
     {
+     "anzahl": 2,
      "name": "Combee",
-     "anzahl": 2,
-     "set": "B4",
-     "nummer": "010"
+     "nummer": "010",
+     "set": "B4"
     },
     {
+     "anzahl": 2,
      "name": "Vespiquen ex",
-     "anzahl": 2,
-     "set": "B4",
-     "nummer": "011"
+     "nummer": "011",
+     "set": "B4"
     },
     {
+     "anzahl": 2,
      "name": "Shuckle ex",
-     "anzahl": 2,
-     "set": "A4",
-     "nummer": "021"
+     "nummer": "021",
+     "set": "A4"
     },
     {
-     "name": "Teal Mask Ogerpon ex",
      "anzahl": 1,
-     "set": "B2",
-     "nummer": "017"
+     "name": "Teal Mask Ogerpon ex",
+     "nummer": "017",
+     "set": "B2"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 2,
      "name": "Copycat",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Cyrus",
-     "anzahl": 1,
-     "set": "A2",
-     "nummer": "150"
+     "nummer": "150",
+     "set": "A2"
     },
     {
+     "anzahl": 1,
      "name": "Sabrina",
-     "anzahl": 1,
-     "set": "A1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "A1"
     },
     {
+     "anzahl": 2,
      "name": "X Speed",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "002"
+     "nummer": "002",
+     "set": "P-A"
     },
     {
-     "name": "Field Blower",
      "anzahl": 1,
-     "set": "B3",
-     "nummer": "147"
+     "name": "Field Blower",
+     "nummer": "147",
+     "set": "B3"
     },
     {
+     "anzahl": 2,
      "name": "Leaf Cape",
-     "anzahl": 2,
-     "set": "A3",
-     "nummer": "147"
+     "nummer": "147",
+     "set": "A3"
     },
     {
-     "name": "Fragrant Forest",
      "anzahl": 2,
-     "set": "B3",
-     "nummer": "153"
+     "name": "Fragrant Forest",
+     "nummer": "153",
+     "set": "B3"
     }
    ],
    "energie": [
@@ -1619,96 +1619,96 @@
    },
    "pokemon": [
     {
-     "name": "Torchic",
      "anzahl": 2,
-     "set": "B1",
-     "nummer": "033"
+     "name": "Torchic",
+     "nummer": "033",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Combusken",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "034"
+     "nummer": "034",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Mega Blaziken ex",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "036"
+     "nummer": "036",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Froakie",
-     "anzahl": 1,
-     "set": "A1",
-     "nummer": "087"
+     "nummer": "087",
+     "set": "A1"
     },
     {
+     "anzahl": 1,
      "name": "Greninja",
-     "anzahl": 1,
-     "set": "A1",
-     "nummer": "089"
+     "nummer": "089",
+     "set": "A1"
     },
     {
+     "anzahl": 1,
      "name": "Heatmor",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "044"
+     "nummer": "044",
+     "set": "B1"
     },
     {
-     "name": "Castform Sunny Form",
      "anzahl": 1,
-     "set": "B3",
-     "nummer": "024"
+     "name": "Castform Sunny Form",
+     "nummer": "024",
+     "set": "B3"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Copycat",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 1,
      "name": "Juliana",
-     "anzahl": 1,
-     "set": "B3a",
-     "nummer": "071"
+     "nummer": "071",
+     "set": "B3a"
     },
     {
+     "anzahl": 1,
      "name": "Cyrus",
-     "anzahl": 1,
-     "set": "A2",
-     "nummer": "150"
+     "nummer": "150",
+     "set": "A2"
     },
     {
+     "anzahl": 2,
      "name": "Rare Candy",
-     "anzahl": 2,
-     "set": "A3",
-     "nummer": "144"
+     "nummer": "144",
+     "set": "A3"
     },
     {
+     "anzahl": 2,
      "name": "Poké Ball",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "005"
+     "nummer": "005",
+     "set": "P-A"
     },
     {
+     "anzahl": 1,
      "name": "Flame Patch",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "217"
+     "nummer": "217",
+     "set": "B1"
     },
     {
-     "name": "Hiking Trail",
      "anzahl": 1,
-     "set": "B2b",
-     "nummer": "069"
+     "name": "Hiking Trail",
+     "nummer": "069",
+     "set": "B2b"
     }
    ],
    "energie": [
@@ -3614,78 +3614,78 @@
    },
    "pokemon": [
     {
+     "anzahl": 2,
      "name": "Team Rocket's Koffing",
-     "anzahl": 2,
-     "set": "B4a",
-     "nummer": "042"
+     "nummer": "042",
+     "set": "B4a"
     },
     {
+     "anzahl": 2,
      "name": "Team Rocket's Weezing ex",
-     "anzahl": 2,
-     "set": "B4a",
-     "nummer": "043"
+     "nummer": "043",
+     "set": "B4a"
     },
     {
+     "anzahl": 2,
      "name": "Hoopa ex",
-     "anzahl": 2,
-     "set": "B4",
-     "nummer": "103"
+     "nummer": "103",
+     "set": "B4"
     },
     {
-     "name": "Darkrai ex",
      "anzahl": 1,
-     "set": "A2",
-     "nummer": "110"
+     "name": "Darkrai ex",
+     "nummer": "110",
+     "set": "A2"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 2,
      "name": "Cyrus",
-     "anzahl": 2,
-     "set": "A2",
-     "nummer": "150"
+     "nummer": "150",
+     "set": "A2"
     },
     {
+     "anzahl": 1,
      "name": "Copycat",
-     "anzahl": 1,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Pokémon Center Lady",
-     "anzahl": 1,
-     "set": "A2b",
-     "nummer": "070"
+     "nummer": "070",
+     "set": "A2b"
     },
     {
+     "anzahl": 2,
      "name": "Poké Ball",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "005"
+     "nummer": "005",
+     "set": "P-A"
     },
     {
+     "anzahl": 2,
      "name": "Lucky Ice Pop",
-     "anzahl": 2,
-     "set": "B2",
-     "nummer": "145"
+     "nummer": "145",
+     "set": "B2"
     },
     {
-     "name": "X Speed",
      "anzahl": 1,
-     "set": "P-A",
-     "nummer": "002"
+     "name": "X Speed",
+     "nummer": "002",
+     "set": "P-A"
     },
     {
-     "name": "Deceptive Needle",
      "anzahl": 2,
-     "set": "B4",
-     "nummer": "148"
+     "name": "Deceptive Needle",
+     "nummer": "148",
+     "set": "B4"
     }
    ],
    "energie": [
@@ -4594,84 +4594,84 @@
    },
    "pokemon": [
     {
+     "anzahl": 2,
      "name": "Mega Diancie ex",
-     "anzahl": 2,
-     "set": "B3b",
-     "nummer": "032"
+     "nummer": "032",
+     "set": "B3b"
     },
     {
+     "anzahl": 2,
      "name": "Carbink",
-     "anzahl": 2,
-     "set": "B3b",
-     "nummer": "031"
+     "nummer": "031",
+     "set": "B3b"
     },
     {
+     "anzahl": 1,
      "name": "Flutter Mane",
-     "anzahl": 1,
-     "set": "B3b",
-     "nummer": "035"
+     "nummer": "035",
+     "set": "B3b"
     },
     {
-     "name": "Flutter Mane ex",
      "anzahl": 1,
-     "set": "B3a",
-     "nummer": "026"
+     "name": "Flutter Mane ex",
+     "nummer": "026",
+     "set": "B3a"
     }
    ],
    "trainer": [
     {
+     "anzahl": 2,
      "name": "Professor's Research",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "007"
+     "nummer": "007",
+     "set": "P-A"
     },
     {
+     "anzahl": 2,
      "name": "Copycat",
-     "anzahl": 2,
-     "set": "B1",
-     "nummer": "225"
+     "nummer": "225",
+     "set": "B1"
     },
     {
+     "anzahl": 1,
      "name": "Cyrus",
-     "anzahl": 1,
-     "set": "A2",
-     "nummer": "150"
+     "nummer": "150",
+     "set": "A2"
     },
     {
+     "anzahl": 1,
      "name": "Pokémon Center Lady",
-     "anzahl": 1,
-     "set": "A2b",
-     "nummer": "070"
+     "nummer": "070",
+     "set": "A2b"
     },
     {
+     "anzahl": 2,
      "name": "Poké Ball",
-     "anzahl": 2,
-     "set": "P-A",
-     "nummer": "005"
+     "nummer": "005",
+     "set": "P-A"
     },
     {
+     "anzahl": 1,
      "name": "Lucky Ice Pop",
-     "anzahl": 1,
-     "set": "B2",
-     "nummer": "145"
+     "nummer": "145",
+     "set": "B2"
     },
     {
+     "anzahl": 2,
      "name": "Giant Cape",
-     "anzahl": 2,
-     "set": "A2",
-     "nummer": "147"
+     "nummer": "147",
+     "set": "A2"
     },
     {
+     "anzahl": 2,
      "name": "Peculiar Plaza",
-     "anzahl": 2,
-     "set": "B2",
-     "nummer": "155"
+     "nummer": "155",
+     "set": "B2"
     },
     {
-     "name": "Starting Plains",
      "anzahl": 1,
-     "set": "B2",
-     "nummer": "154"
+     "name": "Starting Plains",
+     "nummer": "154",
+     "set": "B2"
     }
    ],
    "energie": [

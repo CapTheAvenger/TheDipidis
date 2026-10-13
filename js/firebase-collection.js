@@ -3054,11 +3054,11 @@ function updateDecksUI(offenHalten) {
             </div>
           </div>
           <div class="deck-action-buttons" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <!-- UI-114 (Hausi, 05.10.2026): drei Hauptaktionen sichtbar (Decklist, Bild,
+            <!-- UI-114 (Hausi, 05.10.2026): drei Hauptaktionen sichtbar (Deckliste, Bild,
                  Proxy), alles andere unter "⋯ Mehr". Post/Post-Seite nur fuer das
                  Betreiber-Konto (dsIstBetreiber). -->
             <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="${getLang()==='de' ? 'Kopieren und Limitless-Deckbuilder öffnen' : 'Copy &amp; open Limitless Builder'}">
-              ${getLang()==='de' ? 'Decklist' : 'Print Decklist'}
+              ${getLang()==='de' ? 'Deckliste' : 'Print Decklist'}
             </button>
             <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" class="deck-action-btn deck-btn-export" title="${getLang()==='de' ? 'Als Bild speichern' : 'Save as image'}">
               ${getLang()==='de' ? 'Bild' : 'Image'}
@@ -5208,9 +5208,9 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
           ? `<img src="${escapeHtmlAttr(img)}" alt="${nm}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:2.5/3.5;object-fit:cover;border-radius:5px;">`
           : `<div style="width:100%;aspect-ratio:2.5/3.5;background:var(--line);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.66em;color: var(--ink-3);padding:4px;text-align:center;line-height:1.15;">${(c.set || c.number) ? `${escapeHtml(c.set || '')} ${escapeHtml(c.number || '')}` : nm}</div>`}
         <div style="position:absolute;top:2px;right:2px;background:${colour};color:#fff;border-radius:999px;min-width:26px;padding:2px 7px;font-weight:800;font-size:0.95em;box-shadow:0 1px 3px rgba(0,0,0,.3);">${c.qty}</div>
-        ${c.byName ? `<div style="position:absolute;top:2px;left:2px;background:#fcf8e3;color:#8a6d3b;border-radius:4px;padding:0 4px;font-size:0.7em;font-weight:800;" title="${de ? 'Nur über den Namen zugeordnet — dieser Druck fehlt in der Kartendatenbank, die Zuordnung ist nicht geprüft.' : 'Matched by name only — this print is missing from the card database, so the match is unverified.'}">⚠</div>` : ''}
+        ${c.byName ? `<div style="position:absolute;top:2px;left:2px;background:#fcf8e3;color:#8a6d3b;border-radius:4px;padding:0 4px;font-size:0.7em;font-weight:800;" title="${de ? 'Nur über den Namen zugeordnet — dieser Print fehlt in der Kartendatenbank, die Zuordnung ist nicht geprüft.' : 'Matched by name only — this print is missing from the card database, so the match is unverified.'}">⚠</div>` : ''}
         <div style="font-weight:600;font-size:0.72em;margin-top:3px;line-height:1.2;" title="${nm}">${nm}</div>
-        ${c.reprintOnly ? `<div style="font-size:0.63em;color:#8a6d3b;">${de ? 'nur anderer Druck' : 'same card, other print'}</div>` : ''}
+        ${c.reprintOnly ? `<div style="font-size:0.63em;color:#8a6d3b;">${de ? 'nur anderer Print' : 'same card, other print'}</div>` : ''}
         ${detail ? `<div style="font-size:0.66em;color: var(--ink-3);">${detail}</div>` : ''}
       </div>`;
   }
@@ -5247,7 +5247,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       </div>` : ''}
     ${anyByName ? `<div style="margin-bottom:12px;font-size:11px;color:#8a6d3b;background:#fcf8e3;border-radius:6px;padding:6px 8px;">
         ⚠ ${de
-          ? 'Karten mit diesem Zeichen wurden nur über den Namen zugeordnet — der Druck fehlt in der Kartendatenbank. Vor dem Umbau kurz selbst prüfen.'
+          ? 'Karten mit diesem Zeichen wurden nur über den Namen zugeordnet — der Print fehlt in der Kartendatenbank. Vor dem Umbau kurz selbst prüfen.'
           : 'Cards marked this way were matched by name only — the print is missing from the card database. Worth checking before you rebuild.'}
       </div>` : ''}
     ${(!swapOut.length && !swapIn.length) ? `<div style="text-align:center;color:var(--tint-ok-ink);font-weight:700;padding:24px 0;">${de ? 'Keine Unterschiede — die Decks sind identisch.' : 'No differences — the decks are identical.'}</div>` : ''}
@@ -5302,12 +5302,12 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional', viewMode) 
       </div>
       <div style="display:${view === 'side' ? 'none' : 'flex'};gap:8px;align-items:center;justify-content:flex-end;margin-bottom:12px;">
         <span style="font-size:12px;color: var(--ink-2);font-weight:700;margin-right:4px;">${de ? 'Vergleichsart:' : 'Compare mode:'}</span>
-        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">${getLang()==='de' ? 'Drucke zusammengefasst (*)' : 'Prints merged (*)'}</button>
-        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">${getLang()==='de' ? 'Genauer Druck' : 'Exact print'}</button>
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">${getLang()==='de' ? 'Prints zusammengefasst (*)' : 'Prints merged (*)'}</button>
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">${getLang()==='de' ? 'Genauer Print' : 'Exact print'}</button>
       </div>
       <div style="margin:-4px 0 12px 0;font-size:12px;color: var(--ink-2);">${view === 'side'
-        ? (de ? 'Jeder Druck (Set + Nummer) steht als eigene Zeile — die Vergleichsart gilt hier nicht.' : 'Every print (set + number) is its own row — the compare mode does not apply here.')
-        : (mode === 'functional' ? (de ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Artwork and set variants of the same card are merged.') : (de ? 'Jeder Druck (Set + Nummer) wird einzeln verglichen.' : 'Each print (set + number) is compared individually.'))}</div>
+        ? (de ? 'Jeder Print (Set + Nummer) steht als eigene Zeile — die Vergleichsart gilt hier nicht.' : 'Every print (set + number) is its own row — the compare mode does not apply here.')
+        : (mode === 'functional' ? (de ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Artwork and set variants of the same card are merged.') : (de ? 'Jeder Print (Set + Nummer) wird einzeln verglichen.' : 'Each print (set + number) is compared individually.'))}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:${view === 'changes' ? '6px' : '15px'};">
         <div style="background:var(--solid-info);color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}<div style="font-size:0.72em;font-weight:600;opacity:.95;">${sizeA === 60 ? '60/60' : `⚠ ${sizeA}/60`}</div></div>
         <div style="background:#764ba2;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameB}<div style="font-size:0.72em;font-weight:600;opacity:.95;">${sizeB === 60 ? '60/60' : `⚠ ${sizeB}/60`}</div></div>

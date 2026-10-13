@@ -163,7 +163,7 @@ describe('B3 — die Fussnote nennt die groessere Ursache, nicht die kleinere', 
         assert.ok(/von der GEWICHTUNG, nicht von der Glättung/.test(text),
             'die Fussnote benennt die kleinere Ursache — genau Befund B3:\n' + text);
         assert.ok(!/GLÄTTUNG: bei so dünnen/.test(text));
-        assert.ok(text.includes('100 bis 1.000 Partien groß'),
+        assert.ok(text.includes('100 bis 1.000 Matches groß'),
             'die Spannweite der Paarungsgroessen fehlt — sie ist die Begruendung:\n' + text);
     });
 

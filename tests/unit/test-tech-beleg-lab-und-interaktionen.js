@@ -152,8 +152,8 @@ describe('Tech Lab: jede Kachel sagt, worauf sie beruht', () => {
     it('ueber dem Gitter stehen Quelle, Version, Stand und die Abdeckung', () => {
         const html = maleGitter([AUS_REGELBASIS]);
         assert.ok(html.includes('tech-lab-beleg-kopf'), 'eigener Kopf ueber der Liste');
-        assert.ok(html.includes('5 Paarungen'),
-            'fuenf Paarungen sind eine Aussage ueber die Abdeckung');
+        assert.ok(html.includes('5 Matchups'),
+            'fuenf Matchups sind eine Aussage ueber die Abdeckung');
     });
 
     it('auch ueber einer leeren Liste steht, WORAUS nichts gefunden wurde', () => {
@@ -219,7 +219,7 @@ describe('Tech Lab: die Herkunft wird beim Einsammeln festgehalten', () => {
         alle.forEach((e, i) => {
             assert.ok(/beleg:\s*'paarung'/.test(e),
                 `Eintrag ${i + 1} ohne Herkunft — die Kachel faellt still auf `
-                + `"unbelegt" zurueck, obwohl eine Paarung dahintersteht:\n${e.slice(0, 300)}`);
+                + `"unbelegt" zurueck, obwohl eine Matchup dahintersteht:\n${e.slice(0, 300)}`);
         });
     });
 
@@ -253,7 +253,7 @@ describe('Tech Lab: der Stand der Regelbasis kommt aus der Datei', () => {
         return { f: new Function('fetch', code)(fetchStub), gerufen };
     }
 
-    it('uebernimmt Version, Datum und Zahl der Paarungen aus der Datei', async () => {
+    it('uebernimmt Version, Datum und Zahl der Matchups aus der Datei', async () => {
         const { f, gerufen } = ladeStandHelfer({
             version: '0.1', generated_at: '2026-05-15', interactions: [1, 2, 3, 4, 5]
         });
@@ -348,7 +348,7 @@ describe('Erkannte Tech-Interaktionen: jede Zeile sagt, worauf sie beruht', () =
         assert.ok(html.includes('uv-tech-beleg uv-tech-beleg-ja'), html);
     });
 
-    it('eine Zeile ohne benannte Paarung wird NICHT zum Beleg erklaert', () => {
+    it('eine Zeile ohne benannte Matchup wird NICHT zum Beleg erklaert', () => {
         const ohne = { narrative: 'Irgendwas', confidence: 'low' };
         const html = maleInteraktionen(daten([ohne]), 'Mega Excadrill', MATCHUPS);
         assert.ok(html.includes('unbelegt'), html);
@@ -365,7 +365,7 @@ describe('Erkannte Tech-Interaktionen: jede Zeile sagt, worauf sie beruht', () =
     it('ueber der Liste stehen Quelle, Version, Stand und die Abdeckung', () => {
         const html = maleInteraktionen(daten([REGELZEILE]), 'Mega Excadrill', MATCHUPS);
         assert.ok(html.includes('uv-tech-beleg-kopf'), html);
-        assert.ok(html.includes('5 Paarungen'), html);
+        assert.ok(html.includes('5 Matchups'), html);
     });
 
     it('ohne gelesene Regelbasis steht "Datum unbekannt"', () => {

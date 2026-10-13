@@ -444,7 +444,7 @@ describe('BELEGTE_FELDER stimmt mit den Dateien ueberein', () => {
 });
 
 // ════════════════════════════════════════════════════════════════════
-describe('dataQuality traegt Piloten und Feldgroesse aus den Labs-Dateien', () => {
+describe('dataQuality traegt Spieler und Feldgroesse aus den Labs-Dateien', () => {
 
     it('holt beide Zahlen — und zwar die aus der Datei, nicht abgeschrieben', async () => {
         // Ein Archetyp, den beide Dateien fuehren; welcher, ist egal.
@@ -571,10 +571,10 @@ describe('dataQuality traegt Piloten und Feldgroesse aus den Labs-Dateien', () =
         const dq = res && res.dataQuality;
         if (!dq || !dq.sufficient || dq.n_piloten === null) return;
         assert.ok(dq.n_lists < dq.n_piloten,
-            `Mega Excadrill: ${dq.n_lists} Listen, ${dq.n_piloten} Piloten — `
-            + 'die Listen koennen die Piloten nicht uebersteigen');
+            `Mega Excadrill: ${dq.n_lists} Listen, ${dq.n_piloten} Spieler — `
+            + 'die Listen koennen die Spieler nicht uebersteigen');
         assert.ok(dq.n_piloten < dq.feldgroesse,
-            'Die Piloten eines Archetyps koennen das Feld nicht uebersteigen');
+            'Die Spieler eines Archetyps koennen das Feld nicht uebersteigen');
     });
 
     it('fehlt die Labs-Zeile, bleibt die Zahl LEER statt geraten', async () => {
@@ -590,7 +590,7 @@ describe('dataQuality traegt Piloten und Feldgroesse aus den Labs-Dateien', () =
             const dq = res && res.dataQuality;
             if (!dq || !dq.sufficient) continue;
             assert.equal(dq.n_piloten, null,
-                `${arch}: hat keine Labs-Zeile, bekommt aber ${dq.n_piloten} Piloten`);
+                `${arch}: hat keine Labs-Zeile, bekommt aber ${dq.n_piloten} Spieler`);
         }
     });
 });
@@ -602,10 +602,10 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {
     const OHNE_P = { n_lists: 8, n_piloten: null, feldgroesse: 797 };
     const NACKT  = { n_lists: 8, n_piloten: null, feldgroesse: null };
 
-    it('nennt Listen, Piloten und Feld — und das Wort Tag 2', () => {
+    it('nennt Listen, Spieler und Feld — und das Wort Tag 2', () => {
         const s = MCB.datenbasisSatz(VOLL, 'de');
         // UI-85 (03.10.2026): nie „Feld" auf der Seite (Hausregel) — die Feldgroesse heisst jetzt „797 Spieler".
-        assert.equal(s, '8 Day-2-Listen von 32 Piloten (797 Spieler)');
+        assert.equal(s, '8 Day-2-Listen von 32 Spielern (797 Spieler im Turnier)');
     });
 
     it('englisch dieselbe Aussage', () => {
@@ -615,8 +615,8 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {
 
     it('ohne Pilotenzahl faellt nur dieser Halbsatz weg', () => {
         const s = MCB.datenbasisSatz(OHNE_P, 'de');
-        assert.equal(s, '8 Day-2-Listen (797 Spieler)');
-        assert.ok(!/Piloten/.test(s), 'erfundene Pilotenzahl im Satz');
+        assert.equal(s, '8 Day-2-Listen (797 Spieler im Turnier)');
+        assert.ok(!/ von \d+ Spielern/.test(s), 'erfundene Spielerzahl im Satz');
     });
 
     it('ohne beide Zahlen bleibt die Listenzahl mit dem Wort Tag 2 — und NICHTS sonst', () => {
@@ -633,7 +633,7 @@ describe('Der Satz an der Zahl — ausgefuehrt auf gesetzten Werten', () => {
 
     it('grosse Zahlen bekommen im Deutschen den Punkt', () => {
         assert.equal(MCB.datenbasisSatz({ n_lists: 675, feldgroesse: 3743 }, 'de'),
-            '675 Day-2-Listen (3.743 Spieler)');
+            '675 Day-2-Listen (3.743 Spieler im Turnier)');
     });
 
     it('der Hinweistext erklaert die Quelle und erfindet nichts', () => {
@@ -687,7 +687,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
         total_weight: 0.4,
     };
 
-    it('der Erfolgs-Hinweis nennt Tag 2, Piloten und Feld', () => {
+    it('der Erfolgs-Hinweis nennt Tag 2, Spieler und Feld', () => {
         /* Geschnitten wird bis EINSCHLIESSLICH des echten
            showToast-Aufrufs. Endete der Schnitt davor und baute der
            Test den Aufruf selbst, koennte jemand die Zeile im
@@ -703,7 +703,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
         f({ MostConsistencyBuilder: MCB }, { dataQuality: DQ, coreThreshold: 0.9 },
           'Mega Excadrill', 60, (t) => { gezeigt = t; });
         assert.equal(gezeigt,
-            '✓ Mega Excadrill: 60/60 Karten · Kernkarten ab 90 % · 8 Day-2-Listen von 32 Piloten (797 Spieler)');   // F2-12 (07.10.2026)
+            '✓ Mega Excadrill: 60/60 Karten · Kernkarten ab 90 % · 8 Day-2-Listen von 32 Spielern (797 Spieler im Turnier)');   // F2-12 (07.10.2026)
         assert.ok(!/\b8 Listen ausgewertet\b/.test(gezeigt),
             'die alte, nackte Formulierung steht wieder da');
     });
@@ -730,7 +730,7 @@ describe('Der Deckbauer zeigt den Satz wirklich an', () => {
                     { n_lists: 8, decision: 'data_ok' }, null,
                     { dataQuality: DQ, coreThreshold: 0.9 });
         assert.ok(r, 'die Qualitaetszeile entsteht gar nicht');
-        assert.ok(r.message.startsWith('Datenbasis: 8 Day-2-Listen von 32 Piloten (797 Spieler)'),
+        assert.ok(r.message.startsWith('Datenbasis: 8 Day-2-Listen von 32 Spielern (797 Spieler im Turnier)'),
             'die Zeile nennt den Nenner nicht: ' + r.message);
         assert.ok(/Day 2/.test(r.hint) && /797/.test(r.hint),
             'der Hinweis erklaert die Quelle nicht: ' + r.hint);
@@ -801,7 +801,7 @@ describe('Die Schnellreferenz ordnet ihre Zahlen ein', () => {
         QR = g._currentMetaQuickRefInternals;
     });
 
-    it('die Major-Kachel sagt Tag 2 und nennt Piloten und Feld', () => {
+    it('die Major-Kachel sagt Tag 2 und nennt Spieler und Feld', () => {
         const e = ERHEBUNG.find(x => x.feld > 0);
         assert.ok(e, 'Vorpruefung: ein Turnier mit Feldgroesse');
         const zeile = PER.find(r => String(r.tournament_id || '').trim() === e.tid
@@ -822,7 +822,7 @@ describe('Die Schnellreferenz ordnet ihre Zahlen ein', () => {
         assert.ok(/Day-2-Liste/.test(html), 'Major-Kachel nennt Tag 2 nicht:\n' + html);
         assert.ok(html.includes(String(soll.n_piloten)),
             `Major-Kachel nennt die Pilotenzahl ${soll.n_piloten} nicht`);
-        assert.ok(/Feld /.test(html), 'Major-Kachel nennt das Feld nicht');
+        assert.ok(/im Turnier/.test(html), 'Major-Kachel nennt das Turnier nicht');
         assert.ok(/title="[^"]*Day 2[^"]*"/.test(html),
             'Major-Kachel erklaert Tag 2 nicht im title');
     });
@@ -856,7 +856,7 @@ describe('Die Schnellreferenz ordnet ihre Zahlen ein', () => {
         }, 'online');
         const sub = html.match(/past-meta-best-sub[^>]*>([^<]*)</)[1];
         assert.ok(/214/.test(sub), 'Online-Kachel nennt die Feldgroesse nicht: ' + sub);
-        assert.ok(/Spielern im Feld/.test(sub), 'Einordnung fehlt: ' + sub);
+        assert.ok(/Spielern im Turnier/.test(sub), 'Einordnung fehlt: ' + sub);
         assert.ok(!/Tag.?2/.test(sub),
             'Online-Kachel behauptet Tag 2 — die Quelle kennt keinen: ' + sub);
     });
@@ -933,7 +933,7 @@ describe('Die Gewichtung gewichtet INNERHALB des Cuts', () => {
         assert.strictEqual(w(37, 143), 0.1);
     });
 
-    it('die Mehrheitsdiagnose zaehlt LISTEN, nie Piloten', async () => {
+    it('die Mehrheitsdiagnose zaehlt LISTEN, nie Spieler', async () => {
         /* Gesetzter Fall: acht Listen wie bei Mega Excadrill. Kaeme in
            plurality_n oder naive_n je eine Zahl heraus, die groesser
            als die Listenzahl ist, wuerde der Text "x/y lists" eine
@@ -1098,7 +1098,7 @@ describe('Die Mehrheitsdiagnose nennt Listen, nicht das Feld', () => {
             assert.ok(!/[Ff]ield plurality/.test(txt),
                 'der Text behauptet eine MEHRHEIT DES FELDES. Gerechnet wird sie '
                 + 'ueber _perListCounts, also ueber die veroeffentlichten '
-                + 'Day-2-Listen — bei Mega Excadrill 8 Listen von 32 Piloten. '
+                + 'Day-2-Listen — bei Mega Excadrill 8 Listen von 32 Spieler. '
                 + 'Text: ' + txt);
             assert.ok(/[Dd]ay-2/.test(txt),
                 'der Text sagt nicht, dass es Day-2-Listen sind: ' + txt);

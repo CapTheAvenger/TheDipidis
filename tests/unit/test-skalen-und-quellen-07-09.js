@@ -348,7 +348,7 @@ describe('B5 — der Rueckfall unter die Mindestzahl ist nicht mehr stumm', () =
     it('der Befund sagt, dass der Bau NICHT aus den Praesenzlisten kommt', () => {
         const f = befundApi('de');
         const b = f({ archetyp: 'X', n_lists: 1, schwelle: 3 });
-        assert.ok(/Präsenz/.test(b.hint),
+        assert.ok(/vor Ort/.test(b.hint),
             'der Hinweis sagt nicht, woher der Bau stattdessen kommt: ' + b.hint);
         const e = befundApi('en')({ archetyp: 'X', n_lists: 1, schwelle: 3 });
         assert.notEqual(e.message, b.message, 'der Befund ist einsprachig');
@@ -554,7 +554,7 @@ function spalte() {
     return m[1];
 }
 
-describe('B2 — die Day-2-Quote nennt Quelle und Mindeststichprobe', () => {
+describe('B2 — die Day-2-Conversion nennt Quelle und Mindeststichprobe', () => {
 
     it('die Spalte, die gelesen wird, steht auch im Text', () => {
         for (const sprache of ['de', 'en']) {

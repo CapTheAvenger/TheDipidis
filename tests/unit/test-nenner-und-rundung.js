@@ -44,7 +44,7 @@ function stueck(quelle, re, was) {
 // Gruppe 5 — der Nenner ist der, den die Ueberschrift nennt
 // ---------------------------------------------------------------------------
 
-describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
+describe('Donut: der Share steht auf dem ganzen Feld', () => {
     // Gemessen am 20.08.2026: der Tooltip teilte durch die Summe der
     // gezeigten zwoelf Segmente. Mega Excadrill las sich als 12,4 %,
     // die Tabelle daneben zeigte 7,75 % — Faktor 1,54. In der City
@@ -226,7 +226,7 @@ describe('Donut: der Anteil steht auf dem ganzen Feld', () => {
                 return { anzahl, anteil: Math.round(anzahl / N * 10000) / 100 };
             });
             assert.strictEqual(fn(zeilen), N,
-                `aus einem Feld von ${N} und dessen eigenen gerundeten Anteilen `
+                `aus einem Feld von ${N} und dessen eigenen gerundeten Shares `
                 + `rechnet die Quelle ${fn(zeilen)} zurueck`);
         }
     });
@@ -383,13 +383,13 @@ describe('Der "Other"-Eimer wird ausgewiesen', () => {
  * seinen Wirt selbst und baut die Knoepfe bei jedem Durchgang neu; ein
  * Verweis ohne Bedienelemente hat nichts zu delegieren. */
 describe('EV-Rechner: die Spalte heisst, was sie zeigt', () => {
-    it('nicht "Anteil am Feld" und nicht "Gewicht hier", sondern "wie oft"', () => {
+    it('nicht "Share am Feld" und nicht "Gewicht hier", sondern "wie oft"', () => {
         /* "Anteil am Feld" war falsch (gerendert wird das normierte
            Gewicht). "Gewicht hier" war richtig, aber niemand wusste, was
            es heisst — Betreiber am 11.09.2026: "Was heisst 'n das Gewicht
            hier? Geht's darum, wie oft man erwartet es zu treffen?" Ja,
            innerhalb dieses Meta-Bildes. Genau das steht jetzt da. */
-        assert.doesNotMatch(MCALL, /'Anteil am Feld'/);
+        assert.doesNotMatch(MCALL, /'Share am Feld'/);
         assert.doesNotMatch(MCALL, /'Gewicht hier'/);
         /* UI-62 (02.10.2026): die Tabelle „Alle Paarungen einzeln" ist
            entfernt (Hausi: ohne Mehrwert); die Spalte „wie oft" gibt es
@@ -419,12 +419,12 @@ describe('EV-Rechner: die Spalte heisst, was sie zeigt', () => {
     });
 });
 
-describe('Meta-Performance: die Spalte "Anteil" nennt beide Herkuenfte', () => {
+describe('Meta-Performance: die Spalte "Share" nennt beide Herkuenfte', () => {
     it('der Glossartext beschreibt nicht mehr nur den Nenner von 7 der 138 Zeilen', () => {
-        assert.doesNotMatch(TIER, /gemessen an allen gewichteten Antritten des Zeitraums/);
-        assert.match(TIER, /Anteil an den gemeldeten Listen der Limitless-Online-Turniere/);
+        assert.doesNotMatch(TIER, /gemessen an allen gewichteten Listen des Zeitraums/);
+        assert.match(TIER, /Share an den gemeldeten Listen der Limitless-Online-Turniere/);
     });
-    it('die Turnier-Anteile sind in der Zelle markiert', () => {
+    it('die Turnier-Shares sind in der Zelle markiert', () => {
         assert.match(TIER, /anteilAusTurnier: !l && !!t/);
         assert.match(TIER, /r\.anteilAusTurnier/);
     });
@@ -456,7 +456,7 @@ describe('Der Meta-Durchschnitt sagt, worauf er steht', () => {
             'dann ist die Bedingung von der Zahl aus unerreichbar');
         // Der Nenner selbst bleibt an der Zahl: er ist die Bezugsgroesse,
         // keine Methodik.
-        assert.match(HUB, /gewichteten Antritten/);
+        assert.match(HUB, /gewichteten Listen/);
         assert.match(HUB, /weighted entries/);
     });
     it('der Kommentar behauptet nicht mehr, roh und geglaettet fielen zusammen', () => {
@@ -526,8 +526,8 @@ describe('Karten im Deck: 60, nicht 124', () => {
     });
 });
 
-describe('Halbe gewichtete Antritte werden als halbe gedruckt', () => {
-    it('fmtHalb existiert und wird fuer Antritte UND Cuts benutzt', () => {
+describe('Halbe gewichtete Listen werden als halbe gedruckt', () => {
+    it('fmtHalb existiert und wird fuer Listen UND Cuts benutzt', () => {
         assert.match(TIER, /const fmtHalb = \(n\) => \{/);
         assert.match(TIER, /k === 'antritte'\) return r\.antritte == null \? '–' : fmtHalb/);
         assert.match(TIER, /k === 'cuts'\)\s+return r\.cuts\s+== null \? '–' : fmtHalb/);
@@ -559,12 +559,12 @@ describe('Halbe gewichtete Antritte werden als halbe gedruckt', () => {
            Recht hat er. Die Gewichtung ist ein Abschlag zugunsten der
            QUOTE — fuer eine Anzahl ist sie sinnlos. Es steht jetzt ein
            Strich, bis die gezaehlte Zahl da ist. */
-        assert.ok(!/Turnier-Antritte \(gewichtet\)/.test(TIER),
+        assert.ok(!/Turnier-Listen \(gewichtet\)/.test(TIER),
             'die gewichtete Summe steht wieder als Anzahl auf dem Schirm, '
             + 'nur mit einem Wort in Klammern davor');
         assert.match(TIER, /broughtAnzeige: hatRoh \? broughtRoh : null/,
             'ohne gezaehlte Zahl faellt die Anzeige wieder auf den gewichteten '
-            + 'Wert zurueck — dann stehen dort wieder 532,5 Antritte');
+            + 'Wert zurueck — dann stehen dort wieder 532,5 Listen');
         assert.match(TIER, /top8Anzeige:\s+hatRoh \? top8Roh\s+: null/,
             'dasselbe fuer die Top-8-Spalte');
         assert.match(TIER, /_antritteRoh = hatRoh/,
@@ -607,14 +607,14 @@ describe('Halbe gewichtete Antritte werden als halbe gedruckt', () => {
 // ---------------------------------------------------------------------------
 
 describe('Glaettung wird benannt', () => {
-    it('der Meta-Durchschnitt steht im Kopf der Top-8-Quote (UI-26, 27.09.2026)', () => {
+    it('der Meta-Durchschnitt steht im Kopf der Top-8-Conversion (UI-26, 27.09.2026)', () => {
         // Bis zum 27.09.2026 stand er an der Spalte „ggü. Schnitt". Hausi:
         // „Online Top 8-Quote (Ø 6,6 %)" statt eines separaten Vergleichswerts.
         // Er darf umziehen, aber nicht gehen.
         assert.match(TIER, /' \(Ø ' \+ fmtPct\(_convSchnitt\.expected \* 100, 1\) \+ '\)'/);
         // Derselbe Schnitt wie auf der Kachel: gezaehlte Zeilen (27.09.2026).
         assert.match(TIER, /computeConversionPerformance\(window\.gezaehlteZeilen\(t8rows\)\.zeilen\)/);
-        assert.match(TIER, /de: 'Online Top 8-Quote' \+ schnittKopf/);
+        assert.match(TIER, /de: 'Online Top-8-Conversion' \+ schnittKopf/);
         assert.match(TIER, /en: 'Online top-8 rate' \+ schnittKopf/);
         assert.doesNotMatch(TIER, /k: 'faktor'/);
     });

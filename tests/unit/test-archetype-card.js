@@ -115,7 +115,7 @@ describe('the card and the panel cannot disagree', () => {
         // „Online Top 8-Quote (Ø 6,3 %)" —, nicht mehr als eigene Zeile.
         const ctx = html.match(/arc-tile--conv[\s\S]*?arc-tile-label">([^<]+)</)[1];
         const schnitt = (conv.expected * 100).toFixed(1).replace('.', ',');
-        assert.equal(ctx.trim(), `Online Top 8-Quote (Ø ${schnitt} %)`);
+        assert.equal(ctx.trim(), `Online Top-8-Conversion (Ø ${schnitt} %)`);
         assert.ok(!/arc-tile--conv[^]*?arc-tile-ctx">[^<]*Schnitt/.test(html.split('arc-tile--day2')[0]),
             'der Schnitt steht wieder als eigene Zeile darunter');
         // Und die Probe: die grosse Zahl geteilt durch diese ergibt
@@ -154,14 +154,14 @@ describe('the card and the panel cannot disagree', () => {
            also nur fuer den, der mit einer Maus darueberfaehrt. Jetzt
            an data-hinweis mit der Sprechblase aus css/components.css,
            die auch auf Fokus anspringt, plus aria-label. */
-        assert.match(kachel, /data-hinweis="56,5 von 472,5 gewichteten Antritten auf Turnieren mit Top-8-Schnitt\./,
-            'Zaehler und Nenner der Cut-Quote stehen nicht an der Kachel');
+        assert.match(kachel, /data-hinweis="56,5 von 472,5 gewichteten Listen auf Turnieren mit Top Cut\./,
+            'Zaehler und Nenner der Top-8-Conversion stehen nicht an der Kachel');
         assert.match(kachel, /tabindex="0"/,
             'der Hinweis ist ohne Maus nicht erreichbar');
         assert.match(kachel, /aria-label="[^"]*56,5 von 472,5/,
             'ein Vorlesegeraet bekommt den Nenner nicht');
         assert.match(kachel, /arc-tile-value">(?:<span[^>]*>[^<]*<\/span>)?12,0 %</,
-            'die Cut-Quote selbst fehlt');
+            'die Top-8-Conversion selbst fehlt');
         // Und die Probe: die Quote folgt aus den beiden Zahlen davor.
         assert.equal((56.5 / 472.5 * 100).toFixed(2), '11.96');
     });

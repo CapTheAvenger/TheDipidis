@@ -481,17 +481,17 @@ test('„my call" steht nur ueber eigenen Schaetzungen', async () => {
         `die Unterschrift behauptet eine eigene Erwartung: ${ohne.caption}`);
 });
 
-test('der Meta Call trennt Modellprognose und bearbeitete Prognose', async () => {
+test('der Meta Call trennt Modellprognose und bearbeitete Prediction', async () => {
     /* „da habe ich dann die Möglichkeit zu wählen zwischen
        Standardprognose oder bearbeiteter Prognose, und dann bei der
        bearbeiteten Prognose werden dann meine gespeicherten Metacalls
        angezeigt." */
     const Q = fenster();
     const k = await Q.kaskade(['metacall']);
-    assert.equal(k.stufen[1].frage, 'Forecast',
-        `die zweite Stufe fragt nicht nach der Prognose: ${k.stufen[1].frage}`);
+    assert.equal(k.stufen[1].frage, 'Prediction',
+        `die zweite Stufe fragt nicht nach der Prediction: ${k.stufen[1].frage}`);
     assert.deepEqual(k.stufen[1].optionen.map((o) => o.id), ['standard', 'eigen'],
-        'die zwei Prognosen stehen nicht zur Wahl');
+        'die zwei Predictions stehen nicht zur Wahl');
 
     /* Bearbeitet -> die gespeicherten Meta Calls, DANN die Scheibe. */
     const e = await Q.kaskade(['metacall', 'eigen']);
@@ -513,7 +513,7 @@ test('der Meta Call trennt Modellprognose und bearbeitete Prognose', async () =>
     const a = await (await Q.kaskade(['metacall', 'standard', 'feld'])).blatt.lade();
     const b = await (await Q.kaskade(['metacall', 'eigen', '0', 'feld'])).blatt.lade();
     assert.notEqual(a.zeilen, b.zeilen,
-        'Modellprognose und bearbeitete Prognose liefern dieselben Zeilen');
+        'Modellprognose und bearbeitete Prediction liefern dieselben Zeilen');
 });
 
 test('die Scheibenwahl bietet das Karussell und die einzelnen Features', async () => {

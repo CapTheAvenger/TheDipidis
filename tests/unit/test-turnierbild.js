@@ -92,7 +92,7 @@ describe('Turnierbild: der Kartenschlüssel wird zerlegt', () => {
             { name: "Boss's Orders", set: 'PAL', number: '172' });
     });
 
-    it('ein Schlüssel ohne Druckangabe fällt nicht aus der Liste', () => {
+    it('ein Schlüssel ohne Print-Angabe fällt nicht aus der Liste', () => {
         // Lieber eine Karte ohne Bild als eine Liste mit 58 Karten.
         const r = I.parseKartenSchluessel('Irgendeine Karte');
         assert.equal(r.name, 'Irgendeine Karte');
@@ -496,7 +496,7 @@ describe('Turnierbild: die Matchpunkte', () => {
     const I = ladeShare();
     const r = (...ergebnisse) => ergebnisse.map((result, i) => ({ n: i + 1, result }));
 
-    it('Sieg 3, Unentschieden 1, Niederlage 0', () => {
+    it('Win 3, Tie 1, Loss 0', () => {
         assert.equal(I.matchPunkte(r('win')), 3);
         assert.equal(I.matchPunkte(r('tie')), 1);
         assert.equal(I.matchPunkte(r('loss')), 0);
@@ -550,7 +550,7 @@ describe('Turnierbild: der Day-2-Marker', () => {
 
     it('kein Text verspricht mehr neun Runden', () => {
         assert.ok(!/8-9 Swiss/.test(I18N), 'die Beschreibung nennt noch 8-9 Runden');
-        assert.match(I18N, /8 Swiss-Runden \+ Top-8-Cut/);
+        assert.match(I18N, /8 Swiss-Runden \+ Top Cut \(Top 8\)/);
     });
 });
 
@@ -655,7 +655,7 @@ describe('Turnierbild: keine einzelne Kachel in der letzten Zeile', () => {
  * Runde von Hausis Turnier, statt Zeichenketten zu begutachten.
  */
 
-describe('Turnierbild: ein No-Show zählt als Sieg, aber nicht in die Quote', () => {
+describe('Turnierbild: ein No-Show zählt als Win, aber nicht in die Quote', () => {
     /* Hausis Turnier vom 26.09.2026, in der Reihenfolge, in der es
      * gespielt wurde: acht Runden, davon eine am grünen Tisch. */
     const HAUSI = [
@@ -682,7 +682,7 @@ describe('Turnierbild: ein No-Show zählt als Sieg, aber nicht in die Quote', ()
         assert.equal(I.matchPunkte(spec.rounds), 7);
     });
 
-    it('ein No-Show gibt drei Punkte, wie ein Sieg', () => {
+    it('ein No-Show gibt drei Punkte, wie ein Win', () => {
         const I = ladeShare();
         assert.equal(I.rundenPunkte('win'), 3);
         assert.equal(I.rundenPunkte(I.NO_SHOW), 3);
@@ -690,7 +690,7 @@ describe('Turnierbild: ein No-Show zählt als Sieg, aber nicht in die Quote', ()
         assert.equal(I.rundenPunkte('loss'), 0);
     });
 
-    it('die Siegquote rechnet OHNE den No-Show — in beiden Brüchen', () => {
+    it('die Win Rate rechnet OHNE den No-Show — in beiden Brüchen', () => {
         const I = mitGruppe(HAUSI);
         const spec = I.collectTournamentSpec('Regional', {});
         // DA-47 (05.10.2026): S / (S + N). Ein gespielter Sieg, fuenf
@@ -709,7 +709,7 @@ describe('Turnierbild: ein No-Show zählt als Sieg, aber nicht in die Quote', ()
         assert.ok(Math.abs(spec.winRate - (1 / 6) * 100) < 0.01); // DA-47: S/(S+N)
     });
 
-    it('der Ring ist neutral, nicht rot — rot heißt hier Niederlage', () => {
+    it('der Ring ist neutral, nicht rot — rot heißt hier Loss', () => {
         const I = ladeShare();
         // Der Betreiber hatte rot vorgeschlagen ("vielleicht macht man die
         // Siegerzahl irgendwie rot"). Auf diesem Bild ist rot die
@@ -739,16 +739,16 @@ describe('Turnierbild: ein No-Show zählt als Sieg, aber nicht in die Quote', ()
             WinRateKonvention: {
                 kurz: () => name,
                 kuerzel: () => 'WR*',
-                hol: () => ({ formel: 'S / (S + N + U)' })
+                hol: () => ({ formel: 'W / (W + L + T)' })
             }
         });
-        assert.match(ladeShare(stub('Siegquote inkl. Unentschieden')).noShowHinweis(1),
-            /Siegquote inkl\. Unentschieden/);
+        assert.match(ladeShare(stub('Win Rate inkl. Ties')).noShowHinweis(1),
+            /Win Rate inkl\. Ties/);
         assert.match(ladeShare(stub('ZWERGENQUOTE')).noShowHinweis(1), /ZWERGENQUOTE/,
             'der Satz schreibt den Quotennamen selbst hin statt ihn zu fragen');
     });
 
-    it('No-Show steht ausgeschrieben, weil N in der Formel die Niederlage ist', () => {
+    it('No-Show steht ausgeschrieben, weil N in der Formel die Loss ist', () => {
         // Auf demselben Bild steht S / (S + N + U) — dort ist N die
         // Niederlage. Ein blankes "1 N" im Satz waere zweideutig. Der
         // Quotenname wird hier auf einen N-freien Platzhalter gesetzt,
@@ -781,7 +781,7 @@ describe('Turnierbild: ein No-Show zählt als Sieg, aber nicht in die Quote', ()
         // Die Siegzahl enthaelt ihn; ohne diese Zeile haelt der Leser sie
         // fuer gespielte Siege.
         assert.match(post, /rec\.n \? ' · ' \+ rec\.n \+ '× No-Show' : ''/,
-            'unter ERGEBNIS steht nicht, wie viele Siege am grünen Tisch fielen');
+            'unter ERGEBNIS steht nicht, wie viele Wins am grünen Tisch fielen');
         // Und die Punktelegende darf keine Regel behaupten, die die Summe
         // nicht hergibt — "Sieg 3 · Unentschieden 1" neben einer 7 mit
         // No-Show ist ein falscher Satz.

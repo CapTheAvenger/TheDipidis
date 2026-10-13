@@ -96,7 +96,7 @@
            aendert. Faellt das Modul aus, steht die Formel da statt
            eines Hausnamens. */
         { id: 'rang',    auf: true, nimm: ['div.cm-rangliste-block'],
-          de: ['Meta-Performance', 'Listen, {quote:ohneUnentschieden} und Top-8-Quote je Deck — sortierbar'],
+          de: ['Meta-Performance', 'Listen, {quote:ohneUnentschieden} und Top-8-Conversion je Deck — sortierbar'],
           en: ['Meta performance', 'lists, {quote:ohneUnentschieden} and top-8 rate per deck — sortable'] },
         /* GANZ NACH UNTEN (11.09.2026). Betreiber: „Most played cards
            als letzten Punkt auf die Seite setzen, weil das ist ja mehr
@@ -125,8 +125,8 @@
         var K = window.WinRateKonvention;
         if (K && typeof K.kurz === 'function') return K.kurz(konvention);
         return konvention === 'matchpunkte' ? '(3S + U) / (3n)'
-             : konvention === 'ohneUnentschieden' ? 'S / (S + N)'
-             : 'S / (S + N + U)';
+             : konvention === 'ohneUnentschieden' ? 'W / (W + L)'
+             : 'W / (W + L + T)';
     }
 
     function de() {

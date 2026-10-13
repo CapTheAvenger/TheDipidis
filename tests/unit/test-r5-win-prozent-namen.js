@@ -149,8 +149,8 @@ describe('B1 — die Saetze neben der Spalte tragen denselben Namen wie die Spal
                 + 'Final-Cumulative-Score (Win % × (1 + Day-2-Conversion)).',
             'mc.frozenRecTournHint': '{n} Major-Turniere, Top {archetypes}',
             'mc.frozenColScore': 'Score',
-            'mc.frozenColScoreHint': 'Score = Siege je Match × (1 + Day-2-Conversion).',
-            'mc.frozenColWinPct': 'Siege je Match',
+            'mc.frozenColScoreHint': 'Score = Wins je Match × (1 + Day-2-Conversion).',
+            'mc.frozenColWinPct': 'Wins je Match',
             'mc.frozenColDay2Conv': 'Day 2',
             'mc.frozenColPlayers': 'Spieler',
             'mc.recDeck': 'Deck',
@@ -163,8 +163,8 @@ describe('B1 — die Saetze neben der Spalte tragen denselben Namen wie die Spal
         const html = ctx.renderFrozenRecommendationsPanel();
         const name = K.kurz('mitUnentschieden');
         assert.ok(!/Win\s?%/i.test(html), 'die Tabelle nennt weiter Win %:\n' + html);
-        assert.ok(!/Siege\s+je\s+Match/i.test(html),
-            'der zurueckgezogene Hausbegriff „Siege je Match" steht noch da:\n' + html);
+        assert.ok(!/(Siege|Wins)\s+je\s+Match/i.test(html),
+            'der zurueckgezogene Hausbegriff „Wins je Match" steht noch da:\n' + html);
         // Dreimal: Hinweis ueber der Tabelle, Score-Tooltip, Spaltenkopf.
         const treffer = html.split(name).length - 1;
         assert.equal(treffer, 3,
@@ -195,7 +195,7 @@ describe('B1 — der Konventionsname im Predictor-5.3-Tooltip kommt aus dem Modu
             'der deutsche Satz setzt den Modulnamen nicht ein');
         assert.ok(quelle.includes("' + konv + ' convention (' + konvName + ')"),
             'der englische Satz setzt den Modulnamen nicht ein');
-        assert.ok(!quelle.includes("(Siegquote ohne Unentschieden). Nur diese"),
+        assert.ok(!quelle.includes("(Win Rate ohne Ties). Nur diese"),
             'der abgeschriebene Name steht noch im deutschen Satz');
         assert.ok(!quelle.includes("(win share excluding ties). Only that"),
             'der abgeschriebene Name steht noch im englischen Satz');
@@ -307,7 +307,7 @@ function literale(quelltext) {
    kein Konventionsname, sondern ein Kuerzel, das seine Konvention als
    title mitfuehrt (_wrChip, _wrKonventionsTitel), und sie steckt in
    Dutzenden CSS-Klassennamen. */
-const VERBOTEN = /Win\s?%|Win\s?Rate|Win-Rate|Winrate|Siegrate|Siegquote|Siegesquote|Gewinnrate|Erfolgsquote|Siege je Match|Wins per game|Win share/i;
+const VERBOTEN = /Win\s?%|Win\s?Rate|Win-Rate|Winrate|Siegrate|Siegquote|Siegesquote|Gewinnrate|Erfolgsquote|Siege je Match|Wins je Match|Wins per game|Win share/i;
 
 /** i18n-Schluessel wie 'mc.frozenColWinPct' sind kein angezeigter Text. */
 const IST_SCHLUESSEL = /^[a-z][A-Za-z0-9]*\.[A-Za-z0-9_.]+$/;
@@ -325,7 +325,7 @@ const POSITIVLISTE = [
        Ausnahme deckte nichts mehr ab. */
     {
         datei: 'js/app-meta-call.js',
-        beginnt: 'Siegquote ohne Unentschieden',
+        beginnt: 'Win Rate ohne Ties',
         grund: 'Rueckfall neben WinRateKonvention.kurz(ohneUnentschieden): greift '
              + 'nur, wenn das Modul gar nicht geladen ist, und nennt dann genau '
              + 'den Namen, den das Modul vergeben haette.',
@@ -357,7 +357,7 @@ const POSITIVLISTE = [
         beginnt: 'das ist NICHT die Größe',
         grund: 'Abgrenzungssatz unter der Erwartungstabelle „Dein Deck gegen das '
              + 'Meta". Er vergibt keinen Namen, sondern nimmt einen weg: die Quote '
-             + 'darueber rechnet S/(S+N), und der Satz sagt ausdruecklich, dass das '
+             + 'darueber rechnet W/(W+L), und der Satz sagt ausdruecklich, dass das '
              + 'NICHT die Matchpunkte sind, die Limitless „Win %" nennt. Stand bis '
              + 'zum 11.09.2026 in js/ds-ev-rechner.js (entfallen). '
              + 'tests/unit/test-w3-ev-und-abschnitt.js laesst genau EINE solche '

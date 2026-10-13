@@ -99,7 +99,7 @@ describe('Die Zeile sagt, welche Zahl woher kommt', () => {
     })();
 
     it('beide Zahlen stehen mit ihrem Nenner da', () => {
-        assert.ok(/Präsenz \$\{e\.listenMit\}\/\$\{e\.listen\}/.test(stelle),
+        assert.ok(/vor Ort \$\{e\.listenMit\}\/\$\{e\.listen\}/.test(stelle),
             'die Praesenzseite steht nicht mehr als "x von y" da — eine Quote '
             + 'ohne Nenner ist auf dieser Seite der Fehler, aus dem alles folgt');
         assert.ok(/online ~\$\{mit\}\/\$\{onlineListen\}/.test(stelle),

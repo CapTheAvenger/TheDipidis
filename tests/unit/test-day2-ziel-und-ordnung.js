@@ -165,7 +165,7 @@ describe('Befund 3 — das Bild widerspricht der Seite nicht mehr', () => {
             + 'zweimal als nackte Zahl da und laeuft auseinander');
         const m = /const DAY2_MIN_ANTRITTE = (\d+);/.exec(KARTE);
         assert.ok(Number(m[1]) >= 3,
-            `die Schranke steht auf ${m[1]} Antritten — "2 von 3" sind `
+            `die Schranke steht auf ${m[1]} Listen — "2 von 3" sind `
             + '66,7 % und sagen nichts');
 
         // Die Kachel benutzt sie.
@@ -175,7 +175,7 @@ describe('Befund 3 — das Bild widerspricht der Seite nicht mehr', () => {
         const i = KARTE.indexOf('majorDay2:');
         const rumpf = KARTE.slice(i, i + 260);
         assert.match(rumpf, /m\.day1 >= DAY2_MIN_ANTRITTE/,
-            'das Bild bekommt die Day-2-Quote wieder ungefiltert — dann '
+            'das Bild bekommt die Day-2-Conversion wieder ungefiltert — dann '
             + 'druckt es eine Zahl, wo die Seite daneben schweigt');
         assert.match(KARTE, /majorDay2Antritte:/,
             'die Antrittszahl wird nicht mehr ans Bild durchgereicht — dann '
@@ -183,7 +183,7 @@ describe('Befund 3 — das Bild widerspricht der Seite nicht mehr', () => {
     });
 
     it('das Bild trennt "zu wenige" von "keine Daten"', () => {
-        assert.match(BILD, /zu wenige Antritte/,
+        assert.match(BILD, /zu wenige Listen/,
             'das Bild sagt bei kleiner Stichprobe wieder "keine Daten" — das '
             + 'ist etwas anderes als "war dabei, aber zu selten"');
         assert.match(BILD, /majorDay2Antritte/,

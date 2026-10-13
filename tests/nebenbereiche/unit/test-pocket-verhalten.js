@@ -272,13 +272,13 @@ describe('Pocket-Reiter: Zahlen und Regel kommen aus der Datei', () => {
         const u = await gezeichnet(DATEN);
         const h = u.knoten.pocketListe.innerHTML;
         DATEN._meta.stufenregel.filter(r => r.anteil_ab != null).forEach(r => {
-            assert.ok(h.includes(r.stufe + ': Anteil ab ' + prozent(r.anteil_ab)),
+            assert.ok(h.includes(r.stufe + ': Share ab ' + prozent(r.anteil_ab)),
                 'die Regel fuer ' + r.stufe + ' steht nicht so da wie in der Datei');
         });
         const anders = JSON.parse(JSON.stringify(DATEN));
         anders._meta.stufenregel[0].anteil_ab = 0.123;
         const u2 = await gezeichnet(anders);
-        assert.ok(u2.knoten.pocketListe.innerHTML.includes('Anteil ab 12,3 %'),
+        assert.ok(u2.knoten.pocketListe.innerHTML.includes('Share ab 12,3 %'),
             'die Regel im Text folgt der Datei nicht — dann steht sie im Code');
     });
 

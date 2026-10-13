@@ -941,9 +941,9 @@
                              ZUSAGE (nachgetragen am 08.09.2026). Was "WR"
                              heute aufloest, entscheidet nicht dieser
                              Kommentar, sondern das Konventionsmodul:
-                             beide Zahlen dieser Heatmap rechnen S/(S+N),
+                             beide Zahlen dieser Heatmap rechnen W/(W+L),
                              also OHNE_UNENTSCHIEDEN — nachgemessen traf
-                             S/(S+N) alle 1.716 Zeilen von
+                             W/(W+L) alle 1.716 Zeilen von
                              data/limitless_online_decks_matchups.csv auf
                              0,005 Punkte genau, S/(S+N+U) verfehlte sie um
                              bis zu 16,7. Ein Hausname steht in der Legende

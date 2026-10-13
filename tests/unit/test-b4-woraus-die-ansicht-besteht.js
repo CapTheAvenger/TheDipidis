@@ -103,7 +103,7 @@ describe('B4 — die Ansicht sagt, worauf sie beruht', () => {
 
         const satz = k.cityLeagueHerkunftSatz(her, true);
         assert.ok(satz.includes('Einen Turniernamen führt der Datensatz nicht'), satz);
-        assert.ok(satz.includes('Eine Teilnehmerzahl steht ebenfalls nicht darin'),
+        assert.ok(satz.includes('Eine Spielerzahl steht ebenfalls nicht darin'),
             'die fehlende Feldgroesse muss ausdruecklich dastehen:\n' + satz);
         // Und keine erfundene Zahl: was nicht gelesen wurde, steht nicht da.
         assert.equal(/\b2[.,]?7\d\d\b/.test(satz), false,

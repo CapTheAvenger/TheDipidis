@@ -183,7 +183,7 @@ function ohneKommentare(q) {
    nicht vorkam. „WR" steht bewusst NICHT darin: das Kuerzel ist
    zulaessig, solange sein Hinweis danebenhaengt, und dafuer gibt es
    Pruefung 2. */
-const VERBOTEN = /Win\s?%|Win\s?Rate|Win-Rate|Winrate|Siegrate|Siegquote|Siegesquote|Gewinnrate|Erfolgsquote|Siege je Match|Wins per game|Win share|Matchup-Win/i;
+const VERBOTEN = /Win\s?%|Win\s?Rate|Win-Rate|Winrate|Siegrate|Siegquote|Siegesquote|Gewinnrate|Erfolgsquote|Siege je Match|Wins je Match|Wins per game|Win share|Matchup-Win/i;
 
 /** i18n-Schluessel wie 'mc.frozenColWinPct' sind kein angezeigter Text. */
 const IST_SCHLUESSEL = /^[a-z][A-Za-z0-9]*\.[A-Za-z0-9_.]+$/;
@@ -199,7 +199,7 @@ const POSITIVLISTE = [
        naechsten Fund — deshalb geloescht statt stehengelassen. */
     {
         datei: 'js/app-meta-call.js',
-        beginnt: 'Siegquote ohne Unentschieden',
+        beginnt: 'Win Rate ohne Ties',
         grund: 'Rueckfall neben WinRateKonvention.kurz("ohneUnentschieden") im '
              + 'Predictor-5.3-Hinweis: greift nur, wenn das Modul gar nicht geladen '
              + 'ist, und nennt dann genau den Namen, den das Modul vergeben haette.',
@@ -232,7 +232,7 @@ const POSITIVLISTE = [
         beginnt: 'das ist NICHT die Größe',
         grund: 'Abgrenzungssatz unter der Erwartungstabelle „Dein Deck gegen das '
              + 'Meta". Er vergibt keinen Hausnamen, sondern nimmt einen weg: die '
-             + 'Quote darueber rechnet S/(S+N) (WinRateKonvention ohneUnentschieden), '
+             + 'Quote darueber rechnet W/(W+L) (WinRateKonvention ohneUnentschieden), '
              + 'und der Satz grenzt sie ausdruecklich gegen die Matchpunkte ab, die '
              + 'Limitless „Win %" nennt. Stand bis zum 11.09.2026 in '
              + 'js/ds-ev-rechner.js, das mit dem Umzug der Rechnung in den Meta Call '
@@ -399,8 +399,8 @@ const FENSTER = 600;
 const REGISTER = [
     { datei: 'js/app-meta-call.js', schluessel: 'mc.reasonWr',
       konvention: 'mitUnentschieden', marken: ['_wrKurzform'],
-      grund: '_topMatchupsVsField legt wr = m.pWin ab, den Anteil an allen Partien. '
-           + 'Dasselbe Kuerzel steht ein Panel weiter auf S/(S+N) — deshalb der '
+      grund: '_topMatchupsVsField legt wr = m.pWin ab, den Share an allen Partien. '
+           + 'Dasselbe Kuerzel steht ein Panel weiter auf W/(W+L) — deshalb der '
            + 'title an genau dieser Zeile.' },
 
     { datei: 'js/app-meta-call.js', schluessel: 'mc.d2WrLabel',
@@ -427,7 +427,7 @@ const REGISTER = [
     { datei: 'js/app-meta-call.js', schluessel: 'mc.day1WinRate',
       konvention: 'mitUnentschieden', marken: ['_wrKurzform'],
       grund: 'Dieselbe Groesse auf dem Day-2-Bild. Unter der Kachel steht dort eine '
-           + 'Matchup-Spalte mit S/(S+N) — die Legende im Fuss nennt beide.' },
+           + 'Matchup-Spalte mit W/(W+L) — die Legende im Fuss nennt beide.' },
 
     { datei: 'js/app-meta-call.js', schluessel: 'mc.tipReasonWr',
       konvention: 'mitUnentschieden', marken: ['_wrVollname'],
@@ -468,7 +468,7 @@ const REGISTER = [
       konvention: 'ohneUnentschieden', marken: ['_konvName'],
       grund: 'Nur der Platzhalter {wr} traegt den Hausnamen. Der Wert ist g.quote aus '
            + 'js/tech-ideen.js, also die Spalte win_rate von '
-           + 'data/limitless_online_decks_matchups.csv = S/(S+N). Der Name steht '
+           + 'data/limitless_online_decks_matchups.csv = W/(W+L). Der Name steht '
            + 'einmal am Ende der Aufzaehlung, die Formel als title am Absatz.' },
 ];
 
@@ -633,17 +633,17 @@ const VERTRAEGE = [
 
     { datei: 'js/app-meta-call.js',
       was: 'genau EIN geteiltes Bild kommt ohne Konventionslegende aus (das Feldbild '
-         + 'zeigt Anteile und Listenzahlen, keine Quote)',
+         + 'zeigt Shares und Listenzahlen, keine Quote)',
       zaehle: '_paintFooter(ctx, W, H);', anzahl: 1 },
     { datei: 'js/app-meta-call.js',
       was: 'die beiden Bilder MIT Quote tragen eine Legende',
       zaehle: '_paintFooter(ctx, W, H, _wrLegende([', anzahl: 2 },
     { datei: 'js/app-meta-call.js',
       was: 'die Legende des Feld+Empfehlungs-Bildes nennt fuer „Ø WR" die Konvention, '
-         + 'die dort gerechnet wird (DA-49, 05.10.2026: avgWR = S/(S+N) der erwarteten Bilanz)',
+         + 'die dort gerechnet wird (DA-49, 05.10.2026: avgWR = W/(W+L) der erwarteten Bilanz)',
       muster: /\{ was: _wrKurzform\(t\('mc\.recAvgWr'\)\), konvention: 'ohneUnentschieden' \}/ },
     { datei: 'js/app-meta-call.js',
-      was: 'und die des Day-2-Bildes fuer die grosse Kachel dieselbe (DA-49: S/(S+N), wie die Seite)',
+      was: 'und die des Day-2-Bildes fuer die grosse Kachel dieselbe (DA-49: W/(W+L), wie die Seite)',
       muster: /\{ was: _wrKurzform\(t\('mc\.day1WinRate'\)\), konvention: 'ohneUnentschieden' \}/ },
     { datei: 'js/app-meta-call.js',
       was: 'die Legende des Day-2-Bildes nennt BEIDE Konventionen, die darauf stehen',

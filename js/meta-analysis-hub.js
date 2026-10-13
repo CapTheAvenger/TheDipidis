@@ -40,9 +40,9 @@
         // fall back to English defaults if the key is missing.
         const fallbacks = {
             cityLeague: ['Was in Japan gerade gespielt wird — der früheste Indikator.'],
-            cityLeagueAnalysis: ['Ein japanisches Deck von innen: Karten, Anteile, Matchups.'],
+            cityLeagueAnalysis: ['Ein japanisches Deck von innen: Karten, Shares, Matchups.'],
             currentMeta: ['Was online und auf Majors gespielt wird.'],
-            currentMetaAnalysis: ['Ein globales Deck von innen: Karten, Anteile, Matchups.'],
+            currentMetaAnalysis: ['Ein globales Deck von innen: Karten, Shares, Matchups.'],
             pastMeta: ['Abgeschlossene Formate, eingefroren — zum Vergleichen.'],
             metaCall: ['Was auf deinem nächsten Turnier stehen wird.'],
         };
@@ -407,12 +407,12 @@
            der Leser soll es wissen koennen. */
         const gew = model.hatRoh
             ? (de
-                ? 'Quote, Anteil und Vergleich sind aus gezählten Starts gerechnet — '
+                ? 'Quote, Share und Vergleich sind aus gezählten Starts gerechnet — '
                   + 'aus denselben Zahlen, die daneben stehen. Nachrechenbar.'
                 : 'Rate, share and comparison come from counted entries — the same '
                   + 'numbers shown beside them. You can check the arithmetic.')
             : (de
-                ? 'Quote, Anteil und Vergleich sind nach Aktualität gewichtet: '
+                ? 'Quote, Share und Vergleich sind nach Aktualität gewichtet: '
                   + 'Turniere der letzten sieben Tage zählen voll, ältere halb. '
                   + 'Deshalb kommen halbe Werte vor.'
                 : 'Rate, share and comparison are weighted by recency: tournaments '
@@ -428,10 +428,10 @@
         const duenn = Number.isFinite(best.brought) && best.brought < UNSICHER_UNTER;
         const nTxt = Number.isFinite(best.brought) ? Math.round(best.brought).toLocaleString(de ? 'de-DE' : 'en-US') : '';
         return de
-            ? `<strong>${escapeHtml(best.name)}</strong> hat gerade die höchste Top-8-Quote: `
+            ? `<strong>${escapeHtml(best.name)}</strong> hat gerade die höchste Top-8-Conversion: `
               + `${q} gegen ${schnitt} im Schnitt — `
               + `rund ${fak}-mal so oft.`
-              + (duenn ? ` Aus nur ${nTxt} Antritten — die Reihenfolge an der Spitze ist unsicher.` : '')
+              + (duenn ? ` Aus nur ${nTxt} Listen — die Reihenfolge an der Spitze ist unsicher.` : '')
             : `<strong>${escapeHtml(best.name)}</strong> has the highest top-8 rate right now: `
               + `${q} against ${schnitt} on average — `
               + `about ${fak}× as often.`
@@ -462,10 +462,10 @@
         if (roh) {
             const gesamt = Math.round(model.totalBrought).toLocaleString(loc);
             if (!best) {
-                return de ? `Aus ${gesamt} Antritten.` : `Out of ${gesamt} entries.`;
+                return de ? `Aus ${gesamt} Listen.` : `Out of ${gesamt} entries.`;
             }
             return de
-                ? `Aus ${gesamt} Antritten · ${escapeHtml(best.name)}: `
+                ? `Aus ${gesamt} Listen · ${escapeHtml(best.name)}: `
                   + `${zahl(best.top8)} von ${zahl(best.brought)} in die Top 8.`
                 : `Out of ${gesamt} entries · ${escapeHtml(best.name)}: `
                   + `${zahl(best.top8)} of ${zahl(best.brought)} made top 8.`;
@@ -477,17 +477,17 @@
            nicht zurueck. */
         const gesamt = Math.round(model.totalBrought).toLocaleString(loc);
         if (!best) {
-            return de ? `Aus ${gesamt} gewichteten Antritten.`
+            return de ? `Aus ${gesamt} gewichteten Listen.`
                       : `Out of ${gesamt} weighted entries.`;
         }
         const hinweis = de
-            ? 'Antritte sind nach Aktualität gewichtet; deshalb kommen halbe Werte vor.'
+            ? 'Listen sind nach Aktualität gewichtet; deshalb kommen halbe Werte vor.'
             : 'Entries are weighted by recency, so half values occur.';
         const mit = (v) => (Number.isInteger(Number(v))
             ? zahl(v)
             : `<span class="mah-gewichtet" title="${escapeHtml(hinweis)}">${zahl(v)}</span>`);
         return de
-            ? `Aus ${gesamt} gewichteten Antritten · ${escapeHtml(best.name)}: `
+            ? `Aus ${gesamt} gewichteten Listen · ${escapeHtml(best.name)}: `
               + `${mit(best.top8)} von ${mit(best.brought)} in die Top 8.`
             : `Out of ${gesamt} weighted entries · ${escapeHtml(best.name)}: `
               + `${mit(best.top8)} of ${mit(best.brought)} made top 8.`;
@@ -574,7 +574,7 @@
             // Kontext. Auf der Best-Kachel wird der Anteil deshalb ausdrücklich
             // als "Meta-Anteil" benannt, statt nur "des Metas" (F05).
             const anteilWort = d.role === 'best'
-                ? (de ? 'Meta-Anteil' : 'field share')
+                ? (de ? 'Meta-Share' : 'field share')
                 : (de ? 'des Metas' : 'of the field');
             /* BEFUND B1 (07.09.2026): WOVON IST DAS DER ANTEIL?
                Hier stand "Meta-Anteil · aus 1.201 Antritten" — die
@@ -596,13 +596,13 @@
             const ausLimitless = Number.isFinite(d.limitlessAntritte) && model.limitlessGesamt > 0;
             const anteilBezug = ausLimitless
                 ? (de
-                    ? `${Math.round(d.limitlessAntritte).toLocaleString(loc)} von ${Math.round(model.limitlessGesamt).toLocaleString(loc)} Online-Antritten (Limitless)`
+                    ? `${Math.round(d.limitlessAntritte).toLocaleString(loc)} von ${Math.round(model.limitlessGesamt).toLocaleString(loc)} Online-Listen (Limitless)`
                     : `${Math.round(d.limitlessAntritte).toLocaleString(loc)} of ${Math.round(model.limitlessGesamt).toLocaleString(loc)} online entries (Limitless)`)
                 : (de
-                    ? `${antritte} von ${gesamtAntritte} Antritten`
+                    ? `${antritte} von ${gesamtAntritte} Listen`
                     : `${antritte} of ${gesamtAntritte} entries`);
             const top8Bezug = ausLimitless
-                ? (de ? ` (${antritte} Turnier-Antritte)` : ` (${antritte} tournament entries)`)
+                ? (de ? ` (${antritte} Turnier-Listen)` : ` (${antritte} tournament entries)`)
                 : '';
             return `
                 <div class="ds-stat${cls}">
@@ -610,7 +610,7 @@
                     <span class="ds-stat-label">${escapeHtml(d.name)}</span>
                     <span class="ds-stat-value">${fmtPct(d.sharePct)}</span>
                     <span class="ds-stat-context">${anteilWort} · ${anteilBezug}<br>${
-                        de ? 'Top-8-Quote' : 'top-8 rate'} ${fmtPct(d.convPct)}${top8Bezug}${
+                        de ? 'Top-8-Conversion' : 'top-8 rate'} ${fmtPct(d.convPct)}${top8Bezug}${
                         verglichen ? ` · ${verglichen}` : ''}</span>
                 </div>`;
         };
@@ -626,7 +626,7 @@
                 <p class="meta-hub-answer-line">${answerSentence(model)}</p>
                 <div class="ds-stat-row">${model.top.map(tile).join('')}</div>
                 <!-- Bis zum 30.08.2026 stand hier eine sechszeilige
-                     Fussnote: Definition von Anteil, von Top-8-Quote, die
+                     Fussnote: Definition von Share, von Top-8-Conversion, die
                      Herleitung des Vergleichswerts, der Hinweis auf die
                      Glaettung und die Quelle. Alles richtig, alles
                      ungelesen — direkt unter der ersten Zahl, die jemand

@@ -228,7 +228,7 @@ describe('A-F4.7 — die Kacheln sagen, welchen Zeitraum sie zeigen', () => {
         const w = ladeKarte(ohneMajor);
         const wirt = { innerHTML: '' };
         await w.renderArchetypeCardInto(wirt, 'Dragapult');
-        assert.match(wirt.innerHTML, /kein Präsenzturnier-Auszug/,
+        assert.match(wirt.innerHTML, /kein Major-Auszug/,
             'ohne Auszug muss das dastehen, nicht ein leeres Datum');
         assert.doesNotMatch(wirt.innerHTML, /vom\s+bis/);
     });
@@ -250,18 +250,18 @@ describe('A-F4.7 — die Kacheln sagen, welchen Zeitraum sie zeigen', () => {
         const wirt = { innerHTML: '' };
         await w.renderArchetypeCardInto(wirt, 'Dragapult');
         const h = wirt.innerHTML;
-        assert.match(h, /7,6 %/, 'Anteil online');
-        assert.match(h, /52,6 %/, 'Win-Rate online, S/(S+N)');
+        assert.match(h, /7,6 %/, 'Share online');
+        assert.match(h, /52,6 %/, 'Win-Rate online, W/(W+L)');
         // DA-34: Major ebenso S/(S+N) = (553+100)/(553+601+100+100) = 48,2 %,
         // nicht mehr S/(S+N+U) = 653/1526 = 42,8 %.
-        assert.match(h, /48,2 %/, 'Win-Rate Major, S/(S+N)');
-        assert.doesNotMatch(h, /42,8 %/, 'Major wieder mit Unentschieden im Nenner');
+        assert.match(h, /48,2 %/, 'Win-Rate Major, W/(W+L)');
+        assert.doesNotMatch(h, /42,8 %/, 'Major wieder mit Ties im Nenner');
         assert.match(h, /200/, 'Nenner der Online-Win-%');
-        assert.match(h, /10,0 %/, 'Top-8-Quote');
-        assert.match(h, /17,6 %/, 'Anteil Major (Antritte durch Feld ueber beide Turniere)');
-        assert.doesNotMatch(h, /32,3 %/, 'der Anteil ist wieder die Summe der Turnieranteile');
+        assert.match(h, /10,0 %/, 'Top-8-Conversion');
+        assert.match(h, /17,6 %/, 'Share Major (Listen durch Feld ueber beide Turniere)');
+        assert.doesNotMatch(h, /32,3 %/, 'der Share ist wieder die Summe der Turnieranteile');
         const d2 = (22 + 5) / (178 + 50) * 100;
-        assert.match(h, new RegExp(d2.toFixed(1).replace('.', ',') + ' %'), 'Day-2-Quote');
+        assert.match(h, new RegExp(d2.toFixed(1).replace('.', ',') + ' %'), 'Day-2-Conversion');
     });
 
     it('zwei verschiedene Datenfenster ergeben dieselbe Kachel — genau das sagt die Zeile', async () => {
@@ -401,12 +401,12 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {
         assert.doesNotMatch(text, /\d+ Matches \(/);
     });
 
-    it('Matchup vs Top 20: Paarungen UND Partien stehen da', () => {
+    it('Matchup vs Top 20: Matchups UND Partien stehen da', () => {
         const k = kennzahlSandkasten('de');
         // Der Live-Befund lautete "47,05 % (20 MU)" fuer Mega Excadrill;
         // die 10.361 Partien dahinter standen nirgends.
         const text = k._cmMatchupFussnote({ paarungen: 20, partien: 10361, spiegelPartien: 0 });
-        assert.match(text, /20 Paarungen/, 'die Zahl der Paarungen fehlt');
+        assert.match(text, /20 Matchups/, 'die Zahl der Matchups fehlt');
         assert.match(text, /10\.?361 Matches/, 'der Nenner in Partien fehlt');
         assert.match(text, /total_games/, 'das Feld des Nenners fehlt');
         assert.match(text, /limitless_online_decks_matchups\.csv/, 'die Quelldatei fehlt');
@@ -414,10 +414,10 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {
         assert.match(text, /Ränge 1–20/, 'gegen wen gezaehlt wurde, steht nicht da');
     });
 
-    it('Matchup vs Top 20: ohne Paarung wird nichts behauptet', () => {
+    it('Matchup vs Top 20: ohne Matchup wird nichts behauptet', () => {
         const k = kennzahlSandkasten('de');
         const text = k._cmMatchupFussnote({ paarungen: 0, partien: 0, spiegelPartien: 0 });
-        assert.match(text, /Keine Paarung/);
+        assert.match(text, /Kein Matchup/);
         assert.match(text, /limitless_online_decks_matchups\.csv/);
         assert.doesNotMatch(text, /Schnitt über/);
     });
@@ -464,34 +464,34 @@ describe('H6 — jede Kennzahl nennt Nenner, Quelle und Zeitraum', () => {
         const fuss = k._cmMatchupFussnote(s2);
         /* DIE MUTATION, DIE HIER ROT WIRD: die beiden Nenner vertauschen.
            Dann stuende "3 Matches" neben "(3 MU)" bzw. "500 Paarungen". */
-        assert.match(fuss, /über 3 Paarungen/, 'die Zahl der Paarungen stimmt nicht mit der Kachel ueberein');
+        assert.match(fuss, /über 3 Matchups/, 'die Zahl der Matchups stimmt nicht mit der Kachel ueberein');
         assert.match(fuss, /Nenner: 500 Matches/, 'der Nenner in Partien ist nicht die Summe total_games');
         assert.doesNotMatch(fuss, /Nenner: 3 Matches/,
-            'Paarungen und Partien sind vertauscht — genau Mutation M1');
-        assert.doesNotMatch(fuss, /über 500 Paarungen/, 'ebenso, andersherum');
+            'Matchups und Partien sind vertauscht — genau Mutation M1');
+        assert.doesNotMatch(fuss, /über 500 Matchups/, 'ebenso, andersherum');
     });
 
     it('M1/M2 — der Spiegel zaehlt mit, und das steht auch da', () => {
         const k = kennzahlSandkasten('de');
         const s2 = k._cmTop20Schnitt(DECK_STATS, MU_ZEILEN, 'Mega Excadrill', MK);
-        assert.equal(s2.spiegelPartien, 100, 'die Spiegelpaarung wird nicht erkannt');
+        assert.equal(s2.spiegelPartien, 100, 'die Mirror-Matchup wird nicht erkannt');
         const fuss = k._cmMatchupFussnote(s2);
-        assert.match(fuss, /Spiegelpaarung zählt mit: 100 der 500 Matches/,
+        assert.match(fuss, /Mirror-Matchup zählt mit: 100 der 500 Matches/,
             'dass der Spiegel im Schnitt steckt, steht nicht im Text');
         /* Und die Gegenprobe: ohne Spiegel darf der Satz nicht dastehen. */
         const ohne = k._cmTop20Schnitt(DECK_STATS,
             MU_ZEILEN.filter(m => m.opponent !== 'Mega Excadrill'), 'Mega Excadrill', MK);
         assert.equal(ohne.spiegelPartien, 0);
         assert.equal(ohne.partien, 400);
-        assert.match(k._cmMatchupFussnote(ohne), /Eine Spiegelpaarung ist nicht dabei/);
+        assert.match(k._cmMatchupFussnote(ohne), /Ein Mirror-Matchup ist nicht dabei/);
     });
 
-    it('M1/M2 — ohne Paarung bleibt der Strich, und der Nenner bleibt null', () => {
+    it('M1/M2 — ohne Matchup bleibt der Strich, und der Nenner bleibt null', () => {
         const k = kennzahlSandkasten('de');
         const s2 = k._cmTop20Schnitt(DECK_STATS, MU_ZEILEN, 'Gibt es nicht', MK);
         assert.equal(s2.text, '-');
         assert.equal(s2.partien, 0);
-        assert.match(k._cmMatchupFussnote(s2), /Keine Paarung/);
+        assert.match(k._cmMatchupFussnote(s2), /Kein Matchup/);
     });
 
     it('die Fussnote landet sichtbar an der Kachel, nicht nur im title', () => {

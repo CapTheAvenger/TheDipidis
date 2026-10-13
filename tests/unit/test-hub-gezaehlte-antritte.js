@@ -97,7 +97,7 @@ function modell(rows) {
     return sb._metaHubIntern.answerModel(rows || ROWS);
 }
 
-describe('Gezaehlte Antritte — die Daten', () => {
+describe('Gezaehlte Listen — die Daten', () => {
     it('die Datei fuehrt die gezaehlten Spalten', () => {
         ['total_brought', 'top8_count', 'top16_count'].forEach(k =>
             assert.ok(KOPF.includes(k), `Spalte ${k} fehlt`));
@@ -112,7 +112,7 @@ describe('Gezaehlte Antritte — die Daten', () => {
         assert.deepEqual(krumm, [], 'eine Zaehlung mit Komma ist keine');
     });
 
-    it('kein Deck hat mehr Top-8-Plaetze als Antritte', () => {
+    it('kein Deck hat mehr Top-8-Plaetze als Listen', () => {
         assert.deepEqual(
             ROWS.filter(r => z(r.top8_count) > z(r.total_brought)).map(r => r.deck_name), []);
     });
@@ -123,7 +123,7 @@ describe('Gezaehlte Antritte — die Daten', () => {
     });
 });
 
-describe('Gezaehlte Antritte — jede angezeigte Zahl nachgerechnet', () => {
+describe('Gezaehlte Listen — jede angezeigte Zahl nachgerechnet', () => {
     const m = modell();
     const gesamt = ROWS.reduce((s, r) => s + z(r.total_brought), 0);
     const t8 = ROWS.reduce((s, r) => s + z(r.top8_count), 0);
@@ -146,9 +146,9 @@ describe('Gezaehlte Antritte — jede angezeigte Zahl nachgerechnet', () => {
             const r = ROWS.find(x => x.deck_name === d.name);
             if (!r) { falsch.push(`${d.name} nicht in der CSV`); return; }
             const br = z(r.total_brought), cuts = z(r.top8_count);
-            if (d.brought !== br) falsch.push(`${d.name}: Antritte ${d.brought} statt ${br}`);
+            if (d.brought !== br) falsch.push(`${d.name}: Listen ${d.brought} statt ${br}`);
             if (rund(d.sharePct) !== rund((br / gesamt) * 100)) {
-                falsch.push(`${d.name}: Anteil ${d.sharePct} statt ${(br / gesamt) * 100}`);
+                falsch.push(`${d.name}: Share ${d.sharePct} statt ${(br / gesamt) * 100}`);
             }
             // Die Quote MUSS aus genau den beiden gezeigten Zahlen folgen.
             if (rund(d.convPct) !== rund((cuts / br) * 100)) {
@@ -210,7 +210,7 @@ const entziffere = (s) => String(s)
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>');
 
-describe('Gezaehlte Antritte — der Satz, den man liest', () => {
+describe('Gezaehlte Listen — der Satz, den man liest', () => {
     function texte(rows, lang) {
         const sb = lade(lang || 'de');
         const m = sb._metaHubIntern.answerModel(rows || ROWS);
@@ -222,14 +222,14 @@ describe('Gezaehlte Antritte — der Satz, den man liest', () => {
         };
     }
 
-    it('der Nenner nennt zuerst die Cuts, dann die Antritte', () => {
+    it('der Nenner nennt zuerst die Cuts, dann die Listen', () => {
         ['de', 'en'].forEach(lang => {
             const { m, nenner } = texte(null, lang);
             const best = m.headline;
             const zahl = (v) => Number(v).toLocaleString(lang === 'de' ? 'de-DE' : 'en-US');
             const mm = nenner.replace(/[\s ]+/g, ' ')
                 .match(lang === 'de'
-                    ? /Aus ([\d.,]+) Antritten · .+?: ([\d.,]+) von ([\d.,]+) in die Top 8/
+                    ? /Aus ([\d.,]+) Listen · .+?: ([\d.,]+) von ([\d.,]+) in die Top 8/
                     : /Out of ([\d.,]+) entries · .+?: ([\d.,]+) of ([\d.,]+) made top 8/);
             assert.ok(mm, `${lang}: Nenner nicht lesbar: ${nenner}`);
             assert.equal(mm[1], zahl(Math.round(m.totalBrought)), `${lang}: Grundgesamtheit`);
@@ -266,7 +266,7 @@ describe('Gezaehlte Antritte — der Satz, den man liest', () => {
             const mm = nackt.match(lang === 'de'
                 /* DA-35 (03.10.2026): der Satz nennt die hoechste Top-8-Quote
                    statt „das staerkste Deck"; die drei Zahlen bleiben. */
-                ? /Top-8-Quote: ([\d.,]+) ?% gegen ([\d.,]+) ?% im Schnitt — rund ([\d.,]+)-mal/
+                ? /Top-8-Conversion: ([\d.,]+) ?% gegen ([\d.,]+) ?% im Schnitt — rund ([\d.,]+)-mal/
                 : /top-8 rate right now: ([\d.,]+) ?% against ([\d.,]+) ?% on average — about ([\d.,]+)×/);
             assert.ok(mm, `${lang}: Satz nicht lesbar: ${nackt}`);
             /* Tausenderpunkte gibt es bei Prozentwerten unter 100 nicht,
@@ -295,7 +295,7 @@ describe('Gezaehlte Antritte — der Satz, den man liest', () => {
         const html = sb._metaHubIntern.answerHtml(m);
         const schnitt = m.conv.expected * 100;
         const nackt = html.replace(/<[^>]*>/g, '|').replace(/[\s ]+/g, ' ');
-        const treffer = [...nackt.matchAll(/Top-8-Quote ([\d.,]+) ?% ?· ?([\d.,]+)-mal/g)];
+        const treffer = [...nackt.matchAll(/Top-8-Conversion ([\d.,]+) ?% ?· ?([\d.,]+)-mal/g)];
         assert.ok(treffer.length > 0, 'keine Kachel mit Quote und Vielfachem gefunden');
         treffer.forEach(t => {
             const q = Number(t[1].replace(',', '.'));
@@ -378,7 +378,7 @@ describe('Gezaehlte Antritte — der Satz, den man liest', () => {
     });
 });
 
-describe('Gezaehlte Antritte — alles oder nichts', () => {
+describe('Gezaehlte Listen — alles oder nichts', () => {
     const ohne = (feld) => ROWS.map((r, i) => i === 3 ? Object.assign({}, r, { [feld]: '' }) : r);
 
     it('eine Zeile ohne Zaehlung kippt den ganzen Block zurueck', () => {
@@ -404,16 +404,16 @@ describe('Gezaehlte Antritte — alles oder nichts', () => {
 
     /* Die zwei Loecher, die die zweite Abnahme gefunden hat: das Tor
        prueft je Zeile, nicht nur die Summe. */
-    it('eine einzelne Zeile mit 0 Antritten kippt ihn', () => {
+    it('eine einzelne Zeile mit 0 Listen kippt ihn', () => {
         const rows = ROWS.map((r, i) => i === 2 ? Object.assign({}, r, { total_brought: '0' }) : r);
         const m = modell(rows);
         assert.equal(m.hatRoh, false,
-            'ein Deck mit 0 gezaehlten Antritten faellt aus der Rangfolge, '
+            'ein Deck mit 0 gezaehlten Listen faellt aus der Rangfolge, '
             + 'die Ueberschrift springt auf ein anderes Deck und seine '
             + 'Kachel zeigt 0');
     });
 
-    it('mehr Top-8-Plaetze als Antritte kippt ihn', () => {
+    it('mehr Top-8-Plaetze als Listen kippt ihn', () => {
         const rows = ROWS.map((r, i) => i === 2
             ? Object.assign({}, r, { top8_count: String(Number(r.total_brought) + 5) }) : r);
         const m = modell(rows);
@@ -426,7 +426,7 @@ describe('Gezaehlte Antritte — alles oder nichts', () => {
         const m = modell(rows);
         assert.equal(m && m.hatRoh, false,
             'eine Grundgesamtheit von 0 gilt als gezaehlt — dann steht '
-            + '"Aus 0 Antritten" da');
+            + '"Aus 0 Listen" da');
     });
 
     it('ganz ohne die Spalten laeuft der alte Weg weiter', () => {
@@ -448,7 +448,7 @@ describe('Gezaehlte Antritte — alles oder nichts', () => {
     });
 });
 
-describe('Gezaehlte Antritte — die Mindeststichprobe', () => {
+describe('Gezaehlte Listen — die Mindeststichprobe', () => {
     it('der Spitzenreiter erfuellt sie in denselben Zahlen, die er zeigt', () => {
         const m = modell();
         const best = m.headline;
@@ -466,7 +466,7 @@ describe('Gezaehlte Antritte — die Mindeststichprobe', () => {
         const schwelle = Number((SRC.match(/HEADLINE_MIN_BROUGHT = (\d+)/) || [])[1]);
         assert.ok(schwelle, 'die Schwelle steht nicht mehr im Quelltext');
         assert.equal(Math.min(best.brought, schwelle), schwelle,
-            `${best.name} steht mit ${best.brought} Antritten in der `
+            `${best.name} steht mit ${best.brought} Listen in der `
             + `Ueberschrift, die Schwelle ist ${schwelle}`);
         assert.equal(best.thin, false, 'ein duennes Deck steht in der Ueberschrift');
     });
@@ -476,7 +476,7 @@ describe('Gezaehlte Antritte — die Mindeststichprobe', () => {
         assert.match(SRC, /Toxtricity Box/,
             'die Begruendung der Schwelle ist verschwunden');
         assert.match(SRC, /misst STICHPROBENGROESSE/,
-            'dass die Schwelle jetzt auf gezaehlte Antritte wirkt, steht '
+            'dass die Schwelle jetzt auf gezaehlte Listen wirkt, steht '
             + 'nirgends — dann liest sie beim naechsten Mal jemand als '
             + 'unveraendert');
     });
@@ -489,11 +489,11 @@ describe('Gezaehlte Antritte — die Mindeststichprobe', () => {
         }));
         const m = modell(rows);
         assert.equal(m && m.headline, null,
-            'mit 30 Antritten je Deck wird trotzdem ein "staerkstes Deck" gekuert');
+            'mit 30 Listen je Deck wird trotzdem ein "staerkstes Deck" gekuert');
     });
 });
 
-describe('Gezaehlte Antritte — die Ausgabe', () => {
+describe('Gezaehlte Listen — die Ausgabe', () => {
     it('im gezaehlten Satz steht kein "gewichtet"', () => {
         const von = SRC.indexOf('if (roh) {');
         const bis = SRC.indexOf('OHNE gezaehlte Spalten');
@@ -502,13 +502,13 @@ describe('Gezaehlte Antritte — die Ausgabe', () => {
         const zweig = SRC.slice(von, bis);
         assert.ok(!/gewichtet|weighted/.test(zweig),
             'der Satz mit den gezaehlten Zahlen nennt sie trotzdem gewichtet');
-        assert.match(zweig, /Aus \$\{gesamt\} Antritten/);
+        assert.match(zweig, /Aus \$\{gesamt\} Listen/);
         assert.match(zweig, /Out of \$\{gesamt\} entries/);
     });
 
     it('ohne Zaehlung bleibt der Hinweis an der halben Zahl', () => {
         const zweig = SRC.slice(SRC.indexOf('OHNE gezaehlte Spalten'));
-        assert.match(zweig, /gewichteten Antritten/);
+        assert.match(zweig, /gewichteten Listen/);
         assert.match(zweig, /mah-gewichtet/);
         assert.match(zweig, /nach Aktualität gewichtet/);
         assert.ok(!/nach Turniergröße gewichtet/.test(zweig),

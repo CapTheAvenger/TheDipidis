@@ -18,7 +18,7 @@ const CORE = read('js/app-core.js');
 const CORE_CODE = stripJs(CORE);
 const I18N = read('js/i18n.js');
 
-describe('Meta Call — der Vorhersage-Streifen ist verdrahtet', () => {
+describe('Meta Call — der Prediction-Streifen ist verdrahtet', () => {
     // Er existierte samt Stylesheet (css/meta-call.css:1646) und wurde
     // von keiner Stelle aufgerufen. Nachgemessen: 0 Aufrufe im ganzen
     // Projekt. Ohne ihn verwirft die Maschine still 4.520 von 4.667
@@ -151,10 +151,10 @@ describe('Meta Call — die Spalte heisst, was sie zeigt', () => {
         }
     });
 
-    it('er steht in beiden Sprachen und meint eine Prognose', () => {
+    it('er steht in beiden Sprachen und meint eine Prediction', () => {
         const werte = [...I18N.matchAll(/'mc\.headerOnline':\s*'([^']*)'/g)].map(m => m[1]);
         assert.strictEqual(werte.length, 2);
-        for (const w of werte) assert.match(w, /Prognose|Predicted|Forecast/i);
+        for (const w of werte) assert.match(w, /Prediction|Predicted|Forecast/i);
     });
 
     it('der Tooltip behauptet nicht mehr, es seien die Basisdaten', () => {

@@ -68,7 +68,7 @@ const JS_ANZEIGE = [
 ].map(p => ({ p, src: read(p) }));
 
 describe('Win Rate — ein Begriff, eine Schreibweise', () => {
-    it('"Siegquote" steht nirgends mehr ALLEIN in einer Anzeige', () => {
+    it('"Win Rate" steht nirgends mehr ALLEIN in einer Anzeige', () => {
         /* NACHTRAG 08.09.2026 — DIESE ZUSAGE MUSSTE GESCHAERFT WERDEN,
            WEIL SIE SONST DER NEUEREN WIDERSPRAECHE.
 
@@ -94,14 +94,15 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {
                 .map((z, i) => ({ nr: i + 1, z }))
                 .filter(o => BLOSS.test(o.z));
             assert.deepEqual(zeilen.map(o => `${o.nr}: ${o.z.trim()}`), [],
-                p + ': blosses "Siegquote" ohne Zusatz');
+                p + ': blosses "Win Rate" ohne Zusatz');
         }
-        assert.ok(!BLOSS.test(HTML), 'blosses "Siegquote" in index.html');
+        assert.ok(!BLOSS.test(HTML), 'blosses "Win Rate" in index.html');
 
         /* Gegenprobe: das Muster darf die erlaubten Namen NICHT fangen,
            sonst waere die Ausnahme nur zufaellig grün. */
-        assert.ok(!BLOSS.test('Siegquote inkl. Unentschieden'));
+        assert.ok(!BLOSS.test('Siegquote inkl. Unentschieden'));   // alter Name, nur noch in Kommentaren
         assert.ok(!BLOSS.test('Siegquote ohne Unentschieden'));
+        assert.ok(!BLOSS.test('Win Rate inkl. Ties'));
         assert.ok(BLOSS.test('Siegquote'), 'das Muster faengt den Hausnamen nicht mehr');
         assert.ok(BLOSS.test('Siegesrate'));
     });
@@ -160,12 +161,12 @@ describe('Win Rate — ein Begriff, eine Schreibweise', () => {
            dem Namen der Konvention fuellt. Ein fester Name stuende dort
            wieder fuer eine von dreien. */
         for (const [kuerzel, wort] of [['WR', '{quote}'], ['M', 'Matches'],
-                                        ['Major-WR', 'Präsenzturnieren'],
+                                        ['Major-WR', 'Majors'],
                                         ['Major-Matches', 'die Matches dahinter']]) {
             const zeilen = [...I18N.matchAll(/'arc\.muLegende':\s*'([^']*)'/g)]
                 .map(m => m[1]);
             assert.ok(zeilen.length >= 1, 'arc.muLegende fehlt in i18n.js');
-            const de_zeile = zeilen.find(z => /Siege/.test(z)) || zeilen[0];
+            const de_zeile = zeilen.find(z => /Wins/.test(z)) || zeilen[0];
             assert.ok(de_zeile.includes(kuerzel) && de_zeile.includes(wort),
                 `die Legende loest "${kuerzel}" nicht mehr nach "${wort}" auf`);
         }

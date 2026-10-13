@@ -92,15 +92,15 @@ describe('Die Kacheln der Startseite nennen ihren Nenner', () => {
 
         const de = () => 'de';
         const viele = bauen({ totalCount: 2948 }, fmtHalb, de);
-        assert.match(viele.wrTitel, /über 2948 Antritte/,
+        assert.match(viele.wrTitel, /über 2948 Listen/,
             `der Tooltip nennt die Menge nicht: ${viele.wrTitel}`);
 
         /* Halbe Antritte sind in dieser Datei echt — der Kommentar bei
            fmtHalb erklärt, was das Runden hier schon einmal angerichtet
            hat (Terapagos Noctowl las sich als "2 / 1 / 33,3 %"). */
         const halb = bauen({ totalCount: 35.5 }, fmtHalb, de);
-        assert.match(halb.wrTitel, /über 35,5 Antritte/,
-            `halbe Antritte werden gerundet: ${halb.wrTitel}`);
+        assert.match(halb.wrTitel, /über 35,5 Listen/,
+            `halbe Listen werden gerundet: ${halb.wrTitel}`);
 
         /* Ohne Antritte lieber gar nichts als eine behauptete Null. */
         for (const leer of [{ totalCount: 0 }, { totalCount: null }, {}]) {

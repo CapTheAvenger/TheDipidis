@@ -59,7 +59,7 @@ GERMAN_ONLY_WORDS = [
     'Karte ziehen', 'Auswahl löschen',
     'Aufstellungsphase', 'Mehrspieler',
     'Mulligan-Ziehen', 'Ablagestapel', 'Spielfeld',
-    'Niedrige Seltenheit', 'Alle Drucke',
+    'Niedrige Seltenheit', 'Alle Prints',   # UI-138: Print statt Druck
     'Turniername', 'Eigenes Deck', 'Gegner-Archetyp',
     'Binder generieren',
 ]

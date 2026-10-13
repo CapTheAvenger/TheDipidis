@@ -2210,7 +2210,7 @@
         if (!c || typeof c.legal !== 'function' || !c.legalBekannt) return '';
         const l = c.legal(k);
         if (l === true) return '<span class="abx-legal abx-legal-standard" title="' + esc(tx('abx.legalStandardTitel', { fmt: c.standard || '' },
-            'Mindestens ein Druck ist in {fmt} legal.')) + '">' + esc(tx('abx.legalStandard', null, 'Standard')) + '</span>';
+            'Mindestens ein Print ist in {fmt} legal.')) + '">' + esc(tx('abx.legalStandard', null, 'Standard')) + '</span>';
         if (l === false) return '<span class="abx-legal abx-legal-expanded" title="' + esc(tx('abx.legalExpandedTitel', null,
             'Nicht Standard-legal, nur Expanded.')) + '">' + esc(tx('abx.legalExpanded', null, 'Expanded')) + '</span>';
         return '';
@@ -2259,7 +2259,7 @@
             + '">' + (aufListe ? '&#9829;' : '&#9825;') + '</button>';
         const weitere = k.drucke.filter(function (d) { return d.id !== k.id; }).length;
         const druckZusatz = weitere
-            ? ' <span class="abx-weitere">' + esc(tx('abx.weitereDrucke', { n: weitere }, '+{n} Druck')) + '</span>' : '';
+            ? ' <span class="abx-weitere">' + esc(tx('abx.weitereDrucke', { n: weitere }, '+{n} Print')) + '</span>' : '';
         const boxZeile = mitBoxName ? '<div class="abx-boxname" title="' + esc(nameVon(b)) + '">' + esc(nameVon(b)) + '</div>' : '';
         return '<div class="abx-karte abx-karte-' + status + '" data-karte="' + esc(k.id) + '" data-box="' + esc(b.id) + '">'
             + '<div class="abx-bild">' + bild + sollKnopf + herz + drinPlakette
@@ -2274,8 +2274,8 @@
             + '<button type="button" class="abx-mini" onclick="ArchetypBox.anzahl(' + arg + ',1)" aria-label="'
             + esc(tx('abx.mehrAria', null, 'Eine Kopie mehr')) + '">+</button>'
             + '<button type="button" class="abx-mini abx-drucke-btn" onclick="ArchetypBox.druckeOeffnen(' + arg + ')" title="'
-            + esc(tx('abx.druckeTitel', null, 'Drucke: welcher Druck wie oft in der Box liegt')) + '" aria-label="'
-            + esc(tx('abx.druckeTitel', null, 'Drucke: welcher Druck wie oft in der Box liegt')) + '">★</button>'
+            + esc(tx('abx.druckeTitel', null, 'Prints: welcher Print wie oft in der Box liegt')) + '" aria-label="'
+            + esc(tx('abx.druckeTitel', null, 'Prints: welcher Print wie oft in der Box liegt')) + '">★</button>'
             + '<button type="button" class="abx-mini abx-weg" onclick="ArchetypBox.entfernen(' + arg + ')" title="'
             + esc(tx('abx.entfernenTitel', null, 'Aus der Box entfernen')) + '" aria-label="'
             + esc(tx('abx.entfernenTitel', null, 'Aus der Box entfernen')) + '">✕</button>'
@@ -2400,8 +2400,8 @@
         if (wahl === 'aktuell') satz = tx('abx.fmtAktuell', v, 'Gespielt in {aktuell}, dem neuesten Format mit Turnierdaten (bis {bis}).');
         else if (wahl === 'raus') satz = tx('abx.fmtRaus', v, 'In {vorher} (bis {bisV}) in mindestens {n} % der Listen, in {aktuell} (bis {bis}) darunter.');
         else if (wahl === 'neu') satz = tx('abx.fmtNeu', v, 'In {aktuell} (bis {bis}) in mindestens {n} % der Listen, in {vorher} (bis {bisV}) darunter.');
-        else if (wahl === 'standard') satz = tx('abx.fmtStandard', v, 'Mindestens ein Druck ist in {standard} legal.');
-        else if (wahl === 'expanded') satz = tx('abx.fmtExpanded', v, 'Kein Druck ist in {standard} legal — nur noch in Expanded spielbar.');
+        else if (wahl === 'standard') satz = tx('abx.fmtStandard', v, 'Mindestens ein Print ist in {standard} legal.');
+        else if (wahl === 'expanded') satz = tx('abx.fmtExpanded', v, 'Kein Print ist in {standard} legal — nur noch in Expanded spielbar.');
         else if (wahl === 'rotiert') satz = tx('abx.fmtRotiert', v, 'War vor der letzten Rotation legal (ab {block}), ist in {standard} nicht mehr legal.');
         if (meta && c.fensterSet && c.aktuell && String(c.aktuell).split('-')[1] !== String(c.fensterSet)) {
             satz += ' ' + tx('abx.fmtFensterOhne', v, 'Für {fenster} gibt es noch keine Turnierdaten.');
@@ -2439,13 +2439,13 @@
                 'Ohne Deck in {aktuell} fällt nichts heraus: {liste}.');
         }
         if (ohneFormate && (ansicht.format === 'aktuell' || ansicht.format === 'raus' || ansicht.format === 'neu')) {
-            fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Anteile je Format noch nicht — bitte einmal aktualisieren („Alle Boxen“ → „Alle Boxen aktualisieren“).');
+            fmtZeile += ' ' + tx('abx.fmtAlteBox', null, 'Mindestens eine Box kennt die Shares je Format noch nicht — bitte einmal aktualisieren („Alle Boxen“ → „Alle Boxen aktualisieren“).');
         }
         let html = (mitBoxName ? reihe(tx('abx.fAnsicht', null, 'Ansicht'),
             knopf('gruppe', 'getrennt', tx('abx.gruppeGetrennt', null, 'Getrennt')) + knopf('gruppe', 'zusammen', tx('abx.gruppeZusammen', null, 'Zusammen'))) : '')
             + reihe(tx('abx.fFormat', null, 'Format'), FORMAT_WAHL.map(function (w) { return knopf('format', w, fmtText[w]); }).join(''))
             + (fmtZeile ? '<p class="abx-filter-hinweis">' + esc(fmtZeile) + '</p>' : '')
-            + reihe(tx('abx.fAnteil', null, 'Anteil'), anteil.map(function (a) { return knopf('anteil', a[0], a[1]); }).join(''))
+            + reihe(tx('abx.fAnteil', null, 'Share'), anteil.map(function (a) { return knopf('anteil', a[0], a[1]); }).join(''))
             + reihe(tx('abx.fArt', null, 'Kartenart'), arten.map(function (a) { return knopf('art', a[0], a[1]); }).join(''));
         if (markenDaten && markenDaten.marks) {
             const vorhanden = MARKEN_REIHE.filter(function (m) { return markenDaten.marks[m]; });
@@ -2458,7 +2458,7 @@
                 ELEMENTE.map(function (e) { return knopf('element', e, tx('abx.el.' + e, null, e)); })).join(''));
         }
         html += reihe(tx('abx.fSort', null, 'Sortierung'),
-            knopf('sort', 'anteil', tx('abx.sortAnteil', null, 'Nach Anteil')) + knopf('sort', 'art', tx('abx.sortArt', null, 'Nach Kartenart und Typ')));
+            knopf('sort', 'anteil', tx('abx.sortAnteil', null, 'Nach Share')) + knopf('sort', 'art', tx('abx.sortArt', null, 'Nach Kartenart und Typ')));
         return '<div class="abx-filterblock" role="group" aria-label="' + esc(tx('abx.fAria', null, 'Filter und Sortierung')) + '">' + html + '</div>';
     }
 
@@ -2551,7 +2551,7 @@
         } else if (alleKarten) {
             kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.spielboxTitel', null, 'Spielbox')) + '</h3>'
                 + '<p class="abx-meta">' + esc(tx('abx.alleKartenText', { n: standardBoxen, max: KOPIEN_MAX },
-                    'Die größte gespielte Anzahl je Karte aus den {n} Boxen, die im Standard gespielt werden oder noch legal sind (dazu deine eigenen Boxen). Nur Standard-legale Karten, höchstens {max} Kopien; Basis-Energien ohne Grenze, je Typ ein Druck (SVE).')) + '</p></div>';
+                    'Die größte gespielte Anzahl je Karte aus den {n} Boxen, die im Standard gespielt werden oder noch legal sind (dazu deine eigenen Boxen). Nur Standard-legale Karten, höchstens {max} Kopien; Basis-Energien ohne Grenze, je Typ ein Print (SVE).')) + '</p></div>';
         } else {
             // Keine Namensliste mehr (Hausi, 03.10.2026: "viel zu viel Text"): die Chips oben nennen jede Box.
             kopf = '<div class="abx-kopf"><h3 class="abx-titel">' + esc(tx('abx.alleBoxen', null, 'Alle Boxen')) + '</h3></div>';
@@ -2826,7 +2826,7 @@
             + '<p class="abx-dialog-zeile">' + esc(tx('abx.verteilungZeile', { n: g.teile.length, soll: g.soll, drin: g.drin, offen: g.offen },
                 'Gehört in {n} Boxen, zusammen {soll} Stück · {drin} drin · {offen} offen')) + '</p>'
             + '<div class="abx-vert-rahmen"><table class="abx-vert-tabelle"><thead><tr>'
-            + '<th>' + esc(tx('abx.spBox', null, 'Box')) + '</th><th class="r">' + esc(tx('abx.spAnteil', null, 'Anteil')) + '</th>'
+            + '<th>' + esc(tx('abx.spBox', null, 'Box')) + '</th><th class="r">' + esc(tx('abx.spAnteil', null, 'Share')) + '</th>'
             + '<th class="r">' + esc(tx('abx.spSoll', null, 'Soll')) + '</th><th class="r">' + esc(tx('abx.spDrin', null, 'Drin')) + '</th><th></th></tr></thead>'
             + '<tbody>' + zeilen + '</tbody><tfoot><tr><td>' + esc(tx('abx.zusammen', null, 'Zusammen')) + '</td><td></td>'
             + '<td class="r"><b>' + esc(g.soll + '×') + '</b></td><td class="r">' + esc(g.drin) + '</td><td></td></tr></tfoot></table></div>'

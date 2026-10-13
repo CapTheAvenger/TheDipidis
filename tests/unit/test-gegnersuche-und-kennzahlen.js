@@ -301,7 +301,7 @@ describe('A-F4.26 — nichts faellt still aus', () => {
         assert.ok(!sichtbar(det), 'vor der Auswahl darf noch nichts dastehen');
         s.kontext.selectCurrentMetaOpponent(null, 'Dragapult');
         assert.ok(sichtbar(det), 'nach der Auswahl bleibt das Detail unsichtbar');
-        assert.match(det.innerHTML, /47,05 %/, 'die Win % der Paarung fehlt');
+        assert.match(det.innerHTML, /47,05 %/, 'die Win % der Matchup fehlt');
         assert.match(det.innerHTML, /120 - 135 - 3/, 'die Bilanz fehlt');
         assert.match(det.innerHTML, /258/, 'die Partienzahl fehlt');
     });
@@ -323,7 +323,7 @@ describe('A-F4.26 — nichts faellt still aus', () => {
         const html = s.knoten.currentMetaMatchupDetails.innerHTML;
         assert.match(html, /limitless_online_decks_matchups\.csv/, 'Quelldatei fehlt');
         assert.match(html, /Win %/, 'die Limitless-Bezeichnung "Win %" fehlt');
-        assert.match(html, /258 Partien/, 'der Nenner fehlt');
+        assert.match(html, /258 Matches/, 'der Nenner fehlt');
     });
 
     it('ein Deckwechsel laesst kein fremdes Detail stehen', () => {
@@ -370,7 +370,7 @@ describe('A-F4.26 — nichts faellt still aus', () => {
             'der Aufruf steht wieder hinter einem vorzeitigen return');
     });
 
-    it('ein Deck ohne Paarungen versteckt den Abschnitt nicht mehr stumm', () => {
+    it('ein Deck ohne Matchups versteckt den Abschnitt nicht mehr stumm', () => {
         const rumpf = ausschnitt('function renderCurrentMetaMatchups(archetype)');
         const zweig = rumpf.slice(rumpf.indexOf('Keine Matchup-Daten fuer'));
         const bisReturn = zweig.slice(0, zweig.indexOf('return;'));
@@ -401,7 +401,7 @@ describe('B2 — ein Ladefehler wird nicht als Befund über die Datei ausgegeben
         assert.match(html, /noch nicht geladen/,
             'der Ladezustand wird nicht als solcher benannt');
         assert.match(html, /Dragapult/, 'der Deckname fehlt');
-        assert.doesNotMatch(html, /keine Gegner-Paarungen/,
+        assert.doesNotMatch(html, /keine Gegner-Matchups/,
             'es steht wieder eine Aussage über die Datei da, wo nur ein Ladezustand belegt ist');
         assert.doesNotMatch(html, /kein Ladefehler/,
             'ausgerechnet beim Ladefehler steht "es ist kein Ladefehler"');
@@ -425,7 +425,7 @@ describe('B2 — ein Ladefehler wird nicht als Befund über die Datei ausgegeben
         const erg = s.kontext.fuelleCurrentMetaGegnerauswahl('Dragapult');
         assert.equal(erg.quelle, 'keine');
         const html = s.knoten.currentMetaOpponentDropdown.innerHTML;
-        assert.match(html, /keine Gegner-Paarungen/);
+        assert.match(html, /keine Gegner-Matchups/);
         assert.match(html, /kein Ladefehler/);
     });
 
@@ -440,7 +440,7 @@ describe('B2 — ein Ladefehler wird nicht als Befund über die Datei ausgegeben
     });
 });
 
-describe('B3 — die Win % einer Paarung hat EINE Schreibweise', () => {
+describe('B3 — die Win % einer Matchup hat EINE Schreibweise', () => {
 
     /* DER BEFUND. Registry-Weg: "68.73%" (Punkt, aus wrNum.toFixed(2)
        in js/app-meta-cards.js). CSV-Rueckfall: "68,73%" (Komma, aus der

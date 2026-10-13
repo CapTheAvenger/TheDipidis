@@ -231,7 +231,7 @@ function tausend(n) {
 var TURNIER_KURZ = [
     [/^World\s+Championships?\s+/i,        'Worlds '],
     [/^Regional\s+Championships?\s+/i,     'Regional '],
-    [/^International\s+Championships?\s+/i, 'IC '],
+    [/^International\s+Championships?\s+/i, 'International '],
     [/^Special\s+Events?\s+/i,             'Special Event '],
     [/^League\s+Cup\s+/i,                  'League Cup '],
     [/^League\s+Challenge\s+/i,            'League Challenge ']
@@ -407,7 +407,7 @@ REZEPTE['meta-online'] = {
                 };
             });
             if (!decks.length) throw new Error(
-                'limitless_online_decks.csv hat keine Zeile mit einem Anteil ' +
+                'limitless_online_decks.csv hat keine Zeile mit einem Share ' +
                 'ueber null — eine leere Tafel unter einem Nenner ist ' +
                 'schlimmer als ein gemeldeter Ausfall');
             decks.sort(function (x, y) { return y.anteil - x.anteil; });
@@ -455,7 +455,7 @@ REZEPTE['meta-online'] = {
                         zahlLabel: d.name + "'s share",
                         zahlNenner: tausend(d.listen) + ' of ' + tausend(nenner) +
                             ' lists in the online meta\nWin rate ' +
-                            prozent(d.winrate, 1) + ' — Unentschieden zählen mit'
+                            prozent(d.winrate, 1) + ' — Ties zählen mit'
                     };
                 }
             };
@@ -485,7 +485,7 @@ REZEPTE['matchups-online'] = {
              * Abnahme, 04.09.2026). */
             if (!Object.prototype.hasOwnProperty.call(roh[0], 'record')) throw new Error(
                 'die Matchup-Datei hat keine Spalte `record` — ohne Bilanz ' +
-                'glaettet DsGlaettung nicht, und roh stehen 3-0-Paarungen ' +
+                'glaettet DsGlaettung nicht, und roh stehen 3-0-Matchups ' +
                 'mit 100 % im Bild');
             var mitBilanz = roh.filter(function (r) {
                 return /\d+\s*-\s*\d+/.test(String(r.record || ''));
@@ -717,7 +717,7 @@ function labsLaden() {
 
         var gesamt = ganzzahl(jung.total_players, 'total_players');
         if (gesamt <= 0) throw new Error(
-            'total_players ist null — ohne Feldgroesse darf kein Anteil auf ein Bild');
+            'total_players ist null — ohne Spielerzahl darf kein Anteil auf ein Bild');
 
         /* DER KURZE NAME FUER DIE FUSSZEILE.
          * Sie fasst rund 48 Zeichen (Mono 22 auf 640 px). "World
@@ -801,7 +801,7 @@ REZEPTE['worlds-tag1'] = {
                         zahlNenner: Math.round(r.spieler) + ' of ' + tausend(d.gesamt) +
                             ' players, ' + d.kurz + '\nWin rate ' +
                             prozent(100 * r.siege / r.partien, 1) +
-                            ' — Unentschieden zählen mit'
+                            ' — Ties zählen mit'
                     };
                 }
             };
@@ -936,7 +936,7 @@ REZEPTE['top8'] = {
             });
             if (!reihe.length) throw new Error(
                 'kein Deck in online_tournament_top8_decks.csv erreicht ' +
-                MIN + ' gewichtete Antritte');
+                MIN + ' gewichtete Listen');
             reihe.sort(function (x, y) { return y.quote - x.quote; });
             var acht = ohneGleichstand(reihe, function (r) { return prozent(r.quote, 1); });
 
@@ -955,12 +955,12 @@ REZEPTE['top8'] = {
                 listeKopf: kopfMitAnteil('Top 8', acht.length, reihe.length),
                 kicker: 'Online · Events',
                 titel: 'Who makes Top 8',
-                fuss: 'Feld: ' + prozent(feldschnitt, 1) + ' · ab ' + MIN +
-                    ' Antritten · ' + spanne,
+                fuss: 'Meta: ' + prozent(feldschnitt, 1) + ' · ab ' + MIN +
+                    ' Listen · ' + spanne,
                 tags: hashtags(['top8', 'conversion', 'onlinetournaments']),
                 caption: 'How often a deck makes Top 8 online. The field average ' +
                     'liegt bei ' + prozent(feldschnitt, 1) + ' — gezählt ab ' + MIN +
-                    ' Antritten, weil darunter ein einzelnes Turnier die Quote macht.',
+                    ' Listen, weil darunter ein einzelnes Turnier die Quote macht.',
                 vorlagen: ['liste', 'zahl'],
                 decks: reihe.map(function (r) { return r.name; }),
                 zahlFuer: function (name) {
@@ -971,7 +971,7 @@ REZEPTE['top8'] = {
                         titel: name,
                         zahlLabel: name + ' — Top 8',
                         zahlNenner: 'from ' + r.antritte.toFixed(1) +
-                            ' gewichteten Antritten online\nDer Feldschnitt liegt bei ' +
+                            ' gewichteten Listen online\nDer Meta-Schnitt liegt bei ' +
                             prozent(feldschnitt, 1)
                     };
                 }
@@ -1327,7 +1327,7 @@ REZEPTE['day2-prognose'] = {
             var unbekannt = d.online_abdeckung && d.online_abdeckung.anteil_unbekannt;
             var schwelle = d.min_ankerspieler_anzeige || 30;
             var vorbehalt = (unbekannt != null)
-                ? prozent(unbekannt, 1) + ' des Onlinefelds sind neu — dagegen ungetestet'
+                ? prozent(unbekannt, 1) + ' des Online-Metas sind neu — dagegen ungetestet'
                 : '';
             if (!reihe.length) throw new Error(
                 'deckempfehlung.json hat keine Rangliste ueber der Schwelle');
@@ -1474,7 +1474,7 @@ REZEPTE['heatmap'] = {
                 });
             });
             if (!gefuellt) throw new Error(
-                'keine einzige Paarung der acht groessten Decks steht in '
+                'keine einzige Matchup der acht groessten Decks steht in '
                 + 'limitless_online_decks_matchups.csv');
 
             var stand = kurzDatum(new Date().toISOString());
@@ -2245,7 +2245,7 @@ function fremdeListeScheibe(j, L, opt) {
            zweimal derselbe Name kostete die Zeichen, an denen dann das
            Datum fehlte (live gemessen 26.09.2026). */
         kicker: passtIn(String(opt.kicker || archetyp), KICKER_MAX),
-        titel: opt.titel || archetyp || 'Decklist',
+        titel: opt.titel || archetyp || 'Deckliste',
         fuss: fussZeile(vorn.join(' · '), L.datum || ''),
         caption: (archetyp || 'This deck') + ' — ' + platz
             + ' at ' + (L.turnier || opt.turnier || 'the event')
@@ -2594,7 +2594,7 @@ function gruppenKnoten(gruppe) {
 var BAUM = [
     /* Der Meta Call steht oben: „Ja, also Hauptfeature Metacall." */
     {
-        id: 'metacall', name: 'Meta Call', frage: 'Forecast',
+        id: 'metacall', name: 'Meta Call', frage: 'Prediction',
         optionen: [
             { id: 'standard', name: 'Model forecast — as it stands on the site',
               frage: 'Slide', optionen: metaStandard },

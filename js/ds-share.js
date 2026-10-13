@@ -50,7 +50,7 @@
     function quotenName(konvention) {
         var K = window.WinRateKonvention;
         if (K && typeof K.kurz === 'function') return K.kurz(konvention || SHARE_KONVENTION);
-        return 'S / (S + N + U)';
+        return 'W / (W + L + T)';
     }
 
     /* Das KUERZEL derselben Konvention — fuer Spaltenkoepfe, in die der
@@ -71,7 +71,7 @@
     function quotenFormel(konvention) {
         var K = window.WinRateKonvention;
         var e = (K && typeof K.hol === 'function') ? K.hol(konvention || SHARE_KONVENTION) : null;
-        return (e && e.formel) ? e.formel : 'S / (S + N + U)';
+        return (e && e.formel) ? e.formel : 'W / (W + L + T)';
     }
 
 
@@ -188,7 +188,7 @@
          * fest, ob die Unentschieden im Nenner stehen — und auf einem
          * Bild gibt es keine Sprechblase, in der man das nachliest. */
         return anzahl + '× No-Show: ' + L(
-            'zählt als Sieg (3 Punkte), nicht in die ' + quotenName() + '.',
+            'zählt als Win (3 Punkte), nicht in die ' + quotenName() + '.',
             'counts as a win (3 points), not towards the ' + quotenName() + '.');
     }
 
@@ -530,12 +530,12 @@
         statCol(cols[0], C.dvZero,
             hasShare ? num(spec.share, 2) + ' %' : '–',
             C.ink,
-            L('Anteil am Meta · online', 'Meta share · online'),
+            L('Share am Meta · online', 'Meta share · online'),
             hasShare ? num(spec.count, 0) + ' ' + L('Listen', 'lists') : L('keine Daten', 'no data'),
             '',
             hatMajorShare
                 ? 'Major ' + num(spec.majorShare, 2) + ' %  ·  '
-                    + num(spec.majorAntritte, 0) + ' ' + L('Antritte', 'entries')
+                    + num(spec.majorAntritte, 0) + ' ' + L('Listen', 'entries')
                 : (majorGarNicht ? '' : L('Major: keine Daten', 'major: no data')));
 
         var wrDelta = isFinite(spec.winRate) ? spec.winRate - 50 : null;
@@ -617,7 +617,7 @@
             !hasConv ? C.dvZero : (spec.perfPct >= 0 ? C.dvPos : C.dvNeg),
             hasConv ? num(convQuote, 2) + ' %' : '–',
             C.ink,
-            L('Top-8-Quote · online', 'Top-8 rate · online'),
+            L('Top-8-Conversion · online', 'Top-8 rate · online'),
             hasConv
                 ? (isFinite(convFeld)
                     ? L('Schnitt aller Decks ', 'meta average ') + num(convFeld, 2) + ' %'
@@ -650,7 +650,7 @@
                        auf der Seite auch trennt. Bis zum 02.09.2026
                        druckte das Bild hier eine harte Prozentzahl, wo
                        die Seite schwieg. */
-                    ? L('Day 2 (Major): zu wenige Antritte ('
+                    ? L('Day 2 (Major): zu wenige Listen ('
                             + spec.majorDay2Antritte + ' von '
                             + (spec.majorDay2MinAntritte || 5) + ')',
                         'Day 2 (major): too few entries ('
@@ -1018,7 +1018,7 @@
                    haelt eine fehlende Paarung fuer einen Fehler. */
                 : L(quotenKuerzel('ohneUnentschieden') + ' = ' + quotenName('ohneUnentschieden')
                       + ' (' + quotenFormel('ohneUnentschieden') + '). '
-                      + 'Gezeigt sind die meistgespielten Paarungen über und unter 50 %, sortiert nach Quote.',
+                      + 'Gezeigt sind die meistgespielten Matchups über und unter 50 %, sortiert nach Quote.',
                     quotenKuerzel('ohneUnentschieden') + ' = ' + quotenName('ohneUnentschieden')
                       + ' (' + quotenFormel('ohneUnentschieden') + '). '
                       + 'Showing the most-played pairings above and below 50 %, sorted by rate.');
@@ -1028,7 +1028,7 @@
             var muFmt = spec.majorMuFormat ? String(spec.majorMuFormat) : '';
             if (variante === 'major') {
                 note = L('Major-' + quotenKuerzel('ohneUnentschieden') + ' = ' + quotenName('ohneUnentschieden')
-                          + ' (' + quotenFormel('ohneUnentschieden') + ') auf Präsenzturnieren'
+                          + ' (' + quotenFormel('ohneUnentschieden') + ') auf Majors'
                           + (muFmt ? ' · aus ' + muFmt + ', dem letzten Format mit Major' : '') + '.',
                          'Major ' + quotenKuerzel('ohneUnentschieden') + ' = ' + quotenName('ohneUnentschieden')
                           + ' (' + quotenFormel('ohneUnentschieden') + ') at in-person events'
@@ -1065,7 +1065,7 @@
         ctx.fillText([spec.spaceLabel, spec.format, spec.source].filter(Boolean).join(' · '),
                      DC.PAD + 16, DC.H - DC.FOOT / 2 + 1);
         if (majorGarNicht) {
-            ctx.fillText('·  ' + L('Präsenzturniere: für dieses Deck liegen in diesem Format keine vor.',
+            ctx.fillText('·  ' + L('Majors: für dieses Deck liegen in diesem Format keine vor.',
                                    'In-person events: none on record for this deck in this format.'),
                          DC.PAD + 16 + ctx.measureText(
                              [spec.spaceLabel, spec.format, spec.source].filter(Boolean).join(' · ')).width + 10,
@@ -1891,8 +1891,8 @@
          * behauptet — siehe CLAUDE.md. */
         spalten.push({ lab: L('PUNKTE', 'POINTS'), val: String(punkte),
                        fuss: rec.n
-                           ? L('Sieg & No-Show 3 · Unentschieden 1', 'win & no-show 3 · tie 1')
-                           : L('Sieg 3 · Unentschieden 1', 'win 3 · tie 1'),
+                           ? L('Win & No-Show 3 · Tie 1', 'win & no-show 3 · tie 1')
+                           : L('Win 3 · Tie 1', 'win 3 · tie 1'),
                        farbe: day2 ? C.gold : C.brandInk, mono: true,
                        marke: day2 ? 'DAY 2' : '' });
         spalten.push({ lab: L('RUNDEN', 'ROUNDS'), val: String((spec.rounds || []).length),

@@ -804,7 +804,7 @@
                                 ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" loading="lazy" decoding="async" style="width: 100%; border-radius: 4px; margin-bottom: 4px; aspect-ratio: 2.5/3.5; object-fit: cover;">` : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:#999;">${card.set} ${card.number}</div>`}
                                 <div style="font-weight: 600; font-size: 0.75em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${card.name}">${card.name}</div>
                                 <div style="font-size: 0.95em; font-weight: bold; color: ${group.color};">${countDisplay}</div>
-                                ${card.printChanged ? `<div style="font-size:0.62em;color:#8a6d3b;background:#fcf8e3;border-radius:3px;padding:1px 3px;margin-top:2px;" title="${card.printFrom} → ${card.printTo}">anderer Druck</div>` : ''}
+                                ${card.printChanged ? `<div style="font-size:0.62em;color:#8a6d3b;background:#fcf8e3;border-radius:3px;padding:1px 3px;margin-top:2px;" title="${card.printFrom} → ${card.printTo}">anderer Print</div>` : ''}
                                 ${proxyBtn}
                             </div>
                         `;

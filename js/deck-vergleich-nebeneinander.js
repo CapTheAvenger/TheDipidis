@@ -253,8 +253,8 @@
             abweichend: 'andere Anzahl',
             fehlt: 'nicht enthalten',
             karten: 'Karten',
-            drucke: 'Drucke',
-            ohneDruck: 'ohne Druckangabe',
+            drucke: 'Prints',
+            ohneDruck: 'ohne Print-Angabe',
             kopf: 'Zugeordnet wird über Set und Nummer, nie über den Kartennamen — '
                 + 'gleichnamige Karten aus verschiedenen Sets bleiben getrennte Zeilen.',
             ohneDruckHinweis: 'Zeile(n) ohne Set und Nummer: nur mit einem gleich '

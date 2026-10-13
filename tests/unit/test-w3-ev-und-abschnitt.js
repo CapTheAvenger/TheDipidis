@@ -137,7 +137,7 @@ test('der EV-Rechner rechnet wirklich ohneUnentschieden', () => {
     // Matchpunkte = (90+10)/150 = 66,67 %. Ohne Glaettung (k = 0)
     // muss genau die erste Zahl herauskommen.
     assert.strictEqual(G.quote(30, 10, 0), 75,
-        'quote() rechnet nicht S/(S+N) - die Beschriftung waere dann falsch');
+        'quote() rechnet nicht W/(W+L) - die Beschriftung waere dann falsch');
     assert.notStrictEqual(G.quote(30, 10, 0), 60);
     // Mit dem Vorwert k = 20 zieht es zur Mitte, aber der Nenner bleibt
     // ohne Unentschieden: (30+10)/(40+20) = 66,67 %.
@@ -217,9 +217,9 @@ test('fuelleQuoten() setzt den Namen der richtigen Konvention ein', () => {
             SEKTION.indexOf('function quotenName'),
             SEKTION.indexOf('function texte'));
         vm.runInContext(schnitt + '; globalThis.__f = fuelleQuoten;', kontext);
-        const raus = kontext.__f('Listen, {quote:mitUnentschieden} und Top-8-Quote');
+        const raus = kontext.__f('Listen, {quote:mitUnentschieden} und Top-8-Conversion');
         assert.strictEqual(raus,
-            `Listen, ${K.kurz('mitUnentschieden')} und Top-8-Quote`);
+            `Listen, ${K.kurz('mitUnentschieden')} und Top-8-Conversion`);
         assert.ok(!raus.includes('{quote'), 'Platzhalter blieb stehen');
         assert.ok(!raus.includes('Win %'),
             'die Spalte rechnet S/(S+N+U) und darf nicht "Win %" heissen');
@@ -233,8 +233,8 @@ test('faellt das Konventionsmodul aus, steht die Formel da - nie ein Hausname', 
         SEKTION.indexOf('function quotenName'),
         SEKTION.indexOf('function texte'));
     vm.runInContext(schnitt + '; globalThis.__f = fuelleQuoten;', kontext);
-    const raus = kontext.__f('Listen, {quote:mitUnentschieden} und Top-8-Quote');
-    assert.strictEqual(raus, 'Listen, S / (S + N + U) und Top-8-Quote');
+    const raus = kontext.__f('Listen, {quote:mitUnentschieden} und Top-8-Conversion');
+    assert.strictEqual(raus, 'Listen, W / (W + L + T) und Top-8-Conversion');
     assert.ok(!HAUSNAMEN.test(raus), 'der Rueckfall darf kein Hausname sein');
 });
 
@@ -307,7 +307,7 @@ test('die Bildkarte faellt auf die Formel zurueck, nie auf einen Hausnamen', () 
     vm.runInContext(
         "var SHARE_KONVENTION = 'mitUnentschieden';" + schnitt
         + '; globalThis.__n = quotenName; globalThis.__f = quotenFormel;', kontext);
-    assert.strictEqual(kontext.__n(), 'S / (S + N + U)');
-    assert.strictEqual(kontext.__f(), 'S / (S + N + U)');
+    assert.strictEqual(kontext.__n(), 'W / (W + L + T)');
+    assert.strictEqual(kontext.__f(), 'W / (W + L + T)');
     assert.ok(!HAUSNAMEN.test(kontext.__n()));
 });

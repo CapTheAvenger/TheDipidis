@@ -36,7 +36,7 @@ pruefe('Hero: Mindeststichprobe für die Überschrift ist >= 100', () => {
     const m = hub.match(/HEADLINE_MIN_BROUGHT\s*=\s*(\d+)/);
     assert.ok(m, 'HEADLINE_MIN_BROUGHT nicht gefunden');
     assert.ok(Number(m[1]) >= 100,
-        `Mindeststichprobe ${m[1]} zu niedrig — Toxtricity Box wurde mit 53 Antritten zum "stärksten Deck" gekürt`);
+        `Mindeststichprobe ${m[1]} zu niedrig — Toxtricity Box wurde mit 53 Listen zum "stärksten Deck" gekürt`);
 });
 
 pruefe('Hero: die Stichprobe steht sichtbar dabei', () => {
@@ -55,10 +55,10 @@ pruefe('Hero: die Stichprobe steht sichtbar dabei', () => {
     const nenner = hub.match(/function answerNenner\(model\) \{[\s\S]*?\n    \}/);
     assert.ok(nenner, 'answerNenner nicht gefunden — wo steht der Nenner jetzt?');
     const n = nenner[0];
-    assert.ok(/von \$\{mit\(best\.brought\)\}/.test(n), 'deutscher Nenner nennt die Antritte nicht');
-    assert.ok(/of \$\{mit\(best\.brought\)\}/.test(n), 'englischer Nenner nennt die Antritte nicht');
+    assert.ok(/von \$\{mit\(best\.brought\)\}/.test(n), 'deutscher Nenner nennt die Listen nicht');
+    assert.ok(/of \$\{mit\(best\.brought\)\}/.test(n), 'englischer Nenner nennt die Listen nicht');
     assert.ok(/\$\{mit\(best\.top8\)\}/.test(n), 'die absolute Zahl der Top-8-Plaetze fehlt');
-    assert.ok(/\$\{gesamt\} gewichteten Antritten/.test(n), 'die Gesamtstichprobe fehlt');
+    assert.ok(/\$\{gesamt\} gewichteten Listen/.test(n), 'die Gesamtstichprobe fehlt');
     // Die AUFRUFSTELLE, nicht die Definition: `function answerNenner(model)`
     // steht auch dann noch da, wenn niemand sie mehr zeichnet.
     assert.ok(/class="ds-note">\$\{answerNenner\(model\)\}/.test(hub),
@@ -156,7 +156,7 @@ pruefe('Meta-Performance: keine Faktor-Zahl mehr, die Rohspalten zeigen ihren We
     // Und die Untergrenze gilt nur fuer den Faktor: die Rohspalten daneben
     // sollen weiterhin zeigen, worauf er verzichtet.
     assert.equal(f({ antritte: 3 }, 'antritte'), '3',
-        'die Antritte selbst muessen sichtbar bleiben');
+        'die Listen selbst muessen sichtbar bleiben');
 });
 
 // ---------------------------------------------------------------------------

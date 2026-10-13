@@ -46,9 +46,9 @@ describe('UI-60/62: Reihenfolge', () => {
         const ok = p.every(i => i > 0) && p.every((x, i) => i === 0 || p[i - 1] < x);
         assert.equal(ok, false);
     });
-    it('die entfernten Bloecke sind weg: Ergebnis-Karte, Histogramm, Begegnungsliste, Einzeltabelle', () => {
+    it('die entfernten Bloecke sind weg: Ergebnis-Karte, Histogramm, Matchup-Liste, Einzeltabelle', () => {
         for (const weg of ['function renderResultsPanel(', 'function renderUebersichtPanel(', 'mc-histogram-wrap',
-            'mc-encounter-row', 'Alle Paarungen einzeln']) {
+            'mc-encounter-row', 'Alle Matchups einzeln']) {
             assert.ok(!QUELLE.includes(weg), weg + ' ist wieder da');
         }
     });
@@ -81,7 +81,7 @@ describe('UI-60/62: Reihenfolge', () => {
 const ABHAENGIG = ['function _erwarteteSiege(', 'function renderDeckGegenMetaPanel('];
 function uebersicht(o) {
     return baue(MC, ABHAENGIG, Object.assign({
-        _inFrozenPastMode: () => false, _evL: (d) => d, _evQuotenName: () => 'Siegquote',
+        _inFrozenPastMode: () => false, _evL: (d) => d, _evQuotenName: () => 'Win Rate',
         _mcNum: (n, k) => n.toFixed(k).replace('.', ','), _mcPz: () => ' %',
         _predictTitleKey: () => 'mc.day2Chance', esc, t: (k) => k, zahlLokal: (n) => String(n),
         _settings: { myDeck: 'Dragapult', day2Points: 18, rounds: 9 },
@@ -101,7 +101,7 @@ describe('UI-60/62: Ergebnis-Kacheln', () => {
         assert.match(h, /mc-uebersicht-leer/);
         assert.ok(!/mc-ev-wert/.test(h));
     });
-    it('mit Deck: Quote, Day-2 (gefaerbt) und Bilanz in der Reihenfolge W–L–T', () => {
+    it('mit Deck: Quote, Day-2 (gefaerbt) und Bilanz in der Reihenfolge W-L-T', () => {
         const h = uebersicht().renderDeckGegenMetaPanel([]);
         assert.match(h, /53,4/);
         assert.match(h, /41,0/);
@@ -109,7 +109,7 @@ describe('UI-60/62: Ergebnis-Kacheln', () => {
         assert.match(h, /ab 18 Punkten nach 9 Runden/);
         const bil = h.match(/mc-ev-bilanz">([\s\S]*?)<\/span>\s*<span class="mc-ev-kontext"/)[1]
             .replace(/<[^>]+>/g, '');
-        assert.equal(bil, '5,1–3,4–0,5', 'W–L–T, nicht W–T–L');
+        assert.equal(bil, '5,1–3,4–0,5', 'W-L-T, nicht W–T–L');
     });
     it('VERFAELSCHUNG: aendert sich die Rechnung, aendert sich die Zahl; vertauschte Bilanz faellt auf', () => {
         const h = uebersicht({ calcDay2: () => ({ day2Prob: 0.7, expWin: 7, expLoss: 1, expTie: 1 }) })
@@ -131,9 +131,9 @@ describe('UI-60/62: Ergebnis-Kacheln', () => {
         assert.match(h, /<details class="mc-klappe">[\s\S]*Rechenweg/);
         assert.ok(!/<details class="mc-klappe" open/.test(h));
     });
-    it('ohne gemessene Paarung: Aussage statt erfundener Quote', () => {
+    it('ohne gemessene Matchup: Aussage statt erfundener Quote', () => {
         const h = uebersicht({ _evRechne: () => null }).renderDeckGegenMetaPanel([]);
-        assert.match(h, /keine? gemessene Paarung|gemessene Paarung vor/);
+        assert.match(h, /kein gemessenes Matchup|gemessenes Matchup vor/);
         assert.ok(!/mc-ev-wert/.test(h));
     });
 });

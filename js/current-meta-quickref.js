@@ -655,7 +655,7 @@
         ? _tt('cm.quickRefLoadError', 'Could not load reference data.')
         : nurOnline
           ? (deM2
-              ? 'Für dieses Deck liegt bisher keine Liste von einem Präsenzturnier vor — nur Online-Listen, und die stehen rechts.'
+              ? 'Für dieses Deck liegt bisher keine Liste von einem Major vor — nur Online-Listen, und die stehen rechts.'
               : 'No in-person list for this deck yet — only online lists, and those are on the right.')
           : _tt('cm.quickRefNoMajor', 'No per-decklist data for this archetype yet.');
       majorBody.innerHTML = `<p class="past-meta-section-hint past-meta-empty-state">${_escHtml(msg)}</p>`;
@@ -722,17 +722,17 @@
       let _tag2M = deM ? 'Day-2-Liste' : 'Day 2 list';
       if (_feldM.n_piloten !== null) {
         _tag2M += deM
-          ? ` — ${_zahlM(_feldM.n_piloten)} Piloten`
+          ? ` — ${_zahlM(_feldM.n_piloten)} Spieler mit dem Deck`
           : ` — ${_zahlM(_feldM.n_piloten)} pilots`;
       }
       if (_feldM.feldgroesse !== null) {
         _tag2M += deM
-          ? `, ${_zahlM(_feldM.feldgroesse)} Spieler`
+          ? `, ${_zahlM(_feldM.feldgroesse)} im Turnier`
           : `, ${_zahlM(_feldM.feldgroesse)} players`;
       }
       const _titelM = deM
         ? 'Limitless veroeffentlicht Decklisten erst ab Day 2. Diese Liste stammt '
-          + 'aus dem Top Cut, nicht aus dem ganzen Feld — die Platzierung ist die '
+          + 'aus dem Top Cut, nicht aus dem ganzen Meta — die Platzierung ist die '
           + 'im Gesamtfeld, die veroeffentlichten Listen sind nur die des Cuts.'
         : 'Limitless publishes decklists from Day 2 onward. This list comes from the '
           + 'top cut, not the whole field — the placement is field-wide, the published '
@@ -841,13 +841,13 @@
     const _feldLbl = _tp === null
       ? ''
       : (deO
-          ? `${_trenn}von ${_zahlO(_tp)} Spielern im Feld`
+          ? `${_trenn}von ${_zahlO(_tp)} Spielern im Turnier`
           : `${_trenn}of ${_zahlO(_tp)} players in the field`);
     const _titelO = deO
       ? 'Online-Turniere veroeffentlichen nur einen kleinen Teil ihrer Listen — '
-        + 'nicht das Feld und auch keinen Day-2-Cut. Nachgezaehlt in '
+        + 'nicht das ganze Turnier und auch keinen Day-2-Cut. Nachgezaehlt in '
         + 'data/online_tournament_dated_cards.csv: bei keinem der 321 erfassten '
-        + 'Turniere decken die veroeffentlichten Listen das Feld ab (groesstes '
+        + 'Turniere decken die veroeffentlichten Listen das Turnier ab (groesstes '
         + 'Beispiel: 909 Spieler, 17 Listen). Der typische Build steht also auf '
         + 'dieser Stichprobe, nicht auf dem Online-Meta.'
       : 'Online tournaments publish only a small share of their lists — neither the '

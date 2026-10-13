@@ -160,7 +160,7 @@
         }
         if (u.feldGesamt && u.restAnteil) {
             z.push(de
-                ? 'Das sind ' + zahlKomma((100 - u.restAnteil)) + ' % des Feldes. '
+                ? 'Das sind ' + zahlKomma((100 - u.restAnteil)) + ' % des Metas. '
                   + 'Die übrigen ' + g(u.feldGesamt - u.listen) + ' Listen führt Limitless als '
                   + '„Other“ und meldet sie nicht einzeln.'
                 : 'That is ' + (100 - u.restAnteil).toFixed(1) + ' % of the field. The remaining '
@@ -169,15 +169,15 @@
         }
         if (u.antritte) {
             z.push(de
-                ? g(u.antritte) + ' gewichtete Turnier-Antritte — die zweite, unabhängige '
-                  + 'Zählung desselben Metas. Aus ihr kommen Antritte und Top-8-Quoten.'
+                ? g(u.antritte) + ' gewichtete Turnier-Listen — die zweite, unabhängige '
+                  + 'Zählung desselben Metas. Aus ihr kommen Listen und Top-8-Conversions.'
                 : g(u.antritte) + ' weighted tournament entries — the second, independent count '
                   + 'of the same field. Entries and top-8 rates come from it.');
         }
         if (u.top8Anteil) {
             z.push(de
                 ? 'Auf die acht größten Archetypen — in der Szene die Top 8 Archetypes — '
-                  + 'entfallen ' + u.top8Anteil.toFixed(0) + ' % des Feldes. Daran lässt sich '
+                  + 'entfallen ' + u.top8Anteil.toFixed(0) + ' % des Metas. Daran lässt sich '
                   + 'ablesen, wie eng das Meta gerade ist.'
                 : 'The eight largest archetypes — the top 8 archetypes — account for '
                   + u.top8Anteil.toFixed(0) + ' % of the field. That is how concentrated the '

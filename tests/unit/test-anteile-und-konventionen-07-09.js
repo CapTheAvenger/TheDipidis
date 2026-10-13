@@ -217,9 +217,9 @@ function knoten2(id) {
 
 /* ══ BEFUND B1 ══════════════════════════════════════════════════════ */
 
-describe('B1 — zwei Anteile, zwei Grundgesamtheiten, beide benannt', () => {
+describe('B1 — zwei Shares, zwei Grundgesamtheiten, beide benannt', () => {
 
-    it('die Startseite rechnet den Anteil gegen die Summe der Antritte', () => {
+    it('die Startseite rechnet den Share gegen die Summe der Listen', () => {
         const sb = ladeHub('de');
         const modell = sb._metaHubIntern.answerModel(TOP8);
         assert.ok(modell, 'answerModel liefert nichts');
@@ -233,7 +233,7 @@ describe('B1 — zwei Anteile, zwei Grundgesamtheiten, beide benannt', () => {
             assert.ok(zeile, 'Kachel ohne Zeile in der Datei: ' + d.name);
             assert.equal(Math.round(d.sharePct * 1e6),
                 Math.round((zahl(zeile.total_brought) / summe) * 100 * 1e6),
-                d.name + ': der Anteil folgt nicht aus total_brought / Summe');
+                d.name + ': der Share folgt nicht aus total_brought / Summe');
         }
     });
 
@@ -244,13 +244,13 @@ describe('B1 — zwei Anteile, zwei Grundgesamtheiten, beide benannt', () => {
         const gesamt = Math.round(modell.totalBrought).toLocaleString('de-DE');
         for (const d of modell.top) {
             const eigen = Math.round(d.brought).toLocaleString('de-DE');
-            assert.ok(html.includes(`${eigen} von ${gesamt} Antritten`),
+            assert.ok(html.includes(`${eigen} von ${gesamt} Listen`),
                 `die Kachel "${d.name}" nennt ihren Nenner nicht: erwartet `
-                + `"${eigen} von ${gesamt} Antritten"`);
+                + `"${eigen} von ${gesamt} Listen"`);
         }
         /* Die alte, nennerlose Fassung darf nicht zurueckkommen. */
-        assert.ok(!/aus \d[\d.]* Antritten<br>/.test(html),
-            'die Kachel steht wieder auf "aus N Antritten" ohne Grundgesamtheit');
+        assert.ok(!/aus \d[\d.]* Listen<br>/.test(html),
+            'die Kachel steht wieder auf "aus N Listen" ohne Grundgesamtheit');
     });
 
     it('die Deck-Analyse grenzt das Limitless-Feld aus der Datei ein', () => {
@@ -314,7 +314,7 @@ describe('B1 — zwei Anteile, zwei Grundgesamtheiten, beide benannt', () => {
             .map(a => `${a.name} ${a.s} vs ${a.rek.toFixed(4)} (${a.d.toFixed(4)})`);
         assert.ok(daneben.length <= Math.max(1, Math.round(abweichungen.length * 0.02)),
             `${daneben.length} von ${abweichungen.length} Zeilen geben die `
-            + `Anteilsspalte nicht wieder her — das ist kein Rundungsrand mehr, `
+            + `Share-Spalte nicht wieder her — das ist kein Rundungsrand mehr, `
             + `sondern ein falscher Nenner: ${daneben.join(' · ')}`);
         const groesste = abweichungen.reduce((m, a) => a.d > m.d ? a : m, abweichungen[0]);
         assert.ok(groesste.d < 0.02,
@@ -367,8 +367,8 @@ describe('B1 — zwei Anteile, zwei Grundgesamtheiten, beide benannt', () => {
         assert.ok(/data\/online_tournament_top8_decks\.csv/.test(html),
             'der Hinweis der Deck-Analyse verweist nicht auf die ANDERE Grundgesamtheit — '
             + 'dann bleiben zwei Zahlen unter einem Wort stehen');
-        assert.ok(/Antritte/.test(html),
-            'der Hinweis sagt nicht, dass die Startseite Antritte zaehlt');
+        assert.ok(/Listen/.test(html),
+            'der Hinweis sagt nicht, dass die Startseite Listen zaehlt');
     });
 
     it('die beiden Zahlen sind wirklich verschieden — sonst prueft B1 nichts', () => {
@@ -390,7 +390,7 @@ describe('B1 — zwei Anteile, zwei Grundgesamtheiten, beide benannt', () => {
             if (Math.abs(a - b) > 0.5) paare.push(r.deck_name);
         }
         assert.notEqual(paare.length, 0,
-            'kein einziges Deck steht auf zwei verschiedenen Anteilen — dann gab es '
+            'kein einziges Deck steht auf zwei verschiedenen Shares — dann gab es '
             + 'den Befund nicht, und diese Datei prueft ins Leere');
     });
 });
@@ -426,7 +426,7 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
         assert.notEqual(WK.kurz('ohneUnentschieden'), 'Win %');
     });
 
-    it('die Deck-Kachel: die Datei rechnet S/(S+N+U), die Kachel S/(S+N) — und der Text sagt das', () => {
+    it('die Deck-Kachel: die Datei rechnet S/(S+N+U), die Kachel W/(W+L) — und der Text sagt das', () => {
         const WK = konventionen('de');
         /* WELCHE Konvention wirklich gerechnet wird, kommt aus den DATEN:
            Zeilen, bei denen genau EINE der drei die Spalte trifft. */
@@ -468,7 +468,7 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
             'der Nenner ist beim Umbenennen verloren gegangen');
     });
 
-    it('das Matchup-Detail: die Datei rechnet S/(S+N) — und der Text sagt das', () => {
+    it('das Matchup-Detail: die Datei rechnet W/(W+L) — und der Text sagt das', () => {
         const WK = konventionen('de');
         const bilanz = (r) => String(r.record || '').split(/\s*-\s*/).map(x => zahl(x));
         const eindeutig = MU.filter(r => {
@@ -483,7 +483,7 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
             return passendeKonventionen(WK, zahl(r.win_rate), b[0], b[1], b[2], 0.01)[0];
         }));
         assert.deepEqual([...ids], ['ohneUnentschieden'],
-            'data/limitless_online_decks_matchups.csv rechnet nicht mehr S/(S+N)');
+            'data/limitless_online_decks_matchups.csv rechnet nicht mehr W/(W+L)');
 
         const zeile = eindeutig[0];
         const s = cmSandkasten({
@@ -510,7 +510,7 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
             'der Text behauptet einen anderen Namen als die Konvention, die er rechnet '
             + '— genau Befund B2.\nText: ' + text);
         assert.notEqual(behaupteterName(text), WK.kurz('matchpunkte'),
-            'der reservierte Name steht wieder ueber S/(S+N)');
+            'der reservierte Name steht wieder ueber W/(W+L)');
         assert.ok(text.includes(WK.KONVENTIONEN.ohneUnentschieden.formel), 'die Formel fehlt');
     });
 
@@ -568,7 +568,7 @@ describe('B2 — "Win %" nur dort, wo Matchpunkte gerechnet werden', () => {
         // DA-47 (05.10.2026): die Kachel rechnet S/(S+N), der Satz nennt das.
         assert.ok(html.includes(WK.kurz('ohneUnentschieden')),
             'der Zeitraum-Satz nennt die Konvention der Online-Quote nicht beim Namen');
-        assert.ok(!/Anteil, Win % und Top-8-Quote/.test(html),
+        assert.ok(!/Share, Win % und Top-8-Conversion/.test(html),
             'die Karte behauptet wieder "Win %" ueber einer S/(S+N+U)-Quote');
     });
 });

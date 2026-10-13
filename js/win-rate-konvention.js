@@ -129,9 +129,9 @@
                 toleranz: 0.0051,
                 treffer: 4713,
             },
-            langDe: 'Win % — so nennt Limitless diese Spalte: ein Sieg zaehlt 3, '
-                  + 'ein Unentschieden 1, eine Niederlage 0. Das ist, was über die '
-                  + 'Platzierung entscheidet. Bei Unentschieden liegt der '
+            langDe: 'Win % — so nennt Limitless diese Spalte: ein Win zaehlt 3, '
+                  + 'ein Tie 1, eine Loss 0. Das ist, was über die '
+                  + 'Platzierung entscheidet. Bei Ties liegt der '
                   + 'Gleichstand deshalb unter 50 %.',
             langEn: 'Win % — the label Limitless uses for this column: a win counts 3, '
                   + 'a tie 1, a loss 0. This is what decides standings. With ties '
@@ -145,7 +145,7 @@
             id: 'mitUnentschieden',
             kuerzelDe: 'WR*',
             kuerzelEn: 'WR*',
-            formel: 'S / (S + N + U)',
+            formel: 'W / (W + L + T)',
             /* DIE KURZNAMEN MUESSEN AUSEINANDERZUHALTEN SEIN (07.09.2026).
                Bis heute hiessen die beiden Nicht-Win-%-Konventionen
                "Siege je Match" und "Siege je entschiedenem Match" — zwei
@@ -168,12 +168,12 @@
                ohneUnentschieden). Diese Konvention steht nur noch dort, wo
                die Quelle keine Bilanz liefert (Pocket, Bildkarten) — mit
                ihrem eigenen, unverwechselbaren Namen. */
-            kurzDe: 'Siegquote inkl. Unentschieden',
+            kurzDe: 'Win Rate inkl. Ties',
             kurzEn: 'Win share incl. ties',
-            langDe: 'Anteil gewonnener Matches an allen gespielten — Unentschieden '
-                  + 'zaehlen im Nenner mit, aber nicht als halber Sieg. Die Zahl '
-                  + 'sinkt, je haeufiger unentschieden gespielt wird; zwischen zwei '
-                  + 'Metas mit verschiedener Unentschieden-Quote ist sie deshalb '
+            langDe: 'Anteil gewonnener Matches an allen gespielten — Ties '
+                  + 'zaehlen im Nenner mit, aber nicht als halber Win. Die Zahl '
+                  + 'sinkt, je haeufiger Ties gespielt werden; zwischen zwei '
+                  + 'Metas mit verschiedener Tie-Quote ist sie deshalb '
                   + 'nicht vergleichbar.',
             langEn: 'Share of matches won out of all matches played — ties count in the '
                   + 'denominator, but not as half a win. The figure drops as ties get '
@@ -210,16 +210,16 @@
             id: 'ohneUnentschieden',
             kuerzelDe: 'WR',
             kuerzelEn: 'WR',
-            formel: 'S / (S + N)',
+            formel: 'W / (W + L)',
             /* DA-47 (05.10.2026): die EINE Win-Rate der Seite. Bis heute
                trug sie den langen Namen „Siegquote ohne Unentschieden" und
                „Win-Rate" hiess S/(S+N+U) — fuer dieselbe Bilanz standen
                45,9 / 39,2 / 44,0 % (Mega Excadrill, Major) auf einer Seite. */
             kurzDe: 'Win Rate',
             kurzEn: 'Win rate',
-            langDe: 'Anteil gewonnener an den entschiedenen Matches — Unentschieden '
+            langDe: 'Anteil gewonnener an den entschiedenen Matches — Ties '
                   + 'bleiben ganz aussen vor. Als einzige der drei Konventionen '
-                  + 'haengt sie nicht davon ab, wie oft im Meta unentschieden '
+                  + 'haengt sie nicht davon ab, wie oft im Meta ein Tie '
                   + 'gespielt wird; nur sie darf zwischen zwei Quellen verrechnet '
                   + 'werden.',
             langEn: 'Share of decided matches won — ties are left out entirely. Alone '
@@ -304,9 +304,9 @@
         var k = hol(id);
         if (!k) return '';
         var zusatz = de()
-            ? { matchpunkte: 'Win % · Sieg 3, Unentschieden 1',
-                mitUnentschieden: 'Unentschieden zählen mit',
-                ohneUnentschieden: 'ohne Unentschieden' }
+            ? { matchpunkte: 'Win % · Win 3, Tie 1',
+                mitUnentschieden: 'Ties zählen mit',
+                ohneUnentschieden: 'ohne Ties' }
             : { matchpunkte: 'Win % · win 3, tie 1',
                 mitUnentschieden: 'ties count in the denominator',
                 ohneUnentschieden: 'ties left out' };

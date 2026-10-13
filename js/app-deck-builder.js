@@ -4069,7 +4069,7 @@ if (typeof window.addEventListener === 'function') {
             const de = (typeof getLang === 'function' && getLang() === 'de');
             if (skala.id === 'y2_anteil') {
                 return de
-                    ? 'Skala „score“: 0–100. Der Wert IST der erfolgsgewichtete Anteil '
+                    ? 'Skala „score“: 0–100. Der Wert IST der erfolgsgewichtete Share '
                     + 'der ausgewerteten Day-2-Listen in Prozent — dieselbe Zahl wie '
                     + 'das „% share“ daneben, nur gerundet.'
                     : 'Scale of "score": 0–100. The value IS the success-weighted share '
@@ -4077,10 +4077,10 @@ if (typeof window.addEventListener === 'function') {
                     + '"% share" badge next to it, only rounded.';
             }
             return de
-                ? 'Skala „score“: 0–120. Der Wert ist KEIN Anteil, sondern die '
-                + 'Ordnungsgröße der Stufen: Anteil × (1 + Meta-Boost), gedeckelt bei '
-                + '120, dazu +18 für den gewählten Tech-Konter, −20 für verdrängte '
-                + 'Konter und ein Deckel bei 24 für Karten, die im letzten Major '
+                ? 'Skala „score“: 0–120. Der Wert ist KEIN Share, sondern die '
+                + 'Ordnungsgröße der Stufen: Share × (1 + Meta-Boost), gedeckelt bei '
+                + '120, dazu +18 für den gewählten Tech-Counter, −20 für verdrängte '
+                + 'Counter und ein Deckel bei 24 für Karten, die im letzten Major '
                 + 'fehlen. Die Schwellen 75 (Kern), 40 (erweitert) und 25 (Tech) '
                 + 'beziehen sich auf diese Skala.'
                 : 'Scale of "score": 0–120. The value is NOT a share but the ordering '
@@ -4268,7 +4268,7 @@ if (typeof window.addEventListener === 'function') {
                     if (_y2) {
                         const n = acePick.major_total_decks > 0
                             ? ` von ${acePick.major_total_decks} Listen` : '';
-                        parts.push(`Präsenz ${c.archetype_share != null ? c.archetype_share + ' %' : '—'}${n}`);
+                        parts.push(`Major ${c.archetype_share != null ? c.archetype_share + ' %' : '—'}${n}`);
                     } else if (c.major_share != null) {
                         const fraction = (c.major_deck_count > 0 && acePick.major_total_decks > 0)
                             ? `${c.major_deck_count}/${acePick.major_total_decks}`
@@ -4762,7 +4762,7 @@ if (typeof window.addEventListener === 'function') {
                     row.textContent =
                         `Gleichstand bei ${Math.round((f.share || 0) * 100)} %: `
                         + `${(f.drin || []).join(', ')} kam hinein, `
-                        + `${(f.raus || []).join(', ')} nicht — bei identischem Anteil `
+                        + `${(f.raus || []).join(', ')} nicht — bei identischem Share `
                         + `entscheidet die Reihenfolge, nicht die Qualität. `
                         + `Diese Karten lohnt es, von Hand gegeneinander abzuwägen.`;
                     nmWrap.appendChild(row);
@@ -7333,8 +7333,8 @@ if (typeof window.addEventListener === 'function') {
                             : ', no threshold on record')
                       + '.',
                 hint: (de
-                    ? 'Dieser Bau kommt deshalb NICHT aus den Präsenz-Decklisten, sondern '
-                      + 'aus den aggregierten Archetyp-Anteilen (Legacy-Stufen). Die '
+                    ? 'Dieser Bau kommt deshalb NICHT aus den Decklisten vor Ort, sondern '
+                      + 'aus den aggregierten Archetyp-Shares (Legacy-Stufen). Die '
                       + 'Schwelle bleibt unverändert — sie ist eine '
                       + 'Stichprobenuntergrenze, keine Aussage über das Deck.'
                     : 'This build therefore does NOT come from the in-person decklists but '
@@ -8839,7 +8839,7 @@ if (typeof window.addEventListener === 'function') {
                                 : '';
                             return `${_aceTraceEntry.chosen || ''} steht in `
                                  + `${zahlKomma(Number(((cands[0] && cands[0].weightedShare || 0) * 100)))} % `
-                                 + `der ausgewerteten Präsenz-Day-2-Listen — ${_wo}.`
+                                 + `der ausgewerteten Day-2-Listen vor Ort — ${_wo}.`
                                  + (_ankerAlter != null ? ` Das ist ${_ankerAlter} Tage her.` : '')
                                  + _alt;
                         })(),
@@ -8985,10 +8985,10 @@ if (typeof window.addEventListener === 'function') {
                         if (Math.abs(pOnline - pMajor) < 15) continue;
                         katAudit.push({
                             level: e.gebaut === 0 && pOnline >= 50 ? 'warn' : 'info',
-                            message: `${k}: Präsenz ${e.listenMit}/${e.listen} `
+                            message: `${k}: vor Ort ${e.listenMit}/${e.listen} `
                                    + `(${pMajor.toFixed(0)} %) · online ~${mit}/${onlineListen} `
                                    + `(${pOnline.toFixed(0)} %) — gebaut: ${e.gebaut}`,
-                            hint: 'Gebaut wird aus den Präsenzlisten. Die Online-Zahl '
+                            hint: 'Gebaut wird aus den Listen vor Ort. Die Online-Zahl '
                                 + 'ist eine Näherung: online liegen nur Aggregate vor, '
                                 + 'keine Listen — wer zwei Karten dieser Kategorie '
                                 + 'spielt, ist doppelt gezählt.',

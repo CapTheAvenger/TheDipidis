@@ -215,7 +215,7 @@ describe('eine Zahl und ihr Nenner meinen dieselbe Menge', () => {
         assert.match(CDB, /const kachelZahl = cards\.length;/);
         assert.match(CDB, /const zusatz = kachelZahl - realCardsCount;/);
         assert.match(CDB, /zusatz > 0/,
-            'der Zusatz steht auch dann da, wenn es keine gestempelten Drucke gibt');
+            'der Zusatz steht auch dann da, wenn es keine gestempelten Prints gibt');
         /* BEFUND DER ABNAHME (03.09.2026): bis hierher pruefte die
            Datei nur die Zutaten. `+ kachelSatz` aus beiden Zweigen zu
            entfernen liess alle 21 Zusicherungen gruen — der Satz waere
@@ -235,7 +235,7 @@ describe('eine Zahl und ihr Nenner meinen dieselbe Menge', () => {
         assert.match(bau(T, 'de-DE', { length: 15130 }, 14990),
             /15\.?130.*140/, 'der Satz nennt Kachelzahl und Zusatz nicht mehr');
         assert.equal(bau(T, 'de-DE', { length: 14990 }, 14990), '',
-            'ohne gestempelte Drucke darf kein Zusatz stehen');
+            'ohne gestempelte Prints darf kein Zusatz stehen');
         ['cdb.kachelZusatz'].forEach(k => {
             const n = (I18N.match(new RegExp("'" + k + "'", 'g')) || []).length;
             assert.equal(n, 2, `${k} fehlt in einer der beiden Sprachen`);
@@ -364,7 +364,7 @@ describe('eine Zahl und ihr Nenner meinen dieselbe Menge', () => {
            zurueck. */
         const MC = ohneKomm(lies('js/app-meta-cards.js'));
         assert.match(MC, /_kommaZahl\(card\.metaShare, 1\)/,
-            'der Anteil geht nicht mehr durch die Komma-Funktion');
+            'der Share geht nicht mehr durch die Komma-Funktion');
         assert.match(MC, /_kopienBoden\(card\.avgCount\)/,
             'der Kopienboden ist weg — dann steht wieder "Ø 0x"');
         assert.doesNotMatch(MC, /card\.metaShare\.toFixed\(1\)/);
@@ -392,7 +392,7 @@ describe('eine Zahl und ihr Nenner meinen dieselbe Menge', () => {
             'der gemeinsame Schalter fehlt');
         assert.equal((SH.match(/majorGarNicht \? ''/g) || []).length, 3,
             'nicht alle drei Major-Zeilen haengen am Schalter');
-        assert.match(SH, /Präsenzturniere: für dieses Deck liegen in diesem Format keine vor/,
+        assert.match(SH, /Majors: für dieses Deck liegen in diesem Format keine vor/,
             'der EINE Satz im Fuss fehlt');
         /* Und die Gegenrichtung: liegt IRGENDWO etwas vor, bleibt der
            Hinweis an der Stelle stehen, an der er etwas sagt. */
@@ -433,7 +433,7 @@ describe('dieselbe Funktion heisst auf beiden Reitern gleich', () => {
     }
 
     [
-        ['filter.allPrints', 'cl.rarityAll', 'Alle Drucke / Alle Prints'],
+        ['filter.allPrints', 'cl.rarityAll', 'Alle Prints / Alle Prints'],
         ['filter.typeSpecEnergy', 'cl.typeSpecEnergy', 'Spez. Energie / Spezial-Energie'],
     ].forEach(([a, b, was]) => {
         it(`${was}`, () => {
@@ -499,7 +499,7 @@ describe('die Methodikseite sagt in beiden Sprachen dasselbe', () => {
        geschlossen, damit ein Satz als Satz gelesen wird. */
     const Q = ohneKomm(lies('js/app-quellen.js')).replace(/'\s*\+\s*\n\s*'/g, '');
 
-    it('die Win Rate wird nicht mehr mit halben Unentschieden erklaert', () => {
+    it('die Win Rate wird nicht mehr mit halben Ties erklaert', () => {
         /* js/win-rate-konvention.js fuehrt genau diese Variante als die
            ERFUNDENE vierte und schreibt: "Sie ist hier bewusst NICHT
            aufgefuehrt". Die englische Methodikseite fuehrte sie als die

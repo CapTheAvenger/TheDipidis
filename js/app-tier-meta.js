@@ -275,7 +275,7 @@
             /* DA-47 (05.10.2026): der Name der Quote kommt aus
                js/win-rate-konvention.js — S/(S+N), die Zahl der Tier-Karte. */
             const _WK = (typeof window !== 'undefined' && window.WinRateKonvention) || null;
-            const wrN = _WK ? _WK.kurz('ohneUnentschieden') : 'S/(S+N)';
+            const wrN = _WK ? _WK.kurz('ohneUnentschieden') : 'W/(W+L)';
             const z = (x, st) => {
                 const n = Number(x);
                 if (!Number.isFinite(n)) return '?';
@@ -290,9 +290,9 @@
             const labsDe = g.labsAktiv
                 ? ('und, wo eine Turnierdatei vorliegt (ab ' + ganz(g.labsMinPartien)
                    + ' Matches je Deck), der Turnier-' + wrN + ' über 50 (bis +' + z(g.labsWrDeckel, 0)
-                   + ' pp, Gewicht ' + z(g.labsWrGewicht, 1) + ') samt Day-2-Quote (bis '
+                   + ' pp, Gewicht ' + z(g.labsWrGewicht, 1) + ') samt Day-2-Conversion (bis '
                    + z(g.tag2Deckel, 2) + ', Gewicht ' + z(g.tag2Gewicht, 0) + ')')
-                : 'Für dieses Meta liegt KEINE Turnierdatei vor — der dritte Anteil (Turnier-' + wrN + ' und Day-2-Quote) fehlt, gerechnet wurde nur aus Anteil und ' + wrN;
+                : 'Für dieses Meta liegt KEINE Turnierdatei vor — der dritte Share (Turnier-' + wrN + ' und Day-2-Conversion) fehlt, gerechnet wurde nur aus Share und ' + wrN;
             const labsEn = g.labsAktiv
                 ? ('and, where a tournament file exists (from ' + ganz(g.labsMinPartien)
                    + ' matches per deck), tournament ' + wrN + ' above 50 (up to +' + z(g.labsWrDeckel, 0)
@@ -318,15 +318,15 @@
                 : '';
 
             const text = de
-                ? ('Grundlage der Reihenfolge: nicht der Meta-Anteil allein, sondern ein '
-                   + 'zusammengesetzter Wert aus Anteil (bis ' + z(g.anteilDeckel, 0) + ' %, Gewicht '
+                ? ('Grundlage der Reihenfolge: nicht der Meta-Share allein, sondern ein '
+                   + 'zusammengesetzter Wert aus Share (bis ' + z(g.anteilDeckel, 0) + ' %, Gewicht '
                    + z(g.anteilGewicht, 1) + '), ' + wrN + ' über 50 (bis +' + z(g.wrDeckel, 0) + ' pp, Gewicht '
                    + z(g.wrGewicht, 1) + '; geglättet gegen einen Vorwert von ' + ganz(g.vorListen)
                    + ' Listen bei 50 %)' + (g.labsAktiv ? ' ' : '. ') + labsDe + '. '
                    + 'Tier 1 fasst höchstens ' + ganz(g.t1Max) + ' Decks und verlangt zusätzlich mindestens '
-                   + z(g.minShare, 1) + ' % Anteil und ' + z(g.minWR, 1) + ' % ' + wrN + '; Tier 2 höchstens '
+                   + z(g.minShare, 1) + ' % Share und ' + z(g.minWR, 1) + ' % ' + wrN + '; Tier 2 höchstens '
                    + ganz(g.t2Max) + ', Tier 3 höchstens ' + ganz(g.t3Max) + '.' + listenDe
-                   + ' Deshalb kann ein Deck mit höherem Anteil unter einem mit niedrigerem stehen.')
+                   + ' Deshalb kann ein Deck mit höherem Share unter einem mit niedrigerem stehen.')
                 : ('Basis of this order: not meta share alone, but a composite score of share (up to '
                    + z(g.anteilDeckel, 0) + ' %, weight ' + z(g.anteilGewicht, 1) + '), ' + wrN + ' above 50 (up to +'
                    + z(g.wrDeckel, 0) + ' pp, weight ' + z(g.wrGewicht, 1) + '; shrunk against a prior of '
@@ -421,11 +421,11 @@
                 // nur fuer 7 von 138 Zeilen. Die uebrigen 131 stehen auf den
                 // gemeldeten Listen der Ladder. Jetzt nennt der Text beide
                 // Nenner, und die sieben Ausnahmen sind in der Spalte markiert.
-                share: 'Anteil an den gemeldeten Listen der Limitless-Online-Turniere. Decks ohne eigene Zeile dort zeigen stattdessen ihren Anteil an den gewichteten Turnier-Antritten — diese Werte stehen kursiv.',
-                top8: 'Wie oft dieses Deck aus seinen Antritten die Top 8 erreicht hat. Nach Aktualität gewichtet: Turniere der letzten sieben Tage zählen voll, ältere halb — damit die Quote das heutige Meta abbildet und nicht die Turniere vom Frühjahr. Das ist eine grobe Stufe, kein Naturgesetz.',
+                share: 'Share an den gemeldeten Listen der Limitless-Online-Turniere. Decks ohne eigene Zeile dort zeigen stattdessen ihren Share an den gewichteten Turnier-Listen — diese Werte stehen kursiv.',
+                top8: 'Wie oft dieses Deck aus seinen Listen die Top 8 erreicht hat. Nach Aktualität gewichtet: Turniere der letzten sieben Tage zählen voll, ältere halb — damit die Quote das heutige Meta abbildet und nicht die Turniere vom Frühjahr. Das ist eine grobe Stufe, kein Naturgesetz.',
                 vsField: '1,6-mal heißt: erreicht die Top 8 anderthalbmal so oft wie ein durchschnittliches Deck. Kleine Stichproben werden zum Durchschnitt hin geglättet (k = 50) — der rohe Wert steht im Tooltip der Zelle.',
-                prev: 'Anteil im vorherigen Vergleichszeitraum.',
-                delta: 'Veränderung des Anteils in Prozentpunkten. Gelistet ab 0,4 pp.',
+                prev: 'Share im vorherigen Vergleichszeitraum.',
+                delta: 'Veränderung des Shares in Prozentpunkten. Gelistet ab 0,4 pp.',
             },
             en: {
                 share: 'Share of reported lists from the Limitless online tournaments. Decks with no row of their own there show their share of weighted tournament entries instead — those values are italic.',
@@ -1781,8 +1781,8 @@
                        Spalte new_winrate, also MIT_UNENTSCHIEDEN. */
                     const wrTitel = tierQuotenHinweis(item.mitBilanz ? 'ohneUnentschieden' : 'mitUnentschieden') + '  ' + (getLang() === 'de'
                         ? (item.mitBilanz
-                            ? `Siege und Niederlagen aller Varianten zusammen: ${item.siege.toLocaleString('de-DE')}–${item.niederlagen.toLocaleString('de-DE')}${antritte > 0 ? `, über ${nZahl} Antritte` : ''}.`
-                            : (antritte > 0 ? `Gewichteter Durchschnitt über ${nZahl} Antritte.` : 'Gewichteter Durchschnitt.'))
+                            ? `Wins und Losses aller Varianten zusammen: ${item.siege.toLocaleString('de-DE')}–${item.niederlagen.toLocaleString('de-DE')}${antritte > 0 ? `, über ${nZahl} Listen` : ''}.`
+                            : (antritte > 0 ? `Gewichteter Durchschnitt über ${nZahl} Listen.` : 'Gewichteter Durchschnitt.'))
                         : (item.mitBilanz
                             ? `Wins and losses of all variants combined: ${item.siege.toLocaleString('en-US')}–${item.niederlagen.toLocaleString('en-US')}${antritte > 0 ? `, across ${nZahl} entries` : ''}.`
                             : (antritte > 0 ? `Weighted average across ${nZahl} entries.` : 'Weighted average.')));
@@ -2366,12 +2366,12 @@
                                  en: tierQuotenHinweis('ohneUnentschieden') } },
                         /* FE-6: die Major-Werte daneben — nur sichtbar, wenn der
                            Auszug des laufenden Formats Zeilen traegt. */
-                        { k: 'majorAnteil', de: 'Major-Anteil', en: 'Major share', num: true,
-                          tip: { de: 'Anteil an den Antritten der Präsenzturniere (Majors) im laufenden Format.',
+                        { k: 'majorAnteil', de: 'Major-Share', en: 'Major share', num: true,
+                          tip: { de: 'Share an den Listen der Majors im laufenden Format.',
                                  en: 'Share of entries at in-person events (majors) in the current format.' } },
                         { k: 'majorWr', de: 'Major ' + tierQuotenName('ohneUnentschieden'),
                                         en: 'Major ' + tierQuotenName('ohneUnentschieden'), num: true,
-                          tip: { de: tierQuotenHinweis('ohneUnentschieden') + ' Gemessen auf den Präsenzturnieren des laufenden Formats.',
+                          tip: { de: tierQuotenHinweis('ohneUnentschieden') + ' Gemessen auf den Majors des laufenden Formats.',
                                  en: tierQuotenHinweis('ohneUnentschieden') + ' Measured at the in-person events of the current format.' } },
                         /* DREI UEBERSCHRIFTEN NEU BENANNT AM 01.09.2026.
                            Gemeldet: "was sind denn bitte 618,5 Antritte?
@@ -2405,7 +2405,7 @@
                           num: true,
                           tip: { de: _antritteRoh
                                     ? 'Wie oft dieses Deck auf einem Turnier angetreten ist — gezählte Starts. Eine andere Zählung als die Listen links.'
-                                    : 'Die gezählten Starts kommen mit dem nächsten Datenlauf. Bis dahin steht hier ein Strich: die Datei führt bisher nur eine nach Aktualität gewichtete Summe, und die ist keine Teilnehmerzahl — halb teilnehmen geht nicht.',
+                                    : 'Die gezählten Starts kommen mit dem nächsten Datenlauf. Bis dahin steht hier ein Strich: die Datei führt bisher nur eine nach Aktualität gewichtete Summe, und die ist keine Spielerzahl — halb teilnehmen geht nicht.',
                                  en: _antritteRoh
                                     ? 'How often this deck entered a tournament — counted starts. A different count from the lists on the left.'
                                     : 'Counted starts arrive with the next data run. Until then a dash: the file so far carries only a recency-weighted sum, and that is not a number of entries — you cannot half-attend.' } },
@@ -2420,7 +2420,7 @@
                            Jetzt EINE Spalte, der Schnitt steht im Kopf:
                            „Online Top 8-Quote (Ø 6,6 %)". */
                         { k: 'quote',
-                          de: 'Online Top 8-Quote' + schnittKopf,
+                          de: 'Online Top-8-Conversion' + schnittKopf,
                           en: 'Online top-8 rate' + schnittKopf,
                           num: true, hilf: 'top8' },
                     ];
@@ -2474,7 +2474,7 @@
                             const txt = fmtPct(r.anteil);
                             return r.anteilAusTurnier
                                 ? `<em title="${escapeHtml(deR
-                                    ? 'Anteil an den gewichteten Turnier-Antritten — dieses Deck hat keine eigene Zeile in der Online-Turnier-Auswertung'
+                                    ? 'Share an den gewichteten Turnier-Listen — dieses Deck hat keine eigene Zeile in der Online-Turnier-Auswertung'
                                     : 'Share of weighted tournament entries — this deck has no row of its own in the online-tournament breakdown')}">${txt}</em>`
                                 : txt;
                         }
@@ -2614,21 +2614,21 @@
                                     return zaehlungDa
                                         ? 'Zwei Zählungen desselben Metas nebeneinander — beide aus den '
                                           + '<strong>Limitless-Online-Turnieren</strong>, aber verschieden gezählt: '
-                                          + '<strong>Listen</strong> und <strong>Anteil</strong> stehen fertig auf der '
-                                          + 'Deck-Übersicht von Limitless, <strong>Turnier-Antritte</strong> und '
+                                          + '<strong>Listen</strong> und <strong>Share</strong> stehen fertig auf der '
+                                          + 'Deck-Übersicht von Limitless, <strong>Turnier-Listen</strong> und '
                                           + '<strong>Top 8</strong> zählen wir selbst aus den Endständen der einzelnen '
-                                          + 'Turniere. Darum ist der Anteil in beiden fast '
+                                          + 'Turniere. Darum ist der Share in beiden fast '
                                           + 'gleich, die Stückzahlen aber nicht. Ein Strich heißt: das Deck steht in der einen '
                                           + 'Quelle und in der anderen nicht — oder es heißt in den beiden '
                                           + 'Quellen verschieden. Jede Spaltenüberschrift sortiert und erklärt sich selbst. '
-                                        : '<strong>Listen</strong>, <strong>Anteil</strong> und <strong>'
+                                        : '<strong>Listen</strong>, <strong>Share</strong> und <strong>'
                                           + tierQuotenName('mitUnentschieden') + '</strong> '
                                           + 'kommen von der Deck-Übersicht der Limitless-Online-Turniere, '
-                                          + '<strong>Top-8-Quote</strong> und '
+                                          + '<strong>Top-8-Conversion</strong> und '
                                           + '<strong>ggü. Schnitt</strong> aus den Endständen derselben Turniere. '
                                           + 'Ein Strich heißt: das Deck steht '
                                           + 'in der einen Quelle und in der anderen nicht — oder es heißt in den beiden '
-                                          + 'Quellen verschieden. Die Stückzahlen (Antritte und Top 8) fehlen noch: die Datei '
+                                          + 'Quellen verschieden. Die Stückzahlen (Listen und Top 8) fehlen noch: die Datei '
                                           + 'führt bisher nur eine gewichtete Summe, und halb teilnehmen geht nicht. Sie '
                                           + 'kommen mit dem nächsten Datenlauf; die Quoten stimmen schon jetzt. '
                                           + 'Jede Spaltenüberschrift sortiert und erklärt sich selbst. ';
@@ -2836,7 +2836,7 @@
             if (window.DsNav && fieldConv && fieldConv.totalBrought > 0) {
                 window.DsNav.setSpaceFacts({
                     sample: getLang() === 'de'
-                        ? `${fmtNumDS(fieldConv.totalBrought)} gewichtete Antritte · ${totalEntries.toLocaleString('de-DE')} Decks`
+                        ? `${fmtNumDS(fieldConv.totalBrought)} gewichtete Listen · ${totalEntries.toLocaleString('de-DE')} Decks`
                         : `${fmtNumDS(fieldConv.totalBrought)} weighted entries · ${totalEntries.toLocaleString('en-US')} decks`
                 }, 'gl');
             }

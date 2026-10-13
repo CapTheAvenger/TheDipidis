@@ -86,7 +86,7 @@
                 + 'das schlägt. Grundlage ist je Pokémon der meistgespielte Satz aus der '
                 + 'In-Game-Nutzungsanalyse (Attacken, Item, Fähigkeit, Wesen, Verteilung), dazu '
                 + 'Basiswerte, Attackenwerte und Typentabelle. Das Ergebnis kommt aus unserem '
-                + 'Schadensmodell — Siegquoten Pokémon gegen Pokémon stehen in keiner Quelle.',
+                + 'Schadensmodell — Win Rates Pokémon gegen Pokémon stehen in keiner Quelle.',
             gleichRechnet: 'rechne …',
             gleichVerliert: 'Verliert gegen:',
             gleichKeine: 'Deine Auswahl verliert gegen keines der verbreitetsten Pokémon — '
@@ -124,7 +124,7 @@
                Begriff, den die Szene benutzt, und er steht in beiden
                Sprachen gleich da. */
             inRechner: '\u2192 Damage Calc',
-            inRechnerTitel: 'Rechnet dieses Team gegen das Feld durch \u2014 Schaden, K.-o.-Reichweite und Initiative, mit DEINEN Verteilungen statt den meistgenutzten Sets.',
+            inRechnerTitel: 'Rechnet dieses Team gegen das Meta durch \u2014 Schaden, K.-o.-Reichweite und Initiative, mit DEINEN Verteilungen statt den meistgenutzten Sets.',
             rechnerFehlt: 'Der Damage Calc konnte nicht geladen werden \u2014 bitte die Seite neu laden.',
             kopiert: 'In die Zwischenablage kopiert.',
             modalTitel: (n) => `${n} bearbeiten`,

@@ -288,7 +288,7 @@ describe('B1 — der Nenner der Anteilskachel steht als HOCHGERECHNET da', () =>
             'der Rechenweg fuer "Other" fehlt:\n' + txt);
         assert.ok(txt.includes('je nach Nenner 1.698 bis 1.703'),
             'die Spanne von "Other" fehlt:\n' + txt);
-        assert.ok(txt.includes('83,00 % der Anteile'),
+        assert.ok(txt.includes('83,00 % der Shares'),
             'die Anteilssumme, aus der hochgerechnet wird, fehlt:\n' + txt);
     });
 
@@ -326,7 +326,7 @@ describe('B1 — der Nenner der Anteilskachel steht als HOCHGERECHNET da', () =>
         if (!feld.listen) {
             if (FENSTER.istJung()) {
                 console.log(`    # junges Fenster ${FENSTER.fenster().schluessel}: `
-                    + 'die Anteile summieren sich auf, es gibt keinen hochgerechneten '
+                    + 'die Shares summieren sich auf, es gibt keinen hochgerechneten '
                     + 'Nenner — Probe ausgesetzt');
                 return;
             }

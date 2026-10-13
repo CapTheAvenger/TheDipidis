@@ -32,7 +32,7 @@ describe('Die alten Formulierungen kommen nicht zurück', () => {
     const abgeloest = [
         [EMPF, 'Was du mitnehmen solltest', 'las sich wie eine Packliste'],
         [EMPF, 'so oft reicht es für Day 2', 'zu lang für eine Kachelbeschriftung'],
-        [EMPF, 'Day-2-Quote des Decks bisher', 'zu lang für eine Kachelbeschriftung'],
+        [EMPF, 'Day-2-Conversion des Decks bisher', 'zu lang für eine Kachelbeschriftung'],
         [EMPF, 'beliebiges Deck ', '„beliebig“ klingt nach Zufall, gemeint ist der Schnitt'],
         [EMPF, 'Auch damit reicht es in ', 'doppelte Verneinung'],
         [EMPF, '% des Felds ist neu', 'Numerusfehler'],
@@ -57,7 +57,7 @@ describe('Die neuen Formulierungen stehen in beiden Sprachen', () => {
     const paare = [
         [EMPF, "'Unser Pick fürs Turnier'", "'Our pick for the event'"],
         [EMPF, "'schafft Day 2'", "'makes Day 2'"],
-        [EMPF, "'Day-2-Rate bisher'", "'Day 2 rate so far'"],
+        [EMPF, "'Day-2-Conversion bisher'", "'Day 2 rate so far'"],
         [EMPF, "'Schnitt aller Decks '", "'average across all decks '"],
         // 05.09.2026: der Satz nannte eine SPIELER-Quote als
         // TURNIER-Anteil ("in 75 % der Turniere ist nach Day 1
@@ -66,7 +66,7 @@ describe('Die neuen Formulierungen stehen in beiden Sprachen', () => {
         // `day2_ueberhaupt_erreicht: 43` von `turniere: 44` — in 2,3 %
         // der Turniere war Schluss, nicht in 75 %. Faktor 33.
         [EMPF, "'Und trotzdem: von je vier Spielern dieses Decks scheitern rund '", "'And still: about '"],
-        [EMPF, "' % der Antritte, gemittelt über '", "' % of entries, averaged over '"],
+        [EMPF, "' % der Listen, gemittelt über '", "' % of entries, averaged over '"],
         [EMPF, "' % vom Meta sind neu.</strong> '", null],
         [HUB, "'Was gerade läuft'", "'What is running right now'"],
     ];
@@ -109,7 +109,7 @@ describe('Beim Kürzen ist keine Zahl verschwunden', () => {
         const n = nenner();
         assert.ok(n.length > 200, 'answerNenner nicht gefunden');
         // Der gezaehlte Zweig — der Normalfall seit dem Wochenlauf.
-        assert.match(n, /\$\{gesamt\} Antritten · /);
+        assert.match(n, /\$\{gesamt\} Listen · /);
         assert.match(n, /\$\{gesamt\} entries · /);
         // Seit dem 02.09.2026 rechnet der ganze Block gezaehlt; `best`
         // traegt deshalb selbst die gezaehlten Zahlen, und ein zweites
@@ -117,13 +117,13 @@ describe('Beim Kürzen ist keine Zahl verschwunden', () => {
         assert.match(n, /zahl\(best\.top8\)/);
         assert.match(n, /zahl\(best\.brought\)/);
         // Und der Rueckfall, falls die gezaehlten Spalten fehlen.
-        assert.match(n, /\$\{gesamt\} gewichteten Antritten/);
+        assert.match(n, /\$\{gesamt\} gewichteten Listen/);
         assert.match(n, /\$\{gesamt\} weighted entries/);
         assert.equal((n.match(/\$\{mit\(best\.top8\)\}/g) || []).length, 2);
         assert.equal((n.match(/\$\{mit\(best\.brought\)\}/g) || []).length, 2);
     });
 
-    it('halbe Antritte erklären sich weiterhin an Ort und Stelle', () => {
+    it('halbe Listen erklären sich weiterhin an Ort und Stelle', () => {
         /* "71,5 Antritte" liest sich sonst wie ein Fehler.
 
            KORREKTUR 02.09.2026: hier stand "nach Turniergröße gewichtet".
@@ -160,7 +160,7 @@ describe('Was von der Startseite wegging, steht unter Quellen & Methodik', () =>
     const begriffe = [
         ['Unser Pick', 'Our pick'],
         ['„schafft Day 2“', '“makes Day 2”'],
-        ['„Day-2-Rate bisher“', '“Day 2 rate so far”'],
+        ['„Day-2-Conversion bisher“', '“Day 2 rate so far”'],
         ['„min. 30 pro Deck“', '“min. 30 per deck”'],
         ['„% vom Meta sind neu“', '“% of the meta is new”'],
     ];

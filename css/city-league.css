@@ -3331,11 +3331,29 @@
    vs Major vs Online side-by-side without modal-juggling. Diff
    highlights apply per row: green when all 3 agree, yellow when
    2 of 3 agree, red when only 1 source carries the card. */
+/* UI-140 (14.10.2026, Hausi am iPhone, PWA, Dunkelmodus): „man kann gar
+   keine Zahlen lesen und die Seite nicht mehr verlassen". Gemessen:
+   die Zeilenfarben standen fest auf drei hellen Hex-Werten, die Schrift
+   kippte mit dem Modus — Kontrast der Zahlen im Dunkeln 1,02–1,08:1,
+   Null-Zellen 1,36:1 in BEIDEN Modi. Und der Dialog lag mittig mit
+   `96vh`: in der installierten App (viewport-fit=cover) schob das den
+   Kopf samt × unter die Statusleiste. Jetzt: Tokens statt Hex (kippen
+   mit), Dialog oben verankert, Safe-Areas als Rand, Hoehe am SICHTBAREN
+   Viewport (dvh) — dasselbe Muster wie .sq-play-picker-panel. */
+#threeWayCompareModal {
+    align-items: flex-start;
+    padding: max(10px, env(safe-area-inset-top, 0px))
+             max(10px, env(safe-area-inset-right, 0px))
+             max(10px, env(safe-area-inset-bottom, 0px))
+             max(10px, env(safe-area-inset-left, 0px));
+}
 .three-way-compare-dialog {
     background: var(--surface-1);
+    color: var(--ink);
     border-radius: 14px;
     width: min(96vw, 980px);
-    max-height: 92vh;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - max(10px, env(safe-area-inset-top, 0px)) - max(10px, env(safe-area-inset-bottom, 0px)));
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -3347,15 +3365,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* BEFUND (30.08.2026, Abnahme): der Verlauf stand fest auf zwei
-       fast weissen Werten und blieb deshalb auch im DUNKELmodus weiss,
-       waehrend die Beschriftung darauf (--ink-3) mit dem Modus auf
-       hellgrau kippte. Gemessen: #b9c1e0 auf #f4f7ff = 1,67:1 in der
-       Deck-Analyse, 1,70:1 im Vergangenen Meta — die Zeilen "GESAMTE
-       WIN RATE", "Matchup gegen Top 20", "Turnier", "Format" waren im
-       Dunkeln praktisch nicht zu lesen.
-       Mit Tokens kippt die Kachel mit; der blaue Rand links bleibt und
-       traegt die Kennung weiter. */
+    gap: 10px;
+    flex: none;
     background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
 }
 .three-way-compare-header h3 {
@@ -3364,31 +3375,36 @@
     color: var(--ink);
 }
 .three-way-compare-close {
-    width: 32px;
-    height: 32px;
+    flex: none;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-strong);
     background: var(--surface-1);
-    font-size: 21px;
+    font-size: 24px;
+    line-height: 1;
     cursor: pointer;
-    color: var(--ink-3);
+    color: var(--ink);
 }
-.three-way-compare-close:hover { background: #f3f4f6; }
+.three-way-compare-close:hover { background: var(--surface-2); }
 .three-way-compare-body {
     padding: 14px 18px;
     overflow: auto;
     flex: 1;
+    min-height: 0;
 }
 .three-way-compare-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    color: var(--ink);
 }
 .three-way-compare-table th,
 .three-way-compare-table td {
     padding: 8px 10px;
     text-align: center;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
 }
 .three-way-compare-table th {
     background: var(--surface-0);
@@ -3405,10 +3421,62 @@
     color: var(--ink);
     min-width: 220px;
 }
-.three-way-compare-table tr.three-way-row-all { background: #ecfdf5; }
-.three-way-compare-table tr.three-way-row-two { background: #fffbeb; }
-.three-way-compare-table tr.three-way-row-one { background: #fef2f2; }
-.three-way-compare-table td.three-way-cell-zero { color: #cbd5e1; }
+/* Die Pauschalregel `.tab-content table` (css/styles.css: Grundregel und
+   die Handy-Varianten bei 480 und 375 px) macht jede Tabelle im Reiter zu
+   einem Scrollkasten — display:block, white-space:nowrap, 0,85em bzw.
+   0,75em, erste Spalte klebend mit eigenem Hintergrund. Fuer den
+   Vergleich ist das dreifach falsch: der Kartenname bricht nicht um und
+   laeuft in die Zahlen, die Zahlen schrumpfen auf 9 px, und die
+   Namenszelle deckt mit ihrem Hintergrund die Zeilenfarbe ab (gemessen
+   14.10.2026 bei 390 px: td 93,5 px breit unter einem 149,6 px breiten
+   th). Ausstieg ueber die ID, dasselbe Muster wie
+   `#sideQuestPokedexHost .sqp-table` in css/side-quest.css. */
+#threeWayCompareModal table.three-way-compare-table {
+    display: table;
+    overflow: visible;
+    white-space: normal;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 14px;
+    margin: 0;
+    box-shadow: none;
+}
+/* Und die noch aeltere Grundregel `table thead, table tbody { display:
+   table }` (css/styles.css, Zeile ~928) macht Kopf und Rumpf zu ZWEI
+   Tabellen — die 40-%-Spalte des Kopfes galt dann nicht fuer den Rumpf
+   (gemessen: th 150 px, td darunter 94 px). Dasselbe Gegenmittel wie bei
+   `.arc-mu-table`: Kopf und Rumpf wieder als Gruppen EINER Tabelle. */
+#threeWayCompareModal table.three-way-compare-table thead { display: table-header-group; width: auto; }
+#threeWayCompareModal table.three-way-compare-table tbody { display: table-row-group; width: auto; }
+#threeWayCompareModal table.three-way-compare-table tr { display: table-row; }
+#threeWayCompareModal table.three-way-compare-table th,
+#threeWayCompareModal table.three-way-compare-table td {
+    padding: 8px 10px;
+    font-size: 14px;
+}
+#threeWayCompareModal table.three-way-compare-table td:first-child {
+    position: static;
+    box-shadow: none;
+    background-color: transparent;
+}
+#threeWayCompareModal table.three-way-compare-table th:first-child {
+    left: auto;
+    z-index: 1;
+    box-shadow: none;
+    background-color: var(--surface-0);
+}
+#threeWayCompareModal table.three-way-compare-table th.three-way-section-th {
+    background-color: var(--tint-info);
+    font-size: 12px;
+    padding: 6px 10px;
+    z-index: 0;
+}
+/* Zeilenfarbe = Grad der Einigkeit; die Zahl steht in --ink darauf. Die
+   Toene sind die Tint-Tokens, die im Dunkeln eigene dunkle Werte haben. */
+.three-way-compare-table tr.three-way-row-all { background: var(--tint-ok); }
+.three-way-compare-table tr.three-way-row-two { background: var(--tint-warn); }
+.three-way-compare-table tr.three-way-row-one { background: var(--tint-bad); }
+.three-way-compare-table td.three-way-cell-zero { color: var(--ink-3); }
 /* Count-mismatch — the three columns disagree on copy count even
    though all three contain the card (so the row stays green). The
    amber tint + inset border draws the eye to the diverging quantity
@@ -3416,8 +3484,8 @@
 .three-way-compare-table td.three-way-cell-mismatch {
     color: var(--tint-warn-ink);
     font-weight: 700;
-    background: rgba(245, 158, 11, 0.18);
-    box-shadow: inset 0 0 0 2px rgba(245, 158, 11, 0.55);
+    background: var(--tint-warn);
+    box-shadow: inset 0 0 0 2px var(--tint-warn-ink);
     border-radius: 6px;
 }
 .three-way-compare-table .three-way-col-total {
@@ -3435,17 +3503,19 @@
 }
 .three-way-compare-table th.three-way-section-th {
     text-align: left;
-    background: #eef2ff;
-    color: #3b4cca;
+    background: var(--tint-info);
+    color: var(--tint-info-ink);
     font-weight: 800;
     font-size: 12px;
     letter-spacing: 0.6px;
     text-transform: uppercase;
     padding: 6px 10px;
-    border-top: 2px solid rgba(59, 76, 202, 0.18);
-    border-bottom: 1px solid rgba(59, 76, 202, 0.12);
+    border-top: 2px solid var(--line-strong);
+    border-bottom: 1px solid var(--line);
     position: sticky;
-    top: 38px;  /* sits below the main thead row */
+    /* unter dem Spaltenkopf; dessen gemessene Hoehe setzt
+       openThreeWayCompare() als --three-way-head-h an die Tabelle */
+    top: var(--three-way-head-h, 54px);
     z-index: 0;
 }
 .three-way-compare-summary {
@@ -3462,33 +3532,39 @@
     gap: 6px;
     padding: 2px 10px;
     border-radius: 999px;
-    background: #f1f5f9;
+    background: var(--surface-2);
 }
-.three-way-compare-summary .three-way-chip-all  { background: #d1fae5; color: #065f46; }
-.three-way-compare-summary .three-way-chip-two  { background: #fef3c7; color: #92400e; }
-.three-way-compare-summary .three-way-chip-one  { background: #fee2e2; color: #991b1b; }
+.three-way-compare-summary .three-way-chip-all  { background: var(--tint-ok);   color: var(--tint-ok-ink); }
+.three-way-compare-summary .three-way-chip-two  { background: var(--tint-warn); color: var(--tint-warn-ink); }
+.three-way-compare-summary .three-way-chip-one  { background: var(--tint-bad);  color: var(--tint-bad-ink); }
 
-/* Mobile: shrink the card-name min-width and tighten cell padding so
-   the table fits a 360-px portrait phone without horizontal scroll
-   while staying readable. Column headers wrap to 2 lines instead of
-   overflowing — the totals chip moves below the label. */
+/* Mobile: feste Spaltenaufteilung (Name 40 %, drei Zahlen je 20 %),
+   damit nichts unter die Nachbarspalte laeuft — mit `max-width` an
+   einer Tabellenzelle lief „Team Rocket's Watchtower" in die Zahlen
+   (Hausis Screenshot 14.10.). Lange Namen brechen in die zweite Zeile. */
 @media (max-width: 600px) {
+    #threeWayCompareModal { padding-left: 0; padding-right: 0; }
     .three-way-compare-dialog {
         width: 100vw;
-        max-height: 96vh;
         border-radius: 10px 10px 0 0;
     }
+    .three-way-compare-header { padding: 10px 12px; }
+    .three-way-compare-header h3 { font-size: 15px; }
     .three-way-compare-body { padding: 10px 8px; }
-    .three-way-compare-table { font-size: 14px; }
-    .three-way-compare-table th,
-    .three-way-compare-table td { padding: 6px 4px; }
-    .three-way-compare-table th.three-way-card-col,
-    .three-way-compare-table td.three-way-card-col {
+    /* Dieselbe ID-Spezifitaet wie der Ausstieg oben, sonst gewinnt dort
+       die Grundregel (8px 10px) ueber dieses Handy-Polster. */
+    #threeWayCompareModal table.three-way-compare-table { table-layout: fixed; }
+    #threeWayCompareModal table.three-way-compare-table th,
+    #threeWayCompareModal table.three-way-compare-table td { padding: 6px 4px; }
+    #threeWayCompareModal table.three-way-compare-table th.three-way-card-col,
+    #threeWayCompareModal table.three-way-compare-table td.three-way-card-col {
         min-width: 0;
-        max-width: 42vw;
-        word-break: break-word;
+        width: 40%;
+        overflow-wrap: anywhere;
+        hyphens: auto;
     }
-    .three-way-compare-table th { font-size: 12px; line-height: 1.15; }
+    #threeWayCompareModal table.three-way-compare-table th { font-size: 12px; line-height: 1.15; }
+    #threeWayCompareModal table.three-way-compare-table th.three-way-section-th { padding: 5px 6px; }
     .three-way-compare-table .three-way-col-total { font-size: 0.7em; }
     .three-way-compare-summary { font-size: 12px; }
 }

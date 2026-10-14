@@ -236,8 +236,15 @@ describe('wie weit die Seite dafür ist', () => {
            naechsten Runden.
 
            Ein Zaehlerstand, der nur zaehlt, was leicht zu finden ist,
-           faellt genau dann nicht auf, wenn er faellt. */
-        const BASELINE = 311;
+           faellt genau dann nicht auf, wenn er faellt.
+
+           311 -> 272 am 14.10.2026 (UI-140): die Grundlinie war seit
+           Wochen 30 Flaechen zu locker — gezaehlt standen 281, erlaubt
+           311. Der 3-Wege-Vergleich hatte seine drei Zeilentoene und die
+           Kopf-/Kachelflaechen als feste Hex-Werte; im Dunkeln lagen die
+           Zahlen darauf bei 1,02–1,08:1. Jetzt Tint-Tokens, und die
+           Grundlinie wieder auf den gezaehlten Stand. */
+        const BASELINE = 272;
         const now = countHardcodedLightSurfaces();
         assert.ok(now <= BASELINE,
             `fest verdrahtete helle Flächen: ${now} (erlaubt: ${BASELINE})`);
@@ -270,8 +277,13 @@ describe('wie weit die Seite dafür ist', () => {
            176 -> 182: dieselbe Erweiterung wie beim Flaechenzaehler,
            sechs Stellen mit fest verdrahtetem rgb()/rgba(). Auch hier
            ist nichts schlechter geworden, es wird nur ehrlicher
-           gezaehlt. */
-        const BASELINE_INK = 182;
+           gezaehlt.
+
+           182 -> 161 am 14.10.2026 (UI-140): gezaehlt standen 163, zwei
+           davon im 3-Wege-Vergleich (feste dunkle Schrift auf den
+           Null-Zellen und dem Abweichungsrahmen, im Dunkeln 1,36:1).
+           Grundlinie auf den gezaehlten Stand. */
+        const BASELINE_INK = 161;
         const now = countHardcodedDarkInk();
         assert.ok(now <= BASELINE_INK,
             `fest verdrahtete dunkle Textfarben: ${now} (erlaubt: ${BASELINE_INK})`);

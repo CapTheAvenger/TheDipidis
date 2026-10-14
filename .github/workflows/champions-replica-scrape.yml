@@ -342,7 +342,10 @@ jobs:
       # Attacken kommt von dort. Fail-soft wie die uebrigen.
       - name: Attacken-Merkmale nachziehen
         run: |
-          set -uo pipefail
+          # set +e: GitHub startet jede run-Shell mit -e. Ohne +e stirbt der
+          # Schritt am ersten Fehlercode, BEVOR die rc-Behandlung darunter laeuft
+          # (SC-35, 14.10.2026: pokewiki 403 -> Replica #157 rot statt Warnung).
+          set +e -uo pipefail
           python -u scripts/build_champions_move_flags.py
           rc=$?
           if [ $rc -ne 0 ]; then
@@ -354,7 +357,10 @@ jobs:
 
       - name: Editionen und Pokemon-GO-Liste
         run: |
-          set -uo pipefail
+          # set +e: GitHub startet jede run-Shell mit -e. Ohne +e stirbt der
+          # Schritt am ersten Fehlercode, BEVOR die rc-Behandlung darunter laeuft
+          # (SC-35, 14.10.2026: pokewiki 403 -> Replica #157 rot statt Warnung).
+          set +e -uo pipefail
           python -u scripts/scrape_pokemon_go_liste.py
           rc=$?
           if [ $rc -ne 0 ]; then
@@ -395,7 +401,10 @@ jobs:
       # champions-usage-refresh.yml.
       - name: Editionen und Bild-Luecken nachziehen
         run: |
-          set -uo pipefail
+          # set +e: GitHub startet jede run-Shell mit -e. Ohne +e stirbt der
+          # Schritt am ersten Fehlercode, BEVOR die rc-Behandlung darunter laeuft
+          # (SC-35, 14.10.2026: pokewiki 403 -> Replica #157 rot statt Warnung).
+          set +e -uo pipefail
           python -u scripts/build_champions_editionen.py
           rc=$?
           if [ $rc -ne 0 ]; then

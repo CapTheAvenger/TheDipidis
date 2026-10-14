@@ -1298,9 +1298,9 @@ img[src*="limitlesstcg"] {
 .color-grey-light { color: var(--ink-3) !important; }
 .fs-085 { font-size: 14px !important; }
 .mb-8 { margin-bottom: 8px !important; }
-/* Utility classes for modularizing remaining inline styles in index.html */
-.mb-40 { margin-bottom: 40px !important; }
-.mb-20 { margin-bottom: 20px !important; }
+/* Utility classes for modularizing remaining inline styles in index.html
+   (.mb-40 und .mb-20 standen hier doppelt — dieselben Regeln weiter unten
+   bei den „modularized index.html blocks" gewinnen ohnehin; UI-141) */
 .px-10 { padding-left: 10px !important; padding-right: 10px !important; }
 /* ── `bg-white` heisst hier "die Panelfarbe", nicht "die Farbe Weiss"
  *

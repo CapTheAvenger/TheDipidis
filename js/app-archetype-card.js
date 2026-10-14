@@ -181,6 +181,10 @@
      * zeigt. Den Knopf „Alle {n}" gibt es nur noch, wenn ein Deck mehr
      * als zwanzig Gegner hat. */
     const MU_VORSCHAU = 20;
+    /* UI-141 (Hausi 15.10.2026): in der Deck-Analyse stehen zuerst nur die
+       drei schlechtesten Matchups („Top 3 Threats"), der Rest hinter einem
+       Knopf — sonst scrollt man am Telefon 3.700 px, bis die Karten kommen. */
+    const MU_VORSCHAU_ZEILEN = 3;
 
     /* ── WELCHE PAARUNGEN DIE VORSCHAU ZEIGT ─────────────────────────
      *
@@ -1742,6 +1746,25 @@
         return `<p class="arc-mu-legende">${esc(legendeText(hatMajor))}</p>`;
     }
 
+    /* UI-141 (15.10.2026): in der Deck-Analyse (embed) standen unter der
+       Tabelle drei Absaetze — Legende, „Blasse Zeilen", „Major-WR erst ab
+       30 Matches" — rund 200 px Erklaertext am Telefon. Hausi: keine
+       Erklaertexte auf der Seite, Hilfe ueber Professor Eich. Die Saetze
+       bleiben Wort fuer Wort und werden ans Register gemeldet; den Knopf
+       setzt zeigeCmMatchupTabelle() in die Ueberschrift. Ohne Register
+       (Skript fehlt) bleiben die Absaetze stehen — ein Satz ueber die
+       Datengrundlage faellt nie ersatzlos weg. */
+    const MU_HINWEISE_ID = 'arc-mu-hinweise-embed';
+    function hinweiseHtml(hatMajor, variante, noten) {
+        const legende = legendeHtml(hatMajor, variante);
+        const AI = (typeof window !== 'undefined') ? window.DsAbschnittInfo : null;
+        if (variante === 'embed' && AI && typeof AI.melde === 'function' && (legende || noten)) {
+            AI.melde(MU_HINWEISE_ID, { titel: 'Matchups', html: legende + noten });
+            return '';
+        }
+        return legende + noten;
+    }
+
     function matchupTableHtml(name, opts) {
         const de = isDe();
         const collapsed = !!(opts && opts.collapsible);
@@ -1838,8 +1861,24 @@
                 .replace('{g}', String(rows.length)))}</p>`
             : '';
 
+        /* UI-141 (Hausi 15.10.2026): „die Matchup-Tabelle ist zu lang … entweder
+           Top 3 Threats und den Rest aufklappbar". Gemessen bei 390 px: 27 Matchups
+           als Kartenliste = 3.694 px, bevor die Kartenuebersicht kam. Jetzt stehen
+           die ersten {n} Zeilen der aktuellen Sortierung (schlechteste oben = die
+           drei groessten Threats), der Rest liegt hinter EINEM Knopf. Die Kuerzung
+           haengt als Klasse am Rahmen (CSS: nth-child), damit sie jede Umsortierung
+           ueberlebt und die Handy-Kartenliste (js/kein-querscroll.js) dieselben
+           Zeilen zeigt. */
+        const vorschauZeilen = Math.max(0, parseInt(opts && opts.vorschauZeilen, 10) || 0);
+        const gekuerzt = vorschauZeilen > 0 && rows.length > vorschauZeilen;
+        const mehrKnopf = gekuerzt
+            ? `<button type="button" class="arc-mu-mehr-zeilen" aria-expanded="false"
+                    data-alle="${esc(L('arc.muAlleZeigen', de ? 'Alle {n} Matchups anzeigen' : 'Show all {n} matchups').replace('{n}', String(rows.length)))}"
+                    data-weniger="${esc(L('arc.muWenigerZeigen', de ? 'Nur die {n} schlechtesten' : 'Only the {n} worst').replace('{n}', String(vorschauZeilen)))}">${
+                esc(L('arc.muAlleZeigen', de ? 'Alle {n} Matchups anzeigen' : 'Show all {n} matchups').replace('{n}', String(rows.length)))}</button>`
+            : '';
         const table = `
-            <div class="mobile-table-scroll">
+            <div class="mobile-table-scroll${gekuerzt ? ' arc-mu-vorschau' : ''}"${gekuerzt ? ` data-vorschau="${vorschauZeilen}"` : ''}>
                 <table class="arc-mu-table">
                     <thead><tr>
                         <th>${esc(L('arc.colOpponent', de ? 'Gegner-Deck' : 'Deck'))}</th>
@@ -1898,7 +1937,7 @@
                     <tbody>${body}</tbody>
                 </table>
             </div>
-            ${legendeHtml(hatMajor, variante)}${note}${praesenzNote}`;
+            ${mehrKnopf}${hinweiseHtml(hatMajor, variante, note + praesenzNote)}`;
         if (sortierbar) return sortierbarMachen(table);
         if (!collapsed) return table;
         // Closed by default inline: the tiles are the scroll content, the
@@ -1968,6 +2007,28 @@
     document.addEventListener('click', (e) => {
         const th = e.target.closest && e.target.closest('table.arc-mu-sortierbar th.arc-mu-sort');
         if (th) sortiereNachSpalte(th);
+    });
+    /* UI-141: der Knopf unter der gekuerzten Tabelle klappt den Rest auf und
+       wieder zu. Die Kuerzung sitzt am Rahmen (.arc-mu-vorschau), der Zustand
+       „alle" an der TABELLE: js/kein-querscroll.js baut die Handy-Kartenliste
+       nur neu, wenn sich die Signatur der Tabelle aendert — und die liest
+       table.className, nicht den Rahmen (gemessen 15.10.: Klasse am Rahmen →
+       Tabelle 20 Zeilen, Kartenliste blieb bei 3). Alle Zeilen bleiben im
+       DOM, Sortieren wirkt weiter auf alle. */
+    function muRestUmschalten(knopf) {
+        const rahmen = knopf.previousElementSibling && knopf.previousElementSibling.classList
+            && knopf.previousElementSibling.classList.contains('arc-mu-vorschau')
+            ? knopf.previousElementSibling : null;
+        const tabelle = rahmen && rahmen.querySelector ? rahmen.querySelector('table.arc-mu-table') : null;
+        if (!rahmen || !tabelle) return false;
+        const offen = tabelle.classList.toggle('arc-mu-alle');
+        knopf.setAttribute('aria-expanded', String(offen));
+        knopf.textContent = offen ? knopf.getAttribute('data-weniger') : knopf.getAttribute('data-alle');
+        return offen;
+    }
+    document.addEventListener('click', (e) => {
+        const k = e.target.closest && e.target.closest('.arc-mu-mehr-zeilen');
+        if (k) { e.stopPropagation(); muRestUmschalten(k); }
     });
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
@@ -2375,13 +2436,14 @@
     window.renderArchetypeMatchupTabelle = function (el, name) {
         if (!el || !name) return Promise.resolve(false);
         return load().then(() => {
-            el.innerHTML = matchupTableHtml(name, { sortierbar: true, schlechtesteOben: true, variante: 'embed' });
+            el.innerHTML = matchupTableHtml(name, { sortierbar: true, schlechtesteOben: true, variante: 'embed', vorschauZeilen: MU_VORSCHAU_ZEILEN });
             return true;
         });
     };
     // Exposed for tests; not part of the page's own API surface.
     window._archetypeCardInternals = {
         matchupsFor, parseSemicolonCsv, findKey, THIN_GAMES, factsFor, matchupTableHtml, sortiereNachSpalte, zellWert,
+        muRestUmschalten, MU_VORSCHAU_ZEILEN, MU_HINWEISE_ID,
         // Fuer ausgefuehrte Zusicherungen: die Mindeststichprobe und die
         // Entscheidung, die an ihr haengt (07.09.2026).
         MIN_PRAESENZ_PARTIEN, praesenzZelle, praesenzZellen,

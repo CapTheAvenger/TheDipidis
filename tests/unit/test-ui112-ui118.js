@@ -69,10 +69,14 @@ describe('UI-112 Etappe 3: ein Menuepunkt Deck-Analyse', () => {
 describe('UI-118 Stufe 1: Knopfsystem', () => {
     const css = L.lies('css', 'knopfsystem.css').replace(/\/\*[\s\S]*?\*\//g, '');
     const html = L.lies('index.html');
-    it('laedt als letzte Stilvorlage und steht im Service Worker', () => {
+    it('laedt als letzte allgemeine Stilvorlage und steht im Service Worker', () => {
+        /* UI-141 (15.10.2026): css/deck-analyse.css ist die einzige Datei
+           hinter dem Knopfsystem — sie gilt nur fuer #current-analysis und
+           muss dessen Regeln schlagen koennen. */
         const links = [...html.matchAll(/<link rel="stylesheet" href="css\/([a-z0-9-]+)\.css/g)].map(m => m[1]);
-        assert.equal(links[links.length - 1], 'knopfsystem');
+        assert.deepEqual(links.slice(-2), ['knopfsystem', 'deck-analyse']);
         assert.match(L.lies('service-worker.js'), /'\.\/css\/knopfsystem\.css'/);
+        assert.match(L.lies('service-worker.js'), /'\.\/css\/deck-analyse\.css'/);
     });
     it('Sekundaer faerbt keine farbigen Varianten um und hat nur eine Klasse Gewicht', () => {
         assert.match(css, /\.btn-modern:where\(:not\(\.btn-primary, \.primary, \.success, \.tertiary-danger\)\) \{/);

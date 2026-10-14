@@ -901,6 +901,9 @@ describe('Die Schwelle steht sichtbar unter der Tabelle', () => {
                sie unter der Tabelle. matchupTableHtml ruft sie auf. */
             schneideAus(karte, 'function legendeText(hatMajor)'),
             schneideAus(karte, 'function legendeHtml(hatMajor, variante)'),
+            // UI-141: Register-Weg (hinweiseHtml); ohne DsAbschnittInfo wie frueher
+            'const MU_HINWEISE_ID = "arc-mu-hinweise-embed";',
+            schneideAus(karte, 'function hinweiseHtml(hatMajor, variante, noten)'),
             schneideAus(karte, 'function matchupTableHtml(name, opts)'),
             'return matchupTableHtml;',
         ].join('\n');

@@ -66,6 +66,7 @@ const { stilblatt, gewinner, flaeche, ladeReihenfolge, FLAECHE, WURZEL }
     = require('./lib-css-kaskade.js');
 
 const BLATT = stilblatt([
+    'css/components.css',      // UI-141: die Pille .ds-filter-btn und ihre Zustaende
     'css/ui-components.css',   // fremde Datei, nur gelesen
     'css/pokeball-menu.css',
     'css/city-league.css'
@@ -90,12 +91,26 @@ const bild = (el) => flaeche(BLATT, el);
  */
 const LEISTEN = [
     {
-        name: 'Seltenheitsleiste (overview / currentMeta / pastMeta)',
+        name: 'Seltenheitsleiste (overview / pastMeta)',
         basis: 'btn-toggle-item',
         startGewaehlt: ['btn-success'],
         startAbgewaehlt: ['btn-success', 'btn-inactive'],
         umGewaehlt: ['btn-active'],
         umAbgewaehlt: ['btn-inactive']
+    },
+    {
+        /* UI-141 (15.10.2026): die Seltenheitsleiste der Deck-Analyse ist eine
+           Pille wie die Raumwahl (.ds-filter-btn, css/components.css); sie
+           startet mit btn-active statt btn-success. Den Auswahlring aus
+           ui-components.css traegt sie bewusst nicht — die Raumwahl hat auch
+           keinen; gewaehlt heisst hier Flaeche 1 mit Schatten. */
+        name: 'Seltenheitsleiste Deck-Analyse (currentMeta, Pille)',
+        basis: 'ds-filter-btn',
+        startGewaehlt: ['btn-active'],
+        startAbgewaehlt: ['btn-inactive'],
+        umGewaehlt: ['btn-active'],
+        umAbgewaehlt: ['btn-inactive'],
+        ohneRing: true
     },
     {
         name: 'Typfilter vergangenes Meta',
@@ -145,7 +160,7 @@ describe('Hervorhebung der Umschaltknoepfe (C4 / A-F3.22-24 / A-F4.45-47, B1, B3
         // er das sagen und nicht still weitergruenen.
         assert.match(MARKUP, /id="overviewRarityMin"/);
         assert.match(MARKUP, /class="btn-toggle-item btn-success"[^>]*id="overviewRarityMin"/);
-        assert.match(MARKUP, /class="btn-toggle-item btn-success"[^>]*id="currentMetaOverviewRarityMin"/);
+        assert.match(MARKUP, /class="ds-filter-btn btn-active"[^>]*id="currentMetaOverviewRarityMin"/);
         assert.match(MARKUP, /class="btn-toggle-item btn-success"[^>]*id="pastMetaRarityMin"/);
         assert.match(MARKUP, /class="past-meta-cards-type-btn active"|class="current-meta-cards-type-btn active"/);
     });
@@ -217,6 +232,7 @@ describe('Hervorhebung der Umschaltknoepfe (C4 / A-F3.22-24 / A-F4.45-47, B1, B3
                 [L.startGewaehlt, L.umGewaehlt].forEach(k => {
                     const s = bild(knopf(L.basis, ...k))['box-shadow'];
                     assert.ok(s, 'ohne Schatten: [' + k.join(' ') + ']');
+                    if (L.ohneRing) return;
                     assert.ok(s.includes(RING),
                         'die Hervorhebung darf den Ring aus css/ui-components.css:632 '
                         + 'nicht verdraengen — box-shadow ist eine Eigenschaft, nicht zwei, '

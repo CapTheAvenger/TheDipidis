@@ -24,9 +24,21 @@ function merkmalNachLaden(src, archetyp) {
 }
 
 describe('UI-117: Filter erst nach der Deckwahl', () => {
-    it('fuenf Bedienbloecke tragen cm-nach-wahl', () => {
+    it('die Filterleiste traegt cm-nach-wahl — und mit ihr alle fuenf Bedienbloecke', () => {
+        /* UI-141 (15.10.2026): Ansicht, Turniere, Fusion, Share und Datum
+           stehen in EINEM Kasten (.cm-filterleiste); der traegt die Klasse,
+           nicht mehr jeder Block einzeln. Alle fuenf muessen darin liegen. */
         const a = HTML.indexOf('<div id="current-analysis"'), b = HTML.indexOf('id="currentAnalysisEmptyState"', a);
-        assert.equal((HTML.slice(a, b).match(/cm-nach-wahl/g) || []).length, 5);
+        const kopf = HTML.slice(a, b);
+        assert.equal((kopf.match(/cm-nach-wahl/g) || []).length, 1);
+        const l = kopf.indexOf('class="cm-filterleiste cm-nach-wahl"');
+        assert.ok(l > 0, 'Filterleiste fehlt');
+        const leiste = kopf.slice(l);
+        for (const id of ['cmViewModeVanillaBtn', 'currentMetaFilterAll', 'currentMetaDeckSelectSecondary', 'currentMetaFilterSelect', 'currentMetaDateFrom']) {
+            assert.ok(leiste.indexOf(`id="${id}"`) > 0, id + ' liegt nicht in der Filterleiste');
+        }
+        // und die Deckwahl liegt davor, ausserhalb
+        assert.ok(kopf.indexOf('id="currentMetaDeckSelect"') < l);
     });
     it('CSS blendet sie ohne Wahl aus', () => {
         assert.match(CSS, /#current-analysis:not\(\[data-cm-gewaehlt\]\) \.cm-nach-wahl \{ display: none; \}/);

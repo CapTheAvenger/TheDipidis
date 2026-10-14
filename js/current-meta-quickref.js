@@ -1051,6 +1051,30 @@
       modal.classList.remove('d-none');
       modal.style.display = 'flex';
       if (window.HintergrundSperre) window.HintergrundSperre.sperren('dreiervergleich');
+      // UI-140: Escape schliesst — wie die App-Dialoge (zeigeBestaetigung).
+      // Am Telefon traegt der x-Knopf im Kopf, der seit UI-140 nicht mehr
+      // unter der Statusleiste liegt; Escape ist der Tastaturweg am Rechner.
+      document.addEventListener('keydown', _threeWayEscape, true);
+      const close = modal.querySelector('.three-way-compare-close');
+      if (close && typeof close.focus === 'function') close.focus({ preventScroll: true });
+      // UI-140: die Abschnittszeile (Pokémon/Trainer/Energie) klebt unter
+      // dem Spaltenkopf. Der Kopf ist zwei Zeilen hoch plus Summe — 54 px
+      // bei 390 px, 55 px am Rechner (gemessen 14.10.2026); die feste
+      // Zahl 38 im CSS liess sie beim Scrollen 16–17 px unter den Kopf
+      // rutschen. Die Hoehe wird deshalb gemessen und dem CSS als
+      // Variable gegeben; die Regel selbst bleibt im Stylesheet.
+      const table = modal.querySelector('.three-way-compare-table');
+      const thead = table && table.tHead;
+      if (table && thead && thead.offsetHeight) {
+        table.style.setProperty('--three-way-head-h', thead.offsetHeight + 'px');
+      }
+    }
+  }
+
+  function _threeWayEscape(e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      e.preventDefault();
+      closeThreeWayCompare();
     }
   }
 
@@ -1060,6 +1084,7 @@
       modal.classList.add('d-none');
       modal.style.display = 'none';
     }
+    document.removeEventListener('keydown', _threeWayEscape, true);
     if (window.HintergrundSperre) window.HintergrundSperre.freigeben('dreiervergleich');
   }
 

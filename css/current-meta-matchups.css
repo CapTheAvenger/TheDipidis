@@ -1717,8 +1717,13 @@
 .heatmap-key-unfav { background: rgba(227, 73, 72, .34); }
 
 /* FE-62 (06.10.2026): die zwei Teiltabellen bleiben im Markup, sichtbar ist
-   nur die volle Tabelle. Kennung schlaegt die display:grid-Regel oben. */
-#currentMetaMatchupsSection .current-meta-matchups-grid-container[hidden] { display: none; }
+   nur die volle Tabelle. Kennung schlaegt die display:grid-Regel oben.
+   UI-141 (15.10.2026, gemessen bei 390 px): unter 1024 px setzt
+   css/mobile-responsive.css `display: grid !important` auf den Behaelter —
+   die Teiltabellen „Beste/Schlechteste Matchups" standen am Telefon als
+   zweite Kartenliste unter der vollen Tabelle. Deshalb hier ebenfalls
+   !important. */
+#currentMetaMatchupsSection .current-meta-matchups-grid-container[hidden] { display: none !important; }
 .arc-mu-sortierbar th.arc-mu-sort { cursor: pointer; user-select: none; white-space: nowrap; }
 .arc-mu-sortierbar th.arc-mu-sort[aria-sort="ascending"]::after { content: " ▲"; }
 .arc-mu-sortierbar th.arc-mu-sort[aria-sort="descending"]::after { content: " ▼"; }

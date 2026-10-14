@@ -31,6 +31,7 @@ const VERBOTEN = [
     { was: 'zweiter Menue-Oeffner „☰ Menü“ neben dem Pokeball (06.10.)', html: /class="menu-label-btn"|data-i18n="menu\.labelBtn"/, js: /menu-label-btn|'menu\.labelBtn'/ },
     { was: 'Untertitel „Dein Portal …“ im Kopf (06.10.)', html: /class="header-subtitle"/ },
     { was: 'ⓘ-Glossarknoepfe neben Auswahlen und Ueberschriften (06.10.)', html: /class="glossar-i"/ },
+    { was: '„Als mein Deck speichern“ unter der Archetyp-Wahl der Deck-Analyse (UI-74 → weg 15.10., UI-141)', html: /id="btn-deck-uebernehmen"|deckUebernehmen\(/, js: /function deckUebernehmen\(|window\.deckUebernehmen/ },
 ];
 
 describe('Festlegungen A: Entferntes bleibt weg', () => {

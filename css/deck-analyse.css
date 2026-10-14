@@ -1,0 +1,322 @@
+/* ═══════════════════════════════════════════════════════════════════
+ * UI-141 — Deck-Analyse: kompakter Kopf, kurze Wege (Hausi 15.10.2026)
+ * ───────────────────────────────────────────────────────────────────
+ * Anlass: sechs iPhone-Screenshots. „Der Startbereich sieht nicht geil
+ * aus … die Matchup-Tabelle ist zu lang … die Karten sind zu groß, man
+ * muss ewig scrollen, bis es zum Deck Builder weitergeht."
+ *
+ * Gemessen vorher bei 390 px (Sharpedo Toxtricity, dunkel):
+ *   Kopf bis zur ersten Zahl      632 px  (Deckwahl 163 + Ansicht 52 + Filter 417)
+ *   Deck-Statistiken              512 px
+ *   Matchups (27 als Kartenliste) 4.440 px
+ *   Kartenuebersicht (42 Karten)  8.342 px  (2 je Zeile, Infoleiste unter dem Bild)
+ *   Deck Builder beginnt bei      14.506 px — 17 Bildschirme
+ *
+ * Was hier steht, ist nur die Deck-Analyse (#current-analysis) und die
+ * Kartengitter ihrer Raeume (.deck-grid-skeleton-grid). Die Pillen sind
+ * dieselben wie die Raumwahl (.ds-filter-seg / .ds-filter-btn in
+ * css/components.css) — ein Bauteil, nicht ein zweites, das so aehnlich
+ * aussieht. Laedt nach css/knopfsystem.css, also zuletzt.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Deckwahl: nur das Auswahlfeld, Beschriftung als kleine Zeile ─── */
+#current-analysis .controls.cm-deckwahl {
+    padding: 0;
+    margin: 0 0 10px;
+    background: none;
+    border: 0;
+}
+#current-analysis .cm-deckwahl-label {
+    display: block;
+    margin: 0 0 4px 2px;
+    font-size: var(--lbl);
+    letter-spacing: var(--lbl-track);
+    font-weight: var(--lbl-weight);
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+/* ── 2. Filterleiste: ein Kasten wie die Raumwahl, Beschriftung links ── */
+#current-analysis .cm-filterleiste {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-6);
+    padding: var(--s-2) var(--s-4);
+    margin: 0 0 14px;
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--e-1);
+}
+#current-analysis .cm-filterleiste .ds-filter-group { margin: 0; max-width: none; }
+/* .cm-view-mode-toggle brachte als eigener Kasten (css/meta-card-analysis.css)
+   Polster, Hintergrund und fit-content mit — hier ist er eine Gruppe wie die anderen. */
+#current-analysis .cm-filterleiste .cm-view-mode-toggle { width: auto; margin: 0; padding: 0; background: none; border-radius: 0; gap: var(--s-2); }
+#current-analysis .cm-filterleiste .cm-view-mode-btn { width: auto; }
+#current-analysis .cm-filterleiste .ds-filter-lab { margin: 0; }
+/* Auswahlfelder (Share, Fusion) und das Datum in derselben Pillenform wie
+   die Knoepfe daneben — ohne die 17-px-Schrift und den 2-px-Rand von
+   .control-input, die das Feld 51 px hoch machten. */
+#current-analysis .cm-filterleiste .ds-filter-select {
+    width: auto;
+    max-width: 100%;
+    min-height: 36px;
+    padding: 4px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--ink);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    box-shadow: none;
+}
+#current-analysis .cm-filterleiste .ds-filter-select:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+}
+/* Share und Datum: am Rechner nebeneinander, am Telefon je eine Zeile. Die
+   Felder haben 16 px Schrift — darunter zoomt iOS beim Antippen hinein. */
+#current-analysis .cm-filter-karten-datum { flex-wrap: wrap; gap: var(--s-2) var(--s-3); }
+#current-analysis .cm-filter-karten-datum .ds-filter-select { font-size: 16px; min-height: 38px; }
+#current-analysis .cm-filter-karten-datum #currentMetaDateFrom { min-width: 0; }
+#current-analysis .cm-filter-karten-datum .current-meta-date-group { margin-left: var(--s-1); }
+@media (max-width: 768px) {
+    #current-analysis .cm-filterleiste { gap: var(--s-2) var(--s-3); padding: var(--s-3); }
+    #current-analysis .cm-filterleiste .ds-filter-group { width: 100%; }
+    /* Zwei Zeilen als Gitter: Beschriftung links, Feld rechts. Die Felder
+       duerfen 100 % breit sein (mobile-responsive.css erzwingt das fuer
+       select) — breit ist hier die Spalte, nicht die Zeile. */
+    #current-analysis .cm-filter-karten-datum {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--s-2) var(--s-3);
+    }
+    #current-analysis .cm-filter-karten-datum .ds-filter-lab { grid-column: 1; margin: 0; }
+    #current-analysis .cm-filter-karten-datum #currentMetaFilterSelect { grid-column: 2 / 4; }
+    #current-analysis .cm-filter-karten-datum #currentMetaDateFrom { grid-column: 2; }
+    #current-analysis .cm-filter-karten-datum #currentMetaDateClear { grid-column: 3; }
+}
+/* Das × loescht das Datum; erscheint nur, wenn eines gesetzt ist
+   (_renderCurrentMetaDateStatus setzt display). */
+#current-analysis #currentMetaDateClear {
+    min-height: 36px;
+    min-width: 36px;
+    padding: 0 10px;
+    font-size: 18px;
+    line-height: 1;
+}
+/* „Aktiver Filter: Alle Turniere" und „Active window: …" beschreiben das
+   Bedienelement daneben — bleiben fuer die Zusicherungen im DOM. */
+#current-analysis #currentMetaFilterStatus,
+#current-analysis #currentMetaDateStatus { display: none; }
+#current-analysis .cm-major-hinweis { font-size: var(--fs-xs); color: var(--ink-3); align-self: center; }
+
+/* ── 3. Deck-Statistiken: am Telefon drei Zeilen statt drei Kacheln ──── */
+#current-analysis .current-meta-stat-card .cm-stat-info { margin-top: 6px; }
+@media (max-width: 768px) {
+    #current-analysis .current-meta-stats-title { margin-bottom: 6px; font-size: var(--fs-lg); }
+    #current-analysis .current-meta-stat-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: center;
+        gap: 4px 10px;
+        min-height: 0;
+        padding: 8px 12px;
+    }
+    #current-analysis .current-meta-stat-label {
+        margin: 0;
+        font-size: var(--fs-xs);
+        line-height: 1.2;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+    #current-analysis .current-meta-stat-card .current-meta-stat-value {
+        font-size: var(--fs-lg);
+        text-align: right;
+        white-space: nowrap;
+    }
+    /* Der Professor-Eich-Knopf steht rechts neben der Zahl, nicht als
+       eigene Zeile darunter (vorher 48 px je Kachel). */
+    #current-analysis .current-meta-stat-card .cm-stat-info { margin: 0; line-height: 0; }
+    #current-analysis .current-meta-top256-section { margin-top: 8px; }
+}
+
+/* ── 4. Matchups: die drei schlechtesten, der Rest hinter einem Knopf ── */
+/* Die Zahl 3 steht hier und als MU_VORSCHAU_ZEILEN in js/app-archetype-card.js;
+   tests/unit/test-ui141-deck-analyse.js haelt beide zusammen. Ueber nth-child,
+   damit Umsortieren die Kuerzung nicht aufhebt und die Handy-Kartenliste
+   (js/kein-querscroll.js) dieselben drei Zeilen zeigt. */
+.arc-mu-vorschau table.arc-mu-table:not(.arc-mu-alle) tbody tr:nth-child(n+4) { display: none; }
+.arc-mu-mehr-zeilen {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    margin: 8px 0 4px;
+    padding: 6px 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface-1);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    cursor: pointer;
+}
+.arc-mu-mehr-zeilen:hover { background: var(--surface-2); }
+.arc-mu-mehr-zeilen:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.arc-mu-mehr-zeilen::after { content: " ▾"; }
+.arc-mu-mehr-zeilen[aria-expanded="true"]::after { content: " ▴"; }
+
+/* ── 5. Kartenuebersicht: Kopf mit Pillen ───────────────────────────── */
+#current-analysis .cm-kartenfilter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2);
+}
+#current-analysis .cm-kartenfilter .current-meta-cards-search { flex: 1 1 100%; margin: 0; }
+#current-analysis .cm-kartenfilter .ds-filter-seg { margin: 0; }
+#current-analysis .cm-kartenfilter .cm-kartenfilter-aktionen { display: flex; gap: var(--s-2); margin-left: auto; }
+/* Die Zustandsklassen der vorhandenen Funktionen (btn-active) sehen aus
+   wie .is-on der Raumwahl — eine Pille, drei Schalter. */
+#current-analysis .cm-kartenfilter .ds-filter-btn,
+#current-analysis .cm-filterleiste .ds-filter-btn {
+    min-height: 36px;
+    padding: 4px 12px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    box-shadow: none;
+    transform: none;
+    text-transform: none;
+    letter-spacing: 0;
+}
+#current-analysis .cm-kartenfilter .ds-filter-btn.btn-active,
+#current-analysis .cm-kartenfilter .ds-filter-btn.active,
+#current-analysis .cm-filterleiste .ds-filter-btn.is-on,
+#current-analysis .cm-filterleiste .ds-filter-btn.active,
+#current-analysis .cm-filterleiste .ds-filter-btn.is-active {
+    background: var(--surface-1);
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--space-gl), var(--e-1);
+}
+#current-analysis .cm-kartenfilter .ds-filter-btn.btn-inactive { background: none; color: var(--ink-2); box-shadow: none; }
+/* Die Knopf-Legende „L = … · P = …" lag als Gitterzelle in der ersten von
+   drei Spalten und brach fuenfmal um (Hausis Screenshot 4). */
+#currentMetaDeckGrid .karten-knopf-legende { grid-column: 1 / -1; margin: 0 0 6px; }
+
+/* ── 6. Kartenkacheln am Telefon: drei je Zeile, Daten AUF der Karte ─── */
+/* Dasselbe Muster wie „Dein Deck" (.deck-card-actions in css/styles.css):
+   Prozent und Ø als dunkles Band, zwei Knopfzeilen darunter, alles auf dem
+   Bild. Name, Set und „42/42" fallen am Telefon weg — der Name steht auf
+   der Karte, Tippen oeffnet sie gross (showSingleCard). Vorher: 2 je Zeile,
+   Infoleiste UNTER dem Bild, 375 px je Kachel.
+
+   Die !important hier sind gemessen noetig, nicht vorsorglich: css/styles.css
+   setzt unter 768 px `.card-item .card-info-bottom { position: relative;
+   bottom: auto; background: rgba(255,255,255,.88); padding }` und
+   css/mobile-responsive.css `.card-grid { grid-template-columns: minmax(120px) }`
+   — beide mit !important. Nur die Kachel der Deck-Analyse steigt hier aus. */
+@media (max-width: 768px) {
+    .card-grid.deck-grid-skeleton-grid,
+    .deck-grid-skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)) !important;
+        gap: 6px !important;
+    }
+    .deck-grid-skeleton-grid .city-league-card-item {
+        border-radius: 8px;
+        box-shadow: none;
+        background: none;
+    }
+    .deck-grid-skeleton-grid .city-league-card-image-container { position: relative; }
+    .deck-grid-skeleton-grid .city-league-card-image {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+    .deck-grid-skeleton-grid .card-item .city-league-card-info-bottom {
+        position: absolute !important;
+        left: 3px;
+        right: 3px;
+        bottom: 4px !important;
+        min-height: 0;
+        padding: 0 !important;
+        background: none !important;
+        border: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        z-index: 3;
+    }
+    .deck-grid-skeleton-grid .city-league-card-info-text {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        column-gap: 0.45em;
+        row-gap: 1px;
+        margin: 0;
+        padding: 2px 4px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        font-size: var(--fs-xs);
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: center;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    }
+    .deck-grid-skeleton-grid .city-league-card-title-mobile,
+    .deck-grid-skeleton-grid .city-league-card-set-mobile,
+    .deck-grid-skeleton-grid .city-league-card-deck-stats-mobile { display: none !important; }
+    .deck-grid-skeleton-grid .city-league-card-set-stats-row { display: contents !important; }
+    /* (0,2,1) wie `.card-item .card-info-text > div { color … !important }`
+       in css/styles.css, nur spaeter geladen — deshalb der Kind-Selektor. */
+    .deck-grid-skeleton-grid .card-info-text > div { color: #fff !important; }
+    .deck-grid-skeleton-grid .city-league-card-stats-mobile,
+    .deck-grid-skeleton-grid .city-league-card-avg-mobile {
+        display: inline;
+        margin: 0 !important;
+        font-size: inherit;
+        line-height: inherit !important;
+        white-space: nowrap;
+    }
+    .deck-grid-skeleton-grid .city-league-card-action-buttons { display: flex; flex-direction: column; gap: 2px; margin: 0; }
+    .deck-grid-skeleton-grid .city-league-card-action-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 2px;
+    }
+    .deck-grid-skeleton-grid .city-league-card-action-row:nth-child(2) { grid-template-columns: 1fr 1fr 1.7fr; }
+    .deck-grid-skeleton-grid .city-league-card-action-btn {
+        min-height: 22px;
+        height: 22px;
+        padding: 0 2px;
+        border-radius: 6px;
+        font-size: var(--fs-xs);
+    }
+}
+@media (max-width: 480px) {
+    .card-grid.deck-grid-skeleton-grid,
+    .deck-grid-skeleton-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+}
+
+/* ── 7. Abstaende der Abschnitte am Telefon ─────────────────────────── */
+/* Die Nutzen .mb-40 / .px-30 tragen !important (css/ui-components.css);
+   am Telefon sind 40 px Luft und 30 px Polster je Abschnitt Scrollweg
+   ohne Inhalt. Nur hier, nur unter 768 px. */
+@media (max-width: 768px) {
+    #current-analysis .mb-40 { margin-bottom: 18px !important; }
+    #current-analysis .px-30 { padding-top: 12px !important; padding-bottom: 12px !important; }
+    #current-analysis .current-meta-matchups-title { margin: 0 0 8px; font-size: var(--fs-lg); }
+    #current-analysis .current-meta-cards-header { margin-bottom: 10px; }
+    #current-analysis .ds-legend { margin: 6px 0 8px; }
+}

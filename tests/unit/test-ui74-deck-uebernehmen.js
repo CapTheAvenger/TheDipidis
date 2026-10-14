@@ -1,9 +1,12 @@
 /**
- * UI-74 (03.10.2026, Tiefenanalyse N-03/F-04): Ein Deck zu speichern kostete
- * 8–9 Klicks; „Speichern" erschien erst nach „Max Consistency" ~6.000 px
- * tiefer. Jetzt: „Als mein Deck speichern" direkt unter der Archetyp-Auswahl
- * und „+ Neues Deck" in Meine Decks (fuehrt zum Profil-Builder, UI-73).
- * deckUebernehmen wird AUSGEFUEHRT (Kommentare entfernt), die Knoepfe gelesen.
+ * UI-74 (03.10.2026) hatte „Als mein Deck speichern" direkt unter die
+ * Archetyp-Auswahl gesetzt (baute die typische Liste, oeffnete den
+ * Speichern-Dialog). UI-141 (Hausi 15.10.2026, iPhone-Screenshot, Knopf rot
+ * umkreist): „Was soll der Knopf da? … Das kann weg." — Festlegung A.
+ *
+ * Geblieben ist aus UI-74 nur „+ Neues Deck" in Meine Decks (UI-97: startet
+ * leer). Diese Datei haelt beides: der Knopf und seine Funktion sind weg,
+ * „+ Neues Deck" steht noch.
  */
 'use strict';
 const { describe, it } = require('node:test');
@@ -11,45 +14,29 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const W = path.join(__dirname, '..', '..');
-const DB = fs.readFileSync(path.join(W, 'js', 'app-deck-builder.js'), 'utf8')
-  .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
-const HTML = fs.readFileSync(path.join(W, 'index.html'), 'utf8');
+const ohneKommentare = (s) => s
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
+    .replace(/<!--[\s\S]*?-->/g, '');
+const DB = ohneKommentare(fs.readFileSync(path.join(W, 'js', 'app-deck-builder.js'), 'utf8'));
+const HTML = ohneKommentare(fs.readFileSync(path.join(W, 'index.html'), 'utf8'));
+const I18N = ohneKommentare(fs.readFileSync(path.join(W, 'js', 'i18n.js'), 'utf8'));
 
-function laden(w) {
-  const a = DB.indexOf('async function deckUebernehmen(');
-  const b = DB.indexOf('window.deckUebernehmen = deckUebernehmen;', a);
-  assert.ok(a > -1 && b > a);
-  // eslint-disable-next-line no-new-func
-  return Function('window', 'showNotification', 't', DB.slice(a, b) + '\nreturn deckUebernehmen;')(w, () => {}, (k) => k);
-}
-
-describe('UI-74: Deck direkt aus der Analyse speichern', () => {
-  it('leeres Deck: erst generieren, dann der Speichern-Dialog', async () => {
-    const ruf = [];
-    const w = { currentMetaArchetype: 'Dragapult', currentMetaDeck: {},
-      autoCompleteConsistency: async (s, m) => { ruf.push(['gen', s, m]); w.currentMetaDeck = { 'Dreepy (TWM 128)': 4 }; },
-      saveCurrentDeckToProfile: async (s) => { ruf.push(['save', s]); } };
-    const r = await laden(w)('currentMeta');
-    assert.deepEqual(ruf, [['gen', 'currentMeta', 'min'], ['save', 'currentMeta']]);
-    assert.equal(r.generiert, true);
+describe('UI-141: „Als mein Deck speichern" ist weg (Festlegung A)', () => {
+  it('kein Knopf unter der Archetyp-Auswahl, keine Funktion, keine Woerterbuchzeile', () => {
+    assert.doesNotMatch(HTML, /deckUebernehmen\(/, 'der Knopf steht noch in index.html');
+    assert.doesNotMatch(HTML, /id="btn-deck-uebernehmen"/);
+    assert.doesNotMatch(DB, /function deckUebernehmen\(/, 'die Funktion steht noch in app-deck-builder.js');
+    assert.doesNotMatch(DB, /window\.deckUebernehmen\s*=/);
+    assert.doesNotMatch(I18N, /'deck\.uebernehmen(Erst)?'/);
   });
-  it('gebautes Deck wird nicht neu generiert', async () => {
-    const ruf = [];
-    const w = { currentMetaArchetype: 'Dragapult', currentMetaDeck: { 'X (A 1)': 2 },
-      autoCompleteConsistency: async () => ruf.push('gen'), saveCurrentDeckToProfile: async () => ruf.push('save') };
-    await laden(w)('currentMeta');
-    assert.deepEqual(ruf, ['save']);
+  it('„+ Neues Deck" in Meine Decks bleibt (UI-97: startet leer)', () => {
+    assert.match(HTML, /onclick="[^"]*(ProfileDeckBuilder\.neuesDeck\(\)|switchProfileTab\('deckbuilder'\))[^"]*"[^>]*data-i18n="profile\.newDeck"/);
   });
-  it('ohne Archetyp passiert nichts', async () => {
-    const ruf = [];
-    const w = { currentMetaDeck: {}, autoCompleteConsistency: async () => ruf.push('gen'), saveCurrentDeckToProfile: async () => ruf.push('save') };
-    assert.equal((await laden(w)('currentMeta')).grund, 'kein-archetyp');
-    assert.deepEqual(ruf, []);
-  });
-  it('Knoepfe stehen unter der Archetyp-Auswahl und in Meine Decks', () => {
-    const sel = HTML.indexOf('id="currentMetaDeckSelect"');
-    const knopf = HTML.indexOf("onclick=\"deckUebernehmen('currentMeta')\"");
-    assert.ok(knopf > sel && knopf - sel < 600, 'Knopf steht nicht direkt unter der Auswahl');
-    assert.match(HTML, /onclick="[^"]*(ProfileDeckBuilder\.neuesDeck\(\)|switchProfileTab\('deckbuilder'\))[^"]*"[^>]*data-i18n="profile\.newDeck"/ /* UI-97 (06.10.2026): startet leer */);
+  it('Verfaelschungsprobe: ein wieder eingebauter Knopf faellt auf', () => {
+    const kaputt = HTML.replace('id="currentMetaDeckSelect"',
+      'id="currentMetaDeckSelect"></select><button onclick="deckUebernehmen(\'currentMeta\')">x</button><select');
+    assert.notEqual(kaputt, HTML);
+    assert.throws(() => assert.doesNotMatch(kaputt, /deckUebernehmen\(/));
   });
 });

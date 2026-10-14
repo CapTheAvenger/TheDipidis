@@ -806,6 +806,23 @@ html.is-signed-out [onclick*="radelist"]:hover {
     color: var(--ink);
     box-shadow: var(--e-1);
 }
+/* UI-141 (15.10.2026): dieselbe Pille mit den Zustandsklassen der
+   Umschalter in der Deck-Analyse — setCurrentMetaOverviewCardTypeFilter und
+   setCurrentMetaOverviewRarityMode setzen btn-active/btn-inactive,
+   setCurrentMetaViewMode is-active. Ein Aussehen, drei Schreibweisen;
+   tests/unit/test-knopf-hervorhebung.js haelt die Zustaende. */
+.ds-filter-btn.btn-active,
+.ds-filter-btn.active,
+.ds-filter-btn.is-active {
+    background: var(--surface-1);
+    color: var(--ink);
+    box-shadow: var(--e-1);
+}
+.ds-filter-btn.btn-inactive {
+    background: none;
+    color: var(--ink-2);
+    box-shadow: none;
+}
 .ds-filter-btn:focus-visible {
     outline: 2px solid var(--brand);
     outline-offset: 2px;

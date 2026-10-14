@@ -111,6 +111,11 @@ function tabelleMit(zeilen) {
            und nur im Ueberlagerungsfenster unter der Tabelle. */
         schneide('legendeText'),
         schneide('legendeHtml'),
+        /* UI-141 (15.10.2026): Legende und Hinweise gehen in der Deck-Analyse
+           ans Register (hinweiseHtml); ohne DsAbschnittInfo — wie hier —
+           bleiben sie unter der Tabelle. */
+        'const MU_HINWEISE_ID = "arc-mu-hinweise-embed";',
+        schneide('hinweiseHtml'),
         schneide('matchupTableHtml'),
         'return matchupTableHtml;',
     ].join('\n');

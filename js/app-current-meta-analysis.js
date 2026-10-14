@@ -1413,8 +1413,11 @@
                 const isActive = f.toLowerCase() === format;
                 btn.classList.add('current-meta-format-btn');
                 btn.classList.toggle('active', isActive);
-                btn.classList.remove('btn-secondary'); // legacy class — drop
-                btn.classList.toggle('btn-primary', isActive);
+                // UI-141 (15.10.2026): die drei Knoepfe sind Pillen der Filterleiste
+                // (.ds-filter-btn, wie die Raumwahl). Der aktive traegt .is-on;
+                // .btn-primary/.btn-secondary gibt es an ihnen nicht mehr.
+                btn.classList.remove('btn-secondary', 'btn-primary');
+                btn.classList.toggle('is-on', isActive);
                 btn.setAttribute('aria-pressed', String(isActive));
                 btn.disabled = false;
                 btn.title = '';
@@ -1578,10 +1581,12 @@
             const deepBtn    = document.getElementById('cmViewModeDeepDiveBtn');
             if (vanillaBtn) {
                 vanillaBtn.classList.toggle('is-active', next === 'vanilla');
+                vanillaBtn.classList.toggle('is-on', next === 'vanilla');
                 vanillaBtn.setAttribute('aria-selected', String(next === 'vanilla'));
             }
             if (deepBtn) {
                 deepBtn.classList.toggle('is-active', next === 'deepDive');
+                deepBtn.classList.toggle('is-on', next === 'deepDive');
                 deepBtn.setAttribute('aria-selected', String(next === 'deepDive'));
             }
 
@@ -1847,7 +1852,9 @@
                     knopfHuelle = document.createElement('div');
                     knopfHuelle.id = knopfId;
                     knopfHuelle.className = 'cm-stat-info';
-                    knopfHuelle.setAttribute('style', 'margin-top:6px;');
+                    // UI-141: kein Inline-Abstand mehr — am Telefon steht der Knopf
+                    // neben der Zahl (css/deck-analyse.css), am Rechner darunter.
+                    knopfHuelle.setAttribute('style', '');
                     if (kachel && typeof kachel.appendChild === 'function') kachel.appendChild(knopfHuelle);
                     else return null;
                 }
@@ -4600,7 +4607,16 @@
             const titel = document.getElementById('currentMetaMatchupsTitle');
             if (!ziel || !abschnitt || typeof window.renderArchetypeMatchupTabelle !== 'function') return;
             window.renderArchetypeMatchupTabelle(ziel, archetype).then(() => {
-                if (titel) titel.textContent = 'Matchups · ' + archetype;
+                if (titel) {
+                    titel.textContent = 'Matchups · ' + archetype;
+                    // UI-141: Legende und Hinweise der Tabelle liegen im Register
+                    // (js/app-archetype-card.js, hinweiseHtml) — der Professor-Eich-
+                    // Knopf dazu steht in der Ueberschrift, wie bei den Kennzahlen.
+                    const AI = window.DsAbschnittInfo;
+                    if (AI && typeof AI.hat === 'function' && AI.hat('arc-mu-hinweise-embed')) {
+                        titel.insertAdjacentHTML('beforeend', ' ' + AI.knopfHtml('arc-mu-hinweise-embed', 'Matchups'));
+                    }
+                }
                 abschnitt.classList.remove('d-none');
             }).catch(e => console.error('[FE-62] Matchup-Tabelle:', e));
         }

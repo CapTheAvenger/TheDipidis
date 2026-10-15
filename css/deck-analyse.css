@@ -240,10 +240,20 @@
         height: auto;
         border-radius: 8px;
     }
+    /* UI-143 (Hausis iPhone, 15.10.2026 23:03): die Leiste war nur so breit
+       wie ihr laengster Inhalt — auf der Ace Spec („10,45€") voll, sonst
+       ein Fuenftel der Karte frei. css/styles.css setzt unter 768 px
+       `.card-item .card-info-bottom { left: auto !important; right: auto
+       !important }` (und eine Inline-Regel `body .city-league-card-info-
+       bottom` dasselbe): ohne `!important` unterlagen left/right hier, die
+       absolute Leiste schrumpfte auf Inhaltsbreite. In Chrome fiel es nicht
+       auf (89,4 statt 90 px — die Schrift fuellte die Breite zufaellig). */
     .deck-grid-skeleton-grid .card-item .city-league-card-info-bottom {
         position: absolute !important;
-        left: 3px;
-        right: 3px;
+        left: 3px !important;
+        right: 3px !important;
+        top: auto !important;
+        width: auto !important;
         bottom: 4px !important;
         min-height: 0;
         padding: 0 !important;
@@ -315,13 +325,26 @@
         gap: 2px !important;
         margin: 0 !important;
     }
-    .deck-grid-skeleton-grid .city-league-card-action-row {
+    /* ID in beiden Zeilenregeln: css/ui-components.css gibt der City League
+       `#city-league-analysis .city-league-card-action-row { grid-template-
+       columns: 30px 30px 1fr }` (und 28px-Varianten) — (1,1,0) schlug die
+       Klassenregel, die City-League-Kachel hatte 30/30/26 statt 29/29/29
+       und der Preis lief ueber (gemessen UI-143). */
+    #currentMetaDeckGrid .deck-grid-skeleton-grid .city-league-card-action-row,
+    #cityLeagueDeckGrid .deck-grid-skeleton-grid .city-league-card-action-row {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
         gap: 2px !important;
         padding: 0 !important;
     }
-    .deck-grid-skeleton-grid .city-league-card-action-row:nth-child(2) { grid-template-columns: 1fr 1fr 1.7fr; }
+    /* Zweite Zeile 1fr 1fr 2.3fr („Dein Deck": 1fr 1fr 2fr): mit 1.7fr
+       lief „10,45€" im Preisknopf ueber (41 > 38 px, gemessen UI-143) und
+       wurde zu „10,4…"; mit 2fr blieben 0,6 px Luft — zu wenig fuer eine
+       andere Schriftmessung (iPhone). Gemessen (DOM, scrollWidth gegen
+       clientWidth, 10 px Schrift, -0.02em): 46-px-Spalte, 42 px innen,
+       „10,45€" und ein eingesetztes „184,03€" passen ohne Ellipse. */
+    #currentMetaDeckGrid .deck-grid-skeleton-grid .city-league-card-action-row:nth-child(2),
+    #cityLeagueDeckGrid .deck-grid-skeleton-grid .city-league-card-action-row:nth-child(2) { grid-template-columns: 1fr 1fr 2.3fr; }
     /* Die Knoepfe: 18 px hoch, wie die 15 px in „Dein Deck".
        GEMESSEN 15.10.2026 (Hausis iPhone, dann Chromium 390 px mit
        `pointer: coarse` und echtem Kartenbild 245x342): die erste Fassung
@@ -343,6 +366,20 @@
         border-radius: 5px;
         font-size: var(--fs-xs) !important;
         line-height: 1;
+    }
+    /* Der Preisknopf: css/ui-components.css gibt ihm `flex: 0 0 auto;
+       margin-left: auto` — im Gitter heisst das: so breit wie sein Text,
+       rechtsbuendig („5,18€" 37 px in einer 43-px-Spalte, „10,45€" 43 px;
+       gemessen UI-143). Hier fuellt er seine Spalte wie die anderen Knoepfe.
+       1 px Polster statt 2, damit sieben Zeichen („184,03€") hineinpassen. */
+    #currentMetaDeckGrid .deck-grid-skeleton-grid .city-league-card-market-btn,
+    #cityLeagueDeckGrid .deck-grid-skeleton-grid .city-league-card-market-btn {
+        margin: 0 !important;
+        width: auto !important;
+        justify-self: stretch;
+        padding: 0 1px !important;
+        font-size: 10px !important;
+        letter-spacing: -0.02em !important;
     }
 }
 @media (max-width: 480px) {

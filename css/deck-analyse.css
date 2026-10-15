@@ -254,15 +254,26 @@
         gap: 2px;
         z-index: 3;
     }
+    /* Das Band ist EINE Zeile wie in „Dein Deck" („100,0% Ø 1,01x", dort
+       13 px hoch, gemessen 15.10.2026 bei 390 px mit Touch-Emulation).
+       Die Klammer „(1,01x)" — der Schnitt ueber alle Listen — faellt am
+       Telefon weg (.city-league-card-avg-basis); mit ihr brach das Band
+       in zwei Zeilen und war 33 px hoch. */
     .deck-grid-skeleton-grid .city-league-card-info-text {
         display: flex;
+        /* css/styles.css setzt unter 768 px `.card-info-text { flex-direction:
+           column !important }` — damit stand jede Zahl in einer eigenen
+           Zeile (gemessen: Band 30 px statt 13). Gleiches Gewicht, spaeter
+           geladen. */
+        flex-direction: row !important;
         flex-wrap: wrap;
         justify-content: center;
-        column-gap: 0.45em;
-        row-gap: 1px;
+        align-items: baseline;
+        column-gap: 0.4em;
+        row-gap: 0;
         margin: 0;
-        padding: 2px 4px;
-        border-radius: 6px;
+        padding: 1px 3px;
+        border-radius: 5px;
         background: rgba(0, 0, 0, 0.75);
         color: #fff;
         font-size: var(--fs-xs);
@@ -271,6 +282,7 @@
         text-align: center;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
     }
+    .deck-grid-skeleton-grid .city-league-card-avg-basis { display: none; }
     .deck-grid-skeleton-grid .city-league-card-title-mobile,
     .deck-grid-skeleton-grid .city-league-card-set-mobile,
     .deck-grid-skeleton-grid .city-league-card-deck-stats-mobile { display: none !important; }
@@ -278,27 +290,59 @@
     /* (0,2,1) wie `.card-item .card-info-text > div { color … !important }`
        in css/styles.css, nur spaeter geladen — deshalb der Kind-Selektor. */
     .deck-grid-skeleton-grid .card-info-text > div { color: #fff !important; }
+    /* Der Anteil traegt unter 768 px `color: var(--vorbehalt) !important`
+       (0,3,0, css/styles.css) — im hellen Schema ein dunkles Gold, auf dem
+       schwarzen Band kaum lesbar (gemessen 15.10.2026). Weiss wie in
+       „Dein Deck", gleiche Spezifitaet, spaeter geladen. */
+    .deck-grid-skeleton-grid .city-league-card-set-stats-row .city-league-card-stats-mobile { color: #fff !important; }
     .deck-grid-skeleton-grid .city-league-card-stats-mobile,
     .deck-grid-skeleton-grid .city-league-card-avg-mobile {
         display: inline;
         margin: 0 !important;
+        padding: 0 !important;
         font-size: inherit;
         line-height: inherit !important;
         white-space: nowrap;
     }
-    .deck-grid-skeleton-grid .city-league-card-action-buttons { display: flex; flex-direction: column; gap: 2px; margin: 0; }
+    /* Knopfzeilen dicht wie in „Dein Deck". Die !important sind gemessen:
+       css/mobile-responsive.css gibt jeder `.card-item [class*="action-row"]`
+       unter 600 px `padding: 2px 4px !important`, css/styles.css
+       `.card-action-buttons > div { gap: 3px !important }` — zusammen
+       10 px Luft zwischen Band und Knoepfen, die hier nichts tragen. */
+    .deck-grid-skeleton-grid .city-league-card-action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 2px !important;
+        margin: 0 !important;
+    }
     .deck-grid-skeleton-grid .city-league-card-action-row {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
-        gap: 2px;
+        gap: 2px !important;
+        padding: 0 !important;
     }
     .deck-grid-skeleton-grid .city-league-card-action-row:nth-child(2) { grid-template-columns: 1fr 1fr 1.7fr; }
-    .deck-grid-skeleton-grid .city-league-card-action-btn {
-        min-height: 22px;
-        height: 22px;
-        padding: 0 2px;
-        border-radius: 6px;
-        font-size: var(--fs-xs);
+    /* Die Knoepfe: 18 px hoch, wie die 15 px in „Dein Deck".
+       GEMESSEN 15.10.2026 (Hausis iPhone, dann Chromium 390 px mit
+       `pointer: coarse` und echtem Kartenbild 245x342): die erste Fassung
+       stand hier mit `height: 22px` OHNE ID und OHNE !important — auf dem
+       Telefon gewann css/tippziele.css `button:not(…) { min-height: 44px
+       !important }` (0,7,1) unter `@media (pointer: coarse)`, jeder Knopf
+       wurde 44 px hoch, und Band plus zwei Knopfzeilen deckten 101 % des
+       Bildes ab. Auf der Maus war es unsichtbar, und der Kopflos-Browser
+       lud kein Kartenbild, also fiel die Kachel auf die Hoehe der Knoepfe
+       zusammen. Deshalb hier dieselbe Bauart wie in „Dein Deck"
+       (`#currentMetaMyDeckGrid .deck-card-actions button`, css/styles.css
+       unter 768 px): ID im Selektor (1,2,0) und !important. */
+    #currentMetaDeckGrid .deck-grid-skeleton-grid .city-league-card-action-btn,
+    #cityLeagueDeckGrid .deck-grid-skeleton-grid .city-league-card-action-btn {
+        min-height: 18px !important;
+        height: 18px !important;
+        min-width: 0 !important;
+        padding: 0 2px !important;
+        border-radius: 5px;
+        font-size: var(--fs-xs) !important;
+        line-height: 1;
     }
 }
 @media (max-width: 480px) {

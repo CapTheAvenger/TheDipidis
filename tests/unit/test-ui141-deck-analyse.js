@@ -348,3 +348,74 @@ describe('UI-142: die Knopfregel der Kachel schlaegt die Touch-Regel (Spezifitae
         assert.throws(() => assert.match(klammer, /city-league-card-avg-basis \{ display: none; \}/));
     });
 });
+
+/* ── UI-143 (15.10.2026, 23:03, Hausis iPhone): „Wieso ist die Breite bei
+ * den Buttons nicht ueberall gleich … nicht die gesamte Breite der Karte"
+ *
+ * GEMESSEN: die Leiste war 89,4 statt 90 px breit — geschrumpft auf
+ * Inhaltsbreite, weil css/styles.css unter 768 px `.card-item
+ * .card-info-bottom { left: auto !important; right: auto !important }`
+ * setzt und left/right hier ohne !important standen. Auf dem iPhone (andere
+ * Schriftmessung) blieb ein Fuenftel Karte frei, auf der Ace Spec machte
+ * „10,45€" die Leiste voll. Dazu: der Preisknopf stand mit `margin-left:
+ * auto` (ui-components.css) rechtsbuendig in Textbreite (37 px in einer
+ * 43-px-Spalte), und die City League hatte eigene ID-Spalten
+ * (`#city-league-analysis … { grid-template-columns: 30px 30px 1fr }`).
+ * NACHHER: Leiste 90 px, Knopfbreiten je Position 29/29/29/20/20/46 in
+ * beiden Raeumen, Preise bis sieben Zeichen ohne Ellipse. */
+describe('UI-143: die Leiste spannt die Karte, die Knoepfe sind ueberall gleich breit', () => {
+    function spezifitaet(sel) {
+        let a = 0, b = 0, c = 0;
+        let s = sel.trim();
+        s = s.replace(/:not\(([^)]*)\)/g, (_, inner) => { const [x, y, z] = spezifitaet(inner); a += x; b += y; c += z; return ''; });
+        s = s.replace(/::[\w-]+/g, () => { c++; return ''; });
+        s = s.replace(/#[\w-]+/g, () => { a++; return ''; });
+        s = s.replace(/\[[^\]]*\]/g, () => { b++; return ''; });
+        s = s.replace(/\.[\w-]+/g, () => { b++; return ''; });
+        s = s.replace(/:[\w-]+(\([^)]*\))?/g, () => { b++; return ''; });
+        s = s.replace(/[a-zA-Z][\w-]*/g, () => { c++; return ''; });
+        return [a, b, c];
+    }
+    const schlaegt = (x, y) => (x[0] - y[0]) || (x[1] - y[1]) || (x[2] - y[2]);
+    const leiste = () => {
+        const m = CSS.match(/\.deck-grid-skeleton-grid \.card-item \.city-league-card-info-bottom \{([^}]*)\}/);
+        assert.ok(m, 'Leistenregel fehlt'); return m[1];
+    };
+    it('left/right/width der Leiste tragen !important — gegen styles.css `left/right: auto !important`', () => {
+        const k = leiste();
+        assert.match(k, /\bleft: 3px !important;/);
+        assert.match(k, /\bright: 3px !important;/);
+        assert.match(k, /\bwidth: auto !important;/);
+        assert.match(k, /\btop: auto !important;/);
+    });
+    it('die Zeilenregeln tragen die IDs beider Raeume und schlagen die City-League-Spalten (berechnet)', () => {
+        const m = CSS.match(/\n\s*(#currentMetaDeckGrid \.deck-grid-skeleton-grid \.city-league-card-action-row,\s*#cityLeagueDeckGrid \.deck-grid-skeleton-grid \.city-league-card-action-row)\s*\{([^}]*)\}/);
+        assert.ok(m, 'Zeilenregel mit beiden IDs fehlt');
+        assert.match(m[2], /grid-template-columns: 1fr 1fr 1fr;/);
+        assert.match(CSS, /#currentMetaDeckGrid \.deck-grid-skeleton-grid \.city-league-card-action-row:nth-child\(2\),\s*#cityLeagueDeckGrid \.deck-grid-skeleton-grid \.city-league-card-action-row:nth-child\(2\) \{ grid-template-columns: 1fr 1fr 2\.3fr; \}/);
+        // Die fremde Regel, gegen die hier angeschrieben wird — aus der Datei gelesen, nicht erfunden.
+        const UI = ohneKommentare(lies('css/ui-components.css'));
+        const fremd = UI.match(/(#city-league-analysis \.city-league-card-action-row)[^{]*\{[^}]*grid-template-columns: 30px 30px 1fr/);
+        assert.ok(fremd, 'ui-components.css: die City-League-Spaltenregel ist weg — dann darf die ID hier weg');
+        for (const mein of m[1].split(',').map((t) => t.trim())) {
+            assert.ok(schlaegt(spezifitaet(mein), spezifitaet(fremd[1])) > 0, `${mein} unterliegt ${fremd[1]}`);
+        }
+    });
+    it('der Preisknopf fuellt seine Spalte: margin 0 !important, justify-self stretch, 10 px Schrift', () => {
+        const m = CSS.match(/#currentMetaDeckGrid \.deck-grid-skeleton-grid \.city-league-card-market-btn,\s*#cityLeagueDeckGrid \.deck-grid-skeleton-grid \.city-league-card-market-btn \{([^}]*)\}/);
+        assert.ok(m, 'Preisknopfregel fehlt');
+        assert.match(m[1], /\bmargin: 0 !important;/);
+        assert.match(m[1], /justify-self: stretch;/);
+        assert.match(m[1], /font-size: 10px !important;/);
+    });
+    it('Verfaelschungsprobe: left ohne !important, Zeile ohne ID, Preisknopf ohne margin fallen auf', () => {
+        const ohne = CSS.replace('left: 3px !important;', 'left: 3px;');
+        assert.notEqual(ohne, CSS);
+        assert.throws(() => assert.match(ohne.match(/\.deck-grid-skeleton-grid \.card-item \.city-league-card-info-bottom \{([^}]*)\}/)[1], /\bleft: 3px !important;/));
+        const ohneId = '#cityLeagueDeckGrid .deck-grid-skeleton-grid .city-league-card-action-row'.replace(/^#\w+ /, '');
+        assert.ok(schlaegt(spezifitaet(ohneId), spezifitaet('#city-league-analysis .city-league-card-action-row')) < 0);
+        const ohneMargin = CSS.replace(/(\.city-league-card-market-btn \{[^}]*?)\s*margin: 0 !important;/, '$1');
+        assert.notEqual(ohneMargin, CSS);
+        assert.throws(() => assert.match(ohneMargin.match(/#cityLeagueDeckGrid \.deck-grid-skeleton-grid \.city-league-card-market-btn \{([^}]*)\}/)[1], /\bmargin: 0 !important;/));
+    });
+});

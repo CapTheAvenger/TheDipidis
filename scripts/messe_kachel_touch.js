@@ -108,6 +108,21 @@ const BASIS = process.env.BASIS || 'http://127.0.0.1:8765';
         const info = k.querySelector('.city-league-card-info-bottom');
         const band = k.querySelector('.city-league-card-info-text');
         const btns = [...k.querySelectorAll('.city-league-card-action-btn')].filter((x) => x.offsetParent !== null);
+        // UI-143: Leiste auf Kartenbreite? (left/right 3 px → Kachel − 6). Eine
+        // geschrumpfte Leiste ist so breit wie ihr laengster Inhalt — in Chrome
+        // 89,4 statt 90 px, auf dem iPhone ein Fuenftel Karte frei.
+        const leisteSoll = k.getBoundingClientRect().width - 6;
+        const leisteIst = info.getBoundingClientRect().width;
+        // Ueberlauf in irgendeinem Knopf des Gitters (z. B. „10,45€" im Preisknopf)?
+        const ueberlauf = [...grid.querySelectorAll('.city-league-card-action-btn')]
+            .filter((x) => x.offsetParent !== null && x.scrollWidth > x.clientWidth + 1)
+            .map((x) => `${x.textContent.trim()} ${x.scrollWidth}>${x.clientWidth}`);
+        // Knopfbreiten ueber alle Kacheln: je Position genau eine Breite?
+        const breiten = {};
+        grid.querySelectorAll('.city-league-card-item').forEach((item) => {
+            [...item.querySelectorAll('.city-league-card-action-btn')].filter((x) => x.offsetParent !== null)
+                .forEach((x, i) => { (breiten[i] = breiten[i] || new Set()).add(Math.round(x.getBoundingClientRect().width)); });
+        });
         return {
             medien: { coarse: mq('(pointer: coarse)'), hoverNone: mq('(hover: none)'), breit768: mq('(max-width: 768px)') },
             spalten: getComputedStyle(grid).gridTemplateColumns.split(' ').length,
@@ -116,6 +131,9 @@ const BASIS = process.env.BASIS || 'http://127.0.0.1:8765';
             info: box(info), band: { ...box(band), text: band.textContent.replace(/\s+/g, ' ').trim() },
             knoepfe: btns.map((x) => ({ t: x.textContent.trim(), ...box(x) })),
             verdeckt: `${Math.round(info.getBoundingClientRect().height / img.getBoundingClientRect().height * 100)} % des Bildes`,
+            leisteVoll: Math.abs(leisteIst - leisteSoll) < 1 ? 'ja' : `NEIN: ${leisteIst.toFixed(1)} statt ${leisteSoll.toFixed(1)} px (schrumpft auf Inhaltsbreite)`,
+            knopfUeberlauf: ueberlauf.length ? ueberlauf.slice(0, 5) : 'keiner',
+            knopfBreitenJePosition: Object.values(breiten).map((set) => [...set].join('/')),
             gridTop: Math.round(grid.getBoundingClientRect().top + window.scrollY),
         };
     }, R);

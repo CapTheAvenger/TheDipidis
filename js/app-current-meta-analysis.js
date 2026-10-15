@@ -5445,7 +5445,7 @@
                                         ${resolvedPercentage > 0 ? (
                                             _hasOverride
                                                 ? `<div class="city-league-card-avg-mobile" title="Algorithm uses Ø ${avgCountInUsedDecks}x for this card (${_effEntry && _effEntry.overrideReason || 'override'}). Baseline cross-meta average: ${avgCountBaselineDisplay}x.">Ø ${avgCountInUsedDecks}x <span style="opacity:0.7;font-size:0.85em;">(base ${avgCountBaselineDisplay}x)</span></div>`
-                                                : `<div class="city-league-card-avg-mobile">Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>`
+                                                : `<div class="city-league-card-avg-mobile">Ø ${avgCountInUsedDecks}x <span class="city-league-card-avg-basis">(${avgCountOverall}x)</span></div>`
                                         ) : ''}
                                         <div class="city-league-card-deck-stats-mobile">${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)</div>
                                     </div>

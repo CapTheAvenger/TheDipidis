@@ -16,7 +16,9 @@
  * klappt um; (2) die 3 steht in JS und CSS gleich; (3) die Filterleiste und
  * die Kartenfilter sind Pillen (.ds-filter-btn), ohne .btn-primary; (4) das
  * Kartengitter der Deck-Analyse hat am Telefon drei Spalten und die Daten
- * AUF dem Bild; (5) die alten Teiltabellen bleiben am Telefon unsichtbar.
+ * AUF dem Bild; (5) die alten Teiltabellen bleiben am Telefon unsichtbar;
+ * (6) UI-142: die Knopfregel der Kachel SCHLAEGT die Touch-Regel aus
+ * css/tippziele.css — Spezifitaet wird BERECHNET, nicht abgelesen.
  * Jede Textregel hat ihre Verfaelschungsprobe.
  */
 'use strict';
@@ -226,5 +228,123 @@ describe('UI-141: Kartenuebersicht am Telefon', () => {
     it('das Stylesheet ist eingebunden und im Service Worker', () => {
         assert.match(lies('index.html'), /<link rel="stylesheet" href="css\/deck-analyse\.css\?v=/);
         assert.match(lies('service-worker.js'), /'\.\/css\/deck-analyse\.css'/);
+    });
+});
+
+/* ── UI-142 (15.10.2026): die Kachel blieb auf dem iPhone unsichtbar ──
+ *
+ * Hausi: „Das soll jetzt die neue Ansicht sein, dass man von der Karte gar
+ * nichts mehr sieht?" GEMESSEN (Chromium 390 px, `pointer: coarse`,
+ * Kartenbild 245x342 statt Kopflos-Leere): jeder Knopf 44 px hoch, das Band
+ * zweizeilig 33 px, die Infoleiste 135 px auf einer 134 px hohen Kachel —
+ * 101 % des Bildes verdeckt. Ursache: css/tippziele.css
+ * `button:not(…) { min-height: 44px !important }` (0,7,1) unter
+ * `@media (pointer: coarse)` schlug die Kachelregel (0,2,0) ohne !important.
+ * Auf der Maus unsichtbar, im Kopflos-Browser ohne Bild unsichtbar.
+ * NACHHER: Knoepfe 18 px, Band 17 px einzeilig, Infoleiste 57 px = 43 %
+ * („Dein Deck": 47 von 124 px = 38 %).
+ *
+ * Die Zusicherung RECHNET die Spezifitaet beider Regeln aus, statt eine
+ * Zahl abzulesen — denn genau das Ablesen hat gefehlt. */
+describe('UI-142: die Knopfregel der Kachel schlaegt die Touch-Regel (Spezifitaet berechnet)', () => {
+    /* Spezifitaet (a,b,c) nach CSS Selectors 4: :not() zaehlt wie sein
+       Inhalt, ::pseudo wie ein Element. Reicht fuer die Selektoren hier;
+       Kommas trennt der Aufrufer. */
+    function spezifitaet(sel) {
+        let a = 0, b = 0, c = 0;
+        let s = sel.trim();
+        s = s.replace(/:not\(([^)]*)\)/g, (_, inner) => {
+            const [x, y, z] = spezifitaet(inner); a += x; b += y; c += z; return '';
+        });
+        s = s.replace(/::[\w-]+/g, () => { c++; return ''; });
+        s = s.replace(/#[\w-]+/g, () => { a++; return ''; });
+        s = s.replace(/\[[^\]]*\]/g, () => { b++; return ''; });
+        s = s.replace(/\.[\w-]+/g, () => { b++; return ''; });
+        s = s.replace(/:[\w-]+(\([^)]*\))?/g, () => { b++; return ''; });
+        s = s.replace(/[a-zA-Z][\w-]*/g, () => { c++; return ''; });
+        return [a, b, c];
+    }
+    const schlaegt = (x, y) => (x[0] - y[0]) || (x[1] - y[1]) || (x[2] - y[2]);
+
+    /* Die Touch-Regel: der Block `@media (pointer: coarse)` in tippziele.css,
+       dessen Selektor mit `button:not(` beginnt und min-height 44px !important setzt. */
+    const TIPP = ohneKommentare(lies('css/tippziele.css'));
+    // tippziele.css ist zu 83 % Kommentar (gemessen: 14.253 → 2.448 Zeichen);
+    // die Gegenprobe zum Ausschneiden ist hier, dass die Regel selbst noch da ist.
+    assert.ok(TIPP.includes('min-height: 44px !important'), 'das Ausschneiden hat die Touch-Regel entfernt');
+    const touchRegel = () => {
+        const m = TIPP.match(/@media \(pointer: coarse\) \{\s*(button:not\([^{]*?)\s*\{([^}]*)\}/);
+        assert.ok(m, 'tippziele.css: die Sammelregel button:not(…) unter pointer: coarse fehlt');
+        assert.match(m[2], /min-height: 44px !important/);
+        return m[1].split(',').map((t) => t.trim());
+    };
+    /* Die Kachelregel aus css/deck-analyse.css. */
+    const kachelRegel = () => {
+        const m = CSS.match(/\n\s*((?:#\w+ )?\.deck-grid-skeleton-grid \.city-league-card-action-btn(?:,\s*(?:#\w+ )?\.deck-grid-skeleton-grid \.city-league-card-action-btn)*)\s*\{([^}]*)\}/);
+        assert.ok(m, 'deck-analyse.css: die Knopfregel der Kachel fehlt');
+        return { selektoren: m[1].split(',').map((t) => t.trim()), koerper: m[2] };
+    };
+
+    it('die Touch-Regel trifft den Kachelknopf — er steht NICHT in ihrer Ausnahmeliste', () => {
+        // Sonst waere der Vergleich unten gegenstandslos (und die Ausnahme
+        // traefe auch die Kacheln ohne Kompaktlayout, wo 44 px richtig sind).
+        for (const sel of touchRegel()) assert.ok(!sel.includes('.city-league-card-action-btn'), sel);
+    });
+    it('jede Kachelregel-Variante schlaegt jeden Touch-Selektor: mehr Spezifitaet UND !important', () => {
+        const touch = touchRegel().filter((s) => s.startsWith('button'));
+        assert.ok(touch.length >= 1);
+        const { selektoren, koerper } = kachelRegel();
+        assert.equal(selektoren.length, 2, 'beide Raeume: #currentMetaDeckGrid und #cityLeagueDeckGrid');
+        assert.match(koerper, /min-height: 18px !important/);
+        assert.match(koerper, /\bheight: 18px !important/);
+        assert.match(koerper, /min-width: 0 !important/);   // styles.css: button { min-width: 44px } unter 480 px
+        for (const mein of selektoren) {
+            for (const fremd of touch) {
+                const d = schlaegt(spezifitaet(mein), spezifitaet(fremd));
+                assert.ok(d > 0, `${mein} (${spezifitaet(mein)}) unterliegt ${fremd.slice(0, 60)}… (${spezifitaet(fremd)})`);
+            }
+        }
+    });
+    it('die Rechnung selbst: bekannte Selektoren', () => {
+        assert.deepEqual(spezifitaet('button'), [0, 0, 1]);
+        assert.deepEqual(spezifitaet('button:not(.a):not([data-klein])'), [0, 2, 1]);
+        assert.deepEqual(spezifitaet('#g .x .y'), [1, 2, 0]);
+        assert.deepEqual(spezifitaet('.a::after'), [0, 1, 1]);
+        assert.deepEqual(spezifitaet('html .searchable-select-display'), [0, 1, 1]);
+        // Die echte Touch-Regel hat sieben Ausnahmen → (0,7,1); eine ID allein reicht nicht aus Zufall.
+        const t = touchRegel().find((s) => s.startsWith('button'));
+        assert.ok(spezifitaet(t)[1] >= 7, String(spezifitaet(t)));
+    });
+    it('Verfaelschungsprobe: ohne ID oder ohne !important unterliegt die Kachelregel', () => {
+        const { selektoren, koerper } = kachelRegel();
+        const touch = touchRegel().find((s) => s.startsWith('button'));
+        const ohneId = selektoren[0].replace(/^#\w+ /, '');
+        assert.notEqual(ohneId, selektoren[0]);
+        assert.ok(schlaegt(spezifitaet(ohneId), spezifitaet(touch)) < 0, 'ohne ID muesste sie unterliegen');
+        const ohneWichtig = koerper.replace('min-height: 18px !important', 'min-height: 18px');
+        assert.notEqual(ohneWichtig, koerper);
+        assert.throws(() => assert.match(ohneWichtig, /min-height: 18px !important/));
+    });
+    it('das Band ist eine Zeile: flex-direction row !important gegen styles.css, Klammer (Ø aller Listen) am Telefon weg', () => {
+        assert.match(CSS, /\.deck-grid-skeleton-grid \.city-league-card-info-text \{[^}]*flex-direction: row !important;/);
+        assert.match(CSS, /\.deck-grid-skeleton-grid \.city-league-card-avg-basis \{ display: none; \}/);
+        for (const datei of ['js/app-current-meta-analysis.js', 'js/app-city-league.js']) {
+            const js = ohneKommentare(lies(datei));
+            assert.match(js, /<div class="city-league-card-avg-mobile">Ø \$\{avgCountInUsedDecks\}x <span class="city-league-card-avg-basis">\(\$\{avgCountOverall\}x\)<\/span><\/div>/, datei);
+        }
+        // Der Anteil traegt sonst var(--vorbehalt) !important (0,3,0) — im hellen Schema dunkel auf schwarz.
+        assert.match(CSS, /\.deck-grid-skeleton-grid \.city-league-card-set-stats-row \.city-league-card-stats-mobile \{ color: #fff !important; \}/);
+    });
+    it('die Knopfzeilen sind dicht: kein Polster, 2 px Abstand — beides !important gegen mobile-responsive/styles', () => {
+        assert.match(CSS, /\.deck-grid-skeleton-grid \.city-league-card-action-row \{[^}]*gap: 2px !important;[^}]*padding: 0 !important;/);
+        assert.match(CSS, /\.deck-grid-skeleton-grid \.city-league-card-action-buttons \{[^}]*gap: 2px !important;[^}]*margin: 0 !important;/);
+    });
+    it('Verfaelschungsprobe: Band zweizeilig oder Klammer sichtbar faellt auf', () => {
+        const spalte = CSS.replace('flex-direction: row !important;', 'flex-direction: column !important;');
+        assert.notEqual(spalte, CSS);
+        assert.throws(() => assert.match(spalte, /city-league-card-info-text \{[^}]*flex-direction: row !important;/));
+        const klammer = CSS.replace('.deck-grid-skeleton-grid .city-league-card-avg-basis { display: none; }', '');
+        assert.notEqual(klammer, CSS);
+        assert.throws(() => assert.match(klammer, /city-league-card-avg-basis \{ display: none; \}/));
     });
 });

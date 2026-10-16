@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-10-13 12:23:17+00:00",
+ "erzeugt": "2026-10-16 07:00:03+00:00",
  "format": "TEF-30C",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -21,8 +21,8 @@
  ],
  "ankerspieler_gesamt": 3990,
  "online_abdeckung": {
-  "schnappschuss": "2026-10-13",
-  "anteil_unbekannt": 1.8,
+  "schnappschuss": "2026-10-16",
+  "anteil_unbekannt": 1.82,
   "groesste_unbekannte": [
    {
     "deck": "Marnie's Grimmsnarl",
@@ -30,11 +30,11 @@
    },
    {
     "deck": "Hydreigon",
-    "anteil": 0.18
+    "anteil": 0.17
    },
    {
     "deck": "Mega Zygarde",
-    "anteil": 0.14
+    "anteil": 0.15
    },
    {
     "deck": "Archaludon Zoroark",

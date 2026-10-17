@@ -78,7 +78,7 @@ test('Anzeige: iframe mit sandbox OHNE allow-same-origin und srcdoc = gespeicher
     const sandbox = (html.match(/sandbox="([^"]*)"/) || [])[1];
     assert.ok(sandbox !== undefined, 'kein sandbox-Attribut');
     assert.ok(!/allow-same-origin/.test(sandbox), 'allow-same-origin gibt dem Stueck Zugriff auf Konto und Speicher');
-    assert.strictEqual(rahmen.srcdoc, '<html><body>GEHEIM</body></html>');
+    assert.ok(rahmen.srcdoc.startsWith('<html><body>GEHEIM'), 'gespeicherte Seite gehoert in srcdoc');
     assert.ok(!html.includes('GEHEIM'), 'der Inhalt gehoert in srcdoc, nicht ins Seiten-HTML');
 });
 
@@ -86,4 +86,46 @@ test('im Repo liegt keine Datei einer privaten Masterclass', () => {
     const dateien = fs.readdirSync(path.join(WURZEL, 'masterclass'));
     assert.ok(!dateien.some((d) => /tohaido|sharpedo/i.test(d)),
         'die private Mega-Tohaido-Masterclass darf nicht unter masterclass/ liegen: ' + dateien.join(', '));
+});
+
+/* Nachbesserung 17.10.2026: Sprungmarken im srcdoc-Rahmen zeigten auf die
+ * Elternseite und luden thedipidis.app/#liste im Rahmen („Dieser Inhalt ist
+ * blockiert"). Das eingefuegte Skript wird hier AUSGEFUEHRT. */
+test('Sprungmarken im privaten Stueck scrollen im Rahmen statt zu navigieren', () => {
+    const { mc } = umgebung({ uid: 'U1' }, []);
+    const roh = '<!doctype html><html><body><a href="#liste">Liste</a><section id="liste"></section></body></html>';
+    const html = mc._mitAnkern(roh);
+    assert.ok(html.startsWith('<!doctype html>'), 'das Skript darf nicht vor den Doctype (sonst Quirks-Modus)');
+    const skript = (html.match(/<script>([\s\S]*?)<\/script>/) || [])[1];
+    assert.ok(skript, 'kein Anker-Skript im Stueck');
+    assert.ok(html.indexOf('<script>') < html.lastIndexOf('</body>'), 'Skript gehoert vor </body>');
+    let handler = null, verhindert = false, gescrollt = null;
+    const ziel = { scrollIntoView: () => { gescrollt = 'liste'; } };
+    const document = {
+        addEventListener: (typ, fn) => { if (typ === 'click') handler = fn; },
+        getElementById: (id) => (id === 'liste' ? ziel : null),
+        body: { scrollIntoView: () => { gescrollt = 'body'; } }
+    };
+    const k = { document };
+    vm.createContext(k);
+    vm.runInContext(skript, k);
+    assert.ok(handler, 'Skript registriert keinen Klick-Handler');
+    const anker = { getAttribute: () => '#liste' };
+    handler({ target: { closest: (sel) => (sel.includes('href^=') ? anker : null) }, preventDefault: () => { verhindert = true; } });
+    assert.strictEqual(verhindert, true, 'der Klick muss die Navigation verhindern');
+    assert.strictEqual(gescrollt, 'liste');
+});
+
+test('Stueck ohne </body> bekommt das Skript angehaengt', () => {
+    const { mc } = umgebung({ uid: 'U1' }, []);
+    assert.ok(/<script>[\s\S]*<\/script>$/.test(mc._mitAnkern('<p>x</p>')));
+});
+
+test('zeigePrivat setzt das Stueck MIT Anker-Skript in den Rahmen', () => {
+    const { mc } = umgebung({ uid: 'U1' }, []);
+    const g = mc._privatAusDoc('t', { titel: 'T', html: '<html><body>X</body></html>' });
+    const rahmen = {};
+    const buehne = { innerHTML: '', querySelector: (s) => (s === '.mcl-privat-rahmen' ? rahmen : { addEventListener() {} }), scrollIntoView() {} };
+    mc._zeigePrivat(buehne, g);
+    assert.ok(/addEventListener\("click"/.test(rahmen.srcdoc), 'Rahmen ohne Anker-Skript');
 });

@@ -435,6 +435,25 @@
         });
     }
 
+    /* Sprungmarken im Stueck (<a href="#liste">) zeigen in einem srcdoc-
+     * Rahmen auf die Adresse der ELTERNSEITE: ein Klick laedt dann
+     * thedipidis.app/#liste im Rahmen, und der Browser blockt das
+     * („Dieser Inhalt ist blockiert", Hausi 17.10.2026, Seitenleiste der
+     * Tohaido-Masterclass). Darum bekommt jedes private Stueck vor </body>
+     * ein Skript, das Klicks auf #-Verweise abfaengt und innerhalb des
+     * Rahmens scrollt. */
+    var ANKER_SKRIPT = '<script>document.addEventListener("click",function(e){' +
+        'var a=e.target&&e.target.closest?e.target.closest("a[href^=\'#\']"):null;' +
+        'if(!a)return;e.preventDefault();' +
+        'var id=decodeURIComponent(a.getAttribute("href").slice(1));' +
+        'var z=id?document.getElementById(id):document.body;' +
+        'if(z)z.scrollIntoView({behavior:"smooth",block:"start"});});<\/script>';
+
+    function mitAnkern(html) {
+        var s = String(html || '');
+        return /<\/body>/i.test(s) ? s.replace(/<\/body>(?![\s\S]*<\/body>)/i, ANKER_SKRIPT + '</body>') : s + ANKER_SKRIPT;
+    }
+
     function zeigePrivat(buehne, g) {
         buehne.innerHTML = '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' +
             esc(g.titel) + '</h4>' +
@@ -442,7 +461,7 @@
             '<iframe class="mcl-privat-rahmen" sandbox="allow-scripts allow-popups" title="' +
             esc(g.titel) + '"></iframe>';
         var rahmen = buehne.querySelector('.mcl-privat-rahmen');
-        rahmen.srcdoc = g.html;
+        rahmen.srcdoc = mitAnkern(g.html);
         buehne.querySelector('.mcl-schliessen').addEventListener('click', function () {
             buehne.hidden = true;
             buehne.innerHTML = '';
@@ -1928,6 +1947,7 @@
         _privatAusDoc: privatAusDoc,
         _holePrivat: holePrivat,
         _zeigePrivat: zeigePrivat,
+        _mitAnkern: mitAnkern,
         _bereichWechseln: bereichWechseln,
         _matchupFilter: matchupFilter,
         _listeWechseln: listeWechseln,

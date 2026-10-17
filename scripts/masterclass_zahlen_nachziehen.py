@@ -24,8 +24,20 @@ ES ERFINDET NICHTS. Ein Matchup ohne Bilanz bekommt einen Gedankenstrich,
 eine Bilanz unter 30 Partien bleibt eine Bilanz (S-N-U) statt einer
 Quote — genau die Regel, die das Stueck selbst ausspricht.
 
+UMZUG 17.10.2026 — DAS STUECK LIEGT IM KONTO, DIE ZAHLEN IN DER JSON.
+
+Die Ausarbeitung liegt seit dem 17.10.2026 nur noch in Hausis Konto
+(Firestore), das Repo ist oeffentlich. Dieses Skript schreibt deshalb
+nicht mehr in eine HTML-Datei, sondern den Schluessel `matchups` in
+data/masterclass_live/mega-stalobor.json (scripts/masterclass_live.py).
+Formeln und Regeln sind dieselben; js/ds-masterclass.js setzt die Werte
+beim Oeffnen in die markierten Zellen (data-live-slug / data-live-spalte).
+Das Umstellen der Spaltenkoepfe bei einem Set- oder Majorswechsel
+(frueher online_umstellen/majors_umstellen) passiert jetzt beim Einsetzen:
+die JSON nennt die Koepfe, die Seite benennt die Spalten danach.
+
 Aufruf: python3 scripts/masterclass_zahlen_nachziehen.py [--probe]
-        --probe schreibt nichts und meldet nur, was auseinanderlaeuft.
+        --probe schreibt nichts und meldet nur, was sich aendern wuerde.
 """
 import argparse
 import csv
@@ -37,7 +49,7 @@ import sys
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATEN = os.path.join(WURZEL, "data")
-STUECK = os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+GUIDE_ID = "mega-stalobor"
 
 def _formatfenster(pfad=None):
     """(jetzt, davor) aus data/format_window.json: "TEF-30C" und "TEF-PBL".
@@ -172,109 +184,27 @@ def _und(teile):
     return ", ".join(teile[:-1]) + " und " + teile[-1]
 
 
-MAJORS_KOPF = re.compile(r"Majors \(([^)<]+)\)")
 
-
-def majors_umstellen(roh, meta_neu, laufend):
-    """Stellt das Stueck auf die Majors eines NEUEN Formats um.
-
-    ANLASS 29.09.2026. Mit dem ersten Major des laufenden Formats (Brisbane
-    und Frankfurt, TEF-30C) wechselt die Spalte "Majors". Ohne diesen
-    Schritt faende der Erzeuger keine einzige Zelle mit dem neuen Kopf und
-    schriebe nichts — und drei Saetze im Stueck (Spaltenkopf, Sprechblase,
-    Legende "ein Praesenzturnier im laufenden Format gab es noch nicht")
-    stuenden weiter da und waeren falsch.
-
-    Umgestellt wird nur, was diese Spalte BENENNT: der Kopf, der Anfang der
-    Sprechblasen, der Legendensatz und die Quellenzeile. Die Zahlen rechnet
-    danach `nachziehen` wie immer. Gibt (Text, Aenderungen) zurueck.
-    """
-    alt_koepfe = set(MAJORS_KOPF.findall(roh))
-    kopf_neu = _kopf(meta_neu)
-    if not alt_koepfe or alt_koepfe == {kopf_neu}:
-        return roh, []
-    if len(alt_koepfe) != 1:
-        raise SystemExit("::error::das Stueck nennt mehrere Majors-Koepfe: %s"
-                         % sorted(alt_koepfe))
-    kopf_alt = alt_koepfe.pop()
+def majors_texte(meta_neu, laufend):
+    """Die Texte, die die Majors-Spalte BENENNEN: Sprechblasenanfang,
+    Legendensatz und die Turniernummern der Quellenzeile — dieselben
+    Saetze, die bis zum Umzug majors_umstellen ins Stueck schrieb."""
     nummern, namen = _majors_turniere(meta_neu)
     if not nummern:
         raise SystemExit("::error::keine Turniere fuer Majors (%s)" % meta_neu)
     turniere = _und(namen)
-    t = roh.replace("Majors (%s)" % kopf_alt, "Majors (%s)" % kopf_neu)
-    # Sprechblasen: "Letzte Präsenzturniere (Worlds und Baltimore), Format TEF–PBL: "
-    t, n_blasen = re.subn(
-        r'title="Letzte Präsenzturniere \([^)]*\), Format ' + re.escape(kopf_alt) + ': ',
-        'title="Letzte Präsenzturniere (%s), Format %s: ' % (turniere, kopf_neu), t)
-    # Legende: der Satz, der erklaert, woher die Majors-Spalte kommt.
+    kopf_neu = _kopf(meta_neu)
     if meta_neu == laufend:
         satz = ("sind die letzten Präsenzturniere (%s), schon im laufenden Format."
                 % turniere)
     else:
         satz = ("sind die letzten Präsenzturniere (%s) — die liefen noch im Format %s."
                 % (turniere, kopf_neu))
-    t, n_legende = re.subn(r"sind die letzten Präsenzturniere[^.]*?\.(?:[^.<]*?gab es noch nicht\.)?",
-                           satz, t, count=1)
-    # Quellenzeile: "Turniere 71 und 72"
-    t, n_quelle = re.subn(r"(labs_tournament_matchups\.csv</code>, )Turniere [\d ,und]+?(,\s)",
-                          lambda m: m.group(1) + "Turniere " + _und(str(x) for x in nummern) + m.group(2),
-                          t, count=1)
-    return t, ["Majors-Spalte umgestellt: %s -> %s (%s); %d Sprechblasen, "
-               "Legende %d, Quellenzeile %d" % (kopf_alt, kopf_neu, turniere,
-                                                n_blasen, n_legende, n_quelle)]
-
-
-LEGENDE_ONLINE = re.compile(
-    r"<b>([^<]+)</b> ist das laufende Online-Format, "
-    r"<b>([^<]+)</b> das Online-Format davor")
-
-
-def online_umstellen(roh, jetzt_neu, davor_neu):
-    """Stellt die beiden Online-Spalten des Stuecks auf ein NEUES Formatfenster um.
-
-    ANLASS 01.10.2026 (Setwechsel-Probe, PR #893). Seit DA-20 kommen die
-    Spaltenkoepfe aus format_window.json statt aus dem Quelltext. Beim
-    naechsten Setwechsel (TEF-30C -> TEF-ZZN) stuende im Stueck aber noch
-    "TEF\u201330C / TEF\u2013PBL": der Erzeuger faende keine Zelle mit dem neuen
-    Kopf, braeche ab, und das Tor hielte den Wochenlauf an, bis jemand das
-    Stueck von Hand umschreibt. Wie `majors_umstellen` fuer die Majors-Spalte
-    benennt dieser Schritt nur um, was die Spalten BENENNT: Zellkopf,
-    Sprechblasenanfang, Legendensatz, Quellenzeile. Die Zahlen rechnet danach
-    `nachziehen`. Eine Abbildung, kein Kettenersetzen: aus (30C, PBL) wird
-    (ZZN, 30C), ohne dass ein Kopf zweimal umbenannt wird.
-    Gibt (Text, Aenderungen) zurueck."""
-    m = LEGENDE_ONLINE.search(roh)
-    if not m:
-        return roh, []
-    jetzt_alt, davor_alt = m.group(1), m.group(2)
-    if (jetzt_alt, davor_alt) == (jetzt_neu, davor_neu):
-        return roh, []
-    ab = {jetzt_alt: jetzt_neu, davor_alt: davor_neu}
-    zaehler = [0]
-
-    def umbenannt(kopf):
-        if kopf in ab and ab[kopf] != kopf:
-            zaehler[0] += 1
-            return ab[kopf]
-        return kopf
-
-    t = LEGENDE_ONLINE.sub(
-        lambda x: "<b>%s</b> ist das laufende Online-Format, <b>%s</b> das Online-Format davor"
-        % (umbenannt(x.group(1)), umbenannt(x.group(2))), roh, count=1)
-    t = re.sub(r"<em>([^<]+)</em>",
-               lambda x: "<em>%s</em>" % umbenannt(x.group(1)), t)
-    t = re.sub(r'title="Online-Meta ([^ (]+) \(',
-               lambda x: 'title="Online-Meta %s (' % umbenannt(x.group(1)), t)
-
-    def quellzeile(x):
-        kopf = umbenannt(x.group(1))
-        return "%s (online): <code>data/online_api_matchups_%s.csv</code>" % (
-            kopf, kopf.replace("\u2013", "-"))
-
-    t = re.sub(r"([^\s<>]+) \(online\): <code>data/online_api_matchups_[^<]+\.csv</code>",
-               quellzeile, t)
-    return t, ["Online-Spalten umgestellt: %s/%s -> %s/%s (%d Stellen)"
-               % (jetzt_alt, davor_alt, jetzt_neu, davor_neu, zaehler[0])]
+    return {
+        "praefix": "Letzte Präsenzturniere (%s), Format %s: " % (turniere, kopf_neu),
+        "satz": satz,
+        "turniere": _und(str(x) for x in nummern),
+    }
 
 
 def koepfe():
@@ -374,11 +304,6 @@ def soll_zelle(bilanz, klasse_alt, titel_alt):
 
 ONLINE_FELD = os.path.join(DATEN, "limitless_online_decks.csv")
 
-SUB = re.compile(r'(<span class="mcl-nm">[^<]*<em>([^<]*)</em></span>\s*'
-                 r'<span class="mcl-sub">)([^<]*)(</span>)')
-MU_DETAILS = re.compile(r'<details class="mcl-mu"[\s\S]*?</details>')
-
-
 def _feldanteile():
     """deck_name -> Meta-Anteil als Text ("8,54"). Quelle ist die Datei,
     aus der auch die Meta-Seite ihre Anteile nimmt."""
@@ -393,99 +318,6 @@ def _feldanteile():
             if name and anteil:
                 aus[name.lower()] = anteil.replace(".", ",")
     return aus
-
-
-def feld_nachziehen(roh, anteile):
-    """Der Meta-Anteil je Matchup-Zeile. Die zweite Angabe in derselben
-    Zeile (die Spielzeit) stammt aus Tims Ausarbeitung, nicht aus den
-    Daten — sie wird NICHT angefasst."""
-    aenderungen = []
-
-    def ersetzen(m):
-        vorn, en, text, hinten = m.groups()
-        neu_anteil = anteile.get(html.unescape(en).strip().lower())
-        if not neu_anteil:
-            return m.group(0)
-        t = re.sub(r"^\s*[\d.,]+\s*%\s*Meta-Anteil", "%s %% Meta-Anteil" % neu_anteil, text)
-        if t == text:
-            return m.group(0)
-        aenderungen.append("%s / Meta-Anteil: %s -> %s %%"
-                           % (html.unescape(en), text.split(" Meta-Anteil")[0], neu_anteil))
-        return vorn + t + hinten
-
-    return SUB.sub(ersetzen, roh), aenderungen
-
-
-def sortieren(roh, anteile):
-    """"Sortiert nach Meta-Anteil" steht als Versprechen ueber der Liste.
-    Aendern sich die Anteile, muss die Reihenfolge mit — sonst ist der
-    Satz falsch. Decks ohne Anteil behalten ihre Stelle am Ende."""
-    bloecke = MU_DETAILS.findall(roh)
-    if len(bloecke) < 20:
-        return roh, []
-
-    def schluessel(i_block):
-        i, b = i_block
-        m = re.search(r'<span class="mcl-nm">[^<]*<em>([^<]*)</em></span>', b)
-        name = html.unescape(m.group(1)).strip().lower() if m else ""
-        wert = anteile.get(name)
-        try:
-            zahl = float((wert or "").replace(",", "."))
-        except ValueError:
-            zahl = None
-        return (0 if zahl is not None else 1, -(zahl or 0.0), i)
-
-    sortiert = [b for _k, b in sorted(((schluessel((i, b)), b)
-                                       for i, b in enumerate(bloecke)), key=lambda x: x[0])]
-    if sortiert == bloecke:
-        return roh, []
-
-    def namen(liste):
-        return [html.unescape(re.search(r'<em>([^<]*)</em>', b).group(1)) for b in liste]
-
-    vorher, nachher = namen(bloecke), namen(sortiert)
-    verschoben = [f"{a} -> {n}" for a, n in zip(vorher, nachher) if a != n]
-    kette = iter(sortiert)
-    return MU_DETAILS.sub(lambda _m: next(kette), roh), [
-        "Reihenfolge nach Meta-Anteil: " + "; ".join(verschoben[:4])
-        + (" …" if len(verschoben) > 4 else "")]
-
-
-def nachziehen(roh, quellen, slugs):
-    """Gibt (neuer Text, Liste der Aenderungen, Namen ohne Schluessel).
-
-    `quellen` ist {Spaltenkopf: {slug: [w, l, t]}}. Eine Zelle, deren Kopf
-    dort nicht steht (die Tim-Spalte), bleibt unberuehrt \u2014 sie traegt keine
-    gerechnete Zahl, sondern eine Einschaetzung.
-    """
-    aenderungen = []
-    ohne_slug = []
-
-    def block_ersetzen(m):
-        en, block = m.group(1), m.group(2)
-        name = html.unescape(en).strip().lower()
-        slug = slugs.get(name)
-        if not slug:
-            ohne_slug.append(en)
-            return m.group(0)
-
-        def zelle_ersetzen(z):
-            klasse_alt, titel_alt, kopf, wert_alt, nenner_alt = z.groups()
-            if kopf not in quellen:
-                return z.group(0)          # Tim oder eine neue Spalte
-            klasse, titel, wert, nenner = soll_zelle(
-                quellen[kopf].get(slug, [0, 0, 0]), klasse_alt, titel_alt)
-            neu = (f'<span class="{klasse}" title="{titel}">'
-                   f'<em>{kopf}</em><b>{wert}</b>{nenner}</span>')
-            if neu != z.group(0):
-                aenderungen.append(
-                    f"{html.unescape(en)} / {kopf}: {wert_alt!r}{nenner_alt or ''} "
-                    f"-> {wert!r}{nenner}")
-            return neu
-
-        return m.group(0).replace(block, ZELLE.sub(zelle_ersetzen, block))
-
-    return BLOCK.sub(block_ersetzen, roh), aenderungen, ohne_slug
 
 
 def _stand(pfad):
@@ -504,19 +336,48 @@ def _stand(pfad):
         os.path.getmtime(pfad), dt.timezone.utc).date().isoformat()
 
 
-def stand_nachziehen(text):
-    """Die Standzeile des Stuecks an die Dateien nachziehen."""
-    aend = []
-    for pfad in (ONLINE_JETZT, ONLINE_DAVOR):
-        name = os.path.basename(pfad)
-        neu = _stand(pfad)
-        muster = re.compile(
-            r"(<code>data/" + re.escape(name) + r"</code>, Stand )(\d{4}-\d\d-\d\d)")
-        treffer = muster.search(text)
-        if treffer and treffer.group(2) != neu:
-            aend.append(f"Stand {name}: {treffer.group(2)} -> {neu}")
-            text = muster.sub(lambda m: m.group(1) + neu, text, count=1)
-    return text, aend
+
+def live_daten():
+    """Alles, was die Matchup-Seite der Masterclass aus den Daten braucht.
+
+    zellen[slug][spalte] = [Klasse, Sprechblase OHNE Spaltenanfang, Wert,
+    Nenner-HTML] — genau das, was soll_zelle liefert. Ein Gegner ohne
+    Eintrag bekommt beim Einsetzen die Zelle `leer` (kein Wert erfunden).
+    """
+    k = koepfe()
+    if k["jetzt"] == k["davor"]:
+        raise SystemExit("::error::beide Online-Spalten tragen denselben Kopf "
+                         f"({k['jetzt']}) \u2014 es wird NICHTS geschrieben")
+    quellen = {"jetzt": _online(ONLINE_JETZT), "davor": _online(ONLINE_DAVOR),
+               "majors": _majors()}
+    zellen = {}
+    for spalte, q in quellen.items():
+        for slug, bilanz in sorted(q.items()):
+            klasse, titel, wert, nenner = soll_zelle(bilanz, "mcl-wrz", "X: ")
+            zellen.setdefault(slug, {})[spalte] = [klasse, titel[3:], wert, nenner]
+    klasse, titel, wert, nenner = soll_zelle([0, 0, 0], "mcl-wrz", "X: ")
+    laufend = _fenster_aus_dateiname(ONLINE_JETZT)
+    mt = majors_texte(_majors_meta(), laufend)
+    werte = {
+        "kopf-jetzt": k["jetzt"],
+        "kopf-davor": k["davor"],
+        "kopf-majors": k["majors"],
+        "majors-satz": mt["satz"],
+        "majors-turniere": mt["turniere"],
+        "datei-online-jetzt": "data/" + os.path.basename(ONLINE_JETZT),
+        "datei-online-davor": "data/" + os.path.basename(ONLINE_DAVOR),
+        "stand-online-jetzt": _stand(ONLINE_JETZT),
+        "stand-online-davor": _stand(ONLINE_DAVOR),
+    }
+    return {
+        "koepfe": k,
+        "majors_praefix": mt["praefix"],
+        "werte": werte,
+        "zellen": zellen,
+        "leer": [klasse, titel[3:], wert, nenner],
+        "anteile": _feldanteile(),
+        "mindest_partien": MINDEST_PARTIEN,
+    }
 
 
 def main():
@@ -524,81 +385,31 @@ def main():
     ap.add_argument("--probe", action="store_true",
                     help="nichts schreiben, nur melden")
     args = ap.parse_args()
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import masterclass_live as LIVE
 
-    if not os.path.exists(STUECK):
-        print(f"::warning::{STUECK} liegt nicht im Baum — nichts zu tun")
-        return 0
-
-    with open(STUECK, encoding="utf-8") as f:
-        roh = f.read()
-
-    k = koepfe()
-    if k["jetzt"] == k["davor"]:
-        print("::error::beide Online-Spalten traegen denselben Kopf "
-              f"({k['jetzt']}) \u2014 es wird NICHTS geschrieben")
+    daten = live_daten()
+    # GEGEN EIN LEERES BESTEHEN: je Spalte zaehlen, nicht in Summe
+    # (Verfaelschungsprobe 23.09.2026). Unter 20 Gegnern in einer Spalte
+    # stimmt etwas mit den Eingaben nicht — dann wird nichts geschrieben.
+    je_spalte = {s: sum(1 for z in daten["zellen"].values() if s in z)
+                 for s in ("jetzt", "davor", "majors")}
+    duenn = sorted(s for s, n in je_spalte.items() if n < 20)
+    if duenn:
+        print(f"::error::zu wenige Gegner je Spalte {je_spalte} ({duenn}) — "
+              "es wird NICHTS geschrieben.")
         return 1
-    quellen = {
-        k["jetzt"]: _online(ONLINE_JETZT),
-        k["davor"]: _online(ONLINE_DAVOR),
-        k["majors"]: _majors(),
-    }
-    laufend = _fenster_aus_dateiname(ONLINE_JETZT)
-    roh, online_umst = online_umstellen(roh, k["jetzt"], k["davor"])
-    roh, umstellung = majors_umstellen(roh, _majors_meta(), laufend)
-    umstellung = online_umst + umstellung
-    neu, aenderungen, ohne_slug = nachziehen(roh, quellen, _slugs())
-    aenderungen = umstellung + aenderungen
-    neu, stand_aend = stand_nachziehen(neu)
-    aenderungen += stand_aend
-    anteile = _feldanteile()
-    neu, feld_aend = feld_nachziehen(neu, anteile)
-    aenderungen += feld_aend
-    neu, sort_aend = sortieren(neu, anteile)
-    aenderungen += sort_aend
-
-    # GEGEN EIN LEERES BESTEHEN: findet das Muster die Bloecke ueberhaupt?
-    # Ohne diese Zeile koennte das Skript "0 Aenderungen" melden, weil es
-    # nichts gefunden hat — und genau so bliebe der Fehler unsichtbar.
-    gefunden = len(BLOCK.findall(roh))
-    # JE SPALTE zaehlen, nicht in Summe. Wechselte nur EINE der drei
-    # Beschriftungen, bliebe die Summe ueber jeder Grenze und das Skript
-    # meldete "alle Zahlen stehen wie die Rohdaten" — ohne eine einzige
-    # Zelle dieser Spalte angesehen zu haben. Gemessen am 23.09.2026 in
-    # der Verfaelschungsprobe, nachdem die Spalten von Jetzt/Davor/Majors
-    # auf die Metanamen umgestellt worden waren.
-    alle = ZELLE.findall(roh)
-    je_kopf = {kopf: sum(1 for z in alle if z[2] == kopf) for kopf in quellen}
-    duenn = sorted(k for k, n in je_kopf.items() if n < 20)
-    if gefunden < 20 or duenn:
-        vorhanden = sorted({z[2] for z in alle})
-        print(f"::error::{gefunden} Matchup-Bloecke, Zellen je Spalte "
-              f"{je_kopf}. Zu wenige fuer: {duenn or 'die Bloecke selbst'}. "
-              f"Im Stueck stehen die Koepfe {vorhanden}. "
-              "Es wird NICHTS geschrieben.")
-        return 1
-
-    if ohne_slug:
-        print("::warning::ohne Archetyp-Schluessel, unveraendert gelassen: "
-              + ", ".join(sorted(set(ohne_slug))))
-
-    if not aenderungen:
-        print(f"masterclass/mega-stalobor.de.html: {gefunden} Matchups, "
-              "alle Zahlen stehen wie die Rohdaten.")
+    alt = (LIVE.lesen(GUIDE_ID).get("matchups") or {})
+    if alt == daten:
+        print(f"{LIVE.pfad(GUIDE_ID)}: Matchups stehen wie die Rohdaten ({je_spalte}).")
         return 0
-
-    print(f"masterclass/mega-stalobor.de.html: {len(aenderungen)} Zellen "
-          f"nachgezogen (von {gefunden} Matchups)")
-    for a in aenderungen:
-        print("  " + a)
-
+    geaendert = sum(1 for slug, z in daten["zellen"].items()
+                    if (alt.get("zellen") or {}).get(slug) != z)
+    print(f"Matchups: {geaendert} Gegner mit neuen Zahlen, Gegner je Spalte {je_spalte}")
     if args.probe:
         print("--probe: nichts geschrieben.")
         return 0
-
-    tmp = STUECK + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        f.write(neu)
-    os.replace(tmp, STUECK)
+    LIVE.schreibe_teil(GUIDE_ID, "matchups", daten)
     return 0
 
 

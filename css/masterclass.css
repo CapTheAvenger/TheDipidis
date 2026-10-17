@@ -957,3 +957,13 @@
     border-radius: 12px;
     background: var(--surface-2);
 }
+
+/* Live-Daten (17.10.2026): Hinweis, wenn data/masterclass_live/<id>.json
+   nicht geladen werden konnte und der Stand vom Umzugstag stehen bleibt. */
+.mcl-live-hinweis {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    border-left: 3px solid var(--line);
+    padding-left: var(--s-2);
+    margin: var(--s-2) 0;
+}

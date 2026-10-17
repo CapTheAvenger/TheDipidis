@@ -16,6 +16,12 @@ Drei Dinge muessen dafuer stimmen, und alle drei stehen hier:
   3. Die Druckregel liegt im Repo, nicht im Scratchpad, und liefert
      genau die Drucke, die im Stueck stehen — sonst bekaeme eine
      nachgezogene Liste andere Karten als der Rest.
+
+UMZUG 17.10.2026: das Stueck liegt nur noch in Hausis Konto. Die Erzeuger
+schreiben data/masterclass_live/mega-stalobor.json; Anteile und
+Reihenfolge setzt die Seite beim Oeffnen (tests/unit/test-masterclass-live.js
+prueft das am Verhalten). Was das Stueck selbst traegt, laeuft hier nur,
+wenn MASTERCLASS_STUECK eine Datei nennt.
 """
 
 import csv
@@ -29,7 +35,8 @@ import pytest
 
 HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))
-STUECK = os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+STUECK = os.environ.get("MASTERCLASS_STUECK") or os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+LIVE = os.path.join(WURZEL, "data", "masterclass_live", "mega-stalobor.json")
 WOCHE = os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml")
 API = os.path.join(WURZEL, ".github", "workflows", "limitless-api-scrape.yml")
 FELD_CSV = os.path.join(WURZEL, "data", "limitless_online_decks.csv")
@@ -67,9 +74,9 @@ def test_beide_erzeuger_laufen_im_wochenlauf():
 
 
 def test_der_wochenlauf_committet_alles_was_er_erzeugt():
-    """Der Wochenlauf nimmt `git add -A` — damit ist die neue Datei
-    data/masterclass_online_listen.json mit drin. Faellt das weg, muss
-    sie einzeln in die Liste."""
+    """Der Wochenlauf nimmt `git add -A` — damit sind
+    data/masterclass_online_listen.json und data/masterclass_live/ mit
+    drin. Faellt das weg, muessen sie einzeln in die Liste."""
     text = _lies(WOCHE)
     assert re.search(r"git add -A", text), (
         "der Wochenlauf listet die Dateien einzeln auf — dann gehoert "
@@ -81,7 +88,7 @@ def test_der_api_lauf_zieht_die_zahlen_weiter_nach():
     beim Umbau nicht verloren gehen."""
     text = _lies(API)
     assert "scripts/masterclass_zahlen_nachziehen.py" in text
-    assert re.search(r"git add\s+masterclass/mega-stalobor\.de\.html", text)
+    assert re.search(r"git add\s+data/masterclass_live/", text)
 
 
 def test_der_scraper_schreibt_die_listendatei():
@@ -113,33 +120,27 @@ def _zeilen():
         r'<span class="mcl-sub">([\d.,]+) %', _stueck())]
 
 
-@pytest.mark.skipif(not (os.path.exists(STUECK) and os.path.exists(FELD_CSV)),
-                    reason="Stueck oder Feld-CSV nicht im Baum")
+@pytest.mark.skipif(not (os.path.exists(LIVE) and os.path.exists(FELD_CSV)),
+                    reason="Live-Datei oder Feld-CSV nicht im Baum")
 def test_die_feldanteile_stehen_so_da_wie_in_der_datei():
+    """Die Anteile, die die Seite einsetzt, sind die der Datei — dieselbe
+    Quelle wie die Meta-Seite."""
+    import json
+    with open(LIVE, encoding="utf-8") as f:
+        da = json.load(f)["matchups"]["anteile"]
     anteile = _anteile()
-    falsch = [(n, steht, anteile.get(n.lower()))
-              for n, steht in _zeilen()
-              if anteile.get(n.lower()) and steht != anteile[n.lower()]]
-    assert falsch == [], (
-        "diese Meta-Anteile stehen anders im Stueck als in "
-        "data/limitless_online_decks.csv: " + str(falsch))
-    geprueft = [n for n, _s in _zeilen() if anteile.get(n.lower())]
-    assert len(geprueft) >= 15, (
-        "nur %d Zeilen gegen die Datei geprueft — der Test liefe ins Leere"
-        % len(geprueft))
+    assert da == anteile, "die Live-Datei fuehrt andere Meta-Anteile als data/limitless_online_decks.csv"
+    assert len(da) >= 15, "nur %d Anteile — der Test liefe ins Leere" % len(da)
 
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
+@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck liegt im Konto (MASTERCLASS_STUECK nicht gesetzt)")
 def test_die_reihenfolge_haelt_was_die_einleitung_verspricht():
-    """Ueber der Liste steht "Sortiert nach Meta-Anteil". Zieht der Lauf
-    die Anteile nach, ohne die Reihenfolge mitzuziehen, wird der Satz
-    falsch."""
+    """Ueber der Liste steht "Sortiert nach Meta-Anteil" — das Versprechen
+    muss im Stueck stehen; das Sortieren beim Oeffnen prueft
+    tests/unit/test-masterclass-live.js."""
     roh = _stueck()
     assert "Sortiert nach Meta-Anteil" in roh, "das Versprechen steht nicht mehr da"
-    werte = [float(b.replace(",", ".")) for _a, b in _zeilen()]
-    assert len(werte) >= 15
-    absteigend = all(werte[i] >= werte[i + 1] for i in range(len(werte) - 1))
-    assert absteigend, "die Matchups stehen nicht nach Meta-Anteil sortiert: %s" % werte
+    assert len(_zeilen()) >= 15
 
 
 # ---------------------------------------------------- 3. Die Druckregel
@@ -200,6 +201,7 @@ def _feld_woerter(text):
     return re.findall(r"\w*[Ff]eld\w*", ohne)
 
 
+@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck liegt im Konto (MASTERCLASS_STUECK nicht gesetzt)")
 def test_das_stueck_sagt_meta_statt_feld():
     """Hausi, 04.10.2026: "Feldanteil" heisst im Stueck "Meta-Anteil"."""
     with open(STUECK, encoding="utf-8") as f:

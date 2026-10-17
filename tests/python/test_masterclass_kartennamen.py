@@ -26,7 +26,14 @@ import pytest
 
 HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))
-STUECK = os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+# UMZUG 17.10.2026: das Stueck liegt nur noch in Hausis Konto, nicht im
+# oeffentlichen Repo. Die Inhaltspruefungen laufen gegen eine Datei von der
+# Platte, wenn MASTERCLASS_STUECK sie nennt (vor dem Hochladen:
+# bash scripts/pruefe_masterclass_konto.sh <datei>) — sonst werden sie
+# uebersprungen. Die Zahlen prueft test_die_drei_matchup_quoten_der_live_datei
+# immer, gegen data/masterclass_live/mega-stalobor.json.
+STUECK = os.environ.get("MASTERCLASS_STUECK") or os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+LIVE = os.path.join(WURZEL, "data", "masterclass_live", "mega-stalobor.json")
 DATENBANK = os.path.join(WURZEL, "data", "all_cards_database.csv")
 
 # Deutsche Kartennamen, die zugleich gewoehnliche Woerter sind. Sie im
@@ -457,77 +464,43 @@ def _slugs():
     return k
 
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
-def test_die_drei_matchup_quoten_stehen_so_da_wie_die_rohdaten():
-    """BESTELLUNG (22.09.2026): aktuelles Online-Meta, das Meta davor und
-    die letzten Majors nebeneinander, "damit ich mich mit aktuellen Daten
-    bestmoeglich vorbereiten kann".
+# Bis zum Umzug (17.10.2026) stand hier die Nachrechnung der Zahlen IM
+# STUECK. Seitdem stehen sie in der Live-Datei; die Werte im Stueck sind nur
+# noch der Rueckfall vom Umzugstag und duerfen veralten.
 
-    Drei Zahlen je Matchup sind drei Gelegenheiten, sich zu vertun. Dieser
-    Test rechnet alle drei aus den Rohbilanzen nach und vergleicht sie mit
-    dem, was im Stueck steht — Zeichen fuer Zeichen, inklusive der Regel,
-    dass unter 30 Partien die Bilanz steht statt einer Quote.
-    """
-    with open(STUECK, encoding="utf-8") as f:
-        roh = f.read()
 
-    slugs = _slugs()
-    # BESTELLUNG (23.09.2026): "Bei jetzt schreibst du TEF bis 30C, statt
-    # davor TEF bis PBL, und bei Majors in Klammern auch TEF bis PBL —
-    # mit den Metabezeichnungen kann doch jeder viel mehr anfangen."
-    # Der Kopf jeder Spalte muss deshalb das Fenster nennen, aus dem die
-    # Zahl der Spalte stammt: die beiden Online-Spalten das Fenster aus
-    # dem Dateinamen des Scrapers, die Majors-Spalte das Format aus der
-    # Spalte meta derselben Zeilen.
+@pytest.mark.skipif(not os.path.exists(LIVE), reason="Live-Datei nicht im Baum")
+def test_die_drei_matchup_quoten_der_live_datei_stehen_wie_die_rohdaten():
+    """Dieselbe unabhaengige Nachrechnung wie oben — gegen die Datei, aus
+    der die Seite seit dem Umzug (17.10.2026) ihre Zahlen einsetzt. Die
+    Formel steht hier ein zweites Mal, mit Absicht: rechnete der Erzeuger
+    falsch, saehe eine Pruefung mit SEINER Formel nichts."""
+    with open(LIVE, encoding="utf-8") as f:
+        mu = json.load(f)["matchups"]
     kopf_jetzt = _fenster_aus_dateiname(ONLINE_JETZT).replace("-", "\u2013")
     kopf_davor = _fenster_aus_dateiname(ONLINE_DAVOR).replace("-", "\u2013")
     kopf_major = "Majors (%s)" % _majors_meta().replace("-", "\u2013")
-    assert kopf_jetzt != kopf_davor, "beide Online-Spalten traegen denselben Kopf"
-    quellen = {
-        kopf_jetzt: _online(ONLINE_JETZT),
-        kopf_davor: _online(ONLINE_DAVOR),
-        kopf_major: _majors(),
-    }
-
-    # Je Matchup: englischer Name aus der Kachel, dann die vier Zellen.
-    bloecke = re.findall(
-        r'<span class="mcl-nm">[^<]*<em>([^<]*)</em></span>[\s\S]*?<span class="mcl-wr3">([\s\S]*?)</span></span>',
-        roh)
-    assert len(bloecke) >= 20, "nur %d Matchup-Bloecke gefunden" % len(bloecke)
-
-    falsch, ohne_slug = [], []
-    geprueft = 0
-    for en, block in bloecke:
-        name = html.unescape(en).strip().lower()
-        slug = slugs.get(name)
-        if not slug:
-            ohne_slug.append(en)
-            continue
-        zellen = dict(
-            (m[0], (m[1], m[2]))
-            for m in re.findall(r'<em>([^<]+)</em><b>([^<]+)</b>(?:<i>\(([\d.]+)\)</i>)?', block)
-        )
-        assert "Jetzt" not in zellen and "Davor" not in zellen, (
-            "%s: die Spalten heissen wieder Jetzt/Davor statt nach ihrem Meta" % en)
-        for feld, daten in quellen.items():
-            w, l, t = daten.get(slug, [0, 0, 0])
+    assert mu["koepfe"] == {"jetzt": kopf_jetzt, "davor": kopf_davor, "majors": kopf_major}
+    quellen = {"jetzt": _online(ONLINE_JETZT), "davor": _online(ONLINE_DAVOR), "majors": _majors()}
+    falsch, geprueft = [], 0
+    for spalte, daten in quellen.items():
+        for slug, (w, l, t) in daten.items():
             n = w + l + t
-            steht = zellen.get(feld)
-            assert steht is not None, "%s: Zelle %s fehlt" % (en, feld)
-            wert, nenner = steht
             if n == 0:
-                soll, soll_n = "—", None
+                soll, soll_n = "\u2014", None
             elif n < MINDEST_PARTIEN:
-                soll, soll_n = "%d–%d–%d" % (w, l, t), n
+                soll, soll_n = "%d\u2013%d\u2013%d" % (w, l, t), n
             else:
                 soll = ("%.1f" % _matchpunkte(w, l, t)).replace(".", ",") + " %"
                 soll_n = n
-            ist_n = int(nenner.replace(".", "")) if nenner else None
-            if wert.replace("&nbsp;", " ") != soll or ist_n != soll_n:
-                falsch.append("%s / %s: Stueck sagt %r (%s), gerechnet %r (%s)"
-                              % (en, feld, wert, nenner, soll, soll_n))
+            z = mu["zellen"].get(slug, {}).get(spalte)
+            if z is None:
+                falsch.append("%s / %s fehlt" % (slug, spalte))
+                continue
+            nenner = re.search(r"\(([\d.]+)\)", z[3])
+            ist_n = int(nenner.group(1).replace(".", "")) if nenner else None
+            if z[2] != soll or ist_n != soll_n:
+                falsch.append("%s / %s: Datei %r (%s), gerechnet %r (%s)" % (slug, spalte, z[2], ist_n, soll, soll_n))
             geprueft += 1
-
-    assert ohne_slug == [], "fuer diese Decks gibt es keinen Archetyp-Schluessel: " + ", ".join(ohne_slug)
-    assert falsch == [], "diese Zahlen stehen anders im Stueck als in den Rohdaten:\n  " + "\n  ".join(falsch)
-    assert geprueft >= 60, "nur %d Zellen geprueft — der Test wuerde ins Leere pruefen" % geprueft
+    assert falsch == [], "\n  ".join(falsch[:20])
+    assert geprueft >= 60, "nur %d Zellen geprueft" % geprueft

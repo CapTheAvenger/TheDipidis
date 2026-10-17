@@ -52,7 +52,14 @@
          * Kachel nennt deshalb die 20 festen Listen und „+ Online". */
         kennzahlen: '22 Matchups · 20 Listen + Online (7 Tage) · 10.164 Wörter',
         sprachen: ['de'],
-        datei: 'masterclass/mega-stalobor.de.html'
+        /* UMZUG 17.10.2026 (Hausi: „ja auf jeden Fall“): das Stueck liegt
+         * nicht mehr unter masterclass/ (oeffentliches Repo, GitHub Pages
+         * liefert jede Datei jedem aus), sondern in seinem Konto unter
+         * users/{uid}/masterclasses/mega-stalobor, Feld html. Die Kachel
+         * erscheint nur, wenn das Dokument da ist. Die Zahlen und Online-
+         * Listen kommen beim Oeffnen frisch aus
+         * data/masterclass_live/mega-stalobor.json (Wochenlauf). */
+        quelle: 'konto'
     }];
 
     var cache = {};      /* guide-id -> HTML-Text */
@@ -70,7 +77,7 @@
             laden: 'Masterclass wird geladen …',
             fehler: 'Die Masterclass ließ sich nicht laden.',
             erneut: 'Erneut versuchen',
-            direkt: 'Direkt öffnen',
+            liveAlt: 'Die aktuellen Zahlen ließen sich nicht laden — hier steht der Stand vom %s.',
             nurDe: 'Diese Aufbereitung liegt nur auf Deutsch vor.',
             geoeffnet: 'Geöffnet',
             inDieser: '× in dieser Liste',
@@ -152,7 +159,7 @@
             laden: 'Loading the masterclass …',
             fehler: 'The masterclass could not be loaded.',
             erneut: 'Try again',
-            direkt: 'Open directly',
+            liveAlt: 'The current numbers could not be loaded — showing the state of %s.',
             nurDe: 'This write-up is only available in German.',
             geoeffnet: 'Open',
             inDieser: '× in this list',
@@ -240,18 +247,24 @@
 
     function host() { return document.getElementById(HOST_ID); }
 
-    /* Das ?v= stempelt deploy-pages.yml beim Deploy um — ohne den Stempel
-     * serviert der Service Worker nach einer Textaenderung die alte. */
-    function url(g) { return g.datei + '?v=0'; }
+    /* Ein Stueck aus dem Konto (quelle 'konto'): Firestore
+     * users/{uid}/masterclasses/<id>, Feld html. Die Regel
+     * `match /users/{uid}/{document=**}` laesst nur den Eigentuemer lesen. */
+    function holeAusKonto(id) {
+        var u = window.auth && window.auth.currentUser;
+        if (!u || !window.db) return Promise.reject(new Error('nicht angemeldet'));
+        return window.db.collection('users').doc(u.uid).collection('masterclasses').doc(id).get()
+            .then(function (d) {
+                var x = d && d.exists !== false && typeof d.data === 'function' ? d.data() : null;
+                if (!x || typeof x.html !== 'string' || !x.html) throw new Error('kein Dokument ' + id);
+                return x.html;
+            });
+    }
 
     function hole(g) {
         if (cache[g.id]) return Promise.resolve(cache[g.id]);
         if (pending[g.id]) return pending[g.id];
-        pending[g.id] = fetch(url(g), { credentials: 'same-origin' })
-            .then(function (r) {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.text();
-            })
+        pending[g.id] = holeAusKonto(g.id)
             .then(function (txt) {
                 cache[g.id] = txt;
                 delete pending[g.id];
@@ -411,7 +424,20 @@
             .then(function (snap) {
                 var liste = [];
                 snap.forEach(function (d) {
-                    var g = privatAusDoc(d.id, d.data());
+                    var x = d.data();
+                    /* Ein Stueck, das im Regal einen eigenen Eintrag mit allen
+                     * Funktionen hat (GUIDES, quelle 'konto'), wird NICHT
+                     * zusaetzlich als Rahmen-Kachel gezeigt — es bekommt seine
+                     * eigene Kachel, und sein Text liegt schon im Speicher. */
+                    var konto = kontoGuide(d.id);
+                    if (konto) {
+                        if (x && typeof x.html === 'string' && x.html) {
+                            cache[konto.id] = x.html;
+                            liste.push(konto);
+                        }
+                        return;
+                    }
+                    var g = privatAusDoc(d.id, x);
                     if (g) { privat[g.id] = g; liste.push(g); }
                 });
                 return liste;
@@ -422,12 +448,37 @@
             });
     }
 
+    /* Abmelden oder Kontowechsel: was aus dem Konto gelesen wurde, darf
+     * nicht im Speicher der Seite liegen bleiben (Pruefagent zu PR #972) —
+     * sonst oeffnete nach dem Abmelden ein gemerkter Text, oder ein
+     * anderes Konto saehe die Stuecke des vorigen. */
+    function kontoSpeicherLeeren() {
+        GUIDES.forEach(function (g) {
+            if (g.quelle === 'konto') { delete cache[g.id]; delete pending[g.id]; }
+        });
+        Object.keys(privat).forEach(function (k) { delete privat[k]; });
+    }
+
+    function kontoGuide(id) {
+        return GUIDES.filter(function (g) { return g.quelle === 'konto' && g.id === id; })[0] || null;
+    }
+
     function privatEinreihen() {
         return holePrivat().then(function (liste) {
             var h = host();
             var regal = h && h.querySelector('.mcl-regal');
             if (!regal || !liste.length) return;
+            /* Konto-Guides vorn (in der Reihenfolge von GUIDES), Rahmen-
+             * Kacheln dahinter. */
+            var vorn = liste.filter(function (g) { return g.quelle === 'konto'; })
+                .sort(function (a, b) { return GUIDES.indexOf(b) - GUIDES.indexOf(a); });
+            vorn.forEach(function (g) {
+                if (!regal.querySelector('[data-mcl-guide="' + g.id + '"]')) {
+                    regal.insertAdjacentHTML('afterbegin', kachel(g));
+                }
+            });
             liste.forEach(function (g) {
+                if (g.quelle === 'konto') return;
                 if (!regal.querySelector('[data-mcl-guide="' + g.id + '"]')) {
                     regal.insertAdjacentHTML('beforeend', kachel(g));
                 }
@@ -451,8 +502,268 @@
 
     function mitAnkern(html) {
         var s = String(html || '');
-        return /<\/body>/i.test(s) ? s.replace(/<\/body>(?![\s\S]*<\/body>)/i, ANKER_SKRIPT + '</body>') : s + ANKER_SKRIPT;
+        var skripte = ANKER_SKRIPT + LIVE_SKRIPT;
+        return /<\/body>/i.test(s) ? s.replace(/<\/body>(?![\s\S]*<\/body>)/i, function () { return skripte + '</body>'; }) : s + skripte;
     }
+
+    /* ---------- Live-Daten (17.10.2026) ----------------------------
+     *
+     * ANLASS (Hausi, 17.10.2026): „Die Daten will ich auch in Zukunft …
+     * live haben … wenn ich die Master Class öffne, dass die ganz kurz
+     * lädt und sich dann die aktuellen Daten einzieht.“ Die Stuecke liegen
+     * im Konto; die ZAHLEN darin kommen aus oeffentlichen Turnierdaten. Der
+     * Wochenlauf schreibt sie nach data/masterclass_live/<id>.json
+     * (scripts/masterclass_zahlen_nachziehen.py, .._listen_nachziehen.py),
+     * hier werden sie beim Oeffnen eingesetzt:
+     *
+     *   [data-live="<schluessel>"]  bekommt werte[schluessel] als Text,
+     *   details[data-live-slug] + .mcl-wrz[data-live-spalte]  die Zellen,
+     *   .mcl-sub  den Meta-Anteil, die Liste ihre Reihenfolge danach,
+     *   die Gruppe „Online · letzte 7 Tage“  ihre Listen.
+     *
+     * Schlaegt der Abruf fehl, bleiben die Werte vom Umzugstag stehen und
+     * ein Hinweis nennt dieses Datum (data-live-stand im Stueck). */
+    function liveAdresse(id) { return 'data/masterclass_live/' + id + '.json'; }
+
+    function holeLive(id) {
+        if (typeof fetch !== 'function') return Promise.resolve(null);
+        return fetch(liveAdresse(id) + '?t=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; });
+    }
+
+    function hat(o, k) { return !!o && Object.prototype.hasOwnProperty.call(o, k); }
+
+    function liveWerteSetzen(wurzel, werte) {
+        var n = 0;
+        if (!werte) return n;
+        Array.prototype.forEach.call(wurzel.querySelectorAll('[data-live]'), function (el) {
+            var k = el.getAttribute('data-live');
+            if (hat(werte, k) && typeof werte[k] === 'string') { el.textContent = werte[k]; n++; }
+        });
+        return n;
+    }
+
+    function liveZelle(zelle, spalte, z, m) {
+        var em = zelle.querySelector('em');
+        var alterKopf = em ? em.textContent : '';
+        var neuerKopf = (m.koepfe && m.koepfe[spalte]) || alterKopf;
+        var titel = zelle.getAttribute('title') || '';
+        var vorn = titel.split(': ')[0];
+        if (spalte === 'majors' && m.majors_praefix) vorn = m.majors_praefix.replace(/: $/, '');
+        else if (alterKopf && neuerKopf !== alterKopf) vorn = vorn.split(alterKopf).join(neuerKopf);
+        zelle.className = z[0];
+        zelle.setAttribute('title', vorn + ': ' + z[1]);
+        if (em) em.textContent = neuerKopf;
+        var b = zelle.querySelector('b');
+        if (b) b.textContent = z[2];
+        var i = zelle.querySelector('i');
+        var nenner = /\(([\d.]+)\)/.exec(z[3] || '');
+        if (nenner) {
+            if (!i) { i = document.createElement('i'); zelle.appendChild(i); }
+            i.textContent = '(' + nenner[1] + ')';
+        } else if (i) {
+            i.parentNode.removeChild(i);
+        }
+    }
+
+    function liveMatchups(wurzel, m) {
+        if (!m || !m.zellen) return 0;
+        var n = 0;
+        var bloecke = wurzel.querySelectorAll('details.mcl-mu');
+        Array.prototype.forEach.call(bloecke, function (d) {
+            var slug = d.getAttribute('data-live-slug');
+            if (slug) {
+                var zellen = m.zellen[slug] || {};
+                Array.prototype.forEach.call(d.querySelectorAll('.mcl-wrz[data-live-spalte]'), function (zelle) {
+                    var sp = zelle.getAttribute('data-live-spalte');
+                    liveZelle(zelle, sp, hat(zellen, sp) ? zellen[sp] : m.leer, m);
+                    n++;
+                });
+            }
+            var nm = d.querySelector('.mcl-nm em');
+            var sub = d.querySelector('.mcl-sub');
+            var anteil = nm && m.anteile ? m.anteile[nm.textContent.trim().toLowerCase()] : null;
+            if (sub && anteil) {
+                sub.textContent = sub.textContent.replace(/^\s*[\d.,]+\s*%\s*Meta-Anteil/, anteil + ' % Meta-Anteil');
+            }
+        });
+        /* „Sortiert nach Meta-Anteil“ steht als Versprechen ueber der Liste
+         * — dieselbe Regel wie frueher sortieren() im Erzeuger: Decks mit
+         * Anteil absteigend, ohne Anteil am Ende, sonst stabil. */
+        if (bloecke.length >= 20 && m.anteile) {
+            var reihe = Array.prototype.map.call(bloecke, function (d, i) {
+                var nm = d.querySelector('.mcl-nm em');
+                var w = nm ? m.anteile[nm.textContent.trim().toLowerCase()] : null;
+                var zahl = w ? parseFloat(String(w).replace(',', '.')) : NaN;
+                return { d: d, i: i, hat: !isNaN(zahl), zahl: isNaN(zahl) ? 0 : zahl };
+            });
+            reihe.sort(function (a, b) {
+                if (a.hat !== b.hat) return a.hat ? -1 : 1;
+                if (a.zahl !== b.zahl) return b.zahl - a.zahl;
+                return a.i - b.i;
+            });
+            var eltern = bloecke[0].parentNode;
+            var anker = bloecke[bloecke.length - 1].nextSibling;
+            reihe.forEach(function (x) { eltern.insertBefore(x.d, anker); });
+        }
+        return n;
+    }
+
+    /* Dieselbe Vergleichsform wie _schluessel in
+     * scripts/masterclass_listen_nachziehen.py. */
+    function kartenSchluessel(name) {
+        var t = String(name || '').replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos);/gi, function (g, e) {
+            var k = e.toLowerCase();
+            if (k.charAt(0) === '#') {
+                return String.fromCharCode(k.charAt(1) === 'x' ? parseInt(k.slice(2), 16) : parseInt(k.slice(1), 10));
+            }
+            return { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }[k];
+        });
+        return t.trim().toLowerCase().replace(/[\u2019`]/g, "'")
+            .replace(/^basic\s+/, '').replace(/\s+/g, ' ');
+    }
+
+    function kachelMitAnzahl(vorlage, n, ace) {
+        var k = vorlage.cloneNode(true);
+        k.setAttribute('data-n', String(n));
+        if (ace && !k.hasAttribute('data-ace')) k.setAttribute('data-ace', '1');
+        k.setAttribute('aria-label', (k.getAttribute('data-de') || '') + ', ' + n + ' mal');
+        var a = k.querySelector('.mcl-anz');
+        if (a) a.textContent = String(n);
+        return k.outerHTML;
+    }
+
+    function kachelNeuHtml(x, n) {
+        return '<button type="button" class="mcl-kk" data-mcl-karte="' + esc(x.karte) + '" data-de="' +
+            esc(x.de) + '" data-en="' + esc(x.en) + '" data-druck="' + esc(x.druck) + '" data-druck-hoch="' +
+            esc(x.hoch) + '" data-n="' + n + '"' + (x.ace ? ' data-ace="1"' : '') + ' aria-label="' +
+            esc(x.de) + ', ' + n + ' mal"><img src="' + esc(x.bild) +
+            '" alt="" loading="lazy" width="245" height="342"><span class="mcl-anz">' + n + '</span></button>';
+    }
+
+    /* Wie unterschied() im Erzeuger (bis 17.10.2026 dort gerechnet). */
+    function listenUnterschied(zaehlung, tims) {
+        var mehr = [], weniger = [], neu = [], fehlt = [];
+        function reihe(o) {
+            return Object.keys(o).map(function (k) { return [k, o[k]]; })
+                .sort(function (a, b) { return (b[1] - a[1]) || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0); });
+        }
+        reihe(zaehlung).forEach(function (p) {
+            var alt = hat(tims, p[0]) ? tims[p[0]] : null;
+            if (alt === null) neu.push(p[1] + '× ' + p[0]);
+            else if (p[1] > alt) mehr.push(p[1] + ' statt ' + alt + ' ' + p[0]);
+            else if (p[1] < alt) weniger.push(p[1] + ' statt ' + alt + ' ' + p[0]);
+        });
+        reihe(tims).forEach(function (p) { if (!hat(zaehlung, p[0])) fehlt.push('kein ' + p[0]); });
+        var teile = [];
+        if (neu.length) teile.push('dazu ' + neu.slice(0, 4).join(', '));
+        if (fehlt.length) teile.push(fehlt.slice(0, 4).join(', '));
+        if (mehr.length || weniger.length) teile.push(mehr.concat(weniger).slice(0, 4).join(', '));
+        if (!teile.length) return 'Kartengleich mit Tims aktueller Liste.';
+        return 'Gegenüber Tims aktueller Liste: ' + teile.join('; ') + '.';
+    }
+
+    function liveListen(wurzel, l) {
+        if (!l || !l.listen || !l.gruppe) return false;
+        var gruppe = Array.prototype.filter.call(wurzel.querySelectorAll('.mcl-listgruppe'), function (g) {
+            var t = g.querySelector('.mcl-listgruppe-titel');
+            return t && t.textContent.trim() === l.gruppe;
+        })[0];
+        var reihe = gruppe && gruppe.querySelector('.mcl-listwahl-reihe');
+        if (!reihe || l.listen.length > (l.max_plaetze || 5)) return false;
+        var vorlagen = {};
+        Array.prototype.forEach.call(wurzel.querySelectorAll('button.mcl-kk[data-en]'), function (k) {
+            var s = kartenSchluessel(k.getAttribute('data-en'));
+            if (!hat(vorlagen, s)) vorlagen[s] = k;
+        });
+        var tims = {};
+        var timBlock = wurzel.querySelector('.mcl-liste[data-mcl-listenblock="0"]');
+        Array.prototype.forEach.call(timBlock ? timBlock.querySelectorAll('button.mcl-kk') : [], function (k) {
+            var de = k.getAttribute('data-de');
+            var n = parseInt(k.getAttribute('data-n') || '0', 10);
+            if (de && n) tims[de] = (tims[de] || 0) + n;
+        });
+        if (!Object.keys(vorlagen).length || !Object.keys(tims).length) return false;
+        var alte = Array.prototype.map.call(reihe.querySelectorAll('[data-mcl-liste]'), function (c) {
+            return c.getAttribute('data-mcl-liste');
+        });
+        var alleNummern = Array.prototype.map.call(wurzel.querySelectorAll('[data-mcl-listenblock]'), function (b) {
+            return parseInt(b.getAttribute('data-mcl-listenblock'), 10);
+        });
+        var frei = alleNummern.length ? Math.max.apply(null, alleNummern) + 1 : 0;
+        var ziel = alte.slice(0, l.listen.length);
+        while (ziel.length < l.listen.length) ziel.push(String(frei++));
+        var bloecke = [];
+        for (var i = 0; i < l.listen.length; i++) {
+            var liste = l.listen[i], kacheln = [], zaehlung = {}, summe = 0;
+            for (var j = 0; j < liste.karten.length; j++) {
+                var k = liste.karten[j];
+                var v = vorlagen[k.schluessel];
+                var de;
+                if (v) { kacheln.push(kachelMitAnzahl(v, k.n, k.ace)); de = v.getAttribute('data-de') || k.name; }
+                else if (k.neu) { kacheln.push(kachelNeuHtml(k.neu, k.n)); de = k.neu.de || k.name; }
+                else {
+                    /* Erfunden wird keine Kachel: dann bleibt die Gruppe, wie sie ist. */
+                    console.warn('[DsMasterclass] Online-Liste ' + liste.name + ': unbekannte Karte ' + k.name);
+                    return false;
+                }
+                zaehlung[de] = (zaehlung[de] || 0) + k.n;
+                summe += k.n;
+            }
+            bloecke.push('<div class="mcl-liste" data-mcl-listenblock="' + ziel[i] + '" hidden data-mcl-listenname="' +
+                esc(liste.name) + '"><p class="mcl-listmeta"><b>' + esc(liste.fakten) + '</b> ' +
+                esc(listenUnterschied(zaehlung, tims)) + '</p><div class="mcl-gitter">' + kacheln.join('') +
+                '</div><p class="mcl-quelle">' + summe + ' Karten · ' + kacheln.length + ' verschiedene' +
+                '<button type="button" class="mcl-kopieren" data-mcl-kopieren="' + ziel[i] + '">' +
+                '<span aria-hidden="true">📋</span> Liste als Bild kopieren</button></p></div>');
+        }
+        alte.forEach(function (nr) {
+            var b = wurzel.querySelector('.mcl-liste[data-mcl-listenblock="' + nr + '"]');
+            if (b) b.parentNode.removeChild(b);
+        });
+        var alleBloecke = wurzel.querySelectorAll('.mcl-liste[data-mcl-listenblock]');
+        var letzter = alleBloecke[alleBloecke.length - 1];
+        if (letzter) letzter.insertAdjacentHTML('afterend', bloecke.join(''));
+        reihe.innerHTML = l.listen.map(function (liste, x) {
+            return '<button type="button" class="mcl-chip" data-mcl-liste="' + ziel[x] +
+                '" aria-pressed="false">' + esc(liste.name) + '</button>';
+        }).join('') || l.leer_hinweis || '';
+        return true;
+    }
+
+    function liveHinweis(wurzel) {
+        var st = wurzel.querySelector('[data-live-stand]');
+        if (!st || wurzel.querySelector('.mcl-live-hinweis')) return;
+        var p = document.createElement('p');
+        p.className = 'mcl-live-hinweis';
+        p.textContent = T('liveAlt').replace('%s', st.getAttribute('data-live-stand'));
+        st.parentNode.insertBefore(p, st.nextSibling);
+    }
+
+    /* Gibt true zurueck, wenn frische Daten eingesetzt wurden. */
+    function liveEinsetzen(wurzel, daten) {
+        if (!wurzel) return false;
+        if (!daten) { liveHinweis(wurzel); return false; }
+        if (daten.matchups) {
+            liveWerteSetzen(wurzel, daten.matchups.werte);
+            liveMatchups(wurzel, daten.matchups);
+        }
+        if (daten.werte) liveWerteSetzen(wurzel, daten.werte);
+        if (daten.online_listen) liveListen(wurzel, daten.online_listen);
+        return true;
+    }
+
+    /* Fuer die Rahmen-Masterclasses (Tohaido, Hide 'n Sneak): die Elternseite
+     * holt die JSON und schickt die einfachen Werte per postMessage hinein;
+     * dieses Skript setzt sie in [data-live]. Der Rahmen hat keinen Zugriff
+     * auf die App (kein allow-same-origin), darum der Umweg. */
+    var LIVE_SKRIPT = '<script>window.addEventListener("message",function(e){' +
+        'if(e.source!==window.parent)return;var d=e.data;' +
+        'if(!d||d.typ!=="mcl-live"||!d.werte)return;' +
+        'var w=d.werte;Array.prototype.forEach.call(document.querySelectorAll("[data-live]"),function(el){' +
+        'var k=el.getAttribute("data-live");' +
+        'if(Object.prototype.hasOwnProperty.call(w,k)&&typeof w[k]==="string")el.textContent=w[k];});});<\/script>';
 
     function zeigePrivat(buehne, g) {
         buehne.innerHTML = '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' +
@@ -461,7 +772,14 @@
             '<iframe class="mcl-privat-rahmen" sandbox="allow-scripts allow-popups" title="' +
             esc(g.titel) + '"></iframe>';
         var rahmen = buehne.querySelector('.mcl-privat-rahmen');
+        var geladen = false, daten = null;
+        function senden() {
+            if (!geladen || !daten || !daten.werte || !rahmen.contentWindow) return;
+            rahmen.contentWindow.postMessage({ typ: 'mcl-live', werte: daten.werte }, '*');
+        }
+        rahmen.addEventListener('load', function () { geladen = true; senden(); });
         rahmen.srcdoc = mitAnkern(g.html);
+        holeLive(String(g.id).replace(/^privat-/, '')).then(function (d) { daten = d; senden(); });
         buehne.querySelector('.mcl-schliessen').addEventListener('click', function () {
             buehne.hidden = true;
             buehne.innerHTML = '';
@@ -475,7 +793,7 @@
         h.innerHTML =
             '<p class="mcl-lead">' + esc(T('regalLead')) + '</p>' +
             '<div class="mcl-regal">' +
-            GUIDES.map(kachel).join('') +   /* UI-117: keine Platzhalterkachel mehr */
+            GUIDES.filter(function (g) { return g.quelle !== 'konto'; }).map(kachel).join('') +   /* UI-117: keine Platzhalterkachel mehr; Konto-Guides kommen erst, wenn ihr Dokument da ist (privatEinreihen) */
             '</div><div class="mcl-buehne" id="mclBuehne" hidden></div>';
         h.dataset.state = 'regal';
         privatEinreihen();
@@ -486,7 +804,7 @@
     function zeigeFehler(buehne, g) {
         buehne.innerHTML = '<div class="mcl-fehler"><p>' + esc(T('fehler')) + '</p>' +
             '<p><button type="button" class="mcl-erneut" data-mcl-oeffnen="' + esc(g.id) + '">' +
-            esc(T('erneut')) + '</button> <a href="' + esc(url(g)) + '">' + esc(T('direkt')) + '</a></p></div>';
+            esc(T('erneut')) + '</button></p></div>';
     }
 
     function oeffneGuide(id) {
@@ -496,11 +814,14 @@
         if (g.privat) { buehne.hidden = false; zeigePrivat(buehne, g); return; }
         buehne.hidden = false;
         buehne.innerHTML = '<p class="mcl-status">' + esc(T('laden')) + '</p>';
-        Promise.all([hole(g), holeNamen()]).then(function (erg) {
+        Promise.all([hole(g), holeNamen(), holeLive(g.id)]).then(function (erg) {
             var txt = erg[0];
             buehne.innerHTML = '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' +
                 esc(g.titel) + '</h4>' +
                 '<button type="button" class="mcl-schliessen">' + esc(T('schliessen')) + '</button></div>' + txt;
+            /* Erst die frischen Zahlen, dann Namen und Knoepfe — die
+             * eingesetzten Listen brauchen dieselbe Verdrahtung. */
+            liveEinsetzen(buehne, erg[2]);
             namenAngleichen(buehne, erg[1]);
             verdrahte(buehne, g);
             try { buehne.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' }); } catch (e) { }
@@ -1931,6 +2252,7 @@
     if (window.auth && typeof window.auth.onAuthStateChanged === 'function') {
         try {
             window.auth.onAuthStateChanged(function () {
+                kontoSpeicherLeeren();
                 var h = host();
                 var buehne = document.getElementById('mclBuehne');
                 if (!h || h.dataset.state !== 'regal') return;
@@ -1948,6 +2270,16 @@
         _holePrivat: holePrivat,
         _zeigePrivat: zeigePrivat,
         _mitAnkern: mitAnkern,
+        _holeLive: holeLive,
+        _liveEinsetzen: liveEinsetzen,
+        _liveListen: liveListen,
+        _liveMatchups: liveMatchups,
+        _listenUnterschied: listenUnterschied,
+        _kartenSchluessel: kartenSchluessel,
+        _kontoGuide: kontoGuide,
+        _kontoSpeicherLeeren: kontoSpeicherLeeren,
+        _privat: privat,
+        _hole: hole,
         _bereichWechseln: bereichWechseln,
         _matchupFilter: matchupFilter,
         _listeWechseln: listeWechseln,

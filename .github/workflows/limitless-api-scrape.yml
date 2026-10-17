@@ -265,7 +265,7 @@ jobs:
           python3 -u scripts/masterclass_zahlen_nachziehen.py
           rc=$?
           if [ "$rc" -ne 0 ]; then
-            echo "::warning::masterclass_zahlen_nachziehen exited with $rc — Stueck bleibt wie es ist"
+            echo "::warning::masterclass_zahlen_nachziehen exited with $rc — die Live-Daten bleiben wie sie sind"
           fi
           exit 0
 
@@ -320,11 +320,12 @@ jobs:
                   data/data_stand.json \
                   data/meta_prognose.json
           git add data/online_api_cards_*.csv data/online_api_matchups_*.csv 2>/dev/null || true
-          # Das Stueck aus dem Schritt "Masterclass-Zahlen nachziehen".
-          # Ohne diese Zeile waere der Schritt wirkungslos — dieselbe
-          # Falle, die data/champions_move_flags.json sieben Tage lang
-          # weggeworfen hat (23.09.2026).
-          git add masterclass/mega-stalobor.de.html 2>/dev/null || true
+          # Die Live-Daten aus dem Schritt "Masterclass-Zahlen nachziehen"
+          # (seit 17.10.2026 eine JSON statt des Stuecks — das liegt im
+          # Konto). Ohne diese Zeile waere der Schritt wirkungslos —
+          # dieselbe Falle, die data/champions_move_flags.json sieben Tage
+          # lang weggeworfen hat (23.09.2026).
+          git add data/masterclass_live/ 2>/dev/null || true
           # Die alten flachen Dateien sind in die Chunks uebergegangen.
           # 09.09.2026: die beiden ungeteilten Dateien gibt es nicht mehr —
           # der Lauf schreibt seit dem Umbau nur noch Auszuege je

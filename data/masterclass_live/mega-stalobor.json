@@ -1,0 +1,2913 @@
+{
+ "_meta": {
+  "erzeugt_am": "2026-10-17T07:47:06Z",
+  "id": "mega-stalobor",
+  "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
+ },
+ "matchups": {
+  "anteile": {
+   "alakazam": "0,09",
+   "alakazam dudunsparce": "4,49",
+   "alakazam dusknoir": "2,98",
+   "alolan exeggutor ex": "0,01",
+   "archaludon": "0,04",
+   "archaludon dudunsparce": "0,09",
+   "archaludon zoroark": "0,14",
+   "azumarill": "0,05",
+   "basic box": "5,06",
+   "beedrill": "0,90",
+   "blaziken": "0,04",
+   "blaziken zoroark": "0,06",
+   "blissey": "0,03",
+   "bloodmoon ursaluna": "0,00",
+   "bronzong": "0,01",
+   "ceruledge": "0,45",
+   "cinccino": "0,23",
+   "cinderace": "0,00",
+   "clefairy ogerpon": "0,23",
+   "crustle": "1,96",
+   "cynthia's garchomp": "1,62",
+   "decidueye": "0,09",
+   "dhelmise": "4,16",
+   "diancie dusknoir": "0,05",
+   "doublade": "0,17",
+   "dragapult": "10,98",
+   "dragapult blaziken": "2,67",
+   "dragapult dudunsparce": "0,69",
+   "dragapult dusknoir": "4,68",
+   "dragapult froslass": "0,06",
+   "dragonite eelektrik": "0,01",
+   "dudunsparce control": "0,00",
+   "eelektrik": "0,13",
+   "erika's victreebel": "0,01",
+   "ethan's magcargo": "0,05",
+   "ethan's typhlosion": "0,73",
+   "farigiraf": "0,00",
+   "festival lead": "2,42",
+   "flareon": "0,05",
+   "flareon noctowl": "0,09",
+   "flygon": "0,02",
+   "froslass dudunsparce": "0,05",
+   "froslass munkidori": "0,13",
+   "galvantula": "0,00",
+   "gengar": "0,50",
+   "greninja": "1,03",
+   "greninja froslass": "0,02",
+   "grimmsnarl froslass": "1,50",
+   "heatran metang": "0,01",
+   "hop's trevenant": "0,57",
+   "hop's zacian": "0,15",
+   "hydrapple": "0,01",
+   "hydreigon": "0,17",
+   "incineroar": "0,02",
+   "iono's bellibolt": "0,08",
+   "iron thorns": "0,01",
+   "iron thorns crustle": "0,00",
+   "jellicent dusknoir": "0,02",
+   "joltik box": "0,03",
+   "kangaskhan bouffalant": "0,30",
+   "lillie's clefairy": "0,19",
+   "lopunny dudunsparce": "3,05",
+   "lopunny dusknoir": "1,92",
+   "lucario hariyama": "3,04",
+   "mamoswine": "0,04",
+   "manectric eelektrik": "0,38",
+   "marnie's grimmsnarl": "0,19",
+   "mega abomasnow": "0,15",
+   "mega absol box": "0,32",
+   "mega camerupt": "0,12",
+   "mega chandelure": "0,59",
+   "mega charizard x": "0,21",
+   "mega darkrai": "0,34",
+   "mega diancie": "0,04",
+   "mega dragonite": "0,18",
+   "mega excadrill": "4,02",
+   "mega feraligatr": "0,03",
+   "mega froslass": "0,15",
+   "mega gengar": "0,10",
+   "mega greninja": "1,57",
+   "mega latias": "0,00",
+   "mega lopunny": "0,11",
+   "mega lucario": "1,46",
+   "mega manectric": "0,01",
+   "mega sharpedo": "0,02",
+   "mega starmie": "0,83",
+   "mega venusaur": "0,49",
+   "mega zygarde": "0,15",
+   "metagross": "0,07",
+   "mew box": "0,86",
+   "milotic": "0,01",
+   "misty's gyarados": "0,01",
+   "n's zoroark": "5,42",
+   "ogerpon meganium": "0,21",
+   "ogerpon meganium arboliva": "0,95",
+   "ogerpon meganium hydrapple": "2,97",
+   "okidogi barbaracle": "0,28",
+   "palafin": "0,07",
+   "paldean tauros": "0,03",
+   "raging bolt": "0,01",
+   "raging bolt bellibolt": "0,03",
+   "raging bolt ogerpon": "0,63",
+   "rocket's honchkrow": "1,45",
+   "rocket's mewtwo": "0,91",
+   "rocket's nidoking": "0,02",
+   "rocket's spidops": "0,11",
+   "salamence": "0,01",
+   "seaking festival lead": "0,47",
+   "sharpedo toxtricity": "2,82",
+   "sinistcha ogerpon": "0,07",
+   "slaking": "0,02",
+   "slowking": "5,01",
+   "starmie dusknoir": "0,45",
+   "starmie froslass": "0,71",
+   "steven's metagross": "0,61",
+   "sylveon": "0,00",
+   "tera box": "0,12",
+   "terapagos noctowl": "0,03",
+   "toucannon": "0,66",
+   "toxtricity": "0,21",
+   "toxtricity box": "0,48",
+   "toxtricity brute bonnet": "0,02",
+   "ursaluna lunatone": "0,09",
+   "wailord": "0,05",
+   "yanmega": "0,15",
+   "zygarde barbaracle": "0,07"
+  },
+  "koepfe": {
+   "davor": "TEF–PBL",
+   "jetzt": "TEF–30C",
+   "majors": "Majors (TEF–30C)"
+  },
+  "leer": [
+   "mcl-wrz mcl-wrz-leer",
+   "keine Partien in den Daten",
+   "—",
+   ""
+  ],
+  "majors_praefix": "Letzte Präsenzturniere (Brisbane, Frankfurt, Recife und Louisville), Format TEF–30C: ",
+  "mindest_partien": 30,
+  "werte": {
+   "datei-online-davor": "data/online_api_matchups_TEF-PBL.csv",
+   "datei-online-jetzt": "data/online_api_matchups_TEF-30C.csv",
+   "kopf-davor": "TEF–PBL",
+   "kopf-jetzt": "TEF–30C",
+   "kopf-majors": "Majors (TEF–30C)",
+   "majors-satz": "sind die letzten Präsenzturniere (Brisbane, Frankfurt, Recife und Louisville), schon im laufenden Format.",
+   "majors-turniere": "73, 74, 75 und 76",
+   "stand-online-davor": "2026-09-18",
+   "stand-online-jetzt": "2026-10-17"
+  },
+  "zellen": {
+   "alakazam-dudunsparce": {
+    "davor": [
+     "mcl-wrz",
+     "25,5 % Win % nach Matchpunkten, aus 672 Partien, Bilanz 170–497–5 (S–N–U)",
+     "25,5 %",
+     "<i>(672)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "32,3 % Win % nach Matchpunkten, aus 127 Partien, Bilanz 41–86–0 (S–N–U)",
+     "32,3 %",
+     "<i>(127)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "26,6 % Win % nach Matchpunkten, aus 163 Partien, Bilanz 34–101–28 (S–N–U)",
+     "26,6 %",
+     "<i>(163)</i>"
+    ]
+   },
+   "alakazam-dusknoir": {
+    "davor": [
+     "mcl-wrz",
+     "29,2 % Win % nach Matchpunkten, aus 48 Partien, Bilanz 14–34–0 (S–N–U)",
+     "29,2 %",
+     "<i>(48)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "44,8 % Win % nach Matchpunkten, aus 67 Partien, Bilanz 30–37–0 (S–N–U)",
+     "44,8 %",
+     "<i>(67)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "25,8 % Win % nach Matchpunkten, aus 44 Partien, Bilanz 10–30–4 (S–N–U)",
+     "25,8 %",
+     "<i>(44)</i>"
+    ]
+   },
+   "alakazam-meg": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–3–0 (S–N–U) aus 7 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 14.3 Punkte.",
+     "4–3–0",
+     "<i>(7)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–2–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "1–2–0",
+     "<i>(3)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "alolan-exeggutor-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "archaludon-dudunsparce": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 6–4–0 (S–N–U) aus 10 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 10.0 Punkte.",
+     "6–4–0",
+     "<i>(10)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "archaludon-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–5–0 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "4–5–0",
+     "<i>(9)</i>"
+    ]
+   },
+   "archaludon-zoroark": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–5–0 (S–N–U) aus 7 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 14.3 Punkte.",
+     "2–5–0",
+     "<i>(7)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–2–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "0–2–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "azumarill-ssp": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–5–0 (S–N–U) aus 8 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 12.5 Punkte.",
+     "3–5–0",
+     "<i>(8)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "basic-box-m": {
+    "davor": [
+     "mcl-wrz",
+     "47,3 % Win % nach Matchpunkten, aus 258 Partien, Bilanz 122–136–0 (S–N–U)",
+     "47,3 %",
+     "<i>(258)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "48,4 % Win % nach Matchpunkten, aus 128 Partien, Bilanz 62–66–0 (S–N–U)",
+     "48,4 %",
+     "<i>(128)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "41,6 % Win % nach Matchpunkten, aus 201 Partien, Bilanz 79–108–14 (S–N–U)",
+     "41,6 %",
+     "<i>(201)</i>"
+    ]
+   },
+   "beedrill-ex-cri": {
+    "davor": [
+     "mcl-wrz",
+     "61,0 % Win % nach Matchpunkten, aus 123 Partien, Bilanz 75–48–0 (S–N–U)",
+     "61,0 %",
+     "<i>(123)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 13–10–0 (S–N–U) aus 23 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.3 Punkte.",
+     "13–10–0",
+     "<i>(23)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–4–1 (S–N–U) aus 10 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 10.0 Punkte.",
+     "5–4–1",
+     "<i>(10)</i>"
+    ]
+   },
+   "blaziken-ex-jtg": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–2–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "1–2–0",
+     "<i>(3)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "blaziken-zoroark": {
+    "davor": [
+     "mcl-wrz",
+     "36,4 % Win % nach Matchpunkten, aus 33 Partien, Bilanz 12–21–0 (S–N–U)",
+     "36,4 %",
+     "<i>(33)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–3–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "1–3–0",
+     "<i>(4)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "blissey-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "bloodmoon-ursaluna-sfa": {
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "bronzong-tef": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–6–0 (S–N–U) aus 10 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 10.0 Punkte.",
+     "4–6–0",
+     "<i>(10)</i>"
+    ]
+   },
+   "ceruledge-ex": {
+    "davor": [
+     "mcl-wrz",
+     "22,1 % Win % nach Matchpunkten, aus 68 Partien, Bilanz 15–53–0 (S–N–U)",
+     "22,1 %",
+     "<i>(68)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–8–0 (S–N–U) aus 11 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 9.1 Punkte.",
+     "3–8–0",
+     "<i>(11)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–8–0 (S–N–U) aus 13 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 7.7 Punkte.",
+     "5–8–0",
+     "<i>(13)</i>"
+    ]
+   },
+   "cinccino-ex": {
+    "davor": [
+     "mcl-wrz",
+     "43,6 % Win % nach Matchpunkten, aus 55 Partien, Bilanz 24–31–0 (S–N–U)",
+     "43,6 %",
+     "<i>(55)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–2–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "2–2–0",
+     "<i>(4)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–1 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "2–0–1",
+     "<i>(3)</i>"
+    ]
+   },
+   "cinderace-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "clefairy-ogerpon": {
+    "davor": [
+     "mcl-wrz",
+     "49,2 % Win % nach Matchpunkten, aus 44 Partien, Bilanz 21–21–2 (S–N–U)",
+     "49,2 %",
+     "<i>(44)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–2–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "2–2–0",
+     "<i>(4)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–3–1 (S–N–U) aus 8 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 12.5 Punkte.",
+     "4–3–1",
+     "<i>(8)</i>"
+    ]
+   },
+   "cornerstone-mask-ogerpon-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "crustle-dri": {
+    "davor": [
+     "mcl-wrz",
+     "75,8 % Win % nach Matchpunkten, aus 138 Partien, Bilanz 104–32–2 (S–N–U)",
+     "75,8 %",
+     "<i>(138)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "75,2 % Win % nach Matchpunkten, aus 55 Partien, Bilanz 41–13–1 (S–N–U)",
+     "75,2 %",
+     "<i>(55)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "76,1 % Win % nach Matchpunkten, aus 78 Partien, Bilanz 57–14–7 (S–N–U)",
+     "76,1 %",
+     "<i>(78)</i>"
+    ]
+   },
+   "cynthia-garchomp-ex": {
+    "davor": [
+     "mcl-wrz",
+     "42,2 % Win % nach Matchpunkten, aus 132 Partien, Bilanz 55–75–2 (S–N–U)",
+     "42,2 %",
+     "<i>(132)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "37,7 % Win % nach Matchpunkten, aus 46 Partien, Bilanz 17–28–1 (S–N–U)",
+     "37,7 %",
+     "<i>(46)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "36,7 % Win % nach Matchpunkten, aus 40 Partien, Bilanz 12–20–8 (S–N–U)",
+     "36,7 %",
+     "<i>(40)</i>"
+    ]
+   },
+   "decidueye-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–4–0 (S–N–U) aus 8 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 12.5 Punkte.",
+     "4–4–0",
+     "<i>(8)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "dhelmise-pbl": {
+    "davor": [
+     "mcl-wrz",
+     "51,6 % Win % nach Matchpunkten, aus 490 Partien, Bilanz 251–234–5 (S–N–U)",
+     "51,6 %",
+     "<i>(490)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "55,0 % Win % nach Matchpunkten, aus 97 Partien, Bilanz 53–43–1 (S–N–U)",
+     "55,0 %",
+     "<i>(97)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "54,5 % Win % nach Matchpunkten, aus 118 Partien, Bilanz 57–39–22 (S–N–U)",
+     "54,5 %",
+     "<i>(118)</i>"
+    ]
+   },
+   "diancie-dusknoir": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 15–4–0 (S–N–U) aus 19 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.3 Punkte.",
+     "15–4–0",
+     "<i>(19)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "doublade-por": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–9–0 (S–N–U) aus 14 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 7.1 Punkte.",
+     "5–9–0",
+     "<i>(14)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "dragapult-blaziken": {
+    "davor": [
+     "mcl-wrz",
+     "35,7 % Win % nach Matchpunkten, aus 758 Partien, Bilanz 269–484–5 (S–N–U)",
+     "35,7 %",
+     "<i>(758)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "28,1 % Win % nach Matchpunkten, aus 96 Partien, Bilanz 27–69–0 (S–N–U)",
+     "28,1 %",
+     "<i>(96)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "28,5 % Win % nach Matchpunkten, aus 125 Partien, Bilanz 30–78–17 (S–N–U)",
+     "28,5 %",
+     "<i>(125)</i>"
+    ]
+   },
+   "dragapult-dudunsparce": {
+    "davor": [
+     "mcl-wrz",
+     "33,3 % Win % nach Matchpunkten, aus 66 Partien, Bilanz 22–44–0 (S–N–U)",
+     "33,3 %",
+     "<i>(66)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 8–13–0 (S–N–U) aus 21 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.8 Punkte.",
+     "8–13–0",
+     "<i>(21)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 11–4–3 (S–N–U) aus 18 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.6 Punkte.",
+     "11–4–3",
+     "<i>(18)</i>"
+    ]
+   },
+   "dragapult-dusknoir": {
+    "davor": [
+     "mcl-wrz",
+     "51,2 % Win % nach Matchpunkten, aus 722 Partien, Bilanz 367–348–7 (S–N–U)",
+     "51,2 %",
+     "<i>(722)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "52,8 % Win % nach Matchpunkten, aus 106 Partien, Bilanz 56–50–0 (S–N–U)",
+     "52,8 %",
+     "<i>(106)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "53,2 % Win % nach Matchpunkten, aus 139 Partien, Bilanz 68–53–18 (S–N–U)",
+     "53,2 %",
+     "<i>(139)</i>"
+    ]
+   },
+   "dragapult-ex": {
+    "davor": [
+     "mcl-wrz",
+     "49,4 % Win % nach Matchpunkten, aus 1.053 Partien, Bilanz 517–527–9 (S–N–U)",
+     "49,4 %",
+     "<i>(1.053)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "51,1 % Win % nach Matchpunkten, aus 328 Partien, Bilanz 167–159–2 (S–N–U)",
+     "51,1 %",
+     "<i>(328)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "42,0 % Win % nach Matchpunkten, aus 530 Partien, Bilanz 189–240–101 (S–N–U)",
+     "42,0 %",
+     "<i>(530)</i>"
+    ]
+   },
+   "dragapult-froslass": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–2–0 (S–N–U) aus 5 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 20.0 Punkte.",
+     "3–2–0",
+     "<i>(5)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "dragapult-zoroark": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "dragonite-eelektrik": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "dudunsparce-control": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–4–0 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "5–4–0",
+     "<i>(9)</i>"
+    ]
+   },
+   "eelektrik-blk": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–3–0 (S–N–U) aus 7 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 14.3 Punkte.",
+     "4–3–0",
+     "<i>(7)</i>"
+    ]
+   },
+   "erikas-victreebel": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 16–9–0 (S–N–U) aus 25 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.0 Punkte.",
+     "16–9–0",
+     "<i>(25)</i>"
+    ]
+   },
+   "ethan-magcargo": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–7–0 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "2–7–0",
+     "<i>(9)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "ethan-typhlosion": {
+    "davor": [
+     "mcl-wrz",
+     "23,5 % Win % nach Matchpunkten, aus 85 Partien, Bilanz 20–65–0 (S–N–U)",
+     "23,5 %",
+     "<i>(85)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–9–0 (S–N–U) aus 11 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 9.1 Punkte.",
+     "2–9–0",
+     "<i>(11)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–13–1 (S–N–U) aus 15 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 6.7 Punkte.",
+     "1–13–1",
+     "<i>(15)</i>"
+    ]
+   },
+   "farigiraf-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "feraligatr-tef": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "festival-lead": {
+    "davor": [
+     "mcl-wrz",
+     "50,7 % Win % nach Matchpunkten, aus 727 Partien, Bilanz 366–354–7 (S–N–U)",
+     "50,7 %",
+     "<i>(727)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "51,3 % Win % nach Matchpunkten, aus 52 Partien, Bilanz 26–24–2 (S–N–U)",
+     "51,3 %",
+     "<i>(52)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "58,4 % Win % nach Matchpunkten, aus 89 Partien, Bilanz 46–25–18 (S–N–U)",
+     "58,4 %",
+     "<i>(89)</i>"
+    ]
+   },
+   "flareon-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "flareon-noctowl": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 9–12–0 (S–N–U) aus 21 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.8 Punkte.",
+     "9–12–0",
+     "<i>(21)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–2–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "0–2–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "flygon-ex-ssp": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "froslass-munkidori": {
+    "davor": [
+     "mcl-wrz",
+     "61,3 % Win % nach Matchpunkten, aus 31 Partien, Bilanz 19–12–0 (S–N–U)",
+     "61,3 %",
+     "<i>(31)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–2–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "0–2–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "gengar-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–3–0 (S–N–U) aus 5 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 20.0 Punkte.",
+     "2–3–0",
+     "<i>(5)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 7–4–0 (S–N–U) aus 11 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 9.1 Punkte.",
+     "7–4–0",
+     "<i>(11)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "greninja-blaziken": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "greninja-ex": {
+    "davor": [
+     "mcl-wrz",
+     "43,0 % Win % nach Matchpunkten, aus 107 Partien, Bilanz 46–61–0 (S–N–U)",
+     "43,0 %",
+     "<i>(107)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 17–12–0 (S–N–U) aus 29 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 3.4 Punkte.",
+     "17–12–0",
+     "<i>(29)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–6–2 (S–N–U) aus 10 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 10.0 Punkte.",
+     "2–6–2",
+     "<i>(10)</i>"
+    ]
+   },
+   "greninja-froslass": {
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "grimmsnarl-froslass": {
+    "davor": [
+     "mcl-wrz",
+     "55,2 % Win % nach Matchpunkten, aus 464 Partien, Bilanz 256–207–1 (S–N–U)",
+     "55,2 %",
+     "<i>(464)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "55,9 % Win % nach Matchpunkten, aus 34 Partien, Bilanz 19–15–0 (S–N–U)",
+     "55,9 %",
+     "<i>(34)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 15–5–7 (S–N–U) aus 27 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 3.7 Punkte.",
+     "15–5–7",
+     "<i>(27)</i>"
+    ]
+   },
+   "hop-zacian": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 11–4–0 (S–N–U) aus 15 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 6.7 Punkte.",
+     "11–4–0",
+     "<i>(15)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–1–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "3–1–0",
+     "<i>(4)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "hops-trevenant": {
+    "davor": [
+     "mcl-wrz",
+     "32,1 % Win % nach Matchpunkten, aus 84 Partien, Bilanz 27–57–0 (S–N–U)",
+     "32,1 %",
+     "<i>(84)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 9–14–0 (S–N–U) aus 23 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.3 Punkte.",
+     "9–14–0",
+     "<i>(23)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 8–5–2 (S–N–U) aus 15 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 6.7 Punkte.",
+     "8–5–2",
+     "<i>(15)</i>"
+    ]
+   },
+   "hydreigon-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 9–9–0 (S–N–U) aus 18 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.6 Punkte.",
+     "9–9–0",
+     "<i>(18)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "iono-bellibolt": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 6–5–0 (S–N–U) aus 11 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 9.1 Punkte.",
+     "6–5–0",
+     "<i>(11)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "iron-thorns-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 10–1–0 (S–N–U) aus 11 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 9.1 Punkte.",
+     "10–1–0",
+     "<i>(11)</i>"
+    ]
+   },
+   "jellicent-dusknoir": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–5–0 (S–N–U) aus 6 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 16.7 Punkte.",
+     "1–5–0",
+     "<i>(6)</i>"
+    ]
+   },
+   "joltik-box": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–7–0 (S–N–U) aus 8 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 12.5 Punkte.",
+     "1–7–0",
+     "<i>(8)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–0–1 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–0–1",
+     "<i>(1)</i>"
+    ]
+   },
+   "kangaskhan-bouffalant": {
+    "davor": [
+     "mcl-wrz",
+     "48,1 % Win % nach Matchpunkten, aus 90 Partien, Bilanz 43–46–1 (S–N–U)",
+     "48,1 %",
+     "<i>(90)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–2–0 (S–N–U) aus 6 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 16.7 Punkte.",
+     "4–2–0",
+     "<i>(6)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–8–0 (S–N–U) aus 13 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 7.7 Punkte.",
+     "5–8–0",
+     "<i>(13)</i>"
+    ]
+   },
+   "lillie-clefairy": {
+    "davor": [
+     "mcl-wrz",
+     "56,4 % Win % nach Matchpunkten, aus 39 Partien, Bilanz 22–17–0 (S–N–U)",
+     "56,4 %",
+     "<i>(39)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–4–0 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "5–4–0",
+     "<i>(9)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "lopunny-dudunsparce": {
+    "davor": [
+     "mcl-wrz",
+     "48,2 % Win % nach Matchpunkten, aus 85 Partien, Bilanz 41–44–0 (S–N–U)",
+     "48,2 %",
+     "<i>(85)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "62,5 % Win % nach Matchpunkten, aus 88 Partien, Bilanz 55–33–0 (S–N–U)",
+     "62,5 %",
+     "<i>(88)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "48,9 % Win % nach Matchpunkten, aus 58 Partien, Bilanz 26–25–7 (S–N–U)",
+     "48,9 %",
+     "<i>(58)</i>"
+    ]
+   },
+   "lopunny-dusknoir": {
+    "davor": [
+     "mcl-wrz",
+     "38,2 % Win % nach Matchpunkten, aus 68 Partien, Bilanz 26–42–0 (S–N–U)",
+     "38,2 %",
+     "<i>(68)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "58,8 % Win % nach Matchpunkten, aus 34 Partien, Bilanz 20–14–0 (S–N–U)",
+     "58,8 %",
+     "<i>(34)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "46,8 % Win % nach Matchpunkten, aus 47 Partien, Bilanz 21–23–3 (S–N–U)",
+     "46,8 %",
+     "<i>(47)</i>"
+    ]
+   },
+   "lucario-hariyama": {
+    "davor": [
+     "mcl-wrz",
+     "39,4 % Win % nach Matchpunkten, aus 226 Partien, Bilanz 89–137–0 (S–N–U)",
+     "39,4 %",
+     "<i>(226)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "38,9 % Win % nach Matchpunkten, aus 72 Partien, Bilanz 28–44–0 (S–N–U)",
+     "38,9 %",
+     "<i>(72)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "32,1 % Win % nach Matchpunkten, aus 52 Partien, Bilanz 15–32–5 (S–N–U)",
+     "32,1 %",
+     "<i>(52)</i>"
+    ]
+   },
+   "luxray-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "mamoswine-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–1–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "3–1–0",
+     "<i>(4)</i>"
+    ]
+   },
+   "manectric-eelektrik": {
+    "davor": [
+     "mcl-wrz",
+     "55,1 % Win % nach Matchpunkten, aus 78 Partien, Bilanz 43–35–0 (S–N–U)",
+     "55,1 %",
+     "<i>(78)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–7–0 (S–N–U) aus 12 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 8.3 Punkte.",
+     "5–7–0",
+     "<i>(12)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "marnie-grimmsnarl-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 15–8–1 (S–N–U) aus 24 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.2 Punkte.",
+     "15–8–1",
+     "<i>(24)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–2–0 (S–N–U) aus 6 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 16.7 Punkte.",
+     "4–2–0",
+     "<i>(6)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "mega-abomasnow-ex": {
+    "davor": [
+     "mcl-wrz",
+     "56,7 % Win % nach Matchpunkten, aus 30 Partien, Bilanz 17–13–0 (S–N–U)",
+     "56,7 %",
+     "<i>(30)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–0–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "3–0–0",
+     "<i>(3)</i>"
+    ]
+   },
+   "mega-absol-box": {
+    "davor": [
+     "mcl-wrz",
+     "56,2 % Win % nach Matchpunkten, aus 115 Partien, Bilanz 64–49–2 (S–N–U)",
+     "56,2 %",
+     "<i>(115)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–1–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "2–1–0",
+     "<i>(3)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–1 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "2–0–1",
+     "<i>(3)</i>"
+    ]
+   },
+   "mega-camerupt-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–9–0 (S–N–U) aus 12 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 8.3 Punkte.",
+     "3–9–0",
+     "<i>(12)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–2–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "0–2–0",
+     "<i>(2)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–3–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "0–3–0",
+     "<i>(3)</i>"
+    ]
+   },
+   "mega-chandelure-ex": {
+    "davor": [
+     "mcl-wrz",
+     "34,5 % Win % nach Matchpunkten, aus 110 Partien, Bilanz 38–72–0 (S–N–U)",
+     "34,5 %",
+     "<i>(110)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 6–12–0 (S–N–U) aus 18 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.6 Punkte.",
+     "6–12–0",
+     "<i>(18)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–7–3 (S–N–U) aus 13 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 7.7 Punkte.",
+     "3–7–3",
+     "<i>(13)</i>"
+    ]
+   },
+   "mega-charizard-x-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–14–1 (S–N–U) aus 20 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.0 Punkte.",
+     "5–14–1",
+     "<i>(20)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–2–0 (S–N–U) aus 6 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 16.7 Punkte.",
+     "4–2–0",
+     "<i>(6)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–2–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "1–2–0",
+     "<i>(3)</i>"
+    ]
+   },
+   "mega-darkrai-ex": {
+    "davor": [
+     "mcl-wrz",
+     "45,2 % Win % nach Matchpunkten, aus 42 Partien, Bilanz 19–23–0 (S–N–U)",
+     "45,2 %",
+     "<i>(42)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–4–0 (S–N–U) aus 7 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 14.3 Punkte.",
+     "3–4–0",
+     "<i>(7)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–2–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "1–2–0",
+     "<i>(3)</i>"
+    ]
+   },
+   "mega-diancie-ex": {
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "mega-dragonite-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 9–18–0 (S–N–U) aus 27 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 3.7 Punkte.",
+     "9–18–0",
+     "<i>(27)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "mega-excadrill-ex": {
+    "davor": [
+     "mcl-wrz",
+     "47,1 % Win % nach Matchpunkten, aus 860 Partien, Bilanz 402–450–8 (S–N–U)",
+     "47,1 %",
+     "<i>(860)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "49,0 % Win % nach Matchpunkten, aus 102 Partien, Bilanz 50–52–0 (S–N–U)",
+     "49,0 %",
+     "<i>(102)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "47,0 % Win % nach Matchpunkten, aus 132 Partien, Bilanz 54–54–24 (S–N–U)",
+     "47,0 %",
+     "<i>(132)</i>"
+    ]
+   },
+   "mega-feraligatr-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 7–1–0 (S–N–U) aus 8 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 12.5 Punkte.",
+     "7–1–0",
+     "<i>(8)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "mega-froslass-dudunsparce": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–7–0 (S–N–U) aus 10 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 10.0 Punkte.",
+     "3–7–0",
+     "<i>(10)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "mega-froslass-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 13–10–0 (S–N–U) aus 23 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.3 Punkte.",
+     "13–10–0",
+     "<i>(23)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–3–0 (S–N–U) aus 5 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 20.0 Punkte.",
+     "2–3–0",
+     "<i>(5)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "mega-gengar-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "mega-greninja-ex": {
+    "davor": [
+     "mcl-wrz",
+     "55,8 % Win % nach Matchpunkten, aus 144 Partien, Bilanz 80–63–1 (S–N–U)",
+     "55,8 %",
+     "<i>(144)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 18–7–0 (S–N–U) aus 25 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.0 Punkte.",
+     "18–7–0",
+     "<i>(25)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 9–9–2 (S–N–U) aus 20 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.0 Punkte.",
+     "9–9–2",
+     "<i>(20)</i>"
+    ]
+   },
+   "mega-latias-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–2–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "2–2–0",
+     "<i>(4)</i>"
+    ]
+   },
+   "mega-lopunny-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–1–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "3–1–0",
+     "<i>(4)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–0–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "4–0–0",
+     "<i>(4)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–1–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "2–1–0",
+     "<i>(3)</i>"
+    ]
+   },
+   "mega-lucario-ex": {
+    "davor": [
+     "mcl-wrz",
+     "32,8 % Win % nach Matchpunkten, aus 270 Partien, Bilanz 88–180–2 (S–N–U)",
+     "32,8 %",
+     "<i>(270)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "36,8 % Win % nach Matchpunkten, aus 38 Partien, Bilanz 14–24–0 (S–N–U)",
+     "36,8 %",
+     "<i>(38)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "23,3 % Win % nach Matchpunkten, aus 40 Partien, Bilanz 8–28–4 (S–N–U)",
+     "23,3 %",
+     "<i>(40)</i>"
+    ]
+   },
+   "mega-manectric-ex-meg": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "mega-starmie-ex": {
+    "davor": [
+     "mcl-wrz",
+     "58,5 % Win % nach Matchpunkten, aus 53 Partien, Bilanz 31–22–0 (S–N–U)",
+     "58,5 %",
+     "<i>(53)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 14–10–0 (S–N–U) aus 24 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.2 Punkte.",
+     "14–10–0",
+     "<i>(24)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–3–3 (S–N–U) aus 10 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 10.0 Punkte.",
+     "4–3–3",
+     "<i>(10)</i>"
+    ]
+   },
+   "mega-venusaur-ex": {
+    "davor": [
+     "mcl-wrz",
+     "42,6 % Win % nach Matchpunkten, aus 68 Partien, Bilanz 29–39–0 (S–N–U)",
+     "42,6 %",
+     "<i>(68)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–9–0 (S–N–U) aus 14 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 7.1 Punkte.",
+     "5–9–0",
+     "<i>(14)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–3–3 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "3–3–3",
+     "<i>(9)</i>"
+    ]
+   },
+   "mega-zygarde-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 7–3–0 (S–N–U) aus 10 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 10.0 Punkte.",
+     "7–3–0",
+     "<i>(10)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–1–0 (S–N–U) aus 6 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 16.7 Punkte.",
+     "5–1–0",
+     "<i>(6)</i>"
+    ]
+   },
+   "metagross-cri": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 14–12–1 (S–N–U) aus 27 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 3.7 Punkte.",
+     "14–12–1",
+     "<i>(27)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–4–4 (S–N–U) aus 8 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 12.5 Punkte.",
+     "0–4–4",
+     "<i>(8)</i>"
+    ]
+   },
+   "mew-ex-30c": {
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–5–0 (S–N–U) aus 10 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 10.0 Punkte.",
+     "5–5–0",
+     "<i>(10)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–6–0 (S–N–U) aus 11 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 9.1 Punkte.",
+     "5–6–0",
+     "<i>(11)</i>"
+    ]
+   },
+   "milotic-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "misty-gyarados": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–4–0 (S–N–U) aus 5 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 20.0 Punkte.",
+     "1–4–0",
+     "<i>(5)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "n-zoroark": {
+    "davor": [
+     "mcl-wrz",
+     "53,4 % Win % nach Matchpunkten, aus 630 Partien, Bilanz 335–291–4 (S–N–U)",
+     "53,4 %",
+     "<i>(630)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "58,1 % Win % nach Matchpunkten, aus 164 Partien, Bilanz 95–68–1 (S–N–U)",
+     "58,1 %",
+     "<i>(164)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "54,7 % Win % nach Matchpunkten, aus 161 Partien, Bilanz 80–57–24 (S–N–U)",
+     "54,7 %",
+     "<i>(161)</i>"
+    ]
+   },
+   "ogerpon-meganium": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 7–10–1 (S–N–U) aus 18 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.6 Punkte.",
+     "7–10–1",
+     "<i>(18)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–1 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–0–1",
+     "<i>(2)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–2–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "2–2–0",
+     "<i>(4)</i>"
+    ]
+   },
+   "ogerpon-meganium-arboliva": {
+    "davor": [
+     "mcl-wrz",
+     "37,9 % Win % nach Matchpunkten, aus 87 Partien, Bilanz 33–54–0 (S–N–U)",
+     "37,9 %",
+     "<i>(87)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 10–13–0 (S–N–U) aus 23 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.3 Punkte.",
+     "10–13–0",
+     "<i>(23)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 6–11–1 (S–N–U) aus 18 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.6 Punkte.",
+     "6–11–1",
+     "<i>(18)</i>"
+    ]
+   },
+   "ogerpon-meganium-hydrapple": {
+    "davor": [
+     "mcl-wrz",
+     "35,9 % Win % nach Matchpunkten, aus 170 Partien, Bilanz 61–109–0 (S–N–U)",
+     "35,9 %",
+     "<i>(170)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "42,8 % Win % nach Matchpunkten, aus 99 Partien, Bilanz 42–56–1 (S–N–U)",
+     "42,8 %",
+     "<i>(99)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "35,6 % Win % nach Matchpunkten, aus 120 Partien, Bilanz 34–60–26 (S–N–U)",
+     "35,6 %",
+     "<i>(120)</i>"
+    ]
+   },
+   "okidogi-barbaracle": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 7–13–0 (S–N–U) aus 20 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.0 Punkte.",
+     "7–13–0",
+     "<i>(20)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–1 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "1–1–1",
+     "<i>(3)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–5–1 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "3–5–1",
+     "<i>(9)</i>"
+    ]
+   },
+   "okidogi-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "okidogi-twm": {
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "other": {
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 17–3–2 (S–N–U) aus 22 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.5 Punkte.",
+     "17–3–2",
+     "<i>(22)</i>"
+    ]
+   },
+   "palafin-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 6–13–0 (S–N–U) aus 19 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.3 Punkte.",
+     "6–13–0",
+     "<i>(19)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–2–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "1–2–0",
+     "<i>(3)</i>"
+    ]
+   },
+   "paldean-tauros-pfl": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "raging-bolt-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "raging-bolt-ogerpon": {
+    "davor": [
+     "mcl-wrz",
+     "43,8 % Win % nach Matchpunkten, aus 280 Partien, Bilanz 122–156–2 (S–N–U)",
+     "43,8 %",
+     "<i>(280)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 7–10–0 (S–N–U) aus 17 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.9 Punkte.",
+     "7–10–0",
+     "<i>(17)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 15–8–0 (S–N–U) aus 23 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.3 Punkte.",
+     "15–8–0",
+     "<i>(23)</i>"
+    ]
+   },
+   "reging-bolt-bellibolt": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–1–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "2–1–0",
+     "<i>(3)</i>"
+    ]
+   },
+   "rocket-mewtwo-ex": {
+    "davor": [
+     "mcl-wrz",
+     "68,9 % Win % nach Matchpunkten, aus 89 Partien, Bilanz 61–27–1 (S–N–U)",
+     "68,9 %",
+     "<i>(89)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 6–3–0 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "6–3–0",
+     "<i>(9)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 18–4–2 (S–N–U) aus 24 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 4.2 Punkte.",
+     "18–4–2",
+     "<i>(24)</i>"
+    ]
+   },
+   "rocket-nidoking-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–4–0 (S–N–U) aus 7 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 14.3 Punkte.",
+     "3–4–0",
+     "<i>(7)</i>"
+    ]
+   },
+   "rocket-porygon-z": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "rocket-spidops": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–2–0 (S–N–U) aus 7 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 14.3 Punkte.",
+     "5–2–0",
+     "<i>(7)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "rockets-honchkrow": {
+    "davor": [
+     "mcl-wrz",
+     "29,4 % Win % nach Matchpunkten, aus 154 Partien, Bilanz 45–108–1 (S–N–U)",
+     "29,4 %",
+     "<i>(154)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "28,0 % Win % nach Matchpunkten, aus 44 Partien, Bilanz 12–31–1 (S–N–U)",
+     "28,0 %",
+     "<i>(44)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "25,9 % Win % nach Matchpunkten, aus 76 Partien, Bilanz 13–43–20 (S–N–U)",
+     "25,9 %",
+     "<i>(76)</i>"
+    ]
+   },
+   "scovillain-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "seaking-pre": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–9–0 (S–N–U) aus 14 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 7.1 Punkte.",
+     "5–9–0",
+     "<i>(14)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 11–9–0 (S–N–U) aus 20 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.0 Punkte.",
+     "11–9–0",
+     "<i>(20)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–11–4 (S–N–U) aus 18 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.6 Punkte.",
+     "3–11–4",
+     "<i>(18)</i>"
+    ]
+   },
+   "sharpedo-toxtricity": {
+    "davor": [
+     "mcl-wrz",
+     "64,4 % Win % nach Matchpunkten, aus 44 Partien, Bilanz 28–15–1 (S–N–U)",
+     "64,4 %",
+     "<i>(44)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "56,4 % Win % nach Matchpunkten, aus 78 Partien, Bilanz 44–34–0 (S–N–U)",
+     "56,4 %",
+     "<i>(78)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "58,2 % Win % nach Matchpunkten, aus 51 Partien, Bilanz 28–18–5 (S–N–U)",
+     "58,2 %",
+     "<i>(51)</i>"
+    ]
+   },
+   "sinistcha-ogerpon": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–6–0 (S–N–U) aus 8 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 12.5 Punkte.",
+     "2–6–0",
+     "<i>(8)</i>"
+    ]
+   },
+   "slaking-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "slowking-scr": {
+    "davor": [
+     "mcl-wrz",
+     "34,5 % Win % nach Matchpunkten, aus 722 Partien, Bilanz 247–468–7 (S–N–U)",
+     "34,5 %",
+     "<i>(722)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz",
+     "42,2 % Win % nach Matchpunkten, aus 158 Partien, Bilanz 66–90–2 (S–N–U)",
+     "42,2 %",
+     "<i>(158)</i>"
+    ],
+    "majors": [
+     "mcl-wrz",
+     "37,5 % Win % nach Matchpunkten, aus 199 Partien, Bilanz 69–113–17 (S–N–U)",
+     "37,5 %",
+     "<i>(199)</i>"
+    ]
+   },
+   "starmie-dusknoir": {
+    "davor": [
+     "mcl-wrz",
+     "44,8 % Win % nach Matchpunkten, aus 58 Partien, Bilanz 26–32–0 (S–N–U)",
+     "44,8 %",
+     "<i>(58)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 7–6–0 (S–N–U) aus 13 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 7.7 Punkte.",
+     "7–6–0",
+     "<i>(13)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–3–0 (S–N–U) aus 4 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 25.0 Punkte.",
+     "1–3–0",
+     "<i>(4)</i>"
+    ]
+   },
+   "starmie-froslass": {
+    "davor": [
+     "mcl-wrz",
+     "54,0 % Win % nach Matchpunkten, aus 63 Partien, Bilanz 34–29–0 (S–N–U)",
+     "54,0 %",
+     "<i>(63)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 12–6–0 (S–N–U) aus 18 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.6 Punkte.",
+     "12–6–0",
+     "<i>(18)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–2–1 (S–N–U) aus 8 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 12.5 Punkte.",
+     "5–2–1",
+     "<i>(8)</i>"
+    ]
+   },
+   "stevens-metagross": {
+    "davor": [
+     "mcl-wrz",
+     "58,3 % Win % nach Matchpunkten, aus 36 Partien, Bilanz 21–15–0 (S–N–U)",
+     "58,3 %",
+     "<i>(36)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–6–1 (S–N–U) aus 11 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 9.1 Punkte.",
+     "4–6–1",
+     "<i>(11)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–1–2 (S–N–U) aus 6 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 16.7 Punkte.",
+     "3–1–2",
+     "<i>(6)</i>"
+    ]
+   },
+   "sylveon-pre": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–1–0 (S–N–U) aus 6 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 16.7 Punkte.",
+     "5–1–0",
+     "<i>(6)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "tera-box": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 7–8–0 (S–N–U) aus 15 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 6.7 Punkte.",
+     "7–8–0",
+     "<i>(15)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–2–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "1–2–0",
+     "<i>(3)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–2–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "0–2–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "terapagos-noctowl": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–2–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "0–2–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "toucannon-pbl": {
+    "davor": [
+     "mcl-wrz",
+     "38,3 % Win % nach Matchpunkten, aus 275 Partien, Bilanz 105–169–1 (S–N–U)",
+     "38,3 %",
+     "<i>(275)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 8–7–0 (S–N–U) aus 15 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 6.7 Punkte.",
+     "8–7–0",
+     "<i>(15)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 3–6–0 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "3–6–0",
+     "<i>(9)</i>"
+    ]
+   },
+   "toxtricity-box": {
+    "davor": [
+     "mcl-wrz",
+     "37,7 % Win % nach Matchpunkten, aus 91 Partien, Bilanz 34–56–1 (S–N–U)",
+     "37,7 %",
+     "<i>(91)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 7–4–0 (S–N–U) aus 11 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 9.1 Punkte.",
+     "7–4–0",
+     "<i>(11)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–4–1 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "4–4–1",
+     "<i>(9)</i>"
+    ]
+   },
+   "toxtricity-brute-bonnet": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 0–1–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "0–1–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "toxtricity-pfl": {
+    "davor": [
+     "mcl-wrz",
+     "46,9 % Win % nach Matchpunkten, aus 32 Partien, Bilanz 15–17–0 (S–N–U)",
+     "46,9 %",
+     "<i>(32)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 6–1–0 (S–N–U) aus 7 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 14.3 Punkte.",
+     "6–1–0",
+     "<i>(7)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "ursaluna-lunatone": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 5–4–0 (S–N–U) aus 9 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 11.1 Punkte.",
+     "5–4–0",
+     "<i>(9)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–1–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "2–1–0",
+     "<i>(3)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (S–N–U) aus 1 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "wailord-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 4–1–0 (S–N–U) aus 5 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 20.0 Punkte.",
+     "4–1–0",
+     "<i>(5)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–1–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "2–1–0",
+     "<i>(3)</i>"
+    ]
+   },
+   "wailord-ex-pbl": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 9–7–0 (S–N–U) aus 16 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 6.2 Punkte.",
+     "9–7–0",
+     "<i>(16)</i>"
+    ]
+   },
+   "yanmega-ex": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 8–5–0 (S–N–U) aus 13 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 7.7 Punkte.",
+     "8–5–0",
+     "<i>(13)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–1–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "2–1–0",
+     "<i>(3)</i>"
+    ],
+    "majors": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–0–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "2–0–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "zoroark-crustle": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–1–0 (S–N–U) aus 2 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
+    ]
+   },
+   "zygarde-barbaracle": {
+    "davor": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 9–8–0 (S–N–U) aus 17 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 5.9 Punkte.",
+     "9–8–0",
+     "<i>(17)</i>"
+    ],
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 2–1–0 (S–N–U) aus 3 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 33.3 Punkte.",
+     "2–1–0",
+     "<i>(3)</i>"
+    ]
+   }
+  }
+ },
+ "online_listen": {
+  "gruppe": "Online · letzte 7 Tage",
+  "leer_hinweis": "<span class=\"mcl-listgruppe-leer\">Keine Online-Liste ab 100 Spielern in den letzten 7 Tagen — ältere Listen stehen unter „Worlds · Day 2“.</span>",
+  "listen": [
+   {
+    "fakten": "5. Platz von 188 (7–1–0), „Sunny's Weekly #277 Judge Appreciation Week!“, 13.10.2026.",
+    "karten": [
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Beldum",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_059_R_EN_LG.png",
+       "de": "Tanhel",
+       "druck": "CRI-59",
+       "en": "Beldum",
+       "hoch": "CRI-59",
+       "karte": "beldum"
+      },
+      "schluessel": "beldum"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Metang",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_114_R_EN_LG.png",
+       "de": "Metang",
+       "druck": "TEF-114",
+       "en": "Metang",
+       "hoch": "TEF-114",
+       "karte": "metang"
+      },
+      "schluessel": "metang"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Metagross",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_061_R_EN_LG.png",
+       "de": "Metagross",
+       "druck": "CRI-61",
+       "en": "Metagross",
+       "hoch": "CRI-61",
+       "karte": "metagross"
+      },
+      "schluessel": "metagross"
+     },
+     {
+      "ace": false,
+      "n": 3,
+      "name": "Drilbur",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_046_R_EN_LG.png",
+       "de": "Rotomurf",
+       "druck": "PBL-46",
+       "en": "Drilbur",
+       "hoch": "PBL-46",
+       "karte": "drilbur"
+      },
+      "schluessel": "drilbur"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Mega Excadrill ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_065_R_EN_LG.png",
+       "de": "Mega-Stalobor-ex",
+       "druck": "PBL-65",
+       "en": "Mega Excadrill ex",
+       "hoch": "PBL-103",
+       "karte": "mega-excadrill-ex"
+      },
+      "schluessel": "mega excadrill ex"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Genesect ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_067_R_EN_LG.png",
+       "de": "Genesect-ex",
+       "druck": "BLK-67",
+       "en": "Genesect ex",
+       "hoch": "BLK-169",
+       "karte": "genesect-ex"
+      },
+      "schluessel": "genesect ex"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Heatran",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_123_R_EN_LG.png",
+       "de": "Heatran",
+       "druck": "TWM-123",
+       "en": "Heatran",
+       "hoch": "TWM-123",
+       "karte": "heatran"
+      },
+      "schluessel": "heatran"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Shaymin",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png",
+       "de": "Shaymin",
+       "druck": "DRI-10",
+       "en": "Shaymin",
+       "hoch": "DRI-185",
+       "karte": "shaymin"
+      },
+      "schluessel": "shaymin"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Team Rocket's Petrel",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png",
+       "de": "Team Rockets Lambda",
+       "druck": "ASC-207",
+       "en": "Team Rocket's Petrel",
+       "hoch": "DRI-226",
+       "karte": "team-rocket-s-petrel"
+      },
+      "schluessel": "team rocket's petrel"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Boss's Orders",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png",
+       "de": "Befehl vom Boss",
+       "druck": "ASC-183",
+       "en": "Boss's Orders",
+       "hoch": "ASC-256",
+       "karte": "boss-s-orders"
+      },
+      "schluessel": "boss's orders"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Lillie's Determination",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png",
+       "de": "Lillys Entschlossenheit",
+       "druck": "ASC-192",
+       "en": "Lillie's Determination",
+       "hoch": "MEG-184",
+       "karte": "lillie-s-determination"
+      },
+      "schluessel": "lillie's determination"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Kieran",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_113_R_EN_LG.png",
+       "de": "Jo",
+       "druck": "PRE-113",
+       "en": "Kieran",
+       "hoch": "PRE-174",
+       "karte": "kieran"
+      },
+      "schluessel": "kieran"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Fennel",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_082_R_EN_LG.png",
+       "de": "Vivian",
+       "druck": "BLK-82",
+       "en": "Fennel",
+       "hoch": "BLK-162",
+       "karte": "fennel"
+      },
+      "schluessel": "fennel"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Philippe",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_079_R_EN_LG.png",
+       "de": "Gipson",
+       "druck": "CRI-79",
+       "en": "Philippe",
+       "hoch": "CRI-110",
+       "karte": "philippe"
+      },
+      "schluessel": "philippe"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Judge",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_076_R_EN_LG.png",
+       "de": "Richter",
+       "druck": "POR-76",
+       "en": "Judge",
+       "hoch": "DRI-222",
+       "karte": "judge"
+      },
+      "schluessel": "judge"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Team Rocket's Transceiver",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_209_R_EN_LG.png",
+       "de": "Team Rockets Transceiver",
+       "druck": "ASC-209",
+       "en": "Team Rocket's Transceiver",
+       "hoch": "ASC-263",
+       "karte": "team-rocket-s-transceiver"
+      },
+      "schluessel": "team rocket's transceiver"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Jumbo Ice Cream",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png",
+       "de": "Rieseneis",
+       "druck": "PFL-91",
+       "en": "Jumbo Ice Cream",
+       "hoch": "PFL-91",
+       "karte": "jumbo-ice-cream"
+      },
+      "schluessel": "jumbo ice cream"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Pokégear 3.0",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png",
+       "de": "Pokécom 3.0",
+       "druck": "BLK-84",
+       "en": "Pokégear 3.0",
+       "hoch": "BLK-84",
+       "karte": "pok-gear-3-0"
+      },
+      "schluessel": "pokégear 3.0"
+     },
+     {
+      "ace": true,
+      "n": 1,
+      "name": "Precious Trolley",
+      "neu": {
+       "ace": true,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png",
+       "de": "Edler Rollwagen",
+       "druck": "SSP-185",
+       "en": "Precious Trolley",
+       "hoch": "SSP-185",
+       "karte": "precious-trolley"
+      },
+      "schluessel": "precious trolley"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Energy Recycler",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_164_R_EN_LG.png",
+       "de": "Energieaufbereitung",
+       "druck": "DRI-164",
+       "en": "Energy Recycler",
+       "hoch": "DRI-164",
+       "karte": "energy-recycler"
+      },
+      "schluessel": "energy recycler"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Hand Trimmer",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_150_R_EN_LG.png",
+       "de": "Handtrimmer",
+       "druck": "TEF-150",
+       "en": "Hand Trimmer",
+       "hoch": "TEF-150",
+       "karte": "hand-trimmer"
+      },
+      "schluessel": "hand trimmer"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Redeemable Ticket",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_156_R_EN_LG.png",
+       "de": "Einlösbares Ticket",
+       "druck": "JTG-156",
+       "en": "Redeemable Ticket",
+       "hoch": "JTG-156",
+       "karte": "redeemable-ticket"
+      },
+      "schluessel": "redeemable ticket"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Special Red Card",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_082_R_EN_LG.png",
+       "de": "Spezielle Rote Karte",
+       "druck": "CRI-82",
+       "en": "Special Red Card",
+       "hoch": "CRI-113",
+       "karte": "special-red-card"
+      },
+      "schluessel": "special red card"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Full Metal Lab",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_148_R_EN_LG.png",
+       "de": "Vollmetall-Labor",
+       "druck": "TEF-148",
+       "en": "Full Metal Lab",
+       "hoch": "TEF-148",
+       "karte": "full-metal-lab"
+      },
+      "schluessel": "full metal lab"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Gravity Mountain",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png",
+       "de": "Erdanziehungsberg",
+       "druck": "SSP-177",
+       "en": "Gravity Mountain",
+       "hoch": "SSP-250",
+       "karte": "gravity-mountain"
+      },
+      "schluessel": "gravity mountain"
+     },
+     {
+      "ace": false,
+      "n": 16,
+      "name": "Metal Energy",
+      "neu": null,
+      "schluessel": "metal energy"
+     }
+    ],
+    "name": "Jumshud · 5. von 188"
+   },
+   {
+    "fakten": "6. Platz von 232 (9–2–1), „🏆Moujii's Dojo🏆 (Late Registration Available!)“, 12.10.2026.",
+    "karten": [
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Beldum",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_059_R_EN_LG.png",
+       "de": "Tanhel",
+       "druck": "CRI-59",
+       "en": "Beldum",
+       "hoch": "CRI-59",
+       "karte": "beldum"
+      },
+      "schluessel": "beldum"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Metang",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_114_R_EN_LG.png",
+       "de": "Metang",
+       "druck": "TEF-114",
+       "en": "Metang",
+       "hoch": "TEF-114",
+       "karte": "metang"
+      },
+      "schluessel": "metang"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Metagross",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_061_R_EN_LG.png",
+       "de": "Metagross",
+       "druck": "CRI-61",
+       "en": "Metagross",
+       "hoch": "CRI-61",
+       "karte": "metagross"
+      },
+      "schluessel": "metagross"
+     },
+     {
+      "ace": false,
+      "n": 3,
+      "name": "Drilbur",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_046_R_EN_LG.png",
+       "de": "Rotomurf",
+       "druck": "PBL-46",
+       "en": "Drilbur",
+       "hoch": "PBL-46",
+       "karte": "drilbur"
+      },
+      "schluessel": "drilbur"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Mega Excadrill ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_065_R_EN_LG.png",
+       "de": "Mega-Stalobor-ex",
+       "druck": "PBL-65",
+       "en": "Mega Excadrill ex",
+       "hoch": "PBL-103",
+       "karte": "mega-excadrill-ex"
+      },
+      "schluessel": "mega excadrill ex"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Piplup",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_027_R_EN_LG.png",
+       "de": "Plinfa",
+       "druck": "PFL-27",
+       "en": "Piplup",
+       "hoch": "PFL-98",
+       "karte": "piplup"
+      },
+      "schluessel": "piplup"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Empoleon ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_070_R_EN_LG.png",
+       "de": "Impoleon-ex",
+       "druck": "PFL-70",
+       "en": "Empoleon ex",
+       "hoch": "PFL-114",
+       "karte": "empoleon-ex"
+      },
+      "schluessel": "empoleon ex"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Genesect ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_067_R_EN_LG.png",
+       "de": "Genesect-ex",
+       "druck": "BLK-67",
+       "en": "Genesect ex",
+       "hoch": "BLK-169",
+       "karte": "genesect-ex"
+      },
+      "schluessel": "genesect ex"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Mega Skarmory ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_055_R_EN_LG.png",
+       "de": "Mega-Panzaeron-ex",
+       "druck": "POR-55",
+       "en": "Mega Skarmory ex",
+       "hoch": "POR-106",
+       "karte": "mega-skarmory-ex"
+      },
+      "schluessel": "mega skarmory ex"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Fezandipiti ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_142_R_EN_LG.png",
+       "de": "Beatori-ex",
+       "druck": "ASC-142",
+       "en": "Fezandipiti ex",
+       "hoch": "ASC-288",
+       "karte": "fezandipiti-ex"
+      },
+      "schluessel": "fezandipiti ex"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Psyduck",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_007_R_EN_LG.png",
+       "de": "Enton",
+       "druck": "MEP-7",
+       "en": "Psyduck",
+       "hoch": "ASC-226",
+       "karte": "psyduck"
+      },
+      "schluessel": "psyduck"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Brock's Scouting",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_146_R_EN_LG.png",
+       "de": "Rockos Erkundung",
+       "druck": "JTG-146",
+       "en": "Brock's Scouting",
+       "hoch": "JTG-179",
+       "karte": "brock-s-scouting"
+      },
+      "schluessel": "brock's scouting"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Team Rocket's Petrel",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png",
+       "de": "Team Rockets Lambda",
+       "druck": "ASC-207",
+       "en": "Team Rocket's Petrel",
+       "hoch": "DRI-226",
+       "karte": "team-rocket-s-petrel"
+      },
+      "schluessel": "team rocket's petrel"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Boss's Orders",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png",
+       "de": "Befehl vom Boss",
+       "druck": "ASC-183",
+       "en": "Boss's Orders",
+       "hoch": "ASC-256",
+       "karte": "boss-s-orders"
+      },
+      "schluessel": "boss's orders"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Kieran",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_113_R_EN_LG.png",
+       "de": "Jo",
+       "druck": "PRE-113",
+       "en": "Kieran",
+       "hoch": "PRE-174",
+       "karte": "kieran"
+      },
+      "schluessel": "kieran"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Buddy-Buddy Poffin",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png",
+       "de": "Dicke-Freunde-Knursp",
+       "druck": "ASC-184",
+       "en": "Buddy-Buddy Poffin",
+       "hoch": "TWM-223",
+       "karte": "buddy-buddy-poffin"
+      },
+      "schluessel": "buddy-buddy poffin"
+     },
+     {
+      "ace": false,
+      "n": 3,
+      "name": "Pokégear 3.0",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png",
+       "de": "Pokécom 3.0",
+       "druck": "BLK-84",
+       "en": "Pokégear 3.0",
+       "hoch": "BLK-84",
+       "karte": "pok-gear-3-0"
+      },
+      "schluessel": "pokégear 3.0"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Jumbo Ice Cream",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png",
+       "de": "Rieseneis",
+       "druck": "PFL-91",
+       "en": "Jumbo Ice Cream",
+       "hoch": "PFL-91",
+       "karte": "jumbo-ice-cream"
+      },
+      "schluessel": "jumbo ice cream"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Rare Candy",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png",
+       "de": "Sonderbonbon",
+       "druck": "MEG-125",
+       "en": "Rare Candy",
+       "hoch": "MEG-175",
+       "karte": "rare-candy"
+      },
+      "schluessel": "rare candy"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Switch",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png",
+       "de": "Tausch",
+       "druck": "MEG-130",
+       "en": "Switch",
+       "hoch": "PFL-123",
+       "karte": "switch"
+      },
+      "schluessel": "switch"
+     },
+     {
+      "ace": true,
+      "n": 1,
+      "name": "Hero's Cape",
+      "neu": {
+       "ace": true,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_152_R_EN_LG.png",
+       "de": "Heldenumhang",
+       "druck": "TEF-152",
+       "en": "Hero's Cape",
+       "hoch": "TEF-152",
+       "karte": "hero-s-cape"
+      },
+      "schluessel": "hero's cape"
+     },
+     {
+      "ace": false,
+      "n": 17,
+      "name": "Metal Energy",
+      "neu": null,
+      "schluessel": "metal energy"
+     }
+    ],
+    "name": "Seby · 6. von 232"
+   }
+  ],
+  "max_plaetze": 5,
+  "mindest_spieler": 100
+ }
+}

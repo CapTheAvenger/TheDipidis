@@ -30,6 +30,15 @@ DREI REGELN, damit das Stueck nie schlechter dasteht als vorher:
   3. DIE EINLEITUNG IST EINE MESSUNG. Platz, Bilanz, Turnier, Datum aus
      den Rohdaten; dazu der Unterschied zu Tims aktueller Liste, aus
      den Kartenzahlen gerechnet. Kein Satz, den niemand belegen kann.
+
+UMZUG 17.10.2026: die Ausarbeitung liegt nur noch in Hausis Konto
+(Firestore), das Repo ist oeffentlich. Dieses Skript schreibt deshalb den
+Schluessel `online_listen` in data/masterclass_live/mega-stalobor.json
+(scripts/masterclass_live.py): je Liste Name, die Fakten der Einleitung
+und die Karten samt der Kachel-Angaben aus der Kartendatenbank. Die
+Kacheln mit Tims Begruendung und der Unterschied zu Tims aktueller Liste
+entstehen beim Oeffnen in js/ds-masterclass.js — sie brauchen den Text
+der Ausarbeitung, und der steht nicht im Repo.
 """
 
 import html
@@ -43,7 +52,7 @@ import masterclass_drucke as DRUCKE  # noqa: E402
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATEN = os.path.join(WURZEL, "data")
-STUECK = os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+GUIDE_ID = "mega-stalobor"
 LISTEN_JSON = os.path.join(DATEN, "masterclass_online_listen.json")
 
 # ── WORAN EINE ACE SPEC ERKANNT WIRD ──────────────────────────────────
@@ -94,16 +103,6 @@ GRUPPE = "Online · letzte 7 Tage"
 TIMS_BLOCK = "0"          # Tims aktuelle Liste — Bezug fuer den Unterschied
 CDN = "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci"
 
-KACHEL = re.compile(r'<button type="button" class="mcl-kk"[^>]*?data-en="([^"]*)"[^>]*?>'
-                    r'.*?</button>', re.S)
-# Ein Listenblock endet mit SEINER Quellenzeile. Ein Vorgriff auf den
-# naechsten Block (?=<div class="mcl-liste" ...|\Z) sieht harmlos aus und
-# ist es nicht: beim LETZTEN Block frisst \Z den Rest der Datei — im
-# Versuch am 23.09.2026 waren das 88 KB Ausarbeitung.
-BLOCK = re.compile(r'<div class="mcl-liste" data-mcl-listenblock="(\d+)"[^>]*?>'
-                   r'.*?<p class="mcl-quelle">.*?</p></div>', re.S)
-
-
 # ---------------------------------------------------------------- Werkzeug
 
 def _schluessel(name):
@@ -127,42 +126,13 @@ def _bild(druck):
     return f"{CDN}/{t[0]}/{t[0]}_{t[1].zfill(3)}_R_EN_LG.png"
 
 
-def _attr(kachel, name):
-    m = re.search(r'\sdata-%s="([^"]*)"' % re.escape(name), kachel)
-    return m.group(1) if m else ""
-
-
-# ---------------------------------------------- Kacheln aus dem Stueck
-
-def kachel_vorlagen(roh):
-    """englischer Name -> Kachel-HTML, wie es im Stueck steht. Die erste
-    gefundene Kachel je Karte gewinnt; sie unterscheiden sich nur in der
-    Anzahl, und die wird ohnehin ersetzt."""
-    aus = {}
-    for m in KACHEL.finditer(roh):
-        aus.setdefault(_schluessel(m.group(1)), m.group(0))
-    return aus
-
-
-def kachel_mit_anzahl(vorlage, n):
-    de = _attr(vorlage, "de")
-    k = re.sub(r'\sdata-n="\d+"', ' data-n="%d"' % n, vorlage, count=1)
-    # Eine uebernommene Vorlage kann aus einer Zeit stammen, in der es die
-    # Markierung noch nicht gab. Sie wird ergaenzt, nie entfernt.
-    if 'data-ace=' not in k and ist_ace_spec(_attr(vorlage, "en")):
-        k = k.replace(' data-n=', ' data-ace="1" data-n=', 1)
-    k = re.sub(r'aria-label="[^"]*"', 'aria-label="%s, %d mal"' % (html.escape(de), n), k, count=1)
-    k = re.sub(r'<span class="mcl-anz">\d+</span>', '<span class="mcl-anz">%d</span>' % n, k, count=1)
-    return k
-
-
-def kachel_neu(name_en, set_code, set_number, n, ist_ace=False):
+def kachel_neu(name_en, set_code, set_number, ist_ace=False):
     """Eine Karte, die im Stueck noch nicht vorkommt. Namen und Text aus
     der Kartendatenbank, Druck nach derselben Regel wie der Rest der
     Listen (neuester guenstiger Druck). Ohne Begruendung — die hat Tim
     fuer diese Karte nie geschrieben, und erfunden wird keine.
 
-    `ist_ace` schreibt data-ace="1" an die Kachel. Warum das hier
+    `ist_ace` setzt die Markierung data-ace="1" an der Kachel. Warum das hier
     entsteht und nicht im Test:
 
     BEFUND (Wochenlauf 158, 25.09.2026): tests/unit/test-masterclass.js
@@ -176,6 +146,9 @@ def kachel_neu(name_en, set_code, set_number, n, ist_ace=False):
     Namen abgedriftet ist. Deshalb sagt die KACHEL selbst, was sie ist —
     aus derselben Quelle, aus der die Liste kommt.
     """
+    # Seit dem Umzug (17.10.2026) liefert diese Funktion die ANGABEN der
+    # Kachel, nicht mehr ihr HTML: js/ds-masterclass.js baut daraus
+    # dieselbe Kachel (kachelNeuHtml).
     roh = "%s-%s" % (str(set_code or "").strip(), str(set_number or "").strip())
     kandidaten, basis = DRUCKE.kandidaten(roh)
     if not basis:
@@ -188,13 +161,8 @@ def kachel_neu(name_en, set_code, set_number, n, ist_ace=False):
     bild = _bild(druck)
     if not bild:
         return None
-    ace = ' data-ace="1"' if ist_ace else ''
-    return ('<button type="button" class="mcl-kk" data-mcl-karte="%s" data-de="%s" data-en="%s" '
-            'data-druck="%s" data-druck-hoch="%s" data-n="%d"%s aria-label="%s, %d mal">'
-            '<img src="%s" alt="" loading="lazy" width="245" height="342">'
-            '<span class="mcl-anz">%d</span></button>'
-            % (html.escape(_slug(en)), html.escape(de), html.escape(en),
-               html.escape(druck), html.escape(hoch), n, ace, html.escape(de), n, bild, n))
+    return {"karte": _slug(en), "de": de, "en": en, "druck": druck, "hoch": hoch,
+            "bild": bild, "ace": bool(ist_ace)}
 
 
 # ------------------------------------------------------- Einleitungstext
@@ -237,7 +205,11 @@ def unterschied(zaehlung, tims):
     return "Gegenüber Tims aktueller Liste: " + "; ".join(teile) + "."
 
 
-def einleitung(liste, zaehlung, tims):
+def fakten(liste):
+    """Der erste Satz der Einleitung: Platz, Bilanz, Turnier, Datum — alles
+    aus den Rohdaten. Den zweiten Satz (Unterschied zu Tims aktueller
+    Liste) rechnet die Seite beim Einsetzen mit derselben Regel wie
+    `unterschied`."""
     platz = int(liste.get("place_rank") or 0)
     gesamt = int(liste.get("total_players") or 0)
     kopf = "%d. Platz von %d" % (platz, gesamt) if gesamt else "%d. Platz" % platz
@@ -246,11 +218,8 @@ def einleitung(liste, zaehlung, tims):
         kopf += " (%s)" % bilanz
     turnier = str(liste.get("tournament_name") or "").strip()
     datum = _datum(liste.get("tournament_date"))
-    fakten = "%s, „%s“, %s." % (kopf, turnier, datum) if turnier else "%s, %s." % (kopf, datum)
-    return '<b>%s</b> %s' % (html.escape(fakten), html.escape(unterschied(zaehlung, tims)))
+    return "%s, „%s“, %s." % (kopf, turnier, datum) if turnier else "%s, %s." % (kopf, datum)
 
-
-# ------------------------------------------------------------- Aufbau
 
 def listenname(liste):
     platz = int(liste.get("place_rank") or 0)
@@ -259,71 +228,22 @@ def listenname(liste):
     return "%s · %d. von %d" % (spieler, platz, gesamt) if gesamt else "%s · %d." % (spieler, platz)
 
 
-def block(nummer, liste, vorlagen, tims):
-    kacheln, zaehlung, fehlende = [], {}, []
-    summe = 0
+def live_liste(liste):
+    karten = []
     for karte in liste.get("cards") or []:
         n = int(karte.get("count") or 0)
         if n <= 0:
             continue
         name = karte.get("name") or ""
-        vorlage = vorlagen.get(_schluessel(name))
-        if vorlage:
-            k = kachel_mit_anzahl(vorlage, n)
-            de = _attr(vorlage, "de") or name
-        else:
-            k = kachel_neu(name, karte.get("set_code"), karte.get("set_number"), n,
-                           ist_ace_spec(name, bool(karte.get("is_ace_spec"))))
-            if not k:
-                fehlende.append(name)
-                continue
-            de = _attr(k, "de") or name
-        kacheln.append(k)
-        zaehlung[html.unescape(de)] = zaehlung.get(html.unescape(de), 0) + n
-        summe += n
-    if fehlende:
-        return None, fehlende
-    kopf = einleitung(liste, zaehlung, tims)
-    return ('<div class="mcl-liste" data-mcl-listenblock="%s" hidden data-mcl-listenname="%s">'
-            '<p class="mcl-listmeta">%s</p>'
-            '<div class="mcl-gitter">%s</div>'
-            '<p class="mcl-quelle">%d Karten · %d verschiedene'
-            '<button type="button" class="mcl-kopieren" data-mcl-kopieren="%s">'
-            '<span aria-hidden="true">📋</span> Liste als Bild kopieren</button></p></div>'
-            % (nummer, html.escape(listenname(liste)), kopf, "".join(kacheln),
-               summe, len(kacheln), nummer), [])
-
-
-def chip(nummer, liste):
-    return ('<button type="button" class="mcl-chip" data-mcl-liste="%s" aria-pressed="false">%s</button>'
-            % (nummer, html.escape(listenname(liste))))
-
-
-def tims_zaehlung(roh):
-    """Kartenzahlen aus Tims aktueller Liste — der Bezug fuer den
-    Unterschied in der Einleitung."""
-    m = re.search(r'<div class="mcl-liste" data-mcl-listenblock="%s"[^>]*?>(.*?)'
-                  r'<p class="mcl-quelle">' % TIMS_BLOCK, roh, re.S)
-    if not m:
-        return {}
-    aus = {}
-    for k in KACHEL.finditer(m.group(1)):
-        de = html.unescape(_attr(k.group(0), "de"))
-        n = int(_attr(k.group(0), "n") or 0)
-        if de and n:
-            aus[de] = aus.get(de, 0) + n
-    return aus
-
-
-def gruppen_nummern(roh):
-    """Die Blocknummern, die in der Online-Gruppe stehen — in der
-    Reihenfolge ihrer Schalter. Eine Gruppe ohne Schalter (diese Woche
-    keine Liste) wird gefunden und liefert eine leere Liste."""
-    m = re.search(r'<div class="mcl-listgruppe">\s*<span class="mcl-listgruppe-titel">%s</span>'
-                  r'\s*<div class="mcl-listwahl-reihe">(.*?)</div>' % re.escape(GRUPPE), roh, re.S)
-    if not m:
-        return [], None
-    return re.findall(r'data-mcl-liste="(\d+)"', m.group(1)), m
+        ace = ist_ace_spec(name, bool(karte.get("is_ace_spec")))
+        karten.append({
+            "name": name,
+            "schluessel": _schluessel(name),
+            "n": n,
+            "ace": ace,
+            "neu": kachel_neu(name, karte.get("set_code"), karte.get("set_number"), ace),
+        })
+    return {"name": listenname(liste), "fakten": fakten(liste), "karten": karten}
 
 
 # Hoechstens so viele Plaetze hat die Gruppe — so viele liefert
@@ -334,135 +254,52 @@ LEER_HINWEIS = ('<span class="mcl-listgruppe-leer">Keine Online-Liste ab 100 Spi
                 'letzten 7 Tagen — ältere Listen stehen unter „Worlds · Day 2“.</span>')
 
 
-def nachziehen(roh, listen):
-    """Gibt (neuer Text, Aenderungen, Grund). Grund gesetzt = nichts getan.
+def live_daten(listen):
+    """Gibt (Daten, Grund). Grund gesetzt = nichts schreiben.
 
-    WENIGER LISTEN = WENIGER PLAETZE (Hausi, 30.09.2026, DA-26): „dann
-    lieber weniger Listen anzeigen, veraltete online bringen nichts, dann
-    nehme ich lieber eine aeltere Major als ne alte Online-Liste."
-
-    Bis dahin galt ALLES ODER NICHTS: lieferte die Datei nicht genau so
-    viele Listen, wie die Gruppe Plaetze hat, blieb das Stueck stehen —
-    mit den Listen der Vorwoche unter der Ueberschrift „letzte 7 Tage"
-    (Wochenlauf #172: 4 Listen fuer 5 Plaetze). Jetzt bekommt die Gruppe
-    genau so viele Plaetze, wie das Fenster frische Listen hat (0 bis 5):
-      * weniger Listen: die ueberzaehligen Bloecke und Schalter fallen weg;
-      * mehr Listen als Plaetze: neue Bloecke mit freien Nummern, hinter
-        dem letzten Block des Stuecks;
-      * keine Liste: die Gruppe bleibt mit einem Satz stehen, der auf die
-        Major-Listen (Worlds · Day 2) verweist.
-    Weiter gilt: eine unbekannte Karte in irgendeiner Liste — dann wird
-    NICHTS geschrieben.
+    WENIGER LISTEN = WENIGER PLAETZE (Hausi, 30.09.2026, DA-26): die
+    Gruppe hat genau so viele Plaetze, wie das Fenster frische Listen hat
+    (0 bis 5); bei 0 steht LEER_HINWEIS. Mehr Listen als Plaetze: nichts
+    schreiben. Eine Karte ohne Kachel-Angaben (`neu` leer) UND ohne Kachel
+    in der Ausarbeitung laesst die Seite die Gruppe unveraendert — das
+    entscheidet erst das Einsetzen, weil nur dort die Ausarbeitung liegt.
     """
-    nummern, treffer = gruppen_nummern(roh)
-    if treffer is None:
-        return roh, [], "die Gruppe „%s“ steht nicht im Stueck" % GRUPPE
     if len(listen) > MAX_PLAETZE:
-        return roh, [], ("die Datei liefert %d Listen, die Gruppe hat hoechstens %d Plaetze"
-                         % (len(listen), MAX_PLAETZE))
-
-    vorlagen = kachel_vorlagen(roh)
-    tims = tims_zaehlung(roh)
-    if not vorlagen or not tims:
-        return roh, [], "im Stueck sind keine Kartenkacheln zu finden"
-
-    alle_nummern = [int(n) for n in re.findall(r'data-mcl-listenblock="(\d+)"', roh)]
-    frei = max(alle_nummern) + 1 if alle_nummern else 0
-    ziel = list(nummern[:len(listen)])
-    while len(ziel) < len(listen):
-        ziel.append(str(frei))
-        frei += 1
-    weg = set(nummern[len(listen):])
-
-    neue_bloecke, aenderungen = {}, []
-    for nummer, liste in zip(ziel, listen):
-        b, fehlende = block(nummer, liste, vorlagen, tims)
-        if b is None:
-            return roh, [], ("unbekannte Karten in %s: %s"
-                             % (listenname(liste), ", ".join(sorted(set(fehlende)))))
-        neue_bloecke[nummer] = b
-
-    # Bloecke ersetzen bzw. entfernen
-    def ersetze(m):
-        nummer = m.group(1)
-        if nummer in weg:
-            name = re.search(r'data-mcl-listenname="([^"]*)"', m.group(0))
-            aenderungen.append("Block %s entfernt: %s (nicht mehr im 7-Tage-Fenster)" % (
-                nummer, html.unescape(name.group(1)) if name else "?"))
-            return ""
-        if nummer not in neue_bloecke:
-            return m.group(0)
-        alt = m.group(0)
-        neu = neue_bloecke[nummer]
-        if alt.strip() != neu.strip():
-            altname = re.search(r'data-mcl-listenname="([^"]*)"', alt)
-            neuname = re.search(r'data-mcl-listenname="([^"]*)"', neu)
-            aenderungen.append("Block %s: %s -> %s" % (
-                nummer, html.unescape(altname.group(1)) if altname else "?",
-                html.unescape(neuname.group(1)) if neuname else "?"))
-        return neu
-
-    neu_roh = BLOCK.sub(ersetze, roh)
-
-    # Neue Bloecke hinter den letzten Block des Stuecks
-    dazu = [n for n in ziel if n not in nummern]
-    if dazu:
-        letzte = None
-        for letzte in BLOCK.finditer(neu_roh):
-            pass
-        if letzte is None:
-            return roh, [], "im Stueck steht kein Listenblock, hinter den neue passen"
-        einfuegen = "".join(neue_bloecke[n] for n in dazu)
-        neu_roh = neu_roh[:letzte.end()] + einfuegen + neu_roh[letzte.end():]
-        for n in dazu:
-            name = re.search(r'data-mcl-listenname="([^"]*)"', neue_bloecke[n])
-            aenderungen.append("Block %s neu: %s" % (n, html.unescape(name.group(1)) if name else "?"))
-
-    # Schalter ersetzen
-    reihe = "".join(chip(n, l) for n, l in zip(ziel, listen)) or LEER_HINWEIS
-    alt_reihe = treffer.group(1)
-    if alt_reihe.strip() != reihe.strip():
-        aenderungen.append("Schalterreihe der Gruppe neu beschriftet (%d Listen)" % len(listen))
-    start = neu_roh.index(treffer.group(0))
-    kopf = treffer.group(0)
-    neu_kopf = kopf[:treffer.start(1) - treffer.start(0)] + reihe + kopf[treffer.end(1) - treffer.start(0):]
-    neu_roh = neu_roh[:start] + neu_kopf + neu_roh[start + len(kopf):]
-    return neu_roh, aenderungen, ""
+        return None, ("die Datei liefert %d Listen, die Gruppe hat hoechstens %d Plaetze"
+                      % (len(listen), MAX_PLAETZE))
+    return {
+        "gruppe": GRUPPE,
+        "max_plaetze": MAX_PLAETZE,
+        "leer_hinweis": LEER_HINWEIS,
+        "mindest_spieler": 100,
+        "listen": [live_liste(l) for l in listen],
+    }, ""
 
 
 def main():
+    import masterclass_live as LIVE
     if not os.path.exists(LISTEN_JSON):
-        print("::warning::%s liegt nicht im Baum — das Stueck bleibt, wie es ist" % LISTEN_JSON)
+        print("::warning::%s liegt nicht im Baum — die Online-Listen bleiben, wie sie sind" % LISTEN_JSON)
         return 0
-    if not os.path.exists(STUECK):
-        print("::warning::%s liegt nicht im Baum — nichts zu tun" % STUECK)
-        return 0
-
     with open(LISTEN_JSON, encoding="utf-8") as f:
         daten = json.load(f)
     listen = daten.get("listen") or []
-
-    with open(STUECK, encoding="utf-8") as f:
-        roh = f.read()
-
-    neu, aenderungen, grund = nachziehen(roh, listen)
-    if not grund and len(listen) < MAX_PLAETZE:
-        print("::notice::Masterclass, Gruppe „%s“: %d von %d Plaetzen — mehr frische "
-              "Listen ab %s Spielern gibt das Fenster nicht her. Alte Listen werden "
-              "nicht stehen gelassen (DA-26)." % (GRUPPE, len(listen), MAX_PLAETZE, 100))
+    neu, grund = live_daten(listen)
     if grund:
         print("::warning::Online-Listen NICHT nachgezogen: %s" % grund)
         return 0
-    if not aenderungen:
-        print("masterclass/mega-stalobor.de.html: die Online-Listen stehen wie die Rohdaten.")
-        return 0
-
-    with open(STUECK, "w", encoding="utf-8") as f:
-        f.write(neu)
-    print("masterclass/mega-stalobor.de.html: %d Aenderungen an den Online-Listen"
-          % len(aenderungen))
-    for a in aenderungen:
-        print("  " + a)
+    ohne = sorted({k["name"] for l in neu["listen"] for k in l["karten"] if not k["neu"]})
+    if ohne:
+        print("::notice::ohne Eintrag in der Kartendatenbank (die Seite nimmt dafuer "
+              "Tims Kachel, sonst bleibt die Gruppe stehen): " + ", ".join(ohne))
+    if len(listen) < MAX_PLAETZE:
+        print("::notice::Masterclass, Gruppe „%s“: %d von %d Plaetzen — mehr frische "
+              "Listen ab %s Spielern gibt das Fenster nicht her. Alte Listen werden "
+              "nicht stehen gelassen (DA-26)." % (GRUPPE, len(listen), MAX_PLAETZE, 100))
+    if LIVE.schreibe_teil(GUIDE_ID, "online_listen", neu):
+        print("%s: Online-Listen neu (%d Listen)" % (LIVE.pfad(GUIDE_ID), len(listen)))
+    else:
+        print("%s: die Online-Listen stehen wie die Rohdaten." % LIVE.pfad(GUIDE_ID))
     return 0
 
 

@@ -164,18 +164,30 @@ def test_beide_zweige_an_einem_gebauten_fall(roster_modul, daten):
     Beides unabhaengig davon, wie vollstaendig der echte Bestand gerade
     ist.
     """
-    vorhanden = set(daten["extra"]["smogonKeys"])
+    # SC-36 (17.10.2026): hier stand "eine Art, die NICHT im Kader steht".
+    # Seit pokebase.app am 15.10. seinen ganzen Champions-Dex listet (98 ->
+    # 328 Grundformen), steht fast jede Art im Kader; die Suche landete bei
+    # floette-eternal — einer Form, die die Regel ABSICHTLICH unter der
+    # Grundform fuehrt (TEAM_UNTER_GRUNDFORM) —, und der gebaute Fall war
+    # keiner mehr. Fuenf Champions-Laeufe rollten deshalb ihre Daten zurueck,
+    # Replica #161 wurde rot. Der Fall wird jetzt VOLLSTAENDIG gebaut: die
+    # Art faellt aus der Kopie des Pokedex UND aus der Kopie des Kaders.
+    # Wie vollstaendig die Quelle gerade ist, spielt damit keine Rolle mehr.
+    unter_grundform = set(roster_modul.TEAM_UNTER_GRUNDFORM)
+    unter_grundform |= set(roster_modul.TEAM_UNTER_GRUNDFORM.values())
     # Eine Art suchen, die der Pokedex fuehrt UND die eine Nutzungszeile hat.
     zeilen = sorted((daten["usage"].get("pokemon") or {}))
+    bekannt = roster_modul.pokedex_schluessel(daten["dex"])
     opfer_slug = None
     for schluessel in zeilen:
         nm = roster_modul.slug_to_smogon(schluessel)
         if nm in daten["smogon"] and "baseStats" in daten["smogon"][nm] \
-                and nm not in vorhanden \
-                and schluessel in roster_modul.pokedex_schluessel(daten["dex"]):
+                and nm not in unter_grundform \
+                and schluessel in bekannt:
             opfer_slug, opfer_name = schluessel, nm
             break
     assert opfer_slug, "keine passende Art fuer den gebauten Fall gefunden"
+    vorhanden = set(daten["extra"]["smogonKeys"]) - {opfer_name}
 
     ohne_eintrag = {"entries": [e for e in daten["dex"]["entries"]
                                 if (e.get("meta") or {}).get("slug") != opfer_slug

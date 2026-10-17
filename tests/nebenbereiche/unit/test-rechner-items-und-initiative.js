@@ -121,15 +121,25 @@ describe('Die Gegenstands-Auswahl zeigt Bilder', () => {
     });
 
     it('wo es kein Bild gibt, steht KEIN Ersatzbild', () => {
-        /* Der Fall wird aus den echten Daten geholt, nicht eingetippt:
-           gesucht ist ein Gegenstand, den das Manifest nicht fuehrt
-           (fast durchweg Champions-eigene Mega-Steine). */
-        const { api } = load();
+        /* Der Gegenstand kommt aus den echten Daten — die LUECKE wird
+           gebaut. SC-36 (17.10.2026): hier wurde ein Gegenstand gesucht,
+           den das Manifest nicht fuehrt. Am 17.10. spiegelte der Lauf die
+           40 fehlenden Mega-Stein-Icons, es gab keinen mehr, und die
+           Zusicherung „die Probe greift nicht" hielt den Champions-Lauf an
+           — sie verlangte eine Datenluecke, um pruefen zu koennen. Jetzt:
+           ein echter Gegenstand MIT Bild wird aus einer Kopie des
+           Manifests genommen. */
         const ohne = Object.keys(DATA.usage.pokemon)
             .flatMap(k => ((DATA.usage.pokemon[k].doubles || {}).held_item || []))
             .map(i => i.name)
-            .find(n => !ITEMBILD.sprites[n]);
-        assert.ok(ohne, 'kein Gegenstand ohne Bild in den Daten — die Probe greift nicht');
+            .find(n => ITEMBILD.sprites[n]);
+        assert.ok(ohne, 'kein Gegenstand mit Bild in den Daten — das Manifest ist leer');
+        const sprites = Object.assign({}, ITEMBILD.sprites);
+        delete sprites[ohne];
+        const { api } = load('de', Object.assign({}, DATA,
+            { itembild: Object.assign({}, ITEMBILD, { sprites }) }));
+        assert.ok(/<img/.test(load().api.itemBildHtml(ohne)),
+            `${ohne} hat im echten Manifest ein Bild — sonst prueft die Kopie nichts`);
         const html = api.itemBildHtml(ohne);
         assert.ok(/sq-item-leerbild/.test(html),
             `${ohne} bekommt kein leeres Feld, sondern etwas anderes`);

@@ -103,9 +103,14 @@ describe('Ohne Grundform keine Mega-Form', () => {
         // gespielt wird. Den liefert eine unabhaengige Quelle.
         const extra = json('data/champions_roster_extra.json');
         const ausMega = extra._meta.aus_mega || [];
-        assert.ok(ausMega.length > 0,
-            'kein einziger Eintrag aus einer Mega-Form abgeleitet — dann '
-            + 'greift die Regel nicht mehr');
+        /* SC-36 (17.10.2026): hier stand `ausMega.length > 0`. Seit
+           pokebase.app am 15.10. seinen ganzen Champions-Dex listet, fuehrt
+           die Quelle jede Grundform selbst — es gibt nichts mehr
+           abzuleiten, und die Zusicherung verlangte eine Luecke, damit sie
+           pruefen konnte. Fuenf Champions-Laeufe rollten deshalb zurueck,
+           Replica #161 wurde rot. Dass die Regel greift, haelt „Ohne
+           Grundform keine Mega-Form" darueber am ERGEBNIS fest; hier wird
+           nur noch geprueft, dass jede Ableitung, die es gibt, belegt ist. */
         const usage = json('data/champions_usage.json').pokemon;
         const ohneBeleg = ausMega.filter(n => !usage[n.toLowerCase()]);
         assert.deepEqual(ohneBeleg, [],
@@ -128,8 +133,13 @@ describe('Ohne Grundform keine Mega-Form', () => {
             .concat(extra._meta.aus_mega || [])
             .concat(extra._meta.aus_teams || [])
             .concat(extra._meta.geschlechtsformen || []);
-        assert.ok(ableitungen.length >= 8,
-            `nur ${ableitungen.length} abgeleitete Schluessel — Datenlage pruefen`);
+        /* SC-36 (17.10.2026): hier stand `ableitungen.length >= 8` — eine
+           Untergrenze fuer Luecken der Quelle. Fuehrt die Quelle die Arten
+           selbst, sinkt die Zahl; das ist besser, nicht kaputt. Gegen den
+           Leerlauf steht jetzt der Kader selbst: bricht er zusammen, ist
+           das der Fehler (Richtung „verloren ist rot"). */
+        assert.ok(extra.smogonKeys.length >= 40,
+            `nur ${extra.smogonKeys.length} Kaderschluessel — die Datei ist zusammengebrochen`);
         const ohne = ableitungen.filter(n => !(smogon[n] && smogon[n].baseStats));
         assert.deepEqual(ohne, [],
             'Ohne Basiswerte waere der Eintrag eine leere Zeile. Wer dort '

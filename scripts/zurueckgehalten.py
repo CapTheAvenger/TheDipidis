@@ -30,24 +30,46 @@ import os
 import re
 import subprocess
 import sys
+from urllib.parse import quote
 
 REPO = os.environ.get("GITHUB_REPOSITORY", "CapTheAvenger/TheDipidis")
 
 # Wortlaut aus scripts/tor_vor_dem_push.sh — beide Seiten haelt
 # tests/python/test_zurueckgehalten.py zusammen.
 GEHALTEN = re.compile(r"^Tor: (\S+) bleibt auf dem alten Stand")
+# Die Sammelzeile kommt vor allen anderen Warnungen des Schritts — GitHub nimmt
+# hoechstens 10 je Schritt an, Einzelzeilen koennen wegfallen (Replica #160).
+SAMMEL = re.compile(r"^Tor hielt zurueck: (.*?) \| Bilder: \d+$")
 ERSTLAUF = re.compile(r"^Tor, erster Durchlauf: (.+)$")
 
 
 def ablaeufe_mit_tor(ordner=".github/workflows"):
-    """Jeder Ablauf, der das Tor faehrt — aus den Dateien, nicht aus einer Liste."""
+    """Jeder Ablauf, der das Tor faehrt UND nach main schiebt — aus den Dateien,
+    nicht aus einer Liste. Dieselbe Bedingung wie tor_rollback.ausgabeordner():
+    die Setwechsel-Probe rollt im Wegwerf-Baum zurueck und pusht nie."""
     raus = []
     for name in sorted(os.listdir(ordner)):
         if name.endswith((".yml", ".yaml")):
             with open(os.path.join(ordner, name), encoding="utf-8") as f:
-                if "tor_vor_dem_push.sh" in f.read():
-                    raus.append(name)
+                text = f.read()
+            if "tor_vor_dem_push.sh" in text and re.search(
+                    r"git push|push_nach_rebase\.sh|daten_pushen\.sh", text):
+                raus.append(name)
     return raus
+
+
+def gehalten_aus(annotationen):
+    """Dateinamen aus den Annotationstexten eines Laufs (Sammelzeile + Einzelzeilen)."""
+    raus = []
+    for text in annotationen:
+        text = (text or "").strip()
+        m = SAMMEL.match(text)
+        if m:
+            raus += [w for w in m.group(1).split() if w.startswith("data/") and not w.endswith("/")]
+        m = GEHALTEN.match(text)
+        if m:
+            raus.append(m.group(1))
+    return sorted(set(raus))
 
 
 def befunde(laeufe, zuletzt_geliefert=None):
@@ -118,16 +140,16 @@ def hole(ablaeufe, anzahl):
                     f"?branch=main&status=completed&per_page={anzahl}")
         liste = []
         for lauf in daten.get("workflow_runs", []):
-            gehalten, erst = [], []
+            # Abgebrochene/uebersprungene Laeufe haben keine Tor-Annotation und
+            # wuerden eine Serie still unterbrechen.
+            if lauf.get("conclusion") not in ("success", "failure"):
+                continue
+            texte = []
             for job in _gh(f"repos/{REPO}/actions/runs/{lauf['id']}/jobs").get("jobs", []):
-                for a in _gh(f"repos/{REPO}/check-runs/{job['id']}/annotations?per_page=100"):
-                    text = (a.get("message") or "").strip()
-                    m = GEHALTEN.match(text)
-                    if m:
-                        gehalten.append(m.group(1))
-                    m = ERSTLAUF.match(text)
-                    if m:
-                        erst.append(m.group(1)[:160])
+                texte += [(a.get("message") or "") for a in
+                          _gh(f"repos/{REPO}/check-runs/{job['id']}/annotations?per_page=100")]
+            gehalten = gehalten_aus(texte)
+            erst = [m.group(1)[:160] for m in (ERSTLAUF.match(t.strip()) for t in texte) if m]
             liste.append({"id": lauf["id"], "nummer": lauf.get("run_number"),
                           "zeit": (lauf.get("run_started_at") or lauf.get("created_at") or "")[:16],
                           "url": lauf.get("html_url"), "gehalten": gehalten, "erstlauf": erst})
@@ -138,7 +160,7 @@ def hole(ablaeufe, anzahl):
 def geliefert(dateien):
     raus = {}
     for d in sorted(set(dateien)):
-        c = _gh(f"repos/{REPO}/commits?sha=main&path={d}&per_page=1")
+        c = _gh(f"repos/{REPO}/commits?sha=main&path={quote(d)}&per_page=1")
         if c:
             raus[d] = (c[0].get("commit", {}).get("committer", {}).get("date") or "")[:16]
     return raus

@@ -82,7 +82,8 @@ ABLAUFORDNER = ".github/workflows"
 
 def _git_add_pfade(text):
     """Alle Pfade aus `git add`-Aufrufen (samt Fortsetzungszeilen)."""
-    pfade, zeilen, i = [], text.splitlines(), 0
+    # Kommentarzeilen zuerst weg: dort steht „git add" in Prosa (Prueffund 17.10.).
+    pfade, zeilen, i = [], [z for z in text.splitlines() if not z.lstrip().startswith("#")], 0
     while i < len(zeilen):
         if re.search(r"\bgit add\b", zeilen[i]):
             block = zeilen[i]

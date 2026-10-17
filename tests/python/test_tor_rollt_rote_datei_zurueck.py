@@ -478,3 +478,59 @@ def test_sc36_verfaelschung_ohne_bilder_in_der_familie_bleibt_es_rot(tmp_path):
     b = _bildbaum(tmp_path, rollback_ohne_bilder=True)
     rc, aus = _tor(b)
     assert rc == 1, aus
+
+
+# ── SC-37: die zurueckgerollte Liste erreicht den zweiten Durchlauf UND ein
+#     spaeteres Tor im selben Job (Rebase-Tor) — am Verhalten, nicht am Text.
+ENV_TEST = '''import json
+import os
+
+
+def lies():
+    return json.load(open("data/champions_item_sprites.json"))
+
+
+def test_manifest_nicht_kaputt():
+    assert "kaputt" not in lies()
+
+
+def test_alter_stand_ist_angesagt():
+    """Steht der alte Stand da, muss das Tor ihn angesagt haben."""
+    if "B" not in lies()["sprites"]:
+        assert "data/champions_item_sprites.json" in os.environ.get("TOR_ZURUECKGEROLLT", "").split()
+'''
+
+
+def _envbaum(tmp_path):
+    b = _bildbaum(tmp_path)
+    (b / "tests" / "python" / "test_bilder.py").unlink()
+    (b / "tests" / "python" / "test_env.py").write_text(ENV_TEST)
+    return b
+
+
+def test_sc37_zweiter_durchlauf_kennt_die_zurueckgerollten(tmp_path):
+    b = _envbaum(tmp_path)
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert "B" not in json.loads(_lies(b, "champions_item_sprites.json"))["sprites"]
+    assert "Tor hielt zurueck: data/champions_item_sprites.json | Bilder: 1" in aus, aus
+
+
+def test_sc37_rebase_tor_im_selben_job_erbt_die_liste(tmp_path):
+    """Zweites Tor ohne eigenes Zurueckrollen (main hat sich bewegt): der alte
+    Stand bleibt angesagt, sonst haelt die Frischepruefung ihn fuer einen
+    Lieferfehler und das Rebase-Tor rollt den Herzschlag zurueck."""
+    b = _envbaum(tmp_path)
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    rc2, aus2 = _tor(b)          # dasselbe RUNNER_TEMP, nichts mehr zurueckzurollen
+    assert rc2 == 0, aus2
+
+
+def test_sc37_verfaelschung_ohne_weitergabe_bleibt_es_rot(tmp_path):
+    b = _envbaum(tmp_path)
+    s = (b / "scripts" / "tor_vor_dem_push.sh").read_text()
+    s = s.replace("        export TOR_ZURUECKGEROLLT\n        rot2=0", "        rot2=0")
+    (b / "scripts" / "tor_vor_dem_push.sh").write_text(s)
+    rc, aus = _tor(b)
+    assert rc == 1, aus

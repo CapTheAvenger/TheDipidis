@@ -98,13 +98,20 @@ def online(laufend):
     """Je Deck: Bilanz und Listen im laufenden Format und in den letzten
     TAGE_KURZ Tagen; je Gegner die Bilanz im laufenden Format. Quelle sind
     die Online-Turniere mit Paarungen (online_api_*)."""
-    zeilen = []
     with open(ONLINE_ARCH, encoding="utf-8-sig") as f:
-        for r in csv.DictReader(f, delimiter=";"):
-            if r["meta"] == laufend:
-                zeilen.append(r)
+        alle = list(csv.DictReader(f, delimiter=";"))
+    zeilen = [r for r in alle if r["meta"] == laufend]
+    if not zeilen and alle:
+        # SETWECHSEL (scripts/simuliere_setwechsel.py): in den ersten Tagen
+        # eines neuen Formats gibt es noch keine Online-Turniere. Dann gilt
+        # das juengste Format, das in den Daten steht — und der Block nennt
+        # es beim Namen (online.format). Ohne diesen Rueckfall hielte das
+        # erste neue Set den Wochenlauf an.
+        laufend = max(alle, key=lambda r: r["date"])["meta"]
+        zeilen = [r for r in alle if r["meta"] == laufend]
+        print("::warning::masterclass_aktuell: noch keine Online-Zeilen im neuen Format — nehme %s" % laufend)
     if not zeilen:
-        raise SystemExit("::error::keine Online-Zeilen im Format %s" % laufend)
+        raise SystemExit("::error::keine Online-Zeilen in %s" % ONLINE_ARCH)
     bis = max(r["date"] for r in zeilen)
     von_kurz = (dt.date.fromisoformat(bis) - dt.timedelta(days=TAGE_KURZ - 1)).isoformat()
     seit = min(r["date"] for r in zeilen)
@@ -128,13 +135,16 @@ def online(laufend):
                 gesamt[b][0] += int(r["lists_total"] or 0)
     mu = {}
     pfad = os.path.join(DATEN, "online_api_matchups_%s.csv" % laufend)
-    with open(pfad, encoding="utf-8-sig") as f:
-        for r in csv.DictReader(f, delimiter=";"):
-            e = mu.setdefault(r["archetype_id"], {}).setdefault(r["opponent_id"], [0, 0, 0])
-            e[0] += int(r["wins"])
-            e[1] += int(r["losses"])
-            e[2] += int(r["ties"])
-    return {"bis": bis, "von_kurz": von_kurz, "seit": seit, "namen": namen, "je": je,
+    if os.path.exists(pfad):
+        with open(pfad, encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f, delimiter=";"):
+                e = mu.setdefault(r["archetype_id"], {}).setdefault(r["opponent_id"], [0, 0, 0])
+                e[0] += int(r["wins"])
+                e[1] += int(r["losses"])
+                e[2] += int(r["ties"])
+    else:
+        print("::warning::masterclass_aktuell: %s fehlt — Online-Matchups leer" % pfad)
+    return {"format": laufend, "bis": bis, "von_kurz": von_kurz, "seit": seit, "namen": namen, "je": je,
             "gesamt": {b: g[0] for b, g in gesamt.items()},
             "turniere": {b: len(g[1]) for b, g in gesamt.items()}, "mu": mu}
 
@@ -298,7 +308,7 @@ def baue(decks=None):
         kurz = on["je"].get((slug, "kurz"), {"listen": 0, "bilanz": [0, 0, 0]})
         a14, trend = anteile14.get(name.lower(), ("", ""))
         online_teil = {
-            "format": _kopf(laufend),
+            "format": _kopf(on["format"]),
             "seit": _datum(on["seit"]),
             "bis": _datum(on["bis"]),
             "listen": fmt["listen"],

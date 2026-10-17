@@ -41,7 +41,7 @@ def test_vor_ort_ist_die_summe_der_regionals():
 
 
 def test_online_bilanz_gegen_die_rohdaten():
-    lauf = A.laufendes_format()
+    lauf = A.online(A.laufendes_format())["format"]   # nach einem Setwechsel ggf. das juengste Format
     for gid, slug in A.DECKS.items():
         s = sum(int(r["wins"]) for r in csv.DictReader(open(A.ONLINE_ARCH, encoding="utf-8-sig"), delimiter=";")
                 if r["meta"] == lauf and r["archetype_id"] == slug)
@@ -66,3 +66,18 @@ def test_verfaelschung_falscher_slug_faellt_auf():
     """VERFAELSCHUNGSPROBE: ein Deck ohne Daten erzeugt keinen Block."""
     leer = A.baue({"probe": "gibt-es-nicht-xyz"})
     assert leer == {}
+
+
+def test_setwechsel_ohne_online_turniere_haelt_nichts_an(tmp_path, monkeypatch):
+    """Erstes neues Set: format_window nennt ein Format ohne Online-Zeilen.
+    Der Block nimmt das juengste vorhandene Format statt abzubrechen
+    (sonst wird der Wochenlauf rot)."""
+    fw = json.load(open(os.path.join(WURZEL, "data", "format_window.json"), encoding="utf-8"))
+    fw["current_set"] = "ZZZ"
+    p = tmp_path / "format_window.json"
+    p.write_text(json.dumps(fw), encoding="utf-8")
+    echt = A.laufendes_format
+    monkeypatch.setattr(A, "laufendes_format", lambda pfad=None: echt(str(p)))
+    b = A.baue()
+    assert set(b) == set(A.DECKS)
+    assert all(x["online"]["format"] != "TEF\u2013ZZZ" for x in b.values())

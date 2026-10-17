@@ -150,6 +150,10 @@ FORM_UEBERSTEUERUNG = {
     "Rotom (Frost)":         "479c",   # Frost-Rotom
     "Squawkabilly (Yellow)": "931b",   # Krawalloro gelb
     "Toxtricity (Low-Key)":  "849a",   # Riffex Tiefton-Form
+    # SC-36 (17.10.2026): kam am 15.10. aus pokebase.app in den Kader.
+    # pokewiki.de/Durengard/Sprites_und_3D-Modelle, alt-Text der CMP-Icons:
+    #   681 Durengard (Schildform)   681a Durengard (Klingenform)
+    "Aegislash (Blade)":     "681a",   # Durengard Klingenform
 
     # pokewiki.de/Liste_der_Pokémon_in_Pokémon_Champions nennt die drei
     # Varianten namentlich; die Farben der Icons bestaetigen es

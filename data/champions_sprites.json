@@ -4,11 +4,9 @@
   "quelle": "https://www.pokewiki.de/Liste_der_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions",
   "rechte": "Die Icons sind Spiel-Screenshots. Rechteinhaber: The Pokémon Company / Nintendo / GAME FREAK. PokeWiki fuehrt sie als Bildzitat nach § 51 UrhG; die dortige CC-BY-SA-Lizenz gilt nur fuer den Wiki-Text, nicht fuer diese Bilder.",
   "erzeuger": "scripts/build_champions_sprites.py",
-  "anzahl": 343,
-  "bytes": 4969078,
-  "ohne_bild": {
-   "Aegislash (Blade)": "2026-10-17"
-  }
+  "anzahl": 344,
+  "bytes": 4982955,
+  "ohne_bild": {}
  },
  "sprites": {
   "Garchomp (Mega-Z)": {
@@ -1634,6 +1632,14 @@
    "breite": 128,
    "hoehe": 128,
    "bytes": 14631
+  },
+  "Aegislash (Blade)": {
+   "datei": "images/champions/aegislash-blade.png",
+   "formschluessel": "681a",
+   "quelle": "https://www.pokewiki.de/images/c/c3/Pok%C3%A9mon-Icon_681a_CMP.png",
+   "breite": 128,
+   "hoehe": 128,
+   "bytes": 13877
   },
   "Alakazam": {
    "datei": "images/champions/alakazam.png",

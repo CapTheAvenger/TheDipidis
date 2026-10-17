@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-10-17T09:53:05Z",
+  "erzeugt_am": "2026-10-17T12:48:55Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1389,11 +1389,11 @@
    }
   ],
   "liste_online": {
-   "bilanz": "9-0-1",
-   "datum": "10.10.2026",
+   "bilanz": "10-3-0",
+   "datum": "12.10.2026",
    "karten": [
     [
-     4,
+     3,
      "Carvanha",
      "PFL",
      "60"
@@ -1418,21 +1418,15 @@
     ],
     [
      2,
-     "Pecharunt ex",
-     "SFA",
-     "39"
-    ],
-    [
-     2,
-     "Tatsugiri",
-     "TWM",
-     "131"
-    ],
-    [
-     2,
      "Munkidori",
      "TWM",
      "95"
+    ],
+    [
+     2,
+     "Pecharunt ex",
+     "SFA",
+     "39"
     ],
     [
      1,
@@ -1442,9 +1436,27 @@
     ],
     [
      1,
+     "Chi-Yu",
+     "PBL",
+     "59"
+    ],
+    [
+     1,
      "Yveltal",
      "MEG",
      "88"
+    ],
+    [
+     1,
+     "Psyduck",
+     "ASC",
+     "39"
+    ],
+    [
+     1,
+     "Tatsugiri",
+     "TWM",
+     "131"
     ],
     [
      4,
@@ -1453,40 +1465,16 @@
      "119"
     ],
     [
-     3,
-     "Judge",
-     "POR",
-     "76"
-    ],
-    [
-     3,
+     4,
      "Boss's Orders",
      "MEG",
      "114"
     ],
     [
-     1,
-     "Cyrano",
-     "SSP",
-     "170"
-    ],
-    [
-     1,
-     "Janine's Secret Art",
-     "PRE",
-     "112"
-    ],
-    [
-     1,
-     "Team Rocket's Petrel",
-     "DRI",
-     "176"
-    ],
-    [
-     4,
-     "Ultra Ball",
-     "MEG",
-     "131"
+     3,
+     "Judge",
+     "POR",
+     "76"
     ],
     [
      4,
@@ -1496,12 +1484,18 @@
     ],
     [
      4,
+     "Ultra Ball",
+     "MEG",
+     "131"
+    ],
+    [
+     4,
      "Poké Pad",
      "POR",
      "81"
     ],
     [
-     1,
+     2,
      "Night Stretcher",
      "ASC",
      "196"
@@ -1519,7 +1513,7 @@
      "95"
     ],
     [
-     2,
+     3,
      "Team Rocket's Watchtower",
      "DRI",
      "180"
@@ -1531,10 +1525,10 @@
      "15"
     ]
    ],
-   "platz": 1,
-   "spieler": "88cookie88",
-   "turnier": "FULL BENCH FRIDAYS PTCGL $$CASH PRIZE$$#15",
-   "von": 120
+   "platz": 3,
+   "spieler": "jakee0411",
+   "turnier": "🏆Moujii's Dojo🏆 (Late Registration Available!)",
+   "von": 232
   },
   "listen_vor_ort": [
    {
@@ -1819,14 +1813,14 @@
   "name": "Sharpedo Toxtricity",
   "online": {
    "anteil": "3,04",
-   "anteil14": "3,82",
+   "anteil14": "3,77",
    "bilanz": [
     972,
     1078,
     18
    ],
    "bis": "16.10.2026",
-   "fenster14": "02.10.–16.10.2026",
+   "fenster14": "02.10.–17.10.2026",
    "format": "TEF–30C",
    "kurz_anteil": "4,23",
    "kurz_bilanz": [

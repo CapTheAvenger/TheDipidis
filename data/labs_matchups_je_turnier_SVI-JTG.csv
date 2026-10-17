@@ -10734,3 +10734,689 @@ SVI-JTG,25,1,iron-thorns-crown,Future Thorns,1,1,6,2,18.52,tera-box,Tera Box,1,0
 SVI-JTG,25,1,iron-thorns-crown,Future Thorns,1,1,6,2,18.52,gholdengo-dragapult,Gholdengo Dragapult,1,0.0,0,1,0,overall,2026-10-16T06:49:11.326121+00:00,nein,abfrage
 SVI-JTG,25,1,iron-thorns-crown,Future Thorns,1,1,6,2,18.52,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-10-16T06:49:11.326121+00:00,nein,abfrage
 SVI-JTG,25,1,iron-thorns-crown,Future Thorns,1,1,6,2,18.52,ceruledge-ex,Ceruledge,1,0.0,0,1,0,overall,2026-10-16T06:49:11.326121+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,gholdengo-dudunsparce,Gholdengo Dudunsparce,4,25.0,1,3,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,dragapult-dusknoir,Dragapult Dusknoir,3,0.0,0,3,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,0.0,0,3,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,terapagos-noctowl,Terapagos Noctowl,3,0.0,0,3,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,gardevoir-ex-sv,Gardevoir,2,100.0,2,0,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,tera-box,Tera Box,2,100.0,2,0,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,poison-archaludon,Poison Archaludon,2,66.67,1,0,1,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,slowking-scr,Slowking,1,100.0,1,0,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,archaludon-ex,Archaludon,1,100.0,1,0,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,flareon-noctowl,Flareon Noctowl,1,0.0,0,1,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,gholdengo-dragapult,Gholdengo Dragapult,1,100.0,1,0,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,n-zoroark,N's Zoroark,1,33.33,0,0,1,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,charizard-pidgeot,Charizard Pidgeot,1,100.0,1,0,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,hydreigon-ex,Hydreigon,1,100.0,1,0,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,archaludon-dudunsparce,Archaludon Dudunsparce,1,100.0,1,0,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,gholdengo-ex,Gholdengo,1,100.0,1,0,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,ancient-box,Ancient Box,1,0.0,0,1,0,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,iron-thorns-ex,Iron Thorns,4,13,14,3,46.67,charizard-noctowl,Charizard Noctowl,1,33.33,0,0,1,overall,2026-10-17T12:24:06.704502+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,terapagos-noctowl,Terapagos Noctowl,11,45.45,4,4,3,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,tera-box,Tera Box,10,50.0,4,3,3,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,raging-bolt-ogerpon,Raging Bolt Ogerpon,9,37.04,3,5,1,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,dragapult-dusknoir,Dragapult Dusknoir,7,14.29,1,6,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,gholdengo-dudunsparce,Gholdengo Dudunsparce,5,46.67,2,2,1,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,gardevoir-ex-sv,Gardevoir,5,40.0,2,3,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,gholdengo-ex,Gholdengo,3,100.0,3,0,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,flareon-noctowl,Flareon Noctowl,2,100.0,2,0,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,archaludon-ex,Archaludon,2,16.67,0,1,1,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,mamoswine-ex,Mamoswine,1,100.0,1,0,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,archaludon-dudunsparce,Archaludon Dudunsparce,1,100.0,1,0,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,gholdengo-dragapult,Gholdengo Dragapult,1,100.0,1,0,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,iono-bellibolt,Iono's Bellibolt,1,100.0,1,0,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,ceruledge-ex,Ceruledge,1,0.0,0,1,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,slaking-ex,Slaking,1,100.0,1,0,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,dragapult-charizard,Dragapult Charizard,1,100.0,1,0,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,hop-zacian,Hop's Zacian,1,0.0,0,1,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,slowking-scr,Slowking,1,0.0,0,1,0,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,joltik-box,Joltik Box,8,27,28,10,46.67,roaring-moon-ex,Roaring Moon,1,33.33,0,0,1,overall,2026-10-17T12:24:08.550261+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,raging-bolt-ogerpon,Raging Bolt Ogerpon,21,28.57,5,13,3,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,tera-box,Tera Box,20,35.0,6,11,3,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,terapagos-noctowl,Terapagos Noctowl,20,45.0,7,7,6,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,dragapult-dusknoir,Dragapult Dusknoir,14,30.95,3,7,4,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,gholdengo-dudunsparce,Gholdengo Dudunsparce,14,66.67,9,4,1,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,gholdengo-ex,Gholdengo,11,18.18,1,7,3,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,dragapult-ex,Dragapult,10,36.67,3,5,2,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,archaludon-ex,Archaludon,7,57.14,4,3,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,flareon-noctowl,Flareon Noctowl,6,44.44,2,2,2,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,gardevoir-ex-sv,Gardevoir,5,60.0,3,2,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,poison-archaludon,Poison Archaludon,4,25.0,1,3,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,n-zoroark,N's Zoroark,3,44.44,1,1,1,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,gholdengo-dragapult,Gholdengo Dragapult,3,66.67,2,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,charizard-noctowl,Charizard Noctowl,3,33.33,1,2,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,hydreigon-ex,Hydreigon,2,100.0,2,0,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,archaludon-dudunsparce,Archaludon Dudunsparce,2,50.0,1,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,ceruledge-ex,Ceruledge,2,50.0,1,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,hop-zacian,Hop's Zacian,2,50.0,1,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,tinkaton-ex,Tinkaton,1,33.33,0,0,1,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,joltik-box,Joltik Box,1,0.0,0,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,greninja-froslass,Greninja Froslass,1,0.0,0,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,palafin-ex,Palafin,1,100.0,1,0,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,ancient-box,Ancient Box,1,100.0,1,0,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,greninja-blaziken,Greninja Blaziken,1,0.0,0,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,dragapult-charizard,Dragapult Charizard,1,100.0,1,0,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,slowking-scr,Slowking,1,0.0,0,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,miraidon-ex,Miraidon,1,100.0,1,0,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,flareon-ex,Flareon,1,0.0,0,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,tyranitar-jtg,Tyranitar,1,100.0,1,0,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,dragapult-froslass,Dragapult Froslass,1,0.0,0,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,mamoswine-ex,Mamoswine,23,58,78,26,41.15,blissey-ex,Blissey,1,0.0,0,1,0,overall,2026-10-17T12:24:10.394764+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-ex,Milotic,1,1,5,0,16.67,raging-bolt-ogerpon,Raging Bolt Ogerpon,2,0.0,0,2,0,overall,2026-10-17T12:24:12.238679+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-ex,Milotic,1,1,5,0,16.67,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-10-17T12:24:12.238679+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-ex,Milotic,1,1,5,0,16.67,tera-box,Tera Box,1,0.0,0,1,0,overall,2026-10-17T12:24:12.238679+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-ex,Milotic,1,1,5,0,16.67,terapagos-noctowl,Terapagos Noctowl,1,0.0,0,1,0,overall,2026-10-17T12:24:12.238679+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-ex,Milotic,1,1,5,0,16.67,hydrapple-ogerpon,Hydrapple Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:12.238679+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,raging-bolt-ogerpon,Raging Bolt Ogerpon,32,40.63,10,13,9,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,gholdengo-dudunsparce,Gholdengo Dudunsparce,27,62.96,16,8,3,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,dragapult-dusknoir,Dragapult Dusknoir,25,58.67,14,9,2,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,tera-box,Tera Box,24,34.72,7,13,4,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,terapagos-noctowl,Terapagos Noctowl,21,12.7,2,17,2,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,gholdengo-ex,Gholdengo,15,28.89,4,10,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,flareon-noctowl,Flareon Noctowl,14,50.0,6,5,3,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,gardevoir-ex-sv,Gardevoir,12,19.44,2,9,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,dragapult-ex,Dragapult,10,56.67,5,3,2,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,poison-archaludon,Poison Archaludon,8,4.17,0,7,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,archaludon-ex,Archaludon,6,55.56,3,2,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,dragapult-charizard,Dragapult Charizard,6,66.67,4,2,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,charizard-noctowl,Charizard Noctowl,5,46.67,2,2,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,gholdengo-dragapult,Gholdengo Dragapult,4,0.0,0,4,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,hop-zacian,Hop's Zacian,4,50.0,2,2,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,n-zoroark,N's Zoroark,4,25.0,1,3,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,archaludon-dudunsparce,Archaludon Dudunsparce,4,83.33,3,0,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,ceruledge-ex,Ceruledge,3,100.0,3,0,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,feraligatr-tef,Feraligatr,2,66.67,1,0,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,milotic-farigiraf,Milotic Farigiraf,2,50.0,2,2,0,overall,2026-10-17T12:24:14.086283+00:00,ja,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,hydrapple-ogerpon,Hydrapple Ogerpon,2,50.0,1,1,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,iono-bellibolt,Iono's Bellibolt,2,16.67,0,1,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,other,Other,2,100.0,2,0,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,charizard-pidgeot,Charizard Pidgeot,2,16.67,0,1,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,espathra-xatu,Espathra Xatu,1,100.0,1,0,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,azumarill-ssp,Azumarill,1,100.0,1,0,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,archaludon-zoroark,Archaludon Zoroark,1,100.0,1,0,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,slowking-scr,Slowking,1,0.0,0,1,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,ancient-box,Ancient Box,1,0.0,0,1,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,froslass-munkidori,Froslass Munkidori,1,100.0,1,0,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,venomoth-froslass,Venomoth Froslass,1,0.0,0,1,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,pidgeot-control,Pidgeot Control,1,0.0,0,1,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,clefairy-ogerpon,Clefairy Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,roaring-moon-ex,Roaring Moon,1,33.33,0,0,1,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,palafin-ex,Palafin,1,0.0,0,1,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,hydreigon-ex,Hydreigon,1,100.0,1,0,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,milotic-farigiraf,Milotic Farigiraf,33,97,120,35,43.12,dragapult-iron-thorns,Dragapult Iron Thorns,1,0.0,0,1,0,overall,2026-10-17T12:24:14.086283+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,dragapult-dusknoir,Dragapult Dusknoir,5,33.33,1,2,2,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,gholdengo-ex,Gholdengo,4,58.33,2,1,1,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,terapagos-noctowl,Terapagos Noctowl,3,0.0,0,3,0,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,hop-zacian,Hop's Zacian,2,0.0,0,2,0,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,gholdengo-dudunsparce,Gholdengo Dudunsparce,2,0.0,0,2,0,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,0.0,0,1,0,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,archaludon-dudunsparce,Archaludon Dudunsparce,1,100.0,1,0,0,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,roaring-moon-ex,Roaring Moon,1,0.0,0,1,0,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,other,Other,1,100.0,1,0,0,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,tera-box,Tera Box,1,33.33,0,0,1,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,n-zoroark,N's Zoroark,1,100.0,1,0,0,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,mimikyu-ogerpon,Mimikyu Ogerpon,3,6,13,4,31.88,gardevoir-ex-sv,Gardevoir,1,0.0,0,1,0,overall,2026-10-17T12:24:16.110782+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,raging-bolt-ogerpon,Raging Bolt Ogerpon,4,0.0,0,4,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,terapagos-noctowl,Terapagos Noctowl,2,0.0,0,2,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,flareon-noctowl,Flareon Noctowl,2,100.0,2,0,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,poison-archaludon,Poison Archaludon,2,16.67,0,1,1,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,archaludon-ex,Archaludon,2,50.0,1,1,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,tera-box,Tera Box,2,100.0,2,0,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,archaludon-dudunsparce,Archaludon Dudunsparce,2,0.0,0,2,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,dragapult-dusknoir,Dragapult Dusknoir,2,50.0,1,1,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,gardevoir-ex-sv,Gardevoir,1,0.0,0,1,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,charizard-noctowl,Charizard Noctowl,1,0.0,0,1,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,mamoswine-ex,Mamoswine,1,0.0,0,1,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,gholdengo-ex,Gholdengo,1,0.0,0,1,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,galvantula-ex,Galvantula,1,0.0,0,1,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,gholdengo-dudunsparce,Gholdengo Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,miraidon-ex,Miraidon,5,6,18,2,25.64,dragapult-ex,Dragapult,1,33.33,0,0,1,overall,2026-10-17T12:24:17.953399+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,raging-bolt-ogerpon,Raging Bolt Ogerpon,50,40.67,16,21,13,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,terapagos-noctowl,Terapagos Noctowl,47,31.91,10,22,15,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,dragapult-dusknoir,Dragapult Dusknoir,34,51.96,16,13,5,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,tera-box,Tera Box,32,35.42,9,16,7,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,gholdengo-dudunsparce,Gholdengo Dudunsparce,31,50.54,14,12,5,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,gardevoir-ex-sv,Gardevoir,22,74.24,15,3,4,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,dragapult-ex,Dragapult,19,40.35,7,10,2,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,poison-archaludon,Poison Archaludon,13,46.15,4,3,6,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,gholdengo-ex,Gholdengo,13,53.85,6,4,3,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,flareon-noctowl,Flareon Noctowl,9,29.63,2,5,2,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,archaludon-ex,Archaludon,8,37.5,3,5,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,gholdengo-dragapult,Gholdengo Dragapult,7,66.67,4,1,2,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,hop-zacian,Hop's Zacian,7,52.38,3,2,2,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,roaring-moon-ex,Roaring Moon,6,38.89,2,3,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,feraligatr-tef,Feraligatr,6,22.22,1,4,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,dragapult-charizard,Dragapult Charizard,5,53.33,2,1,2,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,other,Other,4,25.0,1,3,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,ceruledge-ex,Ceruledge,4,33.33,1,2,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,charizard-noctowl,Charizard Noctowl,4,8.33,0,3,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,archaludon-zoroark,Archaludon Zoroark,4,0.0,0,4,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,milotic-farigiraf,Milotic Farigiraf,4,75.0,3,1,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,archaludon-dudunsparce,Archaludon Dudunsparce,4,0.0,0,4,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,greninja-blaziken,Greninja Blaziken,3,0.0,0,3,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,mamoswine-ex,Mamoswine,3,44.44,1,1,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,n-zoroark,N's Zoroark,3,38.89,1,1,4,overall,2026-10-17T12:24:19.827345+00:00,ja,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,flareon-ex,Flareon,3,11.11,0,2,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,dragapult-iron-thorns,Dragapult Iron Thorns,2,100.0,2,0,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,charizard-pidgeot,Charizard Pidgeot,2,16.67,0,1,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,slowking-scr,Slowking,2,100.0,2,0,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,froslass-munkidori,Froslass Munkidori,2,33.33,0,0,2,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,palafin-ex,Palafin,2,100.0,2,0,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,iron-hands-ex,Future Hands,2,0.0,0,2,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,greninja-froslass,Greninja Froslass,2,16.67,0,1,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,tsareena-ex,Tsareena,1,100.0,1,0,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,ancient-box,Ancient Box,1,100.0,1,0,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,blissey-ex,Blissey,1,100.0,1,0,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,miraidon-ex,Miraidon,1,100.0,1,0,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,iron-thorns-ex,Iron Thorns,1,33.33,0,0,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,sinistcha-ogerpon,Sinistcha Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,conkeldurr-twm,Conkeldurr,1,0.0,0,1,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,dragapult-pidgeot,Dragapult Pidgeot,1,33.33,0,0,1,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,mimikyu-ogerpon,Mimikyu Ogerpon,1,0.0,0,1,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,pidgeot-control,Pidgeot Control,1,0.0,0,1,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,espathra-froslass,Espathra Froslass,1,0.0,0,1,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,n-zoroark,N's Zoroark,50,134,157,84,43.2,gouging-fire-ex,Gouging Fire,1,100.0,1,0,0,overall,2026-10-17T12:24:19.827345+00:00,nein,abfrage
+SVI-JTG,25,1,ogerpon-ex,Ogerpon,1,5,3,1,59.26,gholdengo-dragapult,Gholdengo Dragapult,2,66.67,1,0,1,overall,2026-10-17T12:24:21.661880+00:00,nein,abfrage
+SVI-JTG,25,1,ogerpon-ex,Ogerpon,1,5,3,1,59.26,dragapult-ex,Dragapult,2,50.0,1,1,0,overall,2026-10-17T12:24:21.661880+00:00,nein,abfrage
+SVI-JTG,25,1,ogerpon-ex,Ogerpon,1,5,3,1,59.26,gholdengo-ex,Gholdengo,1,100.0,1,0,0,overall,2026-10-17T12:24:21.661880+00:00,nein,abfrage
+SVI-JTG,25,1,ogerpon-ex,Ogerpon,1,5,3,1,59.26,roaring-moon-ex,Roaring Moon,1,100.0,1,0,0,overall,2026-10-17T12:24:21.661880+00:00,nein,abfrage
+SVI-JTG,25,1,ogerpon-ex,Ogerpon,1,5,3,1,59.26,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:21.661880+00:00,nein,abfrage
+SVI-JTG,25,1,ogerpon-ex,Ogerpon,1,5,3,1,59.26,gholdengo-dudunsparce,Gholdengo Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:21.661880+00:00,nein,abfrage
+SVI-JTG,25,1,ogerpon-ex,Ogerpon,1,5,3,1,59.26,terapagos-noctowl,Terapagos Noctowl,1,0.0,0,1,0,overall,2026-10-17T12:24:21.661880+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,tera-box,Tera Box,6,11.11,0,4,2,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,raging-bolt-ogerpon,Raging Bolt Ogerpon,4,8.33,0,3,1,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,dragapult-ex,Dragapult,3,0.0,0,3,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,dragapult-dusknoir,Dragapult Dusknoir,3,100.0,3,0,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,terapagos-noctowl,Terapagos Noctowl,3,11.11,0,2,1,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,charizard-pidgeot,Charizard Pidgeot,2,50.0,1,1,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,gholdengo-dudunsparce,Gholdengo Dudunsparce,2,50.0,1,1,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,dragapult-charizard,Dragapult Charizard,1,100.0,1,0,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,poison-archaludon,Poison Archaludon,1,100.0,1,0,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,feraligatr-tef,Feraligatr,1,100.0,1,0,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,gholdengo-dragapult,Gholdengo Dragapult,1,100.0,1,0,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,gardevoir-ex-sv,Gardevoir,1,100.0,1,0,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,espathra-froslass,Espathra Froslass,1,100.0,1,0,0,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-ex,Okidogi,4,11,14,5,42.22,flareon-noctowl,Flareon Noctowl,1,33.33,0,0,1,overall,2026-10-17T12:24:23.514053+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-twm,Okidogi,1,3,5,1,37.04,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,11.11,0,2,1,overall,2026-10-17T12:24:25.343144+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-twm,Okidogi,1,3,5,1,37.04,hop-zacian,Hop's Zacian,2,100.0,2,0,0,overall,2026-10-17T12:24:25.343144+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-twm,Okidogi,1,3,5,1,37.04,dragapult-dusknoir,Dragapult Dusknoir,1,100.0,1,0,0,overall,2026-10-17T12:24:25.343144+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-twm,Okidogi,1,3,5,1,37.04,archaludon-ex,Archaludon,1,0.0,0,1,0,overall,2026-10-17T12:24:25.343144+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-twm,Okidogi,1,3,5,1,37.04,gholdengo-ex,Gholdengo,1,0.0,0,1,0,overall,2026-10-17T12:24:25.343144+00:00,nein,abfrage
+SVI-JTG,25,1,okidogi-twm,Okidogi,1,3,5,1,37.04,gardevoir-ex-sv,Gardevoir,1,0.0,0,1,0,overall,2026-10-17T12:24:25.343144+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,dragapult-dusknoir,Dragapult Dusknoir,17,35.29,6,11,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,terapagos-noctowl,Terapagos Noctowl,17,37.25,6,10,1,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,tera-box,Tera Box,12,19.44,2,9,1,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,dragapult-ex,Dragapult,12,13.89,0,7,5,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,gholdengo-dudunsparce,Gholdengo Dudunsparce,11,24.24,2,7,2,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,raging-bolt-ogerpon,Raging Bolt Ogerpon,10,23.33,2,7,1,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,archaludon-ex,Archaludon,6,16.67,1,5,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,poison-archaludon,Poison Archaludon,6,38.89,2,3,1,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,gardevoir-ex-sv,Gardevoir,5,20.0,0,2,3,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,n-zoroark,N's Zoroark,4,75.0,3,1,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,charizard-pidgeot,Charizard Pidgeot,4,33.33,1,2,1,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,iron-hands-ex,Future Hands,4,25.0,1,3,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,gholdengo-dragapult,Gholdengo Dragapult,3,33.33,1,2,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,hop-zacian,Hop's Zacian,3,0.0,0,3,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,charizard-noctowl,Charizard Noctowl,3,11.11,0,2,1,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,archaludon-zoroark,Archaludon Zoroark,3,0.0,0,3,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,flareon-noctowl,Flareon Noctowl,3,0.0,0,3,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,gholdengo-ex,Gholdengo,3,33.33,1,2,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,dragapult-charizard,Dragapult Charizard,3,66.67,2,1,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,greninja-blaziken,Greninja Blaziken,2,16.67,0,1,1,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,flareon-ex,Flareon,2,0.0,0,2,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,milotic-farigiraf,Milotic Farigiraf,2,0.0,0,2,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,azumarill-ssp,Azumarill,2,50.0,1,1,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,palafin-ex,Palafin,1,0.0,0,1,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,feraligatr-tef,Feraligatr,1,100.0,1,0,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,gouging-fire-ex,Gouging Fire,1,0.0,0,1,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,archaludon-dudunsparce,Archaludon Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,mimikyu-ogerpon,Mimikyu Ogerpon,1,0.0,0,1,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,tyranitar-jtg,Tyranitar,1,100.0,1,0,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,slaking-ex,Slaking,1,100.0,1,0,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,ceruledge-ex,Ceruledge,1,100.0,1,0,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,reging-bolt-bellibolt,Raging Bolt Bellibolt,1,0.0,0,1,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,other,Other,25,35,95,19,27.74,hydrapple-ogerpon,Hydrapple Ogerpon,1,33.33,0,0,1,overall,2026-10-17T12:24:27.193942+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,tera-box,Tera Box,8,62.5,5,3,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,raging-bolt-ogerpon,Raging Bolt Ogerpon,7,42.86,2,2,3,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,dragapult-dusknoir,Dragapult Dusknoir,4,8.33,0,3,1,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,flareon-noctowl,Flareon Noctowl,2,50.0,1,1,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,terapagos-noctowl,Terapagos Noctowl,2,50.0,1,1,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,n-zoroark,N's Zoroark,2,0.0,0,2,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,dragapult-froslass,Dragapult Froslass,1,0.0,0,1,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,other,Other,1,100.0,1,0,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,mamoswine-ex,Mamoswine,1,0.0,0,1,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,dragapult-charizard,Dragapult Charizard,1,0.0,0,1,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,charizard-pidgeot,Charizard Pidgeot,1,0.0,0,1,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,gholdengo-dudunsparce,Gholdengo Dudunsparce,1,33.33,0,0,1,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,palafin-ex,Palafin,5,11,16,5,39.58,milotic-farigiraf,Milotic Farigiraf,1,100.0,1,0,0,overall,2026-10-17T12:24:29.035988+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,terapagos-noctowl,Terapagos Noctowl,3,33.33,1,2,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,dragapult-ex,Dragapult,2,0.0,0,2,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,iron-hands-ex,Future Hands,2,16.67,0,1,1,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,hydrapple-ogerpon,Hydrapple Ogerpon,1,0.0,0,1,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,dragapult-dusknoir,Dragapult Dusknoir,1,100.0,1,0,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,poison-archaludon,Poison Archaludon,1,0.0,0,1,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,archaludon-ex,Archaludon,1,0.0,0,1,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,slowking-scr,Slowking,1,100.0,1,0,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,hydreigon-ex,Hydreigon,1,33.33,0,0,1,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,tera-box,Tera Box,1,0.0,0,1,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,ancient-box,Ancient Box,1,0.0,0,1,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,hop-zacian,Hop's Zacian,1,0.0,0,1,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,milotic-farigiraf,Milotic Farigiraf,1,100.0,1,0,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,33.33,0,0,1,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,n-zoroark,N's Zoroark,1,100.0,1,0,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,flareon-noctowl,Flareon Noctowl,1,0.0,0,1,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,gholdengo-ex,Gholdengo,1,100.0,1,0,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,pidgeot-control,Pidgeot Control,3,6,13,3,31.82,charizard-noctowl,Charizard Noctowl,1,0.0,0,1,0,overall,2026-10-17T12:24:30.875259+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,dragapult-dusknoir,Dragapult Dusknoir,91,51.65,45,40,6,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,raging-bolt-ogerpon,Raging Bolt Ogerpon,72,48.61,30,27,15,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,terapagos-noctowl,Terapagos Noctowl,71,48.83,29,25,17,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,tera-box,Tera Box,62,62.9,37,19,6,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,gholdengo-dudunsparce,Gholdengo Dudunsparce,55,56.97,29,19,7,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,gardevoir-ex-sv,Gardevoir,38,28.07,9,24,5,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,dragapult-ex,Dragapult,32,26.04,7,21,4,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,gholdengo-ex,Gholdengo,27,54.32,14,11,2,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,flareon-noctowl,Flareon Noctowl,17,64.71,10,4,3,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,gholdengo-dragapult,Gholdengo Dragapult,14,52.38,7,6,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,n-zoroark,N's Zoroark,13,38.46,3,4,6,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,poison-archaludon,Poison Archaludon,13,46.15,10,10,6,overall,2026-10-17T12:24:32.730336+00:00,ja,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,hop-zacian,Hop's Zacian,13,76.92,9,1,3,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,archaludon-ex,Archaludon,12,61.11,7,4,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,iron-hands-ex,Future Hands,10,30.0,2,5,3,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,milotic-farigiraf,Milotic Farigiraf,8,91.67,7,0,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,dragapult-charizard,Dragapult Charizard,8,58.33,4,2,2,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,charizard-pidgeot,Charizard Pidgeot,7,28.57,2,5,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,charizard-noctowl,Charizard Noctowl,7,42.86,3,4,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,ceruledge-ex,Ceruledge,6,50.0,3,3,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,other,Other,6,55.56,3,2,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,archaludon-dudunsparce,Archaludon Dudunsparce,5,73.33,3,0,2,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,roaring-moon-ex,Roaring Moon,5,13.33,0,3,2,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,froslass-munkidori,Froslass Munkidori,5,46.67,2,2,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,archaludon-zoroark,Archaludon Zoroark,5,20.0,1,4,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,dragapult-froslass,Dragapult Froslass,5,26.67,1,3,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,mamoswine-ex,Mamoswine,4,75.0,3,1,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,hydreigon-ex,Hydreigon,4,58.33,2,1,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,greninja-blaziken,Greninja Blaziken,3,66.67,2,1,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,reging-bolt-bellibolt,Raging Bolt Bellibolt,3,77.78,2,0,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,slowking-scr,Slowking,3,66.67,2,1,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,charizard-ex,Charizard,3,77.78,2,0,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,feraligatr-tef,Feraligatr,2,100.0,2,0,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,blissey-ex,Blissey,2,16.67,0,1,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,miraidon-ex,Miraidon,2,66.67,1,0,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,espathra-froslass,Espathra Froslass,2,0.0,0,2,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,conkeldurr-twm,Conkeldurr,2,0.0,0,2,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,iron-thorns-ex,Iron Thorns,2,16.67,0,1,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,iron-thorns-crown,Future Thorns,1,100.0,1,0,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,gouging-fire-ex,Gouging Fire,1,33.33,0,0,1,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,okidogi-ex,Okidogi,1,0.0,0,1,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,pidgeot-control,Pidgeot Control,1,100.0,1,0,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,charizard-greninja,Charizard Greninja,1,100.0,1,0,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,banette-ex-sv,Banette,1,100.0,1,0,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,ancient-box,Ancient Box,1,100.0,1,0,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,great-tusk-tef,Great Tusk Mill,1,100.0,1,0,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,clefairy-ogerpon,Clefairy Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,poison-archaludon,Poison Archaludon,81,305,262,102,50.67,flareon-ex,Flareon,1,100.0,1,0,0,overall,2026-10-17T12:24:32.730336+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ex,Raging Bolt,1,0,4,2,11.11,raging-bolt-ogerpon,Raging Bolt Ogerpon,2,16.67,0,1,1,overall,2026-10-17T12:24:34.568575+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ex,Raging Bolt,1,0,4,2,11.11,dragapult-dusknoir,Dragapult Dusknoir,1,0.0,0,1,0,overall,2026-10-17T12:24:34.568575+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ex,Raging Bolt,1,0,4,2,11.11,blissey-ex,Blissey,1,33.33,0,0,1,overall,2026-10-17T12:24:34.568575+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ex,Raging Bolt,1,0,4,2,11.11,gholdengo-dudunsparce,Gholdengo Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:34.568575+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ex,Raging Bolt,1,0,4,2,11.11,flareon-noctowl,Flareon Noctowl,1,0.0,0,1,0,overall,2026-10-17T12:24:34.568575+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,tera-box,Tera Box,251,34.4,77,146,28,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,dragapult-dusknoir,Dragapult Dusknoir,244,43.17,90,108,46,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,terapagos-noctowl,Terapagos Noctowl,242,35.95,73,127,42,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,gholdengo-dudunsparce,Gholdengo Dudunsparce,187,45.63,78,87,22,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,gardevoir-ex-sv,Gardevoir,129,33.85,36,70,23,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,dragapult-ex,Dragapult,127,36.22,39,67,21,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,gholdengo-ex,Gholdengo,110,42.73,42,53,15,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,raging-bolt-ogerpon,Raging Bolt Ogerpon,106,47.64,91,91,30,overall,2026-10-17T12:24:36.440201+00:00,ja,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,poison-archaludon,Poison Archaludon,72,44.44,27,30,15,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,flareon-noctowl,Flareon Noctowl,68,42.65,27,35,6,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,archaludon-ex,Archaludon,61,44.81,24,27,10,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,n-zoroark,N's Zoroark,50,50.67,21,16,13,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,gholdengo-dragapult,Gholdengo Dragapult,47,55.32,25,19,3,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,hop-zacian,Hop's Zacian,38,60.53,20,9,9,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,milotic-farigiraf,Milotic Farigiraf,32,50.0,13,10,9,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,archaludon-dudunsparce,Archaludon Dudunsparce,27,38.27,8,12,7,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,charizard-noctowl,Charizard Noctowl,25,49.33,11,10,4,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,archaludon-zoroark,Archaludon Zoroark,23,47.83,10,10,3,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,charizard-pidgeot,Charizard Pidgeot,23,63.77,14,7,2,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,dragapult-charizard,Dragapult Charizard,23,60.87,13,7,3,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,feraligatr-tef,Feraligatr,21,63.49,13,7,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,mamoswine-ex,Mamoswine,21,66.67,13,5,3,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,ceruledge-ex,Ceruledge,19,87.72,16,1,2,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,slowking-scr,Slowking,18,50.0,8,7,3,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,froslass-munkidori,Froslass Munkidori,17,15.69,1,11,5,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,iron-hands-ex,Future Hands,17,60.78,8,2,7,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,roaring-moon-ex,Roaring Moon,16,68.75,10,3,3,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,dragapult-froslass,Dragapult Froslass,11,27.27,2,6,3,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,flareon-ex,Flareon,11,69.7,7,2,2,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,espathra-froslass,Espathra Froslass,10,26.67,2,6,2,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,other,Other,10,73.33,7,2,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,dragapult-iron-thorns,Dragapult Iron Thorns,9,29.63,2,5,2,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,joltik-box,Joltik Box,9,59.26,5,3,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,reging-bolt-bellibolt,Raging Bolt Bellibolt,8,83.33,6,0,2,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,palafin-ex,Palafin,7,42.86,2,2,3,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,hydrapple-ogerpon,Hydrapple Ogerpon,7,61.9,4,2,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,miraidon-ex,Miraidon,4,100.0,4,0,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,dragapult-pidgeot,Dragapult Pidgeot,4,33.33,1,2,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,iono-bellibolt,Iono's Bellibolt,4,83.33,3,0,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,hydreigon-ex,Hydreigon,4,75.0,3,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,okidogi-ex,Okidogi,4,83.33,3,0,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,okidogi-twm,Okidogi,3,77.78,2,0,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,iron-thorns-ex,Iron Thorns,3,100.0,3,0,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,gouging-fire-ex,Gouging Fire,3,11.11,0,2,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,greninja-blaziken,Greninja Blaziken,3,44.44,1,1,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,tyranitar-jtg,Tyranitar,3,66.67,2,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,festival-lead,Dipplin,3,44.44,1,1,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,greninja-froslass,Greninja Froslass,3,66.67,2,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,azumarill-ssp,Azumarill,3,44.44,1,1,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,milotic-ex,Milotic,2,100.0,2,0,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,clefairy-ogerpon,Clefairy Ogerpon,2,50.0,1,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,sinistcha-ogerpon,Sinistcha Ogerpon,2,50.0,1,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,blissey-ex,Blissey,2,16.67,0,1,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,raging-bolt-ex,Raging Bolt,2,66.67,1,0,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,iron-thorns-crown,Future Thorns,2,66.67,1,0,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,conkeldurr-twm,Conkeldurr,2,50.0,1,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,flygon-ex-ssp,Flygon,2,100.0,2,0,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,greninja-ex,Greninja,1,0.0,0,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,mimikyu-ogerpon,Mimikyu Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,33.33,0,0,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,pidgeot-control,Pidgeot Control,1,33.33,0,0,1,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,ancient-box,Ancient Box,1,100.0,1,0,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,ogerpon-ex,Ogerpon,1,0.0,0,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,charizard-ex,Charizard,1,100.0,1,0,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,aegislash-par,Aegislash,1,100.0,1,0,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,venomoth-froslass,Venomoth Froslass,1,0.0,0,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,espathra-xatu,Espathra Xatu,1,0.0,0,1,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,313,888,1033,368,44.15,gengar-ex,Gengar,1,100.0,1,0,0,overall,2026-10-17T12:24:36.440201+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,dragapult-dusknoir,Dragapult Dusknoir,11,33.33,3,6,2,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,tera-box,Tera Box,10,16.67,1,7,2,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,terapagos-noctowl,Terapagos Noctowl,9,48.15,4,4,1,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,gholdengo-dudunsparce,Gholdengo Dudunsparce,8,20.83,1,5,2,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,raging-bolt-ogerpon,Raging Bolt Ogerpon,8,8.33,0,6,2,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,gardevoir-ex-sv,Gardevoir,5,66.67,3,1,1,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,dragapult-ex,Dragapult,4,8.33,0,3,1,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,gholdengo-ex,Gholdengo,3,0.0,0,3,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,flareon-noctowl,Flareon Noctowl,3,0.0,0,3,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,poison-archaludon,Poison Archaludon,3,11.11,0,2,1,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,archaludon-ex,Archaludon,3,66.67,2,1,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,charizard-pidgeot,Charizard Pidgeot,2,0.0,0,2,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,hop-zacian,Hop's Zacian,2,0.0,0,2,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,slowking-scr,Slowking,2,100.0,2,0,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,roaring-moon-ex,Roaring Moon,1,100.0,1,0,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,chien-pao-baxcalibur,Chien-Pao Baxcalibur,1,100.0,1,0,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,hydrapple-ogerpon,Hydrapple Ogerpon,1,33.33,0,0,1,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,aegislash-par,Aegislash,1,100.0,1,0,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,dragapult-charizard,Dragapult Charizard,1,0.0,0,1,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,charizard-greninja,Charizard Greninja,1,100.0,1,0,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,other,Other,1,100.0,1,0,0,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,ceruledge-ex,Ceruledge,1,33.33,0,0,1,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,reging-bolt-bellibolt,Raging Bolt Bellibolt,12,21,46,16,31.73,tsareena-ex,Tsareena,1,33.33,0,0,1,overall,2026-10-17T12:24:38.278542+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,3,5,1,37.04,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-10-17T12:24:40.114046+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,3,5,1,37.04,roaring-moon-ex,Roaring Moon,1,100.0,1,0,0,overall,2026-10-17T12:24:40.114046+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,3,5,1,37.04,poison-archaludon,Poison Archaludon,1,100.0,1,0,0,overall,2026-10-17T12:24:40.114046+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,3,5,1,37.04,gholdengo-dudunsparce,Gholdengo Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:40.114046+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,3,5,1,37.04,dragapult-dusknoir,Dragapult Dusknoir,1,0.0,0,1,0,overall,2026-10-17T12:24:40.114046+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,3,5,1,37.04,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,33.33,0,0,1,overall,2026-10-17T12:24:40.114046+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,3,5,1,37.04,charizard-pidgeot,Charizard Pidgeot,1,0.0,0,1,0,overall,2026-10-17T12:24:40.114046+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,3,5,1,37.04,gholdengo-ex,Gholdengo,1,0.0,0,1,0,overall,2026-10-17T12:24:40.114046+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,3,5,1,37.04,other,Other,1,100.0,1,0,0,overall,2026-10-17T12:24:40.114046+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,dragapult-dusknoir,Dragapult Dusknoir,23,53.62,11,8,4,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,raging-bolt-ogerpon,Raging Bolt Ogerpon,16,25.0,3,10,3,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,terapagos-noctowl,Terapagos Noctowl,15,40.0,4,5,6,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,gardevoir-ex-sv,Gardevoir,12,41.67,3,3,6,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,gholdengo-dudunsparce,Gholdengo Dudunsparce,11,63.64,6,2,3,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,tera-box,Tera Box,11,33.33,3,6,2,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,dragapult-ex,Dragapult,7,57.14,4,3,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,n-zoroark,N's Zoroark,6,55.56,3,2,1,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,gholdengo-ex,Gholdengo,5,46.67,2,2,1,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,poison-archaludon,Poison Archaludon,5,73.33,3,0,2,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,archaludon-ex,Archaludon,4,50.0,2,2,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,iron-hands-ex,Future Hands,3,77.78,2,0,1,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,archaludon-zoroark,Archaludon Zoroark,3,11.11,0,2,1,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,hop-zacian,Hop's Zacian,3,66.67,2,1,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,slowking-scr,Slowking,3,55.56,1,0,2,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,flareon-noctowl,Flareon Noctowl,2,100.0,2,0,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,gholdengo-dragapult,Gholdengo Dragapult,2,50.0,1,1,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,archaludon-dudunsparce,Archaludon Dudunsparce,2,50.0,1,1,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,reging-bolt-bellibolt,Raging Bolt Bellibolt,1,0.0,0,1,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,roaring-moon-dudunsparce,Roaring Moon Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,banette-ex-sv,Banette,1,100.0,1,0,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,roaring-moon-ex,Roaring Moon,1,50.0,1,1,0,overall,2026-10-17T12:24:41.966533+00:00,ja,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,greninja-ex,Greninja,1,100.0,1,0,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,ceruledge-ex,Ceruledge,1,100.0,1,0,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,mimikyu-ogerpon,Mimikyu Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,ogerpon-ex,Ogerpon,1,0.0,0,1,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,hydrapple-ogerpon,Hydrapple Ogerpon,1,0.0,0,1,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,feraligatr-tef,Feraligatr,1,100.0,1,0,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,milotic-farigiraf,Milotic Farigiraf,1,33.33,0,0,1,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,joltik-box,Joltik Box,1,33.33,0,0,1,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,charizard-pidgeot,Charizard Pidgeot,1,0.0,0,1,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,roaring-moon-ex,Roaring Moon,17,60,54,34,48.2,dragapult-froslass,Dragapult Froslass,1,100.0,1,0,0,overall,2026-10-17T12:24:41.966533+00:00,nein,abfrage
+SVI-JTG,25,1,sinistcha-ogerpon,Sinistcha Ogerpon,3,2,9,3,21.43,dragapult-dusknoir,Dragapult Dusknoir,4,33.33,1,2,1,overall,2026-10-17T12:24:43.810515+00:00,nein,abfrage
+SVI-JTG,25,1,sinistcha-ogerpon,Sinistcha Ogerpon,3,2,9,3,21.43,raging-bolt-ogerpon,Raging Bolt Ogerpon,2,50.0,1,1,0,overall,2026-10-17T12:24:43.810515+00:00,nein,abfrage
+SVI-JTG,25,1,sinistcha-ogerpon,Sinistcha Ogerpon,3,2,9,3,21.43,gholdengo-dragapult,Gholdengo Dragapult,2,16.67,0,1,1,overall,2026-10-17T12:24:43.810515+00:00,nein,abfrage
+SVI-JTG,25,1,sinistcha-ogerpon,Sinistcha Ogerpon,3,2,9,3,21.43,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-10-17T12:24:43.810515+00:00,nein,abfrage
+SVI-JTG,25,1,sinistcha-ogerpon,Sinistcha Ogerpon,3,2,9,3,21.43,hop-zacian,Hop's Zacian,1,0.0,0,1,0,overall,2026-10-17T12:24:43.810515+00:00,nein,abfrage
+SVI-JTG,25,1,sinistcha-ogerpon,Sinistcha Ogerpon,3,2,9,3,21.43,gholdengo-ex,Gholdengo,1,0.0,0,1,0,overall,2026-10-17T12:24:43.810515+00:00,nein,abfrage
+SVI-JTG,25,1,sinistcha-ogerpon,Sinistcha Ogerpon,3,2,9,3,21.43,dragapult-pidgeot,Dragapult Pidgeot,1,33.33,0,0,1,overall,2026-10-17T12:24:43.810515+00:00,nein,abfrage
+SVI-JTG,25,1,sinistcha-ogerpon,Sinistcha Ogerpon,3,2,9,3,21.43,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-10-17T12:24:43.810515+00:00,nein,abfrage
+SVI-JTG,25,1,sinistcha-ogerpon,Sinistcha Ogerpon,3,2,9,3,21.43,terapagos-noctowl,Terapagos Noctowl,1,0.0,0,1,0,overall,2026-10-17T12:24:43.810515+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,dragapult-dusknoir,Dragapult Dusknoir,3,0.0,0,3,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,terapagos-noctowl,Terapagos Noctowl,2,50.0,1,1,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,gardevoir-ex-sv,Gardevoir,2,50.0,1,1,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,charizard-pidgeot,Charizard Pidgeot,1,0.0,0,1,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,gholdengo-dragapult,Gholdengo Dragapult,1,0.0,0,1,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,gholdengo-ex,Gholdengo,1,33.33,0,0,1,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,flareon-noctowl,Flareon Noctowl,1,100.0,1,0,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,other,Other,1,0.0,0,1,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,joltik-box,Joltik Box,1,0.0,0,1,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,tera-box,Tera Box,1,0.0,0,1,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slaking-ex,Slaking,2,4,11,1,27.08,archaludon-dudunsparce,Archaludon Dudunsparce,1,100.0,1,0,0,overall,2026-10-17T12:24:45.651913+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,raging-bolt-ogerpon,Raging Bolt Ogerpon,18,44.44,7,8,3,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,terapagos-noctowl,Terapagos Noctowl,17,23.53,2,9,6,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,tera-box,Tera Box,16,27.08,4,11,1,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,dragapult-dusknoir,Dragapult Dusknoir,13,41.03,5,7,1,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,gardevoir-ex-sv,Gardevoir,9,40.74,3,4,2,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,dragapult-ex,Dragapult,8,50.0,4,4,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,gholdengo-dudunsparce,Gholdengo Dudunsparce,8,37.5,2,3,3,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,gholdengo-ex,Gholdengo,7,28.57,1,3,3,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,archaludon-ex,Archaludon,4,16.67,0,2,2,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,hop-zacian,Hop's Zacian,3,0.0,0,3,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,flareon-noctowl,Flareon Noctowl,3,44.44,1,1,1,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,poison-archaludon,Poison Archaludon,3,33.33,1,2,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,roaring-moon-ex,Roaring Moon,3,22.22,0,1,2,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,n-zoroark,N's Zoroark,2,0.0,0,2,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,reging-bolt-bellibolt,Raging Bolt Bellibolt,2,0.0,0,2,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,froslass-munkidori,Froslass Munkidori,2,50.0,1,1,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,iron-thorns-ex,Iron Thorns,1,0.0,0,1,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,ceruledge-ex,Ceruledge,1,0.0,0,1,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,milotic-farigiraf,Milotic Farigiraf,1,100.0,1,0,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,flygon-ex-ssp,Flygon,1,100.0,1,0,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,pidgeot-control,Pidgeot Control,1,0.0,0,1,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,feraligatr-tef,Feraligatr,1,100.0,1,0,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,charizard-noctowl,Charizard Noctowl,1,100.0,1,0,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,mamoswine-ex,Mamoswine,1,100.0,1,0,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,charizard-pidgeot,Charizard Pidgeot,1,100.0,1,0,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,dragapult-pidgeot,Dragapult Pidgeot,1,100.0,1,0,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,archaludon-dudunsparce,Archaludon Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,greninja-froslass,Greninja Froslass,1,0.0,0,1,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,charizard-greninja,Charizard Greninja,1,0.0,0,1,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,joltik-box,Joltik Box,1,100.0,1,0,0,overall,2026-10-17T12:24:47.493847+00:00,nein,abfrage
+SVI-JTG,25,1,slowking-scr,Slowking,19,40,71,24,35.56,slowking-scr,Slowking,1,50.0,1,1,0,overall,2026-10-17T12:24:47.493847+00:00,ja,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,raging-bolt-ogerpon,Raging Bolt Ogerpon,251,61.89,146,77,28,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,dragapult-dusknoir,Dragapult Dusknoir,241,49.93,111,102,28,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,terapagos-noctowl,Terapagos Noctowl,233,33.91,70,136,27,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,gholdengo-dudunsparce,Gholdengo Dudunsparce,200,42.33,74,94,32,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,gardevoir-ex-sv,Gardevoir,123,38.75,39,58,26,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,tera-box,Tera Box,104,46.31,81,81,46,overall,2026-10-17T12:24:49.412364+00:00,ja,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,dragapult-ex,Dragapult,104,45.83,43,47,14,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,gholdengo-ex,Gholdengo,83,30.52,23,53,7,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,poison-archaludon,Poison Archaludon,62,33.87,19,37,6,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,flareon-noctowl,Flareon Noctowl,58,55.75,30,21,7,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,gholdengo-dragapult,Gholdengo Dragapult,55,50.3,27,26,2,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,archaludon-ex,Archaludon,52,20.51,8,36,8,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,charizard-noctowl,Charizard Noctowl,38,53.51,18,13,7,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,hop-zacian,Hop's Zacian,35,55.24,17,11,7,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,n-zoroark,N's Zoroark,32,57.29,16,9,7,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,archaludon-dudunsparce,Archaludon Dudunsparce,28,34.52,8,15,5,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,milotic-farigiraf,Milotic Farigiraf,24,59.72,13,7,4,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,mamoswine-ex,Mamoswine,20,60.0,11,6,3,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,dragapult-charizard,Dragapult Charizard,19,40.35,7,10,2,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,archaludon-zoroark,Archaludon Zoroark,17,19.61,3,13,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,slowking-scr,Slowking,16,70.83,11,4,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,iron-hands-ex,Future Hands,16,68.75,10,3,3,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,ceruledge-ex,Ceruledge,14,66.67,9,4,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,froslass-munkidori,Froslass Munkidori,14,47.62,6,6,2,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,charizard-pidgeot,Charizard Pidgeot,14,47.62,6,6,2,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,feraligatr-tef,Feraligatr,13,61.54,7,3,3,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,other,Other,12,77.78,9,2,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,hydreigon-ex,Hydreigon,12,72.22,8,2,2,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,roaring-moon-ex,Roaring Moon,11,60.61,6,3,2,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,reging-bolt-bellibolt,Raging Bolt Bellibolt,10,76.67,7,1,2,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,joltik-box,Joltik Box,10,40.0,3,4,3,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,dragapult-froslass,Dragapult Froslass,8,41.67,3,4,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,palafin-ex,Palafin,8,37.5,3,5,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,espathra-froslass,Espathra Froslass,7,71.43,5,2,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,okidogi-ex,Okidogi,6,77.78,4,0,2,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,greninja-blaziken,Greninja Blaziken,5,46.67,2,2,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,espathra-xatu,Espathra Xatu,5,40.0,2,3,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,hydrapple-ogerpon,Hydrapple Ogerpon,4,41.67,1,1,2,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,flareon-ex,Flareon,4,75.0,3,1,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,festival-lead,Dipplin,4,83.33,3,0,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,conkeldurr-twm,Conkeldurr,3,66.67,2,1,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,clefairy-ogerpon,Clefairy Ogerpon,3,44.44,1,1,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,azumarill-ssp,Azumarill,3,77.78,2,0,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,dragapult-pidgeot,Dragapult Pidgeot,3,33.33,1,2,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,ancient-box,Ancient Box,3,66.67,2,1,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,charizard-ex,Charizard,2,0.0,0,2,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,banette-ex-sv,Banette,2,50.0,1,1,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,dragapult-iron-thorns,Dragapult Iron Thorns,2,0.0,0,2,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,iono-bellibolt,Iono's Bellibolt,2,50.0,1,1,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,miraidon-ex,Miraidon,2,0.0,0,2,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,venomoth-froslass,Venomoth Froslass,2,100.0,2,0,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,iron-thorns-ex,Iron Thorns,2,0.0,0,2,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,tinkaton-ex,Tinkaton,2,100.0,2,0,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,chien-pao-baxcalibur,Chien-Pao Baxcalibur,2,100.0,2,0,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,greninja-ex,Greninja,2,16.67,0,1,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,greninja-froslass,Greninja Froslass,2,50.0,1,1,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,gouging-fire-ex,Gouging Fire,2,50.0,1,1,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,blaziken-ex-jtg,Blaziken,1,100.0,1,0,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,tyranitar-jtg,Tyranitar,1,100.0,1,0,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,tsareena-ex,Tsareena,1,33.33,0,0,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,pidgeot-control,Pidgeot Control,1,100.0,1,0,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,milotic-ex,Milotic,1,100.0,1,0,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,iron-thorns-crown,Future Thorns,1,100.0,1,0,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,blissey-ex,Blissey,1,0.0,0,1,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,mimikyu-ogerpon,Mimikyu Ogerpon,1,33.33,0,0,1,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,aegislash-par,Aegislash,1,0.0,0,1,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,tera-box,Tera Box,275,898,933,301,46.83,slaking-ex,Slaking,1,100.0,1,0,0,overall,2026-10-17T12:24:49.412364+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,dragapult-dusknoir,Dragapult Dusknoir,273,41.03,97,131,45,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,raging-bolt-ogerpon,Raging Bolt Ogerpon,242,58.26,127,73,42,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,tera-box,Tera Box,233,62.23,136,70,27,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,gholdengo-dudunsparce,Gholdengo Dudunsparce,227,49.05,96,85,46,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,terapagos-noctowl,Terapagos Noctowl,132,48.36,119,119,26,overall,2026-10-17T12:24:51.320114+00:00,ja,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,gardevoir-ex-sv,Gardevoir,129,45.22,48,50,31,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,dragapult-ex,Dragapult,112,39.58,36,51,25,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,gholdengo-ex,Gholdengo,99,40.07,34,48,17,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,poison-archaludon,Poison Archaludon,71,43.19,25,29,17,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,flareon-noctowl,Flareon Noctowl,52,53.21,26,21,5,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,archaludon-ex,Archaludon,51,49.02,20,16,15,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,gholdengo-dragapult,Gholdengo Dragapult,51,46.41,19,18,14,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,n-zoroark,N's Zoroark,47,57.45,22,10,15,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,hop-zacian,Hop's Zacian,39,69.23,24,6,9,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,charizard-noctowl,Charizard Noctowl,25,41.33,9,12,4,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,archaludon-dudunsparce,Archaludon Dudunsparce,24,65.28,15,7,2,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,iron-hands-ex,Future Hands,24,73.61,17,5,2,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,dragapult-charizard,Dragapult Charizard,23,37.68,7,11,5,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,milotic-farigiraf,Milotic Farigiraf,21,84.13,17,2,2,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,archaludon-zoroark,Archaludon Zoroark,20,15.0,2,15,3,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,mamoswine-ex,Mamoswine,20,45.0,7,7,6,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,froslass-munkidori,Froslass Munkidori,18,66.67,11,4,3,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,other,Other,17,60.78,10,6,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,slowking-scr,Slowking,17,64.71,9,2,6,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,charizard-pidgeot,Charizard Pidgeot,17,56.86,8,4,5,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,ceruledge-ex,Ceruledge,16,45.83,6,6,4,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,roaring-moon-ex,Roaring Moon,15,46.67,5,4,6,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,feraligatr-tef,Feraligatr,12,69.44,7,1,4,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,joltik-box,Joltik Box,11,45.45,4,4,3,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,dragapult-froslass,Dragapult Froslass,11,51.52,5,4,2,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,hydreigon-ex,Hydreigon,11,57.58,6,4,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,espathra-froslass,Espathra Froslass,9,22.22,2,7,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,reging-bolt-bellibolt,Raging Bolt Bellibolt,9,48.15,4,4,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,greninja-blaziken,Greninja Blaziken,7,28.57,1,3,3,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,dragapult-pidgeot,Dragapult Pidgeot,5,46.67,2,2,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,azumarill-ssp,Azumarill,5,66.67,3,1,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,flareon-ex,Flareon,5,100.0,5,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,blissey-ex,Blissey,5,33.33,1,2,2,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,gouging-fire-ex,Gouging Fire,4,8.33,0,3,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,hydrapple-ogerpon,Hydrapple Ogerpon,4,100.0,4,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,pidgeot-control,Pidgeot Control,3,66.67,2,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,gengar-ex,Gengar,3,77.78,2,0,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,greninja-froslass,Greninja Froslass,3,66.67,2,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,ancient-box,Ancient Box,3,66.67,2,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,mimikyu-ogerpon,Mimikyu Ogerpon,3,100.0,3,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,okidogi-ex,Okidogi,3,77.78,2,0,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,iron-thorns-ex,Iron Thorns,3,100.0,3,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,dragapult-iron-thorns,Dragapult Iron Thorns,3,77.78,2,0,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,miraidon-ex,Miraidon,2,100.0,2,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,slaking-ex,Slaking,2,50.0,1,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,conkeldurr-twm,Conkeldurr,2,0.0,0,2,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,charizard-ex,Charizard,2,100.0,2,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,palafin-ex,Palafin,2,50.0,1,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,festival-lead,Dipplin,2,100.0,2,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,tyranitar-jtg,Tyranitar,1,100.0,1,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,iono-bellibolt,Iono's Bellibolt,1,33.33,0,0,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,chien-pao-baxcalibur,Chien-Pao Baxcalibur,1,100.0,1,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,aegislash-par,Aegislash,1,0.0,0,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,galvantula-ex,Galvantula,1,100.0,1,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,clefairy-ogerpon,Clefairy Ogerpon,1,0.0,0,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,flygon-ex-ssp,Flygon,1,0.0,0,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,milotic-ex,Milotic,1,100.0,1,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,sinistcha-ogerpon,Sinistcha Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,venomoth-froslass,Venomoth Froslass,1,0.0,0,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,blaziken-ex-jtg,Blaziken,1,100.0,1,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,tinkaton-ex,Tinkaton,1,33.33,0,0,1,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,greninja-ex,Greninja,1,0.0,0,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,ogerpon-ex,Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,terapagos-noctowl,Terapagos Noctowl,277,1033,868,409,50.62,great-tusk-tef,Great Tusk Mill,1,0.0,0,1,0,overall,2026-10-17T12:24:51.320114+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,tera-box,Tera Box,2,0.0,0,2,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,mamoswine-ex,Mamoswine,1,33.33,0,0,1,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,dragapult-charizard,Dragapult Charizard,1,0.0,0,1,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,chien-pao-baxcalibur,Chien-Pao Baxcalibur,1,100.0,1,0,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,ceruledge-ex,Ceruledge,1,100.0,1,0,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,flareon-noctowl,Flareon Noctowl,1,100.0,1,0,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,dragapult-dusknoir,Dragapult Dusknoir,1,0.0,0,1,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,gholdengo-ex,Gholdengo,1,0.0,0,1,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,gholdengo-dudunsparce,Gholdengo Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,terapagos-noctowl,Terapagos Noctowl,1,33.33,0,0,1,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,gardevoir-ex-sv,Gardevoir,1,100.0,1,0,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tinkaton-ex,Tinkaton,2,4,8,2,33.33,archaludon-zoroark,Archaludon Zoroark,1,0.0,0,1,0,overall,2026-10-17T12:24:53.164975+00:00,nein,abfrage
+SVI-JTG,25,1,tsareena-ex,Tsareena,1,1,4,4,25.93,dragapult-dusknoir,Dragapult Dusknoir,3,11.11,0,2,1,overall,2026-10-17T12:24:55.000269+00:00,nein,abfrage
+SVI-JTG,25,1,tsareena-ex,Tsareena,1,1,4,4,25.93,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-10-17T12:24:55.000269+00:00,nein,abfrage
+SVI-JTG,25,1,tsareena-ex,Tsareena,1,1,4,4,25.93,tera-box,Tera Box,1,33.33,0,0,1,overall,2026-10-17T12:24:55.000269+00:00,nein,abfrage
+SVI-JTG,25,1,tsareena-ex,Tsareena,1,1,4,4,25.93,gholdengo-dragapult,Gholdengo Dragapult,1,33.33,0,0,1,overall,2026-10-17T12:24:55.000269+00:00,nein,abfrage
+SVI-JTG,25,1,tsareena-ex,Tsareena,1,1,4,4,25.93,reging-bolt-bellibolt,Raging Bolt Bellibolt,1,33.33,0,0,1,overall,2026-10-17T12:24:55.000269+00:00,nein,abfrage
+SVI-JTG,25,1,tsareena-ex,Tsareena,1,1,4,4,25.93,gardevoir-ex-sv,Gardevoir,1,0.0,0,1,0,overall,2026-10-17T12:24:55.000269+00:00,nein,abfrage
+SVI-JTG,25,1,tsareena-ex,Tsareena,1,1,4,4,25.93,hop-zacian,Hop's Zacian,1,100.0,1,0,0,overall,2026-10-17T12:24:55.000269+00:00,nein,abfrage
+SVI-JTG,25,1,tyranitar-jtg,Tyranitar,2,2,11,0,15.38,dragapult-dusknoir,Dragapult Dusknoir,3,0.0,0,3,0,overall,2026-10-17T12:24:56.847203+00:00,nein,abfrage
+SVI-JTG,25,1,tyranitar-jtg,Tyranitar,2,2,11,0,15.38,raging-bolt-ogerpon,Raging Bolt Ogerpon,3,33.33,1,2,0,overall,2026-10-17T12:24:56.847203+00:00,nein,abfrage
+SVI-JTG,25,1,tyranitar-jtg,Tyranitar,2,2,11,0,15.38,terapagos-noctowl,Terapagos Noctowl,1,0.0,0,1,0,overall,2026-10-17T12:24:56.847203+00:00,nein,abfrage
+SVI-JTG,25,1,tyranitar-jtg,Tyranitar,2,2,11,0,15.38,tera-box,Tera Box,1,0.0,0,1,0,overall,2026-10-17T12:24:56.847203+00:00,nein,abfrage
+SVI-JTG,25,1,tyranitar-jtg,Tyranitar,2,2,11,0,15.38,hop-zacian,Hop's Zacian,1,100.0,1,0,0,overall,2026-10-17T12:24:56.847203+00:00,nein,abfrage
+SVI-JTG,25,1,tyranitar-jtg,Tyranitar,2,2,11,0,15.38,other,Other,1,0.0,0,1,0,overall,2026-10-17T12:24:56.847203+00:00,nein,abfrage
+SVI-JTG,25,1,tyranitar-jtg,Tyranitar,2,2,11,0,15.38,archaludon-ex,Archaludon,1,0.0,0,1,0,overall,2026-10-17T12:24:56.847203+00:00,nein,abfrage
+SVI-JTG,25,1,tyranitar-jtg,Tyranitar,2,2,11,0,15.38,mamoswine-ex,Mamoswine,1,0.0,0,1,0,overall,2026-10-17T12:24:56.847203+00:00,nein,abfrage
+SVI-JTG,25,1,tyranitar-jtg,Tyranitar,2,2,11,0,15.38,gholdengo-dudunsparce,Gholdengo Dudunsparce,1,0.0,0,1,0,overall,2026-10-17T12:24:56.847203+00:00,nein,abfrage
+SVI-JTG,25,1,venomoth-froslass,Venomoth Froslass,1,5,4,0,55.56,dragapult-dusknoir,Dragapult Dusknoir,2,100.0,2,0,0,overall,2026-10-17T12:24:58.683598+00:00,nein,abfrage
+SVI-JTG,25,1,venomoth-froslass,Venomoth Froslass,1,5,4,0,55.56,tera-box,Tera Box,2,0.0,0,2,0,overall,2026-10-17T12:24:58.683598+00:00,nein,abfrage
+SVI-JTG,25,1,venomoth-froslass,Venomoth Froslass,1,5,4,0,55.56,froslass-munkidori,Froslass Munkidori,1,0.0,0,1,0,overall,2026-10-17T12:24:58.683598+00:00,nein,abfrage
+SVI-JTG,25,1,venomoth-froslass,Venomoth Froslass,1,5,4,0,55.56,milotic-farigiraf,Milotic Farigiraf,1,100.0,1,0,0,overall,2026-10-17T12:24:58.683598+00:00,nein,abfrage
+SVI-JTG,25,1,venomoth-froslass,Venomoth Froslass,1,5,4,0,55.56,terapagos-noctowl,Terapagos Noctowl,1,100.0,1,0,0,overall,2026-10-17T12:24:58.683598+00:00,nein,abfrage
+SVI-JTG,25,1,venomoth-froslass,Venomoth Froslass,1,5,4,0,55.56,archaludon-ex,Archaludon,1,0.0,0,1,0,overall,2026-10-17T12:24:58.683598+00:00,nein,abfrage
+SVI-JTG,25,1,venomoth-froslass,Venomoth Froslass,1,5,4,0,55.56,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,100.0,1,0,0,overall,2026-10-17T12:24:58.683598+00:00,nein,abfrage

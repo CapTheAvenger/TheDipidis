@@ -1,5 +1,13 @@
 [
   {
+    "tournament_id": "0077",
+    "tournament_name": "Regional Championship Nice",
+    "tournament_date": "2026-10-17",
+    "tournament_type": "regional",
+    "country": "FR",
+    "total_players": 0
+  },
+  {
     "tournament_id": "0076",
     "tournament_name": "Regional Championship Louisville",
     "tournament_date": "2026-10-09",
@@ -134,13 +142,5 @@
     "tournament_type": "regional",
     "country": "US",
     "total_players": 2734
-  },
-  {
-    "tournament_id": "0077",
-    "tournament_name": "Regional Championship Nice",
-    "tournament_date": "",
-    "tournament_type": "special",
-    "country": "",
-    "total_players": 0
   }
 ]

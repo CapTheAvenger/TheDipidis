@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-10-17T09:53:05Z",
+  "erzeugt_am": "2026-10-17T12:48:55Z",
   "id": "hide-n-sneak",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1906,14 +1906,14 @@
   "name": "Dhelmise",
   "online": {
    "anteil": "4,22",
-   "anteil14": "4,42",
+   "anteil14": "4,58",
    "bilanz": [
     1372,
     1500,
     15
    ],
    "bis": "16.10.2026",
-   "fenster14": "02.10.–16.10.2026",
+   "fenster14": "02.10.–17.10.2026",
    "format": "TEF–30C",
    "kurz_anteil": "5,57",
    "kurz_bilanz": [

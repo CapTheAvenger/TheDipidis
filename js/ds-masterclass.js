@@ -760,7 +760,7 @@
      * (scripts/masterclass_aktuell.py). Daraus entstehen zwei Dinge, fuer
      * JEDE Masterclass gleich — im Rahmen wie auf der Seite:
      *   der Block „Aktuelle Daten“ (aktuellBlockHtml) und
-     *   je Matchup eine Zeile „Online … · Vor Ort …“ (aktuellMuZeilen).
+     *   je Matchup eine Zeile „Online … · Major …“ (aktuellMuZeilen).
      * Die Einschaetzung des Autors kommt aus dem Stueck selbst
      * ([data-live-slug] mit data-autor oder Tims Zelle) — sie steht nicht
      * in der oeffentlichen Datei. */
@@ -784,7 +784,45 @@
             (q.n ? ' <i>(' + tausender(q.n) + ')</i>' : '') + '</span>';
     }
 
-    /* Online und vor Ort weichen ab: beide mit Quote, mindestens 10 Punkte auseinander. */
+    /* Mittelwert (Hausi 17.10.2026: „online, Major und Masterclass miteinander
+     * vergleichen und einen Mittelwert bilden“): Durchschnitt der Quoten aus
+     * Online und Major, jede nur mit mindestens 20 Matches. Die Einschaetzung
+     * des Autors ist ein Wort, keine Zahl — sie geht nicht in den Mittelwert,
+     * sondern wird gegen ihn gehalten (autorStufe/aktStufe). */
+    function aktMittel(a, b) {
+        var w = [aktQuote(a), aktQuote(b)].filter(function (q) { return !q.duenn; })
+            .map(function (q) { return q.wert; });
+        if (!w.length) return null;
+        return w.reduce(function (x, y) { return x + y; }, 0) / w.length;
+    }
+
+    function aktMittelZelle(a, b) {
+        var m = aktMittel(a, b);
+        if (m === null) return '<span class="mcl-akt-q mcl-akt-grau">—</span>';
+        var ton = m >= 55 ? 'gut' : (m <= 45 ? 'schlecht' : 'mittel');
+        return '<span class="mcl-akt-q mcl-akt-' + ton + '"><b>' + window.zahlKomma(m, 1) + ' %</b></span>';
+    }
+
+    /* Stufen wie in den Masterclasses: sehr guenstig ab 70, guenstig ab 57,
+     * ausgeglichen ab 44, unguenstig ab 30, darunter sehr unguenstig. */
+    function aktStufe(w) { return w >= 70 ? 4 : w >= 57 ? 3 : w >= 44 ? 2 : w >= 30 ? 1 : 0; }
+
+    /* Das Wort des Autors als Stufe, -1 wenn es keine ist („wenig Sorge“).
+     * DIESELBE Regel steht als Text im LIVE_SKRIPT (Rahmen) —
+     * tests/unit/test-masterclass-live.js haelt beide gleich. */
+    function autorStufe(t) {
+        t = String(t || '').toLowerCase();
+        var z = /(\d+)\s*[–-]\s*(\d+)\s*%/.exec(t) || /(\d+)\s*%/.exec(t);
+        if (z) return aktStufe(z[2] ? (+z[1] + +z[2]) / 2 : +z[1]);
+        if (/sehr ungünstig|sehr schlecht/.test(t)) return 0;
+        if (/sehr günstig|sehr gut/.test(t)) return 4;
+        if (/ungünstig|schlecht/.test(t)) return 1;
+        if (/günstig|gut|einfach/.test(t)) return 3;
+        if (/ausgeglichen|knapp|offen/.test(t)) return 2;
+        return -1;
+    }
+
+    /* Online und Major weichen ab: beide mit Quote, mindestens 10 Punkte auseinander. */
     function aktAbweichung(a, b) {
         var x = aktQuote(a), y = aktQuote(b);
         return !x.duenn && !y.duenn && Math.abs(x.wert - y.wert) >= 10;
@@ -805,7 +843,9 @@
         '.mcl-akt-autor{font-size:12px;opacity:.85}.mcl-akt details{margin-top:8px}.mcl-akt summary{cursor:pointer;font-weight:600;font-size:13px}' +
         '.mcl-akt-liste{columns:2 180px;font-size:12px;margin:6px 0 0;padding:0;list-style:none}.mcl-akt-liste li{break-inside:avoid}' +
         '.mcl-akt-mu{display:block;font-size:12px;margin-top:3px;opacity:.95}' +
-        '@media (max-width:520px){.mcl-akt-tab .mcl-akt-meta{display:none}.mcl-akt{padding:10px}}' +
+        '.mcl-akt-tab td{overflow-wrap:anywhere}' +
+        /* Handy: kein seitliches Scrollen (Festlegung A) — Meta-Spalte und Matchzahlen in der Tabelle weg, Zahlen in einer Zeile */
+        '@media (max-width:520px){.mcl-akt-tab .mcl-akt-meta,.mcl-akt-tab .mcl-akt-q i{display:none}.mcl-akt{padding:10px}.mcl-akt-tab{font-size:12px}.mcl-akt-tab td,.mcl-akt-tab th{padding:4px 3px}.mcl-akt-ab{margin-left:0}}' +
         '</style>';
 
     function aktListe(l, kopf) {
@@ -835,20 +875,26 @@
             '<dt>Letzte 7 Tage: Win %</dt><dd>' + aktZelle(o.kurz_bilanz) + '</dd>' +
             '<dt>Listen</dt><dd>' + tausender(o.listen) + ' in ' + tausender(o.turniere) + ' Turnieren</dd>' +
             '</dl></div>';
-        var vo = v ? '<div class="mcl-akt-k"><h4>Vor Ort · Regionals ' + esc(v.format) + '</h4><dl>' +
+        var vo = v ? '<div class="mcl-akt-k"><h4>Major · Regionals ' + esc(v.format) + '</h4><dl>' +
             '<dt>Meta-Anteil</dt><dd>' + esc(s.anteil) + ' % (' + tausender(s.decks) + ' von ' + tausender(s.spieler) + ')</dd>' +
             '<dt>Win %</dt><dd>' + aktZelle(s.bilanz) + '</dd>' +
             '<dt>Day 2 · Top 8 · Top 1</dt><dd>' + s.day2 + ' · ' + s.top8 + ' · ' + s.sieg + '</dd>' +
             '<dt>Turniere</dt><dd>' + v.turniere.map(function (t) { return esc(t.name); }).join(', ') + '</dd>' +
-            '</dl></div>' : '<div class="mcl-akt-k"><h4>Vor Ort</h4><p class="mcl-akt-fein">Noch kein Regional mit diesem Deck in den Daten.</p></div>';
+            '</dl></div>' : '<div class="mcl-akt-k"><h4>Major</h4><p class="mcl-akt-fein">Noch kein Regional mit diesem Deck in den Daten.</p></div>';
         var zeile = function (g) {
-            var ab = aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">weicht ab</span>' : '';
+            var ab = aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">Online/Major weichen ab</span>' : '';
+            var m = aktMittel(g.online, g.vor_ort);
+            var stufe = m === null ? '' : ' data-mittel-stufe="' + aktStufe(m) + '"';
+            var at = autor(g.slug);
+            var abA = (!rahmen && at && m !== null && autorStufe(at) >= 0 && Math.abs(autorStufe(at) - aktStufe(m)) >= 2) ?
+                '<span class="mcl-akt-ab">Autor weicht ab</span>' : '';
             return '<tr><td>' + esc(g.name) + ab + '</td><td class="z mcl-akt-meta">' + esc(g.anteil) + ' %</td>' +
                 '<td class="z">' + aktZelle(g.online) + '</td><td class="z">' + aktZelle(g.vor_ort) + '</td>' +
-                (rahmen ? '<td class="mcl-akt-autor" data-autor-spalte="1" data-autor-fuer="' + esc(g.slug) + '"></td>' :
-                    mitAutor ? '<td class="mcl-akt-autor">' + esc(autor(g.slug) || '—') + '</td>' : '') + '</tr>';
+                '<td class="z">' + aktMittelZelle(g.online, g.vor_ort) + '</td>' +
+                (rahmen ? '<td class="mcl-akt-autor" data-autor-spalte="1" data-autor-fuer="' + esc(g.slug) + '"' + stufe + '></td>' :
+                    mitAutor ? '<td class="mcl-akt-autor">' + esc(at || '—') + abA + '</td>' : '') + '</tr>';
         };
-        var kopfzeile = '<tr><th>Gegner</th><th class="z mcl-akt-meta">Meta</th><th class="z">Online</th><th class="z">Vor Ort</th>' +
+        var kopfzeile = '<tr><th>Gegner</th><th class="z mcl-akt-meta">Meta</th><th class="z">Online</th><th class="z">Major</th><th class="z">Mittel</th>' +
             (mitAutor ? '<th data-autor-spalte="1">Autor</th>' : '') + '</tr>';
         var g = a.gegner || [];
         var tab = '<table class="mcl-akt-tab"><thead>' + kopfzeile + '</thead><tbody>' +
@@ -858,21 +904,24 @@
         var lo = a.liste_online;
         var listen = (lo ? aktListe(lo, 'Beste Online-Liste (7 Tage): ' + lo.platz + '. von ' + lo.von + ' (' + lo.bilanz + '), ' + lo.datum.slice(0, 6)) : '') +
             (a.listen_vor_ort || []).map(function (l) {
-                return aktListe(l, 'Vor Ort: ' + l.platz + '. ' + l.turnier + ' (' + l.bilanz + '), ' + l.spieler);
+                return aktListe(l, 'Major: ' + l.platz + '. ' + l.turnier + ' (' + l.bilanz + '), ' + l.spieler);
             }).join('');
         return AKT_CSS + '<section class="mcl-akt" id="aktuell" data-mcl-akt="1"><h3>Aktuelle Daten</h3>' +
             '<p class="mcl-akt-fein">' + esc(a.name) + ' · Stand ' + esc(o.bis) +
-            ' · Win % nach Matchpunkten, unter ' + AKT_GRENZE + ' Matches die Bilanz (W-L-T)</p>' +
+            ' · Win % nach Matchpunkten, unter ' + AKT_GRENZE + ' Matches die Bilanz (W-L-T) · Mittel = Durchschnitt aus Online und Major</p>' +
             '<div class="mcl-akt-zwei">' + on + vo + '</div>' +
             '<h4>Die häufigsten Gegner</h4>' + tab + listen + '</section>';
     }
 
-    /* slug -> HTML der Zeile „Online … · Vor Ort …“ fuer die Matchups des Stuecks. */
+    /* slug -> HTML der Zeile „Online … · Major … · Mittel …“ fuer die Matchups des Stuecks. */
     function aktuellMuZeilen(a) {
         var aus = {};
         (a && a.gegner || []).forEach(function (g) {
-            aus[g.slug] = { name: g.name, html: 'Online ' + aktZelle(g.online) + ' · Vor Ort ' + aktZelle(g.vor_ort) +
-                (aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">weicht ab</span>' : '') };
+            var m = aktMittel(g.online, g.vor_ort);
+            aus[g.slug] = { name: g.name, stufe: m === null ? -1 : aktStufe(m),
+                html: 'Online ' + aktZelle(g.online) + ' · Major ' + aktZelle(g.vor_ort) +
+                ' · Mittel ' + aktMittelZelle(g.online, g.vor_ort) +
+                (aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">Online/Major weichen ab</span>' : '') };
         });
         return aus;
     }
@@ -935,13 +984,20 @@
         'if(Object.prototype.hasOwnProperty.call(w,k)&&typeof w[k]==="string")el.textContent=w[k];});' +
         /* Aktuelle Daten (17.10.2026): Block und Matchup-Zeilen aus der Elternseite */
         'function alle(s){return Array.prototype.slice.call(document.querySelectorAll(s));}' +
+        /* autorStufe/aktStufe als Text — Gleichheit haelt test-masterclass-live.js */
+        'function st(w){return w>=70?4:w>=57?3:w>=44?2:w>=30?1:0;}' +
+        'function stufe(t){t=String(t||"").toLowerCase();var z=/(\\d+)\\s*[–-]\\s*(\\d+)\\s*%/.exec(t)||/(\\d+)\\s*%/.exec(t);' +
+        'if(z)return st(z[2]?(+z[1]+ +z[2])/2:+z[1]);if(/sehr ungünstig|sehr schlecht/.test(t))return 0;if(/sehr günstig|sehr gut/.test(t))return 4;' +
+        'if(/ungünstig|schlecht/.test(t))return 1;if(/günstig|gut|einfach/.test(t))return 3;if(/ausgeglichen|knapp|offen/.test(t))return 2;return -1;}' +
         'function finde(s){return alle("[data-live-slug]").filter(function(x){return(" "+x.getAttribute("data-live-slug")+" ").indexOf(" "+s+" ")>=0;})[0];}' +
         'if(typeof d.block==="string"&&d.block){alle("[data-mcl-akt-huelle]").forEach(function(x){x.parentNode.removeChild(x);});' +
         'var h=document.createElement("div");h.setAttribute("data-mcl-akt-huelle","1");h.innerHTML=d.block;' +
         'var z=document.querySelector("[data-live-block]"),m=document.getElementById("matchups");' +
         'if(z){z.innerHTML="";z.appendChild(h);}else if(m){m.parentNode.insertBefore(h,m);}else{document.body.insertBefore(h,document.body.firstChild);}' +
         'var voll=0;alle("[data-autor-fuer]").forEach(function(td){var x=finde(td.getAttribute("data-autor-fuer"));' +
-        'var t=x&&x.getAttribute("data-autor");td.textContent=t||"—";if(t)voll++;});' +
+        'var t=x&&x.getAttribute("data-autor");td.textContent=t||"—";if(t)voll++;' +
+        'var ms=td.getAttribute("data-mittel-stufe");var as=stufe(t);' +
+        'if(t&&ms!==null&&as>=0&&Math.abs(as-(+ms))>=2){var f=document.createElement("span");f.setAttribute("class","mcl-akt-ab");f.textContent="Autor weicht ab";td.appendChild(f);}});' +
         'if(!voll)alle("[data-autor-spalte]").forEach(function(x){x.parentNode.removeChild(x);});}' +
         'if(d.mu&&typeof d.mu==="object"){alle("[data-live-slug]").forEach(function(el){' +
         'var slugs=el.getAttribute("data-live-slug").split(/\\s+/).filter(function(s){return Object.prototype.hasOwnProperty.call(d.mu,s);});' +
@@ -2465,6 +2521,9 @@
         _aktuellMuZeilen: aktuellMuZeilen,
         _aktuellEinsetzen: aktuellEinsetzen,
         _aktQuote: aktQuote,
+        _aktMittel: aktMittel,
+        _autorStufe: autorStufe,
+        _liveSkript: function () { return LIVE_SKRIPT; },
         _liveListen: liveListen,
         _liveMatchups: liveMatchups,
         _listenUnterschied: listenUnterschied,

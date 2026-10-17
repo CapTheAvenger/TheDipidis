@@ -381,7 +381,7 @@ test('der Block zeigt Online und vor Ort nebeneinander, mit der Einschaetzung de
     const { mc } = umgebung();
     const html = mc._aktuellBlockHtml(AKT, (s) => (s === 'dragapult-ex' ? 'AUTORWERT' : ''));
     assert.ok(html.includes('Online · ' + AKT.online.format), 'keine Online-Karte');
-    assert.ok(html.includes('Vor Ort · Regionals ' + AKT.vor_ort.format), 'keine Vor-Ort-Karte');
+    assert.ok(html.includes('Major · Regionals ' + AKT.vor_ort.format), 'keine Major-Karte');
     assert.ok(html.includes('AUTORWERT'), 'die Einschaetzung des Autors fehlt');
     const g = AKT.gegner[0];
     assert.ok(html.includes(mc._aktQuote(g.online).txt) && html.includes(mc._aktQuote(g.vor_ort).txt), 'Zahlen des ersten Gegners fehlen');
@@ -390,7 +390,7 @@ test('der Block zeigt Online und vor Ort nebeneinander, mit der Einschaetzung de
     assert.ok(!ohne.includes('>Autor<'), 'Autor-Spalte ohne einen einzigen Wert');
 });
 
-test('„weicht ab“ nur, wo Online und vor Ort 10 Punkte auseinander liegen', () => {
+test('„weicht ab“ nur, wo Online und Major 10 Punkte auseinander liegen', () => {
     const { mc } = umgebung();
     const a = JSON.parse(JSON.stringify(AKT));
     a.gegner = [
@@ -399,9 +399,9 @@ test('„weicht ab“ nur, wo Online und vor Ort 10 Punkte auseinander liegen', 
         { slug: 'z', name: 'Z', anteil: '1,00', online: [30, 0, 0], vor_ort: [1, 5, 0] }
     ];
     const z = mc._aktuellMuZeilen(a);
-    assert.ok(z.x.html.includes('weicht ab'));
-    assert.ok(!z.y.html.includes('weicht ab'));
-    assert.ok(!z.z.html.includes('weicht ab'), 'eine duenne Stichprobe darf keine Abweichung behaupten');
+    assert.ok(z.x.html.includes('weichen ab'));
+    assert.ok(!z.y.html.includes('weichen ab'));
+    assert.ok(!z.z.html.includes('weichen ab'), 'eine duenne Stichprobe darf keine Abweichung behaupten');
 });
 
 test('Namen aus den Daten werden maskiert', () => {
@@ -436,7 +436,7 @@ test('zeigePrivat schickt Block und Matchup-Zeilen in den Rahmen', async () => {
     laden();
     assert.strictEqual(gesendet.length, 1);
     assert.ok(gesendet[0].block.includes('data-autor-fuer="dragapult-ex"'), 'Autor-Spalte nicht als Platzhalter');
-    assert.ok(gesendet[0].mu['dragapult-ex'].html.includes('Vor Ort'));
+    assert.ok(gesendet[0].mu['dragapult-ex'].html.includes('Major') && gesendet[0].mu['dragapult-ex'].html.includes('Mittel'));
 });
 
 test('im Rahmen setzt das Skript Block, Autor-Spalte und Matchup-Zeilen', () => {
@@ -446,7 +446,7 @@ test('im Rahmen setzt das Skript Block, Autor-Spalte und Matchup-Zeilen', () => 
     const body = new dom.Element('body');
     body.innerHTML = '<h2 id="matchups">M</h2><details class="mu" data-live-slug="dragapult-ex dragapult-blaziken" data-autor="AUTOR-A">' +
         '<summary><h4>K</h4><span class="res" data-live-ersetzt="1">alt</span></summary></details>' +
-        '<details class="mu" data-live-slug="n-zoroark"><summary><h4>Z</h4></summary></details>';
+        '<details class="mu" data-live-slug="n-zoroark" data-autor="sehr günstig"><summary><h4>Z</h4></summary></details>';
     const d = {
         body,
         querySelectorAll: (s) => body.querySelectorAll(s),
@@ -468,6 +468,8 @@ test('im Rahmen setzt das Skript Block, Autor-Spalte und Matchup-Zeilen', () => 
     const t = body.innerHTML;
     assert.ok(t.indexOf('data-mcl-akt') >= 0 && t.indexOf('data-mcl-akt') < t.indexOf('id="matchups"'), 'Block nicht vor den Matchups');
     assert.ok(body.querySelector('[data-autor-fuer="dragapult-ex"]').textContent === 'AUTOR-A', 'Autor-Spalte nicht gefuellt');
+    assert.ok(!body.querySelector('[data-autor-fuer="dragapult-ex"]').innerHTML.includes('weicht'), 'kein Wort, trotzdem Abweichung');
+    assert.ok(body.querySelector('[data-autor-fuer="n-zoroark"]').innerHTML.includes('Autor weicht ab'), 'Zoroark: Autor sehr günstig, Daten deutlich schlechter — ohne Hinweis');
     const zeilen = body.querySelectorAll('details.mu')[0].querySelectorAll('.mcl-akt-mu');
     assert.strictEqual(zeilen.length, 2, 'je Variante eine Zeile erwartet');
     assert.ok(body.querySelector('[data-live-ersetzt]').hidden, 'die alte Datenzeile bleibt sichtbar');
@@ -498,4 +500,28 @@ test('das Kachelbild schlaegt die allgemeine Bildregel (Name wieder sichtbar)', 
     assert.ok(/\.mcl-kachel \.mcl-kachel-bild\s*\{[^}]*width:\s*100%/.test(css), 'Kachelbild ohne eigene, staerkere Regel');
     assert.ok(/\.mcl-kachel-kopf\s*\{[^}]*flex-direction:\s*column/.test(css), 'Name steht nicht unter dem Bild');
     assert.ok(!/\.mcl-kachel-bild\s*\{\s*width:\s*(54|64)px/.test(css), 'die alte 64/54-px-Regel ist zurueck');
+});
+
+test('Mittel ist der Durchschnitt aus Online und Major — duenne Seiten zaehlen nicht', () => {
+    const { mc } = umgebung();
+    assert.strictEqual(mc._aktMittel([30, 10, 0], [10, 30, 0]), 50);
+    assert.strictEqual(mc._aktMittel([30, 10, 0], [1, 5, 0]), 75, 'eine Seite unter 20 Matches ging in den Mittelwert');
+    assert.strictEqual(mc._aktMittel([1, 1, 0], [1, 5, 0]), null);
+    const z = mc._aktuellMuZeilen({ gegner: [{ slug: 'x', name: 'X', online: [30, 10, 0], vor_ort: [10, 30, 0] }] });
+    assert.ok(z.x.html.includes('Mittel') && z.x.html.includes('50,0 %'), z.x.html);
+});
+
+test('das Wort des Autors wird zur Stufe — auf der Seite und im Rahmen gleich', () => {
+    const { mc } = umgebung();
+    const src = mc._liveSkript();
+    const faelle = { 'sehr günstig': 4, 'günstig': 3, 'leicht günstig': 3, 'gut': 3, 'einfach': 3, 'ausgeglichen': 2,
+        'knapper als gedacht': 2, 'eher ungünstig': 1, 'leicht ungünstig': 1, 'sehr ungünstig': 0,
+        'auf dem Papier sehr schlecht': 0, '30–40 % (je nach Gegner)': 1, 'wenig Sorge': -1, '': -1 };
+    Object.keys(faelle).forEach((w) => assert.strictEqual(mc._autorStufe(w), faelle[w], 'Seite: ' + w));
+    const quelle = /function st\(w\)\{[^}]*\}function stufe\(t\)\{[\s\S]*?return -1;\}/.exec(src);
+    assert.ok(quelle, 'stufe() im Rahmen-Skript nicht gefunden');
+    const r = { String, Math };
+    vm.createContext(r);
+    vm.runInContext(quelle[0] + ';globalThis.f=stufe;', r);
+    Object.keys(faelle).forEach((w) => assert.strictEqual(r.f(w), faelle[w], 'Rahmen: ' + w));
 });

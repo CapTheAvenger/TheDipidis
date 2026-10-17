@@ -1,0 +1,61 @@
+{
+ "_zweck": "Gemeinsame Faelle fuer unterschied() (Python, scripts/masterclass_listen_nachziehen.py) und listenUnterschied() (JS, js/ds-masterclass.js) — beide muessen denselben Satz liefern.",
+ "faelle": [
+  {
+   "zaehlung": {
+    "Tanhel": 4,
+    "Metang": 4
+   },
+   "tims": {
+    "Tanhel": 4,
+    "Metang": 4
+   },
+   "erwartet": "Kartengleich mit Tims aktueller Liste."
+  },
+  {
+   "zaehlung": {
+    "Tanhel": 4,
+    "Metang": 3,
+    "Boss": 2,
+    "Neu A": 1
+   },
+   "tims": {
+    "Tanhel": 4,
+    "Metang": 4,
+    "Boss": 1,
+    "Weg B": 2
+   },
+   "erwartet": "Gegenüber Tims aktueller Liste: dazu 1× Neu A; kein Weg B; 2 statt 1 Boss, 3 statt 4 Metang."
+  },
+  {
+   "zaehlung": {
+    "A": 1,
+    "B": 2,
+    "C": 3,
+    "D": 4,
+    "E": 5
+   },
+   "tims": {
+    "F": 1,
+    "G": 2,
+    "H": 3,
+    "I": 4,
+    "J": 5
+   },
+   "erwartet": "Gegenüber Tims aktueller Liste: dazu 5× E, 4× D, 3× C, 2× B; kein J, kein I, kein H, kein G."
+  },
+  {
+   "zaehlung": {
+    "Zeta": 2,
+    "Alpha": 2,
+    "Mu": 3
+   },
+   "tims": {
+    "Alpha": 1,
+    "Zeta": 3,
+    "Mu": 3
+   },
+   "erwartet": "Gegenüber Tims aktueller Liste: 2 statt 1 Alpha, 2 statt 3 Zeta."
+  }
+ ]
+}

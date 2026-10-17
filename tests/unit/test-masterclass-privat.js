@@ -67,7 +67,7 @@ test('Anzeige: iframe mit sandbox OHNE allow-same-origin und srcdoc = gespeicher
     const { mc } = umgebung({ uid: 'U1' }, []);
     const g = mc._privatAusDoc('t', { titel: 'T', html: '<html><body>GEHEIM</body></html>' });
     let html = '';
-    const rahmen = {};
+    const rahmen = { addEventListener() {} };
     const knopf = { addEventListener: () => {} };
     const buehne = {
         set innerHTML(v) { html = v; }, get innerHTML() { return html; },
@@ -83,7 +83,11 @@ test('Anzeige: iframe mit sandbox OHNE allow-same-origin und srcdoc = gespeicher
 });
 
 test('im Repo liegt keine Datei einer privaten Masterclass', () => {
-    const dateien = fs.readdirSync(path.join(WURZEL, 'masterclass'));
+    /* Seit dem Umzug von Mega-Stalobor (17.10.2026) gibt es das
+     * Verzeichnis gar nicht mehr; test-masterclass.js verbietet jede
+     * HTML-Datei darin. */
+    const ordner = path.join(WURZEL, 'masterclass');
+    const dateien = fs.existsSync(ordner) ? fs.readdirSync(ordner) : [];
     assert.ok(!dateien.some((d) => /tohaido|sharpedo/i.test(d)),
         'die private Mega-Tohaido-Masterclass darf nicht unter masterclass/ liegen: ' + dateien.join(', '));
 });
@@ -124,7 +128,7 @@ test('Stueck ohne </body> bekommt das Skript angehaengt', () => {
 test('zeigePrivat setzt das Stueck MIT Anker-Skript in den Rahmen', () => {
     const { mc } = umgebung({ uid: 'U1' }, []);
     const g = mc._privatAusDoc('t', { titel: 'T', html: '<html><body>X</body></html>' });
-    const rahmen = {};
+    const rahmen = { addEventListener() {} };
     const buehne = { innerHTML: '', querySelector: (s) => (s === '.mcl-privat-rahmen' ? rahmen : { addEventListener() {} }), scrollIntoView() {} };
     mc._zeigePrivat(buehne, g);
     assert.ok(/addEventListener\("click"/.test(rahmen.srcdoc), 'Rahmen ohne Anker-Skript');

@@ -17,6 +17,13 @@ wirkt, muessen DREI Dinge stimmen, und alle drei stehen hier:
   3. Er rechnet nach DERSELBEN Konvention wie die Zusicherung, und er
      erfindet nichts: keine Bilanz -> Gedankenstrich, unter 30 Partien ->
      Bilanz statt Quote.
+
+UMZUG 17.10.2026: das Stueck liegt nur noch in Hausis Konto. Der Erzeuger
+schreibt seitdem den Schluessel `matchups` in
+data/masterclass_live/mega-stalobor.json; die Seite setzt die Werte beim
+Oeffnen ein (das Umbenennen der Spalten prueft
+tests/unit/test-masterclass-live.js). Alle drei Bedingungen oben gelten
+unveraendert — nur fuer die JSON statt fuer das Stueck.
 """
 
 import importlib.util
@@ -30,7 +37,7 @@ HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))
 SKRIPT = os.path.join(WURZEL, "scripts", "masterclass_zahlen_nachziehen.py")
 ABLAUF = os.path.join(WURZEL, ".github", "workflows", "limitless-api-scrape.yml")
-STUECK = os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+LIVE = os.path.join(WURZEL, "data", "masterclass_live", "mega-stalobor.json")
 
 
 def _modul():
@@ -58,11 +65,13 @@ def test_der_erzeuger_laeuft_in_dem_ablauf_der_seine_eingabe_schreibt():
         "der Erzeuger steht vor dem Schritt, der seine Eingabe schreibt")
 
 
-def test_das_stueck_steht_in_der_commitliste_dieses_ablaufs():
+def test_die_live_daten_stehen_in_der_commitliste_dieses_ablaufs():
     text = _ablauf()
-    assert re.search(r"git add\s+masterclass/mega-stalobor\.de\.html", text), (
-        "das Stueck fehlt in der `git add`-Liste — der Schritt waere "
+    assert re.search(r"git add\s+data/masterclass_live/", text), (
+        "data/masterclass_live/ fehlt in der `git add`-Liste — der Schritt waere "
         "wirkungslos, genau wie bei champions_move_flags.json am 23.09.2026")
+    assert "masterclass/mega-stalobor" not in re.sub(r"(?m)^\s*#.*$", "", text), (
+        "der Ablauf fasst noch das Stueck an, das nur noch im Konto liegt")
 
 
 def test_er_erfindet_nichts():
@@ -123,23 +132,6 @@ def test_die_spaltenkoepfe_kommen_aus_den_daten():
     assert "Jetzt" not in k.values() and "Davor" not in k.values()
 
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
-def test_die_abgeleiteten_koepfe_stehen_auch_wirklich_im_stueck():
-    """Die eigentliche Verknuepfung. Laufen Ableitung und Stueck
-    auseinander, zieht der Erzeuger keine einzige Zelle nach und meldet
-    trotzdem 'nichts zu tun' — genau das ist am 23.09.2026 passiert, als
-    die Spalten von Jetzt/Davor/Majors auf die Metanamen umgestellt
-    wurden."""
-    m = _modul()
-    with open(STUECK, encoding="utf-8") as f:
-        roh = f.read()
-    im_stueck = {z[2] for z in m.ZELLE.findall(roh)}
-    for name in m.koepfe().values():
-        assert name in im_stueck, (
-            f"der abgeleitete Spaltenkopf {name!r} steht nicht im Stueck \u2014 "
-            f"dort stehen: {sorted(im_stueck)}")
-
-
 def test_die_grenze_liegt_bei_dreissig_und_zwar_beidseitig():
     """29 ist eine Bilanz, 30 ist eine Quote. Eine Grenze, die nur von
     einer Seite geprueft ist, ist nicht geprueft."""
@@ -166,60 +158,94 @@ def test_der_tausenderpunkt_ist_der_des_stuecks():
     assert m._tausender(66) == "66"
 
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
-def test_das_muster_findet_die_bloecke_wirklich():
-    """VERFAELSCHUNGSPROBE. Faende das Muster nichts, meldete das Skript
-    "alle Zahlen stehen wie die Rohdaten" — und waere dabei blind. Genau
-    deshalb bricht es unter 20 Bloecken ab statt gruen zu melden."""
+def _schreibe_in(tmp_path, monkeypatch):
+    sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+    import masterclass_live as L
+    monkeypatch.setattr(L, "ORDNER", str(tmp_path))
+    return L
+
+
+def test_jede_zelle_der_json_ist_aus_den_rohdaten_gerechnet():
+    """Die eigentliche Verknuepfung: jede Zelle in live_daten() ist genau
+    soll_zelle(Bilanz) der Rohdaten — fuer jeden Gegner und jede Spalte.
+    Bis zum Umzug rechnete test_masterclass_kartennamen.py das am Stueck
+    nach; jetzt an der Datei, die die Seite einsetzt."""
     m = _modul()
-    with open(STUECK, encoding="utf-8") as f:
-        roh = f.read()
-    assert len(m.BLOCK.findall(roh)) >= 20
-    koepfe = set(m.koepfe().values())
-    daten = [z for z in m.ZELLE.findall(roh) if z[2] in koepfe]
-    assert len(daten) >= 60, (
-        "weniger als drei Datenzellen je Matchup gefunden \u2014 das Zellmuster "
-        f"passt nicht (gefunden: {len(daten)} von {len(m.ZELLE.findall(roh))} Zellen)")
+    d = m.live_daten()
+    quellen = {"jetzt": m._online(m.ONLINE_JETZT), "davor": m._online(m.ONLINE_DAVOR),
+               "majors": m._majors()}
+    n = 0
+    for spalte, q in quellen.items():
+        assert len(q) >= 20, f"Spalte {spalte}: nur {len(q)} Gegner in den Rohdaten"
+        for slug, bilanz in q.items():
+            k, t, w, nn = m.soll_zelle(bilanz, "mcl-wrz", "X: ")
+            assert d["zellen"][slug][spalte] == [k, t[3:], w, nn], (slug, spalte)
+            n += 1
+    assert n == sum(len(z) for z in d["zellen"].values()), "die JSON fuehrt Zellen ohne Rohdaten"
+    # Ein Gegner ohne Eintrag bekommt die leere Zelle — kein Wert erfunden.
+    assert d["leer"][2] == "\u2014" and d["leer"][0].endswith("mcl-wrz-leer")
 
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
+def test_die_koepfe_und_saetze_der_json_kommen_aus_den_daten():
+    m = _modul()
+    d = m.live_daten()
+    assert d["koepfe"] == m.koepfe()
+    w = d["werte"]
+    assert w["kopf-jetzt"] == d["koepfe"]["jetzt"] and w["kopf-majors"] == d["koepfe"]["majors"]
+    assert w["datei-online-jetzt"] == "data/" + os.path.basename(m.ONLINE_JETZT)
+    assert os.path.exists(os.path.join(WURZEL, w["datei-online-jetzt"]))
+    assert re.match(r"^\d{4}-\d\d-\d\d$", w["stand-online-jetzt"])
+    assert d["majors_praefix"].startswith("Letzte Präsenzturniere (") and d["majors_praefix"].endswith(": ")
+    assert d["koepfe"]["majors"].replace("Majors (", "").rstrip(")") in d["majors_praefix"]
+
+
+@pytest.mark.skipif(not os.path.exists(LIVE), reason="Live-Datei nicht im Baum")
 def test_am_heutigen_stand_ist_nichts_nachzuziehen():
-    """Der Arbeitsbaum muss sauber sein: laeuft hier etwas auf, ist das
-    Stueck dateiert und der naechste Deploy waere rot."""
+    """Der Arbeitsbaum muss sauber sein: weicht die eingecheckte JSON von
+    den Rohdaten ab, zeigt die Seite veraltete Zahlen. Nachziehen mit
+    'python3 scripts/masterclass_zahlen_nachziehen.py'."""
+    import json
     m = _modul()
-    with open(STUECK, encoding="utf-8") as f:
-        roh = f.read()
-    k = m.koepfe()
-    quellen = {
-        k["jetzt"]: m._online(m.ONLINE_JETZT),
-        k["davor"]: m._online(m.ONLINE_DAVOR),
-        k["majors"]: m._majors(),
-    }
-    _neu, aenderungen, _ohne = m.nachziehen(roh, quellen, m._slugs())
-    assert aenderungen == [], (
-        "das Stueck steht anders da als die Rohdaten — nachziehen mit "
-        "'python3 scripts/masterclass_zahlen_nachziehen.py':\n  "
-        + "\n  ".join(aenderungen))
+    with open(LIVE, encoding="utf-8") as f:
+        da = json.load(f).get("matchups")
+    soll = m.live_daten()
+    abw = sorted(s for s in set(soll["zellen"]) | set((da or {}).get("zellen") or {})
+                 if (da or {}).get("zellen", {}).get(s) != soll["zellen"].get(s))
+    assert da == soll, ("die Live-Daten stehen anders da als die Rohdaten — "
+                        f"{len(abw)} Gegner abweichend, z. B. {abw[:5]}")
 
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
-def test_zweimal_nachziehen_aendert_nichts_mehr():
+def test_zweimal_nachziehen_aendert_nichts_mehr(tmp_path, monkeypatch):
     """Ein Erzeuger, der bei jedem Lauf etwas anderes schreibt, erzeugt
     jede Nacht einen Commit und niemand sieht mehr, wann sich wirklich
     etwas geaendert hat."""
+    L = _schreibe_in(tmp_path, monkeypatch)
     m = _modul()
-    with open(STUECK, encoding="utf-8") as f:
-        roh = f.read()
-    k = m.koepfe()
-    quellen = {
-        k["jetzt"]: m._online(m.ONLINE_JETZT),
-        k["davor"]: m._online(m.ONLINE_DAVOR),
-        k["majors"]: m._majors(),
-    }
-    slugs = m._slugs()
-    einmal, _a, _o = m.nachziehen(roh, quellen, slugs)
-    zweimal, aend2, _o2 = m.nachziehen(einmal, quellen, slugs)
-    assert zweimal == einmal and aend2 == [], "der Erzeuger ist nicht stabil"
+    d = m.live_daten()
+    assert L.schreibe_teil("probe", "matchups", d) is True
+    assert L.schreibe_teil("probe", "matchups", m.live_daten()) is False, "der Erzeuger ist nicht stabil"
+    # Der andere Schluessel bleibt stehen.
+    assert L.schreibe_teil("probe", "online_listen", {"listen": []}) is True
+    import json
+    with open(L.pfad("probe"), encoding="utf-8") as f:
+        inhalt = json.load(f)
+    assert inhalt["matchups"] == d and inhalt["online_listen"] == {"listen": []}
+
+
+def test_zu_wenige_gegner_schreibt_nichts(tmp_path, monkeypatch):
+    """VERFAELSCHUNGSPROBE: findet der Erzeuger in einer Spalte unter 20
+    Gegner, stimmt mit den Eingaben etwas nicht — dann wird NICHTS
+    geschrieben (je Spalte gezaehlt, nicht in Summe)."""
+    L = _schreibe_in(tmp_path, monkeypatch)
+    m = _modul()
+    d = m.live_daten()
+    for z in d["zellen"].values():
+        z.pop("davor", None)
+    monkeypatch.setattr(m, "GUIDE_ID", "probe")
+    monkeypatch.setattr(m, "live_daten", lambda: d)
+    monkeypatch.setattr(sys, "argv", ["x"])
+    assert m.main() == 1
+    assert not os.path.exists(L.pfad("probe"))
 
 
 # ---------------------------------------------------------------------------
@@ -264,78 +290,21 @@ def test_die_majors_spalte_nimmt_das_juengste_format(tmp_path, monkeypatch):
         "aelteren Formats ueberschreibt oder ergaenzt die des juengsten")
 
 
-def test_der_kopfwechsel_benennt_die_spalte_ueberall_neu(monkeypatch):
+def test_der_kopfwechsel_nennt_die_neuen_majors(monkeypatch):
+    """Mit dem ersten Major eines neuen Formats wechseln Spaltenkopf,
+    Sprechblasenanfang, Legendensatz und Turniernummern (29.09.2026). Die
+    Texte kommen aus majors_texte; eingesetzt werden sie auf der Seite."""
     m = _modul()
     monkeypatch.setattr(m, "_majors_turniere", lambda meta: ([73, 74], ["Brisbane", "Frankfurt"]))
-    alt = ('<b>Majors (TEF–PBL)</b> sind die letzten Präsenzturniere — die liefen noch '
-           'im Format TEF–PBL, ein\nPräsenzturnier im laufenden Format gab es noch nicht. '
-           'Alle drei sind gleich.'
-           '<span class="mcl-wrz" title="Letzte Präsenzturniere (Worlds und Baltimore), '
-           'Format TEF–PBL: 50,6 %"><em>Majors (TEF–PBL)</em><b>50,6 %</b></span>'
-           '<code>data/labs_tournament_matchups.csv</code>, Turniere 71 und 72,\nalle Tage.')
-    neu, aend = m.majors_umstellen(alt, "TEF-30C", "TEF-30C")
-    assert aend, "der Kopfwechsel meldet keine Aenderung"
-    assert "PBL" not in neu and "Baltimore" not in neu, (
-        "nach dem Kopfwechsel nennt das Stueck noch das alte Format: " + neu)
-    assert "gab es noch nicht" not in neu, (
-        "die Legende behauptet weiter, es gebe kein Praesenzturnier im "
-        "laufenden Format — mit Brisbane und Frankfurt ist das falsch")
-    assert neu.count("Majors (TEF–30C)") == 2
-    assert "Letzte Präsenzturniere (Brisbane und Frankfurt), Format TEF–30C: " in neu
-    assert "Turniere 73 und 74," in neu
-    assert m.majors_umstellen(neu, "TEF-30C", "TEF-30C") == (neu, []), (
-        "ein zweiter Lauf aendert das Stueck noch einmal")
-
-
-def test_ein_setwechsel_stellt_die_online_spalten_um():
-    """Setwechsel-Probe (PR #893, 01.10.2026): seit DA-20 kommen die Koepfe aus
-    format_window.json. Ohne diesen Schritt stuende nach dem naechsten Set im
-    Stueck noch TEF\u201330C/TEF\u2013PBL, der Erzeuger braeche ab und das Tor hielte den
-    Wochenlauf an. Die Abbildung ist (30C, PBL) -> (ZZN, 30C), nicht zweimal
-    30C -> ZZN."""
-    m = _modul()
-    alt = ('<b>TEF\u201330C</b> ist das laufende Online-Format, <b>TEF\u2013PBL</b> das '
-           'Online-Format davor, <b>Majors (TEF\u201330C)</b> sind Majors.'
-           '<span class="mcl-wrz" title="Online-Meta TEF\u201330C (laufendes Format): 48,8 %">'
-           '<em>TEF\u201330C</em><b>48,8 %</b></span>'
-           '<span class="mcl-wrz" title="Online-Meta TEF\u2013PBL (Format davor): 49,4 %">'
-           '<em>TEF\u2013PBL</em><b>49,4 %</b></span>'
-           '<span class="mcl-wrz" title="Letzte Pr\u00e4senzturniere (X), Format TEF\u201330C: 50 %">'
-           '<em>Majors (TEF\u201330C)</em><b>50 %</b></span>'
-           '<p class="mcl-quelle">TEF\u201330C (online): <code>data/online_api_matchups_TEF-30C.csv</code>, Stand 2026-09-30 \u00b7\n'
-           'TEF\u2013PBL (online): <code>data/online_api_matchups_TEF-PBL.csv</code>, Stand 2026-09-18 \u00b7\n'
-           'Majors (TEF\u201330C): <code>data/labs_tournament_matchups.csv</code></p>')
-    neu, aend = m.online_umstellen(alt, "TEF\u2013ZZN", "TEF\u201330C")
-    assert aend, "der Setwechsel meldet keine Aenderung"
-    assert "<b>TEF\u2013ZZN</b> ist das laufende Online-Format, <b>TEF\u201330C</b> das Online-Format davor" in neu
-    assert "<em>TEF\u2013ZZN</em><b>48,8 %</b>" in neu and "<em>TEF\u201330C</em><b>49,4 %</b>" in neu, (
-        "die Zellen sind nicht um eine Stelle weitergerueckt: " + neu)
-    assert 'Online-Meta TEF\u2013ZZN (laufendes Format)' in neu
-    assert 'Online-Meta TEF\u201330C (Format davor)' in neu
-    assert "online_api_matchups_TEF-ZZN.csv" in neu and "online_api_matchups_TEF-PBL.csv" not in neu
-    assert "TEF\u2013PBL" not in neu
-    # Die Majors-Spalte gehoert zu majors_umstellen und bleibt unberuehrt.
-    assert neu.count("Majors (TEF\u201330C)") == 3
-    assert m.online_umstellen(neu, "TEF\u2013ZZN", "TEF\u201330C") == (neu, []), (
-        "ein zweiter Lauf aendert das Stueck noch einmal")
-
-
-def test_am_echten_stueck_rueckt_jede_zelle_mit(tmp_path):
-    """Dasselbe am echten Stueck: nach der Umstellung gibt es genauso viele
-    Zellen mit dem neuen Kopf wie vorher mit dem alten."""
-    m = _modul()
-    with open(m.STUECK, encoding="utf-8") as f:
-        roh = f.read()
-    # Die Koepfe stehen im Stueck selbst (Legende), nicht in format_window.json:
-    # das Stueck kann vor oder nach dem Nachziehen stehen.
-    jetzt, davor = m.LEGENDE_ONLINE.search(roh).groups()
-    n_jetzt = roh.count("<em>%s</em>" % jetzt)
-    n_davor = roh.count("<em>%s</em>" % davor)
-    assert n_jetzt >= 20 and n_davor >= 20, "das Stueck hat zu wenige Zellen zum Pruefen"
-    neu, _ = m.online_umstellen(roh, "TEF\u2013QQQ", jetzt)
-    assert neu.count("<em>TEF\u2013QQQ</em>") == n_jetzt
-    assert neu.count("<em>%s</em>" % jetzt) == n_davor
-    assert "<em>%s</em>" % davor not in neu
+    t = m.majors_texte("TEF-30C", "TEF-30C")
+    assert t["praefix"] == "Letzte Präsenzturniere (Brisbane und Frankfurt), Format TEF–30C: "
+    assert t["turniere"] == "73 und 74"
+    assert "schon im laufenden Format" in t["satz"] and "gab es noch nicht" not in t["satz"]
+    alt = m.majors_texte("TEF-PBL", "TEF-30C")
+    assert "liefen noch im Format TEF–PBL" in alt["satz"], alt["satz"]
+    monkeypatch.setattr(m, "_majors_turniere", lambda meta: ([], []))
+    with pytest.raises(SystemExit):
+        m.majors_texte("TEF-30C", "TEF-30C")
 
 
 # DA-20 (01.10.2026): die Online-Dateien kommen aus format_window.json.

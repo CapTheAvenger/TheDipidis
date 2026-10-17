@@ -15,6 +15,14 @@ kaputtmachen als er nuetzt. Was hier beissen soll:
   3. Er ist stabil: zweimal laufen aendert beim zweiten Mal nichts.
   4. Der heutige Stand ist nachgezogen — sonst waere das Stueck
      dateiert und niemand saehe es.
+
+UMZUG 17.10.2026: das Stueck liegt nur noch in Hausis Konto. Der Erzeuger
+schreibt den Schluessel `online_listen` in
+data/masterclass_live/mega-stalobor.json; das Einsetzen in die Gruppe
+(Kacheln mit Tims Begruendung, Unterschied zu Tims Liste, weniger Listen =
+weniger Plaetze, Gruppe bleibt bei unbekannter Karte stehen) prueft
+tests/unit/test-masterclass-live.js am Verhalten. Hier bleibt, was der
+Erzeuger selbst entscheidet.
 """
 
 import hashlib
@@ -29,7 +37,8 @@ import pytest
 HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))
 SKRIPT = os.path.join(WURZEL, "scripts", "masterclass_listen_nachziehen.py")
-STUECK = os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+LIVE = os.path.join(WURZEL, "data", "masterclass_live", "mega-stalobor.json")
+FAELLE = os.path.join(WURZEL, "tests", "fixtures", "masterclass_unterschied.json")
 LISTEN = os.path.join(WURZEL, "data", "masterclass_online_listen.json")
 
 
@@ -48,11 +57,6 @@ def _fp(text):
     Fehler zu melden (gemessen am 23.09.2026 in der
     Verfaelschungsprobe)."""
     return hashlib.sha1(text.encode("utf-8")).hexdigest()
-
-
-def _stueck():
-    with open(STUECK, encoding="utf-8") as f:
-        return f.read()
 
 
 def _listen():
@@ -78,199 +82,102 @@ def _liste(spieler="testspieler", platz=1, feld=100, bilanz="7 - 0 - 0", karten=
     }
 
 
-def _plaetze(m, roh):
-    nummern, _t = m.gruppen_nummern(roh)
-    return len(nummern)
-
-
-def _listen_fuer_die_gruppe(m, roh):
-    """Die echten Listen, wenn sie die Gruppe fuellen — sonst TESTDATEN in
-    passender Zahl. Stabilitaet und Abgrenzung sind Eigenschaften des
-    Erzeugers, nicht der Datenlage einer Woche (s. unten, #172)."""
-    echt = _listen()
-    n = _plaetze(m, roh)
-    return echt if len(echt) == n else [_liste("s%d" % i, i + 1) for i in range(n)]
-
-
 # ---------------------------------------------------------------- Zustand
 
-@pytest.mark.skipif(not (os.path.exists(STUECK) and os.path.exists(LISTEN)),
-                    reason="Stueck oder Listendatei nicht im Baum")
+@pytest.mark.skipif(not (os.path.exists(LIVE) and os.path.exists(LISTEN)),
+                    reason="Live- oder Listendatei nicht im Baum")
 def test_am_heutigen_stand_ist_nichts_nachzuziehen():
-    """Das Stueck steht wie die Rohdaten — mit genau so vielen Plaetzen,
-    wie die Datei Listen liefert (DA-26, 30.09.2026). Die Ausnahme fuer
-    „falsche Listenzahl" (Wochenlauf #172) entfaellt damit: eine andere
-    Zahl ist kein Grund mehr, nicht nachzuziehen."""
+    """Die eingecheckte JSON steht wie die Rohdaten — mit genau so vielen
+    Listen, wie die Datei liefert (DA-26, 30.09.2026)."""
     m = _modul()
-    roh = _stueck()
-    _neu, aenderungen, grund = m.nachziehen(roh, _listen())
+    soll, grund = m.live_daten(_listen())
     assert grund == "", grund
-    assert aenderungen == [], (
+    with open(LIVE, encoding="utf-8") as f:
+        da = json.load(f).get("online_listen")
+    assert _fp(json.dumps(da, sort_keys=True)) == _fp(json.dumps(soll, sort_keys=True)), (
         "die Online-Listen stehen anders da als die Rohdaten — nachziehen mit "
-        "'python3 scripts/masterclass_listen_nachziehen.py':\n  " + "\n  ".join(aenderungen))
-    assert len(m.gruppen_nummern(roh)[0]) == len(_listen())
+        "'python3 scripts/masterclass_listen_nachziehen.py'")
+    assert len(da["listen"]) == len(_listen())
 
 
-@pytest.mark.skipif(not (os.path.exists(STUECK) and os.path.exists(LISTEN)),
-                    reason="Stueck oder Listendatei nicht im Baum")
 def test_zweimal_nachziehen_aendert_nichts_mehr():
     m = _modul()
-    listen = _listen_fuer_die_gruppe(m, _stueck())
-    einmal, _a, grund = m.nachziehen(_stueck(), listen)
-    assert grund == "", grund
-    zweimal, aend2, _g2 = m.nachziehen(einmal, listen)
-    assert _fp(zweimal) == _fp(einmal) and aend2 == [], "der Erzeuger ist nicht stabil"
-
-
-@pytest.mark.skipif(not (os.path.exists(STUECK) and os.path.exists(LISTEN)),
-                    reason="Stueck oder Listendatei nicht im Baum")
-def test_er_fasst_nur_die_online_gruppe_an():
-    """Gegenprobe mit VERAENDERTEN Listen: alles ausserhalb der Gruppe
-    muss Zeichen fuer Zeichen stehen bleiben."""
-    m = _modul()
-    roh = _stueck()
-    listen = [dict(e, player="Proband%d" % i) for i, e in enumerate(_listen_fuer_die_gruppe(m, roh))]
-    neu, aenderungen, grund = m.nachziehen(roh, listen)
-    assert grund == "" and aenderungen, "die Gegenprobe hat gar nichts geaendert"
-
-    # Alles vor dem ersten Block der Gruppe und die Ausarbeitung dahinter.
-    nummern, _t = m.gruppen_nummern(roh)
-    erste = 'data-mcl-listenblock="%s"' % nummern[0]
-    assert roh[:roh.find(erste)].replace(
-        "Kingssofgamer02", "X") != "", "Schnitt misslungen"
-    vorher_teil = roh[:roh.find(erste)]
-    nachher_teil = neu[:neu.find(erste)]
-    # Die Schalterreihe der Gruppe steht davor und darf sich aendern —
-    # alles andere nicht.
-    def ohne_reihe(t):
-        return re.sub(r'<div class="mcl-listwahl-reihe">.*?</div>', "", t, flags=re.S)
-    assert _fp(ohne_reihe(vorher_teil)) == _fp(ohne_reihe(nachher_teil)), \
-        "ausserhalb der Gruppe wurde etwas veraendert"
-
-    doku_a = roh[roh.find('data-mcl-abschnitt="doku"'):]
-    doku_b = neu[neu.find('data-mcl-abschnitt="doku"'):]
-    assert _fp(doku_a) == _fp(doku_b), "die Ausarbeitung wurde angefasst"
-    assert neu.count('data-mcl-listenblock=') == roh.count('data-mcl-listenblock=')
-    assert neu.count('data-mcl-kopieren=') == roh.count('data-mcl-kopieren=')
+    listen = [_liste("s%d" % i, i + 1) for i in range(5)]
+    a, _g = m.live_daten(listen)
+    b, _g2 = m.live_daten(listen)
+    assert _fp(json.dumps(a, sort_keys=True)) == _fp(json.dumps(b, sort_keys=True)), "der Erzeuger ist nicht stabil"
 
 
 # ------------------------------------------------------- Alles oder nichts
 
-def _bloecke(text):
-    return re.findall(r'data-mcl-listenblock="(\d+)"', text)
-
-
-def _feste_teile(m, text):
-    """Alles ausser der Online-Gruppe: die Bloecke der anderen Gruppen und
-    die Ausarbeitung, als Fingerabdruck."""
-    nummern, _t = m.gruppen_nummern(text)
-    fest = [b.group(0) for b in m.BLOCK.finditer(text) if b.group(1) not in nummern]
-    doku = text[text.find('data-mcl-abschnitt="doku"'):]
-    return _fp("".join(fest)), _fp(doku)
-
-
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
 def test_weniger_listen_heisst_weniger_plaetze():
     """DA-26 (Hausi, 30.09.2026): „lieber weniger Listen anzeigen,
-    veraltete online bringen nichts". Bis dahin blieb bei 4 Listen fuer
-    5 Plaetze das ganze Stueck mit den Listen der Vorwoche stehen."""
+    veraltete online bringen nichts". Die JSON fuehrt genau die Listen des
+    Fensters — 4, 1 oder 0 — und fuer 0 den Hinweis."""
     m = _modul()
-    roh = _stueck()
-    fest_vorher = _feste_teile(m, roh)
     for anzahl in (4, 1, 0):
-        listen = [_liste("s%d" % i, i + 1) for i in range(anzahl)]
-        neu, aend, grund = m.nachziehen(roh, listen)
+        d, grund = m.live_daten([_liste("s%d" % i, i + 1) for i in range(anzahl)])
         assert grund == "", grund
-        nummern, _t = m.gruppen_nummern(neu)
-        assert len(nummern) == anzahl, (anzahl, nummern)
-        online = [n for n in _bloecke(neu) if n in nummern]
-        assert sorted(online) == sorted(nummern), "Schalter und Bloecke passen nicht zusammen"
-        assert "s0 · 1. von 100" in neu if anzahl else "mcl-listgruppe-leer" in neu
-        # Keine Liste der Vorwoche bleibt stehen.
-        for alt in m.gruppen_nummern(roh)[0][anzahl:]:
-            assert alt not in _bloecke(neu), "Block %s blieb stehen" % alt
-        assert neu.count("data-mcl-kopieren=") == len(_bloecke(neu))
-        assert _feste_teile(m, neu) == fest_vorher, "ausserhalb der Online-Gruppe wurde etwas veraendert"
+        assert len(d["listen"]) == anzahl
+        assert [l["name"] for l in d["listen"]] == ["s%d · %d. von 100" % (i, i + 1) for i in range(anzahl)]
+    assert "mcl-listgruppe-leer" in d["leer_hinweis"]
+    assert d["gruppe"] == "Online · letzte 7 Tage" and d["max_plaetze"] == 5
 
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
-def test_die_gruppe_waechst_wieder():
-    """Von 0 bzw. 2 zurueck auf 5: neue Bloecke bekommen freie Nummern,
-    keine Nummer kommt doppelt vor, und der zweite Lauf ist still."""
-    m = _modul()
-    roh = _stueck()
-    fuenf = [_liste("s%d" % i, i + 1) for i in range(5)]
-    for start in (0, 2):
-        klein, _a, g = m.nachziehen(roh, fuenf[:start])
-        assert g == "", g
-        gross, aend, g2 = m.nachziehen(klein, fuenf)
-        assert g2 == "", g2
-        nummern, _t = m.gruppen_nummern(gross)
-        assert len(nummern) == 5 and len(set(_bloecke(gross))) == len(_bloecke(gross)), _bloecke(gross)
-        assert all(n in _bloecke(gross) for n in nummern)
-        assert "mcl-listgruppe-leer" not in gross
-        nochmal, aend3, _g3 = m.nachziehen(gross, fuenf)
-        assert _fp(nochmal) == _fp(gross) and aend3 == []
-
-
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
 def test_mehr_listen_als_plaetze_schreibt_nichts():
     m = _modul()
-    roh = _stueck()
-    neu, aend, grund = m.nachziehen(roh, [_liste("s%d" % i, i + 1) for i in range(6)])
-    assert _fp(neu) == _fp(roh) and aend == [] and "hoechstens" in grund
+    d, grund = m.live_daten([_liste("s%d" % i, i + 1) for i in range(6)])
+    assert d is None and "hoechstens" in grund
 
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
-def test_unbekannte_karte_schreibt_nichts():
+def test_unbekannte_karte_kommt_ohne_kachelangaben():
+    """Eine Karte, die die Kartendatenbank nicht kennt, bekommt KEINE
+    erfundenen Kachel-Angaben (`neu` leer). Die Seite nimmt dann Tims
+    Kachel — gibt es keine, bleibt die Gruppe stehen (JS-Zusicherung)."""
     m = _modul()
-    roh = _stueck()
-    kaputt = [{"name": "Gibt Es Nicht", "count": 2, "set_code": "ZZZ", "set_number": "999"}]
-    listen = [_liste("s%d" % i, i + 1) for i in range(5)]
-    listen[2]["cards"] = kaputt
-    neu, aend, grund = m.nachziehen(roh, listen)
-    assert _fp(neu) == _fp(roh) and aend == [] and "Gibt Es Nicht" in grund
+    listen = [_liste("s0", 1, karten=[{"name": "Gibt Es Nicht", "count": 2, "set_code": "ZZZ", "set_number": "999"},
+                                      {"name": "Drilbur", "count": 3, "set_code": "PBL", "set_number": "46"}])]
+    d, _g = m.live_daten(listen)
+    k = {x["name"]: x for x in d["listen"][0]["karten"]}
+    assert k["Gibt Es Nicht"]["neu"] is None
+    assert k["Drilbur"]["neu"]["de"] and k["Drilbur"]["neu"]["bild"].endswith("_R_EN_LG.png")
 
 
 # ------------------------------------------------------------- Inhalt
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
 def test_die_einleitung_ist_aus_den_rohdaten_gerechnet():
     m = _modul()
-    roh = _stueck()
-    listen = [_liste("s%d" % i, i + 1) for i in range(5)]
-    listen[0] = _liste("Kingssofgamer02", 1, 386, "10 - 1 - 1")
-    neu, _a, grund = m.nachziehen(roh, listen)
+    d, grund = m.live_daten([_liste("Kingssofgamer02", 1, 386, "10 - 1 - 1")])
     assert grund == "", grund
-    nummern, _t = m.gruppen_nummern(roh)
-    block = re.search(r'data-mcl-listenblock="%s"[^>]*>(<p class="mcl-listmeta">.*?</p>)'
-                      % nummern[0], neu, re.S).group(1)
-    text = re.sub(r"<[^>]+>", "", block)
-    assert "1. Platz von 386" in text
-    assert "10–1–1" in text, text            # Gedankenstriche wie im Stueck
-    assert "Probe-Cup" in text
-    assert "20.09.2026" in text
-    # Und der Unterschied ist gezaehlt, nicht behauptet.
-    assert "Tims aktueller Liste" in text
-    assert "Kartengleich" in text or "×" in text or "statt" in text or "kein " in text
+    l = d["listen"][0]
+    assert l["fakten"] == "1. Platz von 386 (10–1–1), „Probe-Cup“, 20.09.2026."
+    assert l["name"] == "Kingssofgamer02 · 1. von 386"
+    assert [(k["name"], k["n"]) for k in l["karten"]] == [("Drilbur", 3), ("Metal Energy", 17)]
+    assert l["karten"][1]["schluessel"] == m._schluessel("Basic Metal Energy")
 
 
-@pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck nicht im Baum")
-def test_die_kacheln_tragen_weiter_deutsche_namen_und_begruendung():
-    """Die Kacheln werden aus dem Stueck uebernommen, nicht neu erfunden —
-    sonst verloere eine nachgezogene Liste Tims Begruendungen."""
+def test_der_unterschied_ist_derselbe_satz_wie_auf_der_seite():
+    """Den Satz rechnet seit dem Umzug die Seite (listenUnterschied in
+    js/ds-masterclass.js). Beide Fassungen muessen dieselben Faelle gleich
+    beantworten — die JS-Seite prueft dieselbe Datei."""
     m = _modul()
-    roh = _stueck()
-    listen = [_liste("s%d" % i, i + 1) for i in range(5)]
-    neu, _a, grund = m.nachziehen(roh, listen)
-    assert grund == "", grund
-    nummern, _t = m.gruppen_nummern(roh)
-    block = re.search(r'(data-mcl-listenblock="%s".*?<p class="mcl-quelle">.*?</p></div>)'
-                      % nummern[0], neu, re.S).group(1)
-    assert 'data-de="Rotomurf"' in block, "der deutsche Name fehlt"
-    assert 'data-warum=' in block, "Tims Begruendung fehlt"
-    assert 'data-n="3"' in block and '<span class="mcl-anz">3</span>' in block
-    assert "20 Karten · 2 verschiedene" in block
+    with open(FAELLE, encoding="utf-8") as f:
+        faelle = json.load(f)["faelle"]
+    assert len(faelle) >= 4
+    for fa in faelle:
+        assert m.unterschied(fa["zaehlung"], fa["tims"]) == fa["erwartet"]
+
+
+def test_in_der_json_steht_kein_satz_der_ausarbeitung():
+    """Die Live-Datei ist oeffentlich. Sie darf nur Daten tragen: Namen,
+    Zahlen, Turniere, Kartenangaben — keine Begruendung (data-warum) und
+    keinen Kartentext."""
+    if not os.path.exists(LIVE):
+        pytest.skip("Live-Datei nicht im Baum")
+    with open(LIVE, encoding="utf-8") as f:
+        roh = f.read()
+    for verboten in ("data-warum", "data-text", "Tim ", "Begründung", "<p", "<div"):
+        assert verboten not in roh, verboten
 
 
 def test_der_namensschluessel_haelt_die_schreibweisen_aus():

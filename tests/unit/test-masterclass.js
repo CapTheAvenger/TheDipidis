@@ -22,7 +22,17 @@ const vm = require('vm');
 
 const WURZEL = path.join(__dirname, '..', '..');
 const JS = fs.readFileSync(path.join(WURZEL, 'js', 'ds-masterclass.js'), 'utf8');
-const FRAGMENT = fs.readFileSync(path.join(WURZEL, 'masterclass', 'mega-stalobor.de.html'), 'utf8');
+/* UMZUG 17.10.2026: das Stueck liegt nur noch in Hausis Konto (Firestore),
+ * nicht mehr im oeffentlichen Repo. Die Zusicherungen, die seinen INHALT
+ * pruefen, laufen deshalb gegen eine Datei von der Platte, wenn
+ * MASTERCLASS_STUECK sie nennt (vor jedem Hochladen:
+ * bash scripts/pruefe_masterclass_konto.sh <datei>) — in der CI, wo es das
+ * Stueck nicht gibt, werden sie mit Begruendung uebersprungen. Das
+ * Verhalten des Codes wird weiter immer geprueft. */
+const STUECK_PFAD = process.env.MASTERCLASS_STUECK || '';
+const FRAGMENT = STUECK_PFAD ? fs.readFileSync(STUECK_PFAD, 'utf8') : '';
+const inhalt = FRAGMENT ? test
+    : (name, fn) => test(name, { skip: 'Stück liegt im Konto — Inhaltsprüfung: bash scripts/pruefe_masterclass_konto.sh <datei>' }, fn);
 const CSS = fs.readFileSync(path.join(WURZEL, 'css', 'masterclass.css'), 'utf8');
 const INDEX = fs.readFileSync(path.join(WURZEL, 'index.html'), 'utf8');
 const I18N = fs.readFileSync(path.join(WURZEL, 'js', 'i18n.js'), 'utf8');
@@ -33,9 +43,9 @@ const I18N = fs.readFileSync(path.join(WURZEL, 'js', 'i18n.js'), 'utf8');
  * Legende zu den DATEN passt, prueft tests/python/test_masterclass_kartennamen.py
  * gegen data/format_window.json — dieser Test liest bewusst nichts aus data/
  * (tests/unit/test-testdaten-wachhund.js). */
-const LEGENDE = (FRAGMENT.match(/<b>([^<]+)<\/b> ist das laufende Online-Format, <b>([^<]+)<\/b> das Online-Format davor/) || []);
-const KOPF_JETZT = LEGENDE[1];
-const KOPF_DAVOR = LEGENDE[2];
+const LEGENDE = (FRAGMENT.match(/<b[^>]*>([^<]+)<\/b> ist das laufende Online-Format, <b[^>]*>([^<]+)<\/b> das Online-Format davor/) || []);
+const KOPF_JETZT = LEGENDE[1] || '';
+const KOPF_DAVOR = LEGENDE[2] || '';
 const dateiZu = (kopf) => `online_api_matchups_${kopf.replace('\u2013', '-')}.csv`;
 const SWITCH = fs.readFileSync(path.join(WURZEL, 'js', 'firebase-collection.js'), 'utf8');
 
@@ -157,7 +167,7 @@ test('markiere maskiert HTML und laesst nur Fett und Kursiv durch', () => {
 
 /* ── Was das Inhaltsstueck behauptet, muss darin auch stehen ── */
 
-test('jede Liste fuehrt 60 Karten und hoechstens eine ACE SPEC', () => {
+inhalt('jede Liste fuehrt 60 Karten und hoechstens eine ACE SPEC', () => {
     /* 21.09.2026: sechs Listen. 22.09.2026 auf 20 erweitert — Tims
      * Empfehlung mit dem Kangama/Arktos-Paket plus die dreizehn
      * Mega-Stalobor-Listen aus Tag 2 der Worlds. Der Betreiber hatte
@@ -217,7 +227,7 @@ test('jede Liste fuehrt 60 Karten und hoechstens eine ACE SPEC', () => {
         + 'SPEC aus dem Register — der Abgleich greift nicht mehr');
 });
 
-test('jede Siegquote nennt ihren Nenner, und unter 30 Partien steht keine Quote', () => {
+inhalt('jede Siegquote nennt ihren Nenner, und unter 30 Partien steht keine Quote', () => {
     /* BESTELLUNG (22.09.2026): "Koennen wir bei Matchups die aktuellen
      * Werte vom current Online Meta anzeigen ... und von den letzten
      * Majors auch noch die Matchup-Daten dazu ... damit ich mich mit
@@ -259,7 +269,7 @@ test('jede Siegquote nennt ihren Nenner, und unter 30 Partien steht keine Quote'
     assert.ok(bilanzen >= 5, `nur ${bilanzen} Bilanzen — die Mindeststichprobe greift nirgends`);
 });
 
-test('jedes Matchup zeigt drei Metas und Tims Einschaetzung', () => {
+inhalt('jedes Matchup zeigt drei Metas und Tims Einschaetzung', () => {
     /* "Vielleicht zeigen wir auch aktuelles Meta WR und daneben last
      * Meta Online und Last Meta Major ... und falls Tim eine eigene
      * Schaetzung gegeben hat, dann noch Tim WR." — Tim hat keine Zahl
@@ -331,7 +341,7 @@ test('die Zahlenspalten stapeln, solange sie nicht nebeneinander passen', () => 
     assert.ok(Number(m[1]) >= 900,
         `gestapelt wird erst unter ${m[1]} px — der Zahlenblock braucht 527 px neben dem Namen`);
 });
-test('das Stueck nennt seine Quellen und behauptet keine eigenen Zahlen', () => {
+inhalt('das Stueck nennt seine Quellen und behauptet keine eigenen Zahlen', () => {
     /* 22.09.2026: die Matchup-Quelle hat gewechselt. Vorher stand dort
      * EINE Ladder-Aggregation (limitless_online_decks_matchups.csv,
      * Konvention ohne Unentschieden); jetzt sind es drei Quellen, aus
@@ -345,11 +355,14 @@ test('das Stueck nennt seine Quellen und behauptet keine eigenen Zahlen', () => 
     ].forEach((quelle) => {
         assert.ok(FRAGMENT.includes(quelle), `die Quelle ${quelle} wird nicht genannt`);
     });
-    /* Und der Stand, zu dem die Zahlen gelesen wurden: das Stueck zieht
-     * nicht nach. */
-    assert.ok(/Stand \d{4}-\d{2}-\d{2}/.test(FRAGMENT), 'der Datenstand fehlt');
-    assert.ok(/zieht nicht selbst nach/.test(FRAGMENT),
-        'das Stueck sagt nicht, dass seine Zahlen eingefroren sind');
+    /* Und der Stand, zu dem die Zahlen gelesen wurden — seit dem Umzug
+     * (17.10.2026) als markierte Stelle, die beim Oeffnen frisch wird,
+     * und der Satz sagt das auch (vorher: „zieht nicht selbst nach“). */
+    assert.ok(/Stand (?:<span data-live="stand-online-jetzt">)?\d{4}-\d{2}-\d{2}/.test(FRAGMENT), 'der Datenstand fehlt');
+    assert.ok(!/zieht nicht selbst nach/.test(FRAGMENT),
+        'das Stueck behauptet noch, seine Zahlen seien eingefroren');
+    assert.ok(/data\/masterclass_live\/mega-stalobor\.json/.test(FRAGMENT),
+        'das Stueck nennt die Live-Datei nicht, aus der seine Zahlen kommen');
 });
 
 /* ── Einbindung und Sprache ── */
@@ -417,32 +430,29 @@ test('die CSS kommt ohne !important aus und faerbt ueber Tokens', () => {
 
 /* ── Ausgeliefert wird nur, was die Positivliste kennt ── */
 
-test('der Deploy kopiert masterclass/ nach _site — sonst ist es live 404', () => {
-    /* BEFUND (21.09.2026, live gemessen): PR #792 war gruen, gemerged und
-     * ausgerollt. Der Reiter zeigte trotzdem "Die Masterclass liess sich
-     * nicht laden", weil `fetch('masterclass/mega-stalobor.de.html')` auf
-     * thedipidis.app 404 gab: _site wird aus einer Positivliste gebaut,
-     * nicht aus dem Repo-Inhalt. Dieselbe Falle wie bei tutorial/ (18.08.)
-     * und posts/ (04.09.) — beide stehen als Kommentar in derselben Datei.
-     * Eine gruene Suite hat davon nichts gemerkt, weil kein Test die
-     * Ausliefer-Liste gelesen hat. Jetzt tut es einer. */
+test('kein bezahltes Stueck im oeffentlichen Repo und keins im Deploy', () => {
+    /* UMZUG 17.10.2026 (Hausi: „ja auf jeden Fall“, das Repo ist
+     * oeffentlich): eine gekaufte Ausarbeitung liegt nur im Konto. Bis
+     * dahin stand hier das Gegenteil — der Deploy MUSSTE masterclass/
+     * kopieren (BEFUND 21.09.2026, live 404). Jetzt darf es das Verzeichnis
+     * mit einer HTML-Datei gar nicht mehr geben, und kein Guide darf auf
+     * eine Datei zeigen. */
+    const ordner = path.join(WURZEL, 'masterclass');
+    const html = fs.existsSync(ordner) ? fs.readdirSync(ordner).filter((d) => /\.html?$/i.test(d)) : [];
+    assert.deepStrictEqual(html, [], 'bezahlte Stuecke im Repo: ' + html.join(', '));
     const yml = fs.readFileSync(
         path.join(WURZEL, '.github', 'workflows', 'deploy-pages.yml'), 'utf8');
     const ohneRaute = yml.split('\n').filter((z) => !/^\s*#/.test(z)).join('\n');
     assert.ok(ohneRaute.length > yml.length * 0.3,
         `das Ausschneiden hat zu viel entfernt: ${ohneRaute.length} von ${yml.length}`);
-    assert.match(ohneRaute, /cp -r masterclass _site\/masterclass/,
-        'masterclass/ fehlt in der Positivliste von deploy-pages.yml — '
-        + 'das Inhaltsstueck waere live 404, obwohl es im Repo liegt');
-    /* Die Gegenprobe: das Verzeichnis, aus dem geladen wird, ist auch das,
-     * das kopiert wird. Ein Umbenennen faellt hier auf. */
-    assert.match(JS_NACKT, /datei:\s*'masterclass\//,
-        'der Guide zeigt nicht mehr auf masterclass/');
+    assert.doesNotMatch(ohneRaute, /cp -r masterclass/, 'der Deploy kopiert noch masterclass/');
+    assert.doesNotMatch(JS_NACKT, /datei:\s*'masterclass\//, 'ein Guide zeigt noch auf masterclass/');
+    assert.match(JS_NACKT, /quelle:\s*'konto'/, 'der Stalobor-Guide kommt nicht aus dem Konto');
 });
 
 /* ── Fachbegriffe, die man nicht uebersetzt ── */
 
-test('going first/second steht so da und ist nicht in "vorne/hinten" uebersetzt', () => {
+inhalt('going first/second steht so da und ist nicht in "vorne/hinten" uebersetzt', () => {
     /* BEFUND (21.09.2026, vom Betreiber gemeldet): Die Aufbereitung hatte
      * "Vorne wählen" und "Zug 1 hinten" geschrieben. Im Deutschen sagen
      * Spieler aber "Going First" und "Going Second" — und schlimmer: im
@@ -476,7 +486,7 @@ test('going first/second steht so da und ist nicht in "vorne/hinten" uebersetzt'
         `${rest} offene "vorne/hinten" im Stueck — jedes davon von Hand pruefen`);
 });
 
-test('Phase 1 und Phase 2 heissen wie auf der Karte, nicht "Stufe"', () => {
+inhalt('Phase 1 und Phase 2 heissen wie auf der Karte, nicht "Stufe"', () => {
     /* Die deutschen Karten sagen "Phase-2-Pokémon" (siehe card_text_de von
      * POR-84 Rosys Ermutigung). "Stufe 2" ist die englische Denkweise. */
     const stufe = (FRAGMENT.match(/Stufe[- ][12]/g) || []);
@@ -484,7 +494,7 @@ test('Phase 1 und Phase 2 heissen wie auf der Karte, nicht "Stufe"', () => {
         'auf den deutschen Karten heisst das Phase 1 / Phase 2: ' + stufe.join(', '));
 });
 
-test('der Lavados-Treffer steht mit 220 da, und der Bankzugriff beim Boss', () => {
+inhalt('der Lavados-Treffer steht mit 220 da, und der Bankzugriff beim Boss', () => {
     /* BEFUND (21.09.2026, vom Betreiber gemeldet): Im Stueck stand
      * "Lavados (Moltres) gibt Bankzugriff ohne Matt" und "für 120".
      * Beides war falsch. Nachgerechnet am Kartentext:
@@ -512,7 +522,7 @@ test('der Lavados-Treffer steht mit 220 da, und der Bankzugriff beim Boss', () =
         'die widerlegten 120 stehen wieder im Stueck');
 });
 
-test('das Kartendetail zeigt den deutschen Kartentext, nicht nur den englischen', () => {
+inhalt('das Kartendetail zeigt den deutschen Kartentext, nicht nur den englischen', () => {
     /* BEFUND (21.09.2026, live gesehen): Das Kartendetail war mit
      * "Kartentext (englisch)" ueberschrieben und zeigte nur den
      * englischen Text — in einer Aufbereitung, die es ausdruecklich auf
@@ -558,7 +568,7 @@ test('das Kartendetail zeigt den deutschen Kartentext, nicht nur den englischen'
         'die deutsche Beschriftung heisst weiter "Kartentext (englisch)"');
 });
 
-test('die fuenf Online-Listen der letzten sieben Tage sind eigene Listen', () => {
+inhalt('die fuenf Online-Listen der letzten sieben Tage sind eigene Listen', () => {
     /* BESTELLUNG (22.09.2026): "kannst du noch die erfolgreichsten Listen
      * der letzten 7 Tage online Limitless Turniere dazu packen". Quelle:
      * play.limitlesstcg.com, gelesen am 22.09.2026 — Best-Finishes-Tabelle
@@ -710,7 +720,7 @@ test('die Bildadresse wird aus dem Druck gebaut, nicht geraten', () => {
     });
 });
 
-test('jede Liste traegt einen Kopierknopf, jede Kachel beide Drucke', () => {
+inhalt('jede Liste traegt einen Kopierknopf, jede Kachel beide Drucke', () => {
     /* BESTELLUNG (22.09.2026): "In den Listen selbst bitte den
      * aktuellsten Low-Rarity-Print" plus "einen Button, der die Liste
      * als Screenshot in die Zwischenablage packt". Also zwei Drucke je
@@ -741,7 +751,7 @@ test('jede Liste traegt einen Kopierknopf, jede Kachel beide Drucke', () => {
     assert.ok(JS_NACKT.includes('druckHoch'), 'das Skript liest data-druck-hoch nicht');
 });
 
-test('die Regalkachel zeigt den Sammlerdruck und nennt die Zahlen des Stuecks', () => {
+inhalt('die Regalkachel zeigt den Sammlerdruck und nennt die Zahlen des Stuecks', () => {
     /* BEFUND (22.09.2026, vom Betreiber gemeldet, mit Bildschirmfoto):
      * "Ist immer noch der low rarity Print, obwohl da max rarity Print
      * hin soll." Gemeint war die KACHEL im Regal — sie hing noch an
@@ -826,7 +836,7 @@ test('der Klick auf den Kopierknopf landet beim Kopieren, der auf eine Karte bei
         'ein Klick auf eine Karte ruft nicht mehr das Detail');
 });
 
-test('Tims Paketliste heisst Kangama Arktos Build', () => {
+inhalt('Tims Paketliste heisst Kangama Arktos Build', () => {
     /* BESTELLUNG (22.09.2026): "kannst du die Tim Liste welche aktuell
      * Update mit Paket heisst umbenennen in Kangama Arktos Build". */
     assert.ok(/data-mcl-liste="\d+"[^>]*>Kangama Arktos Build</.test(FRAGMENT),
@@ -835,7 +845,7 @@ test('Tims Paketliste heisst Kangama Arktos Build', () => {
         'der alte Name "Update · mit Paket" steht noch im Stueck');
 });
 
-test('die Kangama/Arktos-Liste und die Worlds-Gruppe sind da', () => {
+inhalt('die Kangama/Arktos-Liste und die Worlds-Gruppe sind da', () => {
     /* BEFUND (22.09.2026, vom Betreiber gemeldet): "es gibt ja wohl eine
      * Liste mit Kangama und Arctos, aber die ist gar nicht drin." Stimmte:
      * das Paket stand nur als Fliesstext in Teil B4. Tim zeigt die

@@ -1170,10 +1170,13 @@ jobs:
       # BESTELLUNG: "Die Masterclass unbedingt auf den Wochenlauf
       # haengen, damit ich immer die aktuellsten Daten habe."
       #
-      # masterclass/mega-stalobor.de.html traegt drei Sorten Zahlen aus
+      # Die Mega-Stalobor-Masterclass traegt drei Sorten Zahlen aus
       # genau den Dateien, die dieser Lauf schreibt: die Matchup-Quoten,
       # die Feldanteile und die fuenf Listen unter "Online - letzte 7
-      # Tage". Bis heute standen die Listen seit dem 22.09. still.
+      # Tage". Seit dem 17.10.2026 liegt das Stueck nur in Hausis Konto;
+      # die Erzeuger schreiben data/masterclass_live/mega-stalobor.json,
+      # und die Seite setzt die Werte beim Oeffnen ein (git add -A unten
+      # nimmt die Datei mit).
       #
       # Der Schritt gehoert HINTER die Scraper und VOR das Tor: er
       # rechnet mit dem frischen Stand, und die Zusicherungen im
@@ -1188,7 +1191,7 @@ jobs:
           python3 -u scripts/masterclass_listen_nachziehen.py
           rc2=$?
           if [ "$rc1" -ne 0 ] || [ "$rc2" -ne 0 ]; then
-            echo "::warning::Masterclass nicht vollstaendig nachgezogen (Zahlen $rc1, Listen $rc2) — das Stueck bleibt, wie es ist"
+            echo "::warning::Masterclass nicht vollstaendig nachgezogen (Zahlen $rc1, Listen $rc2) — die Live-Daten bleiben, wie sie sind"
           fi
           exit 0
 

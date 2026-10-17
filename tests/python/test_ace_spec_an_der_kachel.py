@@ -35,7 +35,13 @@ import pytest
 HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))
 ERZEUGER = os.path.join(WURZEL, "scripts", "masterclass_listen_nachziehen.py")
-STUECK = os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+# UMZUG 17.10.2026: das Stueck liegt nur noch in Hausis Konto. Die
+# Zusicherungen an seinen Kacheln laufen, wenn MASTERCLASS_STUECK eine Datei
+# nennt (bash scripts/pruefe_masterclass_konto.sh <datei>); die Kacheln der
+# Online-Listen der Woche stehen in der Live-Datei und werden immer geprueft.
+STUECK = os.environ.get("MASTERCLASS_STUECK") or os.path.join(WURZEL, "masterclass", "mega-stalobor.de.html")
+LIVE = os.path.join(WURZEL, "data", "masterclass_live", "mega-stalobor.json")
+OHNE_STUECK = pytest.mark.skipif(not os.path.exists(STUECK), reason="Stueck liegt im Konto (MASTERCLASS_STUECK nicht gesetzt)")
 REGISTER = os.path.join(WURZEL, "data", "ace_specs.json")
 
 KACHEL = re.compile(r'<button[^>]*class="mcl-kk"[^>]*>')
@@ -82,9 +88,12 @@ def test_der_erzeuger_setzt_die_markierung():
         koerper = koerper[1:]          # Docstring raus
     texte = [k.value for k in ast.walk(ast.Module(body=koerper, type_ignores=[]))
              if isinstance(k, ast.Constant) and isinstance(k.value, str)]
-    assert any('data-ace="1"' in t for t in texte), (
-        "kachel_neu schreibt keine ACE-SPEC-Markierung mehr — eine frisch "
-        "gezogene Liste traegt sie dann nicht")
+    # Seit dem Umzug (17.10.2026) liefert kachel_neu die Angaben der Kachel;
+    # das Feld "ace" wird auf der Seite zu data-ace="1" (kachelNeuHtml,
+    # tests/unit/test-masterclass-live.js).
+    assert any(t == "ace" for t in texte), (
+        "kachel_neu liefert keine ACE-SPEC-Angabe mehr — eine frisch "
+        "gezogene Liste traegt die Markierung dann nicht")
     assert any("ist_ace" == getattr(k, "id", None)
                for k in ast.walk(ast.Module(body=koerper, type_ignores=[]))), (
         "ist_ace steht in der Signatur, wird im Koerper aber nicht benutzt")
@@ -135,6 +144,7 @@ def test_die_erkennung_steht_auf_zwei_beinen():
     assert mod.ist_ace_spec("Beldum", False) is False
 
 
+@OHNE_STUECK
 def test_die_markierungen_stimmen_mit_dem_register_ueberein():
     """Der Abgleich an den Daten: jede markierte Kachel steht im
     Register, und jede Kachel aus dem Register ist markiert."""
@@ -162,6 +172,7 @@ def test_die_markierungen_stimmen_mit_dem_register_ueberein():
         "%s" % sorted(set(nicht_markiert)))
 
 
+@OHNE_STUECK
 def test_keine_liste_fuehrt_zwei_ace_spec():
     """Die Spielregel: hoechstens eine. Null ist erlaubt."""
     stueck = _lies(STUECK)
@@ -174,6 +185,7 @@ def test_keine_liste_fuehrt_zwei_ace_spec():
     assert zuviel == [], "diese Listen fuehren mehr als eine ACE SPEC: %s" % zuviel
 
 
+@OHNE_STUECK
 def test_die_markierung_ist_ueberhaupt_da():
     """Gegenprobe: ohne eine einzige Markierung pruefen die drei
     Zusicherungen darueber ins Leere."""
@@ -181,3 +193,27 @@ def test_die_markierung_ist_ueberhaupt_da():
     assert stueck.count('data-ace="1"') >= 10, (
         "nur %d markierte Kacheln im Stueck — der Abgleich greift nicht"
         % stueck.count('data-ace="1"'))
+
+
+@pytest.mark.skipif(not os.path.exists(LIVE), reason="Live-Datei nicht im Baum")
+def test_die_online_listen_der_live_datei_stimmen_mit_dem_register():
+    """Dieselbe Regel an den Listen der Woche: eine Karte ist genau dann
+    als ACE SPEC markiert, wenn sie im Register steht (oder das Feld es
+    sagt), und keine Liste fuehrt zwei."""
+    import html as _html
+    reg = _register()
+    with open(LIVE, encoding="utf-8") as f:
+        listen = json.load(f)["online_listen"]["listen"]
+    falsch = []
+    for l in listen:
+        aces = 0
+        for k in l["karten"]:
+            en = _html.unescape(k["name"]).lower().replace("\u2019", "'")
+            if en in reg and not k["ace"]:
+                falsch.append("nicht markiert: " + k["name"])
+            if k["ace"]:
+                aces += 1
+            if k["neu"] and k["neu"]["ace"] != k["ace"]:
+                falsch.append("Kachel und Karte widersprechen sich: " + k["name"])
+        assert aces <= 1, "%s fuehrt %d ACE SPEC" % (l["name"], aces)
+    assert falsch == [], falsch

@@ -18,6 +18,8 @@ on:
 permissions:
   contents: write   # commit the updated baseline
   issues: write     # open/update the findings issue
+  actions: read     # Laufkontrolle + zurueckgehaltene Daten (SC-37)
+  checks: read      # Annotationen des Tors lesen (SC-37)
 
 concurrency:
   group: data-guardian
@@ -207,6 +209,28 @@ jobs:
           done
           echo "rot=$rot" >> "$GITHUB_OUTPUT"
 
+      # GRUEN, ABER DATEN STILL (SC-37, 17.10.2026). Vom 13. bis 17.10. liefen
+      # acht Champions-Laeufe gruen und rollten dabei die ganze Champions-
+      # Familie zurueck — drei Tage ohne neue Daten, ohne Mail. Die Pruefung
+      # darueber sieht nur rot/gruen. Hier: jede Datei, die der juengste UND
+      # der vorherige Lauf eines Ablaufs zurueckgehalten haben (und die kein
+      # anderer Ablauf seither geliefert hat), wird CRITICAL im Issue. Der
+      # Lauf selbst bleibt gruen — Bestandsschutz ist richtig, Schweigen nicht.
+      - name: Zurueckgehaltene Daten pruefen
+        id: still
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e -uo pipefail
+          python3 scripts/zurueckgehalten.py --laeufe 4 > /tmp/still.md
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "- **CRITICAL** Zurueckhalte-Pruefung brach ab (Rueckgabewert $rc)" >> /tmp/still.md
+            echo "anzahl=1" >> "$GITHUB_OUTPUT"
+          fi
+          cat /tmp/still.md >> /tmp/findings.md
+          cat /tmp/still.md
+
       - name: Report findings
         env:
           GH_TOKEN: ${{ github.token }}
@@ -214,6 +238,7 @@ jobs:
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           CRIT: ${{ steps.guard.outputs.crit }}
           ROT: ${{ steps.laeufe.outputs.rot }}
+          STILL: ${{ steps.still.outputs.anzahl }}
         run: |
           TITLE="🛡️ Data guardian: findings"
           # Reuse one rolling issue instead of opening a new one every morning.
@@ -221,7 +246,7 @@ jobs:
                  "https://api.github.com/repos/$REPO/issues?state=open&per_page=100" \
                | T="$TITLE" python3 -c "import sys,json,os;t=os.environ['T'];print(next((i['number'] for i in json.load(sys.stdin) if i['title']==t),''))")
 
-          if [ "$(( ${CRIT:-0} + ${ROT:-0} ))" = "0" ]; then
+          if [ "$(( ${CRIT:-0} + ${ROT:-0} + ${STILL:-0} ))" = "0" ]; then
             if [ -n "$NUM" ]; then
               echo "All clear — closing issue #$NUM"
               curl -sS -X PATCH -H "Authorization: Bearer $GH_TOKEN" \
@@ -247,6 +272,28 @@ jobs:
 
           if [ -n "$NUM" ]; then
             echo "Updating issue #$NUM"
+            # Eine Aenderung am Issue-Text verschickt keine Mail. Kommt eine
+            # CRITICAL-Zeile dazu, die gestern noch nicht dastand, deshalb ein
+            # Kommentar (SC-37) — sonst laege der neue Befund still im alten Issue.
+            curl -sS -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$REPO/issues/$NUM" > /tmp/alt.json
+            python3 - /tmp/alt.json /tmp/body.md > /tmp/neu.md <<'PY'
+          import json, re, sys
+          # Verglichen wird ohne Ziffern: Serienlaenge, Laufnummer und Datum
+          # aendern sich mit jedem Lauf — sonst kaeme fuer einen fortbestehenden
+          # Befund jeden Tag ein Kommentar (Prueffund 17.10.2026).
+          kern = lambda z: re.sub(r"\d+", "#", z)
+          alt = {kern(z) for z in (json.load(open(sys.argv[1], encoding="utf-8")).get("body") or "").splitlines()}
+          neu = [z for z in open(sys.argv[2], encoding="utf-8").read().splitlines()
+                 if "**CRITICAL**" in z and kern(z) not in alt]
+          if neu:
+              print("\n".join(neu))
+          PY
+            if grep -q . /tmp/neu.md; then
+              curl -sS -X POST -H "Authorization: Bearer $GH_TOKEN" \
+                "https://api.github.com/repos/$REPO/issues/$NUM/comments" \
+                -d "$(python3 -c 'import json;print(json.dumps({"body":"Neu seit dem letzten Lauf:\n\n"+open("/tmp/neu.md",encoding="utf-8").read()}))')" >/dev/null
+            fi
             curl -sS -X PATCH -H "Authorization: Bearer $GH_TOKEN" \
               "https://api.github.com/repos/$REPO/issues/$NUM" \
               -d "$(python3 -c 'import json;print(json.dumps({"body":open("/tmp/body.md",encoding="utf-8").read()}))')" >/dev/null

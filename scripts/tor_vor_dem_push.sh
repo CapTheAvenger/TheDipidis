@@ -92,6 +92,14 @@ if [ "${TOR_OHNE_SCHRUMPF:-0}" != "1" ] && [ -f scripts/schrumpf_waechter.py ]; 
     fi
 fi
 
+# SC-37: hat ein frueheres Tor in diesem Job zurueckgerollt (Rebase-Tor in
+# push_nach_rebase.sh), gilt dessen Liste auch hier — sonst meldete die
+# Frischepruefung den gewollt alten Stempel als Lieferfehler.
+if [ -s "${RUNNER_TEMP:-/tmp}/tor_zurueckgerollt.txt" ]; then
+    TOR_ZURUECKGEROLLT="${TOR_ZURUECKGEROLLT:-} $(cat "${RUNNER_TEMP:-/tmp}/tor_zurueckgerollt.txt")"
+    export TOR_ZURUECKGEROLLT
+fi
+
 rot=0
 laeufe=("js-kern|bash scripts/run-js-unit-tests.sh tests/unit"
         "py-kern|python3 -m pytest tests/python -q")
@@ -134,6 +142,18 @@ if [ "$rot" -ne 0 ] && [ "${TOR_OHNE_ROLLBACK:-0}" != "1" ] && [ -f scripts/tor_
     mkdir -p "$protokolle/erstlauf" && cp "$protokolle"/*.log "$protokolle/erstlauf/" 2>/dev/null
     rollback_versucht=1
     if python3 scripts/tor_rollback.py suchen "$protokolle/erstlauf" "$sicherung"; then
+        # SC-37 (17.10.2026): eine zurueckgerollte Datei traegt den Stempel von
+        # gestern, obwohl ihr Erzeuger heute lief. Die Frischepruefung meldete
+        # das am dritten Tag als „kommt nicht an (git-add-Liste?)" und machte
+        # den zweiten Durchlauf rot (Replica #161). Der Grund ist hier bekannt
+        # und benannt — die Frischepruefung nimmt diese Dateien aus; wer laenger
+        # als einen Lauf zurueckhaelt, meldet der Data Guardian (zurueckgehalten.py).
+        # Vereinigt mit einem frueheren Tor DESSELBEN Jobs (Rebase-Tor in
+        # push_nach_rebase.sh): dort ist die zurueckgerollte Datei kein
+        # Kandidat mehr, ihr alter Stempel aber weiter gewollt. Die Liste lebt
+        # in $RUNNER_TEMP (bleibt ueber die Schritte eines Jobs erhalten).
+        TOR_ZURUECKGEROLLT="$(cat "${RUNNER_TEMP:-/tmp}/tor_zurueckgerollt.txt" 2>/dev/null || true) $(python3 -c "import json,sys;print(' '.join(json.load(open(sys.argv[1])).get('zurueck') or []))" "$sicherung/manifest.json" 2>/dev/null || true)"
+        export TOR_ZURUECKGEROLLT
         rot2=0
         for lauf in "${laeufe[@]}"; do
             name="${lauf%%|*}"; befehl="${lauf#*|}"
@@ -167,6 +187,17 @@ fi
 # zeigen Protokoll und Zusammenfassung sonst nur den ZWEITEN Durchlauf — die
 # Ursache, wegen der eine Datei alt bleibt, waere unsichtbar. Hier wird sie
 # benannt, geheilt oder nicht.
+# SAMMELZEILE ZUERST (SC-37, Prueffund 17.10.2026): GitHub nimmt hoechstens
+# 10 Warnungen je Schritt an. Bei Replica #160 fielen so champions_usage.json
+# und weitere Einzelzeilen weg — der Data Guardian (zurueckgehalten.py) haette
+# sie nie gesehen. Diese eine Zeile kommt vor allen anderen und nennt jede
+# zurueckgehaltene Datei unter data/ (Bilder nur gezaehlt).
+if [ -n "$rollback" ]; then
+    echo "$rollback" | tr ' ' '\n' | grep -v '^$' >> "${RUNNER_TEMP:-/tmp}/tor_zurueckgerollt.txt"
+    daten_gehalten="$(echo "$rollback" | tr ' ' '\n' | grep '^data/' | tr '\n' ' ' | sed 's/ $//')"
+    bilder_gehalten="$(echo "$rollback" | tr ' ' '\n' | grep -vc -e '^data/' -e '^$' || true)"
+    echo "::warning::Tor hielt zurueck: ${daten_gehalten:-keine Datei unter data/} | Bilder: ${bilder_gehalten:-0}"
+fi
 if [ "$rollback_versucht" -eq 1 ]; then
     erstlauf_rot="$(grep -hE '^✗|^FAILED' "$protokolle"/erstlauf/*.log 2>/dev/null | head -40 || true)"
     {
@@ -188,7 +219,7 @@ for k, t in (("kandidaten", "geaendert in diesem Lauf"), ("zurueck", "auf dem St
 PY
         fi
     } >> "$zusammenfassung"
-    echo "$erstlauf_rot" | grep -E '^✗|^FAILED' | head -20 | sed 's/^/::warning::Tor, erster Durchlauf: /' || true
+    echo "$erstlauf_rot" | grep -E '^✗|^FAILED' | head -5 | sed 's/^/::warning::Tor, erster Durchlauf: /' || true
 fi
 if [ -n "$rollback" ]; then
     {

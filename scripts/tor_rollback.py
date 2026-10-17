@@ -70,7 +70,58 @@ FAMILIEN = [
 # 40 Icons unter images/champions-items/ blieben liegen — der zweite
 # Durchlauf fand „Dateien ohne Eintrag im Manifest" und das Tor blieb zu.
 # Ein Zurueckrollen, das selbst einen Widerspruch erzeugt, heilt nie.
-BILDORDNER = ("images/champions/", "images/champions-items/")
+#
+# SC-38 (17.10.2026): WELCHE Ordner ausser data/ ein Lauf schreibt, steht
+# nicht mehr hier von Hand, sondern kommt aus den `git add`-Zeilen der
+# Ablaufdateien — alles, was ein Ablauf commitet, kann das Tor auch
+# zurueckrollen. Dass jeder solche Ordner in einer Familie steht (sonst
+# rollte ein Bild ohne sein Manifest zurueck), haelt
+# tests/python/test_tor_familie_deckt_die_ausgaben.py fest.
+ABLAUFORDNER = ".github/workflows"
+
+
+def _git_add_pfade(text):
+    """Alle Pfade aus `git add`-Aufrufen (samt Fortsetzungszeilen)."""
+    # Kommentarzeilen zuerst weg: dort steht „git add" in Prosa (Prueffund 17.10.).
+    pfade, zeilen, i = [], [z for z in text.splitlines() if not z.lstrip().startswith("#")], 0
+    while i < len(zeilen):
+        if re.search(r"\bgit add\b", zeilen[i]):
+            block = zeilen[i]
+            while block.rstrip().endswith("\\") and i + 1 < len(zeilen):
+                i += 1
+                block += " " + zeilen[i]
+            teil = block.split("git add", 1)[1]
+            teil = re.split(r"\|\||&&|;|\||#", teil)[0]
+            pfade += [w for w in teil.replace("\\", " ").split()
+                      if not w.startswith(("-", "$", "/")) and w not in (".",)]
+        i += 1
+    return pfade
+
+
+def ausgabeordner(ordner=ABLAUFORDNER):
+    """Pfade ausserhalb von data/, die ein Ablauf mit Tor nach main commitet."""
+    raus = set()
+    if not os.path.isdir(ordner):
+        return ()
+    for name in sorted(os.listdir(ordner)):
+        if not name.endswith((".yml", ".yaml")):
+            continue
+        with open(os.path.join(ordner, name), encoding="utf-8") as fh:
+            text = fh.read()
+        if "tor_vor_dem_push.sh" not in text or not re.search(
+                r"git push|push_nach_rebase\.sh|daten_pushen\.sh", text):
+            continue                  # nur Ablaeufe, die das Tor fahren UND nach main schieben
+                                      # (setwechsel-probe commitet nur im Wegwerf-Baum)
+        for p in _git_add_pfade(text):
+            p = p.strip("'\"").rstrip("/")
+            if not p or p == "data" or p.startswith("data/"):
+                continue
+            if not os.path.exists(p):
+                continue          # Platzhalter, Variablen, /dev/null
+            if sh("git", "check-ignore", "-q", p).returncode == 0:
+                continue          # z. B. backend/core/data: Saat, nie commitet
+            raus.add(p + "/" if os.path.isdir(p) else p)
+    return tuple(sorted(raus))
 
 
 def sh(*cmd, **kw):
@@ -85,7 +136,7 @@ def ausgangsstand():
 
 
 def kandidaten(basis):
-    ordner = ("data/",) + BILDORDNER
+    ordner = ("data/",) + ausgabeordner()
     geaendert = sh("git", "diff", "--name-only", basis, "--", *ordner).stdout.split()
     neu = sh("git", "ls-files", "-o", "--exclude-standard", *ordner).stdout.split()
     return sorted({f for f in geaendert + neu if f not in NIE_ZURUECK})

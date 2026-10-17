@@ -313,3 +313,47 @@ def test_jeder_name_den_ein_ablauf_bucht_steht_in_einer_liste(tmp_path):
         "diese Ablaeufe buchen Herzschlaege fuer Erzeuger, die in keiner Liste "
         f"von scripts/pruefe_frische.py stehen: {fehlt}. Im PR ist das gruen — "
         "rot wird es erst im Tor des naechsten Laufs (Wochenlauf #169).")
+
+
+# ── SC-37 (17.10.2026): vom Tor zurueckgerollt ist kein Lieferfehler ─────
+#
+# Replica #161: das Tor rollte champions_usage.json zum dritten Mal zurueck,
+# der alte Stempel war gewollt — die Frischepruefung meldete „kommt nicht an
+# (git-add-Liste?)" und machte den zweiten Durchlauf rot. Das Tor gibt die
+# zurueckgerollten Dateien jetzt in TOR_ZURUECKGEROLLT mit; nur DIESE fallen
+# aus der Pruefung, jede andere bleibt ein Befund.
+
+def _veralteter_stand(tmp_path, m):
+    import json as _json
+    jetzt = m.dt.datetime(2026, 10, 17, 4, 30, tzinfo=m.dt.timezone.utc)
+    (tmp_path / "_job_heartbeats.json").write_text(_json.dumps({
+        job: {"zuletzt_erfolgreich": "2026-10-17T04:05:00Z"}
+        for job in m.ERGEBNIS_MIT_STEMPEL}))
+    for datei in m.ERGEBNIS_MIT_STEMPEL.values():
+        (tmp_path / datei).write_text(_json.dumps({"_meta": {"scraped_at": "2026-10-14T06:30:00Z",
+                                                             "erzeugt_am": "2026-10-14T06:30:00Z"}}))
+    m.DATEN = str(tmp_path)
+    return jetzt
+
+
+def test_sc37_zurueckgerollte_datei_ist_kein_lieferfehler(tmp_path, monkeypatch):
+    m = _pruefe_frische()
+    jetzt = _veralteter_stand(tmp_path, m)
+    monkeypatch.delenv("TOR_ZURUECKGEROLLT", raising=False)
+    ohne = {d for _, d, _ in m.nicht_ausgeliefert(jetzt)}
+    assert ohne == set(m.ERGEBNIS_MIT_STEMPEL.values()), \
+        "ohne Tor-Angabe muss jede veraltete Datei ein Befund sein (sonst prueft die Probe nichts)"
+    monkeypatch.setenv("TOR_ZURUECKGEROLLT", "data/champions_usage.json data/champions_pokedex.json")
+    mit = {d for _, d, _ in m.nicht_ausgeliefert(jetzt)}
+    assert "champions_usage.json" not in mit
+    assert mit == ohne - {"champions_usage.json"}, \
+        "die Ausnahme darf nur die zurueckgerollten Dateien treffen"
+
+
+def test_sc37_tor_gibt_die_zurueckgerollten_dateien_an_den_zweiten_durchlauf():
+    text = open(os.path.join(WURZEL, "scripts", "tor_vor_dem_push.sh"), encoding="utf-8").read()
+    ohne_kommentare = "\n".join(z for z in text.splitlines() if not z.lstrip().startswith("#"))
+    a = ohne_kommentare.find("export TOR_ZURUECKGEROLLT")
+    b = ohne_kommentare.find("rot2=0")
+    assert a != -1 and b != -1 and a < b, \
+        "TOR_ZURUECKGEROLLT muss VOR dem zweiten Durchlauf exportiert werden"

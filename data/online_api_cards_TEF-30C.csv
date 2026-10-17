@@ -119408,3 +119408,1130 @@ tournament_id;date;meta;archetype_id;group;set;number;card;copies_total;lists_wi
 6acc878a8a8383117e3ea118;2026-10-14;TEF-30C;lucario-hariyama;trainer;TWM;154;Kieran;1;1;5;0.2;0.2
 6acc878a8a8383117e3ea118;2026-10-14;TEF-30C;lucario-hariyama;trainer;SFA;64;Xerosic's Machinations;1;1;5;0.2;0.2
 6acc878a8a8383117e3ea118;2026-10-14;TEF-30C;lucario-hariyama;trainer;TEF;152;Hero's Cape;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;TWM;128;Dreepy;56;14;14;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;TWM;129;Drakloak;56;14;14;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;TWM;130;Dragapult ex;42;14;14;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;ASC;16;Budew;25;14;14;1.7857;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;TWM;95;Munkidori;28;14;14;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;JTG;120;Dunsparce;6;6;14;0.4286;0.4286
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;TEF;129;Dudunsparce;12;12;14;0.8571;0.8571
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;ASC;142;Fezandipiti ex;14;14;14;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;POR;62;Meowth ex;14;14;14;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;PFL;14;Moltres;5;5;14;0.3571;0.3571
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;MEG;119;Lillie's Determination;56;14;14;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;MEG;114;Boss's Orders;42;14;14;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;SCR;133;Crispin;28;14;14;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;POR;84;Rosa's Encouragement;14;14;14;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;POR;76;Judge;10;9;14;0.7143;0.6429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;POR;81;Poké Pad;56;14;14;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;TEF;144;Buddy-Buddy Poffin;56;14;14;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;POR;71;Crushing Hammer;54;14;14;3.8571;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;MEG;131;Ultra Ball;42;14;14;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;ASC;196;Night Stretcher;41;14;14;2.9286;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;TWM;165;Unfair Stamp;14;14;14;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;MEG;127;Risky Ruins;25;13;14;1.7857;0.9286
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;energy;MEE;10;Fire Energy;43;14;14;3.0714;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;energy;MEE;13;Psychic Energy;43;14;14;3.0714;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;energy;MEE;15;Darkness Energy;35;14;14;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;PRE;35;Duskull;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;PRE;36;Dusclops;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;PRE;37;Dusknoir;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;PFL;83;Buneary;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;PFL;84;Mega Lopunny ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;TEF;68;Bronzor;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;TEF;69;Bronzong;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;SSP;76;Latias ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;MEG;104;Mega Kangaskhan ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;POR;62;Meowth ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;JTG;56;Lillie's Clefairy ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;DRI;10;Shaymin;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;pokemon;TEF;78;Flutter Mane;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;trainer;WHT;84;Hilda;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;trainer;MEG;119;Lillie's Determination;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;trainer;MEG;130;Switch;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;trainer;MEG;131;Ultra Ball;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;trainer;MEG;125;Rare Candy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;trainer;POR;81;Poké Pad;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;trainer;CRI;82;Special Red Card;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;trainer;TWM;153;Jamming Tower;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;energy;POR;88;Telepathic Psychic Energy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;energy;MEE;13;Psychic Energy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dusknoir;energy;SSP;191;Enriching Energy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;PBL;11;Charcadet;2;1;2;1.0;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;SSP;32;Charcadet;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;SSP;36;Ceruledge ex;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;PFL;20;Ceruledge;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;MEG;75;Solrock;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;MEG;74;Lunatone;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;DRI;10;Shaymin;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;ASC;39;Psyduck;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;ASC;142;Fezandipiti ex;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;pokemon;TEF;85;Drilbur;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;MEG;119;Lillie's Determination;3;1;2;1.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;MEG;114;Boss's Orders;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;TEF;147;Explorer's Guidance;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;POR;76;Judge;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;MEG;131;Ultra Ball;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;POR;81;Poké Pad;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;MEG;116;Fighting Gong;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;ASC;196;Night Stretcher;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;SSP;164;Brilliant Blender;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;CRI;82;Special Red Card;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;MEG;130;Switch;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;CRI;80;Prism Tower;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;energy;MEE;14;Fighting Energy;23;2;2;11.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;energy;MEE;10;Fire Energy;15;2;2;7.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;energy;TEF;161;Mist Energy;2;1;2;1.0;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;MEG;54;Abra;20;5;5;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;MEG;55;Kadabra;20;5;5;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;MEG;56;Alakazam;15;5;5;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;JTG;120;Dunsparce;13;5;5;2.6;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;TEF;129;Dudunsparce;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;PBL;66;Pikipek;3;2;5;0.6;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;PBL;67;Trumbeak;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;PBL;68;Toucannon;3;2;5;0.6;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;SFA;40;Genesect;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;ASC;142;Fezandipiti ex;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;DRI;10;Shaymin;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;PFL;87;Dawn;18;5;5;3.6;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;WHT;84;Hilda;16;5;5;3.2;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;MEG;114;Boss's Orders;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;TWM;155;Lana's Aid;4;4;5;0.8;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;TEF;144;Buddy-Buddy Poffin;19;5;5;3.8;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;POR;81;Poké Pad;19;5;5;3.8;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;MEG;125;Rare Candy;16;5;5;3.2;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;ASC;196;Night Stretcher;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;CRI;82;Special Red Card;4;4;5;0.8;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;TWM;148;Enhanced Hammer;6;4;5;1.2;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;DRI;168;Sacred Ash;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;TWM;150;Handheld Fan;5;3;5;1.0;0.6
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;ASC;181;Air Balloon;4;4;5;0.8;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;TWM;158;Lucky Helmet;4;3;5;0.8;0.6
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;PFL;85;Battle Cage;13;5;5;2.6;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;ASC;197;Nighttime Mine;5;3;5;1.0;0.6
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;energy;POR;88;Telepathic Psychic Energy;20;5;5;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;energy;SSP;191;Enriching Energy;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;energy;MEE;13;Psychic Energy;6;5;5;1.2;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;PBL;39;Dhelmise;24;6;6;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;TWM;128;Dreepy;3;1;6;0.5;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;TWM;129;Drakloak;2;1;6;0.3333;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;TWM;130;Dragapult ex;2;1;6;0.3333;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;PBL;5;Poltchageist;23;6;6;3.8333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;PBL;6;Sinistcha;12;6;6;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;PBL;33;Shuppet;18;6;6;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;PBL;34;Banette;21;6;6;3.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;SSP;76;Latias ex;5;5;6;0.8333;0.8333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;POR;62;Meowth ex;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;DRI;10;Shaymin;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;JTG;56;Lillie's Clefairy ex;11;6;6;1.8333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;ASC;16;Budew;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;PBL;78;Gwynn;24;6;6;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;MEG;119;Lillie's Determination;24;6;6;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;MEG;114;Boss's Orders;18;6;6;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;SCR;133;Crispin;2;1;6;0.3333;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;MEG;131;Ultra Ball;24;6;6;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;POR;81;Poké Pad;24;6;6;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;ASC;196;Night Stretcher;16;6;6;2.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;TEF;144;Buddy-Buddy Poffin;4;2;6;0.6667;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;CRI;80;Prism Tower;17;6;6;2.8333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;DRI;180;Team Rocket's Watchtower;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;energy;POR;88;Telepathic Psychic Energy;23;6;6;3.8333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;energy;MEE;13;Psychic Energy;12;6;6;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;energy;MEE;10;Fire Energy;2;1;6;0.3333;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;energy;TWM;167;Legacy Energy;6;6;6;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;TEF;128;Dunsparce;6;6;14;0.4286;0.4286
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;TEF;113;Beldum;16;4;5;3.2;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;TEF;114;Metang;16;4;5;3.2;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;CRI;61;Metagross;6;4;5;1.2;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;PBL;46;Drilbur;14;5;5;2.8;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;PBL;65;Mega Excadrill ex;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;BLK;67;Genesect ex;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;PFL;27;Piplup;3;2;5;0.6;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;PFL;70;Empoleon ex;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;DRI;10;Shaymin;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;DRI;176;Team Rocket's Petrel;20;5;5;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;JTG;146;Brock's Scouting;9;3;5;1.8;0.6
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;MEG;114;Boss's Orders;9;5;5;1.8;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;TWM;154;Kieran;4;4;5;0.8;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;TEF;144;Buddy-Buddy Poffin;17;5;5;3.4;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;SVI;186;Pokégear 3.0;10;4;5;2.0;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;CRI;82;Special Red Card;5;4;5;1.0;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;DRI;164;Energy Recycler;4;3;5;0.8;0.6
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;MEG;125;Rare Candy;5;3;5;1.0;0.6
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;MEG;130;Switch;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;TWM;165;Unfair Stamp;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;PFL;91;Jumbo Ice Cream;8;5;5;1.6;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;energy;MEE;16;Metal Energy;72;5;5;14.4;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;pokemon;PFL;60;Carvanha;12;4;4;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;pokemon;PFL;61;Mega Sharpedo ex;14;4;4;3.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;pokemon;SFA;39;Pecharunt ex;12;4;4;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;pokemon;PFL;67;Toxel;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;pokemon;PFL;68;Toxtricity;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;pokemon;TWM;131;Tatsugiri;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;pokemon;TWM;95;Munkidori;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;pokemon;ASC;142;Fezandipiti ex;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;pokemon;MEG;88;Yveltal;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;MEG;119;Lillie's Determination;16;4;4;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;MEG;114;Boss's Orders;12;4;4;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;POR;76;Judge;11;4;4;2.75;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;DRI;176;Team Rocket's Petrel;5;4;4;1.25;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;MEG;131;Ultra Ball;15;4;4;3.75;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;TEF;144;Buddy-Buddy Poffin;16;4;4;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;POR;81;Poké Pad;14;4;4;3.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;ASC;196;Night Stretcher;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;MEG;115;Energy Switch;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;TWM;165;Unfair Stamp;3;3;4;0.75;0.75
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;PRE;95;Binding Mochi;12;4;4;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;DRI;180;Team Rocket's Watchtower;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;SSP;177;Gravity Mountain;5;4;4;1.25;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;energy;MEE;15;Darkness Energy;35;4;4;8.75;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;TWM;25;Teal Mask Ogerpon ex;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;TWM;17;Applin;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;TWM;18;Dipplin;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;SCR;14;Hydrapple ex;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;ASC;8;Chikorita;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;MEG;9;Bayleef;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;MEG;10;Meganium;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;SFA;6;Tapu Bulu;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;MEG;12;Celebi;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;ASC;142;Fezandipiti ex;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;pokemon;POR;62;Meowth ex;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;MEG;119;Lillie's Determination;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;PFL;87;Dawn;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;MEG;114;Boss's Orders;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;POR;76;Judge;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;TWM;155;Lana's Aid;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;SCR;132;Briar;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;TWM;143;Bug Catching Set;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;POR;81;Poké Pad;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;ASC;196;Night Stretcher;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;MEG;131;Ultra Ball;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;TEF;152;Hero's Cape;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;MEG;117;Forest of Vitality;7;2;2;3.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;energy;MEE;9;Grass Energy;27;2;2;13.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;TWM;25;Teal Mask Ogerpon ex;16;4;4;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;DRI;21;Smoliv;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;DRI;22;Dolliv;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;DRI;23;Arboliva ex;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;ASC;8;Chikorita;3;2;4;0.75;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;MEG;8;Chikorita;5;3;4;1.25;0.75
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;MEG;9;Bayleef;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;MEG;10;Meganium;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;SCR;114;Hoothoot;2;2;4;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;SCR;115;Noctowl;2;2;4;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;POR;62;Meowth ex;5;4;4;1.25;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;ASC;142;Fezandipiti ex;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;pokemon;ASC;16;Budew;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;MEG;119;Lillie's Determination;16;4;4;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;PFL;87;Dawn;10;4;4;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;MEG;114;Boss's Orders;9;4;4;2.25;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;TWM;155;Lana's Aid;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;SCR;132;Briar;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;TWM;143;Bug Catching Set;16;4;4;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;MEG;131;Ultra Ball;12;4;4;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;ASC;196;Night Stretcher;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;MEG;115;Energy Switch;6;3;4;1.5;0.75
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;POR;81;Poké Pad;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;TWM;165;Unfair Stamp;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;MEG;117;Forest of Vitality;13;4;4;3.25;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;energy;MEE;9;Grass Energy;47;4;4;11.75;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;pokemon;CRI;20;Froakie;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;pokemon;CRI;21;Frogadier;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;pokemon;TWM;106;Greninja ex;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;pokemon;CRI;22;Mega Greninja ex;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;pokemon;JTG;120;Dunsparce;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;pokemon;TEF;129;Dudunsparce;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;pokemon;JTG;121;Dudunsparce ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;WHT;84;Hilda;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;TWM;155;Lana's Aid;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;SFA;64;Xerosic's Machinations;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;TWM;160;Perrin;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;TEF;144;Buddy-Buddy Poffin;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;MEG;125;Rare Candy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;SVI;171;Energy Retrieval;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;trainer;MEG;129;Surfing Beach;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;energy;MEE;11;Water Energy;6;1;1;6.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-greninja-ex;energy;WHT;86;Ignition Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;TEF;128;Dunsparce;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;TEF;129;Dudunsparce;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;CRI;1;Weedle;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;CRI;2;Kakuna;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;CRI;3;Beedrill ex;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;TEF;23;Rellor;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;TEF;24;Rabsca;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;POR;62;Meowth ex;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;MEG;119;Lillie's Determination;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;MEG;114;Boss's Orders;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;PFL;87;Dawn;2;1;2;1.0;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;SFA;64;Xerosic's Machinations;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;SFA;57;Colress's Tenacity;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;POR;76;Judge;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;POR;81;Poké Pad;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;TWM;143;Bug Catching Set;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;TEF;144;Buddy-Buddy Poffin;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;MEG;131;Ultra Ball;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;CRI;82;Special Red Card;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;PRE;116;Max Rod;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;DRI;168;Sacred Ash;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;MEG;125;Rare Candy;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;MEG;117;Forest of Vitality;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;energy;MEE;9;Grass Energy;11;2;2;5.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;energy;POR;86;Growing Grass Energy;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;JTG;120;Dunsparce;5;2;3;1.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;TEF;128;Dunsparce;5;3;3;1.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;TEF;129;Dudunsparce;8;3;3;2.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;PFL;83;Buneary;8;3;3;2.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;PFL;84;Mega Lopunny ex;8;3;3;2.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;TWM;80;Abra;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;SCR;118;Fan Rotom;2;2;3;0.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;PFL;14;Moltres;2;2;3;0.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;MEG;132;Wally's Compassion;9;3;3;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;WHT;84;Hilda;9;3;3;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;MEG;114;Boss's Orders;9;3;3;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;MEG;119;Lillie's Determination;11;3;3;3.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;POR;81;Poké Pad;11;3;3;3.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;SVI;186;Pokégear 3.0;7;2;3;2.3333;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;TEF;144;Buddy-Buddy Poffin;10;3;3;3.3333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;MEG;131;Ultra Ball;6;2;3;2.0;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;CRI;82;Special Red Card;3;2;3;1.0;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;ASC;181;Air Balloon;7;3;3;2.3333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;PFL;85;Battle Cage;6;2;3;2.0;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;energy;TEF;161;Mist Energy;8;2;3;2.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;energy;MEE;10;Fire Energy;4;2;3;1.3333;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;energy;SSP;191;Enriching Energy;2;2;3;0.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;MEG;76;Riolu;23;7;7;3.2857;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;MEG;77;Mega Lucario ex;22;7;7;3.1429;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;MEG;75;Solrock;19;7;7;2.7143;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;MEG;72;Makuhita;14;7;7;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;MEG;73;Hariyama;14;7;7;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;MEG;74;Lunatone;14;7;7;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;POR;62;Meowth ex;7;7;7;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;MEG;119;Lillie's Determination;28;7;7;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;POR;76;Judge;13;7;7;1.8571;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;MEG;114;Boss's Orders;14;7;7;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;DRI;176;Team Rocket's Petrel;5;5;7;0.7143;0.7143
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;MEG;132;Wally's Compassion;5;4;7;0.7143;0.5714
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;MEG;116;Fighting Gong;26;7;7;3.7143;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;POR;81;Poké Pad;22;7;7;3.1429;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;MEG;124;Premium Power Pro;28;7;7;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;MEG;131;Ultra Ball;24;7;7;3.4286;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;TWM;165;Unfair Stamp;3;3;7;0.4286;0.4286
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;MEG;130;Switch;9;7;7;1.2857;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;ASC;181;Air Balloon;12;7;7;1.7143;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;SSP;177;Gravity Mountain;15;7;7;2.1429;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;energy;MEE;14;Fighting Energy;65;7;7;9.2857;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;TWM;128;Dreepy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;TWM;129;Drakloak;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;SSP;117;Deino;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;SSP;118;Zweilous;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;SSP;119;Hydreigon ex;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;ASC;172;Mega Audino ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;POR;62;Meowth ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;ASC;39;Psyduck;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;DRI;10;Shaymin;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;SSP;76;Latias ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;pokemon;30C;102;Jirachi ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;DRI;176;Team Rocket's Petrel;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;MEG;114;Boss's Orders;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;POR;84;Rosa's Encouragement;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;PFL;87;Dawn;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;TWM;154;Kieran;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;MEG;125;Rare Candy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;SVI;186;Pokégear 3.0;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;MEG;131;Ultra Ball;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;CRI;82;Special Red Card;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;SSP;185;Precious Trolley;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;trainer;PFL;85;Battle Cage;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;energy;MEE;15;Darkness Energy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;energy;MEE;16;Metal Energy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;energy;MEE;13;Psychic Energy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hydreigon-ex;energy;TEF;161;Mist Energy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;pokemon;TWM;128;Dreepy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;pokemon;TWM;129;Drakloak;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;pokemon;TWM;130;Dragapult ex;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;pokemon;JTG;120;Dunsparce;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;pokemon;TEF;129;Dudunsparce;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;pokemon;TWM;95;Munkidori;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;pokemon;ASC;142;Fezandipiti ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;pokemon;POR;62;Meowth ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;MEG;114;Boss's Orders;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;SCR;133;Crispin;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;POR;76;Judge;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;POR;84;Rosa's Encouragement;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;MEG;125;Rare Candy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;TEF;144;Buddy-Buddy Poffin;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;MEG;131;Ultra Ball;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;TWM;165;Unfair Stamp;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;trainer;MEG;127;Risky Ruins;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;energy;MEE;13;Psychic Energy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;energy;MEE;10;Fire Energy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dudunsparce;energy;MEE;15;Darkness Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;DRI;143;Steven's Beldum;3;1;5;0.6;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;DRI;144;Steven's Metang;2;1;5;0.4;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;DRI;145;Steven's Metagross ex;3;1;5;0.6;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;CRI;32;Deoxys;2;1;5;0.4;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;SSP;76;Latias ex;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;POR;62;Meowth ex;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;JTG;56;Lillie's Clefairy ex;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;ASC;16;Budew;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;MEG;119;Lillie's Determination;7;3;5;1.4;0.6
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;DRI;178;Team Rocket's Transceiver;3;1;5;0.6;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;MEG;131;Ultra Ball;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;ASC;196;Night Stretcher;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;SSP;185;Precious Trolley;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;PFL;85;Battle Cage;3;2;5;0.6;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;DRI;173;Team Rocket's Factory;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;energy;MEE;13;Psychic Energy;7;1;5;1.4;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;ASC;59;Tynamo;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;ASC;60;Eelektrik;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;ASC;61;Mega Eelektross ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;MEG;49;Electrike;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;MEG;50;Mega Manectric ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;PBL;24;Manectric;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;TWM;131;Tatsugiri;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;ASC;142;Fezandipiti ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;DRI;10;Shaymin;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;DRI;78;Zeraora;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;pokemon;SSP;76;Latias ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;MEG;114;Boss's Orders;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;MEG;119;Lillie's Determination;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;WHT;84;Hilda;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;POR;76;Judge;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;ASC;185;Canari;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;TEF;155;Morty's Conviction;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;MEG;131;Ultra Ball;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;TEF;144;Buddy-Buddy Poffin;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;ASC;196;Night Stretcher;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;TEF;157;Prime Catcher;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;MEG;130;Switch;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;PFL;85;Battle Cage;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;trainer;TWM;153;Jamming Tower;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;energy;MEE;12;Lightning Energy;7;1;1;7.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;manectric-eelektrik;energy;PBL;84;Voltaic Lightning Energy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;JTG;56;Lillie's Clefairy ex;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;TEF;146;Eri;3;3;5;0.6;0.6
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;PFL;94;Wondrous Patch;3;2;5;0.6;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;JTG;151;Lillie's Pearl;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;JTG;97;N's Zorua;24;6;6;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;JTG;98;N's Zoroark ex;24;6;6;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;ASC;155;N's Zekrom;10;6;6;1.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;JTG;26;N's Darumaka;3;3;6;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;JTG;27;N's Darmanitan;3;3;6;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;POR;62;Meowth ex;2;2;6;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;TWM;95;Munkidori;7;6;6;1.1667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;SFA;39;Pecharunt ex;6;6;6;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;ASC;142;Fezandipiti ex;5;5;6;0.8333;0.8333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;ASC;16;Budew;4;4;6;0.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;MEG;88;Yveltal;4;4;6;0.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;MEG;119;Lillie's Determination;24;6;6;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;MEG;114;Boss's Orders;21;6;6;3.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;SSP;170;Cyrano;11;6;6;1.8333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;JTG;157;Ruffian;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;JTG;143;Black Belt's Training;7;6;6;1.1667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;TEF;144;Buddy-Buddy Poffin;23;6;6;3.8333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;CRI;83;Transformation Tome;4;1;6;0.6667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;MEG;131;Ultra Ball;16;6;6;2.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;JTG;153;N's PP Up;19;6;6;3.1667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;POR;81;Poké Pad;16;6;6;2.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;CRI;82;Special Red Card;7;6;6;1.1667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;ASC;196;Night Stretcher;11;6;6;1.8333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;TWM;163;Secret Box;5;5;6;0.8333;0.8333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;PRE;95;Binding Mochi;8;5;6;1.3333;0.8333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;JTG;152;N's Castle;8;4;6;1.3333;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;energy;MEE;15;Darkness Energy;47;6;6;7.8333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;MEG;104;Mega Kangaskhan ex;20;5;5;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;POR;62;Meowth ex;15;5;5;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;JTG;56;Lillie's Clefairy ex;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;TWM;25;Teal Mask Ogerpon ex;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;SSP;76;Latias ex;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;ASC;142;Fezandipiti ex;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;TEF;25;Iron Leaves ex;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;TEF;81;Iron Crown ex;4;4;5;0.8;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;TEF;123;Raging Bolt ex;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;TWM;64;Wellspring Mask Ogerpon ex;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;ASC;121;Koraidon ex;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;TWM;93;Enamorus;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;SSP;56;Chien-Pao;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;SCR;133;Crispin;20;5;5;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;MEG;114;Boss's Orders;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;SSP;170;Cyrano;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;TEF;145;Ciphermaniac's Codebreaking;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;MEG;115;Energy Switch;20;5;5;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;MEG;131;Ultra Ball;20;5;5;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;ASC;196;Night Stretcher;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;CRI;82;Special Red Card;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;SCR;135;Glass Trumpet;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;TEF;152;Hero's Cape;4;4;5;0.8;0.8
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;SCR;131;Area Zero Underdepths;15;5;5;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;energy;MEE;9;Grass Energy;30;5;5;6.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;energy;MEE;13;Psychic Energy;15;5;5;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;energy;MEE;14;Fighting Energy;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;energy;MEE;12;Lightning Energy;10;5;5;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;energy;MEE;11;Water Energy;5;5;5;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;pokemon;ASC;95;Hop's Phantump;12;3;3;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;pokemon;ASC;96;Hop's Trevenant;9;3;3;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;pokemon;JTG;117;Hop's Snorlax;6;3;3;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;pokemon;JTG;135;Hop's Wooloo;3;3;3;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;pokemon;JTG;136;Hop's Dubwool;3;3;3;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;pokemon;JTG;138;Hop's Cramorant;3;3;3;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;pokemon;CRI;70;Patrat;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;pokemon;JTG;56;Lillie's Clefairy ex;3;3;3;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;pokemon;DRI;10;Shaymin;3;3;3;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;MEG;119;Lillie's Determination;12;3;3;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;DRI;176;Team Rocket's Petrel;11;3;3;3.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;TWM;154;Kieran;4;2;3;1.3333;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;MEG;114;Boss's Orders;8;3;3;2.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;POR;76;Judge;2;2;3;0.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;TWM;151;Hassel;4;3;3;1.3333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;POR;81;Poké Pad;12;3;3;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;SVI;186;Pokégear 3.0;7;3;3;2.3333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;MEG;130;Switch;7;3;3;2.3333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;ASC;196;Night Stretcher;7;3;3;2.3333;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;JTG;147;Hop's Bag;6;3;3;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;TWM;163;Secret Box;3;3;3;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;CRI;82;Special Red Card;2;2;3;0.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;JTG;148;Hop's Choice Band;12;3;3;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;JTG;154;Postwick;12;3;3;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;energy;POR;88;Telepathic Psychic Energy;11;3;3;3.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;energy;TEF;161;Mist Energy;11;3;3;3.6667;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;energy;MEE;13;Psychic Energy;2;2;3;0.6667;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;JTG;96;N's Purrloin;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;TWM;131;Tatsugiri;2;2;6;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;pokemon;JTG;116;N's Reshiram;5;5;6;0.8333;0.8333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;POR;76;Judge;5;3;6;0.8333;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;PRE;112;Janine's Secret Art;2;2;6;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;ASC;181;Air Balloon;3;3;6;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;DRI;180;Team Rocket's Watchtower;12;4;6;2.0;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;TWM;128;Dreepy;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;TWM;129;Drakloak;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;TWM;130;Dragapult ex;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;PRE;35;Duskull;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;PRE;36;Dusclops;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;PRE;37;Dusknoir;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;ASC;16;Budew;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;POR;62;Meowth ex;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;PFL;14;Moltres;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;TWM;95;Munkidori;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;pokemon;ASC;142;Fezandipiti ex;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;MEG;119;Lillie's Determination;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;MEG;114;Boss's Orders;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;SCR;133;Crispin;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;PFL;87;Dawn;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;POR;84;Rosa's Encouragement;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;TEF;144;Buddy-Buddy Poffin;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;POR;81;Poké Pad;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;MEG;131;Ultra Ball;7;2;2;3.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;ASC;196;Night Stretcher;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;CRI;82;Special Red Card;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;TWM;165;Unfair Stamp;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;TWM;153;Jamming Tower;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;DRI;180;Team Rocket's Watchtower;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;energy;MEE;13;Psychic Energy;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;energy;MEE;10;Fire Energy;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;energy;MEE;15;Darkness Energy;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;pokemon;PRE;50;Riolu;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;pokemon;MEG;76;Riolu;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;pokemon;MEG;77;Mega Lucario ex;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;pokemon;JTG;120;Dunsparce;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;pokemon;TEF;129;Dudunsparce;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;pokemon;MEG;74;Lunatone;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;pokemon;MEG;75;Solrock;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;pokemon;POR;62;Meowth ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;MEG;132;Wally's Compassion;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;POR;76;Judge;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;TWM;154;Kieran;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;JTG;143;Black Belt's Training;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;DRI;176;Team Rocket's Petrel;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;MEG;116;Fighting Gong;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;MEG;124;Premium Power Pro;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;TEF;144;Buddy-Buddy Poffin;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;MEG;131;Ultra Ball;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;MEG;130;Switch;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;TEF;152;Hero's Cape;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;trainer;SSP;177;Gravity Mountain;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;energy;MEE;14;Fighting Energy;9;1;1;9.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-lucario-ex;energy;POR;87;Rocky Fighting Energy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;TWM;95;Munkidori;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;ASC;46;Snorunt;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;TWM;53;Froslass;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;DRI;134;Marnie's Impidimp;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;DRI;135;Marnie's Morgrem;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;DRI;136;Marnie's Grimmsnarl ex;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;TWM;141;Bloodmoon Ursaluna ex;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;TWM;131;Tatsugiri;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;ASC;142;Fezandipiti ex;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;ASC;16;Budew;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;MEG;88;Yveltal;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;MEG;119;Lillie's Determination;7;2;2;3.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;PBL;78;Gwynn;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;MEG;114;Boss's Orders;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;DRI;176;Team Rocket's Petrel;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;POR;81;Poké Pad;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;ASC;196;Night Stretcher;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;TEF;144;Buddy-Buddy Poffin;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;TWM;163;Secret Box;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;CRI;82;Special Red Card;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;MEG;131;Ultra Ball;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;MEG;125;Rare Candy;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;ASC;181;Air Balloon;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;DRI;169;Spikemuth Gym;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;energy;MEE;15;Darkness Energy;17;2;2;8.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;SCR;118;Fan Rotom;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;SCR;8;Mow Rotom;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;ASC;142;Fezandipiti ex;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;pokemon;DRI;10;Shaymin;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;TEF;145;Ciphermaniac's Codebreaking;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;JTG;156;Redeemable Ticket;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;ASC;196;Night Stretcher;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;beedrill-ex-cri;trainer;ASC;181;Air Balloon;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;MEG;88;Yveltal;1;1;14;0.0714;0.0714
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;CRI;82;Special Red Card;6;6;14;0.4286;0.4286
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;TWM;165;Unfair Stamp;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;TWM;153;Jamming Tower;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-hydrapple;trainer;TWM;165;Unfair Stamp;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;JTG;120;Dunsparce;11;5;6;1.8333;0.8333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;TEF;129;Dudunsparce;10;5;6;1.6667;0.8333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;JTG;121;Dudunsparce ex;5;5;6;0.8333;0.8333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;pokemon;CRI;70;Patrat;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;TEF;147;Explorer's Guidance;8;4;6;1.3333;0.6667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;MEG;104;Mega Kangaskhan ex;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;POR;62;Meowth ex;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;SCR;119;Bouffalant;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;SSP;151;Bouffalant;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;JTG;56;Lillie's Clefairy ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;TWM;25;Teal Mask Ogerpon ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;SSP;76;Latias ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;ASC;142;Fezandipiti ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;TEF;25;Iron Leaves ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;TEF;123;Raging Bolt ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;TWM;64;Wellspring Mask Ogerpon ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;pokemon;SSP;56;Chien-Pao;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;SCR;133;Crispin;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;TEF;145;Ciphermaniac's Codebreaking;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;JTG;146;Brock's Scouting;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;SSP;170;Cyrano;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;MEG;115;Energy Switch;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;MEG;131;Ultra Ball;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;SCR;135;Glass Trumpet;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;TEF;152;Hero's Cape;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;trainer;SCR;131;Area Zero Underdepths;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;energy;MEE;9;Grass Energy;6;1;1;6.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;energy;MEE;13;Psychic Energy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;energy;MEE;14;Fighting Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;energy;MEE;12;Lightning Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;kangaskhan-bouffalant;energy;MEE;11;Water Energy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;pokemon;CRI;69;Tauros;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;pokemon;PFL;48;Paldean Tauros;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;JTG;149;Iris's Fighting Spirit;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;TWM;151;Hassel;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;SFA;57;Colress's Tenacity;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;TWM;155;Lana's Aid;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;MEG;116;Fighting Gong;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;MEG;124;Premium Power Pro;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;SVI;186;Pokégear 3.0;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;ASC;196;Night Stretcher;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;TWM;163;Secret Box;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;MEG;130;Switch;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;MEG;131;Ultra Ball;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;WHT;80;Brave Bangle;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;SSP;169;Counter Gain;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;ASC;181;Air Balloon;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;trainer;MEG;127;Risky Ruins;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;paldean-tauros-pfl;energy;MEE;14;Fighting Energy;8;1;1;8.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;CRI;20;Froakie;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;CRI;21;Frogadier;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;TWM;106;Greninja ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;PRE;35;Duskull;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;PRE;36;Dusclops;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;PRE;37;Dusknoir;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;ASC;46;Snorunt;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;ASC;47;Mega Froslass ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;POR;62;Meowth ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;POR;20;Staryu;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;POR;21;Mega Starmie ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;SSP;76;Latias ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;ASC;142;Fezandipiti ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;pokemon;ASC;16;Budew;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;SFA;57;Colress's Tenacity;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;WHT;84;Hilda;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;TEF;144;Buddy-Buddy Poffin;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;MEG;131;Ultra Ball;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;POR;81;Poké Pad;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;MEG;125;Rare Candy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;ASC;196;Night Stretcher;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;CRI;82;Special Red Card;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;MEG;130;Switch;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;SCR;136;Grand Tree;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;trainer;SSP;177;Gravity Mountain;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;energy;MEE;11;Water Energy;5;1;1;5.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;energy;WHT;86;Ignition Energy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;greninja-ex;energy;CRI;84;Bubbly Water Energy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;TWM;165;Unfair Stamp;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;PFL;92;Punk Helmet;4;2;6;0.6667;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;WHT;84;Hilda;2;1;2;1.0;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;MEG;125;Rare Candy;3;1;2;1.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;trainer;MEG;127;Risky Ruins;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;energy;POR;88;Telepathic Psychic Energy;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-dusknoir;energy;TEF;162;Neo Upper Energy;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;PRE;112;Janine's Secret Art;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;TWM;163;Secret Box;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;MEG;121;Mega Signal;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;CRI;82;Special Red Card;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;pokemon;JTG;121;Dudunsparce ex;2;2;14;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;pokemon;MEG;104;Mega Kangaskhan ex;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;pokemon;DRI;11;Dwebble;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;pokemon;DRI;12;Crustle;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;pokemon;DRI;10;Shaymin;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;pokemon;ASC;39;Psyduck;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;pokemon;TWM;112;Cornerstone Mask Ogerpon ex;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;MEG;114;Boss's Orders;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;DRI;176;Team Rocket's Petrel;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;MEG;119;Lillie's Determination;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;WHT;84;Hilda;5;2;2;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;SFA;64;Xerosic's Machinations;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;TEF;146;Eri;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;MEG;123;Pokémon Center Lady;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;TEF;142;Bianca's Devotion;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;PFL;91;Jumbo Ice Cream;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;SVI;186;Pokégear 3.0;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;TEF;144;Buddy-Buddy Poffin;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;MEG;130;Switch;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;MEG;131;Ultra Ball;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;ASC;181;Air Balloon;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;TEF;152;Hero's Cape;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;TWM;149;Festival Grounds;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;POR;77;Lumiose City;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;energy;JTG;159;Spiky Energy;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;energy;TEF;161;Mist Energy;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;energy;POR;86;Growing Grass Energy;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;energy;ASC;216;Prism Energy;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;DRI;10;Shaymin;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;pokemon;ASC;39;Psyduck;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;POR;76;Judge;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;TWM;148;Enhanced Hammer;3;1;2;1.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;MEG;115;Energy Switch;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;SVI;186;Pokégear 3.0;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;TWM;165;Unfair Stamp;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;grimmsnarl-froslass;trainer;PFL;92;Punk Helmet;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;SSP;87;Dedenne;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;BLK;40;Elgyem;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;POR;55;Mega Skarmory ex;3;3;5;0.6;0.6
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;ASC;142;Fezandipiti ex;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;ASC;39;Psyduck;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;TEF;152;Hero's Cape;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;SFA;64;Xerosic's Machinations;3;2;6;0.5;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;sharpedo-toxtricity;trainer;MEG;132;Wally's Compassion;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;TWM;128;Dreepy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;TWM;129;Drakloak;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;TWM;130;Dragapult ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;DRI;40;Torchic;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;DRI;41;Combusken;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;JTG;24;Blaziken ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;TWM;95;Munkidori;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;ASC;16;Budew;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;ASC;142;Fezandipiti ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;pokemon;POR;62;Meowth ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;MEG;114;Boss's Orders;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;SCR;133;Crispin;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;POR;76;Judge;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;PFL;87;Dawn;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;TEF;144;Buddy-Buddy Poffin;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;MEG;131;Ultra Ball;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;MEG;125;Rare Candy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;TWM;165;Unfair Stamp;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;trainer;DRI;180;Team Rocket's Watchtower;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;energy;MEE;13;Psychic Energy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;energy;MEE;10;Fire Energy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-blaziken;energy;MEE;15;Darkness Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;MEG;130;Switch;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;n-zoroark;trainer;ASC;212;Tool Scrapper;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;SSP;75;Smoochum;3;1;3;1.0;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;SSP;78;Uxie;3;1;3;1.0;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;SSP;80;Azelf;2;1;3;0.6667;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;TWM;95;Munkidori;2;1;3;0.6667;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;SSP;79;Mesprit;2;1;3;0.6667;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;SCR;133;Crispin;2;1;3;0.6667;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;ASC;196;Night Stretcher;3;1;3;1.0;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;PFL;94;Wondrous Patch;3;1;3;1.0;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;MEG;130;Switch;2;1;3;0.6667;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;TEF;152;Hero's Cape;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;energy;MEE;13;Psychic Energy;8;1;3;2.6667;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;energy;POR;88;Telepathic Psychic Energy;3;1;3;1.0;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;energy;MEE;15;Darkness Energy;2;1;3;0.6667;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;DRI;10;Shaymin;4;4;7;0.5714;0.5714
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;TWM;163;Secret Box;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;energy;POR;87;Rocky Fighting Energy;11;4;7;1.5714;0.5714
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;TWM;141;Bloodmoon Ursaluna ex;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;pokemon;POR;20;Staryu;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;pokemon;POR;21;Mega Starmie ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;pokemon;PRE;35;Duskull;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;pokemon;PRE;36;Dusclops;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;pokemon;PRE;37;Dusknoir;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;pokemon;ASC;46;Snorunt;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;pokemon;ASC;47;Mega Froslass ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;pokemon;POR;62;Meowth ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;WHT;84;Hilda;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;MEG;132;Wally's Compassion;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;TEF;160;Salvatore;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;DRI;176;Team Rocket's Petrel;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;TEF;144;Buddy-Buddy Poffin;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;SVI;186;Pokégear 3.0;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;POR;81;Poké Pad;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;MEG;131;Ultra Ball;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;TEF;157;Prime Catcher;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;CRI;82;Special Red Card;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;POR;72;Energy Search;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;trainer;MEG;127;Risky Ruins;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;energy;MEE;11;Water Energy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;energy;CRI;84;Bubbly Water Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;energy;WHT;86;Ignition Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;starmie-dusknoir;energy;TEF;161;Mist Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;MEG;130;Switch;1;1;6;0.1667;0.1667
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;SCR;57;Slowpoke;16;4;4;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;SCR;58;Slowking;12;4;4;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;MEG;104;Mega Kangaskhan ex;12;4;4;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;SSP;76;Latias ex;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;CRI;61;Metagross;5;4;4;1.25;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;SFA;47;Kyurem;8;4;4;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;ASC;142;Fezandipiti ex;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;DRI;78;Zeraora;2;2;4;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;JTG;56;Lillie's Clefairy ex;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;POR;62;Meowth ex;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;30C;66;Mew ex;3;3;4;0.75;0.75
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;TEF;145;Ciphermaniac's Codebreaking;14;4;4;3.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;MEG;119;Lillie's Determination;15;4;4;3.75;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;MEG;131;Ultra Ball;15;4;4;3.75;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;POR;81;Poké Pad;16;4;4;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;PFL;94;Wondrous Patch;12;4;4;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;ASC;196;Night Stretcher;10;4;4;2.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;MEG;130;Switch;4;4;4;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;TWM;163;Secret Box;2;2;4;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;TWM;158;Lucky Helmet;2;2;4;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;SFA;54;Academy at Night;16;4;4;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;energy;MEE;13;Psychic Energy;17;4;4;4.25;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;energy;POR;88;Telepathic Psychic Energy;15;4;4;3.75;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;energy;TWM;166;Boomerang Energy;7;4;4;1.75;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;POR;47;Mega Zygarde ex;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;WHT;84;Hilda;2;2;7;0.2857;0.2857
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;CRI;82;Special Red Card;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;TWM;148;Enhanced Hammer;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;CRI;82;Special Red Card;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;TWM;150;Handheld Fan;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;trainer;DRI;173;Team Rocket's Factory;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;crustle-dri;energy;MEE;9;Grass Energy;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;pokemon;PBL;66;Pikipek;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;pokemon;PBL;67;Trumbeak;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;pokemon;PBL;68;Toucannon;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;pokemon;SCR;118;Fan Rotom;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;pokemon;TWM;131;Tatsugiri;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;pokemon;SFA;40;Genesect;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;pokemon;DRI;10;Shaymin;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;pokemon;CRI;70;Patrat;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;TWM;151;Hassel;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;MEG;114;Boss's Orders;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;MEG;125;Rare Candy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;TEF;144;Buddy-Buddy Poffin;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;DRI;168;Sacred Ash;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;ASC;181;Air Balloon;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;trainer;PFL;85;Battle Cage;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;energy;TEF;161;Mist Energy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;energy;JTG;159;Spiky Energy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;toucannon-pbl;energy;TWM;167;Legacy Energy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;PRE;35;Duskull;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;PRE;36;Dusclops;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;PRE;37;Dusknoir;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;MEG;54;Abra;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;TWM;80;Abra;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;MEG;55;Kadabra;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;MEG;56;Alakazam;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;ASC;16;Budew;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;ASC;142;Fezandipiti ex;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;pokemon;DRI;10;Shaymin;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;PFL;87;Dawn;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;WHT;84;Hilda;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;PBL;78;Gwynn;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;MEG;114;Boss's Orders;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;POR;81;Poké Pad;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;MEG;125;Rare Candy;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;MEG;128;Strange Timepiece;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;TEF;144;Buddy-Buddy Poffin;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;CRI;82;Special Red Card;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;ASC;196;Night Stretcher;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;TEF;157;Prime Catcher;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;trainer;DRI;168;Sacred Ash;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;energy;POR;88;Telepathic Psychic Energy;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dusknoir;energy;MEE;13;Psychic Energy;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;SSP;70;Togepi;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;SSP;72;Togekiss;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;pokemon;ASC;39;Psyduck;2;2;5;0.4;0.4
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;MEG;128;Strange Timepiece;2;1;5;0.4;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;SSP;75;Smoochum;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;POR;52;Drapion;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;SSP;100;Annihilape;2;2;4;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;MEG;114;Boss's Orders;2;2;4;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;SSP;187;Surfer;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dhelmise-pbl;trainer;SVI;186;Pokégear 3.0;3;3;6;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;pokemon;DRI;32;Ethan's Cyndaquil;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;pokemon;DRI;33;Ethan's Quilava;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;pokemon;DRI;34;Ethan's Typhlosion;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;pokemon;JTG;120;Dunsparce;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;pokemon;TEF;129;Dudunsparce;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;pokemon;SSP;21;Victini;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;pokemon;ASC;142;Fezandipiti ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;pokemon;DRI;10;Shaymin;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;pokemon;ASC;16;Budew;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;DRI;165;Ethan's Adventure;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;DRI;176;Team Rocket's Petrel;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;SFA;64;Xerosic's Machinations;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;TWM;154;Kieran;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;TWM;155;Lana's Aid;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;MEG;119;Lillie's Determination;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;MEG;131;Ultra Ball;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;MEG;125;Rare Candy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;TEF;144;Buddy-Buddy Poffin;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;ASC;196;Night Stretcher;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;ASC;212;Tool Scrapper;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;CRI;82;Special Red Card;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;PRE;116;Max Rod;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;WHT;80;Brave Bangle;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;PFL;85;Battle Cage;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;trainer;SSP;177;Gravity Mountain;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ethan-typhlosion;energy;MEE;10;Fire Energy;5;1;1;5.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;MEG;125;Rare Candy;2;1;14;0.1429;0.0714
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;TWM;17;Applin;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;TWM;126;Applin;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;TWM;18;Dipplin;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;TWM;14;Grookey;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;TWM;15;Thwackey;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;TWM;44;Goldeen;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;PRE;21;Seaking;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;TEF;23;Rellor;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;TEF;24;Rabsca;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;pokemon;DRI;10;Shaymin;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;PBL;77;Gladion's Final Battle;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;TWM;155;Lana's Aid;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;TWM;154;Kieran;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;PFL;87;Dawn;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;TEF;144;Buddy-Buddy Poffin;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;MEG;131;Ultra Ball;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;POR;82;Pokémon Catcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;TWM;163;Secret Box;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;MEG;130;Switch;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;WHT;80;Brave Bangle;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;ASC;181;Air Balloon;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;TWM;149;Festival Grounds;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;trainer;MEG;117;Forest of Vitality;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;energy;MEE;9;Grass Energy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;festival-lead;energy;POR;86;Growing Grass Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;dragapult-ex;trainer;DRI;180;Team Rocket's Watchtower;6;3;14;0.4286;0.2143
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;pokemon;MEG;104;Mega Kangaskhan ex;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;TWM;155;Lana's Aid;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;PRE;35;Duskull;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;PRE;36;Dusclops;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;PRE;37;Dusknoir;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;JTG;56;Lillie's Clefairy ex;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;SSP;76;Latias ex;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;SSP;70;Togepi;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;SSP;72;Togekiss;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;TWM;141;Bloodmoon Ursaluna ex;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;ASC;142;Fezandipiti ex;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;POR;62;Meowth ex;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;pokemon;30C;72;Unown;1;1;2;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;MEG;119;Lillie's Determination;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;TWM;145;Carmine;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;MEG;114;Boss's Orders;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;PFL;94;Wondrous Patch;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;MEG;131;Ultra Ball;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;MEG;125;Rare Candy;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;ASC;196;Night Stretcher;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;TWM;163;Secret Box;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;POR;81;Poké Pad;2;2;2;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;CRI;82;Special Red Card;3;2;2;1.5;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;JTG;151;Lillie's Pearl;4;2;2;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;trainer;MEG;122;Mystery Garden;6;2;2;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;energy;MEE;13;Psychic Energy;14;2;2;7.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lillie-clefairy;energy;POR;88;Telepathic Psychic Energy;8;2;2;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;PRE;47;Larvitar;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;PRE;48;Pupitar;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;JTG;95;Tyranitar;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;PFL;54;Gastly;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;PFL;55;Haunter;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;PFL;56;Mega Gengar ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;ASC;16;Budew;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;POR;62;Meowth ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;SFA;39;Pecharunt ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;TWM;95;Munkidori;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;ASC;142;Fezandipiti ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;pokemon;SFA;36;Okidogi ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;PRE;112;Janine's Secret Art;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;MEG;119;Lillie's Determination;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;SFA;64;Xerosic's Machinations;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;POR;76;Judge;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;PFL;87;Dawn;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;WHT;84;Hilda;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;DRI;176;Team Rocket's Petrel;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;SCR;133;Crispin;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;MEG;125;Rare Candy;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;MEG;131;Ultra Ball;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;POR;81;Poké Pad;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;TEF;144;Buddy-Buddy Poffin;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;POR;71;Crushing Hammer;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;TWM;165;Unfair Stamp;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;trainer;PRE;95;Binding Mochi;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;energy;MEE;15;Darkness Energy;6;1;1;6.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;tyranitar-jtg;energy;MEE;13;Psychic Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;PBL;41;Annihilape;2;2;4;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;30C;72;Unown;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;PFL;34;Pawmot;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;DRI;176;Team Rocket's Petrel;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;TWM;155;Lana's Aid;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;TEF;157;Prime Catcher;2;2;4;0.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;pokemon;JTG;51;Tapu Koko ex;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;basic-box-m;trainer;JTG;151;Lillie's Pearl;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;alakazam-dudunsparce;trainer;MEG;130;Switch;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;TWM;145;Carmine;3;1;2;1.5;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ceruledge-ex;trainer;POR;82;Pokémon Catcher;4;1;2;2.0;0.5
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;TEF;145;Ciphermaniac's Codebreaking;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;DRI;180;Team Rocket's Watchtower;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;30C;66;Mew ex;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;ASC;39;Psyduck;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;ASC;196;Night Stretcher;6;3;7;0.8571;0.4286
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;TEF;152;Hero's Cape;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;pokemon;ASC;16;Budew;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;slowking-scr;trainer;CRI;82;Special Red Card;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;ogerpon-meganium-arboliva;trainer;CRI;82;Special Red Card;1;1;4;0.25;0.25
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;SSP;56;Chien-Pao;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;pokemon;ASC;39;Psyduck;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lopunny-dudunsparce;trainer;TEF;146;Eri;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;PBL;66;Pikipek;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;PBL;67;Trumbeak;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;PBL;68;Toucannon;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;SCR;114;Hoothoot;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;SCR;115;Noctowl;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;SCR;128;Terapagos ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;TWM;64;Wellspring Mask Ogerpon ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;SCR;118;Fan Rotom;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;ASC;142;Fezandipiti ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;SSP;76;Latias ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;POR;62;Meowth ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;SSP;56;Chien-Pao;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;pokemon;JTG;56;Lillie's Clefairy ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;SCR;133;Crispin;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;SCR;132;Briar;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;MEG;119;Lillie's Determination;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;PFL;87;Dawn;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;SSP;170;Cyrano;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;POR;81;Poké Pad;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;TEF;144;Buddy-Buddy Poffin;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;MEG;131;Ultra Ball;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;MEG;125;Rare Candy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;TEF;157;Prime Catcher;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;MEG;115;Energy Switch;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;CRI;82;Special Red Card;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;SCR;135;Glass Trumpet;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;trainer;SCR;131;Area Zero Underdepths;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;energy;MEE;11;Water Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;energy;MEE;12;Lightning Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;energy;MEE;13;Psychic Energy;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;terapagos-noctowl;energy;MEE;9;Grass Energy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;SFA;64;Xerosic's Machinations;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;JTG;157;Ruffian;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;TWM;25;Teal Mask Ogerpon ex;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;MEG;8;Chikorita;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;MEG;9;Bayleef;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;MEG;10;Meganium;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;MEG;1;Bulbasaur;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;MEG;2;Ivysaur;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;MEG;3;Mega Venusaur ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;POR;62;Meowth ex;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;ASC;142;Fezandipiti ex;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;MEG;12;Celebi;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;pokemon;PRE;86;Regigigas;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;MEG;114;Boss's Orders;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;TWM;155;Lana's Aid;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;MEG;132;Wally's Compassion;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;SFA;64;Xerosic's Machinations;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;PFL;87;Dawn;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;TWM;143;Bug Catching Set;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;MEG;131;Ultra Ball;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;POR;81;Poké Pad;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;TWM;165;Unfair Stamp;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;trainer;MEG;117;Forest of Vitality;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-venusaur-ex;energy;MEE;9;Grass Energy;12;1;1;12.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;SFA;64;Xerosic's Machinations;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;POR;72;Energy Search;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;TEF;154;Maximum Belt;2;2;7;0.2857;0.2857
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;pokemon;DRI;102;Cynthia's Gible;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;pokemon;DRI;103;Cynthia's Gabite;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;pokemon;DRI;104;Cynthia's Garchomp ex;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;pokemon;DRI;7;Cynthia's Roselia;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;pokemon;DRI;8;Cynthia's Roserade;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;pokemon;DRI;129;Cynthia's Spiritomb;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;MEG;119;Lillie's Determination;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;MEG;114;Boss's Orders;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;PRE;115;Larry's Skill;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;POR;84;Rosa's Encouragement;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;WHT;84;Hilda;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;MEG;116;Fighting Gong;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;TEF;144;Buddy-Buddy Poffin;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;POR;81;Poké Pad;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;SVI;186;Pokégear 3.0;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;ASC;196;Night Stretcher;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;MEG;124;Premium Power Pro;2;1;1;2.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;MEG;130;Switch;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;MEG;125;Rare Candy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;DRI;162;Cynthia's Power Weight;3;1;1;3.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;trainer;DRI;180;Team Rocket's Watchtower;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;energy;MEE;14;Fighting Energy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;energy;POR;87;Rocky Fighting Energy;4;1;1;4.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;cynthia-garchomp-ex;energy;TEF;162;Neo Upper Energy;1;1;1;1.0;1.0
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;MEG;131;Ultra Ball;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;hops-trevenant;trainer;ASC;181;Air Balloon;1;1;3;0.3333;0.3333
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;ASC;181;Air Balloon;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;mega-excadrill-ex;trainer;SSP;177;Gravity Mountain;1;1;5;0.2;0.2
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;ASC;122;Okidogi;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;pokemon;ASC;142;Fezandipiti ex;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;TEF;160;Salvatore;1;1;7;0.1429;0.1429
+6ace6c698a8383117e3eb1a5;2026-10-16;TEF-30C;lucario-hariyama;trainer;POR;85;Tarragon;1;1;7;0.1429;0.1429

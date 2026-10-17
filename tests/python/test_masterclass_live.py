@@ -29,7 +29,9 @@ WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))
 ORDNER = os.path.join(WURZEL, "data", "masterclass_live")
 sys.path.insert(0, os.path.join(WURZEL, "scripts"))
 
-OBEN = {"_meta", "matchups", "online_listen", "werte"}
+OBEN = {"_meta", "matchups", "online_listen", "werte", "aktuell"}
+# 17.10.2026: Block „Aktuelle Daten“ (scripts/masterclass_aktuell.py)
+AKTUELL = {"deck", "name", "online", "vor_ort", "gegner", "liste_online", "listen_vor_ort"}
 META = {"id", "erzeugt_am", "quelle"}
 MATCHUPS = {"koepfe", "majors_praefix", "werte", "zellen", "leer", "anteile", "mindest_partien"}
 LISTEN = {"gruppe", "max_plaetze", "leer_hinweis", "mindest_spieler", "listen"}
@@ -84,6 +86,9 @@ def befunde(daten):
     for k in (daten.get("matchups") or {}):
         if k not in MATCHUPS:
             aus.append("unbekannter Schluessel /matchups/%s" % k)
+    for k in (daten.get("aktuell") or {}):
+        if k not in AKTUELL:
+            aus.append("unbekannter Schluessel /aktuell/%s" % k)
     for k in (daten.get("online_listen") or {}):
         if k not in LISTEN:
             aus.append("unbekannter Schluessel /online_listen/%s" % k)
@@ -121,8 +126,12 @@ def test_keine_prosa_in_der_live_datei(pfad):
     aus = befunde(daten)
     assert aus == [], "%s:\n  " % os.path.basename(pfad) + "\n  ".join(aus[:20])
     # Gegen ein leeres Bestehen: die Schablonen muessen wirklich greifen.
-    treffer = sum(1 for _p, s in _zeichenketten(daten) if any(m.match(s) for m in SCHABLONEN))
-    assert treffer >= 20, "nur %d Zeichenketten passen auf eine Schablone" % treffer
+    if "matchups" in daten:
+        treffer = sum(1 for _p, s in _zeichenketten(daten) if any(m.match(s) for m in SCHABLONEN))
+        assert treffer >= 20, "nur %d Zeichenketten passen auf eine Schablone" % treffer
+    else:
+        # Nur „Aktuelle Daten“: gegen ein leeres Bestehen mindestens zehn Gegner.
+        assert len((daten.get("aktuell") or {}).get("gegner") or []) >= 10, "Live-Datei ohne Gegner"
 
 
 def test_der_feste_quellsatz_ist_der_des_schreibers(tmp_path, monkeypatch):
@@ -138,7 +147,7 @@ def test_der_feste_quellsatz_ist_der_des_schreibers(tmp_path, monkeypatch):
 def test_verfaelschung_prosa_satz_faellt_auf():
     """VERFAELSCHUNGSPROBE: ein Satz, wie er in einer Ausarbeitung steht,
     an drei Stellen — jede muss auffallen."""
-    pfad = _dateien()[0]
+    pfad = os.path.join(ORDNER, "mega-stalobor.json")
     with open(pfad, encoding="utf-8") as f:
         echt = json.load(f)
     satz = "Going Second — sonst setzt dich Knospi mit Item-Lock aus dem Spiel."
@@ -150,6 +159,8 @@ def test_verfaelschung_prosa_satz_faellt_auf():
         lambda d: d["matchups"]["zellen"][next(iter(d["matchups"]["zellen"]))]["jetzt"].__setitem__(1, kurz),
         lambda d: d.__setitem__("ausarbeitung", {}),
         lambda d: d["matchups"]["werte"].__setitem__("tipp", kurz),
+        lambda d: d["aktuell"].__setitem__("plan", satz),
+        lambda d: d["aktuell"]["gegner"][0].__setitem__("name", satz),
     ):
         d = json.loads(json.dumps(echt))
         setze(d)

@@ -413,5 +413,23 @@ def main():
     return 0
 
 
+def aktuell_mitziehen(probe=False):
+    """17.10.2026: im selben Schritt den Block „Aktuelle Daten“ fuer ALLE
+    Masterclasses (scripts/masterclass_aktuell.py) — so laeuft er im
+    Wochenlauf und im Limitless-Lauf mit, ohne eigenen Ablaufschritt.
+    Ein Fehler dort haelt die Matchups nicht an: Warnung, Datei bleibt."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    try:
+        import masterclass_aktuell as AKT
+        return AKT.main(["--probe"] if probe else [])
+    except SystemExit as e:
+        print("::warning::masterclass_aktuell: %s — Aktuelle Daten bleiben wie sie sind" % e)
+    except Exception as e:  # noqa: BLE001 — Warnung statt Abbruch, siehe oben
+        print("::warning::masterclass_aktuell: %r — Aktuelle Daten bleiben wie sie sind" % e)
+    return 0
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    rc = main()
+    aktuell_mitziehen(probe="--probe" in sys.argv)
+    sys.exit(rc)

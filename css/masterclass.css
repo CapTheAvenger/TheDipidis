@@ -37,9 +37,11 @@
     color: var(--ink-3);
 }
 
+/* Variante A (Hausi 17.10.2026): grosses Kartenbild oben, Name darunter —
+   am Handy zwei Kacheln nebeneinander. */
 .mcl-regal {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: var(--s-3);
     margin-bottom: var(--s-6);
 }
@@ -56,17 +58,23 @@
 
 .mcl-kachel-kopf {
     display: flex;
-    gap: var(--s-3);
-    padding: var(--s-3);
+    flex-direction: column;
+    gap: var(--s-2);
+    padding: var(--s-2) var(--s-2) var(--s-3);
     flex: 1;
 }
 
-.mcl-kachel-bild {
-    width: 64px;
+/* Die Klasse steht doppelt: img[src*="limitlesstcg"] in ui-components.css
+   (0,1,1) war staerker als .mcl-kachel-bild (0,1,0) und hat das Bild bis
+   17.10.2026 auf volle Breite gezogen — mit dem Text daneben auf 0 px. */
+.mcl-kachel .mcl-kachel-bild {
+    display: block;
+    width: 100%;
     height: auto;
-    border-radius: var(--r-sm);
+    aspect-ratio: 2.5 / 3.5;
+    object-fit: cover;
+    border-radius: var(--r-md);
     flex: none;
-    align-self: flex-start;
 }
 
 .mcl-kachel-txt {
@@ -574,7 +582,6 @@
 .mcl-keintreffer { color: var(--ink-3); font-size: var(--fs-md); padding: var(--s-4) 0; }
 
 @media (max-width: 480px) {
-    .mcl-kachel-bild { width: 54px; }
     .mcl-gitter { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
 }
 

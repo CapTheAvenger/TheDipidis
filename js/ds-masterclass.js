@@ -468,8 +468,10 @@
             var h = host();
             var regal = h && h.querySelector('.mcl-regal');
             if (!regal || !liste.length) return;
-            /* Konto-Guides vorn (in der Reihenfolge von GUIDES), Rahmen-
-             * Kacheln dahinter. */
+            /* Reihenfolge (Hausi 17.10.2026: Profi-Wissen „als allererste
+             * Stelle“): erst die allgemeinen Stuecke (Dokument-Kennung
+             * beginnt mit „allgemein-“), dann die Konto-Guides in der
+             * Reihenfolge von GUIDES, dann die uebrigen Rahmen-Kacheln. */
             var vorn = liste.filter(function (g) { return g.quelle === 'konto'; })
                 .sort(function (a, b) { return GUIDES.indexOf(b) - GUIDES.indexOf(a); });
             vorn.forEach(function (g) {
@@ -477,6 +479,12 @@
                     regal.insertAdjacentHTML('afterbegin', kachel(g));
                 }
             });
+            liste.filter(function (g) { return g.quelle !== 'konto' && /^privat-allgemein-/.test(g.id); })
+                .reverse().forEach(function (g) {
+                    if (!regal.querySelector('[data-mcl-guide="' + g.id + '"]')) {
+                        regal.insertAdjacentHTML('afterbegin', kachel(g));
+                    }
+                });
             liste.forEach(function (g) {
                 if (g.quelle === 'konto') return;
                 if (!regal.querySelector('[data-mcl-guide="' + g.id + '"]')) {
@@ -741,6 +749,166 @@
         st.parentNode.insertBefore(p, st.nextSibling);
     }
 
+    /* ---------- Aktuelle Daten: Online neben vor Ort (17.10.2026) ----------
+     *
+     * BESTELLUNG (Hausi, 17.10.2026): „… dass die Masterclasses … immer mit
+     * aktuellen Daten nachgeliefert werden. … In-Personendaten und
+     * Online-Daten gehen immer so ein bisschen auseinander … man kann es ja
+     * beides aufzeigen … damit ich alle Daten auf einen Blick habe.“
+     *
+     * Quelle ist der Schluessel `aktuell` der Live-Datei
+     * (scripts/masterclass_aktuell.py). Daraus entstehen zwei Dinge, fuer
+     * JEDE Masterclass gleich — im Rahmen wie auf der Seite:
+     *   der Block „Aktuelle Daten“ (aktuellBlockHtml) und
+     *   je Matchup eine Zeile „Online … · Vor Ort …“ (aktuellMuZeilen).
+     * Die Einschaetzung des Autors kommt aus dem Stueck selbst
+     * ([data-live-slug] mit data-autor oder Tims Zelle) — sie steht nicht
+     * in der oeffentlichen Datei. */
+    var AKT_GRENZE = 20;   /* Festlegung DA-50: unter 20 Matches Bilanz statt Quote */
+
+    function tausender(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+
+    /* {txt, n, duenn, wert} aus [S, N, U] — Matchpunkte (3S+U)/(3n). */
+    function aktQuote(b) {
+        var s = +(b && b[0]) || 0, l = +(b && b[1]) || 0, t = +(b && b[2]) || 0, n = s + l + t;
+        if (!n) return { txt: '—', n: 0, duenn: true, wert: null };
+        var w = (3 * s + t) / (3 * n) * 100;
+        if (n < AKT_GRENZE) return { txt: s + '–' + l + '–' + t, n: n, duenn: true, wert: w };
+        return { txt: window.zahlKomma(w, 1) + ' %', n: n, duenn: false, wert: w };
+    }
+
+    function aktZelle(b) {
+        var q = aktQuote(b);
+        var ton = q.duenn || q.wert === null ? 'grau' : (q.wert >= 55 ? 'gut' : (q.wert <= 45 ? 'schlecht' : 'mittel'));
+        return '<span class="mcl-akt-q mcl-akt-' + ton + '">' + esc(q.txt) +
+            (q.n ? ' <i>(' + tausender(q.n) + ')</i>' : '') + '</span>';
+    }
+
+    /* Online und vor Ort weichen ab: beide mit Quote, mindestens 10 Punkte auseinander. */
+    function aktAbweichung(a, b) {
+        var x = aktQuote(a), y = aktQuote(b);
+        return !x.duenn && !y.duenn && Math.abs(x.wert - y.wert) >= 10;
+    }
+
+    var AKT_CSS = '<style>' +
+        '.mcl-akt{border:1px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:12px;padding:12px;margin:12px 0 18px;font-size:14px;line-height:1.45}' +
+        '.mcl-akt h3{margin:0 0 2px;font-size:17px}.mcl-akt-fein{font-size:12px;opacity:.72;margin:0 0 10px}' +
+        '.mcl-akt-zwei{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:12px}' +
+        '.mcl-akt-k{border-radius:10px;padding:10px;background:color-mix(in srgb,currentColor 6%,transparent)}' +
+        '.mcl-akt-k h4{margin:0 0 6px;font-size:14px}.mcl-akt-k dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0}' +
+        '.mcl-akt-k dt{opacity:.72}.mcl-akt-k dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}' +
+        '.mcl-akt-tab{width:100%;border-collapse:collapse;font-size:13px}.mcl-akt-tab th{text-align:left;font-size:12px;opacity:.72;font-weight:600;padding:4px}' +
+        '.mcl-akt-tab td{padding:5px 4px;border-top:1px solid color-mix(in srgb,currentColor 12%,transparent);vertical-align:top}' +
+        '.mcl-akt-tab td.z,.mcl-akt-tab th.z{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}' +
+        '.mcl-akt-q i{font-style:normal;font-size:11px;opacity:.65}.mcl-akt-gut{color:#1f9d55}.mcl-akt-schlecht{color:#d64545}.mcl-akt-grau{opacity:.6}' +
+        '.mcl-akt-ab{display:inline-block;font-size:11px;border-radius:999px;padding:0 6px;background:rgba(227,96,43,.16);color:#e3602b;margin-left:4px}' +
+        '.mcl-akt-autor{font-size:12px;opacity:.85}.mcl-akt details{margin-top:8px}.mcl-akt summary{cursor:pointer;font-weight:600;font-size:13px}' +
+        '.mcl-akt-liste{columns:2 180px;font-size:12px;margin:6px 0 0;padding:0;list-style:none}.mcl-akt-liste li{break-inside:avoid}' +
+        '.mcl-akt-mu{display:block;font-size:12px;margin-top:3px;opacity:.95}' +
+        '@media (max-width:520px){.mcl-akt-tab .mcl-akt-meta{display:none}.mcl-akt{padding:10px}}' +
+        '</style>';
+
+    function aktListe(l, kopf) {
+        if (!l || !l.karten || !l.karten.length) return '';
+        return '<details><summary>' + esc(kopf) + '</summary><ul class="mcl-akt-liste">' +
+            l.karten.map(function (k) {
+                return '<li>' + esc(k[0]) + '× ' + esc(k[1]) + ' <span class="mcl-akt-fein">' + esc(k[2] + ' ' + k[3]) + '</span></li>';
+            }).join('') + '</ul></details>';
+    }
+
+    /* autorVon(slug) -> Einschaetzung des Autors (Text) oder ''. Rein: baut
+     * nur HTML aus den Zahlen, alles ueber esc(). */
+    function aktuellBlockHtml(a, autorVon, wieviele) {
+        if (!a || !a.online) return '';
+        var o = a.online, v = a.vor_ort, s = v && v.summe;
+        /* autorVon === 'rahmen': im Rahmen fuellt das eingefuegte Skript die
+         * Spalte aus dem Stueck (data-autor-fuer) und nimmt sie wieder weg,
+         * wenn kein Matchup eine Einschaetzung traegt. */
+        var rahmen = autorVon === 'rahmen';
+        var autor = typeof autorVon === 'function' ? autorVon : function () { return ''; };
+        var zeigen = wieviele || 12;
+        var mitAutor = rahmen || (a.gegner || []).some(function (g) { return !!autor(g.slug); });
+        var on = '<div class="mcl-akt-k"><h4>Online · ' + esc(o.format) + '</h4><dl>' +
+            (o.anteil14 ? '<dt>Meta-Anteil (14 Tage)</dt><dd>' + esc(o.anteil14) + ' %</dd>' : '') +
+            '<dt>Win % seit ' + esc(o.seit.slice(0, 6)) + '</dt><dd>' + aktZelle(o.bilanz) + '</dd>' +
+            '<dt>Letzte 7 Tage: Anteil</dt><dd>' + esc(o.kurz_anteil) + ' %</dd>' +
+            '<dt>Letzte 7 Tage: Win %</dt><dd>' + aktZelle(o.kurz_bilanz) + '</dd>' +
+            '<dt>Listen</dt><dd>' + tausender(o.listen) + ' in ' + tausender(o.turniere) + ' Turnieren</dd>' +
+            '</dl></div>';
+        var vo = v ? '<div class="mcl-akt-k"><h4>Vor Ort · Regionals ' + esc(v.format) + '</h4><dl>' +
+            '<dt>Meta-Anteil</dt><dd>' + esc(s.anteil) + ' % (' + tausender(s.decks) + ' von ' + tausender(s.spieler) + ')</dd>' +
+            '<dt>Win %</dt><dd>' + aktZelle(s.bilanz) + '</dd>' +
+            '<dt>Day 2 · Top 8 · Top 1</dt><dd>' + s.day2 + ' · ' + s.top8 + ' · ' + s.sieg + '</dd>' +
+            '<dt>Turniere</dt><dd>' + v.turniere.map(function (t) { return esc(t.name); }).join(', ') + '</dd>' +
+            '</dl></div>' : '<div class="mcl-akt-k"><h4>Vor Ort</h4><p class="mcl-akt-fein">Noch kein Regional mit diesem Deck in den Daten.</p></div>';
+        var zeile = function (g) {
+            var ab = aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">weicht ab</span>' : '';
+            return '<tr><td>' + esc(g.name) + ab + '</td><td class="z mcl-akt-meta">' + esc(g.anteil) + ' %</td>' +
+                '<td class="z">' + aktZelle(g.online) + '</td><td class="z">' + aktZelle(g.vor_ort) + '</td>' +
+                (rahmen ? '<td class="mcl-akt-autor" data-autor-spalte="1" data-autor-fuer="' + esc(g.slug) + '"></td>' :
+                    mitAutor ? '<td class="mcl-akt-autor">' + esc(autor(g.slug) || '—') + '</td>' : '') + '</tr>';
+        };
+        var kopfzeile = '<tr><th>Gegner</th><th class="z mcl-akt-meta">Meta</th><th class="z">Online</th><th class="z">Vor Ort</th>' +
+            (mitAutor ? '<th data-autor-spalte="1">Autor</th>' : '') + '</tr>';
+        var g = a.gegner || [];
+        var tab = '<table class="mcl-akt-tab"><thead>' + kopfzeile + '</thead><tbody>' +
+            g.slice(0, zeigen).map(zeile).join('') + '</tbody></table>' +
+            (g.length > zeigen ? '<details><summary>Alle ' + g.length + ' Gegner</summary><table class="mcl-akt-tab"><tbody>' +
+                g.slice(zeigen).map(zeile).join('') + '</tbody></table></details>' : '');
+        var lo = a.liste_online;
+        var listen = (lo ? aktListe(lo, 'Beste Online-Liste (7 Tage): ' + lo.platz + '. von ' + lo.von + ' (' + lo.bilanz + '), ' + lo.datum.slice(0, 6)) : '') +
+            (a.listen_vor_ort || []).map(function (l) {
+                return aktListe(l, 'Vor Ort: ' + l.platz + '. ' + l.turnier + ' (' + l.bilanz + '), ' + l.spieler);
+            }).join('');
+        return AKT_CSS + '<section class="mcl-akt" id="aktuell" data-mcl-akt="1"><h3>Aktuelle Daten</h3>' +
+            '<p class="mcl-akt-fein">' + esc(a.name) + ' · Stand ' + esc(o.bis) +
+            ' · Win % nach Matchpunkten, unter ' + AKT_GRENZE + ' Matches die Bilanz (W-L-T)</p>' +
+            '<div class="mcl-akt-zwei">' + on + vo + '</div>' +
+            '<h4>Die häufigsten Gegner</h4>' + tab + listen + '</section>';
+    }
+
+    /* slug -> HTML der Zeile „Online … · Vor Ort …“ fuer die Matchups des Stuecks. */
+    function aktuellMuZeilen(a) {
+        var aus = {};
+        (a && a.gegner || []).forEach(function (g) {
+            aus[g.slug] = { name: g.name, html: 'Online ' + aktZelle(g.online) + ' · Vor Ort ' + aktZelle(g.vor_ort) +
+                (aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">weicht ab</span>' : '') };
+        });
+        return aus;
+    }
+
+    /* Einschaetzung des Autors aus dem Stueck: data-autor am Matchup, sonst
+     * Tims Zelle (Stalobor). */
+    function autorAusStueck(wurzel) {
+        return function (slug) {
+            var d = Array.prototype.filter.call(wurzel.querySelectorAll('[data-live-slug]'), function (x) {
+                return (' ' + x.getAttribute('data-live-slug') + ' ').indexOf(' ' + slug + ' ') >= 0;
+            })[0];
+            if (!d) return '';
+            if (d.getAttribute('data-autor')) return d.getAttribute('data-autor');
+            var tim = d.querySelector('.mcl-wrz-tim b');
+            return tim ? tim.textContent.trim() : '';
+        };
+    }
+
+    /* Auf der Seite (Konto-Masterclass wie Stalobor): Block an
+     * [data-live-block], sonst oben in den Matchups, sonst nach dem Kopf. */
+    function aktuellEinsetzen(wurzel, a) {
+        if (!wurzel || !a || !a.online) return false;
+        var html = '<div data-mcl-akt-huelle="1">' + aktuellBlockHtml(a, autorAusStueck(wurzel)) + '</div>';
+        Array.prototype.forEach.call(wurzel.querySelectorAll('[data-mcl-akt-huelle]'), function (x) {
+            x.parentNode.removeChild(x);
+        });
+        var ziel = wurzel.querySelector('[data-live-block]');
+        if (ziel) { ziel.innerHTML = html; return true; }
+        var mu = wurzel.querySelector('[data-mcl-abschnitt="matchups"]');
+        if (mu) { mu.insertAdjacentHTML('afterbegin', html); return true; }
+        var kopf = wurzel.querySelector('.mcl-buehne-kopf');
+        if (kopf) kopf.insertAdjacentHTML('afterend', html);
+        else wurzel.insertAdjacentHTML('afterbegin', html);
+        return true;
+    }
+
     /* Gibt true zurueck, wenn frische Daten eingesetzt wurden. */
     function liveEinsetzen(wurzel, daten) {
         if (!wurzel) return false;
@@ -751,6 +919,7 @@
         }
         if (daten.werte) liveWerteSetzen(wurzel, daten.werte);
         if (daten.online_listen) liveListen(wurzel, daten.online_listen);
+        if (daten.aktuell) aktuellEinsetzen(wurzel, daten.aktuell);
         return true;
     }
 
@@ -760,10 +929,28 @@
      * auf die App (kein allow-same-origin), darum der Umweg. */
     var LIVE_SKRIPT = '<script>window.addEventListener("message",function(e){' +
         'if(e.source!==window.parent)return;var d=e.data;' +
-        'if(!d||d.typ!=="mcl-live"||!d.werte)return;' +
-        'var w=d.werte;Array.prototype.forEach.call(document.querySelectorAll("[data-live]"),function(el){' +
+        'if(!d||d.typ!=="mcl-live")return;' +
+        'var w=d.werte||{};Array.prototype.forEach.call(document.querySelectorAll("[data-live]"),function(el){' +
         'var k=el.getAttribute("data-live");' +
-        'if(Object.prototype.hasOwnProperty.call(w,k)&&typeof w[k]==="string")el.textContent=w[k];});});<\/script>';
+        'if(Object.prototype.hasOwnProperty.call(w,k)&&typeof w[k]==="string")el.textContent=w[k];});' +
+        /* Aktuelle Daten (17.10.2026): Block und Matchup-Zeilen aus der Elternseite */
+        'function alle(s){return Array.prototype.slice.call(document.querySelectorAll(s));}' +
+        'function finde(s){return alle("[data-live-slug]").filter(function(x){return(" "+x.getAttribute("data-live-slug")+" ").indexOf(" "+s+" ")>=0;})[0];}' +
+        'if(typeof d.block==="string"&&d.block){alle("[data-mcl-akt-huelle]").forEach(function(x){x.parentNode.removeChild(x);});' +
+        'var h=document.createElement("div");h.setAttribute("data-mcl-akt-huelle","1");h.innerHTML=d.block;' +
+        'var z=document.querySelector("[data-live-block]"),m=document.getElementById("matchups");' +
+        'if(z){z.innerHTML="";z.appendChild(h);}else if(m){m.parentNode.insertBefore(h,m);}else{document.body.insertBefore(h,document.body.firstChild);}' +
+        'var voll=0;alle("[data-autor-fuer]").forEach(function(td){var x=finde(td.getAttribute("data-autor-fuer"));' +
+        'var t=x&&x.getAttribute("data-autor");td.textContent=t||"—";if(t)voll++;});' +
+        'if(!voll)alle("[data-autor-spalte]").forEach(function(x){x.parentNode.removeChild(x);});}' +
+        'if(d.mu&&typeof d.mu==="object"){alle("[data-live-slug]").forEach(function(el){' +
+        'var slugs=el.getAttribute("data-live-slug").split(/\\s+/).filter(function(s){return Object.prototype.hasOwnProperty.call(d.mu,s);});' +
+        'if(!slugs.length)return;var ort=el.querySelector("summary")||el;' +
+        'Array.prototype.forEach.call(ort.querySelectorAll(".mcl-akt-mu"),function(x){x.parentNode.removeChild(x);});' +
+        'Array.prototype.forEach.call(ort.querySelectorAll("[data-live-ersetzt]"),function(x){x.hidden=true;});' +
+        'slugs.forEach(function(s){var sp=document.createElement("span");sp.setAttribute("class","mcl-akt-mu");' +
+        'sp.innerHTML=(slugs.length>1?"<b>"+String(d.mu[s].name).replace(/[&<>"]/g,"")+":</b> ":"")+d.mu[s].html;ort.appendChild(sp);});});}' +
+        '});<\/script>';
 
     function zeigePrivat(buehne, g) {
         buehne.innerHTML = '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' +
@@ -774,8 +961,10 @@
         var rahmen = buehne.querySelector('.mcl-privat-rahmen');
         var geladen = false, daten = null;
         function senden() {
-            if (!geladen || !daten || !daten.werte || !rahmen.contentWindow) return;
-            rahmen.contentWindow.postMessage({ typ: 'mcl-live', werte: daten.werte }, '*');
+            if (!geladen || !daten || !rahmen.contentWindow) return;
+            var a = daten.aktuell;
+            rahmen.contentWindow.postMessage({ typ: 'mcl-live', werte: daten.werte || {},
+                block: a ? aktuellBlockHtml(a, 'rahmen') : '', mu: a ? aktuellMuZeilen(a) : null }, '*');
         }
         rahmen.addEventListener('load', function () { geladen = true; senden(); });
         rahmen.srcdoc = mitAnkern(g.html);
@@ -2272,6 +2461,10 @@
         _mitAnkern: mitAnkern,
         _holeLive: holeLive,
         _liveEinsetzen: liveEinsetzen,
+        _aktuellBlockHtml: aktuellBlockHtml,
+        _aktuellMuZeilen: aktuellMuZeilen,
+        _aktuellEinsetzen: aktuellEinsetzen,
+        _aktQuote: aktQuote,
         _liveListen: liveListen,
         _liveMatchups: liveMatchups,
         _listenUnterschied: listenUnterschied,

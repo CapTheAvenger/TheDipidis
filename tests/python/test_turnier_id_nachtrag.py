@@ -245,6 +245,11 @@ def test_der_wochenlauf_prueft_bevor_er_pusht():
         "Daten sind dann schon auf main")
 
     block = y[tor:commit]
+    # SC-39 (17.10.2026): ruft der Wochenlauf das gemeinsame Tor, faehrt DAS die Suiten.
+    if "bash scripts/tor_vor_dem_push.sh kern" in block:
+        with io.open(os.path.join(os.path.dirname(WOCHENLAUF), "..", "..", "scripts",
+                                  "tor_vor_dem_push.sh"), encoding="utf-8") as f:
+            block += f.read()
     assert "run-js-unit-tests.sh" in block and "pytest tests/python" in block, (
         "das Tor faehrt nicht beide Suiten — eine allein haette am "
         "22.09.2026 nur die Haelfte der Befunde gesehen")

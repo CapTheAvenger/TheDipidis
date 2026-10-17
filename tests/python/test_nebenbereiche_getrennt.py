@@ -103,7 +103,15 @@ def test_tor_und_deploy_fahren_nur_den_kern():
     # und sie fahren den Kern wirklich (sonst waere "nicht nebenbereiche"
     # auch mit einer leeren Pruefung erfuellt)
     assert "tests/unit/test-*.js" in deploy and re.search(r"pytest tests/python", deploy)
-    assert "run-js-unit-tests.sh" in wochen and "pytest tests/python" in wochen
+    if "bash scripts/tor_vor_dem_push.sh kern" in wochen:
+        # SC-39: der Wochenlauf faehrt das gemeinsame Tor im Bereich kern.
+        tor = open(os.path.join(ABLAEUFE, "..", "..", "scripts", "tor_vor_dem_push.sh"),
+                   encoding="utf-8").read()
+        kern = tor[:tor.index('if [ "$bereich" = "alle" ]')]
+        assert "run-js-unit-tests.sh tests/unit" in kern and "pytest tests/python" in kern
+        assert "nebenbereiche" not in kern.split("laeufe=(", 1)[1]
+    else:
+        assert "run-js-unit-tests.sh" in wochen and "pytest tests/python" in wochen
 
 
 def test_die_nebenbereiche_laufen_trotzdem_bei_jedem_push_und_pr():

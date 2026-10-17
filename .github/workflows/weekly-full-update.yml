@@ -1263,99 +1263,43 @@ jobs:
         with:
           node-version: '20'
 
+      # SC-39 (17.10.2026, aus SC-34): hier lief bis heute ein eigenes Tor ohne
+      # Zurueckrollen. Eine einzige rote Zusicherung warf die frischen Daten
+      # der ganzen Woche weg (Wochenlauf #181, 13.10.: alles bis auf zwei
+      # Dateien waere gesund gewesen). Jetzt dasselbe Tor wie die 20
+      # Tagesablaeufe: rote Datei(en) — bzw. ihre Familie — bleiben auf dem
+      # Stand von gestern, der Rest geht durch, laut gemeldet; nicht heilbar
+      # = zu wie bisher. Installation, Saat, Schrumpf-Waechter, Annotationen
+      # und Artefakt tor-<run_id> kommen aus scripts/tor_vor_dem_push.sh.
       - name: Zusicherungen gegen die frischen Daten
         id: pruefen
         run: |
           set +e
-          echo "## Tor vor dem Push" >> "$GITHUB_STEP_SUMMARY"
-          # Genau wie in deploy-pages.yml — die Suite braucht nur papaparse.
-          npm install --no-save papaparse >/dev/null 2>&1
-          if ! command -v node >/dev/null 2>&1; then
-            echo "::error::node fehlt — das Tor kann nicht pruefen und laesst deshalb NICHTS durch."
+          bash scripts/tor_vor_dem_push.sh kern
+          rc=$?
+          # Die Protokolle wie bisher neben die Daten (Artefakt daten-wochenlauf-*).
+          cp "${RUNNER_TEMP:-/tmp}/tor/js-kern.log" data/js.log 2>/dev/null || true
+          cp "${RUNNER_TEMP:-/tmp}/tor/py-kern.log" data/py.log 2>/dev/null || true
+          if [ "$rc" -ne 0 ]; then
             echo "gruen=false" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-          bash scripts/run-js-unit-tests.sh > /tmp/js.log 2>&1
-          js=$?
-
-          # DIESELBE LISTE WIE IM TESTSCHRITT VON deploy-pages.yml.
-          #
-          # BEFUND 22.09.2026, erster Lauf mit diesem Tor: hier standen
-          # nur `pytest beautifulsoup4`. pytest brach beim Einsammeln
-          # mit Rueckgabewert 2 ab — ein Importfehler, kein einziger
-          # Fehlschlag. Das Tor haette damit JEDEN Wochenlauf blockiert,
-          # unabhaengig von den Daten: ein Tor, das immer zu ist, ist
-          # kein Tor, sondern ein Riegel.
-          #
-          # tests/python/test_tor_und_testschritt_ziehen_gleich.py haelt
-          # die beiden Zeilen aneinander.
-          python3 -m pip install --quiet \
-              pytest beautifulsoup4 requests lxml \
-              zxing-cpp segno Pillow PyYAML >/dev/null 2>&1
-          python3 -m pytest tests/python -q > /tmp/py.log 2>&1
-          py=$?
-          {
-            echo ""
-            echo "| Suite | Rueckgabewert | Ergebnis |"
-            echo "| --- | ---: | --- |"
-            echo "| JS   | $js | $(grep -E 'JS unit tests:' /tmp/js.log | tail -n 1) |"
-            echo "| Python | $py | $(grep -E '[0-9]+ (passed|failed|error)' /tmp/py.log | tail -n 1) |"
-          } >> "$GITHUB_STEP_SUMMARY"
-          if [ $js -ne 0 ] || [ $py -ne 0 ]; then
-            {
-              echo ""
-              echo "**Es wird NICHTS gepusht.** \`main\` bleibt auf dem letzten"
-              echo "guten Stand, die Seite laeuft mit den Daten der Vorwoche"
-              echo "weiter. Die frischen Daten liegen als Artefakt bei."
-              echo ""
-              # DIE MELDUNG, NICHT NUR DER DATEINAME (22.09.2026).
-              #
-              # Der erste Lauf meldete "✗ test-tag2-grundgesamtheit.js —
-              # 1 failure(s)" und sonst nichts. Welche Zahl gegen welche
-              # Grenze gelaufen war, stand nur in einem Log, das niemand
-              # ohne Anmeldung herunterladen kann — und die frischen
-              # Daten liegen als 41-MB-Artefakt daneben. Die Diagnose
-              # kostete einen zweiten Lauf.
-              #
-              # Wer dieses Tor zuschlagen sieht, muss OHNE zweiten Lauf
-              # wissen, was es gefangen hat.
-              echo "### Rot — die Meldungen"
-              echo '```'
-              grep -E '^✗|^FAILED|^ *error:|^ *[A-Za-z]*Error|^E ' /tmp/js.log /tmp/py.log \
-                | head -60
-              echo '```'
-              echo ""
-              echo "<details><summary>JS-Log, letzte 120 Zeilen</summary>"
-              echo ""
-              echo '```'
-              tail -n 120 /tmp/js.log
-              echo '```'
-              echo "</details>"
-              echo ""
-              echo "<details><summary>Python-Log, letzte 120 Zeilen</summary>"
-              echo ""
-              echo '```'
-              tail -n 120 /tmp/py.log
-              echo '```'
-              echo "</details>"
-            } >> "$GITHUB_STEP_SUMMARY"
-            cp /tmp/js.log /tmp/py.log data/ 2>/dev/null || true
-            echo "gruen=false" >> "$GITHUB_OUTPUT"
-            # JEDE ROTE ZEILE AUCH ALS ANNOTATION (13.10.2026, Lauf #181).
-            # Die Zusammenfassung oben sieht nur, wer bei GitHub angemeldet
-            # ist — die Mail, die Lauf-Seite ohne Anmeldung und die
-            # API-Abfrage (check-runs/<job>/annotations) zeigen nur die
-            # Annotationen. Lauf #181 kostete deshalb erst einen Umweg ueber
-            # einen angemeldeten Browser, bevor die vier roten Namen
-            # ueberhaupt lesbar waren.
-            # GitHub zeigt hoechstens 10 ::error::-Annotationen je Schritt:
-            # die Sammelzeile zuerst, dann bis zu neun rote Zeilen.
-            echo "::error::Die frischen Daten machen Zusicherungen rot — nicht gepusht. Siehe Zusammenfassung."
-            grep -hE '^✗|^FAILED' /tmp/js.log /tmp/py.log 2>/dev/null \
+            # JEDE ROTE ZEILE AUCH ALS ANNOTATION (13.10.2026, Lauf #181) —
+            # ohne Anmeldung sieht man nur Annotationen. Das Tor schreibt die
+            # Sammelzeile; hier die roten Namen (hoechstens 9 je Schritt).
+            grep -hE '^✗|^FAILED' "${RUNNER_TEMP:-/tmp}"/tor/*.log 2>/dev/null \
               | head -9 | sed 's/^/::error::Tor: /' || true
             exit 1
           fi
+          rm -f data/js.log data/py.log
           echo "gruen=true" >> "$GITHUB_OUTPUT"
+
+      - name: Tor-Protokolle sichern
+        if: ${{ always() && (steps.pruefen.outcome == 'failure' || steps.pruefen.outputs.rollback != '') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tor-${{ github.run_id }}
+          path: ${{ runner.temp }}/tor
+          retention-days: 7
+          if-no-files-found: ignore
 
       # Die frischen Daten bleiben erreichbar, auch wenn das Tor
       # zugeschlagen hat — sonst waere eine Stunde Scrapen verloren und

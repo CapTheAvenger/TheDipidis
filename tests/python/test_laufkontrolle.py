@@ -114,7 +114,9 @@ def test_meldung_zaehlt_die_laufkontrolle_mit():
     s = _schritt("Report findings")
     assert "steps.laeufe.outputs.rot" in (s.get("env") or {}).get("ROT", ""), \
         "die Meldung kennt das Ergebnis der Laufkontrolle nicht"
-    assert re.search(r'\$\(\(\s*\$\{CRIT:-0\}\s*\+\s*\$\{ROT:-0\}\s*\)\)', s["run"]), \
+    # SC-37 (17.10.2026): die Summe darf weitere Befundzahlen tragen (STILL),
+    # CRIT und ROT muessen drin bleiben.
+    assert re.search(r'\$\(\(\s*\$\{CRIT:-0\}\s*\+\s*\$\{ROT:-0\}\s*(\+\s*\$\{[A-Z]+:-0\}\s*)*\)\)', s["run"]), \
         "ein roter Lauf allein oeffnet dann kein Issue"
 
 

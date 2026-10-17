@@ -134,6 +134,14 @@ if [ "$rot" -ne 0 ] && [ "${TOR_OHNE_ROLLBACK:-0}" != "1" ] && [ -f scripts/tor_
     mkdir -p "$protokolle/erstlauf" && cp "$protokolle"/*.log "$protokolle/erstlauf/" 2>/dev/null
     rollback_versucht=1
     if python3 scripts/tor_rollback.py suchen "$protokolle/erstlauf" "$sicherung"; then
+        # SC-37 (17.10.2026): eine zurueckgerollte Datei traegt den Stempel von
+        # gestern, obwohl ihr Erzeuger heute lief. Die Frischepruefung meldete
+        # das am dritten Tag als „kommt nicht an (git-add-Liste?)" und machte
+        # den zweiten Durchlauf rot (Replica #161). Der Grund ist hier bekannt
+        # und benannt — die Frischepruefung nimmt diese Dateien aus; wer laenger
+        # als einen Lauf zurueckhaelt, meldet der Data Guardian (zurueckgehalten.py).
+        TOR_ZURUECKGEROLLT="$(python3 -c "import json,sys;print(' '.join(json.load(open(sys.argv[1])).get('zurueck') or []))" "$sicherung/manifest.json" 2>/dev/null || true)"
+        export TOR_ZURUECKGEROLLT
         rot2=0
         for lauf in "${laeufe[@]}"; do
             name="${lauf%%|*}"; befehl="${lauf#*|}"

@@ -446,6 +446,13 @@ def _bildbaum(tmp_path, rollback_ohne_bilder=False):
         "import os, sys\nsys.path.insert(0, os.path.dirname(__file__))\n")
     (b / "tests" / "python" / "test_bilder.py").write_text(BILD_TEST)
     (b / "images" / "champions-items").mkdir(parents=True)
+    # SC-38: welche Ordner ausser data/ ein Lauf schreibt, liest das Tor aus
+    # den Ablaeufen — hier ein Ablauf wie champions-replica-scrape.yml.
+    (b / ".github" / "workflows").mkdir(parents=True)
+    (b / ".github" / "workflows" / "lauf.yml").write_text(
+        "steps:\n  - run: |\n      bash scripts/tor_vor_dem_push.sh alle\n"
+        "      git add data/champions_item_sprites.json \\\n        images/champions-items\n"
+        "      bash scripts/push_nach_rebase.sh alle\n")
     (b / "images" / "champions-items" / "a.png").write_bytes(b"\x89PNGa")
     (b / "data" / "champions_item_sprites.json").write_text(json.dumps({"sprites": {"A": "a.png"}}))
     git(b, "add", "-A"); git(b, "commit", "-qm", "bilder")

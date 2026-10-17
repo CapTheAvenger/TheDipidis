@@ -224,7 +224,13 @@ def nicht_ausgeliefert(jetzt=None):
     jetzt = jetzt or dt.datetime.now(dt.timezone.utc)
     herz = _lies(os.path.join(DATEN, "_job_heartbeats.json"))
     heraus = []
+    # SC-37 (17.10.2026): hat das Tor diese Datei in DIESEM Lauf zurueckgerollt,
+    # ist der alte Stempel gewollt und benannt (Annotation „bleibt auf dem alten
+    # Stand", Data Guardian ab dem zweiten Lauf in Folge) — kein Lieferfehler.
+    zurueck = {os.path.basename(f) for f in os.environ.get("TOR_ZURUECKGEROLLT", "").split()}
     for job, datei in sorted(ERGEBNIS_MIT_STEMPEL.items()):
+        if datei in zurueck:
+            continue
         rhythmus = RHYTHMUS.get(job)
         if not rhythmus:
             continue

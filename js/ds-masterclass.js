@@ -448,6 +448,17 @@
             });
     }
 
+    /* Abmelden oder Kontowechsel: was aus dem Konto gelesen wurde, darf
+     * nicht im Speicher der Seite liegen bleiben (Pruefagent zu PR #972) —
+     * sonst oeffnete nach dem Abmelden ein gemerkter Text, oder ein
+     * anderes Konto saehe die Stuecke des vorigen. */
+    function kontoSpeicherLeeren() {
+        GUIDES.forEach(function (g) {
+            if (g.quelle === 'konto') { delete cache[g.id]; delete pending[g.id]; }
+        });
+        Object.keys(privat).forEach(function (k) { delete privat[k]; });
+    }
+
     function kontoGuide(id) {
         return GUIDES.filter(function (g) { return g.quelle === 'konto' && g.id === id; })[0] || null;
     }
@@ -2241,6 +2252,7 @@
     if (window.auth && typeof window.auth.onAuthStateChanged === 'function') {
         try {
             window.auth.onAuthStateChanged(function () {
+                kontoSpeicherLeeren();
                 var h = host();
                 var buehne = document.getElementById('mclBuehne');
                 if (!h || h.dataset.state !== 'regal') return;
@@ -2265,6 +2277,8 @@
         _listenUnterschied: listenUnterschied,
         _kartenSchluessel: kartenSchluessel,
         _kontoGuide: kontoGuide,
+        _kontoSpeicherLeeren: kontoSpeicherLeeren,
+        _privat: privat,
         _hole: hole,
         _bereichWechseln: bereichWechseln,
         _matchupFilter: matchupFilter,

@@ -44,8 +44,9 @@ function umgebung(opt) {
     host.dataset = {};
     doc.addEventListener = () => {};
     doc.getElementById = (id) => (id === 'masterclassHost' ? host : host.querySelector('#' + id));
+    const anmeldung = [];
     const window = {
-        auth: { currentUser: opt.user === undefined ? { uid: 'U1' } : opt.user, onAuthStateChanged: () => {} },
+        auth: { currentUser: opt.user === undefined ? { uid: 'U1' } : opt.user, onAuthStateChanged: (fn) => { anmeldung.push(fn); } },
         db,
         addEventListener: () => {},
         getLang: () => 'de'
@@ -61,7 +62,7 @@ function umgebung(opt) {
     const ktx = { window, document: doc, fetch, console: { warn: () => {}, log: () => {} }, Promise, Set, Date, NodeFilter: { SHOW_TEXT: 4 } };
     vm.createContext(ktx);
     vm.runInContext(JS, ktx);
-    return { mc: window.DsMasterclass, abrufe, docPfade, host };
+    return { mc: window.DsMasterclass, abrufe, docPfade, host, window, anmeldung };
 }
 
 /* ── Ein kuenstliches Stueck mit derselben Auszeichnung wie das echte ── */
@@ -339,4 +340,22 @@ test('zeigePrivat schickt die Live-Werte in den Rahmen, sobald er geladen ist', 
     assert.strictEqual(gesendet.length, 0, 'vor dem Laden gesendet');
     laden();
     assert.strictEqual(JSON.stringify(gesendet.map((x) => x[0])), JSON.stringify([{ typ: 'mcl-live', werte: { a: 'b' } }]));
+});
+
+test('nach dem Abmelden oder Kontowechsel liegt nichts aus dem Konto mehr im Speicher', async () => {
+    const u = umgebung({ docs: [{ id: 'mega-stalobor', data: { html: '<p>ALT</p>' } }, { id: 'mega-tohaido', data: { titel: 'T', html: '<p>T</p>' } }] });
+    await u.mc._holePrivat();
+    assert.ok(Object.keys(u.mc._privat).length === 1, 'Vorbedingung: Rahmen-Stueck gemerkt');
+    const g = u.mc.guides().filter((x) => x.id === 'mega-stalobor')[0];
+    assert.strictEqual(await u.mc._hole(g), '<p>ALT</p>');
+    assert.strictEqual(u.docPfade.length, 0, 'Vorbedingung: Text kam aus dem Speicher');
+    assert.ok(u.anmeldung.length >= 1, 'kein Zuhoerer fuer Anmeldewechsel');
+    u.window.auth.currentUser = null;
+    u.anmeldung.forEach((fn) => fn(null));
+    assert.strictEqual(Object.keys(u.mc._privat).length, 0, 'Rahmen-Stuecke blieben nach dem Abmelden gemerkt');
+    await assert.rejects(u.mc._hole(g), 'nach dem Abmelden oeffnete der gemerkte Text');
+    u.window.auth.currentUser = { uid: 'U2' };
+    u.anmeldung.forEach((fn) => fn({ uid: 'U2' }));
+    await u.mc._hole(g);
+    assert.deepStrictEqual(u.docPfade, ['users/U2/masterclasses/mega-stalobor'], 'das neue Konto las nicht selbst');
 });

@@ -525,3 +525,15 @@ test('das Wort des Autors wird zur Stufe — auf der Seite und im Rahmen gleich'
     vm.runInContext(quelle[0] + ';globalThis.f=stufe;', r);
     Object.keys(faelle).forEach((w) => assert.strictEqual(r.f(w), faelle[w], 'Rahmen: ' + w));
 });
+
+test('die Kachel zeigt nur Titel und Autor — kein Kleingedrucktes, kein Konto-Hinweis', () => {
+    const { mc } = umgebung();
+    const g = mc._privatAusDoc('x', { titel: 'TITEL', titelEn: 'ENGLISCH', autor: 'AUTOR', datum: 'DATUM',
+        zusatz: 'ZUSATZ', kennzahlen: 'KENNZAHLEN', html: '<p>x</p>' });
+    const w = wurzelMit('');
+    w.innerHTML = mc._kachel(g);
+    const t = w.textContent;
+    assert.ok(t.includes('TITEL') && t.includes('AUTOR'), t);
+    ['ENGLISCH', 'DATUM', 'ZUSATZ', 'KENNZAHLEN', 'Nur in deinem Konto'].forEach((x) =>
+        assert.ok(!t.includes(x), 'auf der Kachel steht noch: ' + x));
+});

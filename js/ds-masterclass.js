@@ -368,12 +368,13 @@
             '<div class="mcl-kachel-kopf">' +
             '<img class="mcl-kachel-bild" src="' + esc(g.bild) + '" alt="" loading="lazy" width="245" height="342">' +
             '<div class="mcl-kachel-txt">' +
+            /* Hausi 17.10.2026: „nicht so viel Text darunter … den Titel und
+             * von wem die ist … keine Details weiter.“ Alle Stuecke liegen
+             * im Konto — ein Hinweis „Nur in deinem Konto“ an einzelnen
+             * Kacheln verwirrte nur (Stalobor hatte ihn nicht). */
             '<b>' + esc(g.titel) + '</b>' +
-            '<span class="mcl-kachel-en">' + esc(g.titelEn) + '</span>' +
-            '<span class="mcl-fein">' + esc(g.autor) + ' · ' + esc(g.datum) + '<br>' + esc(g.zusatz) + '</span>' +
-            '<span class="mcl-kennzahlen">' + esc(g.kennzahlen) + '</span>' +
+            (g.autor ? '<span class="mcl-fein mcl-kachel-autor">' + esc(g.autor) + '</span>' : '') +
             (nurDe ? '<span class="mcl-nurde">' + esc(T('nurDe')) + '</span>' : '') +
-            (g.privat ? '<span class="mcl-privat">' + esc(T('privat')) + '</span>' : '') +
             '</div></div>' +
             '<button type="button" class="mcl-oeffnen" data-mcl-oeffnen="' + esc(g.id) + '">' +
             esc(T('oeffnen')) + '</button></article>';
@@ -2517,6 +2518,7 @@
         _mitAnkern: mitAnkern,
         _holeLive: holeLive,
         _liveEinsetzen: liveEinsetzen,
+        _kachel: kachel,
         _aktuellBlockHtml: aktuellBlockHtml,
         _aktuellMuZeilen: aktuellMuZeilen,
         _aktuellEinsetzen: aktuellEinsetzen,

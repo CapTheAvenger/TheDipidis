@@ -939,3 +939,21 @@
 @media (max-width: 480px) {
     .mcl-bd-dknopf .mcl-btn { flex: 1 1 auto; }
 }
+
+/* Private Masterclasses (17.10.2026): Kachel-Hinweis und Rahmen fuer das
+   Stueck aus users/{uid}/masterclasses — siehe js/ds-masterclass.js. */
+.mcl-privat {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--mcl-akzent);
+    margin-top: var(--s-1);
+}
+.mcl-privat-rahmen {
+    display: block;
+    width: 100%;
+    height: 85vh;
+    min-height: 480px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+}

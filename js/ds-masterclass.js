@@ -62,6 +62,7 @@
         de: {
             regalTitel: 'Meine Masterclasses',
             regalLead: 'Gekaufte Guides, auf Deutsch aufbereitet. Eine Kachel je Masterclass.',
+            privat: 'Nur in deinem Konto',
             oeffnen: 'Öffnen',
             schliessen: 'Schließen',
             platz: 'Platz für die nächste Masterclass',
@@ -143,6 +144,7 @@
         en: {
             regalTitel: 'My Masterclasses',
             regalLead: 'Purchased guides, written up in German. One tile per masterclass.',
+            privat: 'Only in your account',
             oeffnen: 'Open',
             schliessen: 'Close',
             platz: 'Room for the next masterclass',
@@ -358,9 +360,94 @@
             '<span class="mcl-fein">' + esc(g.autor) + ' · ' + esc(g.datum) + '<br>' + esc(g.zusatz) + '</span>' +
             '<span class="mcl-kennzahlen">' + esc(g.kennzahlen) + '</span>' +
             (nurDe ? '<span class="mcl-nurde">' + esc(T('nurDe')) + '</span>' : '') +
+            (g.privat ? '<span class="mcl-privat">' + esc(T('privat')) + '</span>' : '') +
             '</div></div>' +
             '<button type="button" class="mcl-oeffnen" data-mcl-oeffnen="' + esc(g.id) + '">' +
             esc(T('oeffnen')) + '</button></article>';
+    }
+
+    /* ---------- Private Masterclasses (17.10.2026) ----------
+     *
+     * ANLASS (Betreiber, 17.10.2026): „Komplett nur für mich in meinem
+     * Konto … Ich habe dafür bezahlt und möchte es in meinem Format auf
+     * meiner Seite haben." Eine Datei unter masterclass/ ist das NICHT:
+     * GitHub Pages liefert sie jedem aus, der die Adresse kennt.
+     *
+     * Deshalb liegt so ein Stueck in Firestore unter
+     * users/{uid}/masterclasses/{id}. Die bestehende Regel
+     * `match /users/{uid}/{document=**}` (firestore.rules) laesst nur den
+     * Eigentuemer lesen — es braucht keine neue Regel, und im Repo steht
+     * vom Inhalt kein Wort. Felder: titel, titelEn, autor, datum, zusatz,
+     * bild, kennzahlen, html (vollstaendige Seite).
+     *
+     * Angezeigt wird in einem iframe mit srcdoc und sandbox: das Stueck
+     * bringt eigenes CSS und ein paar Zeilen Skript mit und darf weder in
+     * die Seite hineinregnen noch auf Konto oder Speicher der App
+     * zugreifen (kein allow-same-origin).
+     */
+    var privat = {};     /* 'privat-<id>' -> Guide inkl. html */
+
+    function privatAusDoc(id, x) {
+        if (!x || typeof x.html !== 'string' || !x.html) return null;
+        return {
+            id: 'privat-' + id,
+            titel: x.titel || id,
+            titelEn: x.titelEn || '',
+            autor: x.autor || '',
+            datum: x.datum || '',
+            zusatz: x.zusatz || '',
+            bild: x.bild || '',
+            kennzahlen: x.kennzahlen || '',
+            sprachen: ['de'],
+            privat: true,
+            html: x.html
+        };
+    }
+
+    function holePrivat() {
+        var u = window.auth && window.auth.currentUser;
+        if (!u || !window.db) return Promise.resolve([]);
+        return window.db.collection('users').doc(u.uid).collection('masterclasses').get()
+            .then(function (snap) {
+                var liste = [];
+                snap.forEach(function (d) {
+                    var g = privatAusDoc(d.id, d.data());
+                    if (g) { privat[g.id] = g; liste.push(g); }
+                });
+                return liste;
+            })
+            .catch(function (err) {
+                console.warn('[DsMasterclass] private Masterclasses nicht geladen:', err && err.message);
+                return [];
+            });
+    }
+
+    function privatEinreihen() {
+        return holePrivat().then(function (liste) {
+            var h = host();
+            var regal = h && h.querySelector('.mcl-regal');
+            if (!regal || !liste.length) return;
+            liste.forEach(function (g) {
+                if (!regal.querySelector('[data-mcl-guide="' + g.id + '"]')) {
+                    regal.insertAdjacentHTML('beforeend', kachel(g));
+                }
+            });
+        });
+    }
+
+    function zeigePrivat(buehne, g) {
+        buehne.innerHTML = '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' +
+            esc(g.titel) + '</h4>' +
+            '<button type="button" class="mcl-schliessen">' + esc(T('schliessen')) + '</button></div>' +
+            '<iframe class="mcl-privat-rahmen" sandbox="allow-scripts allow-popups" title="' +
+            esc(g.titel) + '"></iframe>';
+        var rahmen = buehne.querySelector('.mcl-privat-rahmen');
+        rahmen.srcdoc = g.html;
+        buehne.querySelector('.mcl-schliessen').addEventListener('click', function () {
+            buehne.hidden = true;
+            buehne.innerHTML = '';
+        });
+        try { buehne.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' }); } catch (e) { }
     }
 
     function zeichneRegal() {
@@ -372,6 +459,7 @@
             GUIDES.map(kachel).join('') +   /* UI-117: keine Platzhalterkachel mehr */
             '</div><div class="mcl-buehne" id="mclBuehne" hidden></div>';
         h.dataset.state = 'regal';
+        privatEinreihen();
     }
 
     /* ---------- Inhalt ---------- */
@@ -383,9 +471,10 @@
     }
 
     function oeffneGuide(id) {
-        var g = GUIDES.filter(function (x) { return x.id === id; })[0];
+        var g = GUIDES.filter(function (x) { return x.id === id; })[0] || privat[id];
         var buehne = document.getElementById('mclBuehne');
         if (!g || !buehne) return;
+        if (g.privat) { buehne.hidden = false; zeigePrivat(buehne, g); return; }
         buehne.hidden = false;
         buehne.innerHTML = '<p class="mcl-status">' + esc(T('laden')) + '</p>';
         Promise.all([hole(g), holeNamen()]).then(function (erg) {
@@ -1817,10 +1906,28 @@
         zeichneRegal();
     });
 
+    /* Wer den Untertab vor dem Ende der Anmeldung oeffnet, saehe die
+     * privaten Kacheln sonst nie: nach dem Anmelden das Regal neu zeichnen
+     * — aber nur, wenn gerade keine Masterclass offen ist. */
+    if (window.auth && typeof window.auth.onAuthStateChanged === 'function') {
+        try {
+            window.auth.onAuthStateChanged(function () {
+                var h = host();
+                var buehne = document.getElementById('mclBuehne');
+                if (!h || h.dataset.state !== 'regal') return;
+                if (buehne && !buehne.hidden) return;
+                zeichneRegal();
+            });
+        } catch (e) { }
+    }
+
     window.DsMasterclass = {
         oeffnen: oeffnen,
         guides: function () { return GUIDES.slice(); },
         _zeichneRegal: zeichneRegal,
+        _privatAusDoc: privatAusDoc,
+        _holePrivat: holePrivat,
+        _zeigePrivat: zeigePrivat,
         _bereichWechseln: bereichWechseln,
         _matchupFilter: matchupFilter,
         _listeWechseln: listeWechseln,

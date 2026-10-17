@@ -62,8 +62,15 @@ NIE_ZURUECK = {"data/data_stand.json", "data/datenluecken.json"}
 # Kader, Namen; Ressourcen <- Nutzung, op.gg; Merkmale <- Ressourcen),
 # deshalb ist die Familie das ganze Champions-Datenpaket.
 FAMILIEN = [
-    ("champions", re.compile(r"^data/(champions_[^/]+|opgg_champions_moves\.json)$")),
+    ("champions", re.compile(r"^(data/(champions_[^/]+|opgg_champions_moves\.json)"
+                             r"|images/champions(-items)?/[^/]+)$")),
 ]
+# SC-36 (17.10.2026): Bilder gehoeren zur Familie. Replica #161 rollte
+# data/champions_item_sprites.json zurueck, die im selben Lauf gespiegelten
+# 40 Icons unter images/champions-items/ blieben liegen — der zweite
+# Durchlauf fand „Dateien ohne Eintrag im Manifest" und das Tor blieb zu.
+# Ein Zurueckrollen, das selbst einen Widerspruch erzeugt, heilt nie.
+BILDORDNER = ("images/champions/", "images/champions-items/")
 
 
 def sh(*cmd, **kw):
@@ -78,8 +85,9 @@ def ausgangsstand():
 
 
 def kandidaten(basis):
-    geaendert = sh("git", "diff", "--name-only", basis, "--", "data/").stdout.split()
-    neu = sh("git", "ls-files", "-o", "--exclude-standard", "data/").stdout.split()
+    ordner = ("data/",) + BILDORDNER
+    geaendert = sh("git", "diff", "--name-only", basis, "--", *ordner).stdout.split()
+    neu = sh("git", "ls-files", "-o", "--exclude-standard", *ordner).stdout.split()
     return sorted({f for f in geaendert + neu if f not in NIE_ZURUECK})
 
 
@@ -288,8 +296,13 @@ def suchen(ordner, sicherung):
     print("Rot im ersten Durchlauf: " + " ".join(py + js))
     basis = ausgangsstand()
     kand = kandidaten(basis)
-    if not kand or len(kand) > MAX_KANDIDATEN:
-        print(f"Kein Datenbefund — {len(kand)} geaenderte Dateien unter data/ (1..{MAX_KANDIDATEN} noetig)")
+    # SC-36: gezaehlt werden EINHEITEN, nicht Dateien — seit die Bildordner
+    # zur Champions-Familie gehoeren, wuerde ein Lauf mit vielen neuen Icons
+    # sonst die Grenze reissen, obwohl die Suche nur eine Einheit probiert.
+    if not kand or len(einheiten(kand)) > MAX_KANDIDATEN:
+        print(f"Kein Datenbefund — {len(kand)} geaenderte Dateien unter data/ und den "
+              f"Champions-Bildordnern in {len(einheiten(kand))} Einheiten "
+              f"(1..{MAX_KANDIDATEN} noetig)")
         return 2
     for f in kand:  # neuen Stand sichern (auch: geloescht)
         if os.path.exists(f):

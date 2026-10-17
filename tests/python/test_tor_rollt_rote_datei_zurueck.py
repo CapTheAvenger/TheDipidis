@@ -405,3 +405,69 @@ def test_sc29_ohne_konsistenztest_geht_der_partner_durch(tmp_path):
     assert rc == 0, aus
     assert json.loads(_lies(b, "kader.json")) == {"wert": 2}, "kader wurde ohne Grund zurueckgerollt"
     assert json.loads(_lies(b, "nutzung.json")) == {"wert": 1}
+
+
+# ── SC-36 (17.10.2026): Bilder rollen mit ihrem Manifest zurueck ─────────
+#
+# Replica #161 rollte data/champions_item_sprites.json zurueck; die im selben
+# Lauf gespiegelten 40 Icons unter images/champions-items/ blieben liegen.
+# Der zweite Durchlauf fand „Dateien ohne Eintrag im Manifest", das Tor blieb
+# zu — das Zurueckrollen selbst hatte den Widerspruch erzeugt.
+BILD_TEST = '''import json
+import os
+
+from _quellen import MANIFEST, ORDNER
+
+
+def lies():
+    return json.load(open("data/" + MANIFEST))
+
+
+def test_manifest_nicht_kaputt():
+    assert "kaputt" not in lies()
+
+
+def test_jede_datei_steht_im_manifest():
+    da = {f for f in os.listdir(ORDNER) if f.endswith(".png")}
+    assert not da - set(lies()["sprites"].values())
+'''
+
+
+def _bildbaum(tmp_path, rollback_ohne_bilder=False):
+    b = _baum(tmp_path)
+    if rollback_ohne_bilder:
+        s = (b / "scripts" / "tor_rollback.py").read_text()
+        alt = 'r"|images/champions(-items)?/[^/]+)$"'
+        assert alt in s, "Muster fuer die Verfaelschung nicht gefunden"
+        (b / "scripts" / "tor_rollback.py").write_text(s.replace(alt, 'r")$"'))
+    (b / "tests" / "python" / "_quellen.py").write_text(
+        "MANIFEST = 'champions_item_sprites.json'\nORDNER = 'images/champions-items'\n")
+    (b / "tests" / "python" / "conftest.py").write_text(
+        "import os, sys\nsys.path.insert(0, os.path.dirname(__file__))\n")
+    (b / "tests" / "python" / "test_bilder.py").write_text(BILD_TEST)
+    (b / "images" / "champions-items").mkdir(parents=True)
+    (b / "images" / "champions-items" / "a.png").write_bytes(b"\x89PNGa")
+    (b / "data" / "champions_item_sprites.json").write_text(json.dumps({"sprites": {"A": "a.png"}}))
+    git(b, "add", "-A"); git(b, "commit", "-qm", "bilder")
+    # der Lauf: ein neues Icon samt Manifestzeile — und eine rote Stelle im Manifest
+    (b / "images" / "champions-items" / "b.png").write_bytes(b"\x89PNGb")
+    (b / "data" / "champions_item_sprites.json").write_text(
+        json.dumps({"sprites": {"A": "a.png", "B": "b.png"}, "kaputt": 1}))
+    return b
+
+
+def test_sc36_neues_bild_rollt_mit_dem_manifest_zurueck(tmp_path):
+    b = _bildbaum(tmp_path)
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert not (b / "images" / "champions-items" / "b.png").exists(), \
+        "das neue Icon blieb liegen, obwohl sein Manifest zurueckgerollt wurde"
+    assert (b / "images" / "champions-items" / "a.png").exists()
+
+
+def test_sc36_verfaelschung_ohne_bilder_in_der_familie_bleibt_es_rot(tmp_path):
+    """Gegenprobe am echten Skript: Bildordner aus dem Familienmuster
+    entfernt — das alte Verhalten aus Replica #161, Tor zu."""
+    b = _bildbaum(tmp_path, rollback_ohne_bilder=True)
+    rc, aus = _tor(b)
+    assert rc == 1, aus

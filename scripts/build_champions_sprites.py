@@ -351,12 +351,18 @@ def main():
 
     os.makedirs(BILD_DIR, exist_ok=True)
 
+    # SC-36 (17.10.2026): hier stieg der Lauf aus, sobald EIN Eintrag keine
+    # belegte Formzuordnung hatte — dann bekam auch keiner der anderen sein
+    # Bild. Am 15.10. kam „Aegislash (Blade)" aus der Quelle in den Pokedex.
+    # Geraten wird weiter nichts: ein Eintrag ohne Zuordnung wird NICHT
+    # gespiegelt, sondern steht in _meta.ohne_bild (benannt, datiert), bis
+    # jemand den Schluessel MIT Quelle in FORM_UEBERSTEUERUNG eintraegt.
     ohne_regel = [e["en"] for e in eintraege if schluessel(e) is None]
     if ohne_regel:
-        print("FEHLER: fuer diese Eintraege gibt es keine belegte Formzuordnung.\n"
-              "  Eintrag in FORM_UEBERSTEUERUNG ergaenzen — MIT Quelle:\n  "
-              + "\n  ".join(ohne_regel), file=sys.stderr)
-        return 1
+        print("::warning::Champions-Sprites: keine belegte Formzuordnung fuer "
+              + ", ".join(ohne_regel) + " — nicht gespiegelt, steht in "
+              "_meta.ohne_bild. Eintrag in FORM_UEBERSTEUERUNG ergaenzen — MIT Quelle.")
+    eintraege = [e for e in eintraege if schluessel(e) is not None]
 
     # Zwei Eintraege duerfen nie auf dieselbe Datei zeigen.
     belegt = {}
@@ -427,6 +433,13 @@ def main():
         return 1
 
     gesamt = sum(v["bytes"] for v in manifest.values())
+    import datetime as _dt
+    heute = _dt.datetime.now(_dt.timezone.utc).date().isoformat()
+    try:
+        with open(MANIFEST, encoding="utf-8") as f:
+            alt_luecken = (json.load(f).get("_meta") or {}).get("ohne_bild") or {}
+    except (OSError, ValueError):
+        alt_luecken = {}
     with open(MANIFEST, "w", encoding="utf-8") as f:
         json.dump({
             "_meta": {
@@ -442,9 +455,11 @@ def main():
                 "erzeuger": "scripts/build_champions_sprites.py",
                 "anzahl": len(manifest),
                 "bytes": gesamt,
-                # Nach einem vollstaendigen Lauf leer — sonst waere er oben
-                # mit Fehler ausgestiegen. Gleiche Rechnung wie --nur-luecken.
-                "ohne_bild": luecken_fortschreiben(manifest, eintraege, {}, ""),
+                # Nach einem vollstaendigen Lauf stehen hier nur noch die
+                # Eintraege ohne belegte Formzuordnung (SC-36), mit dem Tag,
+                # an dem sie zuerst ohne Bild gesehen wurden.
+                "ohne_bild": luecken_fortschreiben(manifest, dex["entries"],
+                                                   alt_luecken, heute),
             },
             "sprites": manifest,
         }, f, ensure_ascii=False, indent=1)

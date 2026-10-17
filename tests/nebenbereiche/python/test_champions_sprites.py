@@ -77,10 +77,43 @@ def test_der_umlaut_wird_kodiert(mod):
 
 # ── Die Formzuordnung ──────────────────────────────────────────────
 
-def test_jeder_eintrag_bekommt_einen_schluessel(mod, dex):
+def _manifest():
+    with open(os.path.join(DATA, "champions_sprites.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
+def test_ohne_belegte_zuordnung_wird_nichts_gespiegelt(mod, dex):
+    """Ein Eintrag ohne Formschluessel bekommt KEIN Bild — und steht benannt da.
+
+    SC-36 (17.10.2026): hier stand `ohne == []`. Am 15.10. brachte die
+    Quelle „Aegislash (Blade)" in den Pokedex; eine Zuordnung dafuer gibt
+    es (noch) nicht, und fuenf Champions-Laeufe rollten deshalb ihren
+    ganzen Datenstand zurueck, Replica #161 wurde rot. Eine neue Form ohne
+    Bild ist eine Luecke, kein Fehler — dieselbe Regel wie fuer fehlende
+    Bilder seit dem 29.09. (luecken_fortschreiben): benannt und datiert in
+    _meta.ohne_bild. Rot bleibt, was gefaehrlich ist: ein Bild ohne
+    belegte Zuordnung (das falsche Pokemon, das trotzdem laedt) und eine
+    Luecke, die nirgends steht.
+    """
+    m = _manifest()
+    benannt = (m.get("_meta") or {}).get("ohne_bild") or {}
     ohne = [e["en"] for e in dex if mod.schluessel(e) is None]
-    assert ohne == [], (
-        "ohne belegte Zuordnung darf nichts gespiegelt werden: " + str(ohne))
+    gespiegelt = sorted(n for n in ohne if n in (m.get("sprites") or {}))
+    assert gespiegelt == [], (
+        "ohne belegte Zuordnung darf nichts gespiegelt werden: " + str(gespiegelt))
+    still = sorted(n for n in ohne if not benannt.get(n))
+    assert still == [], (
+        "ohne Formzuordnung UND nicht in _meta.ohne_bild benannt (mit Datum): "
+        + str(still))
+
+
+def test_ohne_zuordnung_ist_die_ausnahme(mod, dex):
+    """Gegen den Leerlauf: faellt die Regel selbst aus, waere jeder Eintrag
+    ohne Schluessel — und die Zusicherung darueber haette nur noch Namen
+    zu zaehlen."""
+    ohne = [e["en"] for e in dex if mod.schluessel(e) is None]
+    assert len(dex) > 200 and len(ohne) * 20 < len(dex), (
+        f"{len(ohne)} von {len(dex)} Eintraegen ohne Formschluessel — die Regel ist kaputt")
 
 
 def test_keine_zwei_eintraege_teilen_sich_ein_bild(mod, dex):
@@ -90,6 +123,8 @@ def test_keine_zwei_eintraege_teilen_sich_ein_bild(mod, dex):
     doppelt = []
     for e in dex:
         k = mod.schluessel(e)
+        if k is None:   # ohne Zuordnung wird nichts gespiegelt (s. o.)
+            continue
         if k in belegt:
             doppelt.append(f"{e['en']} und {belegt[k]} -> {k}")
         belegt[k] = e["en"]

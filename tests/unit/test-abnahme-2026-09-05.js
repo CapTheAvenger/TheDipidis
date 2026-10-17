@@ -756,13 +756,34 @@ describe('Champions-Nutzung: Regionalformen finden ihre Daten', () => {
             .map((e) => e.en).filter((n) => /[\s(]/.test(String(n)));
         assert.ok(kader.length >= 50,
             `nur ${kader.length} mehrteilige Kadernamen — die Probe waere fast leer`);
+        /* KAMPFFORMEN (SC-36, 17.10.2026). Am 15.10. brachte pokebase.app
+           „Aegislash (Blade)" in den Kader. Die Klingenform ENTSTEHT im Kampf
+           aus Aegislash (Faehigkeit Stance Change) — es ist dasselbe
+           Teammitglied mit demselben Item, Wesen und denselben Attacken, und
+           die Quelle fuehrt dafuer folgerichtig keine eigene Zeile. Dass sie
+           die Zahlen von `aegislash` zeigt, ist hier RICHTIG, nicht der
+           Maushold-Fehler vom 23.09. Benannt statt geduldet: nur was hier
+           steht, darf erben. Fuehrt die Quelle eines Tages eine eigene Zeile,
+           greift die Zusicherung weiter oben (der eigene Schluessel wird
+           genommen) — und die Gegenprobe unten meldet die Zeile hier als
+           ueberholt. */
+        const KAMPFFORMEN = { 'Aegislash (Blade)': 'aegislash' };
         const erbt = [];
         kader.forEach((n) => {
             const s = usageSlug(n);
+            if (KAMPFFORMEN[n] === s) return;
             if (usage[s] && s.indexOf('-') === -1) erbt.push(`${n} -> ${s}`);
         });
         assert.deepEqual(erbt, [],
             'Diese Formen bekommen die Nutzungszahlen ihrer GRUNDFORM: ' + erbt.join(' ; '));
+        /* Gegenprobe zur Liste: eine Kampfform erbt nur von IHRER Art —
+           ein Tippfehler hier wuerde sonst einer fremden Art die Zahlen
+           geben. Fuehrt die Quelle spaeter eine eigene Zeile, greift die
+           Ausnahme einfach nicht mehr (kein Rot fuer Zuwachs). */
+        Object.keys(KAMPFFORMEN).forEach((n) => {
+            assert.equal(n.split(' ')[0].toLowerCase(), KAMPFFORMEN[n],
+                `KAMPFFORMEN: ${n} zeigt auf eine fremde Art (${KAMPFFORMEN[n]})`);
+        });
     });
 
     it('beide Schreibweisen der Quelle werden erreicht', () => {

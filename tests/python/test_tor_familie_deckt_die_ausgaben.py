@@ -69,3 +69,38 @@ def test_der_parser_nimmt_fortsetzungen_und_keine_schalter():
         "git add data/a.json \\\n   images/x  # Kommentar\n"
         "[ -f y ] && git add data/y.json\n")
     assert pfade == ["data/a.json", "images/x", "data/y.json"], pfade
+
+
+# ── SC-39 (17.10.2026): der Wochenlauf faehrt dasselbe Tor ─────────────────
+#
+# Wochenlauf #181 (13.10.) warf die ganzen Wochendaten weg, weil zwei Dateien
+# rot waren — sein eigenes Tor kannte kein Zurueckrollen (SC-34).
+
+def _wochenlauf_schritte():
+    import yaml
+    with open(os.path.join(WURZEL, ".github", "workflows", "weekly-full-update.yml"),
+              encoding="utf-8") as f:
+        y = yaml.safe_load(f)
+    return [s for job in y["jobs"].values() for s in job.get("steps", [])]
+
+
+def test_der_wochenlauf_faehrt_das_tor_mit_zurueckrollen():
+    schritte = _wochenlauf_schritte()
+    tor = next(s for s in schritte if s.get("id") == "pruefen")
+    run = "\n".join(z for z in tor["run"].splitlines() if not z.lstrip().startswith("#"))
+    assert "bash scripts/tor_vor_dem_push.sh kern" in run
+    assert "TOR_OHNE_ROLLBACK" not in run, "das Zurueckrollen ist der Sinn dieses Umbaus"
+    namen = [s.get("name") for s in schritte]
+    sicherung = schritte[namen.index("Tor-Protokolle sichern")]
+    assert "steps.pruefen.outputs.rollback" in sicherung.get("if", "")
+    assert namen.index("Tor-Protokolle sichern") < namen.index("Commit + push")
+
+
+def test_turnierdaten_gehen_nur_gemeinsam_zurueck():
+    e = tor_rollback.einheiten([
+        "data/labs_tournament_decks_TEF-30C.csv", "data/tournament_decklists_per_player.csv",
+        "data/player_continuity.csv", "data/deckempfehlung.json",
+        "data/masterclass_live/dragapult.json", "data/price_data.csv"])
+    gross = [x for x in e if len(x) > 1]
+    assert len(gross) == 1 and len(gross[0]) == 5, e
+    assert ["data/price_data.csv"] in e, "eine fremde Datei darf nicht in die Familie geraten"

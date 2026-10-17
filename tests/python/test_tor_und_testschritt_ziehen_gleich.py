@@ -99,6 +99,10 @@ def test_der_testschritt_und_das_tor_installieren_dasselbe():
         WOCHENLAUF,
         ab="Zusicherungen gegen die frischen Daten",
         bis="Frische Daten sichern")
+    # SC-39 (17.10.2026): der Wochenlauf ruft das gemeinsame Tor auf; dann
+    # installiert DAS Skript die Pakete.
+    if _ruft_gemeinsames_tor():
+        tor |= _pakete(TOR_SKRIPT)
 
     assert testschritt, (
         "im Testschritt von deploy-pages.yml steht keine pip-install-Zeile "
@@ -116,6 +120,28 @@ def test_der_testschritt_und_das_tor_installieren_dasselbe():
         f"Daten etwas ist. Genau das ist am 22.09.2026 passiert.")
 
 
+TOR_SKRIPT = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))), "scripts", "tor_vor_dem_push.sh")
+
+
+def _ruft_gemeinsames_tor():
+    with io.open(WOCHENLAUF, encoding="utf-8") as f:
+        y = f.read()
+    block = y[y.find("Zusicherungen gegen die frischen Daten"):y.find("- name: Commit + push")]
+    return "bash scripts/tor_vor_dem_push.sh kern" in block
+
+
+def _tor_block():
+    """Der Tor-Block des Wochenlaufs — samt gemeinsamem Tor, wenn er es aufruft (SC-39)."""
+    with io.open(WOCHENLAUF, encoding="utf-8") as f:
+        y = f.read()
+    block = y[y.find("Zusicherungen gegen die frischen Daten"):y.find("- name: Commit + push")]
+    if _ruft_gemeinsames_tor():
+        with io.open(TOR_SKRIPT, encoding="utf-8") as f:
+            block += f.read()
+    return block
+
+
 def test_das_tor_faehrt_beide_suiten_und_blockiert_wirklich():
     """Die Form des Tors, nicht seine Pakete.
 
@@ -128,7 +154,8 @@ def test_das_tor_faehrt_beide_suiten_und_blockiert_wirklich():
     tor = y.find("Zusicherungen gegen die frischen Daten")
     commit = y.find("- name: Commit + push")
     assert 0 < tor < commit, "das Tor steht nicht mehr vor dem Push"
-    block = y[tor:commit]
+    block = _tor_block()
+    assert "exit 1" in y[tor:commit], "der Schritt im Wochenlauf blockiert nicht"
     assert "run-js-unit-tests.sh" in block, "das Tor faehrt die JS-Suite nicht"
     assert "pytest tests/python" in block, "das Tor faehrt die Python-Suite nicht"
     assert "exit 1" in block, "das Tor meldet nur, es blockiert nicht"
@@ -146,8 +173,9 @@ def test_das_tor_zeigt_die_meldung_nicht_nur_den_dateinamen():
         y = f.read()
     tor = y.find("Zusicherungen gegen die frischen Daten")
     commit = y.find("- name: Commit + push")
-    block = y[tor:commit]
-    assert "tail -n 120 /tmp/js.log" in block and "tail -n 120 /tmp/py.log" in block, (
+    block = _tor_block()
+    assert ("tail -n 120 /tmp/js.log" in block and "tail -n 120 /tmp/py.log" in block) or \
+        ('tail -n 120 "$log"' in block and 'for log in "$protokolle"/*.log' in block), (
         "das Tor legt die Logs nicht in die Zusammenfassung. Dann sieht man "
         "beim naechsten Zuschlagen wieder nur den Dateinamen und braucht "
         "einen zweiten Lauf, um zu erfahren, was eigentlich los war")

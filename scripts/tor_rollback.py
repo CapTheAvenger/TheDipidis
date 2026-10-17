@@ -64,6 +64,14 @@ NIE_ZURUECK = {"data/data_stand.json", "data/datenluecken.json"}
 FAMILIEN = [
     ("champions", re.compile(r"^(data/(champions_[^/]+|opgg_champions_moves\.json)"
                              r"|images/champions(-items)?/[^/]+)$")),
+    # SC-39 (17.10.2026): der Wochenlauf rollt jetzt auch zurueck. Seine
+    # Turnierdaten bauen aufeinander auf (Labs-Listen -> Listen je Spieler ->
+    # Day-2-Kontinuitaet -> Deckempfehlung -> Masterclass-Zahlen); eine davon
+    # alt und den Rest frisch zu pushen, waere ein Stand, den es nie gab
+    # (vgl. SC-29). Sie gehen nur gemeinsam zurueck.
+    ("turnierdaten", re.compile(r"^data/(labs_[^/]+|tournament_decklists_per_player[^/]*"
+                                r"|player_continuity[^/]*|deckempfehlung[^/]*"
+                                r"|masterclass[^/]*(/.+)?)$")),
 ]
 # SC-36 (17.10.2026): Bilder gehoeren zur Familie. Replica #161 rollte
 # data/champions_item_sprites.json zurueck, die im selben Lauf gespiegelten

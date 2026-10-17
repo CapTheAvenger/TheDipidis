@@ -6,7 +6,9 @@
   "erzeuger": "scripts/build_champions_sprites.py",
   "anzahl": 343,
   "bytes": 4969078,
-  "ohne_bild": {}
+  "ohne_bild": {
+   "Aegislash (Blade)": "2026-10-17"
+  }
  },
  "sprites": {
   "Garchomp (Mega-Z)": {

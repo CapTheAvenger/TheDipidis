@@ -42,6 +42,13 @@ def test_schreibt_wie_ein_ablaufschritt():
 
 def _ablaufdateien(tmp_path):
     env = dict(os.environ)
+    # Der Zustand eines echten ZWEITEN Tor-Durchlaufs (SC-40, Pocket #35):
+    # exportierte Liste und Merkdatei im RUNNER_TEMP des Laufs.
+    runner = tmp_path / "echt_runner_temp"
+    runner.mkdir(exist_ok=True)
+    (runner / "tor_zurueckgerollt.txt").write_text("data/pocket_tierlist.json\n", encoding="utf-8")
+    env["RUNNER_TEMP"] = str(runner)
+    env["TOR_ZURUECKGEROLLT"] = "data/pocket_tierlist.json"
     pfade = {}
     for name in DATEIEN:
         p = tmp_path / ("echt_" + name.lower())
@@ -70,6 +77,30 @@ def test_die_abschirmung_jedes_ordners_haelt(tmp_path, ordner):
     assert not _inhalt(pfade), (
         f"die conftest in {os.path.relpath(ordner, WURZEL)} laesst einen Test in die "
         f"Umgebung des echten Laufs schreiben: {_inhalt(pfade)}")
+
+
+TOR_LESER = '''
+import os
+def test_sieht_keinen_tor_zustand():
+    assert "TOR_ZURUECKGEROLLT" not in os.environ
+    assert not os.path.exists(os.path.join(os.environ.get("RUNNER_TEMP", "/nirgends"),
+                                           "tor_zurueckgerollt.txt"))
+'''
+
+
+@pytest.mark.parametrize("ordner", ORDNER, ids=["kern", "nebenbereiche"])
+def test_der_zustand_des_tors_erreicht_keinen_test(tmp_path, ordner):
+    """SC-40 (18.10.2026): im zweiten Tor-Durchlauf von Pocket #35 erbten zwei
+    Tor-Tests TOR_ZURUECKGEROLLT des echten Laufs und wurden rot — das
+    Zurueckrollen konnte nicht heilen."""
+    probe = tmp_path / "probe"
+    probe.mkdir()
+    shutil.copy(os.path.join(ordner, "conftest.py"), probe / "conftest.py")
+    (probe / "test_leser.py").write_text(TOR_LESER, encoding="utf-8")
+    env, _ = _ablaufdateien(tmp_path)
+    r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", str(probe)],
+                       cwd=str(probe), env=env, capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-1000:]
 
 
 def test_die_probe_selbst_beisst(tmp_path):

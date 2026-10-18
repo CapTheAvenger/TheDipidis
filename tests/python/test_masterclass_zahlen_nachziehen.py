@@ -325,3 +325,48 @@ def test_formatfenster_aus_den_daten(tmp_path):
     # die echten Daten ergeben die vorhandenen Dateien
     assert os.path.basename(m.ONLINE_JETZT) == f"online_api_matchups_{m._JETZT}.csv"
     assert os.path.exists(m.ONLINE_JETZT) and os.path.exists(m.ONLINE_DAVOR)
+
+
+# ── SC-40 (18.10.2026): der Erzeuger laeuft NACH dem Datenstand ────────────
+#
+# live_daten() schreibt `stand-online-*` aus data/data_stand.json. Lief der
+# Erzeuger vor "Datenstaende fortschreiben", trug die JSON den Stempel von
+# gestern und test_am_heutigen_stand_ist_nichts_nachzuziehen rechnete mit dem
+# von heute: Limitless #49 blieb am Tor haengen, und das Zurueckrollen konnte
+# nicht heilen (data_stand.json rollt nicht mit).
+
+@pytest.mark.parametrize("ablauf", ["limitless-api-scrape.yml", "weekly-full-update.yml"])
+def test_der_erzeuger_laeuft_nach_dem_datenstand(ablauf):
+    import yaml
+    with open(os.path.join(WURZEL, ".github", "workflows", ablauf), encoding="utf-8") as f:
+        y = yaml.safe_load(f)
+    for job in y["jobs"].values():
+        laeufe = [s.get("run") or "" for s in job.get("steps", [])]
+        erzeuger = [i for i, r in enumerate(laeufe) if "scripts/masterclass_zahlen_nachziehen.py" in r]
+        stand = [i for i, r in enumerate(laeufe) if "scripts/build_data_stand.py" in r]
+        if not erzeuger:
+            continue
+        assert stand, f"{ablauf}: kein build_data_stand.py im Job des Erzeugers"
+        assert stand[0] < erzeuger[0], (
+            f"{ablauf}: der Erzeuger laeuft vor 'Datenstaende fortschreiben' — dann "
+            "traegt mega-stalobor.json den Stempel von gestern")
+        return
+    raise AssertionError(f"{ablauf}: der Erzeuger steht in keinem Job")
+
+
+def test_ein_neuer_datenstand_macht_die_stempel_rot(tmp_path, monkeypatch):
+    """Die Bedingung selbst, ausgefuehrt: rueckt der Stand der Online-Datei vor,
+    liefert live_daten() einen anderen Stempel — die Reihenfolge oben ist also
+    keine Kosmetik."""
+    import json
+    import shutil
+    m = _modul()
+    vorher = m.live_daten()["werte"]["stand-online-jetzt"]
+    daten = tmp_path / "data"
+    daten.mkdir()
+    stand = json.load(open(os.path.join(WURZEL, "data", "data_stand.json"), encoding="utf-8"))
+    stand["dateien"][os.path.basename(m.ONLINE_JETZT)] = "2099-01-01T00:00:00+00:00"
+    (daten / "data_stand.json").write_text(json.dumps(stand), encoding="utf-8")
+    monkeypatch.setattr(m, "DATEN", str(daten))
+    assert m._stand(m.ONLINE_JETZT) == "2099-01-01" != vorher
+    shutil.rmtree(daten)

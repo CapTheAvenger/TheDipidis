@@ -310,12 +310,17 @@ def zusammenfassen(turniere, tabelle, jetzt=None, min_listen=MIN_LISTEN):
             unter["listen"] += a["listen"]
             continue
         partien = a["s"] + a["n"] + a["u"]
-        anteil = a["listen"] / gesamt if gesamt else 0.0
-        quote = a["s"] / partien if partien else 0.0
+        # Die Stufe folgt aus den Zahlen, die AUSGELIEFERT werden (SC-40,
+        # 18.10.2026, Pocket #35): Flygon ex lag ungerundet unter 1 % (Stufe C),
+        # gerundet in der Datei bei 0,01 — wer die Datei nachrechnet, kommt
+        # auf B. Erst runden,
+        # dann einstufen.
+        anteil = round(a["listen"] / gesamt, 4) if gesamt else 0.0
+        quote = round(a["s"] / partien, 4) if partien else 0.0
         eintrag = {"id": did, "name": a["name"], "tier": stufe(anteil, quote),
-                   "anteil": round(anteil, 4), "listen": a["listen"],
+                   "anteil": anteil, "listen": a["listen"],
                    "siege": a["s"], "niederlagen": a["n"], "unentschieden": a["u"],
-                   "quote": round(quote, 4), "turniere": a["turniere"]}
+                   "quote": quote, "turniere": a["turniere"]}
         a["kandidaten"].sort(key=lambda tk: _rang(tk[1]["bilanz"], tk[0]["datum"]), reverse=True)
         code, grund, gewaehlt, rang = None, None, None, 0
         for i, (t, l) in enumerate(a["kandidaten"]):

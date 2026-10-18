@@ -242,6 +242,16 @@ jobs:
             exit $rc
           fi
 
+      - name: Datenstaende fortschreiben
+        if: ${{ success() && inputs.gegenprobe != true && inputs.trocken != true }}
+        run: python3 scripts/build_data_stand.py
+
+      # SC-40 (18.10.2026): NACH "Datenstaende fortschreiben". Der Erzeuger
+      # schreibt `stand-online-*` aus data/data_stand.json; lief er davor, stand
+      # in der JSON der Stempel von gestern, die Zusicherung rechnete mit dem
+      # von heute — Limitless #49 blieb am Tor haengen, an jedem Tag, an dem
+      # die Online-Matchups neu kamen. Gehalten von
+      # tests/python/test_masterclass_zahlen_nachziehen.py.
       # ── Die Masterclass-Aufbereitung nachziehen (23.09.2026) ─────
       #
       # BEFUND: masterclass/mega-stalobor.de.html traegt je Matchup drei
@@ -268,10 +278,6 @@ jobs:
             echo "::warning::masterclass_zahlen_nachziehen exited with $rc — die Live-Daten bleiben wie sie sind"
           fi
           exit 0
-
-      - name: Datenstaende fortschreiben
-        if: ${{ success() && inputs.gegenprobe != true && inputs.trocken != true }}
-        run: python3 scripts/build_data_stand.py
 
       # DAS TOR VOR DEM PUSH (29.09.2026) — scripts/tor_vor_dem_push.sh.
       # Wer nach main schreibt, prueft vorher: faellt hier eine Zusicherung,

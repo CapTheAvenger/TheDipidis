@@ -408,3 +408,18 @@ def test_der_testschritt_installiert_die_qr_bibliotheken():
     zusammen = " ".join(z for z in text.splitlines() if "pip install" in z).lower()
     for paket in ["zxing-cpp", "segno", "pillow", "pyyaml"]:
         assert paket in zusammen, f"{paket} fehlt in nebenbereiche-tests.yml"
+
+
+def test_die_stufe_folgt_den_ausgelieferten_zahlen_an_der_grenze():
+    """SC-40 (18.10.2026, Pocket #35): Flygon ex lag ungerundet knapp unter 1 %
+    (Stufe C), in der Datei stand 0,01 — die Zusicherung rechnete B. Hier:
+    100 von 10.010 Listen = 0,00999 -> ausgeliefert 0,01 -> Stufe B."""
+    flygon, rest = 100, 9910
+    turniere = {"T1": _turnier("T1", "2026-10-17", {
+        "f": _zaehlung("Flygon ex", flygon, 40, 60),
+        "x": _zaehlung("Fuellung", rest, 5000, 4910)})}
+    decks, _, _, gesamt = S.zusammenfassen(turniere, TAB)
+    f = next(d for d in decks if d["id"] == "f")
+    assert gesamt == flygon + rest and flygon / gesamt < 0.01, "der Fall liegt nicht an der Grenze"
+    assert f["anteil"] == 0.01
+    assert f["tier"] == S.stufe(f["anteil"], f["quote"]) == "B"

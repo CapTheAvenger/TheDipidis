@@ -25,6 +25,7 @@ import pytest
 
 ABLAUF_DATEIEN = ("GITHUB_ENV", "GITHUB_OUTPUT", "GITHUB_STEP_SUMMARY",
                   "GITHUB_PATH", "GITHUB_STATE")
+TOR_ZUSTAND = ("TOR_ZURUECKGEROLLT", "TOR_OHNE_ROLLBACK", "TOR_OHNE_SCHRUMPF")
 
 
 @pytest.fixture(autouse=True)
@@ -37,4 +38,14 @@ def _ablaufumgebung_abschirmen(tmp_path_factory, monkeypatch):
             datei = ordner / name.lower()
             datei.write_text("", encoding="utf-8")
             monkeypatch.setenv(name, str(datei))
+    # DER ZUSTAND DES TORS IST NICHT DER DES TESTS (SC-40, 18.10.2026).
+    # Im zweiten Durchlauf des Tors stehen TOR_ZURUECKGEROLLT (exportiert)
+    # und $RUNNER_TEMP/tor_zurueckgerollt.txt im ECHTEN Lauf. Tests, die das
+    # Tor oder die Frischepruefung als Unterprozess fahren, erbten beides —
+    # Pocket #35 und Limitless #49: der zweite Durchlauf blieb an zwei
+    # Tor-Tests rot, das Zurueckrollen konnte nicht heilen.
+    for name in TOR_ZUSTAND:
+        monkeypatch.delenv(name, raising=False)
+    if os.environ.get("RUNNER_TEMP"):
+        monkeypatch.setenv("RUNNER_TEMP", str(tmp_path_factory.mktemp("runner_temp")))
     yield

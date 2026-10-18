@@ -1165,36 +1165,6 @@ jobs:
       - name: Deckempfehlung neu rechnen
         run: python3 scripts/build_deckempfehlung.py
 
-      # ── Die Masterclass an den Wochenlauf haengen (23.09.2026) ────
-      #
-      # BESTELLUNG: "Die Masterclass unbedingt auf den Wochenlauf
-      # haengen, damit ich immer die aktuellsten Daten habe."
-      #
-      # Die Mega-Stalobor-Masterclass traegt drei Sorten Zahlen aus
-      # genau den Dateien, die dieser Lauf schreibt: die Matchup-Quoten,
-      # die Feldanteile und die fuenf Listen unter "Online - letzte 7
-      # Tage". Seit dem 17.10.2026 liegt das Stueck nur in Hausis Konto;
-      # die Erzeuger schreiben data/masterclass_live/mega-stalobor.json,
-      # und die Seite setzt die Werte beim Oeffnen ein (git add -A unten
-      # nimmt die Datei mit).
-      #
-      # Der Schritt gehoert HINTER die Scraper und VOR das Tor: er
-      # rechnet mit dem frischen Stand, und die Zusicherungen im
-      # naechsten Schritt sehen sein Ergebnis. Fail-soft: faellt ein
-      # Erzeuger um, bleibt das Stueck stehen — dann ist es dateiert,
-      # nicht falsch, und die Zusicherung meldet es beim Deploy.
-      - name: Masterclass nachziehen (Zahlen, Feldanteile, Online-Listen)
-        run: |
-          set +e
-          python3 -u scripts/masterclass_zahlen_nachziehen.py
-          rc1=$?
-          python3 -u scripts/masterclass_listen_nachziehen.py
-          rc2=$?
-          if [ "$rc1" -ne 0 ] || [ "$rc2" -ne 0 ]; then
-            echo "::warning::Masterclass nicht vollstaendig nachgezogen (Zahlen $rc1, Listen $rc2) — die Live-Daten bleiben, wie sie sind"
-          fi
-          exit 0
-
       # DIE KARTENMAPPE GEHOERT IN DENSELBEN LAUF WIE DIE KARTENDATEN
       #
       # scripts/build_masterclass_cardbinder.py liest data/*.csv — die
@@ -1225,6 +1195,42 @@ jobs:
 
       - name: Datenstaende fortschreiben
         run: python3 scripts/build_data_stand.py
+
+      # SC-40 (18.10.2026): NACH "Datenstaende fortschreiben". Der Erzeuger
+      # schreibt `stand-online-*` aus data/data_stand.json; lief er davor, stand
+      # in der JSON der Stempel von gestern, die Zusicherung rechnete mit dem
+      # von heute — Limitless #49 blieb am Tor haengen, an jedem Tag, an dem
+      # die Online-Matchups neu kamen. Gehalten von
+      # tests/python/test_masterclass_zahlen_nachziehen.py.
+      # ── Die Masterclass an den Wochenlauf haengen (23.09.2026) ────
+      #
+      # BESTELLUNG: "Die Masterclass unbedingt auf den Wochenlauf
+      # haengen, damit ich immer die aktuellsten Daten habe."
+      #
+      # Die Mega-Stalobor-Masterclass traegt drei Sorten Zahlen aus
+      # genau den Dateien, die dieser Lauf schreibt: die Matchup-Quoten,
+      # die Feldanteile und die fuenf Listen unter "Online - letzte 7
+      # Tage". Seit dem 17.10.2026 liegt das Stueck nur in Hausis Konto;
+      # die Erzeuger schreiben data/masterclass_live/mega-stalobor.json,
+      # und die Seite setzt die Werte beim Oeffnen ein (git add -A unten
+      # nimmt die Datei mit).
+      #
+      # Der Schritt gehoert HINTER die Scraper und VOR das Tor: er
+      # rechnet mit dem frischen Stand, und die Zusicherungen im
+      # naechsten Schritt sehen sein Ergebnis. Fail-soft: faellt ein
+      # Erzeuger um, bleibt das Stueck stehen — dann ist es dateiert,
+      # nicht falsch, und die Zusicherung meldet es beim Deploy.
+      - name: Masterclass nachziehen (Zahlen, Feldanteile, Online-Listen)
+        run: |
+          set +e
+          python3 -u scripts/masterclass_zahlen_nachziehen.py
+          rc1=$?
+          python3 -u scripts/masterclass_listen_nachziehen.py
+          rc2=$?
+          if [ "$rc1" -ne 0 ] || [ "$rc2" -ne 0 ]; then
+            echo "::warning::Masterclass nicht vollstaendig nachgezogen (Zahlen $rc1, Listen $rc2) — die Live-Daten bleiben, wie sie sind"
+          fi
+          exit 0
 
       # ══════════════════════════════════════════════════════════════
       # DAS TOR VOR DEM PUSH (22.09.2026)

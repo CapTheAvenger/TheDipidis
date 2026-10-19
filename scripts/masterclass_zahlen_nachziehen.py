@@ -195,13 +195,13 @@ def majors_texte(meta_neu, laufend):
     turniere = _und(namen)
     kopf_neu = _kopf(meta_neu)
     if meta_neu == laufend:
-        satz = ("sind die letzten Präsenzturniere (%s), schon im laufenden Format."
+        satz = ("sind die letzten Majors (%s), schon im laufenden Format."
                 % turniere)
     else:
-        satz = ("sind die letzten Präsenzturniere (%s) — die liefen noch im Format %s."
+        satz = ("sind die letzten Majors (%s) — die liefen noch im Format %s."
                 % (turniere, kopf_neu))
     return {
-        "praefix": "Letzte Präsenzturniere (%s), Format %s: " % (turniere, kopf_neu),
+        "praefix": "Letzte Majors (%s), Format %s: " % (turniere, kopf_neu),
         "satz": satz,
         "turniere": _und(str(x) for x in nummern),
     }
@@ -284,21 +284,21 @@ def soll_zelle(bilanz, klasse_alt, titel_alt):
     w, l, t = bilanz
     n = w + l + t
     if n == 0:
-        return (grund + " mcl-wrz-leer", kopf + "keine Partien in den Daten", "\u2014", "")
+        return (grund + " mcl-wrz-leer", kopf + "keine Matches in den Daten", "\u2014", "")
     bilanztext = f"{w}\u2013{l}\u2013{t}"
     if n < MINDEST_PARTIEN:
         # Wie stark eine einzelne Partie die Quote verschiebt: ein Sieg statt
         # einer Niederlage sind drei der 3n Punkte, also 100/n Prozentpunkte.
         verschiebung = f"{100.0 / n:.1f}"
-        titel = (f"{kopf}Bilanz {bilanztext} (S\u2013N\u2013U) aus {_tausender(n)} Partien. "
-                 f"Unter {MINDEST_PARTIEN} Partien steht hier keine Quote \u2014 eine "
-                 f"einzelne Partie verschiebt sie um {verschiebung} Punkte.")
+        titel = (f"{kopf}Bilanz {bilanztext} (W\u2013L\u2013T) aus {_tausender(n)} Matches. "
+                 f"Unter {MINDEST_PARTIEN} Matches steht hier keine Quote \u2014 ein "
+                 f"einzelnes Match verschiebt sie um {verschiebung} Punkte.")
         return (grund + " mcl-wrz-duenn", titel, bilanztext, f"<i>({_tausender(n)})</i>")
     # Das Leerzeichen vor dem Prozentzeichen ist ein GEWOEHNLICHES \u2014
     # so steht es im Stueck.
     quote = ("%.1f" % _matchpunkte(w, l, t)).replace(".", ",") + " %"
-    titel = (f"{kopf}{quote} Win % nach Matchpunkten, aus {_tausender(n)} Partien, "
-             f"Bilanz {bilanztext} (S\u2013N\u2013U)")
+    titel = (f"{kopf}{quote} Win % nach Matchpunkten, aus {_tausender(n)} Matches, "
+             f"Bilanz {bilanztext} (W\u2013L\u2013T)")
     return (grund, titel, quote, f"<i>({_tausender(n)})</i>")
 
 

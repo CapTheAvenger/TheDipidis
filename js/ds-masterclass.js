@@ -552,7 +552,7 @@
         if (!werte) return n;
         Array.prototype.forEach.call(wurzel.querySelectorAll('[data-live]'), function (el) {
             var k = el.getAttribute('data-live');
-            if (hat(werte, k) && typeof werte[k] === 'string') { el.textContent = werte[k]; n++; }
+            if (hat(werte, k) && typeof werte[k] === 'string') { el.textContent = liveEn(werte[k]); n++; }
         });
         return n;
     }
@@ -563,13 +563,13 @@
         var neuerKopf = (m.koepfe && m.koepfe[spalte]) || alterKopf;
         var titel = zelle.getAttribute('title') || '';
         var vorn = titel.split(': ')[0];
-        if (spalte === 'majors' && m.majors_praefix) vorn = m.majors_praefix.replace(/: $/, '');
+        if (spalte === 'majors' && m.majors_praefix) vorn = liveEn(m.majors_praefix).replace(/: $/, '');
         else if (alterKopf && neuerKopf !== alterKopf) vorn = vorn.split(alterKopf).join(neuerKopf);
         zelle.className = z[0];
-        zelle.setAttribute('title', vorn + ': ' + z[1]);
+        zelle.setAttribute('title', vorn + ': ' + liveEn(z[1]));
         if (em) em.textContent = neuerKopf;
         var b = zelle.querySelector('b');
-        if (b) b.textContent = z[2];
+        if (b) b.textContent = liveEn(z[2]);
         var i = zelle.querySelector('i');
         var nenner = /\(([\d.]+)\)/.exec(z[3] || '');
         if (nenner) {
@@ -667,16 +667,16 @@
         reihe(zaehlung).forEach(function (p) {
             var alt = hat(tims, p[0]) ? tims[p[0]] : null;
             if (alt === null) neu.push(p[1] + '× ' + p[0]);
-            else if (p[1] > alt) mehr.push(p[1] + ' statt ' + alt + ' ' + p[0]);
-            else if (p[1] < alt) weniger.push(p[1] + ' statt ' + alt + ' ' + p[0]);
+            else if (p[1] > alt) mehr.push(p[1] + ' ' + LT('statt') + ' ' + alt + ' ' + p[0]);
+            else if (p[1] < alt) weniger.push(p[1] + ' ' + LT('statt') + ' ' + alt + ' ' + p[0]);
         });
-        reihe(tims).forEach(function (p) { if (!hat(zaehlung, p[0])) fehlt.push('kein ' + p[0]); });
+        reihe(tims).forEach(function (p) { if (!hat(zaehlung, p[0])) fehlt.push(LT('kein') + ' ' + p[0]); });
         var teile = [];
-        if (neu.length) teile.push('dazu ' + neu.slice(0, 4).join(', '));
+        if (neu.length) teile.push(LT('dazu') + ' ' + neu.slice(0, 4).join(', '));
         if (fehlt.length) teile.push(fehlt.slice(0, 4).join(', '));
         if (mehr.length || weniger.length) teile.push(mehr.concat(weniger).slice(0, 4).join(', '));
-        if (!teile.length) return 'Kartengleich mit Tims aktueller Liste.';
-        return 'Gegenüber Tims aktueller Liste: ' + teile.join('; ') + '.';
+        if (!teile.length) return LT('gleich');
+        return LT('gegenueber') + ' ' + teile.join('; ') + '.';
     }
 
     function liveListen(wurzel, l) {
@@ -727,11 +727,11 @@
                 summe += k.n;
             }
             bloecke.push('<div class="mcl-liste" data-mcl-listenblock="' + ziel[i] + '" hidden data-mcl-listenname="' +
-                esc(liste.name) + '"><p class="mcl-listmeta"><b>' + esc(liste.fakten) + '</b> ' +
+                esc(liste.name) + '"><p class="mcl-listmeta"><b>' + esc(liveEn(liste.fakten)) + '</b> ' +
                 esc(listenUnterschied(zaehlung, tims)) + '</p><div class="mcl-gitter">' + kacheln.join('') +
-                '</div><p class="mcl-quelle">' + summe + ' Karten · ' + kacheln.length + ' verschiedene' +
+                '</div><p class="mcl-quelle">' + summe + ' ' + LT('karten') + ' · ' + kacheln.length + ' ' + LT('verschiedene') +
                 '<button type="button" class="mcl-kopieren" data-mcl-kopieren="' + ziel[i] + '">' +
-                '<span aria-hidden="true">📋</span> Liste als Bild kopieren</button></p></div>');
+                '<span aria-hidden="true">📋</span> ' + LT('kopieren') + '</button></p></div>');
         }
         alte.forEach(function (nr) {
             var b = wurzel.querySelector('.mcl-liste[data-mcl-listenblock="' + nr + '"]');
@@ -742,8 +742,8 @@
         if (letzter) letzter.insertAdjacentHTML('afterend', bloecke.join(''));
         reihe.innerHTML = l.listen.map(function (liste, x) {
             return '<button type="button" class="mcl-chip" data-mcl-liste="' + ziel[x] +
-                '" aria-pressed="false">' + esc(liste.name) + '</button>';
-        }).join('') || l.leer_hinweis || '';
+                '" aria-pressed="false">' + esc(liveEn(liste.name)) + '</button>';
+        }).join('') || liveEn(l.leer_hinweis) || '';
         return true;
     }
 
@@ -777,6 +777,15 @@
      * einfach und schnell zwischen Deutsch und Englisch umschalten“). Der
      * Block „Aktuelle Daten“ spricht dieselbe Sprache wie das Stueck. */
     var aktSprache = 'de';
+    /* Texte der Online-Listen im Stueck — folgen der Sprache der Masterclass,
+     * nicht der Seite (die englische Fassung kann auf der deutschen Seite offen sein). */
+    var LISTEN_TXT = {
+        de: { karten: 'Karten', verschiedene: 'verschiedene', kopieren: 'Liste als Bild kopieren', statt: 'statt',
+              kein: 'kein', dazu: 'dazu', gleich: 'Kartengleich mit Tims aktueller Liste.', gegenueber: 'Gegenüber Tims aktueller Liste:' },
+        en: { karten: 'cards', verschiedene: 'unique', kopieren: 'Copy list as image', statt: 'instead of',
+              kein: 'no', dazu: 'plus', gleich: "Same cards as Tim's current list.", gegenueber: "Compared with Tim's current list:" }
+    };
+    function LT(k) { return (LISTEN_TXT[aktSprache] || LISTEN_TXT.de)[k]; }
     var AKT_TXT = {
         de: { online: 'Online', anteil14: 'Meta-Anteil (14 Tage)', seit: 'Win % seit ', k7a: 'Letzte 7 Tage: Anteil',
             k7w: 'Letzte 7 Tage: Win %', listen: 'Listen', in: ' in ', turniereN: ' Turnieren', majorReg: 'Major · Regionals ',
@@ -800,6 +809,40 @@
     function A(k) { return (AKT_TXT[aktSprache] || AKT_TXT.de)[k]; }
     /* Zahlen der Live-Datei tragen das deutsche Komma ("4,42"). */
     function aktZahl(t) { return aktSprache === 'en' ? String(t).replace(',', '.') : String(t); }
+
+    /* Englische Masterclass (19.10.2026): die Live-Texte kommen deutsch aus
+     * data/masterclass_live/<id>.json (scripts/masterclass_zahlen_nachziehen.py,
+     * masterclass_listen_nachziehen.py). In der englischen Fassung werden sie
+     * hier uebertragen — alte und neue deutsche Schreibweise (Partien/Matches,
+     * S–N–U/W–L–T, Präsenzturniere/Majors) werden beide erkannt. */
+    function liveEn(t) {
+        if (aktSprache !== 'en' || typeof t !== 'string') return t;
+        /* Alt-Wortlaut als Regex-Literal: er wird nur erkannt, nie geschrieben. */
+        return t
+            .replace(/Win % nach Matchpunkten, aus ([\d.]+) (?:Partien|Matches), Bilanz ([\d–-]+) \((?:S–N–U|W–L–T)\)/,
+                'Win % by match points, from $1 matches, record $2 (W–L–T)')
+            .replace(/Bilanz ([\d–-]+) \((?:S–N–U|W–L–T)\) aus ([\d.]+) (?:Partien|Matches)\. Unter (\d+) (?:Partien|Matches) steht hier keine Quote — (?:eine einzelne Partie|ein einzelnes Match) verschiebt sie um ([\d.,]+) Punkte\./,
+                'Record $1 (W–L–T) from $2 matches. Under $3 matches there is no rate here — a single match moves it by $4 points.')
+            .replace(/keine (?:Partien|Matches) in den Daten/, 'no matches in the data')
+            .replace(/^sind die letzten (?:Präsenzturniere|Majors) \((.*)\), schon im laufenden Format\.$/,
+                'are the most recent Majors ($1), already in the current format.')
+            .replace(/^sind die letzten (?:Präsenzturniere|Majors) \((.*)\) — die liefen noch im Format (.*)\.$/,
+                'are the most recent Majors ($1) — those were still in the $2 format.')
+            .replace(/^Letzte (?:Präsenzturniere|Majors) \((.*)\), Format /, 'Most recent Majors ($1), format ')
+            .replace(/(\d+)\. Platz von (\d+)/g, function (x, a, b) { return enOrdinal(a) + ' place of ' + b; })
+            .replace(/(\d+)\. Platz\b/g, function (x, a) { return enOrdinal(a) + ' place'; })
+            .replace(/(\d+)\. von (\d+)/g, function (x, a, b) { return enOrdinal(a) + ' of ' + b; })
+            .replace(/Keine Online-Liste ab (\d+) Spielern in den letzten 7 Tagen — ältere Listen stehen unter „([^“]*)“\./,
+                'No online list from events with $1+ players in the last 7 days — older lists are under “$2”.')
+            .replace(/ und /g, ' and ').replace(/„/g, '“')
+            .replace(/(\d+),(\d+) ?%/g, '$1.$2%')
+            .replace(/(\d),(\d)/g, '$1.$2')
+            .replace(/\b([1-9]\d{0,2})\.(\d{3})\b/g, '$1,$2');
+    }
+    function enOrdinal(n) {
+        n = +n; var z = n % 100, e = n % 10;
+        return n + ((z >= 11 && z <= 13) ? 'th' : e === 1 ? 'st' : e === 2 ? 'nd' : e === 3 ? 'rd' : 'th');
+    }
     function aktProzent(w) { return aktSprache === 'en' ? w.toFixed(1) + '%' : window.zahlKomma(w, 1) + ' %'; }   /* Festlegung DA-50: unter 20 Matches Bilanz statt Quote */
 
     function tausender(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
@@ -2672,6 +2715,7 @@
         _aktuellBlockHtml: aktuellBlockHtml,
         _aktuellMuZeilen: aktuellMuZeilen,
         _aktuellEinsetzen: aktuellEinsetzen,
+        _liveEn: liveEn,
         _aktQuote: aktQuote,
         _aktMittel: aktMittel,
         _autorStufe: autorStufe,

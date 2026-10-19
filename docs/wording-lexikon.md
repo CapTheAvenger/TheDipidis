@@ -104,6 +104,37 @@ Predictor) · Deck-Analyse · Archetyp-Box · Spielbox · Masterclass · Side Qu
 Champions · Pocket · Battle Journal · Binder / Meta-Binder · **Testing Groups**
 (nicht Testgruppen).
 
+## 8 · Spielsprache in den Masterclasses (Hausi 19.10.2026)
+
+Gemessen am Neuschreiben der englischen Masterclass-Fassungen gegen die
+Originale (Tim Danklin, Rahul Reddy/Grant Shen, ZapdosTCG, Henry Brand,
+AzulGG); Liste mit Zählungen: `claude/wording-lexikon-masterclass-2026-10-19.md`
+(Projektwissen). Gilt für Masterclass-Texte und jeden neuen Strategietext.
+
+| so | nicht so | Bedeutung |
+|---|---|---|
+| **Prize Map** | Preisreihenfolge | welche Pokémon man in welcher Folge für die Preise nimmt |
+| **Prize Race**, **Prize Trade** | Preisplan, Preistausch | das Rennen um die sechs Preise · Preis gegen Preis |
+| **one-shotten** | — | mit einem Angriff besiegen |
+| **whiffen** | verfehlen | eine gesuchte Karte nicht finden |
+| **Win Con** | Weg, Siegbedingung | wie das Deck gewinnt |
+| **Lethal** | „den Sieg übersehen“ | genug Schaden für den letzten Preis |
+| **Single-Prizer**, **Two-Prizer** | Einpreiser, 2-Preis-Pokémon | Pokémon, das 1 bzw. 2 Preise gibt |
+| **pre-benchen** | vorbankieren | vorsorglich auf die Bank legen |
+| **bricken** | hängen | nicht ins Spiel kommen |
+| **scoopen** | aufgeben | ein Game vorzeitig abgeben |
+| **snipen**, **Spread** | wegschießen, streuen | Schaden auf die Bank · Schaden verteilt |
+| **Dead Draw** | totes Ziehen | gezogene Karte, die nichts tut |
+| **Freebie** | Freilos | Matchup, das praktisch von selbst gewonnen ist |
+| **Flex Slot** | flexibler Platz | freier Platz in der Liste |
+| **Sequencing** | Reihenfolge (im Zug) | Abfolge der Aktionen in einem Zug |
+| **Hand Disruption** | Handstörung | Karten, die die Hand des Gegners verkleinern |
+| **tanken** | aushalten | einen Treffer überstehen |
+| Konsistenz, Gust, Rückzugs-Lock, Auto-Loss | — | bleiben so |
+
+Die Masterclass-Texte liegen im Konto (Firestore), nicht im Repo; die
+Sperrliste unten prüft sie deshalb nicht.
+
 ## Sperrliste (maschinenlesbar)
 
 Jede Zeile: `regex | ersatz | wo`, getrennt durch „ | “ mit Leerzeichen (ein `|` ohne Leerzeichen gehört zum Regex). `wo` ist `de` (deutsches Wörterbuch und

@@ -143,7 +143,7 @@
     top: 0;
     z-index: 30;
     padding: var(--s-2) 0;
-    background: var(--surface-0, var(--bg, #0b1020));
+    background: var(--surface-0);
 }
 .mcl-kopf-rechts { display: flex; align-items: center; gap: var(--s-2); }
 .mcl-sprachwahl {
@@ -1001,3 +1001,9 @@
     padding-left: var(--s-2);
     margin: var(--s-2) 0;
 }
+
+/* Englische Fassung (19.10.2026): steht der Untertitel gleich dem Namen
+ * („Dragapult" / „Dragapult"), bleibt das <em> fuer die Live-Daten im
+ * Stueck (liveMatchups liest den Meta-Anteil ueber .mcl-nm em), wird aber
+ * nicht doppelt gezeigt. */
+.mcl-nm em.mcl-nm-gleich { display: none; }

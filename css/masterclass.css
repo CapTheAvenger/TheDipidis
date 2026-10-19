@@ -134,9 +134,36 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--s-3);
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-3);
     margin-bottom: var(--s-2);
+    /* Hausi 19.10.2026: der DE/EN-Umschalter bleibt oben stehen,
+       alles andere scrollt darunter. */
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding: var(--s-2) 0;
+    background: var(--surface-0, var(--bg, #0b1020));
 }
+.mcl-kopf-rechts { display: flex; align-items: center; gap: var(--s-2); }
+.mcl-sprachwahl {
+    display: inline-flex;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.mcl-sprachknopf {
+    border: 0;
+    background: transparent;
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    padding: 5px 12px;
+    min-width: 44px;
+    cursor: pointer;
+}
+.mcl-sprachknopf[aria-pressed="true"] { background: var(--mcl-akzent); color: #fff; }
+.mcl-sprach-hinweis { font-size: var(--fs-sm); color: var(--ink-3); margin: 0 0 var(--s-2); }
 .mcl-buehne-kopf h4 { margin: 0; font-size: var(--fs-lg); }
 
 .mcl-schliessen,

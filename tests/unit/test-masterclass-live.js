@@ -29,10 +29,10 @@ function umgebung(opt) {
     const docs = opt.docs || [];
     const db = {
         collection: (a) => ({ doc: (uid) => ({ collection: (b) => ({
-            get: () => Promise.resolve({ forEach: (fn) => docs.forEach((d) => fn({ id: d.id, data: () => d.data })) }),
+            get: () => Promise.resolve({ forEach: (fn) => docs.filter((d) => (d.sammlung || 'masterclasses') === b).forEach((d) => fn({ id: d.id, data: () => d.data })) }),
             doc: (id) => ({ get: () => {
                 docPfade.push([a, uid, b, id].join('/'));
-                const d = docs.filter((x) => x.id === id)[0];
+                const d = docs.filter((x) => x.id === id && (x.sammlung || 'masterclasses') === b)[0];
                 return Promise.resolve({ exists: !!d, data: () => (d ? d.data : undefined) });
             } })
         }) }) })
@@ -49,6 +49,8 @@ function umgebung(opt) {
         auth: { currentUser: opt.user === undefined ? { uid: 'U1' } : opt.user, onAuthStateChanged: (fn) => { anmeldung.push(fn); } },
         db,
         addEventListener: () => {},
+        localStorage: (() => { const m = {}; return { getItem: (k) => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); } }; })(),
+        scrollY: 0, scrollTo: () => {},
         getLang: () => 'de',
         /* wie js/app-utils.js (zahlKomma), das auf der Seite vorher laedt */
         zahlKomma: (w, st) => w.toFixed(st == null ? 1 : st).replace('.', ',')
@@ -536,4 +538,73 @@ test('die Kachel zeigt nur Titel und Autor — kein Kleingedrucktes, kein Konto-
     assert.ok(t.includes('TITEL') && t.includes('AUTOR'), t);
     ['ENGLISCH', 'DATUM', 'ZUSATZ', 'KENNZAHLEN', 'Nur in deinem Konto'].forEach((x) =>
         assert.ok(!t.includes(x), 'auf der Kachel steht noch: ' + x));
+});
+
+
+/* ── Deutsch / Englisch (Hausi 19.10.2026) ── */
+
+test('der Kopf traegt DE/EN, die gewaehlte Sprache ist gedrueckt', () => {
+    const { mc } = umgebung();
+    const g = { id: 'x', titel: 'T' };
+    const w = wurzelMit(mc._buehneKopf(g, 'en', false));
+    const k = w.querySelectorAll('[data-mcl-sprache]');
+    assert.strictEqual(k.length, 2);
+    assert.strictEqual(w.querySelector('[data-mcl-sprache="en"]').getAttribute('aria-pressed'), 'true');
+    assert.strictEqual(w.querySelector('[data-mcl-sprache="de"]').getAttribute('aria-pressed'), 'false');
+    assert.ok(!w.innerHTML.includes('mcl-sprach-hinweis'));
+    assert.ok(wurzelMit(mc._buehneKopf(g, 'de', true)).querySelector('.mcl-sprach-hinweis'), 'fehlende EN-Fassung ohne Hinweis');
+});
+
+test('die englische Fassung kommt aus users/<uid>/masterclassesEn/<id>', async () => {
+    const u = umgebung({ docs: [{ id: 'hide-n-sneak', data: { html: '<p>DE</p>' } },
+        { id: 'hide-n-sneak', sammlung: 'masterclassesEn', data: { html: '<p>EN</p>' } }] });
+    assert.strictEqual(await u.mc._holeEn('hide-n-sneak'), '<p>EN</p>');
+    assert.ok(u.docPfade.includes('users/U1/masterclassesEn/hide-n-sneak'), u.docPfade.join(','));
+    assert.strictEqual(await u.mc._holeEn('gibt-es-nicht'), null);
+});
+
+test('der Block spricht Englisch, wenn das Stueck englisch ist', () => {
+    const { mc } = umgebung();
+    const w = wurzelMit('<div data-mcl-abschnitt="matchups"></div>');
+    mc._aktuellEinsetzen(w, AKT);   /* Grundzustand deutsch */
+    assert.ok(w.innerHTML.includes('Aktuelle Daten') && w.innerHTML.includes('Mittel'));
+    assert.ok(!w.innerHTML.includes('Current data'));
+    mc._setzeAktSprache('en');
+    const e = mc._aktuellBlockHtml(AKT, () => '');
+    assert.ok(e.includes('Current data') && e.includes('>Avg<') && e.includes('Most common opponents'), 'kein englischer Block');
+    assert.ok(!/Aktuelle Daten|Gegner|Mittel|Meta-Anteil/.test(e.replace(/<style[\s\S]*?<\/style>/, '')), 'deutsche Reste im englischen Block');
+    assert.ok(/\d\.\d%/.test(e) && !/\d,\d %/.test(e), 'englische Zahlen mit Komma');
+    mc._setzeAktSprache('de');
+});
+
+test('das Wort des Autors wird auch auf Englisch zur Stufe', () => {
+    const { mc } = umgebung();
+    const f = { 'very favorable': 4, 'favorable': 3, 'slightly favorable': 3, 'good': 3, 'easy': 3, 'even': 2,
+        'close': 2, 'slightly unfavorable': 1, 'unfavorable': 1, 'very unfavorable': 0, 'bad': 1, 'very bad': 0 };
+    Object.keys(f).forEach((w) => assert.strictEqual(mc._autorStufe(w), f[w], 'Seite: ' + w));
+    const src = mc._liveSkript();
+    const quelle = /function st\(w\)\{[^}]*\}function stufe\(t\)\{[\s\S]*?return -1;\}/.exec(src);
+    const r = { String, Math };
+    vm.createContext(r);
+    vm.runInContext(quelle[0] + ';globalThis.f=stufe;', r);
+    Object.keys(f).forEach((w) => assert.strictEqual(r.f(w), f[w], 'Rahmen: ' + w));
+});
+
+test('Sprachwechsel merkt die Wahl und oeffnet dieselbe Masterclass englisch', async () => {
+    const u = umgebung({ docs: [{ id: 'mega-tohaido', data: { titel: 'T', html: '<html><body>DE</body></html>' } },
+        { id: 'mega-tohaido', sammlung: 'masterclassesEn', data: { html: '<html><body>EN</body></html>' } }] });
+    assert.strictEqual(u.mc._mclSprache(), 'de');
+    u.mc._zeichneRegal();
+    await new Promise((r) => setTimeout(r, 0));
+    const buehne = u.host.querySelector('#mclBuehne');
+    buehne.dataset = {};
+    buehne.cloneNode = () => { const n = new dom.Element('div'); n.id = 'mclBuehne'; n.setAttribute('id', 'mclBuehne'); n.dataset = {}; n.scrollIntoView = () => {}; return n; };
+    buehne.scrollIntoView = () => {};
+    buehne.dataset.mclId = 'privat-mega-tohaido';
+    u.mc._sprachWechsel('en');
+    assert.strictEqual(u.mc._mclSprache(), 'en', 'die Wahl wurde nicht gemerkt');
+    await new Promise((r) => setTimeout(r, 10));
+    const neu = u.host.querySelector('#mclBuehne');
+    assert.ok(neu && neu !== buehne, 'die Buehne wurde nicht ersetzt');
+    assert.ok(u.docPfade.includes('users/U1/masterclassesEn/mega-tohaido'), 'EN nicht geholt: ' + u.docPfade.join(','));
 });

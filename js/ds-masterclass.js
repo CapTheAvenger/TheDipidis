@@ -72,6 +72,8 @@
             privat: 'Nur in deinem Konto',
             oeffnen: 'Öffnen',
             schliessen: 'Schließen',
+            sprache: 'Sprache der Masterclass',
+            keinEn: 'Die englische Fassung dieser Masterclass fehlt noch — angezeigt wird die deutsche.',
             platz: 'Platz für die nächste Masterclass',
             platzFein: 'Erscheint hier, sobald sie aufbereitet ist',
             laden: 'Masterclass wird geladen …',
@@ -154,6 +156,8 @@
             privat: 'Only in your account',
             oeffnen: 'Open',
             schliessen: 'Close',
+            sprache: 'Masterclass language',
+            keinEn: 'There is no English version of this masterclass yet — showing the German one.',
             platz: 'Room for the next masterclass',
             platzFein: 'Appears here once it is prepared',
             laden: 'Loading the masterclass …',
@@ -594,7 +598,9 @@
             var sub = d.querySelector('.mcl-sub');
             var anteil = nm && m.anteile ? m.anteile[nm.textContent.trim().toLowerCase()] : null;
             if (sub && anteil) {
-                sub.textContent = sub.textContent.replace(/^\s*[\d.,]+\s*%\s*Meta-Anteil/, anteil + ' % Meta-Anteil');
+                sub.textContent = sub.textContent.replace(/^\s*[\d.,]+\s*%\s*(Meta-Anteil|meta share)/i, function (x, wort) {
+                    return /share/i.test(wort) ? String(anteil).replace(',', '.') + '% ' + wort : anteil + ' % ' + wort;
+                });
             }
         });
         /* „Sortiert nach Meta-Anteil“ steht als Versprechen ueber der Liste
@@ -765,7 +771,36 @@
      * Die Einschaetzung des Autors kommt aus dem Stueck selbst
      * ([data-live-slug] mit data-autor oder Tims Zelle) — sie steht nicht
      * in der oeffentlichen Datei. */
-    var AKT_GRENZE = 20;   /* Festlegung DA-50: unter 20 Matches Bilanz statt Quote */
+    var AKT_GRENZE = 20;
+
+    /* Sprache des geoeffneten Stuecks (Hausi 19.10.2026: „jede Masterclass
+     * einfach und schnell zwischen Deutsch und Englisch umschalten“). Der
+     * Block „Aktuelle Daten“ spricht dieselbe Sprache wie das Stueck. */
+    var aktSprache = 'de';
+    var AKT_TXT = {
+        de: { online: 'Online', anteil14: 'Meta-Anteil (14 Tage)', seit: 'Win % seit ', k7a: 'Letzte 7 Tage: Anteil',
+            k7w: 'Letzte 7 Tage: Win %', listen: 'Listen', in: ' in ', turniereN: ' Turnieren', majorReg: 'Major · Regionals ',
+            anteil: 'Meta-Anteil', von: ' von ', win: 'Win %', d2: 'Day 2 · Top 8 · Top 1', turniere: 'Turniere',
+            keinMajor: 'Noch kein Regional mit diesem Deck in den Daten.', omAb: 'Online/Major weichen ab',
+            autorAb: 'Autor weicht ab', gegner: 'Gegner', meta: 'Meta', major: 'Major', mittel: 'Mittel', autor: 'Autor',
+            alle: 'Alle ', gegnerN: ' Gegner', besteOnline: 'Beste Online-Liste (7 Tage): ', platzVon: '. von ',
+            titel: 'Aktuelle Daten', stand: ' · Stand ',
+            fein: ' · Win % nach Matchpunkten, unter %n Matches die Bilanz (W-L-T) · Mittel = Durchschnitt aus Online und Major',
+            haeufig: 'Die häufigsten Gegner' },
+        en: { online: 'Online', anteil14: 'Meta share (14 days)', seit: 'Win % since ', k7a: 'Last 7 days: share',
+            k7w: 'Last 7 days: Win %', listen: 'Lists', in: ' in ', turniereN: ' tournaments', majorReg: 'Major · Regionals ',
+            anteil: 'Meta share', von: ' of ', win: 'Win %', d2: 'Day 2 · Top 8 · Top 1', turniere: 'Tournaments',
+            keinMajor: 'No Regional with this deck in the data yet.', omAb: 'Online/Major differ',
+            autorAb: 'Author differs', gegner: 'Opponent', meta: 'Meta', major: 'Major', mittel: 'Avg', autor: 'Author',
+            alle: 'All ', gegnerN: ' opponents', besteOnline: 'Best online list (7 days): ', platzVon: ' of ',
+            titel: 'Current data', stand: ' · as of ',
+            fein: ' · Win % by match points, under %n matches the record (W-L-T) · Avg = mean of Online and Major',
+            haeufig: 'Most common opponents' }
+    };
+    function A(k) { return (AKT_TXT[aktSprache] || AKT_TXT.de)[k]; }
+    /* Zahlen der Live-Datei tragen das deutsche Komma ("4,42"). */
+    function aktZahl(t) { return aktSprache === 'en' ? String(t).replace(',', '.') : String(t); }
+    function aktProzent(w) { return aktSprache === 'en' ? w.toFixed(1) + '%' : window.zahlKomma(w, 1) + ' %'; }   /* Festlegung DA-50: unter 20 Matches Bilanz statt Quote */
 
     function tausender(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 
@@ -775,7 +810,7 @@
         if (!n) return { txt: '—', n: 0, duenn: true, wert: null };
         var w = (3 * s + t) / (3 * n) * 100;
         if (n < AKT_GRENZE) return { txt: s + '–' + l + '–' + t, n: n, duenn: true, wert: w };
-        return { txt: window.zahlKomma(w, 1) + ' %', n: n, duenn: false, wert: w };
+        return { txt: aktProzent(w), n: n, duenn: false, wert: w };
     }
 
     function aktZelle(b) {
@@ -801,7 +836,7 @@
         var m = aktMittel(a, b);
         if (m === null) return '<span class="mcl-akt-q mcl-akt-grau">—</span>';
         var ton = m >= 55 ? 'gut' : (m <= 45 ? 'schlecht' : 'mittel');
-        return '<span class="mcl-akt-q mcl-akt-' + ton + '"><b>' + window.zahlKomma(m, 1) + ' %</b></span>';
+        return '<span class="mcl-akt-q mcl-akt-' + ton + '"><b>' + aktProzent(m) + '</b></span>';
     }
 
     /* Stufen wie in den Masterclasses: sehr guenstig ab 70, guenstig ab 57,
@@ -815,11 +850,11 @@
         t = String(t || '').toLowerCase();
         var z = /(\d+)\s*[–-]\s*(\d+)\s*%/.exec(t) || /(\d+)\s*%/.exec(t);
         if (z) return aktStufe(z[2] ? (+z[1] + +z[2]) / 2 : +z[1]);
-        if (/sehr ungünstig|sehr schlecht/.test(t)) return 0;
-        if (/sehr günstig|sehr gut/.test(t)) return 4;
-        if (/ungünstig|schlecht/.test(t)) return 1;
-        if (/günstig|gut|einfach/.test(t)) return 3;
-        if (/ausgeglichen|knapp|offen/.test(t)) return 2;
+        if (/sehr ungünstig|sehr schlecht|very unfavou?rable|very bad/.test(t)) return 0;
+        if (/sehr günstig|sehr gut|very favou?rable|very good/.test(t)) return 4;
+        if (/ungünstig|schlecht|unfavou?rable|bad/.test(t)) return 1;
+        if (/günstig|gut|einfach|favou?rable|good|easy/.test(t)) return 3;
+        if (/ausgeglichen|knapp|offen|even|close/.test(t)) return 2;
         return -1;
     }
 
@@ -869,49 +904,49 @@
         var autor = typeof autorVon === 'function' ? autorVon : function () { return ''; };
         var zeigen = wieviele || 12;
         var mitAutor = rahmen || (a.gegner || []).some(function (g) { return !!autor(g.slug); });
-        var on = '<div class="mcl-akt-k"><h4>Online · ' + esc(o.format) + '</h4><dl>' +
-            (o.anteil14 ? '<dt>Meta-Anteil (14 Tage)</dt><dd>' + esc(o.anteil14) + ' %</dd>' : '') +
-            '<dt>Win % seit ' + esc(o.seit.slice(0, 6)) + '</dt><dd>' + aktZelle(o.bilanz) + '</dd>' +
-            '<dt>Letzte 7 Tage: Anteil</dt><dd>' + esc(o.kurz_anteil) + ' %</dd>' +
-            '<dt>Letzte 7 Tage: Win %</dt><dd>' + aktZelle(o.kurz_bilanz) + '</dd>' +
-            '<dt>Listen</dt><dd>' + tausender(o.listen) + ' in ' + tausender(o.turniere) + ' Turnieren</dd>' +
+        var on = '<div class="mcl-akt-k"><h4>' + A('online') + ' · ' + esc(o.format) + '</h4><dl>' +
+            (o.anteil14 ? '<dt>' + A('anteil14') + '</dt><dd>' + esc(aktZahl(o.anteil14)) + (aktSprache === 'en' ? '%' : ' %') + '</dd>' : '') +
+            '<dt>' + A('seit') + esc(o.seit.slice(0, 6)) + '</dt><dd>' + aktZelle(o.bilanz) + '</dd>' +
+            '<dt>' + A('k7a') + '</dt><dd>' + esc(aktZahl(o.kurz_anteil)) + (aktSprache === 'en' ? '%' : ' %') + '</dd>' +
+            '<dt>' + A('k7w') + '</dt><dd>' + aktZelle(o.kurz_bilanz) + '</dd>' +
+            '<dt>' + A('listen') + '</dt><dd>' + tausender(o.listen) + A('in') + tausender(o.turniere) + A('turniereN') + '</dd>' +
             '</dl></div>';
-        var vo = v ? '<div class="mcl-akt-k"><h4>Major · Regionals ' + esc(v.format) + '</h4><dl>' +
-            '<dt>Meta-Anteil</dt><dd>' + esc(s.anteil) + ' % (' + tausender(s.decks) + ' von ' + tausender(s.spieler) + ')</dd>' +
-            '<dt>Win %</dt><dd>' + aktZelle(s.bilanz) + '</dd>' +
+        var vo = v ? '<div class="mcl-akt-k"><h4>' + A('majorReg') + esc(v.format) + '</h4><dl>' +
+            '<dt>' + A('anteil') + '</dt><dd>' + esc(aktZahl(s.anteil)) + (aktSprache === 'en' ? '%' : ' %') + ' (' + tausender(s.decks) + A('von') + tausender(s.spieler) + ')</dd>' +
+            '<dt>' + A('win') + '</dt><dd>' + aktZelle(s.bilanz) + '</dd>' +
             '<dt>Day 2 · Top 8 · Top 1</dt><dd>' + s.day2 + ' · ' + s.top8 + ' · ' + s.sieg + '</dd>' +
-            '<dt>Turniere</dt><dd>' + v.turniere.map(function (t) { return esc(t.name); }).join(', ') + '</dd>' +
-            '</dl></div>' : '<div class="mcl-akt-k"><h4>Major</h4><p class="mcl-akt-fein">Noch kein Regional mit diesem Deck in den Daten.</p></div>';
+            '<dt>' + A('turniere') + '</dt><dd>' + v.turniere.map(function (t) { return esc(t.name); }).join(', ') + '</dd>' +
+            '</dl></div>' : '<div class="mcl-akt-k"><h4>Major</h4><p class="mcl-akt-fein">' + A('keinMajor') + '</p></div>';
         var zeile = function (g) {
-            var ab = aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">Online/Major weichen ab</span>' : '';
+            var ab = aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">' + A('omAb') + '</span>' : '';
             var m = aktMittel(g.online, g.vor_ort);
             var stufe = m === null ? '' : ' data-mittel-stufe="' + aktStufe(m) + '"';
             var at = autor(g.slug);
             var abA = (!rahmen && at && m !== null && autorStufe(at) >= 0 && Math.abs(autorStufe(at) - aktStufe(m)) >= 2) ?
-                '<span class="mcl-akt-ab">Autor weicht ab</span>' : '';
-            return '<tr><td>' + esc(g.name) + ab + '</td><td class="z mcl-akt-meta">' + esc(g.anteil) + ' %</td>' +
+                '<span class="mcl-akt-ab">' + A('autorAb') + '</span>' : '';
+            return '<tr><td>' + esc(g.name) + ab + '</td><td class="z mcl-akt-meta">' + esc(aktZahl(g.anteil)) + (aktSprache === 'en' ? '%' : ' %') + '</td>' +
                 '<td class="z">' + aktZelle(g.online) + '</td><td class="z">' + aktZelle(g.vor_ort) + '</td>' +
                 '<td class="z">' + aktMittelZelle(g.online, g.vor_ort) + '</td>' +
                 (rahmen ? '<td class="mcl-akt-autor" data-autor-spalte="1" data-autor-fuer="' + esc(g.slug) + '"' + stufe + '></td>' :
                     mitAutor ? '<td class="mcl-akt-autor">' + esc(at || '—') + abA + '</td>' : '') + '</tr>';
         };
-        var kopfzeile = '<tr><th>Gegner</th><th class="z mcl-akt-meta">Meta</th><th class="z">Online</th><th class="z">Major</th><th class="z">Mittel</th>' +
-            (mitAutor ? '<th data-autor-spalte="1">Autor</th>' : '') + '</tr>';
+        var kopfzeile = '<tr><th>' + A('gegner') + '</th><th class="z mcl-akt-meta">' + A('meta') + '</th><th class="z">Online</th><th class="z">' + A('major') + '</th><th class="z">' + A('mittel') + '</th>' +
+            (mitAutor ? '<th data-autor-spalte="1">' + A('autor') + '</th>' : '') + '</tr>';
         var g = a.gegner || [];
         var tab = '<table class="mcl-akt-tab"><thead>' + kopfzeile + '</thead><tbody>' +
             g.slice(0, zeigen).map(zeile).join('') + '</tbody></table>' +
-            (g.length > zeigen ? '<details><summary>Alle ' + g.length + ' Gegner</summary><table class="mcl-akt-tab"><tbody>' +
+            (g.length > zeigen ? '<details><summary>' + A('alle') + g.length + A('gegnerN') + '</summary><table class="mcl-akt-tab"><tbody>' +
                 g.slice(zeigen).map(zeile).join('') + '</tbody></table></details>' : '');
         var lo = a.liste_online;
-        var listen = (lo ? aktListe(lo, 'Beste Online-Liste (7 Tage): ' + lo.platz + '. von ' + lo.von + ' (' + lo.bilanz + '), ' + lo.datum.slice(0, 6)) : '') +
+        var listen = (lo ? aktListe(lo, A('besteOnline') + lo.platz + A('platzVon') + lo.von + ' (' + lo.bilanz + '), ' + lo.datum.slice(0, 6)) : '') +
             (a.listen_vor_ort || []).map(function (l) {
                 return aktListe(l, 'Major: ' + l.platz + '. ' + l.turnier + ' (' + l.bilanz + '), ' + l.spieler);
             }).join('');
-        return AKT_CSS + '<section class="mcl-akt" id="aktuell" data-mcl-akt="1"><h3>Aktuelle Daten</h3>' +
-            '<p class="mcl-akt-fein">' + esc(a.name) + ' · Stand ' + esc(o.bis) +
-            ' · Win % nach Matchpunkten, unter ' + AKT_GRENZE + ' Matches die Bilanz (W-L-T) · Mittel = Durchschnitt aus Online und Major</p>' +
+        return AKT_CSS + '<section class="mcl-akt" id="aktuell" data-mcl-akt="1"><h3>' + A('titel') + '</h3>' +
+            '<p class="mcl-akt-fein">' + esc(a.name) + A('stand') + esc(o.bis) +
+            A('fein').replace('%n', AKT_GRENZE) + '</p>' +
             '<div class="mcl-akt-zwei">' + on + vo + '</div>' +
-            '<h4>Die häufigsten Gegner</h4>' + tab + listen + '</section>';
+            '<h4>' + A('haeufig') + '</h4>' + tab + listen + '</section>';
     }
 
     /* slug -> HTML der Zeile „Online … · Major … · Mittel …“ fuer die Matchups des Stuecks. */
@@ -921,8 +956,8 @@
             var m = aktMittel(g.online, g.vor_ort);
             aus[g.slug] = { name: g.name, stufe: m === null ? -1 : aktStufe(m),
                 html: 'Online ' + aktZelle(g.online) + ' · Major ' + aktZelle(g.vor_ort) +
-                ' · Mittel ' + aktMittelZelle(g.online, g.vor_ort) +
-                (aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">Online/Major weichen ab</span>' : '') };
+                ' · ' + A('mittel') + ' ' + aktMittelZelle(g.online, g.vor_ort) +
+                (aktAbweichung(g.online, g.vor_ort) ? '<span class="mcl-akt-ab">' + A('omAb') + '</span>' : '') };
         });
         return aus;
     }
@@ -979,6 +1014,10 @@
      * auf die App (kein allow-same-origin), darum der Umweg. */
     var LIVE_SKRIPT = '<script>window.addEventListener("message",function(e){' +
         'if(e.source!==window.parent)return;var d=e.data;' +
+        /* Sprachwechsel: Stelle melden und nach dem Neuladen wieder anspringen */
+        'if(d&&d.typ==="mcl-wo"){var h=null;Array.prototype.forEach.call(document.querySelectorAll("[id]"),function(x){' +
+        'if(x.getBoundingClientRect().top<=80)h=x.id;});window.parent.postMessage({typ:"mcl-hier",id:h,y:window.scrollY},"*");return;}' +
+        'if(d&&d.typ==="mcl-geh"){var z=d.id?document.getElementById(d.id):null;if(z)z.scrollIntoView({block:"start"});else window.scrollTo(0,d.y||0);return;}' +
         'if(!d||d.typ!=="mcl-live")return;' +
         'var w=d.werte||{};Array.prototype.forEach.call(document.querySelectorAll("[data-live]"),function(el){' +
         'var k=el.getAttribute("data-live");' +
@@ -988,8 +1027,8 @@
         /* autorStufe/aktStufe als Text — Gleichheit haelt test-masterclass-live.js */
         'function st(w){return w>=70?4:w>=57?3:w>=44?2:w>=30?1:0;}' +
         'function stufe(t){t=String(t||"").toLowerCase();var z=/(\\d+)\\s*[–-]\\s*(\\d+)\\s*%/.exec(t)||/(\\d+)\\s*%/.exec(t);' +
-        'if(z)return st(z[2]?(+z[1]+ +z[2])/2:+z[1]);if(/sehr ungünstig|sehr schlecht/.test(t))return 0;if(/sehr günstig|sehr gut/.test(t))return 4;' +
-        'if(/ungünstig|schlecht/.test(t))return 1;if(/günstig|gut|einfach/.test(t))return 3;if(/ausgeglichen|knapp|offen/.test(t))return 2;return -1;}' +
+        'if(z)return st(z[2]?(+z[1]+ +z[2])/2:+z[1]);if(/sehr ungünstig|sehr schlecht|very unfavou?rable|very bad/.test(t))return 0;if(/sehr günstig|sehr gut|very favou?rable|very good/.test(t))return 4;' +
+        'if(/ungünstig|schlecht|unfavou?rable|bad/.test(t))return 1;if(/günstig|gut|einfach|favou?rable|good|easy/.test(t))return 3;if(/ausgeglichen|knapp|offen|even|close/.test(t))return 2;return -1;}' +
         'function finde(s){return alle("[data-live-slug]").filter(function(x){return(" "+x.getAttribute("data-live-slug")+" ").indexOf(" "+s+" ")>=0;})[0];}' +
         'if(typeof d.block==="string"&&d.block){alle("[data-mcl-akt-huelle]").forEach(function(x){x.parentNode.removeChild(x);});' +
         'var h=document.createElement("div");h.setAttribute("data-mcl-akt-huelle","1");h.innerHTML=d.block;' +
@@ -1009,10 +1048,52 @@
         'sp.innerHTML=(slugs.length>1?"<b>"+String(d.mu[s].name).replace(/[&<>"]/g,"")+":</b> ":"")+d.mu[s].html;ort.appendChild(sp);});});}' +
         '});<\/script>';
 
-    function zeigePrivat(buehne, g) {
-        buehne.innerHTML = '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' +
-            esc(g.titel) + '</h4>' +
-            '<button type="button" class="mcl-schliessen">' + esc(T('schliessen')) + '</button></div>' +
+    /* ---------- Deutsch / Englisch (Hausi 19.10.2026) ----------
+     * „jede Masterclass einfach und schnell zwischen Deutsch und Englisch
+     * umschalten … der Umschalt-Button oben fixiert“. Die englische Fassung
+     * liegt wie die deutsche nur im Konto: users/{uid}/masterclassesEn/{id},
+     * Feld html (eigene Sammlung, weil ein Dokument hoechstens 1 MB tragen
+     * darf und Stalobor allein 571 KB hat). Die Wahl gilt fuer alle
+     * Masterclasses und wird im Browser gemerkt. */
+    var SPRACH_SCHLUESSEL = 'mcl-sprache';
+    function mclSprache() {
+        try { return window.localStorage.getItem(SPRACH_SCHLUESSEL) === 'en' ? 'en' : 'de'; } catch (e) { return 'de'; }
+    }
+    function setzeMclSprache(l) {
+        try { window.localStorage.setItem(SPRACH_SCHLUESSEL, l === 'en' ? 'en' : 'de'); } catch (e) { }
+    }
+    var enCache = {};
+    function holeEn(id) {
+        var u = window.auth && window.auth.currentUser;
+        if (!u || !window.db) return Promise.resolve(null);
+        if (hat(enCache, id)) return Promise.resolve(enCache[id]);
+        return window.db.collection('users').doc(u.uid).collection('masterclassesEn').doc(id).get()
+            .then(function (d) {
+                var x = d && d.exists !== false && typeof d.data === 'function' ? d.data() : null;
+                var h = x && typeof x.html === 'string' && x.html ? x.html : null;
+                enCache[id] = h;
+                return h;
+            })
+            .catch(function () { return null; });
+    }
+    /* Kopf der Buehne: Titel, DE|EN, Schliessen. Klebt oben (css), damit
+     * der Umschalter beim Scrollen erreichbar bleibt. */
+    function buehneKopf(g, sprache, fehltEn) {
+        return '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' + esc(g.titel) + '</h4>' +
+            '<div class="mcl-kopf-rechts"><div class="mcl-sprachwahl" role="group" aria-label="' + esc(T('sprache')) + '">' +
+            ['de', 'en'].map(function (l) {
+                return '<button type="button" class="mcl-sprachknopf" data-mcl-sprache="' + l + '" aria-pressed="' +
+                    (l === sprache ? 'true' : 'false') + '">' + l.toUpperCase() + '</button>';
+            }).join('') + '</div>' +
+            '<button type="button" class="mcl-schliessen">' + esc(T('schliessen')) + '</button></div></div>' +
+            (fehltEn ? '<p class="mcl-sprach-hinweis">' + esc(T('keinEn')) + '</p>' : '');
+    }
+    function mcIdOhnePrivat(g) { return String(g.id).replace(/^privat-/, ''); }
+
+    function zeigePrivat(buehne, g, htmlText, sprache, fehltEn) {
+        sprache = sprache || 'de';
+        htmlText = htmlText || g.html;
+        buehne.innerHTML = buehneKopf(g, sprache, fehltEn) +
             '<iframe class="mcl-privat-rahmen" sandbox="allow-scripts allow-popups" title="' +
             esc(g.titel) + '"></iframe>';
         var rahmen = buehne.querySelector('.mcl-privat-rahmen');
@@ -1020,17 +1101,25 @@
         function senden() {
             if (!geladen || !daten || !rahmen.contentWindow) return;
             var a = daten.aktuell;
+            aktSprache = sprache;
             rahmen.contentWindow.postMessage({ typ: 'mcl-live', werte: daten.werte || {},
                 block: a ? aktuellBlockHtml(a, 'rahmen') : '', mu: a ? aktuellMuZeilen(a) : null }, '*');
         }
-        rahmen.addEventListener('load', function () { geladen = true; senden(); });
-        rahmen.srcdoc = mitAnkern(g.html);
+        var ziel = springZiel; springZiel = null;
+        rahmen.addEventListener('load', function () {
+            geladen = true; senden();
+            /* nach dem Einsetzen des Blocks springen, damit die Stelle stimmt */
+            if (ziel && rahmen.contentWindow) setTimeout(function () {
+                rahmen.contentWindow.postMessage({ typ: 'mcl-geh', id: ziel.id, y: ziel.y }, '*');
+            }, 400);
+        });
+        rahmen.srcdoc = mitAnkern(htmlText);
         holeLive(String(g.id).replace(/^privat-/, '')).then(function (d) { daten = d; senden(); });
         buehne.querySelector('.mcl-schliessen').addEventListener('click', function () {
             buehne.hidden = true;
             buehne.innerHTML = '';
         });
-        try { buehne.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' }); } catch (e) { }
+        if (!ziel) try { buehne.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' }); } catch (e) { }
     }
 
     function zeichneRegal() {
@@ -1057,19 +1146,33 @@
         var g = GUIDES.filter(function (x) { return x.id === id; })[0] || privat[id];
         var buehne = document.getElementById('mclBuehne');
         if (!g || !buehne) return;
-        if (g.privat) { buehne.hidden = false; zeigePrivat(buehne, g); return; }
+        var sprache = mclSprache();
+        buehne.dataset.mclId = id;
+        var enHolen = sprache === 'en' ? holeEn(mcIdOhnePrivat(g)) : Promise.resolve(null);
+        if (g.privat) {
+            buehne.hidden = false;
+            enHolen.then(function (en) {
+                if (sprache === 'en' && en) zeigePrivat(buehne, g, en, 'en');
+                else zeigePrivat(buehne, g, g.html, 'de', sprache === 'en');
+            });
+            return;
+        }
         buehne.hidden = false;
         buehne.innerHTML = '<p class="mcl-status">' + esc(T('laden')) + '</p>';
-        Promise.all([hole(g), holeNamen(), holeLive(g.id)]).then(function (erg) {
-            var txt = erg[0];
-            buehne.innerHTML = '<div class="mcl-buehne-kopf"><h4>' + esc(T('geoeffnet')) + ': ' +
-                esc(g.titel) + '</h4>' +
-                '<button type="button" class="mcl-schliessen">' + esc(T('schliessen')) + '</button></div>' + txt;
+        Promise.all([hole(g), holeNamen(), holeLive(g.id), enHolen]).then(function (erg) {
+            var istEn = sprache === 'en' && !!erg[3];
+            var txt = istEn ? erg[3] : erg[0];
+            buehne.innerHTML = buehneKopf(g, istEn ? 'en' : 'de', sprache === 'en' && !istEn) + txt;
             /* Erst die frischen Zahlen, dann Namen und Knoepfe — die
              * eingesetzten Listen brauchen dieselbe Verdrahtung. */
+            aktSprache = istEn ? 'en' : 'de';
             liveEinsetzen(buehne, erg[2]);
-            namenAngleichen(buehne, erg[1]);
+            if (!istEn) namenAngleichen(buehne, erg[1]);
             verdrahte(buehne, g);
+            var zielS = springZiel; springZiel = null;
+            var zEl = zielS && zielS.id ? buehne.querySelector('#' + zielS.id.replace(/[^\w-]/g, '')) : null;
+            if (zEl) { try { zEl.scrollIntoView({ block: 'start' }); } catch (e) { } return; }
+            if (zielS) { try { window.scrollTo(0, zielS.y); } catch (e) { } return; }
             try { buehne.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' }); } catch (e) { }
         }).catch(function (err) {
             console.warn('[DsMasterclass] ' + g.id + ' nicht geladen:', err && err.message);
@@ -2472,7 +2575,49 @@
     document.addEventListener('click', function (e) {
         var b = e.target.closest('[data-mcl-oeffnen]');
         if (b) oeffneGuide(b.getAttribute('data-mcl-oeffnen'));
+        var sp = e.target.closest('[data-mcl-sprache]');
+        if (sp) sprachWechsel(sp.getAttribute('data-mcl-sprache'));
     });
+
+    /* Gleiche Masterclass in der anderen Sprache neu oeffnen. Die Buehne
+     * wird durch eine frische ersetzt — sonst haengen die Klick-Zuhoerer
+     * der ersten Fassung (verdrahte) doppelt am selben Element. Die
+     * Scrollstelle der Seite bleibt. */
+    var springZiel = null;
+    function stelleAufSeite(buehne) {
+        var h = null;
+        Array.prototype.forEach.call(buehne.querySelectorAll('[id]'), function (x) {
+            if (x.getBoundingClientRect && x.getBoundingClientRect().top <= 80) h = x.id;
+        });
+        return { id: h, y: window.scrollY };
+    }
+    function sprachWechsel(l) {
+        var alt = document.getElementById('mclBuehne');
+        if (!alt || !alt.dataset.mclId) return;
+        if (l === mclSprache()) return;
+        setzeMclSprache(l);
+        var id = alt.dataset.mclId;
+        function neuOeffnen(stelle) {
+            springZiel = stelle;
+            var neu = alt.cloneNode(false);
+            alt.parentNode.insertBefore(neu, alt);
+            alt.parentNode.removeChild(alt);
+            oeffneGuide(id);
+        }
+        var rahmen = alt.querySelector('.mcl-privat-rahmen');
+        if (!rahmen || !rahmen.contentWindow) { neuOeffnen(stelleAufSeite(alt)); return; }
+        /* Im Rahmen fragt die Seite nach der Stelle; kommt keine Antwort,
+         * oeffnet sie nach 400 ms oben. */
+        var fertig = false;
+        function antwort(e) {
+            if (e.source !== rahmen.contentWindow || !e.data || e.data.typ !== 'mcl-hier' || fertig) return;
+            fertig = true; window.removeEventListener('message', antwort);
+            neuOeffnen({ id: e.data.id, y: e.data.y });
+        }
+        window.addEventListener('message', antwort);
+        rahmen.contentWindow.postMessage({ typ: 'mcl-wo' }, '*');
+        setTimeout(function () { if (!fertig) { fertig = true; window.removeEventListener('message', antwort); neuOeffnen(null); } }, 400);
+    }
 
     document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
@@ -2519,6 +2664,11 @@
         _holeLive: holeLive,
         _liveEinsetzen: liveEinsetzen,
         _kachel: kachel,
+        _setzeAktSprache: function (l) { aktSprache = l; },
+        _buehneKopf: buehneKopf,
+        _sprachWechsel: function (l) { return sprachWechsel(l); },
+        _mclSprache: mclSprache,
+        _holeEn: holeEn,
         _aktuellBlockHtml: aktuellBlockHtml,
         _aktuellMuZeilen: aktuellMuZeilen,
         _aktuellEinsetzen: aktuellEinsetzen,

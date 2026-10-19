@@ -680,3 +680,26 @@ test('CSS: der gleiche Untertitel in der englischen Namenszeile ist versteckt, n
     const css = fs.readFileSync(path.join(WURZEL, 'css', 'masterclass.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     assert.ok(/\.mcl-nm em\.mcl-nm-gleich\s*\{\s*display:\s*none;?\s*\}/.test(css));
 });
+
+/* ── Sprachwechsel in der Seite: die Stelle bleibt (gemessen 19.10.2026 live:
+ * Stalobor sprang an den Anfang, weil der einzige [id]-Anker oben verborgen war) ── */
+test('Stelle in der Seite: letzter sichtbarer Anker oben, verborgene zaehlen nicht, Sprung auf dieselbe Nummer', () => {
+    const u = umgebung();
+    const bau = (tops) => {
+        const b = wurzelMit('<h3>A</h3><details class="mcl-mu"></details><details class="mcl-mu"></details><p>x</p><div id="aktuell" hidden></div>');
+        const els = b.querySelectorAll('[id], h2, h3, details.mcl-mu, .mcl-liste, .mcl-listgruppe, p, li');
+        els.forEach((e, i) => { e.getBoundingClientRect = () => ({ top: tops[i][0], height: tops[i][1] }); });
+        return b;
+    };
+    // h3 weit oben, erstes details knapp unter dem Kopf, Rest unten, verborgenes #aktuell am Ende (0/0 wie live)
+    const alt = bau([[-600, 30], [40, 200], [300, 200], [900, 20], [0, 0]]);
+    u.window.scrollY = 1000;
+    const st = u.mc._stelleAufSeite(alt);
+    assert.strictEqual(st.n, 1, 'falscher Anker: ' + JSON.stringify(st));
+    assert.strictEqual(st.d, 40);
+    let ziel = null;
+    u.window.scrollTo = (x, y) => { ziel = y; };
+    const neu = bau([[-100, 30], [700, 200], [900, 200], [1500, 20], [0, 0]]);
+    assert.strictEqual(u.mc._springeAufSeite(neu, st), true);
+    assert.strictEqual(ziel, 1000 + 700 - 40, 'Sprung nicht auf dieselbe Stelle');
+});

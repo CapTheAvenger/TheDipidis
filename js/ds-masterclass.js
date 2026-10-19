@@ -1213,8 +1213,7 @@
             if (!istEn) namenAngleichen(buehne, erg[1]);
             verdrahte(buehne, g);
             var zielS = springZiel; springZiel = null;
-            var zEl = zielS && zielS.id ? buehne.querySelector('#' + zielS.id.replace(/[^\w-]/g, '')) : null;
-            if (zEl) { try { zEl.scrollIntoView({ block: 'start' }); } catch (e) { } return; }
+            if (zielS && springeAufSeite(buehne, zielS)) return;
             if (zielS) { try { window.scrollTo(0, zielS.y); } catch (e) { } return; }
             try { buehne.scrollIntoView({ behavior: (window.scrollVerhalten ? window.scrollVerhalten() : 'smooth'), block: 'start' }); } catch (e) { }
         }).catch(function (err) {
@@ -2627,12 +2626,27 @@
      * der ersten Fassung (verdrahte) doppelt am selben Element. Die
      * Scrollstelle der Seite bleibt. */
     var springZiel = null;
+    /* Die Stelle in der Seite (Stalobor): das letzte SICHTBARE Ankerelement,
+     * das schon oben angekommen ist, als Nummer in der Ankerliste, dazu sein
+     * Abstand zum Fensterrand. Deutsch und Englisch haben denselben Aufbau
+     * (seg.py tauscht nur Text), also zeigt dieselbe Nummer auf dieselbe
+     * Stelle. Gemessen 19.10.2026 live: die Fassung hat nur vier [id], die
+     * erste (#aktuell) ist verborgen und lag „oben" — der Wechsel sprang an
+     * den Anfang. */
+    var ANKER = '[id], h2, h3, details.mcl-mu, .mcl-liste, .mcl-listgruppe, p, li';
     function stelleAufSeite(buehne) {
-        var h = null;
-        Array.prototype.forEach.call(buehne.querySelectorAll('[id]'), function (x) {
-            if (x.getBoundingClientRect && x.getBoundingClientRect().top <= 80) h = x.id;
+        var n = -1, d = 0;
+        Array.prototype.forEach.call(buehne.querySelectorAll(ANKER), function (x, i) {
+            var r = x.getBoundingClientRect ? x.getBoundingClientRect() : null;
+            if (r && r.height > 0 && r.top <= 80) { n = i; d = r.top; }
         });
-        return { id: h, y: window.scrollY };
+        return { n: n, d: d, y: window.scrollY };
+    }
+    function springeAufSeite(buehne, ziel) {
+        var el = ziel && ziel.n >= 0 ? buehne.querySelectorAll(ANKER)[ziel.n] : null;
+        if (!el || !el.getBoundingClientRect) return false;
+        try { window.scrollTo(0, window.scrollY + el.getBoundingClientRect().top - (ziel.d || 0)); } catch (e) { return false; }
+        return true;
     }
     function sprachWechsel(l) {
         var alt = document.getElementById('mclBuehne');
@@ -2716,6 +2730,8 @@
         _aktuellMuZeilen: aktuellMuZeilen,
         _aktuellEinsetzen: aktuellEinsetzen,
         _liveEn: liveEn,
+        _stelleAufSeite: function (b) { return stelleAufSeite(b); },
+        _springeAufSeite: function (b, z) { return springeAufSeite(b, z); },
         _aktQuote: aktQuote,
         _aktMittel: aktMittel,
         _autorStufe: autorStufe,

@@ -34,7 +34,7 @@ import masterclass_zahlen_nachziehen as Z  # noqa: E402
 
 LEGENDE = re.compile(r"<b>([^<]+)</b>( ist das laufende Online-Format, )<b>([^<]+)</b>"
                      r"( das Online-Format davor,\s*)<b>(Majors \([^)<]+\))</b> "
-                     r"(sind die letzten Präsenzturniere[^.]*?\.(?:[^.<]*?gab es noch nicht\.)?)")
+                     r"(sind die letzten (?:Präsenzturniere|Majors)[^.]*?\.(?:[^.<]*?gab es noch nicht\.)?)")
 ALT_SATZ = re.compile(r"<b>Die Zahlen sind der Stand des Baus</b> — das Stück\s*zieht nicht selbst nach\.")
 
 

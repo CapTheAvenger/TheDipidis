@@ -39,13 +39,13 @@ LISTEN = {"gruppe", "max_plaetze", "leer_hinweis", "mindest_spieler", "listen"}
 ZAHL = r"[\d.]+"
 SCHABLONEN = [
     # Sprechblasen der Zellen (soll_zelle)
-    re.compile(r"^\d+,\d % Win % nach Matchpunkten, aus " + ZAHL + r" Partien, Bilanz \d+–\d+–\d+ \(S–N–U\)$"),
-    re.compile(r"^Bilanz \d+–\d+–\d+ \(S–N–U\) aus " + ZAHL + r" Partien\. Unter \d+ Partien steht hier keine Quote — "
-               r"eine einzelne Partie verschiebt sie um \d+\.\d Punkte\.$"),
-    re.compile(r"^keine Partien in den Daten$"),
+    re.compile(r"^\d+,\d % Win % nach Matchpunkten, aus " + ZAHL + r" Matches, Bilanz \d+–\d+–\d+ \(W–L–T\)$"),
+    re.compile(r"^Bilanz \d+–\d+–\d+ \(W–L–T\) aus " + ZAHL + r" Matches\. Unter \d+ Matches steht hier keine Quote — "
+               r"ein einzelnes Match verschiebt sie um \d+\.\d Punkte\.$"),
+    re.compile(r"^keine Matches in den Daten$"),
     # Majors-Texte (majors_texte)
-    re.compile(r"^Letzte Präsenzturniere \([^()]+\), Format [A-Z0-9]+–[A-Z0-9]+: $"),
-    re.compile(r"^sind die letzten Präsenzturniere \([^()]+\)(?:, schon im laufenden Format| — die liefen noch im Format [A-Z0-9]+–[A-Z0-9]+)\.$"),
+    re.compile(r"^Letzte Majors \([^()]+\), Format [A-Z0-9]+–[A-Z0-9]+: $"),
+    re.compile(r"^sind die letzten Majors \([^()]+\)(?:, schon im laufenden Format| — die liefen noch im Format [A-Z0-9]+–[A-Z0-9]+)\.$"),
     # Einleitung einer Online-Liste (fakten)
     re.compile(r"^\d+\. Platz(?: von \d+)?(?: \(\d+–\d+–\d+\))?, „[^“]{1,160}“, \d\d\.\d\d\.\d{4}\.$"),
     re.compile(r"^\d+\. Platz(?: von \d+)?(?: \(\d+–\d+–\d+\))?, \d\d\.\d\d\.\d{4}\.$"),

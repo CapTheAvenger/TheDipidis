@@ -81,7 +81,7 @@ def test_er_erfindet_nichts():
     klasse, titel, wert, nenner = m.soll_zelle([0, 0, 0], "mcl-wrz", kopf)
     assert wert == "\u2014" and nenner == ""
     assert klasse.endswith("mcl-wrz-leer")
-    assert titel.endswith("keine Partien in den Daten")
+    assert titel.endswith("keine Matches in den Daten")
     # Unter 30 Partien bleibt es eine Bilanz — die Regel, die das Stueck
     # selbst ausspricht.
     assert m.soll_zelle([5, 6, 0], "mcl-wrz", kopf)[2] == "5\u20136\u20130"
@@ -102,7 +102,7 @@ def test_die_sprechblase_wird_mitgezogen():
     _k, titel, wert, _n = m.soll_zelle([17, 17, 0], "mcl-wrz", kopf)
     assert titel.startswith("Online-Meta TEF\u201330C (laufendes Format): ")
     assert wert in titel, "die Sprechblase nennt einen anderen Wert als die Zelle"
-    assert "34 Partien" in titel and "17\u201317\u20130" in titel
+    assert "34 Matches" in titel and "17\u201317\u20130" in titel
     # Und der ANFANG bleibt stehen: er benennt die Spalte und stammt nicht
     # aus diesem Skript.
     _k2, titel2, _w2, _n2 = m.soll_zelle(
@@ -195,7 +195,7 @@ def test_die_koepfe_und_saetze_der_json_kommen_aus_den_daten():
     assert w["datei-online-jetzt"] == "data/" + os.path.basename(m.ONLINE_JETZT)
     assert os.path.exists(os.path.join(WURZEL, w["datei-online-jetzt"]))
     assert re.match(r"^\d{4}-\d\d-\d\d$", w["stand-online-jetzt"])
-    assert d["majors_praefix"].startswith("Letzte Präsenzturniere (") and d["majors_praefix"].endswith(": ")
+    assert d["majors_praefix"].startswith("Letzte Majors (") and d["majors_praefix"].endswith(": ")
     assert d["koepfe"]["majors"].replace("Majors (", "").rstrip(")") in d["majors_praefix"]
 
 
@@ -297,7 +297,7 @@ def test_der_kopfwechsel_nennt_die_neuen_majors(monkeypatch):
     m = _modul()
     monkeypatch.setattr(m, "_majors_turniere", lambda meta: ([73, 74], ["Brisbane", "Frankfurt"]))
     t = m.majors_texte("TEF-30C", "TEF-30C")
-    assert t["praefix"] == "Letzte Präsenzturniere (Brisbane und Frankfurt), Format TEF–30C: "
+    assert t["praefix"] == "Letzte Majors (Brisbane und Frankfurt), Format TEF–30C: "
     assert t["turniere"] == "73 und 74"
     assert "schon im laufenden Format" in t["satz"] and "gab es noch nicht" not in t["satz"]
     alt = m.majors_texte("TEF-PBL", "TEF-30C")

@@ -29,10 +29,10 @@ function umgebung(opt) {
     const docs = opt.docs || [];
     const db = {
         collection: (a) => ({ doc: (uid) => ({ collection: (b) => ({
-            get: () => Promise.resolve({ forEach: (fn) => docs.forEach((d) => fn({ id: d.id, data: () => d.data })) }),
+            get: () => Promise.resolve({ forEach: (fn) => docs.filter((d) => (d.sammlung || 'masterclasses') === b).forEach((d) => fn({ id: d.id, data: () => d.data })) }),
             doc: (id) => ({ get: () => {
                 docPfade.push([a, uid, b, id].join('/'));
-                const d = docs.filter((x) => x.id === id)[0];
+                const d = docs.filter((x) => x.id === id && (x.sammlung || 'masterclasses') === b)[0];
                 return Promise.resolve({ exists: !!d, data: () => (d ? d.data : undefined) });
             } })
         }) }) })
@@ -49,6 +49,8 @@ function umgebung(opt) {
         auth: { currentUser: opt.user === undefined ? { uid: 'U1' } : opt.user, onAuthStateChanged: (fn) => { anmeldung.push(fn); } },
         db,
         addEventListener: () => {},
+        localStorage: (() => { const m = {}; return { getItem: (k) => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); } }; })(),
+        scrollY: 0, scrollTo: () => {},
         getLang: () => 'de',
         /* wie js/app-utils.js (zahlKomma), das auf der Seite vorher laedt */
         zahlKomma: (w, st) => w.toFixed(st == null ? 1 : st).replace('.', ',')
@@ -81,7 +83,7 @@ function stueck() {
             '<span class="mcl-wr"><span class="mcl-wr3">' +
             zelle('jetzt', 'TEF–30C', 'Online-Meta TEF–30C (laufendes Format)', '1 %') +
             zelle('davor', 'TEF–PBL', 'Online-Meta TEF–PBL (Format davor)', '2 %') +
-            zelle('majors', 'Majors (TEF–30C)', 'Letzte Präsenzturniere (A und B), Format TEF–30C', '3 %') +
+            zelle('majors', 'Majors (TEF–30C)', 'Letzte Majors (A und B), Format TEF–30C', '3 %') +
             '<span class="mcl-wrz mcl-wrz-tim" title="Tims Einschätzung"><em>Tim</em><b>gut</b></span>' +
             `</span></span></summary><div class="mcl-mu-body">Plan ${i}</div></details>`;
     }
@@ -112,8 +114,8 @@ function liveDaten() {
     const zellen = {};
     for (let i = 0; i < N - 1; i++) {
         zellen['deck-' + i] = {
-            jetzt: ['mcl-wrz', `${50 + i},0 % Win % nach Matchpunkten, aus 100 Partien, Bilanz 1–2–3 (S–N–U)`, `${50 + i},0 %`, '<i>(100)</i>'],
-            davor: ['mcl-wrz mcl-wrz-duenn', 'Bilanz 1–1–0 (S–N–U) aus 2 Partien.', '1–1–0', '<i>(2)</i>']
+            jetzt: ['mcl-wrz', `${50 + i},0 % Win % nach Matchpunkten, aus 100 Matches, Bilanz 1–2–3 (W–L–T)`, `${50 + i},0 %`, '<i>(100)</i>'],
+            davor: ['mcl-wrz mcl-wrz-duenn', 'Bilanz 1–1–0 (W–L–T) aus 2 Matches.', '1–1–0', '<i>(2)</i>']
         };
     }
     const anteile = {};
@@ -121,12 +123,12 @@ function liveDaten() {
     return {
         matchups: {
             koepfe: { jetzt: 'TEF–ZZN', davor: 'TEF–30C', majors: 'Majors (TEF–ZZN)' },
-            majors_praefix: 'Letzte Präsenzturniere (Neustadt), Format TEF–ZZN: ',
+            majors_praefix: 'Letzte Majors (Neustadt), Format TEF–ZZN: ',
             werte: { 'kopf-jetzt': 'TEF–ZZN', 'kopf-davor': 'TEF–30C', 'kopf-majors': 'Majors (TEF–ZZN)',
-                'majors-satz': 'sind die letzten Präsenzturniere (Neustadt), schon im laufenden Format.',
+                'majors-satz': 'sind die letzten Majors (Neustadt), schon im laufenden Format.',
                 'datei-online-jetzt': 'quelle/online_api_matchups_TEF-ZZN.csv', 'stand-online-jetzt': '2026-10-17' },
             zellen,
-            leer: ['mcl-wrz mcl-wrz-leer', 'keine Partien in den Daten', '—', ''],
+            leer: ['mcl-wrz mcl-wrz-leer', 'keine Matches in den Daten', '—', ''],
             anteile
         },
         online_listen: {
@@ -150,7 +152,7 @@ test('die Werte landen in jeder markierten Stelle, und nur dort', () => {
     assert.strictEqual(mc._liveEinsetzen(w, liveDaten()), true);
     assert.deepStrictEqual(w.querySelectorAll('[data-live="kopf-jetzt"]').map((e) => e.textContent), ['TEF–ZZN', 'TEF–ZZN']);
     assert.strictEqual(w.querySelector('[data-live="majors-satz"]').textContent,
-        'sind die letzten Präsenzturniere (Neustadt), schon im laufenden Format.');
+        'sind die letzten Majors (Neustadt), schon im laufenden Format.');
     assert.strictEqual(w.querySelector('[data-live="stand-online-jetzt"]').textContent, '2026-10-17');
     assert.ok(w.innerHTML.includes('AUSARBEITUNG') && w.innerHTML.includes('Plan 7'), 'Ausarbeitung angefasst');
 });
@@ -165,7 +167,7 @@ test('jede Zelle bekommt Wert, Nenner, Sprechblase und den neuen Spaltennamen', 
     assert.strictEqual(j.querySelector('b').textContent, '53,0 %');
     assert.strictEqual(j.querySelector('i').textContent, '(100)');
     assert.strictEqual(j.getAttribute('title'),
-        'Online-Meta TEF–ZZN (laufendes Format): 53,0 % Win % nach Matchpunkten, aus 100 Partien, Bilanz 1–2–3 (S–N–U)');
+        'Online-Meta TEF–ZZN (laufendes Format): 53,0 % Win % nach Matchpunkten, aus 100 Matches, Bilanz 1–2–3 (W–L–T)');
     /* Setwechsel: die alte Jetzt-Spalte wird zur Davor-Spalte — benannt
      * EINMAL, nicht zweimal weitergerueckt. */
     const v = d.querySelector('[data-live-spalte="davor"]');
@@ -176,7 +178,7 @@ test('jede Zelle bekommt Wert, Nenner, Sprechblase und den neuen Spaltennamen', 
     const m = d.querySelector('[data-live-spalte="majors"]');
     assert.strictEqual(m.querySelector('b').textContent, '—');
     assert.strictEqual(m.querySelector('i'), null, 'die leere Zelle traegt noch einen Nenner');
-    assert.strictEqual(m.getAttribute('title'), 'Letzte Präsenzturniere (Neustadt), Format TEF–ZZN: keine Partien in den Daten');
+    assert.strictEqual(m.getAttribute('title'), 'Letzte Majors (Neustadt), Format TEF–ZZN: keine Matches in den Daten');
     assert.strictEqual(m.querySelector('em').textContent, 'Majors (TEF–ZZN)');
     /* Tims Spalte ist eine Einschaetzung, keine gerechnete Zahl. */
     const tim = d.querySelector('.mcl-wrz-tim');
@@ -536,4 +538,145 @@ test('die Kachel zeigt nur Titel und Autor — kein Kleingedrucktes, kein Konto-
     assert.ok(t.includes('TITEL') && t.includes('AUTOR'), t);
     ['ENGLISCH', 'DATUM', 'ZUSATZ', 'KENNZAHLEN', 'Nur in deinem Konto'].forEach((x) =>
         assert.ok(!t.includes(x), 'auf der Kachel steht noch: ' + x));
+});
+
+
+/* ── Deutsch / Englisch (Hausi 19.10.2026) ── */
+
+test('der Kopf traegt DE/EN, die gewaehlte Sprache ist gedrueckt', () => {
+    const { mc } = umgebung();
+    const g = { id: 'x', titel: 'T' };
+    const w = wurzelMit(mc._buehneKopf(g, 'en', false));
+    const k = w.querySelectorAll('[data-mcl-sprache]');
+    assert.strictEqual(k.length, 2);
+    assert.strictEqual(w.querySelector('[data-mcl-sprache="en"]').getAttribute('aria-pressed'), 'true');
+    assert.strictEqual(w.querySelector('[data-mcl-sprache="de"]').getAttribute('aria-pressed'), 'false');
+    assert.ok(!w.innerHTML.includes('mcl-sprach-hinweis'));
+    assert.ok(wurzelMit(mc._buehneKopf(g, 'de', true)).querySelector('.mcl-sprach-hinweis'), 'fehlende EN-Fassung ohne Hinweis');
+});
+
+test('die englische Fassung kommt aus users/<uid>/masterclassesEn/<id>', async () => {
+    const u = umgebung({ docs: [{ id: 'hide-n-sneak', data: { html: '<p>DE</p>' } },
+        { id: 'hide-n-sneak', sammlung: 'masterclassesEn', data: { html: '<p>EN</p>' } }] });
+    assert.strictEqual(await u.mc._holeEn('hide-n-sneak'), '<p>EN</p>');
+    assert.ok(u.docPfade.includes('users/U1/masterclassesEn/hide-n-sneak'), u.docPfade.join(','));
+    assert.strictEqual(await u.mc._holeEn('gibt-es-nicht'), null);
+});
+
+test('der Block spricht Englisch, wenn das Stueck englisch ist', () => {
+    const { mc } = umgebung();
+    const w = wurzelMit('<div data-mcl-abschnitt="matchups"></div>');
+    mc._aktuellEinsetzen(w, AKT);   /* Grundzustand deutsch */
+    assert.ok(w.innerHTML.includes('Aktuelle Daten') && w.innerHTML.includes('Mittel'));
+    assert.ok(!w.innerHTML.includes('Current data'));
+    mc._setzeAktSprache('en');
+    const e = mc._aktuellBlockHtml(AKT, () => '');
+    assert.ok(e.includes('Current data') && e.includes('>Avg<') && e.includes('Most common opponents'), 'kein englischer Block');
+    assert.ok(!/Aktuelle Daten|Gegner|Mittel|Meta-Anteil/.test(e.replace(/<style[\s\S]*?<\/style>/, '')), 'deutsche Reste im englischen Block');
+    assert.ok(/\d\.\d%/.test(e) && !/\d,\d %/.test(e), 'englische Zahlen mit Komma');
+    mc._setzeAktSprache('de');
+});
+
+test('das Wort des Autors wird auch auf Englisch zur Stufe', () => {
+    const { mc } = umgebung();
+    const f = { 'very favorable': 4, 'favorable': 3, 'slightly favorable': 3, 'good': 3, 'easy': 3, 'even': 2,
+        'close': 2, 'slightly unfavorable': 1, 'unfavorable': 1, 'very unfavorable': 0, 'bad': 1, 'very bad': 0 };
+    Object.keys(f).forEach((w) => assert.strictEqual(mc._autorStufe(w), f[w], 'Seite: ' + w));
+    const src = mc._liveSkript();
+    const quelle = /function st\(w\)\{[^}]*\}function stufe\(t\)\{[\s\S]*?return -1;\}/.exec(src);
+    const r = { String, Math };
+    vm.createContext(r);
+    vm.runInContext(quelle[0] + ';globalThis.f=stufe;', r);
+    Object.keys(f).forEach((w) => assert.strictEqual(r.f(w), f[w], 'Rahmen: ' + w));
+});
+
+test('Sprachwechsel merkt die Wahl und oeffnet dieselbe Masterclass englisch', async () => {
+    const u = umgebung({ docs: [{ id: 'mega-tohaido', data: { titel: 'T', html: '<html><body>DE</body></html>' } },
+        { id: 'mega-tohaido', sammlung: 'masterclassesEn', data: { html: '<html><body>EN</body></html>' } }] });
+    assert.strictEqual(u.mc._mclSprache(), 'de');
+    u.mc._zeichneRegal();
+    await new Promise((r) => setTimeout(r, 0));
+    const buehne = u.host.querySelector('#mclBuehne');
+    buehne.dataset = {};
+    buehne.cloneNode = () => { const n = new dom.Element('div'); n.id = 'mclBuehne'; n.setAttribute('id', 'mclBuehne'); n.dataset = {}; n.scrollIntoView = () => {}; return n; };
+    buehne.scrollIntoView = () => {};
+    buehne.dataset.mclId = 'privat-mega-tohaido';
+    u.mc._sprachWechsel('en');
+    assert.strictEqual(u.mc._mclSprache(), 'en', 'die Wahl wurde nicht gemerkt');
+    await new Promise((r) => setTimeout(r, 10));
+    const neu = u.host.querySelector('#mclBuehne');
+    assert.ok(neu && neu !== buehne, 'die Buehne wurde nicht ersetzt');
+    assert.ok(u.docPfade.includes('users/U1/masterclassesEn/mega-tohaido'), 'EN nicht geholt: ' + u.docPfade.join(','));
+});
+
+/* ── Englische Fassung: die Live-Texte aus der JSON werden uebertragen (19.10.2026) ──
+ * Die Erzeuger (scripts/masterclass_zahlen_nachziehen.py, masterclass_listen_nachziehen.py)
+ * schreiben deutsch; ohne Uebertragung staende in der englischen Masterclass
+ * „Bilanz … aus 34 Matches“. Die Muster unten sind die Schablonen aus
+ * tests/python/test_masterclass_live.py (SCHABLONEN), je einmal alt und neu. */
+
+const DEUTSCH = /Partien|Bilanz|nach Matchpunkten|Letzte |sind die letzten|Präsenz|Platz|Matches in den|steht hier|Keine Online|„| und /;
+
+test('liveEn uebertraegt jede Schablone der Erzeuger, alt und neu', () => {
+    const { mc } = umgebung();
+    const proben = [
+        ['53,0 % Win % nach Matchpunkten, aus 1.234 Matches, Bilanz 1–2–3 (W–L–T)', '53.0% Win % by match points, from 1,234 matches, record 1–2–3 (W–L–T)'],
+        ['53,0 % Win % nach Matchpunkten, aus 100 Partien, Bilanz 1–2–3 (S–N–U)', '53.0% Win % by match points, from 100 matches, record 1–2–3 (W–L–T)'],
+        ['Bilanz 17–17–0 (W–L–T) aus 34 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 3.6 Punkte.',
+            'Record 17–17–0 (W–L–T) from 34 matches. Under 30 matches there is no rate here — a single match moves it by 3.6 points.'],
+        ['Bilanz 17–17–0 (S–N–U) aus 34 Partien. Unter 30 Partien steht hier keine Quote — eine einzelne Partie verschiebt sie um 3.6 Punkte.',
+            'Record 17–17–0 (W–L–T) from 34 matches. Under 30 matches there is no rate here — a single match moves it by 3.6 points.'],
+        ['keine Matches in den Daten', 'no matches in the data'],
+        ['keine Partien in den Daten', 'no matches in the data'],
+        ['Letzte Majors (Brisbane und Frankfurt), Format TEF–30C: ', 'Most recent Majors (Brisbane and Frankfurt), format TEF–30C: '],
+        ['Letzte Präsenzturniere (Brisbane und Frankfurt), Format TEF–30C: ', 'Most recent Majors (Brisbane and Frankfurt), format TEF–30C: '],
+        ['sind die letzten Majors (Brisbane, Frankfurt und Recife), schon im laufenden Format.', 'are the most recent Majors (Brisbane, Frankfurt and Recife), already in the current format.'],
+        ['sind die letzten Majors (Baltimore) — die liefen noch im Format TEF–PBL.', 'are the most recent Majors (Baltimore) — those were still in the TEF–PBL format.'],
+        ['73, 74, 75 und 76', '73, 74, 75 and 76'],
+        ['5. Platz von 188 (7–1–0), „Sunny\'s Weekly #277“, 13.10.2026.', '5th place of 188 (7–1–0), “Sunny\'s Weekly #277“, 13.10.2026.'],
+        ['1. Platz, „Probe-Cup“, 16.10.2026.', '1st place, “Probe-Cup“, 16.10.2026.'],
+        ['Jumshud · 22. von 188', 'Jumshud · 22nd of 188'],
+        ['<span class="mcl-listgruppe-leer">Keine Online-Liste ab 100 Spielern in den letzten 7 Tagen — ältere Listen stehen unter „Worlds · Day 2“.</span>',
+            '<span class="mcl-listgruppe-leer">No online list from events with 100+ players in the last 7 days — older lists are under “Worlds · Day 2”.</span>'],
+        ['25,5 %', '25.5%'],
+        ['17–1–0', '17–1–0']
+    ];
+    mc._setzeAktSprache('en');
+    for (const [de, en] of proben) {
+        assert.strictEqual(mc._liveEn(de), en, de);
+        assert.ok(!DEUTSCH.test(mc._liveEn(de).replace(/“[^“]*“/g, '')), 'Deutsch uebrig: ' + mc._liveEn(de));
+    }
+    mc._setzeAktSprache('de');
+    for (const [de] of proben) assert.strictEqual(mc._liveEn(de), de, 'deutsch muss unveraendert bleiben');
+});
+
+test('englische Masterclass: liveEinsetzen schreibt englisch, die Namenszeile behaelt ihr em', () => {
+    const { mc } = umgebung();
+    const html = stueck().replace(/<span class="mcl-nm">Deutsch(\d+)<em>Deck (\d+)<\/em>/g,
+        '<span class="mcl-nm">Deck $1<em class="mcl-nm-gleich">Deck $2</em>').replace(/Meta-Anteil/g, 'meta share');
+    const w = wurzelMit(html);
+    mc._setzeAktSprache('en');
+    mc._liveEinsetzen(w, liveDaten());
+    mc._setzeAktSprache('de');
+    assert.strictEqual(w.querySelector('[data-live="majors-satz"]').textContent,
+        'are the most recent Majors (Neustadt), already in the current format.');
+    const z = w.querySelector('details.mu [data-live-spalte="jetzt"]') || w.querySelector('[data-live-spalte="jetzt"]');
+    assert.ok(/from 100 matches, record 1–2–3 \(W–L–T\)$/.test(z.getAttribute('title')), z.getAttribute('title'));
+    assert.ok(/^\d+\.0%$/.test(z.querySelector('b').textContent), z.querySelector('b').textContent);
+    const m = w.querySelector('[data-live-spalte="majors"]');
+    assert.ok(/^Most recent Majors \(Neustadt\), format TEF–ZZN: /.test(m.getAttribute('title')), m.getAttribute('title'));
+    const sub = w.querySelector('.mcl-sub');
+    assert.ok(/^\d+\.00% meta share/.test(sub.textContent), 'Meta-Anteil ueber em nicht gefunden: ' + sub.textContent);
+    const chip = w.querySelectorAll('.mcl-listgruppe')[1].querySelector('.mcl-chip');
+    assert.strictEqual(chip.textContent, 'Neu · 1st of 200');
+    const quelle = w.querySelectorAll('.mcl-liste[data-mcl-listenname]');
+    const neu = Array.prototype.filter.call(quelle, (b) => /1st place of 200/.test(b.innerHTML))[0];
+    assert.ok(neu, 'Liste nicht englisch eingesetzt');
+    assert.ok(/cards · \d+ unique/.test(neu.innerHTML) && /Copy list as image/.test(neu.innerHTML), neu.innerHTML.slice(-300));
+    assert.ok(!/Karten · |verschiedene|Liste als Bild|Gegenüber Tims|Kartengleich/.test(neu.innerHTML), 'deutsche Listentexte uebrig');
+});
+
+test('CSS: der gleiche Untertitel in der englischen Namenszeile ist versteckt, nicht entfernt', () => {
+    const css = fs.readFileSync(path.join(WURZEL, 'css', 'masterclass.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    assert.ok(/\.mcl-nm em\.mcl-nm-gleich\s*\{\s*display:\s*none;?\s*\}/.test(css));
 });

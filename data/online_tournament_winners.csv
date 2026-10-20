@@ -13,6 +13,12 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a7e005ecdc0391d7fa65824,2026-08-19,PBL,122,Dragapult Dudunsparce,21.0
 6a7a215f2b308b6067b5051b,2026-08-18,PBL,163,Clefairy Ogerpon,30.0
 6a819f1978baaa6d1c22139a,2026-08-18,PBL,178,N's Zoroark,18.0
+6acd2914115c12b73a5a2514,2026-10-19,30C,149,Dragapult,24.0
+6ad4e8fe8a8383117e3eeae5,2026-10-19,30C,128,Dragapult,18.0
+6ace21698a8383117e3eaf39,2026-10-19,30C,203,Sharpedo Toxtricity,36.0
+6ad47a5f8a8383117e3ee7cf,2026-10-19,30C,115,Basic Box,27.0
+6ad246f68a8383117e3ed0a1,2026-10-19,30C,179,Basic Box,27.0
+6acb2b2a115c12b73a5a1197,2026-10-18,30C,203,Dragapult,30.0
 dinner,2026-10-17,30C,358,Basic Box,31.0
 6ace6c698a8383117e3eb1a5,2026-10-16,30C,102,Slowking,24.0
 6ace82e5115c12b73a5a339b,2026-10-16,30C,104,Basic Box,15.0
@@ -92,12 +98,3 @@ lets-go,2026-09-26,30C,434,Lopunny Dudunsparce,34.0
 6ab0edbce905c1db68746c13,2026-09-22,30C,147,Ogerpon Meganium Hydrapple,21.0
 6ab141bdf127b1b52c27e96d,2026-09-22,30C,138,Sharpedo Toxtricity,27.0
 6ab15326f127b1b52c27eaa2,2026-09-22,30C,111,Ogerpon Meganium Arboliva,25.0
-hamburger,2026-09-22,30C,128,Ogerpon Meganium Arboliva,21.0
-6aa860e3f1243e65f980170f,2026-09-21,30C,178,Dragapult,21.0
-6ab03b02e905c1db68746671,2026-09-21,30C,176,Alakazam Dudunsparce,24.0
-6aad843af127b1b52c27c2fd,2026-09-21,30C,168,Basic Box,33.0
-6aae98a2f127b1b52c27cf94,2026-09-21,30C,124,Dhelmise,28.0
-6aaf5762f127b1b52c27da24,2026-09-21,30C,108,Alakazam Dusknoir,28.0
-6aace66ef127b1b52c27bd26,2026-09-21,30C,200,Dragapult,30.0
-6aae988df127b1b52c27cf93,2026-09-20,30C,142,Dragapult,28.0
-6aad6f9ce905c1db687444f5,2026-09-19,30C,105,Basic Box,6.0

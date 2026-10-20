@@ -321,3 +321,111 @@ def test_das_regional_modell_ist_enger_als_das_ueber_alle_arten():
         f"Regionals {spanne_reg:.1f} pp Spanne, alle {spanne_alle:.1f} pp — "
         f"die Trennung nach Turnierart bringt nichts")
     assert reg["r_mittel"] > alle["r_mittel"]
+
+
+# ── Seit 21.10.2026: Potenz, Erfolg beim letzten Major, Mischung ──────
+# Anlass: Abgleich gegen Louisville und Nizza (Projektwissen
+# claude/metacall-lernbuch.md) — zweimal rund 6 pp zu viel bei den kleinen
+# Decks, die erfolgreichen Decks des Vor-Majors zu klein geschaetzt.
+
+def _major(anteile, day2, datum="2026-10-17", meta="TEF-30C", spieler=1000, name="R"):
+    return {"datum": datum, "meta": meta, "name": name, "spieler": spieler,
+            "art": "regional", "anteile": anteile, "day2": day2}
+
+
+def test_ohne_major_wachsen_die_grossen_und_die_kleinen_schrumpfen():
+    aktuell = {"a": 30.0, "b": 20.0, "c": 10.0, "d": 5.0, "e": 2.0}
+    p = bp.rechne(aktuell, None)
+    assert sum(p.values()) == pytest.approx(sum(aktuell.values()), abs=1e-6), (
+        "die Summe der Online-Zeilen muss bleiben — der Sammeleimer behaelt seinen Teil")
+    assert p["a"] > aktuell["a"], "das groesste Deck waechst nicht"
+    assert p["e"] < aktuell["e"], "das kleinste Deck schrumpft nicht"
+    assert sorted(p, key=p.get, reverse=True) == ["a", "b", "c", "d", "e"], (
+        "die Potenz darf die Reihenfolge nicht umwerfen")
+
+
+def test_erfolg_beim_letzten_major_hebt_das_deck():
+    """Gleicher Online-Anteil, gleicher Anteil beim Major — aber x kam
+    doppelt so oft in Day 2 wie y. Dann muss x vorn liegen."""
+    aktuell = {"x": 10.0, "y": 10.0, "z": 80.0}
+    vorher = _major({"x": 10.0, "y": 10.0, "z": 80.0},
+                    {"x": (100, 40), "y": (100, 10), "z": (800, 150)})
+    p = bp.rechne(aktuell, vorher)
+    assert p["x"] > p["y"], f"x {p['x']:.2f} nicht vor y {p['y']:.2f}"
+    assert sum(p.values()) == pytest.approx(100.0, abs=1e-6)
+
+
+def test_die_mischung_zieht_zum_anteil_beim_major():
+    """Ein Deck, das online kaum vorkommt, aber beim Major 20 % hatte,
+    bekommt einen sichtbaren Teil davon — ein Deck, das online gross ist
+    und beim Major fehlte, verliert."""
+    aktuell = {"klein": 1.0, "gross": 49.0, "rest": 50.0}
+    vorher = _major({"klein": 20.0, "gross": 0.0, "rest": 80.0},
+                    {"klein": (200, 40), "rest": (800, 160)})
+    p = bp.rechne(aktuell, vorher, exponent=0)
+    ohne = bp.rechne(aktuell, None)
+    assert p["klein"] > ohne["klein"] + 5, f"klein {ohne['klein']:.2f} -> {p['klein']:.2f}"
+    assert p["gross"] < ohne["gross"], "das beim Major fehlende Deck verliert nichts"
+
+
+def test_das_letzte_major_kommt_aus_dem_laufenden_format():
+    anker = [
+        _major({"a": 50.0}, {}, datum="2026-10-03", name="alt"),
+        _major({"a": 30.0}, {}, datum="2026-10-09", name="Louisville", spieler=3000),
+        _major({"a": 10.0}, {}, datum="2026-10-12", meta="TEF-PBL", name="fremdes Format"),
+        _major({"a": 90.0}, {}, datum="2026-10-20", name="nach dem Stichtag"),
+    ]
+    v = bp.letztes_major(anker, "TEF-30C", "2026-10-16")
+    assert v and v["namen"] == ["Louisville"], v and v["namen"]
+    assert bp.letztes_major(anker, "TEF-30C", "2026-12-31") is None or \
+        bp.letztes_major(anker, "TEF-30C", "2026-12-31")["datum"] >= "2026-11-26", (
+        "ein Major aelter als die Hoechstfrist darf nicht mehr zaehlen")
+
+
+def test_zwei_majors_am_selben_tag_werden_nach_spielern_gewichtet():
+    anker = [_major({"a": 10.0}, {"a": (100, 20)}, datum="2026-09-26", spieler=3000, name="F"),
+             _major({"a": 30.0}, {"a": (50, 20)}, datum="2026-09-26", spieler=1000, name="B")]
+    v = bp.letztes_major(anker, "TEF-30C", "2026-10-01")
+    assert sorted(v["namen"]) == ["B", "F"]
+    assert v["anteile"]["a"] == pytest.approx(15.0)
+    assert v["day2"]["a"] == (150, 40)
+
+
+def test_das_band_umschliesst_die_prognose_auch_mit_major():
+    aktuell = {c: v for c, v in zip("abcdefgh", [20, 15, 12, 10, 8, 6, 5, 24])}
+    vorher = _major({"a": 25.0, "h": 30.0, "c": 5.0, "neu": 4.0},
+                    {"a": (250, 60), "h": (300, 50), "c": (50, 5), "neu": (40, 15)})
+    m = {"verdichtung_median": 9.0, "verdichtung_min": 3.0,
+         "verdichtung_max": 12.0, "art": "regional", "anker": 6}
+    p = bp.prognose(aktuell, {c: 1 for c in aktuell}, 100, m, vorher)
+    assert sum(z["prognose"] for z in p) == pytest.approx(100.0, abs=0.01)
+    for z in p:
+        assert z["prognose_von"] <= z["prognose"] <= z["prognose_bis"], z
+    neu = [z for z in p if z["archetyp_id"] == "neu"]
+    assert neu and neu[0]["online_anteil"] == 0 and neu[0]["prognose"] > 0, (
+        "ein Deck, das nur beim Major gespielt wurde, fehlt in der Prognose")
+
+
+def test_der_rueckblick_misst_die_rechnung_an_vergangenen_majors():
+    """Die Zahl, die der Meta Call als Fehler der Prediction nennt, muss
+    aus genau dieser Rechnung kommen — und ein Worlds zaehlt nicht."""
+    zeilen = []
+    for tag in ("2026-10-05", "2026-10-08"):
+        decks = [("a", 40), ("b", 30), ("c", 20), ("other", 10)] + [(chr(100 + i), 1) for i in range(30)]
+        for aid, n in decks:
+            zeilen.append({"meta": "TEF-30C", "date": tag, "archetype_id": aid,
+                           "archetype_name": aid.upper(), "lists": str(n * 10)})
+    anteile = {chr(100 + i): 0.1 for i in range(30)}
+    anteile.update({"a": 45.0, "b": 30.0, "c": 15.0})
+    anker = [
+        {"datum": "2026-10-10", "name": "Regional Championship X", "meta": "TEF-30C",
+         "art": "regional", "spieler": 1000, "anteile": dict(anteile), "day2": {}},
+        {"datum": "2026-10-10", "name": "World Championship Y", "meta": "TEF-30C",
+         "art": "worlds", "spieler": 500, "anteile": dict(anteile), "day2": {}},
+    ]
+    rb = bp.rueckblick(zeilen, anker)
+    assert rb and rb["turniere"] == 1, "Worlds darf nicht mitzaehlen"
+    erwartet = bp.rechne(bp.online_anteile(zeilen, "TEF-30C", "2026-09-26", "2026-10-09")[0], None)
+    oben = sorted(erwartet.items(), key=lambda x: -x[1])[:25]
+    mae = sum(abs(v - anteile.get(k, 0.0)) for k, v in oben) / len(oben)
+    assert rb["mae"] == pytest.approx(mae, abs=1e-3)

@@ -11791,10 +11791,9 @@ window.MetaCall = (function () {
     /* Beim ersten Klick aus der Voreinstellung heraus wird sie zuerst
        ausgeschrieben — sonst waere „Dragapult abwaehlen" gleichbedeutend
        mit „nur Dragapult waehlen". */
-    if (!_feldAuswahl) {
-      const n = (typeof _feldAnzahl === 'number') ? _feldAnzahl : TOP_N;
-      _feldAuswahl = new Set(sortiert.slice(0, n).map(d => d.name));
-    }
+    /* Dieselbe Regel wie _feldTeilung — sonst fiele ein Deck mit eigener
+       Schaetzung beim ersten Klick aus dem Feld (Pruefagent 21.10.2026). */
+    if (!_feldAuswahl) _feldAuswahl = new Set(_feldTeilung(sortiert).genannt.map(d => d.name));
     if (_feldAuswahl.has(name)) _feldAuswahl.delete(name);
     else _feldAuswahl.add(name);
     _feldAuswahlMerken();
@@ -15652,7 +15651,7 @@ window.MetaCall = (function () {
           /* Vor JEDEM Szenario zurueck auf den Ausgangsstand: _applyState
              mischt `settings` in die vorhandenen, sonst traegt Szenario B
              die Einstellungen von A weiter. */
-          _applyState(original);
+          _applyState(original, true);
           _applyState(alle[name]);
           const paket = _postPaket(name);
           if (paket) aus.push({ titel: name, daten: paket });
@@ -15660,7 +15659,7 @@ window.MetaCall = (function () {
       });
     } finally {
       try {
-        _applyState(original);
+        _applyState(original, true);
         /* ERSETZEN, NICHT MISCHEN (Pruefagent, 26.09.2026). `_applyState`
          * spreizt `settings` IN die vorhandenen — ein Schluessel, den nur
          * ein altes Szenario fuehrt, ueberlebt das Zuruecksetzen sonst.
@@ -16592,7 +16591,12 @@ window.MetaCall = (function () {
     };
   }
 
-  function _applyState(state) {
+  /* `exakt`: den EIGENEN Stand dieser Sitzung zuruecksetzen (nach dem
+     Szenario-Durchlauf fuer die Post-Seite) — dann gilt auch eine
+     Handauswahl wieder. Ein gespeichertes Szenario laedt dagegen nur die
+     Anzahl: das Feld folgt der aktuellen Prognose (FE-70, Pruefagent
+     21.10.2026). */
+  function _applyState(state, exakt) {
     if (!state) return;
     _settings = { ..._settings, ...(state.settings || {}) };
     _personalShares   = { ...(state.personalShares   || {}) };
@@ -16601,11 +16605,16 @@ window.MetaCall = (function () {
       ? state.customDecks.map(c => ({ name: c.name || '', share: Number(c.share) || 0 }))
       : [];
     _groupByMain      = !!state.groupByMain;
+    if (exakt && Array.isArray(state.feldAuswahl)) {
+      _feldAuswahl = new Set(state.feldAuswahl.map(String));
+      _feldAnzahl  = _feldAnzahlAusSpeicher({ anzahl: state.feldAnzahl });
+    } else {
     _feldAuswahl      = null;
     _feldAnzahl       = _feldAnzahlAusSpeicher(
       state.feldAnzahl !== undefined && state.feldAnzahl !== null
         ? { anzahl: state.feldAnzahl }
         : (Array.isArray(state.feldAuswahl) ? { decks: state.feldAuswahl } : null));
+    }
     _feldAuswahlMerken();
 
     // Rebuild journal stats for the new deck if one is set

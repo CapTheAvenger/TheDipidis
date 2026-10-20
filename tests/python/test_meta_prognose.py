@@ -393,6 +393,7 @@ def test_zwei_majors_am_selben_tag_werden_nach_spielern_gewichtet():
 
 def test_das_band_umschliesst_die_prognose_auch_mit_major():
     aktuell = {c: v for c, v in zip("abcdefgh", [20, 15, 12, 10, 8, 6, 5, 24])}
+    bp.MAJOR_NAMEN.setdefault("neu", "Neu")   # wie aus deck_name der Labs-Datei
     vorher = _major({"a": 25.0, "h": 30.0, "c": 5.0, "neu": 4.0},
                     {"a": (250, 60), "h": (300, 50), "c": (50, 5), "neu": (40, 15)})
     m = {"verdichtung_median": 9.0, "verdichtung_min": 3.0,
@@ -429,3 +430,21 @@ def test_der_rueckblick_misst_die_rechnung_an_vergangenen_majors():
     oben = sorted(erwartet.items(), key=lambda x: -x[1])[:25]
     mae = sum(abs(v - anteile.get(k, 0.0)) for k, v in oben) / len(oben)
     assert rb["mae"] == pytest.approx(mae, abs=1e-3)
+
+
+def test_ein_turnier_ohne_day2_zahlen_drueckt_die_quoten_nicht():
+    anker = [_major({"a": 10.0}, {"a": (100, 40), "b": (100, 10)}, datum="2026-09-26", spieler=1000, name="mit"),
+             _major({"a": 10.0}, {"a": (500, 0), "b": (500, 0)}, datum="2026-09-26", spieler=1000, name="ohne")]
+    v = bp.letztes_major(anker, "TEF-30C", "2026-10-01")
+    assert v["day2"]["a"] == (100, 40), "die Spieler des Turniers ohne Day-2-Zahlen zaehlen mit"
+    assert sorted(v["namen"]) == ["mit", "ohne"], "der Anteil des Turniers muss weiter zaehlen"
+
+
+def test_ein_deck_nur_beim_major_ohne_namen_bekommt_keine_zeile():
+    m = {"verdichtung_median": 9.0, "verdichtung_min": 3.0,
+         "verdichtung_max": 12.0, "art": "regional", "anker": 6}
+    vorher = _major({"a": 50.0, "ohne-namen-xyz": 5.0}, {})
+    bp.NAMEN.setdefault("a", "A")
+    p = bp.prognose({"a": 100.0}, {"a": 1}, 100, m, vorher)
+    assert "ohne-namen-xyz" not in [z["archetyp_id"] for z in p], (
+        "eine Zeile ohne Namen macht test-meta-prognose.js rot")

@@ -351,7 +351,13 @@ def letztes_major(anker: List[dict], fenster: str, bis: str,
         gewicht = (a.get("spieler") or 1) / spieler
         for k, v in a["anteile"].items():
             anteile[k] += v * gewicht
-        for k, (nn, dd) in (a.get("day2") or {}).items():
+        tag2 = a.get("day2") or {}
+        # Ein Turnier ohne jede Day-2-Zahl (aeltere Labs-Datei ohne Spalte)
+        # zaehlt fuer den Erfolg nicht mit — sonst drueckten seine Spieler
+        # die Quoten (Pruefagent 21.10.2026).
+        if sum(dd for _, dd in tag2.values()) <= 0:
+            continue
+        for k, (nn, dd) in tag2.items():
             n[k] += nn
             d[k] += dd
     return {"datum": tag, "namen": [a["name"] for a in gleich],
@@ -459,7 +465,11 @@ def prognose(aktuell: Dict[str, float], roh: Dict[str, int], gesamt: int,
     # mit Online-Anteil 0, denn online wurden sie nicht gespielt.
     alle = dict(aktuell)
     for k in mitte_alle:
-        alle.setdefault(k, 0.0)
+        # Nur mit Namen: eine Zeile ohne Namen kann der Meta Call keinem
+        # Deck zuordnen, und test-meta-prognose.js verlangt fuer jede Zeile
+        # einen. Ohne Namen bleibt der Anteil im Rest („Sonstige").
+        if k in alle or NAMEN.get(k) or MAJOR_NAMEN.get(k):
+            alle.setdefault(k, 0.0)
     if m:
         rang = sorted(alle.items(), key=lambda x: (-mitte_alle.get(x[0], 0.0), -x[1]))
     else:

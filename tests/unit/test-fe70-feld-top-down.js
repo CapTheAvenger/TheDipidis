@@ -142,3 +142,43 @@ describe('Die Quellenzeile nennt den gemessenen Fehler der Prediction', () => {
         assert.match(zeile(null), /an 12 Regionals geprüft/);
     });
 });
+
+describe('Szenarien und Haken (Pruefagent 21.10.2026)', () => {
+    function stand(o) {
+        return baue(MC, [
+            'function _feldAnzahlAusSpeicher(roh)',
+            'function _feldAuswahlMerken()',
+            'function _applyState(state, exakt)',
+        ], {
+            FELD_AUSWAHL_KEY: 'metacall_feldauswahl_v1',
+            localStorage: { setItem() {}, removeItem() {} },
+            _settings: {}, _personalShares: {}, _winRateOverrides: {}, _customDecks: [],
+            _groupByMain: false, _feldAuswahl: null, _feldAnzahl: null,
+            _ladeJournal() {},
+        });
+    }
+    it('ein gespeichertes Szenario laedt nur die Anzahl', () => {
+        const ctx = stand();
+        ctx._applyState({ feldAuswahl: ['Alt', 'Rand', 'Klein'], feldAnzahl: 3 });
+        assert.equal(ctx._feldAuswahl, null);
+        assert.equal(ctx._feldAnzahl, 3);
+    });
+    it('der eigene Stand dieser Sitzung kommt exakt zurueck', () => {
+        const ctx = stand();
+        ctx._applyState({ feldAuswahl: ['Alt', 'Rand'], feldAnzahl: 2 }, true);
+        assert.deepEqual(Array.from(ctx._feldAuswahl).sort(), ['Alt', 'Rand']);
+    });
+    it('der erste Haken-Klick behaelt ein Deck mit eigener Schaetzung', () => {
+        const ctx = baue(MC, [
+            'function _feldSortiert()', 'function _feldTeilung(sortiert)',
+            'function _feldAuswahlMerken()', 'function _toggleFeldDeck(name)',
+        ], {
+            TOP_N: 2, _shareList: shareList(), _prognoseAktiv: false, _prognoseRest: 0,
+            _feldAuswahl: null, _feldAnzahl: 2, _personalShares: { Klein: 5 },
+            FELD_AUSWAHL_KEY: 'k', localStorage: { setItem() {}, removeItem() {} },
+            _feldNeu() {},
+        });
+        ctx._toggleFeldDeck('Gross');
+        assert.deepEqual(Array.from(ctx._feldAuswahl).sort(), ['Klein', 'Neu']);
+    });
+});

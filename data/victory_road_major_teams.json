@@ -26,7 +26,7 @@
     "format": "M-C OTS",
     "sieger": "Nicholas Morales",
     "platzierungen_gesamt": 32,
-    "mit_replica_code": 2,
+    "mit_replica_code": 0,
     "mit_ots": 32,
     "gezogen": 32
    }
@@ -7625,7 +7625,7 @@
    "trainer": "Nicholas Morales",
    "trainer_tag": "Charmdi",
    "preis": "VRtSG $785",
-   "replica_code": "TB0C85121Q",
+   "replica_code": "",
    "ots_url": "https://www.vrpastes.com/QaBVnwJ0",
    "paste_id": "QaBVnwJ0",
    "team_name": "Copy of im bad at this game",
@@ -8570,7 +8570,7 @@
    "trainer": "Flavio Del Pidio",
    "trainer_tag": "PADØ",
    "preis": "$100",
-   "replica_code": "K81FNUHF62",
+   "replica_code": "",
    "ots_url": "https://www.vrpastes.com/CFrAcVkI",
    "paste_id": "CFrAcVkI",
    "team_name": "Rain del Pescatore",
@@ -9523,8 +9523,8 @@
    "format": "M-C OTS",
    "team_vorschau": [
     "Charizard Mega Y",
+    "Mawile Mega",
     "Incineroar",
-    "Mawile",
     "Basculegion",
     "Farigiraf",
     "Whimsicott"

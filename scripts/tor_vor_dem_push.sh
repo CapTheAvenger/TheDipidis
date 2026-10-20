@@ -78,9 +78,9 @@ if [ "${TOR_OHNE_SCHRUMPF:-0}" != "1" ] && [ -f scripts/schrumpf_waechter.py ]; 
             echo ""
             echo "STOPP-Dateien bleiben auf dem Stand von gestern (unter 0,5 des alten Umfangs)."
         } >> "$zusammenfassung"
-        echo "$schrumpf" | grep -E '^(WARNUNG|STOPP):' | sed 's/^/::warning::Schrumpf-Waechter /'
+        echo "$schrumpf" | grep -E '^(WARNUNG|STOPP|STOPP-FAMILIE):' | sed 's/^/::warning::Schrumpf-Waechter /'
         # Steht der Commit schon, die zurueckgesetzten Dateien in ihn aufnehmen.
-        stopp_dateien="$(echo "$schrumpf" | sed -n 's/^STOPP: \([^ ]*\) .*/\1/p')"
+        stopp_dateien="$(echo "$schrumpf" | sed -n 's/^STOPP\(-FAMILIE\)\{0,1\}: \([^ ]*\) .*/\2/p')"
         if [ -n "$stopp_dateien" ] && git rev-parse -q --verify origin/main >/dev/null \
            && [ -n "$(git rev-list origin/main..HEAD)" ]; then
             # shellcheck disable=SC2086

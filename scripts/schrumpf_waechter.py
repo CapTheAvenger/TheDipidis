@@ -34,6 +34,15 @@ STOPP = 0.5
 MIN_BYTES = 2048
 NIE = {"data/data_stand.json"}
 
+# SC-41 (20.10.2026, Wochenlauf #186): Dateien, deren Umfang nach einer
+# festgelegten Regel legitim auf (fast) null fallen kann. Sie werden weiter
+# gemeldet (WARNUNG), aber nie zurueckgesetzt. Jeder Eintrag nennt die Regel.
+DARF_SCHRUMPFEN = {
+    "data/masterclass_online_listen.json":
+        "DA-26 (Hausi 30.09.2026): genau die Listen des 7-Tage-Fensters, 0 bis 5 — "
+        "eine leere Gruppe ist richtig, nicht kaputt",
+}
+
 
 def sh(*a):
     return subprocess.run(list(a), capture_output=True, text=True)
@@ -61,11 +70,32 @@ def bewerten(basis):
             continue
         neu = os.path.getsize(f)
         q = neu / alt
-        if q < STOPP:
+        if q < STOPP and f not in DARF_SCHRUMPFEN:
             befunde.append(("STOPP", f, alt, neu, q))
         elif q < WARNUNG:
             befunde.append(("WARNUNG", f, alt, neu, q))
     return befunde
+
+
+def mit_familie(basis, stopp):
+    """SC-41: eine Datei geht nie ALLEIN zurueck. Am 20.10. setzte der Waechter
+    data/masterclass_online_listen.json zurueck, die daraus schon gebaute
+    data/masterclass_live/mega-stalobor.json blieb frisch — das Tor fand den
+    Widerspruch und hielt nach 2,5 h Suche die ganze Turnierwoche zurueck.
+    Dieselbe Regel wie beim Zuruecksetzen des Tors (SC-29/SC-38): die
+    Familie aus scripts/tor_rollback.py geht gemeinsam."""
+    if not stopp:
+        return []
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from tor_rollback import einheiten  # noqa: PLC0415
+    geaendert = sh("git", "diff", "--name-only", basis, "--", "data/").stdout.split()
+    geaendert += sh("git", "ls-files", "--others", "--exclude-standard", "--", "data/").stdout.split()
+    alle = sorted((set(geaendert) | set(stopp)) - NIE)
+    mit = set(stopp)
+    for e in einheiten(alle):
+        if any(f in stopp for f in e):
+            mit.update(e)
+    return sorted(mit - set(stopp))
 
 
 def zuruecksetzen(basis, dateien):
@@ -73,6 +103,8 @@ def zuruecksetzen(basis, dateien):
         alt = subprocess.run(["git", "show", f"{basis}:{f}"], capture_output=True)
         if alt.returncode == 0:
             open(f, "wb").write(alt.stdout)
+        elif os.path.exists(f):  # neu in diesem Lauf: gestern gab es sie nicht
+            os.remove(f)
     if dateien:
         sh("git", "reset", "-q", "--", *dateien)
         try:
@@ -90,9 +122,14 @@ def main():
     try:
         basis = ausgangsstand()
         befunde = bewerten(basis)
-        zuruecksetzen(basis, [f for stufe, f, *_ in befunde if stufe == "STOPP"])
+        stopp = [f for stufe, f, *_ in befunde if stufe == "STOPP"]
+        familie = mit_familie(basis, stopp)
+        zuruecksetzen(basis, stopp + familie)
         for stufe, f, alt, neu, q in befunde:
-            print(f"{stufe}: {f} {alt} -> {neu} ({q:.2f})")
+            grund = f" — erlaubt: {DARF_SCHRUMPFEN[f]}" if f in DARF_SCHRUMPFEN else ""
+            print(f"{stufe}: {f} {alt} -> {neu} ({q:.2f}){grund}")
+        for f in familie:
+            print(f"STOPP-FAMILIE: {f} (geht mit {' '.join(stopp)} zurueck)")
     except Exception as e:  # noqa: BLE001
         print(f"::warning::schrumpf_waechter: nicht geprueft ({e})")
     return 0

@@ -85,3 +85,52 @@ def test_abgeschaltet_bleibt_die_geschrumpfte_datei(tmp_path):
     rc, aus = _tor(b, TOR_OHNE_SCHRUMPF=1)
     assert rc == 0, aus
     assert len(json.loads((b / "data" / "gross.json").read_text())) == 700
+
+
+# ── SC-41 (20.10.2026, Wochenlauf #186) ─────────────────────────────────────
+#
+# Der Waechter setzte data/masterclass_online_listen.json zurueck (0 Listen im
+# 7-Tage-Fenster, 5976 -> 63 Bytes — nach DA-26 richtig), die daraus schon
+# gebaute masterclass_live/mega-stalobor.json blieb frisch. Das Tor fand den
+# Widerspruch und hielt nach 2 h 37 min die ganze Turnierwoche zurueck.
+
+def test_eine_erlaubt_leere_datei_bleibt_frisch(tmp_path):
+    b = _baum(tmp_path)
+    p = b / "data" / "masterclass_online_listen.json"
+    p.write_text(json.dumps({"listen": list(range(2000))}))
+    git(b, "add", "-A")
+    git(b, "commit", "-qm", "listen")
+    p.write_text(json.dumps({"listen": []}))
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert json.loads(p.read_text()) == {"listen": []}, "die leere Gruppe wurde zurueckgesetzt"
+    assert "WARNUNG: data/masterclass_online_listen.json" in aus and "erlaubt: DA-26" in aus, aus
+
+
+def test_die_familie_geht_mit_zurueck(tmp_path):
+    b = _baum(tmp_path)
+    (b / "data" / "champions_usage.json").write_text(json.dumps(list(range(2000))))
+    (b / "data" / "champions_pokedex.json").write_text(json.dumps({"v": 1}))
+    git(b, "add", "-A")
+    git(b, "commit", "-qm", "familie")
+    (b / "data" / "champions_usage.json").write_text(json.dumps(list(range(300))))  # STOPP
+    (b / "data" / "champions_pokedex.json").write_text(json.dumps({"v": 2}))        # abgeleitet
+    (b / "data" / "champions_neu.json").write_text("{}")                            # neu, Familie
+    (b / "data" / "gross.json").write_text(json.dumps(list(range(1900))))          # fremd
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    assert len(json.loads((b / "data" / "champions_usage.json").read_text())) == 2000
+    assert json.loads((b / "data" / "champions_pokedex.json").read_text()) == {"v": 1}, \
+        "die abgeleitete Datei blieb frisch, die Quelle alt — genau der Widerspruch vom 20.10."
+    assert not (b / "data" / "champions_neu.json").exists()
+    assert len(json.loads((b / "data" / "gross.json").read_text())) == 1900, "fremde Datei mitgerollt"
+    assert "STOPP-FAMILIE: data/champions_pokedex.json" in aus
+    assert "::warning::Schrumpf-Waechter STOPP-FAMILIE" in aus
+
+
+def test_der_waechter_kennt_jeden_erlaubten_eintrag_mit_grund():
+    sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+    import schrumpf_waechter as W
+    for f, grund in W.DARF_SCHRUMPFEN.items():
+        assert f.startswith("data/") and len(grund) > 30, (f, grund)
+        assert os.path.exists(os.path.join(WURZEL, f)), f"{f} gibt es nicht mehr — Eintrag streichen"

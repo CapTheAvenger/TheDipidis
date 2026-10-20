@@ -534,3 +534,49 @@ def test_sc37_verfaelschung_ohne_weitergabe_bleibt_es_rot(tmp_path):
     (b / "scripts" / "tor_vor_dem_push.sh").write_text(s)
     rc, aus = _tor(b)
     assert rc == 1, aus
+
+
+# ── SC-41 (20.10.2026): halbierende Suche mit Frist ─────────────────────────
+#
+# Wochenlauf #186: 43 Einheiten einzeln probiert, je ~3 min Orakel → das Tor
+# lief 2 h 37 min. Gemessen an der echten Funktion, mit gezaehlten Probeläufen.
+
+def _halbierend(n, schuldig, **kw):
+    sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+    import tor_rollback as T
+    proben = []
+
+    def probe(gruppe):
+        proben.append(len(gruppe))
+        return not any(e[0] in schuldig for e in gruppe)
+    frisch, uebrig = T.halbierend([[i] for i in range(n)], probe, **kw)
+    return {e[0] for e in frisch}, {e[0] for e in uebrig}, len(proben)
+
+
+def test_sc41_eine_schuldige_unter_43_braucht_hoechstens_14_proben():
+    frisch, uebrig, n = _halbierend(43, {17}, ganz_rot=True)
+    assert frisch == set(range(43)) - {17} and not uebrig
+    assert n <= 14, f"{n} Proben — die alte Suche brauchte 43"
+
+
+def test_sc41_zwei_schuldige_und_keine():
+    frisch, _, n = _halbierend(43, {3, 30}, ganz_rot=True)
+    assert frisch == set(range(43)) - {3, 30} and n <= 26
+    frisch, _, n = _halbierend(8, set())
+    assert frisch == set(range(8)) and n == 1
+
+
+def test_sc41_nach_der_frist_bleibt_der_rest_alt():
+    uhr = iter(range(100))
+    frisch, uebrig, n = _halbierend(16, {5}, frist=2, jetzt=lambda: next(uhr), ganz_rot=True)
+    assert n == 3 and uebrig and not (frisch & uebrig) and 5 not in frisch
+    assert frisch | uebrig | {5} >= set(range(16)) - {5}
+
+
+def test_sc41_suchen_nutzt_die_halbierung():
+    sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+    import inspect
+    import tor_rollback as T
+    code = "\n".join(z for z in inspect.getsource(T.suchen).splitlines() if not z.lstrip().startswith("#"))
+    assert "halbierend(" in code and "for einheit in alle_einheiten" not in code
+    assert T.SUCHE_SEKUNDEN <= 3600

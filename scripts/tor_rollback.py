@@ -46,6 +46,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 
 MAX_KANDIDATEN = 80
 # abgeleitet: data_stand.json wird nach dem Rebase neu gebaut, das
@@ -347,6 +348,42 @@ def gruen(py, js):
     return True
 
 
+# SC-41 (20.10.2026, Wochenlauf #186): die Suche probierte jede Einheit
+# einzeln — 43 Einheiten x ~3 min Orakel = 2 h 37 min im Tor. Jetzt halbierend
+# (k schuldige unter n Einheiten: etwa 2k*log2(n) Durchlaeufe statt n) und mit
+# einer Frist: was bis dahin nicht geprueft ist, bleibt alt (Bestandsschutz,
+# kein Abbruch, kein Raten).
+SUCHE_SEKUNDEN = int(os.environ.get("TOR_SUCHE_SEKUNDEN", "2400"))
+
+
+def halbierend(einheiten_, probe, frist=None, jetzt=None, ganz_rot=False):
+    """Gibt (frisch, uebrig) zurueck. probe(gruppe) setzt die Gruppe frisch
+    und meldet, ob das Orakel gruen bleibt (sonst setzt sie sie zurueck).
+    Eine gruene Gruppe bleibt frisch; eine rote wird geteilt, bis die
+    schuldigen Einheiten einzeln feststehen. Nach der Frist wird nichts mehr
+    probiert — der Rest kommt als `uebrig` zurueck und bleibt alt.
+    ganz_rot: die ganze Menge ist schon als rot bekannt (der erste Durchlauf
+    des Tors) — dann gleich teilen statt sie noch einmal zu probieren."""
+    jetzt = jetzt or time.monotonic
+    alle = list(einheiten_)
+    if ganz_rot and len(alle) > 1:
+        stapel = [alle[:len(alle) // 2], alle[len(alle) // 2:]]
+    else:
+        stapel = [alle] if alle else []
+    frisch, uebrig = [], []
+    while stapel:
+        gruppe = stapel.pop(0)
+        if frist is not None and jetzt() > frist:
+            uebrig += gruppe
+            continue
+        if probe(gruppe):
+            frisch += gruppe
+        elif len(gruppe) > 1:
+            mitte = len(gruppe) // 2
+            stapel[:0] = [gruppe[:mitte], gruppe[mitte:]]
+    return frisch, uebrig
+
+
 def suchen(ordner, sicherung):
     py, js, unlesbar = rote_zusicherungen(ordner)
     if unlesbar or not (py or js):
@@ -410,15 +447,26 @@ def suchen(ordner, sicherung):
         else:
             stand_setzen(basis, flach, sicherung, True)
             unschuldig = []  # einzeln probieren
-    for einheit in alle_einheiten:
-        if einheit in unschuldig:
-            continue
-        rest = [x for x in zurueck if x not in einheit]
-        stand_setzen(basis, einheit, sicherung, False)
+    offen = [e for e in alle_einheiten if e not in unschuldig]
+
+    def probe(gruppe):
+        """Gruppe frisch setzen; gruen -> bleibt frisch, sonst wieder alt."""
+        flach = [f for e in gruppe for f in e]
+        stand_setzen(basis, flach, sicherung, False)
         if gruen(orakel_py, orakel_js):
-            zurueck = rest
-        else:
-            stand_setzen(basis, einheit, sicherung, True)
+            return True
+        stand_setzen(basis, flach, sicherung, True)
+        return False
+
+    # „offen frisch" (plus die schon frischen unschuldigen) ist genau der rote
+    # erste Durchlauf — gleich teilen statt ihn noch einmal zu fahren.
+    frisch, uebrig = halbierend(offen, probe, frist=time.monotonic() + SUCHE_SEKUNDEN,
+                                ganz_rot=True)
+    zurueck = [x for x in zurueck if not any(x in e for e in frisch)]
+    if uebrig:
+        print(f"Suchzeit ({SUCHE_SEKUNDEN} s) erreicht — {len(uebrig)} nicht gepruefte "
+              "Einheit(en) bleiben auf dem alten Stand: "
+              + " ".join(f for e in uebrig for f in e))
     manifest = {"basis": basis, "kandidaten": kand, "zurueck": zurueck,
                 "rot": py + js, "konsistenztests": py_extra + js_extra, "altbefund": alt,
                 "einheiten": [e for e in alle_einheiten if len(e) > 1]}

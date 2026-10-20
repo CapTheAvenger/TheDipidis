@@ -458,10 +458,10 @@ def suchen(ordner, sicherung):
         stand_setzen(basis, flach, sicherung, True)
         return False
 
-    # Sind alle Einheiten schon im Rennen (nichts als unschuldig frisch), ist
-    # „alle frisch" genau der rote erste Durchlauf — gleich teilen.
+    # „offen frisch" (plus die schon frischen unschuldigen) ist genau der rote
+    # erste Durchlauf — gleich teilen statt ihn noch einmal zu fahren.
     frisch, uebrig = halbierend(offen, probe, frist=time.monotonic() + SUCHE_SEKUNDEN,
-                                ganz_rot=len(offen) == len(alle_einheiten))
+                                ganz_rot=True)
     zurueck = [x for x in zurueck if not any(x in e for e in frisch)]
     if uebrig:
         print(f"Suchzeit ({SUCHE_SEKUNDEN} s) erreicht — {len(uebrig)} nicht gepruefte "

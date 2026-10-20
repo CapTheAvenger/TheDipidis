@@ -83,14 +83,13 @@ def mit_familie(basis, stopp):
     data/masterclass_live/mega-stalobor.json blieb frisch — das Tor fand den
     Widerspruch und hielt nach 2,5 h Suche die ganze Turnierwoche zurueck.
     Dieselbe Regel wie beim Zuruecksetzen des Tors (SC-29/SC-38): die
-    Familie aus scripts/tor_rollback.py geht gemeinsam."""
+    Familie aus scripts/tor_rollback.py geht gemeinsam — mit denselben
+    Kandidaten (data/ UND die Bildordner der Ablaeufe, SC-36)."""
     if not stopp:
         return []
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from tor_rollback import einheiten  # noqa: PLC0415
-    geaendert = sh("git", "diff", "--name-only", basis, "--", "data/").stdout.split()
-    geaendert += sh("git", "ls-files", "--others", "--exclude-standard", "--", "data/").stdout.split()
-    alle = sorted((set(geaendert) | set(stopp)) - NIE)
+    from tor_rollback import einheiten, kandidaten  # noqa: PLC0415
+    alle = sorted((set(kandidaten(basis)) | set(stopp)) - NIE)
     mit = set(stopp)
     for e in einheiten(alle):
         if any(f in stopp for f in e):
@@ -123,13 +122,18 @@ def main():
         basis = ausgangsstand()
         befunde = bewerten(basis)
         stopp = [f for stufe, f, *_ in befunde if stufe == "STOPP"]
-        familie = mit_familie(basis, stopp)
+        try:
+            familie = mit_familie(basis, stopp)
+        except Exception as e:  # noqa: BLE001 — die STOPP-Dateien gehen trotzdem zurueck
+            print(f"::warning::schrumpf_waechter: Familie nicht bestimmt ({e})")
+            familie = []
         zuruecksetzen(basis, stopp + familie)
         for stufe, f, alt, neu, q in befunde:
             grund = f" — erlaubt: {DARF_SCHRUMPFEN[f]}" if f in DARF_SCHRUMPFEN else ""
             print(f"{stufe}: {f} {alt} -> {neu} ({q:.2f}){grund}")
-        for f in familie:
-            print(f"STOPP-FAMILIE: {f} (geht mit {' '.join(stopp)} zurueck)")
+        if familie:
+            # EINE Zeile: GitHub nimmt hoechstens 10 Warnungen je Schritt (SC-37).
+            print(f"STOPP-FAMILIE: {' '.join(familie)} (gehen mit {' '.join(stopp)} zurueck)")
     except Exception as e:  # noqa: BLE001
         print(f"::warning::schrumpf_waechter: nicht geprueft ({e})")
     return 0

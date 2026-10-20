@@ -124,8 +124,31 @@ def test_die_familie_geht_mit_zurueck(tmp_path):
         "die abgeleitete Datei blieb frisch, die Quelle alt — genau der Widerspruch vom 20.10."
     assert not (b / "data" / "champions_neu.json").exists()
     assert len(json.loads((b / "data" / "gross.json").read_text())) == 1900, "fremde Datei mitgerollt"
-    assert "STOPP-FAMILIE: data/champions_pokedex.json" in aus
-    assert "::warning::Schrumpf-Waechter STOPP-FAMILIE" in aus
+    zeilen = [z for z in aus.splitlines() if z.startswith("::warning::Schrumpf-Waechter STOPP-FAMILIE")]
+    assert len(zeilen) == 1, "eine Sammelzeile, nicht eine Warnung je Datei (10er-Grenze, SC-37)"
+    assert "data/champions_pokedex.json" in zeilen[0] and "data/champions_neu.json" in zeilen[0]
+    gemerkt = (b / "tmp" / "tor_zurueckgerollt.txt").read_text().split()
+    assert {"data/champions_usage.json", "data/champions_pokedex.json"} <= set(gemerkt), gemerkt
+
+
+def test_steht_der_commit_schon_kommt_die_ganze_familie_hinein(tmp_path):
+    """Prueffund SC-41: ein gemeinsames `git add` mit einer geloeschten, nie
+    getrackten Datei scheitert — dann waere auch die STOPP-Datei nicht im Commit."""
+    b = _baum(tmp_path)
+    (b / "data" / "champions_usage.json").write_text(json.dumps(list(range(2000))))
+    git(b, "add", "-A")
+    git(b, "commit", "-qm", "familie")
+    git(b, "update-ref", "refs/remotes/origin/main", "HEAD")
+    (b / "data" / "champions_usage.json").write_text(json.dumps(list(range(300))))
+    (b / "data" / "gross.json").write_text(json.dumps(list(range(1900))))   # der Rest des Laufs
+    git(b, "add", "data/champions_usage.json", "data/gross.json")
+    git(b, "commit", "-qm", "lauf")                                   # Commit vor dem Tor
+    (b / "data" / "champions_neu.json").write_text("{}")              # ungetrackt, Familie
+    rc, aus = _tor(b)
+    assert rc == 0, aus
+    im_commit = json.loads(git(b, "show", "HEAD:data/champions_usage.json"))
+    assert len(im_commit) == 2000, "der geschrumpfte Stand steht noch im Commit"
+    assert len(json.loads(git(b, "show", "HEAD:data/gross.json"))) == 1900, "der Rest fehlt im Commit"
 
 
 def test_der_waechter_kennt_jeden_erlaubten_eintrag_mit_grund():

@@ -80,11 +80,16 @@ if [ "${TOR_OHNE_SCHRUMPF:-0}" != "1" ] && [ -f scripts/schrumpf_waechter.py ]; 
         } >> "$zusammenfassung"
         echo "$schrumpf" | grep -E '^(WARNUNG|STOPP|STOPP-FAMILIE):' | sed 's/^/::warning::Schrumpf-Waechter /'
         # Steht der Commit schon, die zurueckgesetzten Dateien in ihn aufnehmen.
-        stopp_dateien="$(echo "$schrumpf" | sed -n 's/^STOPP\(-FAMILIE\)\{0,1\}: \([^ ]*\) .*/\2/p')"
+        stopp_dateien="$(echo "$schrumpf" | sed -n -e 's/^STOPP: \([^ ]*\) .*/\1/p' \
+            -e 's/^STOPP-FAMILIE: \(.*\) (gehen mit .*/\1/p' | tr ' ' '\n' | grep -v '^$' || true)"
+        # SC-41: wie Zurueckgerolltes ansagen (Frischepruefung, Rebase-Tor, SC-37).
+        [ -n "$stopp_dateien" ] && echo "$stopp_dateien" >> "${RUNNER_TEMP:-/tmp}/tor_zurueckgerollt.txt"
         if [ -n "$stopp_dateien" ] && git rev-parse -q --verify origin/main >/dev/null \
            && [ -n "$(git rev-list origin/main..HEAD)" ]; then
-            # shellcheck disable=SC2086
-            git add -- $stopp_dateien
+            # Je Datei einzeln: ein geloeschter, nie getrackter Pfad liesse ein
+            # gemeinsames `git add` mit „pathspec did not match" scheitern —
+            # und dann waere auch die STOPP-Datei nicht im Commit (Prueffund).
+            for f in $stopp_dateien; do git add -A -- "$f" 2>/dev/null || true; done
             [ -f data/data_stand.json ] && git add -- data/data_stand.json
         [ -f data/datenluecken.json ] && git add -- data/datenluecken.json  # SC-29: neu erzeugt
             git commit -q --amend --no-edit || true

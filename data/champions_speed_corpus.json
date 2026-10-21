@@ -1,17 +1,17 @@
 {
   "_meta": {
-    "last_updated": "2026-10-20",
+    "last_updated": "2026-10-21",
     "window_days": 14,
-    "window_start": "2026-10-06",
-    "window_end": "2026-10-20",
+    "window_start": "2026-10-07",
+    "window_end": "2026-10-21",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
     "content_to": "2026-10-16",
     "samples_outside_window": 156,
-    "team_count": 96,
-    "teams_with_samples": 95,
-    "sample_count": 576,
-    "species_count": 82,
+    "team_count": 94,
+    "teams_with_samples": 93,
+    "sample_count": 564,
+    "species_count": 81,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
   "samples": [
@@ -2914,48 +2914,6 @@
       "replica": "B3FHCE059U"
     },
     {
-      "species": "Whimsicott",
-      "evs": "26 SpA / 21 SpD / 19 Spe",
-      "nature": "Timid",
-      "date": "6 Oct 2026",
-      "replica": "1T1M4UQVCF"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "6 Oct 2026",
-      "replica": "1T1M4UQVCF"
-    },
-    {
-      "species": "Indeedee",
-      "evs": "2 Def / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "6 Oct 2026",
-      "replica": "1T1M4UQVCF"
-    },
-    {
-      "species": "Glimmora",
-      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-      "nature": "Timid",
-      "date": "6 Oct 2026",
-      "replica": "1T1M4UQVCF"
-    },
-    {
-      "species": "Basculegion-F",
-      "evs": "2 Def / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "6 Oct 2026",
-      "replica": "1T1M4UQVCF"
-    },
-    {
-      "species": "Ninetales",
-      "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "6 Oct 2026",
-      "replica": "1T1M4UQVCF"
-    },
-    {
       "species": "Indeedee-F",
       "evs": "31 HP / 32 Def / 3 SpD",
       "nature": "Relaxed",
@@ -3206,48 +3164,6 @@
       "nature": "Modest",
       "date": "10 Oct 2026",
       "replica": "WG1HTHQQ4G"
-    },
-    {
-      "species": "Tyranitar",
-      "evs": "32 HP / 26 Atk / 8 SpD",
-      "nature": "Adamant",
-      "date": "6 Oct 2026",
-      "replica": "P8R8JUAEMB"
-    },
-    {
-      "species": "Excadrill",
-      "evs": "32 Atk / 2 Def / 32 Spe",
-      "nature": "Adamant",
-      "date": "6 Oct 2026",
-      "replica": "P8R8JUAEMB"
-    },
-    {
-      "species": "Corviknight",
-      "evs": "32 HP / 1 Atk / 6 Def / 24 SpD / 3 Spe",
-      "nature": "Impish",
-      "date": "6 Oct 2026",
-      "replica": "P8R8JUAEMB"
-    },
-    {
-      "species": "Glimmora",
-      "evs": "18 HP / 16 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "6 Oct 2026",
-      "replica": "P8R8JUAEMB"
-    },
-    {
-      "species": "Charizard",
-      "evs": "22 HP / 30 Atk / 10 Def / 4 Spe",
-      "nature": "Adamant",
-      "date": "6 Oct 2026",
-      "replica": "P8R8JUAEMB"
-    },
-    {
-      "species": "Kommo-o",
-      "evs": "25 HP / 11 SpA / 1 SpD / 29 Spe",
-      "nature": "Modest",
-      "date": "6 Oct 2026",
-      "replica": "P8R8JUAEMB"
     },
     {
       "species": "Vanilluxe",

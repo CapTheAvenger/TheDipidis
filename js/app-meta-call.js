@@ -278,7 +278,7 @@ window.MetaCall = (function () {
       if (!name || !Number.isFinite(Number(z.prognose))) return;
       zeilen.set(normalize(name), z);
     });
-    return zeilen.size ? { meta: j._meta || {}, modell: j.modell || {}, zeilen } : null;
+    return zeilen.size ? { meta: j._meta || {}, modell: j.modell || {}, verfahren: j.verfahren || null, zeilen } : null;
   }
 
   function _prognoseDateiAnwenden() {
@@ -1334,7 +1334,14 @@ window.MetaCall = (function () {
    * laesst den Restposten ganz draussen und meldet es als Abdeckung. */
   const FELD_AUSWAHL_KEY = 'metacall_feldauswahl_v1';
   const FELD_VORWAHLEN   = [8, 16, 25];
-  let _feldAuswahl = null;   // null | Set<string>
+  let _feldAuswahl = null;   // null | Set<string> — nur innerhalb der Sitzung
+  /* FE-70 (Hausi 21.10.2026): „bei der Zusammensetzung des Metas soll es
+     top-down nach prognostiziertem Share sein". Gemerkt wird deshalb nur
+     noch die ANZAHL der Decks. Vorher stand im Speicher eine Namensliste,
+     und die fror das Feld ein, waehrend sich die Prognose bewegte: das
+     Bild vom 16.10. zeigte Kangaskhan Bouffalant (Rang 48 der Prognose),
+     aber nicht Mew Box (Rang 26, zugleich Empfehlung #5). */
+  let _feldAnzahl  = null;   // null = Voreinstellung TOP_N
   let _feldSuche   = '';
   let _feldAlle    = false;  // Kachelraster ganz ausgeklappt?
   /* Was buildField() beim letzten Lauf tun musste. Gelesen von der
@@ -1342,17 +1349,28 @@ window.MetaCall = (function () {
      Sorte Zahl, die niemand nachprueft, solange sie niemand sieht. */
   let _feldBilanz  = null;
 
+  /* Aus einem gespeicherten Stand die Anzahl lesen. Alte Staende tragen
+     eine Namensliste — von ihr zaehlt nur noch die Laenge. */
+  function _feldAnzahlAusSpeicher(roh) {
+    if (!roh) return null;
+    const n = Number(roh.anzahl);
+    if (roh.anzahl !== undefined && roh.anzahl !== null && Number.isFinite(n) && n >= 0) return Math.floor(n);
+    if (Array.isArray(roh.decks)) return roh.decks.length;
+    return null;
+  }
+
   (function _feldAuswahlLaden() {
     try {
       const roh = JSON.parse(localStorage.getItem(FELD_AUSWAHL_KEY) || 'null');
-      if (roh && Array.isArray(roh.decks)) _feldAuswahl = new Set(roh.decks.map(String));
+      _feldAnzahl = _feldAnzahlAusSpeicher(roh);
     } catch (_e) { /* kein Speicher, kein Problem */ }
   }());
 
   function _feldAuswahlMerken() {
     try {
-      if (!_feldAuswahl) localStorage.removeItem(FELD_AUSWAHL_KEY);
-      else localStorage.setItem(FELD_AUSWAHL_KEY, JSON.stringify({ decks: [..._feldAuswahl] }));
+      const n = _feldAuswahl ? _feldAuswahl.size : _feldAnzahl;
+      if (n === null || n === undefined) localStorage.removeItem(FELD_AUSWAHL_KEY);
+      else localStorage.setItem(FELD_AUSWAHL_KEY, JSON.stringify({ anzahl: n }));
     } catch (_e) { /* kein Speicher, kein Problem */ }
   }
 
@@ -1378,7 +1396,16 @@ window.MetaCall = (function () {
   function _feldTeilung(sortiert) {
     const liste = sortiert || _feldSortiert();
     if (!_feldAuswahl) {
-      return { genannt: liste.slice(0, TOP_N), rest: liste.slice(TOP_N) };
+      /* Von oben nach unten nach prognostiziertem Anteil (FE-70). Ein Deck
+         mit eigener Schaetzung bleibt einzeln — sonst ginge die Schaetzung
+         still verloren, sobald es aus den oberen n rutscht. */
+      const n = (typeof _feldAnzahl === 'number') ? _feldAnzahl : TOP_N;
+      const eigen = (typeof _personalShares !== 'undefined' && _personalShares) ? _personalShares : {};
+      const genannt = [], rest = [];
+      liste.forEach((d, i) => {
+        (i < n || Object.prototype.hasOwnProperty.call(eigen, d.name) ? genannt : rest).push(d);
+      });
+      return { genannt, rest };
     }
     const genannt = [], rest = [];
     liste.forEach(d => { (_feldAuswahl.has(d.name) ? genannt : rest).push(d); });
@@ -1387,7 +1414,11 @@ window.MetaCall = (function () {
 
   /** Kennung der aktuellen Auswahl — fuer den Zwischenspeicher der Restquote. */
   function _feldAuswahlSchluessel() {
-    return _feldAuswahl ? [..._feldAuswahl].sort().join('\u0001') : '*';
+    if (_feldAuswahl) return [..._feldAuswahl].sort().join('\u0001');
+    const n = (typeof _feldAnzahl === 'number') ? _feldAnzahl : '';
+    const eigen = (typeof _personalShares !== 'undefined' && _personalShares)
+      ? Object.keys(_personalShares).sort().join('\u0001') : '';
+    return '*' + n + '\u0002' + eigen;
   }
 
   const MAX_CUSTOM = 10;         // max custom decks the user can add
@@ -11578,6 +11609,22 @@ window.MetaCall = (function () {
     const datum = (iso) => String(iso || '').split('-').reverse().join('.');
     const anker = Number(mo.anker) || 0;
     const mae = Number(mo.mae_mittel);
+    /* Seit 21.10.2026 rechnet das Skript den Rueckblick selbst mit: der
+       mittlere Fehler der 25 groessten Decks an den vergangenen Majors.
+       Vorher stand hier `mae_mittel` — das ist der Abstand Online gegen
+       Major ueber ALLE Decks und nicht der Fehler der Prediction. */
+    const rb = _prognoseDatei.verfahren && _prognoseDatei.verfahren.rueckblick;
+    if (rb && Number.isFinite(Number(rb.mae)) && Number(rb.turniere) > 0) {
+      return `<p class="mc-mct-quelle">${esc(L(
+        'Online: ' + datum(m.online_von) + '–' + datum(m.online_bis) + ', ' + zahlLokal(Number(m.online_listen) || 0)
+          + ' Listen (' + (m.fenster || '') + '). Prediction: rückblickend an ' + Number(rb.turniere) + ' Majors geprüft, die '
+          + Number(rb.decks || 25) + ' größten Decks liegen im Mittel ' + _mcNum(Number(rb.mae), 1)
+          + ' Prozentpunkte daneben. Matchups und Day-2 aus gezählten Matches.',
+        'Online: ' + (m.online_von || '') + ' to ' + (m.online_bis || '') + ', ' + zahlLokal(Number(m.online_listen) || 0)
+          + ' lists (' + (m.fenster || '') + '). Forecast: back-tested on ' + Number(rb.turniere) + ' majors, the '
+          + Number(rb.decks || 25) + ' largest decks off by ' + _mcNum(Number(rb.mae), 1)
+          + ' percentage points on average. Pairings and Day 2 from counted matches.'))}</p>`;
+    }
     return `<p class="mc-mct-quelle">${esc(L(
       'Online: ' + datum(m.online_von) + '–' + datum(m.online_bis) + ', ' + zahlLokal(Number(m.online_listen) || 0)
         + ' Listen (' + (m.fenster || '') + '). Prediction: an ' + anker + ' Regionals geprüft, liegt im Mittel '
@@ -11591,13 +11638,15 @@ window.MetaCall = (function () {
     const de = _mcIstDeutsch();
     const L = (d, e) => (de ? d : e);
     const sortiert = _feldSortiert();
+    const anzahl = (typeof _feldAnzahl === 'number') ? _feldAnzahl : TOP_N;
     const istVorwahl = (n) => {
-      if (!_feldAuswahl) return n === TOP_N;
+      if (!_feldAuswahl) return n === anzahl;
       if (_feldAuswahl.size !== n) return false;
       return sortiert.slice(0, n).every(d => _feldAuswahl.has(d.name));
     };
-    const istAlle  = !!_feldAuswahl && _feldAuswahl.size === sortiert.length;
-    const istKeine = !!_feldAuswahl && _feldAuswahl.size === 0;
+    const istAlle  = _feldAuswahl ? _feldAuswahl.size === sortiert.length
+      : anzahl >= sortiert.length && sortiert.length > 0;
+    const istKeine = _feldAuswahl ? _feldAuswahl.size === 0 : anzahl === 0;
     const pille = (id, text, aktiv) =>
       `<button type="button" class="mc-feld-pille${aktiv ? ' is-aktiv' : ''}"
                onclick="MetaCall._setFeldVorwahl('${id}')">${esc(text)}</button>`;
@@ -11723,13 +11772,16 @@ window.MetaCall = (function () {
 
   function _setFeldVorwahl(id) {
     const sortiert = _feldSortiert();
-    if (id === 'alle')       _feldAuswahl = new Set(sortiert.map(d => d.name));
-    else if (id === 'keine') _feldAuswahl = new Set();
+    /* FE-70: eine Vorwahl ist eine ANZAHL, keine Namensliste — das Feld
+       folgt so jeder neuen Prognose von oben nach unten. */
+    if (id === 'alle')       _feldAnzahl = 9999;   // auch kuenftige Decks
+    else if (id === 'keine') _feldAnzahl = 0;
     else {
       const n = parseInt(id, 10);
       if (!(n > 0)) return;
-      _feldAuswahl = new Set(sortiert.slice(0, n).map(d => d.name));
+      _feldAnzahl = n;
     }
+    _feldAuswahl = null;
     _feldAuswahlMerken();
     _feldNeu();
   }
@@ -11739,7 +11791,9 @@ window.MetaCall = (function () {
     /* Beim ersten Klick aus der Voreinstellung heraus wird sie zuerst
        ausgeschrieben — sonst waere „Dragapult abwaehlen" gleichbedeutend
        mit „nur Dragapult waehlen". */
-    if (!_feldAuswahl) _feldAuswahl = new Set(sortiert.slice(0, TOP_N).map(d => d.name));
+    /* Dieselbe Regel wie _feldTeilung — sonst fiele ein Deck mit eigener
+       Schaetzung beim ersten Klick aus dem Feld (Pruefagent 21.10.2026). */
+    if (!_feldAuswahl) _feldAuswahl = new Set(_feldTeilung(sortiert).genannt.map(d => d.name));
     if (_feldAuswahl.has(name)) _feldAuswahl.delete(name);
     else _feldAuswahl.add(name);
     _feldAuswahlMerken();
@@ -15597,7 +15651,7 @@ window.MetaCall = (function () {
           /* Vor JEDEM Szenario zurueck auf den Ausgangsstand: _applyState
              mischt `settings` in die vorhandenen, sonst traegt Szenario B
              die Einstellungen von A weiter. */
-          _applyState(original);
+          _applyState(original, true);
           _applyState(alle[name]);
           const paket = _postPaket(name);
           if (paket) aus.push({ titel: name, daten: paket });
@@ -15605,7 +15659,7 @@ window.MetaCall = (function () {
       });
     } finally {
       try {
-        _applyState(original);
+        _applyState(original, true);
         /* ERSETZEN, NICHT MISCHEN (Pruefagent, 26.09.2026). `_applyState`
          * spreizt `settings` IN die vorhandenen — ein Schluessel, den nur
          * ein altes Szenario fuehrt, ueberlebt das Zuruecksetzen sonst.
@@ -16531,10 +16585,18 @@ window.MetaCall = (function () {
          koennen, sonst laedt „keine Decks einzeln" als „die groessten
          25" zurueck. */
       feldAuswahl      : _feldAuswahl ? [..._feldAuswahl] : null,
+      /* FE-70: beim Laden zaehlt nur die Anzahl; die Liste kommt frisch
+         aus der Prognose. */
+      feldAnzahl       : _feldAuswahl ? _feldAuswahl.size : _feldAnzahl,
     };
   }
 
-  function _applyState(state) {
+  /* `exakt`: den EIGENEN Stand dieser Sitzung zuruecksetzen (nach dem
+     Szenario-Durchlauf fuer die Post-Seite) — dann gilt auch eine
+     Handauswahl wieder. Ein gespeichertes Szenario laedt dagegen nur die
+     Anzahl: das Feld folgt der aktuellen Prognose (FE-70, Pruefagent
+     21.10.2026). */
+  function _applyState(state, exakt) {
     if (!state) return;
     _settings = { ..._settings, ...(state.settings || {}) };
     _personalShares   = { ...(state.personalShares   || {}) };
@@ -16543,8 +16605,16 @@ window.MetaCall = (function () {
       ? state.customDecks.map(c => ({ name: c.name || '', share: Number(c.share) || 0 }))
       : [];
     _groupByMain      = !!state.groupByMain;
-    _feldAuswahl      = Array.isArray(state.feldAuswahl)
-      ? new Set(state.feldAuswahl.map(String)) : null;
+    if (exakt && Array.isArray(state.feldAuswahl)) {
+      _feldAuswahl = new Set(state.feldAuswahl.map(String));
+      _feldAnzahl  = _feldAnzahlAusSpeicher({ anzahl: state.feldAnzahl });
+    } else {
+    _feldAuswahl      = null;
+    _feldAnzahl       = _feldAnzahlAusSpeicher(
+      state.feldAnzahl !== undefined && state.feldAnzahl !== null
+        ? { anzahl: state.feldAnzahl }
+        : (Array.isArray(state.feldAuswahl) ? { decks: state.feldAuswahl } : null));
+    }
     _feldAuswahlMerken();
 
     // Rebuild journal stats for the new deck if one is set

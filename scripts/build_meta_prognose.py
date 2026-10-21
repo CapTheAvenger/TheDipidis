@@ -69,6 +69,38 @@ Die Verdichtung selbst ist davon unberuehrt: sie ist ein Verhalten von
 Spielern, kein Kartenwert, und wiederholt sich in allen drei Fenstern.
 Sie darf also fensteruebergreifend gelernt und im laufenden Fenster
 angewendet werden. Anteile und Quoten duerfen es nicht.
+
+SEIT 21.10.2026: DREI SCHRITTE STATT „SPITZE + FESTER AUFSCHLAG"
+--------------------------------------------------------------
+Abgleich Prognose gegen Realitaet (Louisville 10.10., Nizza 17.10.,
+Projektwissen `claude/metacall-lernbuch.md`): zweimal lagen rund 6
+Prozentpunkte zu viel bei den kleinen Decks, und die Decks, die beim
+Turnier davor gut durch Day 1 kamen, wurden zu klein geschaetzt
+(Nizza: Dragapult +3,3, Festival Lead +3,1, Dragapult Blaziken +2,5 pp —
+die drei besten Day-2-Quoten von Louisville). Die Rechnung ist jetzt:
+
+1. Verdichtung als Potenz: Anteil ~ Online-Anteil ** POTENZ, wieder auf
+   dieselbe Summe gebracht. Grosse Decks wachsen, kleine schrumpfen —
+   stetig, ohne die harte Grenze „Top 5".
+2. Erfolg beim letzten Major im selben Format: jeder Anteil mal
+   (Day-2-Quote des Decks / Day-2-Quote des Feldes) ** ERFOLG_EXPONENT,
+   die Quote geschrumpft wie in `deckempfehlung.json` (K = 30).
+3. Mischung mit dem Anteil beim letzten Major: MISCHUNG Anteil Major,
+   der Rest aus Schritt 1+2.
+
+Ohne Major im laufenden Format (erste Woche nach einem Setwechsel) gilt
+nur Schritt 1. Die Parameter sind im Rueckblick gewaehlt — jedes
+Turnier nur mit dem, was davor bekannt war, 13 Ziele von Campinas
+(16.05.) bis Nizza (17.10.), mittlerer Fehler der 25 groessten Decks:
+
+    alte Rechnung (Spitze + Median-Aufschlag)   1,19 pp
+    neue Rechnung (1,2 · 0,5 · 0,35)            0,91 pp
+    besser in 13 von 13 Turnieren; Nachbarwerte (Potenz 1,15, Mischung
+    0,5, Exponent 1,0) 0,92 / 0,91 / 0,94 — kein Glueckstreffer.
+    Online-Fenster „nur seit dem letzten Major" brachte nichts (0,93).
+
+Die gemessene Verdichtung je Anker bleibt im Modell stehen — sie ist der
+Beleg, dass die Spitze waechst, und die Grundlage der Anker-Guete.
 """
 
 from __future__ import annotations
@@ -100,6 +132,16 @@ MIN_VORLAUF_LISTEN = 300
 # verdichtet. Fuenf, weil die Messung oben mit fuenf gemacht wurde;
 # andere Werte ergaeben andere Verdichtungszahlen.
 SPITZE = 5
+
+# Seit 21.10.2026 (Rueckblick siehe Dateikopf).
+POTENZ = 1.2
+ERFOLG_EXPONENT = 0.5
+ERFOLG_SCHRUMPF = 30      # wie deckempfehlung.json: K = 30 Spieler
+MISCHUNG = 0.35           # Anteil des letzten Majors an der Prognose
+LETZTES_MAJOR_MAX_TAGE = 35
+# Fuer das Band: dieselbe Rechnung mit Nachbarwerten.
+BAND_POTENZ = (1.1, 1.3)
+BAND_MISCHUNG = (0.2, 0.5)
 
 
 def _lies(pfad: str, trenner: str = ";") -> List[dict]:
@@ -158,6 +200,10 @@ def online_anteile(zeilen: List[dict], meta: str, von: str, bis: str
 # existieren getrennt. Ohne diese Tabelle ist die Datei fuer eine Anzeige
 # nicht brauchbar, ohne dass man Namen raet.
 NAMEN: Dict[str, str] = {}
+# Namen aus den Labs-Dateien — nur fuer Decks, die online gar nicht
+# vorkommen, aber beim letzten Major gespielt wurden (deck_slug ist
+# dieselbe Kennung wie archetype_id, gemessen 20.10.2026).
+MAJOR_NAMEN: Dict[str, str] = {}
 
 
 def praesenz_anker(datenverzeichnis: str) -> List[dict]:
@@ -177,6 +223,7 @@ def praesenz_anker(datenverzeichnis: str) -> List[dict]:
         if meta.startswith("_"):
             continue
         proturnier: Dict[Tuple[str, str], Dict[str, float]] = defaultdict(dict)
+        day2: Dict[Tuple[str, str], Dict[str, Tuple[int, int]]] = defaultdict(dict)
         groesse: Dict[Tuple[str, str], int] = {}
         art: Dict[Tuple[str, str], str] = {}
         for zeile in _lies(pfad, ","):
@@ -189,11 +236,21 @@ def praesenz_anker(datenverzeichnis: str) -> List[dict]:
             if slug and slug != SAMMELEIMER:
                 anteil = zeile.get("day1_share_pct") or zeile.get("share_pct") or 0
                 proturnier[schluessel][slug] = float(anteil or 0)
+                try:
+                    n = int(float(zeile.get("player_count") or zeile.get("day1_players") or 0))
+                    d = int(float(zeile.get("day2_players") or 0))
+                except ValueError:
+                    n, d = 0, 0
+                day2[schluessel][slug] = (n, d)
+                name = (zeile.get("deck_name") or "").strip()
+                if name:
+                    MAJOR_NAMEN.setdefault(slug, name)
         for schluessel, anteile in proturnier.items():
             heraus.append({
                 "datum": schluessel[0], "name": schluessel[1], "meta": meta,
                 "art": art.get(schluessel, ""), "spieler": groesse.get(schluessel, 0),
                 "anteile": anteile,
+                "day2": dict(day2.get(schluessel, {})),
             })
     heraus.sort(key=lambda x: x["datum"])
     return heraus
@@ -271,8 +328,125 @@ def modell(verdichtungen: List[dict], art: Optional[str] = None) -> Optional[dic
     }
 
 
+def letztes_major(anker: List[dict], fenster: str, bis: str,
+                  max_tage: int = LETZTES_MAJOR_MAX_TAGE) -> Optional[dict]:
+    """Das juengste Praesenzturnier im LAUFENDEN Format vor `bis`.
+
+    Mehrere am selben Tag (Frankfurt und Brisbane, 26.09.) werden nach
+    Spielerzahl gewichtet zusammengelegt. Nur dasselbe Format: im neuen
+    Format gibt es andere Karten, ein altes Major sagt dort nichts.
+    """
+    frueheste = _minus_tage(bis, max_tage)
+    passend = [a for a in anker
+               if a.get("meta") == fenster and frueheste <= a["datum"] <= bis]
+    if not passend:
+        return None
+    tag = max(a["datum"] for a in passend)
+    gleich = [a for a in passend if a["datum"] == tag]
+    spieler = sum(a.get("spieler") or 0 for a in gleich) or len(gleich)
+    anteile: Dict[str, float] = defaultdict(float)
+    n: Dict[str, int] = defaultdict(int)
+    d: Dict[str, int] = defaultdict(int)
+    for a in gleich:
+        gewicht = (a.get("spieler") or 1) / spieler
+        for k, v in a["anteile"].items():
+            anteile[k] += v * gewicht
+        tag2 = a.get("day2") or {}
+        # Ein Turnier ohne jede Day-2-Zahl (aeltere Labs-Datei ohne Spalte)
+        # zaehlt fuer den Erfolg nicht mit — sonst drueckten seine Spieler
+        # die Quoten (Pruefagent 21.10.2026).
+        if sum(dd for _, dd in tag2.values()) <= 0:
+            continue
+        for k, (nn, dd) in tag2.items():
+            n[k] += nn
+            d[k] += dd
+    return {"datum": tag, "namen": [a["name"] for a in gleich],
+            "spieler": sum(a.get("spieler") or 0 for a in gleich),
+            "anteile": dict(anteile), "day2": {k: (n[k], d[k]) for k in n}}
+
+
+def _erfolg(vorher: Optional[dict]) -> Tuple[Dict[str, float], float]:
+    """Geschrumpfte Day-2-Quote je Deck und die Quote des Feldes."""
+    if not vorher or not vorher.get("day2"):
+        return {}, 0.0
+    n_ges = sum(n for n, _ in vorher["day2"].values())
+    d_ges = sum(d for _, d in vorher["day2"].values())
+    if n_ges <= 0 or d_ges <= 0:
+        return {}, 0.0
+    feld = d_ges / n_ges
+    return ({k: (d + ERFOLG_SCHRUMPF * feld) / (n + ERFOLG_SCHRUMPF * 1.0)
+             for k, (n, d) in vorher["day2"].items()}, feld)
+
+
+def rechne(aktuell: Dict[str, float], vorher: Optional[dict] = None,
+           potenz: float = POTENZ, mischung: float = MISCHUNG,
+           exponent: float = ERFOLG_EXPONENT) -> Dict[str, float]:
+    """Die Prognose in drei Schritten (siehe Dateikopf).
+
+    Die Summe bleibt die der Online-Zeilen: der Sammeleimer `other`
+    steht im Nenner, aber in keiner Zeile, und behaelt seinen Teil.
+    """
+    summe = sum(aktuell.values())
+    if summe <= 0:
+        return {}
+    roh = {k: v ** potenz for k, v in aktuell.items() if v > 0}
+    z = sum(roh.values())
+    p = {k: summe * v / z for k, v in roh.items()}
+    if vorher:
+        quote, feld = _erfolg(vorher)
+        if feld > 0 and exponent:
+            p = {k: v * (quote.get(k, feld) / feld) ** exponent for k, v in p.items()}
+            z = sum(p.values())
+            p = {k: summe * v / z for k, v in p.items()}
+        major = {k: v for k, v in vorher.get("anteile", {}).items() if v > 0}
+        zm = sum(major.values())
+        if mischung and zm > 0:
+            major = {k: summe * v / zm for k, v in major.items()}
+            schluessel = set(p) | set(major)
+            p = {k: (1 - mischung) * p.get(k, 0.0) + mischung * major.get(k, 0.0)
+                 for k in schluessel}
+    return p
+
+
+RUECKBLICK_DECKS = 25
+
+
+def rueckblick(archetypen: List[dict], anker: List[dict]) -> Optional[dict]:
+    """Wie weit die Rechnung an den vergangenen Majors daneben lag.
+
+    Je auswertbarem Anker (ohne Worlds — Einladungsfeld): Online-Vorlauf
+    wie in `messe_verdichtung`, letztes Major davor im selben Format,
+    dann `rechne`. Gemessen wird der mittlere Fehler der 25 Decks mit der
+    groessten Prognose — dieselbe Kennzahl wie im Lernbuch
+    (`claude/metacall-lernbuch.md`). Diese Zahl nennt der Meta Call in
+    seiner Quellenzeile; sie wird bei jedem Lauf neu gerechnet, damit der
+    Satz nie eine alte Zahl behauptet.
+    """
+    je = []
+    for a in anker:
+        if "World" in a.get("name", ""):
+            continue
+        vor, listen, _ = online_anteile(
+            archetypen, a["meta"],
+            _minus_tage(a["datum"], VORLAUF_TAGE), _minus_tage(a["datum"], 1))
+        if listen < MIN_VORLAUF_LISTEN:
+            continue
+        frueher = [x for x in anker if x["datum"] < a["datum"]]
+        vorher = letztes_major(frueher, a["meta"], _minus_tage(a["datum"], 1))
+        p = rechne(vor, vorher)
+        oben = sorted(p.items(), key=lambda x: -x[1])[:RUECKBLICK_DECKS]
+        if len(oben) < RUECKBLICK_DECKS:
+            continue
+        fehler = sum(abs(v - a["anteile"].get(k, 0.0)) for k, v in oben) / len(oben)
+        je.append({"datum": a["datum"], "name": a["name"], "mae": round(fehler, 4)})
+    if not je:
+        return None
+    return {"turniere": len(je), "decks": RUECKBLICK_DECKS,
+            "mae": round(sum(x["mae"] for x in je) / len(je), 4), "je_turnier": je}
+
+
 def prognose(aktuell: Dict[str, float], roh: Dict[str, int], gesamt: int,
-             m: Optional[dict]) -> List[dict]:
+             m: Optional[dict], vorher: Optional[dict] = None) -> List[dict]:
     """Erwarteter Praesenzanteil je Archetyp.
 
     Die Verdichtung wird auf die Spitze verteilt und dem Rest anteilig
@@ -280,34 +454,42 @@ def prognose(aktuell: Dict[str, float], roh: Dict[str, int], gesamt: int,
     und die Bandbreite aus min/max der Anker; ohne Modell gibt es keine
     Prognose, sondern nur den Online-Anteil und einen Hinweis.
     """
-    rang = sorted(aktuell.items(), key=lambda x: -x[1])
+    mitte_alle: Dict[str, float] = {}
+    varianten: List[Dict[str, float]] = []
+    if m:
+        mitte_alle = rechne(aktuell, vorher)
+        for pz in BAND_POTENZ:
+            for mi in (BAND_MISCHUNG if vorher else (MISCHUNG,)):
+                varianten.append(rechne(aktuell, vorher, potenz=pz, mischung=mi))
+    # Decks, die nur beim letzten Major vorkamen, bekommen eine Zeile —
+    # mit Online-Anteil 0, denn online wurden sie nicht gespielt.
+    alle = dict(aktuell)
+    for k in mitte_alle:
+        # Nur mit Namen: eine Zeile ohne Namen kann der Meta Call keinem
+        # Deck zuordnen, und test-meta-prognose.js verlangt fuer jede Zeile
+        # einen. Ohne Namen bleibt der Anteil im Rest („Sonstige").
+        if k in alle or NAMEN.get(k) or MAJOR_NAMEN.get(k):
+            alle.setdefault(k, 0.0)
+    if m:
+        rang = sorted(alle.items(), key=lambda x: (-mitte_alle.get(x[0], 0.0), -x[1]))
+    else:
+        rang = sorted(alle.items(), key=lambda x: -x[1])
     spitze = {k for k, _ in rang[:SPITZE]}
-    spitze_summe = sum(v for k, v in aktuell.items() if k in spitze)
-    rest_summe = 100.0 - spitze_summe
-
-    def verteile(delta: float) -> Dict[str, float]:
-        aus = {}
-        for k, v in aktuell.items():
-            if k in spitze:
-                aus[k] = v + (delta * v / spitze_summe if spitze_summe > 0 else 0.0)
-            else:
-                aus[k] = v - (delta * v / rest_summe if rest_summe > 0 else 0.0)
-        return aus
 
     heraus = []
     for k, v in rang:
         zeile = {
             "archetyp_id": k,
-            "archetyp_name": NAMEN.get(k, ""),
+            "archetyp_name": NAMEN.get(k, "") or MAJOR_NAMEN.get(k, ""),
             "online_anteil": round(v, 4),
             "online_listen": roh.get(k, 0),
             "online_listen_gesamt": gesamt,
             "in_der_spitze": k in spitze,
         }
         if m:
-            mitte = verteile(m["verdichtung_median"])[k]
-            unten = verteile(m["verdichtung_min"])[k]
-            oben = verteile(m["verdichtung_max"])[k]
+            mitte = mitte_alle.get(k, 0.0)
+            werte = [mitte] + [x.get(k, 0.0) for x in varianten]
+            unten, oben = min(werte), max(werte)
             zeile.update({
                 "prognose": round(max(0.0, mitte), 4),
                 "prognose_von": round(max(0.0, min(unten, oben)), 4),
@@ -341,6 +523,7 @@ def baue(datenverzeichnis: str, fenster: Optional[str] = None,
         raise SystemExit(f"::error::keine Online-Daten fuer das Fenster {fenster}")
     aktuell, gesamt, roh = online_anteile(
         archetypen, fenster, _minus_tage(tage[-1], VORLAUF_TAGE), tage[-1])
+    vorher = letztes_major(anker, fenster, tage[-1])
 
     return {
         "_meta": {
@@ -362,9 +545,20 @@ def baue(datenverzeichnis: str, fenster: Optional[str] = None,
             ),
         },
         "modell": genommen,
+        "verfahren": {
+            "seit": "2026-10-21",
+            "schritte": "Potenz auf den Online-Anteil, Erfolg beim letzten Major, Mischung mit dessen Anteil",
+            "potenz": POTENZ,
+            "erfolg_exponent": ERFOLG_EXPONENT,
+            "erfolg_schrumpf": ERFOLG_SCHRUMPF,
+            "mischung": MISCHUNG if vorher else 0.0,
+            "letztes_major": ({"datum": vorher["datum"], "turniere": vorher["namen"],
+                               "spieler": vorher["spieler"]} if vorher else None),
+            "rueckblick": rueckblick(archetypen, anker),
+        },
         "modell_alle_arten": m_alle,
         "anker": verdichtungen,
-        "prognose": prognose(aktuell, roh, gesamt, genommen),
+        "prognose": prognose(aktuell, roh, gesamt, genommen, vorher),
     }
 
 

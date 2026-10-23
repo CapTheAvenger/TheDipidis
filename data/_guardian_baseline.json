@@ -125,7 +125,7 @@
    "PLS 130"
   ]
  },
- "champions_teams": 86,
+ "champions_teams": 89,
  "champions_ueber_grenze": 0,
  "empty_files": {
   "labs_tournament_decks__unsorted.csv": true
@@ -141,17 +141,17 @@
   "champions_type_chart.json": 183,
   "cm_expansions.csv": 785,
   "japanese_cards_database.csv": 1076,
-  "online_api_archetypes.csv": 23252,
-  "online_api_cards_TEF-30C.csv": 138902,
-  "online_api_matchups_TEF-30C.csv": 41763,
-  "online_api_tournaments.csv": 533,
+  "online_api_archetypes.csv": 23388,
+  "online_api_cards_TEF-30C.csv": 142961,
+  "online_api_matchups_TEF-30C.csv": 42967,
+  "online_api_tournaments.csv": 536,
   "opgg_champions_moves.json": 2072,
   "pokemon_go_liste.json": 981,
   "pokemon_go_shiny.json": 1001,
   "price_data.csv": 20601,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-10-22 09:40 UTC",
+ "generated": "2026-10-23 09:40 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,

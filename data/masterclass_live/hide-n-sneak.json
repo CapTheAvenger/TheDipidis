@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-10-23T03:52:14Z",
+  "erzeugt_am": "2026-10-23T07:08:58Z",
   "id": "hide-n-sneak",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1599,20 +1599,20 @@
    }
   ],
   "liste_online": {
-   "bilanz": "9-2-0",
-   "datum": "16.10.2026",
+   "bilanz": "9-1-0",
+   "datum": "22.10.2026",
    "karten": [
     [
      4,
-     "Poltchageist",
-     "PBL",
-     "5"
+     "Dunsparce",
+     "JTG",
+     "120"
     ],
     [
      4,
-     "Sinistcha",
-     "PBL",
-     "6"
+     "Dudunsparce",
+     "TEF",
+     "129"
     ],
     [
      4,
@@ -1621,7 +1621,7 @@
      "33"
     ],
     [
-     4,
+     3,
      "Banette",
      "PBL",
      "34"
@@ -1633,10 +1633,16 @@
      "39"
     ],
     [
-     1,
-     "Shaymin",
-     "DRI",
-     "10"
+     2,
+     "Poltchageist",
+     "PBL",
+     "5"
+    ],
+    [
+     2,
+     "Sinistcha",
+     "PBL",
+     "6"
     ],
     [
      1,
@@ -1646,21 +1652,21 @@
     ],
     [
      1,
-     "Latias ex",
-     "SSP",
-     "76"
+     "Bloodmoon Ursaluna ex",
+     "TWM",
+     "141"
     ],
     [
      1,
-     "Patrat",
-     "CRI",
-     "70"
+     "Fan Rotom",
+     "SCR",
+     "118"
     ],
     [
      1,
-     "Spiritomb",
-     "PBL",
-     "35"
+     "Shaymin",
+     "DRI",
+     "10"
     ],
     [
      4,
@@ -1681,12 +1687,6 @@
      "114"
     ],
     [
-     1,
-     "Naveen",
-     "POR",
-     "79"
-    ],
-    [
      4,
      "Poké Pad",
      "POR",
@@ -1699,22 +1699,34 @@
      "131"
     ],
     [
-     3,
+     2,
      "Night Stretcher",
      "ASC",
      "196"
     ],
     [
      1,
-     "Special Red Card",
-     "CRI",
-     "82"
+     "Buddy-Buddy Poffin",
+     "TEF",
+     "144"
     ],
     [
-     3,
+     1,
+     "Switch",
+     "MEG",
+     "130"
+    ],
+    [
+     2,
      "Prism Tower",
      "CRI",
      "80"
+    ],
+    [
+     1,
+     "Jamming Tower",
+     "TWM",
+     "153"
     ],
     [
      4,
@@ -1723,7 +1735,7 @@
      "88"
     ],
     [
-     3,
+     2,
      "Psychic Energy",
      "MEE",
      "13"
@@ -1736,9 +1748,9 @@
     ]
    ],
    "platz": 1,
-   "spieler": "THEGRAV",
-   "turnier": "Team Corna Weekly October's #4",
-   "von": 76
+   "spieler": "Tobias Freitag",
+   "turnier": "SEASAC League Challenge #11 (SEASON 6) [50 CODES]",
+   "von": 110
   },
   "listen_vor_ort": [
    {
@@ -2023,14 +2035,14 @@
   "name": "Dhelmise",
   "online": {
    "anteil": "4,44",
-   "anteil14": "5,02",
+   "anteil14": "5,63",
    "bilanz": [
     1697,
     1899,
     18
    ],
    "bis": "22.10.2026",
-   "fenster14": "06.10.–20.10.2026",
+   "fenster14": "09.10.–23.10.2026",
    "format": "TEF–30C",
    "kurz_anteil": "5,74",
    "kurz_bilanz": [
@@ -2043,7 +2055,7 @@
    "kurz_von": "16.10.2026",
    "listen": 732,
    "seit": "18.09.2026",
-   "trend14": "",
+   "trend14": "1,5",
    "turniere": 107
   },
   "vor_ort": {

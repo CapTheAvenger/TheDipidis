@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-10-23T03:52:14Z",
+  "erzeugt_am": "2026-10-23T07:08:58Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1873,14 +1873,14 @@
   "name": "Sharpedo Toxtricity",
   "online": {
    "anteil": "3,21",
-   "anteil14": "4,09",
+   "anteil14": "4,36",
    "bilanz": [
     1229,
     1360,
     22
    ],
    "bis": "22.10.2026",
-   "fenster14": "06.10.–20.10.2026",
+   "fenster14": "09.10.–23.10.2026",
    "format": "TEF–30C",
    "kurz_anteil": "4,11",
    "kurz_bilanz": [
@@ -1893,7 +1893,7 @@
    "kurz_von": "16.10.2026",
    "listen": 529,
    "seit": "18.09.2026",
-   "trend14": "",
+   "trend14": "1,68",
    "turniere": 107
   },
   "vor_ort": {

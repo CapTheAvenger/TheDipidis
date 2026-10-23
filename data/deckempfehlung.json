@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-10-20 11:57:27+00:00",
+ "erzeugt": "2026-10-23 07:08:10+00:00",
  "format": "TEF-30C",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -21,16 +21,20 @@
  ],
  "ankerspieler_gesamt": 5248,
  "online_abdeckung": {
-  "schnappschuss": "2026-10-20",
-  "anteil_unbekannt": 0.98,
+  "schnappschuss": "2026-10-23",
+  "anteil_unbekannt": 1.1,
   "groesste_unbekannte": [
    {
     "deck": "Mega Zygarde",
-    "anteil": 0.15
+    "anteil": 0.17
    },
    {
     "deck": "Zygarde Barbaracle",
-    "anteil": 0.08
+    "anteil": 0.09
+   },
+   {
+    "deck": "Erika's Victreebel",
+    "anteil": 0.07
    },
    {
     "deck": "Iono's Bellibolt",
@@ -38,11 +42,7 @@
    },
    {
     "deck": "Sinistcha Ogerpon",
-    "anteil": 0.06
-   },
-   {
-    "deck": "Mamoswine",
-    "anteil": 0.05
+    "anteil": 0.07
    }
   ]
  },

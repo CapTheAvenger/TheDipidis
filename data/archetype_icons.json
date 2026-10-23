@@ -3,12 +3,12 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-10-20T11:11:20",
-    "lastScrapedCount": 131,
+    "lastScrapedAt": "2026-10-23T06:32:08",
+    "lastScrapedCount": 133,
     "lastBackfilledAt": "2026-05-05T13:19:27",
     "lastBackfillCount": 342,
     "lastHarvestedFrom": "city_league_archetype_scraper",
-    "lastHarvestedAt": "2026-10-16T06:22:05"
+    "lastHarvestedAt": "2026-10-23T06:24:49"
   },
   "archetypes": {
     "Dragapult": [
@@ -2358,6 +2358,58 @@
     "Mega Rayquaza Ho-Oh": [
       "rayquaza-mega",
       "ho-oh"
+    ],
+    "Greninja Mega Lopunny": [
+      "greninja",
+      "lopunny-mega"
+    ],
+    "Leafeon Meowth": [
+      "leafeon",
+      "meowth"
+    ],
+    "Luxray Mega Eelektross": [
+      "luxray",
+      "eelektross-mega"
+    ],
+    "Azumarill Clefairy": [
+      "azumarill",
+      "clefairy"
+    ],
+    "Mega Greninja Talonflame": [
+      "greninja-mega",
+      "talonflame"
+    ],
+    "Mega Kangaskhan Pecharunt": [
+      "kangaskhan-mega",
+      "pecharunt"
+    ],
+    "Mega Starmie Mega Kangaskhan": [
+      "starmie-mega",
+      "kangaskhan-mega"
+    ],
+    "Avalugg Mega Abomasnow": [
+      "avalugg",
+      "abomasnow-mega"
+    ],
+    "Ho-Oh Talonflame": [
+      "ho-oh",
+      "talonflame"
+    ],
+    "Toucannon Dudunsparce": [
+      "toucannon",
+      "dudunsparce"
+    ],
+    "Metagross Archaludon": [
+      "metagross",
+      "archaludon"
+    ],
+    "Arboliva Mega Meganium": [
+      "arboliva",
+      "meganium-mega"
+    ],
+    "Typhlosion Toucannon": [
+      "typhlosion",
+      "toucannon"
     ]
   }
 }

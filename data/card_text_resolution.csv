@@ -1,465 +1,426 @@
 ﻿set,number,name,eur_price,status,current_product_id,current_product_name,resolved_product_id,resolved_product_name,card_text,candidates,applied
-N1,5,Feraligatr,"492,87€",already-correct,274405,Feraligatr [Downpour | Riptide],274405,Feraligatr [Downpour | Riptide],Downpour Riptide,2,no
-WP,47,Mew,"132,48€",already-correct,275466,Mew [Neutral Shield | Psyshock],275466,Mew [Neutral Shield | Psyshock],Neutral Shield Psyshock,3,no
-DX,98,Deoxys ex,"127,48€",already-correct,276501,Deoxys ex [Form Change | Psyburst],276501,Deoxys ex [Form Change | Psyburst],Form Change Psyburst,3,no
-RG,113,Charmander,"112,78€",already-correct,276289,Charmander [Flare | Rage],276289,Charmander [Flare | Rage],Flare Rage,3,no
-WP,46,Electabuzz,"53,08€",already-correct,275465,Electabuzz [Lightning Rod | Lightning Bolt],275465,Electabuzz [Lightning Rod | Lightning Bolt],Lightning Rod Lightning Bolt,2,no
-CRZ,GG30,Pikachu,"51,30€",already-correct,691909,Pikachu [Pika Dash | Whimsy Tackle],691909,Pikachu [Pika Dash | Whimsy Tackle],Pika Dash Whimsy Tackle,2,no
+WP,47,Mew,"129,19€",already-correct,275466,Mew [Neutral Shield | Psyshock],275466,Mew [Neutral Shield | Psyshock],Neutral Shield Psyshock,3,no
+SP,241,Gengar,"95,75€",already-correct,665984,Gengar [Netherworld Gate | Screaming Circle],665984,Gengar [Netherworld Gate | Screaming Circle],Netherworld Gate Screaming Circle,2,no
+RG,113,Charmander,"72,60€",already-correct,276289,Charmander [Flare | Rage],276289,Charmander [Flare | Rage],Flare Rage,3,no
+WP,27,Pikachu,"53,35€",already-correct,275446,Pikachu [Thundershock | Agility],275446,Pikachu [Thundershock | Agility],Thundershock Agility,4,no
+WP,46,Electabuzz,"51,89€",already-correct,275465,Electabuzz [Lightning Rod | Lightning Bolt],275465,Electabuzz [Lightning Rod | Lightning Bolt],Lightning Rod Lightning Bolt,2,no
+WP,26,Pikachu,"50,03€",already-correct,275445,Pikachu [Scratch | Thunderbolt],275445,Pikachu [Scratch | Thunderbolt],Scratch Thunderbolt,4,no
+SP,52,Gengar,"48,09€",already-correct,505880,Gengar [Life Shaker | Hypnoblast],505880,Gengar [Life Shaker | Hypnoblast],Life Shaker Hypnoblast,2,no
 NVI,43,Victini,"30,49€",already-correct,280166,Victini [V-blast],280166,Victini [V-blast],V-blast,5,no
-WP,4,Pikachu,"19,82€",already-correct,275423,Pikachu [Recharge | Thunderbolt],275423,Pikachu [Recharge | Thunderbolt],Recharge Thunderbolt,4,no
-TRR,32,Dark Dragonair,"14,97€",already-correct,276324,Dark Dragonair [Double Tackle | Crushing Blow],276324,Dark Dragonair [Double Tackle | Crushing Blow],Double Tackle Crushing Blow,2,no
+WP,4,Pikachu,"26,74€",already-correct,275423,Pikachu [Recharge | Thunderbolt],275423,Pikachu [Recharge | Thunderbolt],Recharge Thunderbolt,4,no
+TRR,32,Dark Dragonair,"14,67€",already-correct,276324,Dark Dragonair [Double Tackle | Crushing Blow],276324,Dark Dragonair [Double Tackle | Crushing Blow],Double Tackle Crushing Blow,2,no
 SP,162,Mewtwo V-UNION,"12,51€",already-correct,572162,Mewtwo V-UNION [Photon Barrier | Final Burn],572162,Mewtwo V-UNION [Photon Barrier | Final Burn],Photon Barrier Final Burn,5,no
-PRC,77,Rhyperior,"10,40€",already-correct,273608,Rhyperior [Rock Wall | Hammer Arm],273608,Rhyperior [Rock Wall | Hammer Arm],Rock Wall Hammer Arm,2,no
-N1,32,Croconaw,"10,16€",already-correct,274432,Croconaw [Tackle | Sweep Away],274432,Croconaw [Tackle | Sweep Away],Tackle Sweep Away,2,no
-PRC,69,Nidoqueen,"9,71€",already-correct,273600,Nidoqueen [Poison Jab | Dynamite Punch],273600,Nidoqueen [Poison Jab | Dynamite Punch],Poison Jab Dynamite Punch,2,no
-XY,86,Aegislash,"7,41€",already-correct,281423,Aegislash [Stance Change | King's Shield],281423,Aegislash [Stance Change | King's Shield],Stance Change King's Shield,3,no
-SHF,SV44,Morpeko,"7,29€",already-correct,539608,Morpeko [Torment | Spark],539608,Morpeko [Torment | Spark],Torment Spark,3,no
-TRR,60,Houndour,"6,74€",already-correct,276352,Houndour [Dark Lift | Firebreathing],276352,Houndour [Dark Lift | Firebreathing],Dark Lift Firebreathing,2,no
-SP,140,Pikachu V-UNION,"6,46€",already-correct,576739,Pikachu V-UNION [Shocking Shock],576739,Pikachu V-UNION [Shocking Shock],Shocking Shock,5,no
-ROS,46,Togekiss,"6,33€",already-correct,282714,Togekiss [Serene Grace | Fairy Wind],282714,Togekiss [Serene Grace | Fairy Wind],Serene Grace Fairy Wind,2,no
+XY,86,Aegislash,"8,98€",already-correct,281423,Aegislash [Stance Change | King's Shield],281423,Aegislash [Stance Change | King's Shield],Stance Change King's Shield,3,no
+PRC,69,Nidoqueen,"8,45€",already-correct,273600,Nidoqueen [Poison Jab | Dynamite Punch],273600,Nidoqueen [Poison Jab | Dynamite Punch],Poison Jab Dynamite Punch,2,no
+SHF,SV44,Morpeko,"7,62€",already-correct,539608,Morpeko [Torment | Spark],539608,Morpeko [Torment | Spark],Torment Spark,3,no
+TRR,60,Houndour,"6,79€",already-correct,276352,Houndour [Dark Lift | Firebreathing],276352,Houndour [Dark Lift | Firebreathing],Dark Lift Firebreathing,2,no
+ROS,46,Togekiss,"5,64€",already-correct,282714,Togekiss [Serene Grace | Fairy Wind],282714,Togekiss [Serene Grace | Fairy Wind],Serene Grace Fairy Wind,2,no
 SP,166,Zacian V-UNION,"5,56€",already-correct,572166,Zacian V-UNION [Master Blade],572166,Zacian V-UNION [Master Blade],Master Blade,5,no
-SP,235,Dragonite V,"5,17€",already-correct,664340,Dragonite V [Hyper Beam | Buster Tail],664340,Dragonite V [Hyper Beam | Buster Tail],Hyper Beam Buster Tail,3,no
+SP,235,Dragonite V,"5,10€",already-correct,664340,Dragonite V [Hyper Beam | Buster Tail],664340,Dragonite V [Hyper Beam | Buster Tail],Hyper Beam Buster Tail,3,no
 TRR,41,Dark Pupitar,"4,64€",already-correct,276333,Dark Pupitar [Dark Streak | Rock Tumble],276333,Dark Pupitar [Dark Streak | Rock Tumble],Dark Streak Rock Tumble,2,no
-SP,95,Eevee,"4,55€",already-correct,547026,Eevee [First Step | Tail Whap],547026,Eevee [First Step | Tail Whap],First Step Tail Whap,7,no
-TRR,53,Dratini,"4,47€",already-correct,276345,Dratini [Dragon Song | Tail Strike],276345,Dratini [Dragon Song | Tail Strike],Dragon Song Tail Strike,2,no
+SP,165,Zacian V-UNION,"4,63€",already-correct,572165,Zacian V-UNION [Steel Cut],572165,Zacian V-UNION [Steel Cut],Steel Cut,5,no
+TRR,53,Dratini,"4,24€",already-correct,276345,Dratini [Dragon Song | Tail Strike],276345,Dratini [Dragon Song | Tail Strike],Dragon Song Tail Strike,2,no
 SP,70,Grookey,"3,80€",already-correct,516349,Grookey [Full On],516349,Grookey [Full On],Full On,3,no
-TRR,31,Dark Dragonair,"3,26€",already-correct,276323,Dark Dragonair [Evolutionary Light | Dragon Rage],276323,Dark Dragonair [Evolutionary Light | Dragon Rage],Evolutionary Light Dragon Rage,2,no
-RS,60,Mudkip,"2,98€",already-correct,275708,Mudkip [Pound | Fury Swipes],275708,Mudkip [Pound | Fury Swipes],Pound Fury Swipes,3,no
-E2,85,Horsea,"2,88€",already-correct,275159,Horsea [Reverse Thrust],275159,Horsea [Reverse Thrust],Reverse Thrust,2,no
-PAF,172,Paldean Tauros,"2,85€",already-correct,751711,Paldean Tauros [Raging Horns | Combat Tackle],751711,Paldean Tauros [Raging Horns | Combat Tackle],Raging Horns Combat Tackle,3,no
-N1,47,Quilava,"2,18€",already-correct,274447,Quilava [Smokescreen | Char],274447,Quilava [Smokescreen | Char],Smokescreen Char,2,no
+SP,71,Scorbunny,"3,44€",already-correct,516354,Scorbunny [Me First | Live Coal],516354,Scorbunny [Me First | Live Coal],Me First Live Coal,4,no
+TRR,31,Dark Dragonair,"3,02€",already-correct,276323,Dark Dragonair [Evolutionary Light | Dragon Rage],276323,Dark Dragonair [Evolutionary Light | Dragon Rage],Evolutionary Light Dragon Rage,2,no
+E2,85,Horsea,"2,83€",already-correct,275159,Horsea [Reverse Thrust],275159,Horsea [Reverse Thrust],Reverse Thrust,2,no
+RS,60,Mudkip,"2,54€",already-correct,275708,Mudkip [Pound | Fury Swipes],275708,Mudkip [Pound | Fury Swipes],Pound Fury Swipes,3,no
+N1,47,Quilava,"2,08€",already-correct,274447,Quilava [Smokescreen | Char],274447,Quilava [Smokescreen | Char],Smokescreen Char,2,no
 DR,30,Graveler,"1,91€",already-correct,275907,Graveler [Magnitude | Rollout],275907,Graveler [Magnitude | Rollout],Magnitude Rollout,2,no
-UD,48,Eevee,"1,71€",already-correct,279301,Eevee [Call for Family | Tickle],279301,Eevee [Call for Family | Tickle],Call for Family Tickle,2,no
-DR,29,Graveler,"1,63€",already-correct,275906,Graveler [Grind | Big Explosion],275906,Graveler [Grind | Big Explosion],Grind Big Explosion,2,no
+UD,48,Eevee,"1,67€",already-correct,279301,Eevee [Call for Family | Tickle],279301,Eevee [Call for Family | Tickle],Call for Family Tickle,2,no
+XY,88,Jigglypuff,"1,57€",already-correct,281425,Jigglypuff [Body Slam],281425,Jigglypuff [Body Slam],Body Slam,2,no
 SHF,SV28,Chewtle,"1,56€",already-correct,539528,Chewtle [Bite | Water Gun],539528,Chewtle [Bite | Water Gun],Bite Water Gun,2,no
-SS,62,Duskull,"1,15€",already-correct,275839,Duskull [Haunt | Dark Mind],275839,Duskull [Haunt | Dark Mind],Haunt Dark Mind,2,no
-LOT,91,Unown,"0,97€",already-correct,365728,Unown [HAND | Hidden Power],365728,Unown [HAND | Hidden Power],HAND Hidden Power,3,no
-SS,61,Duskull,"0,96€",already-correct,275838,Duskull [Surprise | Confuse Ray],275838,Duskull [Surprise | Confuse Ray],Surprise Confuse Ray,2,no
+XY,87,Jigglypuff,"1,51€",already-correct,281424,Jigglypuff [Rollout | Heartfelt Song],281424,Jigglypuff [Rollout | Heartfelt Song],Rollout Heartfelt Song,2,no
+SSH,36,Cinderace,"1,44€",already-correct,436334,Cinderace [Flame Cloak | Bright Flame],436334,Cinderace [Flame Cloak | Bright Flame],Flame Cloak Bright Flame,4,no
+SS,62,Duskull,"1,38€",already-correct,275839,Duskull [Haunt | Dark Mind],275839,Duskull [Haunt | Dark Mind],Haunt Dark Mind,2,no
+SS,61,Duskull,"1,12€",already-correct,275838,Duskull [Surprise | Confuse Ray],275838,Duskull [Surprise | Confuse Ray],Surprise Confuse Ray,2,no
+LOT,91,Unown,"1,08€",already-correct,365728,Unown [HAND | Hidden Power],365728,Unown [HAND | Hidden Power],HAND Hidden Power,3,no
 FST,43,Cinderace V,"0,94€",already-correct,582177,Cinderace V [Blaze Kick],582177,Cinderace V [Blaze Kick],Blaze Kick,2,no
-UD,47,Eevee,"0,93€",already-correct,279300,Eevee [Tackle | Bite],279300,Eevee [Tackle | Bite],Tackle Bite,2,no
-TRR,63,Larvitar,"0,92€",already-correct,276355,Larvitar [Light Punch | Dig Drain],276355,Larvitar [Light Punch | Dig Drain],Light Punch Dig Drain,2,no
-TEU,115,Alolan Exeggutor,"0,89€",already-correct,369043,Alolan Exeggutor [Paradise Draw | Egg Splat],369043,Alolan Exeggutor [Paradise Draw | Egg Splat],Paradise Draw Egg Splat,2,no
-SSH,36,Cinderace,"0,86€",already-correct,436334,Cinderace [Flame Cloak | Bright Flame],436334,Cinderace [Flame Cloak | Bright Flame],Flame Cloak Bright Flame,4,no
+SS,67,Lotad,"0,91€",already-correct,275844,Lotad [Tackle | Blot],275844,Lotad [Tackle | Blot],Tackle Blot,2,no
+TRR,63,Larvitar,"0,89€",already-correct,276355,Larvitar [Light Punch | Dig Drain],276355,Larvitar [Light Punch | Dig Drain],Light Punch Dig Drain,2,no
+TEU,115,Alolan Exeggutor,"0,83€",already-correct,369043,Alolan Exeggutor [Paradise Draw | Egg Splat],369043,Alolan Exeggutor [Paradise Draw | Egg Splat],Paradise Draw Egg Splat,2,no
+UD,47,Eevee,"0,81€",already-correct,279300,Eevee [Tackle | Bite],279300,Eevee [Tackle | Bite],Tackle Bite,2,no
 RS,65,Poochyena,"0,80€",already-correct,275713,Poochyena [Shadow Bind],275713,Poochyena [Shadow Bind],Shadow Bind,3,no
-SSH,35,Cinderace,"0,74€",already-correct,436329,Cinderace [Pyro Ball | Burning Kick],436329,Cinderace [Pyro Ball | Burning Kick],Pyro Ball Burning Kick,4,no
-RS,75,Treecko,"0,65€",already-correct,275723,Treecko [Poison Breath],275723,Treecko [Poison Breath],Poison Breath,3,no
-DR,68,Nincada,"0,64€",already-correct,275945,Nincada [Leech Life],275945,Nincada [Leech Life],Leech Life,3,no
+SS,66,Lotad,"0,80€",already-correct,275843,Lotad [Rain Dish | Ram],275843,Lotad [Rain Dish | Ram],Rain Dish Ram,2,no
+SSH,35,Cinderace,"0,71€",already-correct,436329,Cinderace [Pyro Ball | Burning Kick],436329,Cinderace [Pyro Ball | Burning Kick],Pyro Ball Burning Kick,4,no
+RS,58,Makuhita,"0,62€",already-correct,275706,Makuhita [Fake Out],275706,Makuhita [Fake Out],Fake Out,3,no
 SVP,197,Koraidon ex,"0,61€",already-correct,813956,Koraidon ex [Claw Slash | Revenge Buster],813956,Koraidon ex [Claw Slash | Revenge Buster],Claw Slash Revenge Buster,2,no
-RS,58,Makuhita,"0,57€",already-correct,275706,Makuhita [Fake Out],275706,Makuhita [Fake Out],Fake Out,3,no
-PLS,65,Trubbish,"0,56€",already-correct,280805,Trubbish [Tool Drop],280805,Trubbish [Tool Drop],Tool Drop,3,no
-BKT,9,Chespin,"0,55€",already-correct,286255,Chespin [Tree Climb | Seed Bomb],286255,Chespin [Tree Climb | Seed Bomb],Tree Climb Seed Bomb,3,no
-RS,64,Poochyena,"0,55€",already-correct,275712,Poochyena [Knock Off | Rear Kick],275712,Poochyena [Knock Off | Rear Kick],Knock Off Rear Kick,3,no
+DR,68,Nincada,"0,57€",already-correct,275945,Nincada [Leech Life],275945,Nincada [Leech Life],Leech Life,3,no
+BKT,9,Chespin,"0,54€",already-correct,286255,Chespin [Tree Climb | Seed Bomb],286255,Chespin [Tree Climb | Seed Bomb],Tree Climb Seed Bomb,3,no
+PLS,65,Trubbish,"0,51€",already-correct,280805,Trubbish [Tool Drop],280805,Trubbish [Tool Drop],Tool Drop,3,no
 SSH,110,Sandaconda,"0,50€",already-correct,436669,Sandaconda [Sand Sac | Power Press],436669,Sandaconda [Sand Sac | Power Press],Sand Sac Power Press,2,no
-TEU,35,Alolan Geodude,"0,50€",already-correct,368966,Alolan Geodude [Charge | Smash Bomb],368966,Alolan Geodude [Charge | Smash Bomb],Charge Smash Bomb,2,no
-SSH,75,Boltund,"0,49€",already-correct,436504,Boltund [Big Bite | Fighting Fangs],436504,Boltund [Big Bite | Fighting Fangs],Big Bite Fighting Fangs,3,no
-DR,62,Magnemite,"0,44€",already-correct,275939,Magnemite [Random Spark],275939,Magnemite [Random Spark],Random Spark,3,no
-UNM,150,Dragonair,"0,43€",already-correct,388542,Dragonair [Tail Whap | Destructive Whirlpool],388542,Dragonair [Tail Whap | Destructive Whirlpool],Tail Whap Destructive Whirlpool,2,no
-LOT,162,Kecleon,"0,37€",already-correct,365798,Kecleon [Unit Color 3 | Gentle Slap],365798,Kecleon [Unit Color 3 | Gentle Slap],Unit Color 3 Gentle Slap,2,no
-PRC,68,Nidoqueen,"0,36€",already-correct,273599,Nidoqueen [Double Kick | Poison Fang],273599,Nidoqueen [Double Kick | Poison Fang],Double Kick Poison Fang,2,no
-UNM,99,Salazzle,"0,35€",already-correct,388302,Salazzle [Smack | Slashing Claw],388302,Salazzle [Smack | Slashing Claw],Smack Slashing Claw,2,no
-DR,67,Nincada,"0,34€",already-correct,275944,Nincada [Bite | Double Scratch],275944,Nincada [Bite | Double Scratch],Bite Double Scratch,3,no
-UNM,34,Salazzle,"0,26€",already-correct,388002,Salazzle [Fire Claws],388002,Salazzle [Fire Claws],Fire Claws,2,no
+RS,64,Poochyena,"0,49€",already-correct,275712,Poochyena [Knock Off | Rear Kick],275712,Poochyena [Knock Off | Rear Kick],Knock Off Rear Kick,3,no
+RS,75,Treecko,"0,49€",already-correct,275723,Treecko [Poison Breath],275723,Treecko [Poison Breath],Poison Breath,3,no
+DR,62,Magnemite,"0,45€",already-correct,275939,Magnemite [Random Spark],275939,Magnemite [Random Spark],Random Spark,3,no
+TEU,35,Alolan Geodude,"0,42€",already-correct,368966,Alolan Geodude [Charge | Smash Bomb],368966,Alolan Geodude [Charge | Smash Bomb],Charge Smash Bomb,2,no
+UNM,150,Dragonair,"0,42€",already-correct,388542,Dragonair [Tail Whap | Destructive Whirlpool],388542,Dragonair [Tail Whap | Destructive Whirlpool],Tail Whap Destructive Whirlpool,2,no
+LOT,162,Kecleon,"0,39€",already-correct,365798,Kecleon [Unit Color 3 | Gentle Slap],365798,Kecleon [Unit Color 3 | Gentle Slap],Unit Color 3 Gentle Slap,2,no
+DR,67,Nincada,"0,38€",already-correct,275944,Nincada [Bite | Double Scratch],275944,Nincada [Bite | Double Scratch],Bite Double Scratch,3,no
+UNM,99,Salazzle,"0,37€",already-correct,388302,Salazzle [Smack | Slashing Claw],388302,Salazzle [Smack | Slashing Claw],Smack Slashing Claw,2,no
+UNM,34,Salazzle,"0,32€",already-correct,388002,Salazzle [Fire Claws],388002,Salazzle [Fire Claws],Fire Claws,2,no
 UNM,64,Tynamo,"0,25€",already-correct,388142,Tynamo [Generate Electricity],388142,Tynamo [Generate Electricity],Generate Electricity,2,no
-TEU,117,Dratini,"0,24€",already-correct,369045,Dratini [Defensive Scales | Rain Splash],369045,Dratini [Defensive Scales | Rain Splash],Defensive Scales Rain Splash,2,no
-TEU,116,Dratini,"0,23€",already-correct,369044,Dratini [Dragon Rage],369044,Dratini [Dragon Rage],Dragon Rage,2,no
-UD,59,Murkrow,"0,20€",already-correct,279312,Murkrow [Glide | Dark Cutter],279312,Murkrow [Glide | Dark Cutter],Glide Dark Cutter,2,no
+UNB,67,Gastly,"0,21€",already-correct,372355,Gastly [Swelling Spite | Will-O-Wisp],372355,Gastly [Swelling Spite | Will-O-Wisp],Swelling Spite Will-O-Wisp,2,no
+NVI,68,Stunfisk,"0,20€",already-correct,280191,Stunfisk [Trickle | Thundershock],280191,Stunfisk [Trickle | Thundershock],Trickle Thundershock,2,no
 SSH,74,Yamper,"0,19€",already-correct,436499,Yamper [Bite | Zap Kick],436499,Yamper [Bite | Zap Kick],Bite Zap Kick,2,no
+UD,59,Murkrow,"0,19€",already-correct,279312,Murkrow [Glide | Dark Cutter],279312,Murkrow [Glide | Dark Cutter],Glide Dark Cutter,2,no
+LOT,64,Popplio,"0,18€",already-correct,365702,Popplio [Disarming Voice],365702,Popplio [Disarming Voice],Disarming Voice,2,no
 PLS,110,Patrat,"0,18€",already-correct,280850,Patrat [Reckless Charge],280850,Patrat [Reckless Charge],Reckless Charge,2,no
 PLS,111,Patrat,"0,18€",already-correct,280851,Patrat [Collect | Slam],280851,Patrat [Collect | Slam],Collect Slam,2,no
-UNB,67,Gastly,"0,17€",already-correct,372355,Gastly [Swelling Spite | Will-O-Wisp],372355,Gastly [Swelling Spite | Will-O-Wisp],Swelling Spite Will-O-Wisp,2,no
 UD,63,Pineco,"0,16€",already-correct,279316,Pineco [Focus Energy | Surprise Attack],279316,Pineco [Focus Energy | Surprise Attack],Focus Energy Surprise Attack,2,no
-HIF,39,Clefairy,"0,14€",already-correct,394652,Clefairy [Pound | Moon Dance],394652,Clefairy [Pound | Moon Dance],Pound Moon Dance,2,no
-UNB,9,Venonat,"0,13€",already-correct,372302,Venonat [Radar Eyes | Flop],372302,Venonat [Radar Eyes | Flop],Radar Eyes Flop,2,no
-PLF,54,Yamask,"0,12€",already-correct,280932,Yamask [Transfer Pain],280932,Yamask [Transfer Pain],Transfer Pain,2,no
-PLF,55,Yamask,"0,12€",already-correct,280933,Yamask [Will-O-Wisp | Ram],280933,Yamask [Will-O-Wisp | Ram],Will-O-Wisp Ram,2,no
+UNB,9,Venonat,"0,15€",already-correct,372302,Venonat [Radar Eyes | Flop],372302,Venonat [Radar Eyes | Flop],Radar Eyes Flop,2,no
+HIF,39,Clefairy,"0,12€",already-correct,394652,Clefairy [Pound | Moon Dance],394652,Clefairy [Pound | Moon Dance],Pound Moon Dance,2,no
+SSH,13,Thwackey,"0,12€",already-correct,436239,Thwackey [Beat | Ambush],436239,Thwackey [Beat | Ambush],Beat Ambush,2,no
 UNM,168,Slakoth,"0,12€",already-correct,388627,Slakoth [Scratch | Boundless Power],388627,Slakoth [Scratch | Boundless Power],Scratch Boundless Power,2,no
-SSH,13,Thwackey,"0,11€",already-correct,436239,Thwackey [Beat | Ambush],436239,Thwackey [Beat | Ambush],Beat Ambush,2,no
+UNM,98,Salandit,"0,12€",already-correct,388297,Salandit [Suffocating Gas | Gnaw],388297,Salandit [Suffocating Gas | Gnaw],Suffocating Gas Gnaw,2,no
+SSH,43,Krabby,"0,11€",already-correct,436369,Krabby [Super Slice],436369,Krabby [Super Slice],Super Slice,2,no
+UNB,37,Poliwag,"0,11€",already-correct,372328,Poliwag [Call for Family],372328,Poliwag [Call for Family],Call for Family,2,no
 UNM,167,Slakoth,"0,11€",already-correct,388622,Slakoth [Lazy Howl | Hang Down],388622,Slakoth [Lazy Howl | Hang Down],Lazy Howl Hang Down,2,no
-SSH,43,Krabby,"0,10€",already-correct,436369,Krabby [Super Slice],436369,Krabby [Super Slice],Super Slice,2,no
+UPR,81,Magnemite,"0,11€",already-correct,316008,Magnemite [Solid Unit | Ram],316008,Magnemite [Solid Unit | Ram],Solid Unit Ram,2,no
+SSH,11,Grookey,"0,10€",already-correct,427156,Grookey [Scratch | Beat],427156,Grookey [Scratch | Beat],Scratch Beat,2,no
+SSH,145,Minccino,"0,10€",already-correct,436819,Minccino [Glance | Tail Slap],436819,Minccino [Glance | Tail Slap],Glance Tail Slap,2,no
+SSH,146,Minccino,"0,10€",already-correct,436824,Minccino [Tail Whap],436824,Minccino [Tail Whap],Tail Whap,2,no
 SVI,56,Wiglett,"0,10€",already-correct,702351,Wiglett [Dig a Little | Ram],702351,Wiglett [Dig a Little | Ram],Dig a Little Ram,3,no
-UPR,81,Magnemite,"0,10€",already-correct,316008,Magnemite [Solid Unit | Ram],316008,Magnemite [Solid Unit | Ram],Solid Unit Ram,2,no
-SSH,108,Silicobra,"0,09€",already-correct,436659,Silicobra [Headbutt | Tail Whap],436659,Silicobra [Headbutt | Tail Whap],Headbutt Tail Whap,2,no
-UNB,37,Poliwag,"0,09€",already-correct,372328,Poliwag [Call for Family],372328,Poliwag [Call for Family],Call for Family,2,no
-UNM,63,Tynamo,"0,09€",already-correct,388137,Tynamo [Wild River],388137,Tynamo [Wild River],Wild River,2,no
-UNM,98,Salandit,"0,08€",already-correct,388297,Salandit [Suffocating Gas | Gnaw],388297,Salandit [Suffocating Gas | Gnaw],Suffocating Gas Gnaw,2,no
-UPR,80,Magnemite,"0,08€",already-correct,316007,Magnemite [Searching Magnet | Tackle],316007,Magnemite [Searching Magnet | Tackle],Searching Magnet Tackle,2,no
-FLI,5,Scatterbug,"0,07€",already-correct,355526,Scatterbug [Abnormal Outbreak | Tackle],355526,Scatterbug [Abnormal Outbreak | Tackle],Abnormal Outbreak Tackle,2,no
-FLI,6,Scatterbug,"0,07€",already-correct,355527,Scatterbug [Ultra Evolution],355527,Scatterbug [Ultra Evolution],Ultra Evolution,2,no
-GRI,63,Machop,"0,07€",already-correct,297524,Machop [Dynamic Chop],297524,Machop [Dynamic Chop],Dynamic Chop,2,no
-SSH,12,Thwackey,"0,07€",already-correct,436234,Thwackey [Taunt | Double Hit],436234,Thwackey [Taunt | Double Hit],Taunt Double Hit,2,no
+FLI,6,Scatterbug,"0,08€",already-correct,355527,Scatterbug [Ultra Evolution],355527,Scatterbug [Ultra Evolution],Ultra Evolution,2,no
+SSH,12,Thwackey,"0,08€",already-correct,436234,Thwackey [Taunt | Double Hit],436234,Thwackey [Taunt | Double Hit],Taunt Double Hit,2,no
+UNM,63,Tynamo,"0,08€",already-correct,388137,Tynamo [Wild River],388137,Tynamo [Wild River],Wild River,2,no
 SVI,40,Charcadet,"0,07€",already-correct,702335,Charcadet [Heat Blast],702335,Charcadet [Heat Blast],Heat Blast,2,no
-CRZ,42,Luxio,"0,06€",already-correct,691759,Luxio [Shorting Spark | Bite],691759,Luxio [Shorting Spark | Bite],Shorting Spark Bite,2,no
+UPR,80,Magnemite,"0,07€",already-correct,316007,Magnemite [Searching Magnet | Tackle],316007,Magnemite [Searching Magnet | Tackle],Searching Magnet Tackle,2,no
+SSH,10,Grookey,"0,06€",already-correct,436229,Grookey [Fury Swipes],436229,Grookey [Fury Swipes],Fury Swipes,2,no
+SSH,153,Wooloo,"0,06€",already-correct,436859,Wooloo [Tackle | Headbutt],436859,Wooloo [Tackle | Headbutt],Tackle Headbutt,2,no
 SSH,46,Goldeen,"0,06€",already-correct,436384,Goldeen [Collect | Waterfall],436384,Goldeen [Collect | Waterfall],Collect Waterfall,2,no
 SSH,68,Chinchou,"0,06€",already-correct,436474,Chinchou [Luring Glow | Lightning Ball],436474,Chinchou [Luring Glow | Lightning Ball],Luring Glow Lightning Ball,2,no
 SSH,97,Rhyhorn,"0,06€",already-correct,436604,Rhyhorn [Stomp Off | Land Crush],436604,Rhyhorn [Stomp Off | Land Crush],Stomp Off Land Crush,2,no
 SSP,101,Paldean Tauros,"0,06€",already-correct,794418,Paldean Tauros [Smash Kick | Blocking Stomp],794418,Paldean Tauros [Smash Kick | Blocking Stomp],Smash Kick Blocking Stomp,3,no
-SVI,112,Riolu,"0,06€",already-correct,702408,Riolu [Jab | Low Kick],702408,Riolu [Jab | Low Kick],Jab Low Kick,3,no
 SVI,25,Toedscool,"0,06€",already-correct,702321,Toedscool [Spore | Ram],702321,Toedscool [Spore | Ram],Spore Ram,3,no
-UPR,97,Gible,"0,06€",already-correct,316023,Gible [Rock Hiding | Gnaw],316023,Gible [Rock Hiding | Gnaw],Rock Hiding Gnaw,2,no
+SVI,95,Dedenne,"0,06€",already-correct,702391,Dedenne [Second Bite],702391,Dedenne [Second Bite],Second Bite,2,no
 CRZ,41,Luxio,"0,05€",already-correct,691758,Luxio [Jumping Kick | Head Bolt],691758,Luxio [Jumping Kick | Head Bolt],Jumping Kick Head Bolt,2,no
+CRZ,42,Luxio,"0,05€",already-correct,691759,Luxio [Shorting Spark | Bite],691759,Luxio [Shorting Spark | Bite],Shorting Spark Bite,2,no
 OBF,61,Finizen,"0,05€",already-correct,725141,Finizen [Tail Smack],725141,Finizen [Tail Smack],Tail Smack,2,no
-SSH,33,Raboot,"0,05€",already-correct,436324,Raboot [Kick | Heat Blast],436324,Raboot [Kick | Heat Blast],Kick Heat Blast,2,no
 SSH,38,Sizzlipede,"0,05€",already-correct,436344,Sizzlipede [Relentless Flames],436344,Sizzlipede [Relentless Flames],Relentless Flames,2,no
+SVI,135,Maschiff,"0,05€",already-correct,702430,Maschiff [Rear Kick | Darkness Fang],702430,Maschiff [Rear Kick | Darkness Fang],Rear Kick Darkness Fang,2,no
 SVI,94,Dedenne,"0,05€",already-correct,702390,Dedenne [Energy Munch],702390,Dedenne [Energy Munch],Energy Munch,2,no
-SVI,95,Dedenne,"0,05€",already-correct,702391,Dedenne [Second Bite],702391,Dedenne [Second Bite],Second Bite,2,no
-OBF,126,Paldean Wooper,"0,04€",already-correct,725206,Paldean Wooper [Spit Poison],725206,Paldean Wooper [Spit Poison],Spit Poison,2,no
+UPR,97,Gible,"0,05€",already-correct,316023,Gible [Rock Hiding | Gnaw],316023,Gible [Rock Hiding | Gnaw],Rock Hiding Gnaw,2,no
 OBF,155,Varoom,"0,04€",already-correct,725235,Varoom [Suffocating Gas],725235,Varoom [Suffocating Gas],Suffocating Gas,3,no
-PAL,102,Tinkatink,"0,04€",already-correct,715577,Tinkatink [Brutal Swing],715577,Tinkatink [Brutal Swing],Brutal Swing,4,no
-SSH,32,Raboot,"0,04€",already-correct,436319,Raboot [Flame Charge | Magnum Kick],436319,Raboot [Flame Charge | Magnum Kick],Flame Charge Magnum Kick,2,no
 SSH,67,Chinchou,"0,04€",already-correct,436469,Chinchou [Gentle Slap],436469,Chinchou [Gentle Slap],Gentle Slap,2,no
 SSP,39,Paldean Tauros,"0,04€",already-correct,794305,Paldean Tauros [Upthrusting Horns | Jet Headbutt],794305,Paldean Tauros [Upthrusting Horns | Jet Headbutt],Upthrusting Horns Jet Headbutt,3,no
 SSP,89,Oricorio,"0,04€",already-correct,794397,Oricorio [Energy Assist | Dazzle Dance],794397,Oricorio [Energy Assist | Dazzle Dance],Energy Assist Dazzle Dance,2,no
-SVI,135,Maschiff,"0,04€",already-correct,702430,Maschiff [Rear Kick | Darkness Fang],702430,Maschiff [Rear Kick | Darkness Fang],Rear Kick Darkness Fang,2,no
+SVI,140,Varoom,"0,04€",already-correct,702435,Varoom [Poison Gas],702435,Varoom [Poison Gas],Poison Gas,2,no
 SVI,141,Varoom,"0,04€",already-correct,702436,Varoom [Hammer In],702436,Varoom [Hammer In],Hammer In,2,no
+SVI,28,Capsakid,"0,04€",already-correct,702324,Capsakid [Increasing Spice | Playful Kick],702324,Capsakid [Increasing Spice | Playful Kick],Increasing Spice Playful Kick,2,no
 SVI,30,Growlithe,"0,04€",already-correct,702326,Growlithe [Relentless Flames],702326,Growlithe [Relentless Flames],Relentless Flames,2,no
 SVI,31,Growlithe,"0,04€",already-correct,702327,Growlithe [Stoke | Fire Claws],702327,Growlithe [Stoke | Fire Claws],Stoke Fire Claws,2,no
-SVI,59,Cetoddle,"0,04€",already-correct,702354,Cetoddle [Icicle | Sharp Fin],702354,Cetoddle [Icicle | Sharp Fin],Icicle Sharp Fin,2,no
-TWM,21,Poltchageist,"0,04€",already-correct,769195,Poltchageist [Tea Server | Surprise Attack],769195,Poltchageist [Tea Server | Surprise Attack],Tea Server Surprise Attack,3,no
-OBF,60,Finizen,"0,03€",already-correct,725140,Finizen [Valiant Evolution | Razor Fin],725140,Finizen [Valiant Evolution | Razor Fin],Valiant Evolution Razor Fin,2,no
+CRI,33,Deoxys,"0,03€",already-correct,886425,Deoxys [Psy Protection],886425,Deoxys [Psy Protection],Psy Protection,4,no
 OBF,74,Tadbulb,"0,03€",already-correct,725154,Tadbulb [Energize | Lightning Ball],725154,Tadbulb [Energize | Lightning Ball],Energize Lightning Ball,3,no
 PAL,100,Tinkatink,"0,03€",already-correct,715575,Tinkatink [Collect | Corkscrew Punch],715575,Tinkatink [Collect | Corkscrew Punch],Collect Corkscrew Punch,4,no
+PAL,102,Tinkatink,"0,03€",already-correct,715577,Tinkatink [Brutal Swing],715577,Tinkatink [Brutal Swing],Brutal Swing,4,no
 PAL,39,Charcadet,"0,03€",already-correct,715513,Charcadet [Live Coal | Magnum Punch],715513,Charcadet [Live Coal | Magnum Punch],Live Coal Magnum Punch,2,no
-PAR,101,Nacli,"0,03€",already-correct,740615,Nacli [Rock Throw | Stone Edge],740615,Nacli [Rock Throw | Stone Edge],Rock Throw Stone Edge,2,no
-PAR,133,Doublade,"0,03€",already-correct,740671,Doublade [Swords Dance | Slicing Blade],740671,Doublade [Swords Dance | Slicing Blade],Swords Dance Slicing Blade,3,no
 SSH,37,Sizzlipede,"0,03€",already-correct,436339,Sizzlipede [Bite | Combustion],436339,Sizzlipede [Bite | Combustion],Bite Combustion,2,no
-SVI,140,Varoom,"0,03€",already-correct,702435,Varoom [Poison Gas],702435,Varoom [Poison Gas],Poison Gas,2,no
 SVI,27,Capsakid,"0,03€",already-correct,702323,Capsakid [Slightly Spicy],702323,Capsakid [Slightly Spicy],Slightly Spicy,2,no
-SVI,28,Capsakid,"0,03€",already-correct,702324,Capsakid [Increasing Spice | Playful Kick],702324,Capsakid [Increasing Spice | Playful Kick],Increasing Spice Playful Kick,2,no
-SVI,77,Wattrel,"0,03€",already-correct,702374,Wattrel [Collect | Glide],702374,Wattrel [Collect | Glide],Collect Glide,2,no
-SVI,78,Wattrel,"0,03€",already-correct,702375,Wattrel [Static Shock],702375,Wattrel [Static Shock],Static Shock,2,no
-TEF,97,Great Tusk,"0,03€",already-correct,760727,Great Tusk [Land Collapse | Giant Tusk],760727,Great Tusk [Land Collapse | Giant Tusk],Land Collapse Giant Tusk,3,no
 SVP,101,Pikachu,"295,69€",ambiguous,726923,Pikachu [Scrappy Spark],,,Scrappy Spark,,no
-CEL,CC2,Charizard,"170,68€",ambiguous,576772,Charizard [Energy Burn | Fire Spin],,,Energy Burn Fire Spin,,no
+CEL,CC2,Charizard,"165,90€",ambiguous,576772,Charizard [Energy Burn | Fire Spin],,,Energy Burn Fire Spin,,no
 SVP,91,Koraidon,"105,73€",ambiguous,692236,Koraidon [Claw Slash | Rampaging Fang],,,Primordial Beatdown Shred,,no
 LC,29,Mewtwo,"50,51€",ambiguous,274794,Mewtwo [Energy Control | Telekinesis],,,Energy Control Telekinesis,,no
-SVP,173,Eevee,"30,71€",ambiguous,826138,Eevee [Call for Family | Gnaw],,,Boosted Evolution Reckless Charge,,no
-UF,27,Ho-Oh,"23,25€",ambiguous,276673,Ho-Oh [Gust | Sacred Fire],,,Gust Sacred Fire,,no
-SP,198,Pikachu V,"12,32€",ambiguous,576742,Pikachu V [Volt Tackle],,,Lightning Blast,,no
-SP,39,Pikachu,"11,38€",ambiguous,549406,Pikachu [Tail Whip | Pika Bolt],,,Tail Whip Pika Bolt,,no
+SVP,173,Eevee,"27,50€",ambiguous,826138,Eevee [Call for Family | Gnaw],,,Boosted Evolution Reckless Charge,,no
+UF,27,Ho-Oh,"24,68€",ambiguous,276673,Ho-Oh [Gust | Sacred Fire],,,Gust Sacred Fire,,no
+SP,198,Pikachu V,"12,07€",ambiguous,576742,Pikachu V [Volt Tackle],,,Lightning Blast,,no
 STS,15,Volcarona,"10,51€",ambiguous,450473,Volcarona [Shimmering Scales | Power Hurricane],,,Shimmering Scales Power Hurricane,,no
 UF,!,Unown,"10,08€",ambiguous,276627,Unown [E] [Shuffle | Hidden Power],,,Shuffle Hidden Power !,,no
-SVP,183,Lillie's Ribombee,"9,99€",ambiguous,816616,Lillie's Ribombee [Inviting Wink | Magical Shot],,,Inviting Wink Magical Shot,,no
+SP,39,Pikachu,"9,47€",ambiguous,549406,Pikachu [Tail Whip | Pika Bolt],,,Tail Whip Pika Bolt,,no
 SVP,182,Iono's Kilowattrel,"9,47€",ambiguous,816615,Iono's Kilowattrel [Flashing Draw | Mach Bolt],,,Flashing Draw Mach Bolt,,no
-SVP,92,Miraidon,"8,37€",ambiguous,760234,Miraidon [Peak Acceleration | Sparking Strike],,,Peak Acceleration Sparking Strike,,no
-NVI,15,Victini,"7,63€",ambiguous,280137,Victini [Victory Star | Stored Power],,,V-create,,no
-SP,5,Meowth VMAX,"5,43€",ambiguous,427101,Meowth VMAX [G-Max Gold Rush],,,G-Max Gold Rush,,no
-SVP,14,Koraidon,"5,36€",ambiguous,692235,Koraidon [Claw Slash | Rampaging Fang],,,Claw Slash Rampaging Fang,,no
-SVP,27,Pikachu,"5,18€",ambiguous,832224,Pikachu [Scrappy Spark],,,Adventuring Together,,no
-SVP,134,Crabominable,"4,43€",ambiguous,785841,Crabominable [Food Prep | Haymaker],,,Food Prep Haymaker,,no
+SVP,183,Lillie's Ribombee,"9,13€",ambiguous,816616,Lillie's Ribombee [Inviting Wink | Magical Shot],,,Inviting Wink Magical Shot,,no
+SVP,92,Miraidon,"8,21€",ambiguous,760234,Miraidon [Peak Acceleration | Sparking Strike],,,Peak Acceleration Sparking Strike,,no
+NVI,15,Victini,"7,91€",ambiguous,280137,Victini [Victory Star | Stored Power],,,V-create,,no
+SVP,27,Pikachu,"7,42€",ambiguous,832224,Pikachu [Scrappy Spark],,,Adventuring Together,,no
+SP,5,Meowth VMAX,"5,70€",ambiguous,427101,Meowth VMAX [G-Max Gold Rush],,,G-Max Gold Rush,,no
+SVP,14,Koraidon,"4,79€",ambiguous,692235,Koraidon [Claw Slash | Rampaging Fang],,,Claw Slash Rampaging Fang,,no
 SP,45,Eternatus VMAX,"4,34€",ambiguous,496315,Eternatus VMAX [Eternal Zone | Dread End],,,Eternal Zone Dread End,,no
-RG,50,Wartortle,"3,85€",ambiguous,276226,Wartortle [Water Gun | Smash Turn],,,Water Gun Smash Turn,,no
+RG,50,Wartortle,"4,16€",ambiguous,276226,Wartortle [Water Gun | Smash Turn],,,Water Gun Smash Turn,,no
+SVP,134,Crabominable,"4,09€",ambiguous,785841,Crabominable [Food Prep | Haymaker],,,Food Prep Haymaker,,no
+LOT,108,Naganadel,"3,26€",ambiguous,365745,Naganadel [Charging Up | Turning Point],,,Charging Up Turning Point,,no
 SP,97,Dragapult VMAX,"3,04€",ambiguous,549391,Dragapult VMAX [Shred | Max Phantom],,,Shred Max Phantom,,no
-LOT,108,Naganadel,"2,82€",ambiguous,365745,Naganadel [Charging Up | Turning Point],,,Charging Up Turning Point,,no
-SP,195,Leafeon VSTAR,"2,81€",ambiguous,604997,Leafeon VSTAR [Leaf Guard | Ivy Star],,,Ivy Star Leaf Guard,,no
-SP,154,Dragonite V,"2,65€",ambiguous,576501,Dragonite V [Shred | Dragon Gale],,,Shred Dragon Gale,,no
-SP,265,Zeraora VSTAR,"2,64€",ambiguous,669840,Zeraora VSTAR [Crushing Beat | Lightning Storm Star],,,Crushing Beat Lightning Storm Star,,no
-SP,99,Crobat VMAX,"2,50€",ambiguous,549401,Crobat VMAX [Stealth Poison | Max Cutter],,,Stealth Poison Max Cutter,,no
+SP,195,Leafeon VSTAR,"2,96€",ambiguous,604997,Leafeon VSTAR [Leaf Guard | Ivy Star],,,Ivy Star Leaf Guard,,no
+SP,154,Dragonite V,"2,61€",ambiguous,576501,Dragonite V [Shred | Dragon Gale],,,Shred Dragon Gale,,no
+SP,99,Crobat VMAX,"2,54€",ambiguous,549401,Crobat VMAX [Stealth Poison | Max Cutter],,,Stealth Poison Max Cutter,,no
+SP,265,Zeraora VSTAR,"2,43€",ambiguous,669840,Zeraora VSTAR [Crushing Beat | Lightning Storm Star],,,Crushing Beat Lightning Storm Star,,no
 SP,1,Grookey,"2,21€",ambiguous,547426,Grookey [Branch Poke],,,Branch Poke,,no
-TEU,99,Jirachi,"2,20€",ambiguous,369028,Jirachi [Stellar Wish | Slap],,,Stellar Wish Slap,,no
 SP,218,Morpeko V-UNION,"2,05€",ambiguous,651357,Morpeko V-UNION [Union Gain],,,Electric Ball,,no
 UNB,81,Marshadow,"1,99€",ambiguous,406994,Marshadow [Resetting Hole | Red Knuckles],,,Resetting Hole Red Knuckles,,no
 SP,11,Wooloo,"1,98€",ambiguous,439963,Wooloo [Defense Curl | Headbutt],,,Defense Curl Headbutt,,no
-SP,83,Alakazam V,"1,67€",ambiguous,530487,Alakazam V [Zen Spoon | Mind Ruler],,,Zen Spoon Mind Ruler,,no
-SP,301,Lugia V,"1,60€",ambiguous,719677,Lugia V [Read the Wind | Aero Dive],,,Read the Wind Aero Dive,,no
-RCL,55,Eiscue V,"1,50€",ambiguous,456448,Eiscue V [Cold Absorption | Blizzard],,,Cold Absorption Blizzard,,no
-UPR,9,Torterra,"1,45€",ambiguous,315941,Torterra [Giga Drain | Earthquake],,,Giga Drain Earthquake,,no
-SP,217,Morpeko V-UNION,"1,41€",ambiguous,651356,Morpeko V-UNION [Electric Ball],,,Burst Wheel,,no
-SP,61,Pikachu V,"1,40€",ambiguous,565010,Pikachu V [Charge | Thunderbolt],,,Charge Thunderbolt,,no
+TEU,99,Jirachi,"1,93€",ambiguous,369028,Jirachi [Stellar Wish | Slap],,,Stellar Wish Slap,,no
+SP,83,Alakazam V,"1,62€",ambiguous,530487,Alakazam V [Zen Spoon | Mind Ruler],,,Zen Spoon Mind Ruler,,no
+SP,301,Lugia V,"1,55€",ambiguous,719677,Lugia V [Read the Wind | Aero Dive],,,Read the Wind Aero Dive,,no
+SP,217,Morpeko V-UNION,"1,50€",ambiguous,651356,Morpeko V-UNION [Electric Ball],,,Burst Wheel,,no
+SP,61,Pikachu V,"1,45€",ambiguous,565010,Pikachu V [Charge | Thunderbolt],,,Charge Thunderbolt,,no
+UPR,9,Torterra,"1,39€",ambiguous,315941,Torterra [Giga Drain | Earthquake],,,Giga Drain Earthquake,,no
+CES,95,Metagross,"1,33€",ambiguous,360408,Metagross [Extend | Meteor Mash],,,Extend Meteor Mash,,no
 SP,2,Scorbunny,"1,28€",ambiguous,665987,Scorbunny [Flaring Dash | Ember],,,Super Singe,,no
-CES,95,Metagross,"1,21€",ambiguous,360408,Metagross [Extend | Meteor Mash],,,Extend Meteor Mash,,no
-SP,298,Hisuian Zoroark VSTAR,"1,21€",ambiguous,671765,Hisuian Zoroark VSTAR [Ticking Curse | Phantom Star],,,Phantom Star Ticking Curse,,no
-RS,76,Treecko,"1,11€",ambiguous,275724,Treecko [Tail Slap | Razor Leaf],,,Tail Slap Razor Leaf,,no
-SP,30,Copperajah V,"1,10€",ambiguous,477159,Copperajah V [Adamantine Press | Wrack Down],,,Adamantine Press Wrack Down,,no
-SVP,4,Mimikyu ex,"1,10€",ambiguous,701131,Mimikyu ex [Void Return | Energy Burst],,,Void Return Energy Burst,,no
-SP,219,Boltund V,"1,04€",ambiguous,608110,Boltund V [Smash Turn | Electrobullet],,,Smash Turn Electrobullet,,no
-SP,216,Morpeko V-UNION,"1,02€",ambiguous,651353,Morpeko V-UNION [Union Gain],,,All You Can Eat,,no
-SP,252,Infernape V,"1,00€",ambiguous,665992,Infernape V [Meteor Punch | Bright Flame],,,Meteor Punch Bright Flame,,no
-RCL,141,Snorlax,"0,89€",ambiguous,458093,Snorlax [Collect | Collapse],,,Collect Collapse,,no
-SP,294,Hisuian Electrode V,"0,87€",ambiguous,671806,Hisuian Electrode V [Tantrum Blast | Solar Shot],,,Tantrum Blast Solar Shot,,no
-SVP,177,Bloodmoon Ursaluna ex,"0,84€",ambiguous,796948,Bloodmoon Ursaluna ex [Seasoned Skill | Blood Moon],,,Seasoned Skill Blood Moon,,no
+SP,298,Hisuian Zoroark VSTAR,"1,19€",ambiguous,671772,Hisuian Zoroark VSTAR [Ticking Curse | Phantom Star],,,Phantom Star Ticking Curse,,no
+SP,30,Copperajah V,"1,13€",ambiguous,477159,Copperajah V [Adamantine Press | Wrack Down],,,Adamantine Press Wrack Down,,no
+SP,216,Morpeko V-UNION,"1,03€",ambiguous,651353,Morpeko V-UNION [Union Gain],,,All You Can Eat,,no
+SP,252,Infernape V,"1,01€",ambiguous,665992,Infernape V [Meteor Punch | Bright Flame],,,Meteor Punch Bright Flame,,no
+SP,219,Boltund V,"1,00€",ambiguous,608110,Boltund V [Smash Turn | Electrobullet],,,Smash Turn Electrobullet,,no
+SVP,4,Mimikyu ex,"1,00€",ambiguous,701130,Mimikyu ex [Void Return | Energy Burst],,,Void Return Energy Burst,,no
+RS,76,Treecko,"0,91€",ambiguous,275724,Treecko [Tail Slap | Razor Leaf],,,Tail Slap Razor Leaf,,no
+SVP,177,Bloodmoon Ursaluna ex,"0,85€",ambiguous,796948,Bloodmoon Ursaluna ex [Seasoned Skill | Blood Moon],,,Seasoned Skill Blood Moon,,no
+SP,294,Hisuian Electrode V,"0,82€",ambiguous,671806,Hisuian Electrode V [Tantrum Blast | Solar Shot],,,Tantrum Blast Solar Shot,,no
+SLG,32,Raikou,"0,78€",ambiguous,302170,Raikou [Booming Thunder | Electric Ball],,,Booming Thunder Electric Ball,,no
 UPR,23,Infernape,"0,78€",ambiguous,315826,Infernape [Flaming Fighter | Burst Punch],,,Flaming Fighter Burst Punch,,no
+SP,249,Kleavor VSTAR,"0,75€",ambiguous,660942,Kleavor VSTAR [Axe Break | Rampaging Star],,,Axe Break Rampaging Star,,no
 SP,28,Duraludon,"0,74€",ambiguous,453308,Duraludon [Metal Claw | Steel Beam],,,Metal Claw Steel Beam,,no
-SP,249,Kleavor VSTAR,"0,73€",ambiguous,660942,Kleavor VSTAR [Axe Break | Rampaging Star],,,Axe Break Rampaging Star,,no
+SSH,76,Boltund,"0,69€",ambiguous,436504,Boltund [Big Bite | Fighting Fangs],,,Bite Electrodash,,no
 UL,21,Poliwrath,"0,69€",ambiguous,279177,Poliwrath [Steamroll | Dynamic Punch],,,Steamroll Dynamic Punch,,no
-PK,27,Cacturne,"0,68€",ambiguous,277333,Cacturne [Poison Structure | Pin Missile],,,Poison Structure Pin Missile,,no
-RCL,62,Luxray,"0,64€",ambiguous,457743,Luxray [Raid | Head Bolt],,,Raid Head Bolt,,no
-SSH,58,Inteleon,"0,64€",ambiguous,436429,Inteleon [Silent Shot | Hydro Snipe],,,Shady Dealings Aqua Bullet,,no
-SP,85,Boltund V,"0,63€",ambiguous,608109,Boltund V [Smash Turn | Electrobullet],,,Electrify Bolt Storm,,no
-MEP,34,Mega Meganium ex,"0,62€",ambiguous,873717,Mega Meganium ex [Giant Bouquet],,,Giant Bouquet,,no
-SSH,76,Boltund,"0,58€",ambiguous,436509,Boltund [Bite | Electrodash],,,Bite Electrodash,,no
-UL,60,Riolu,"0,56€",ambiguous,279216,Riolu [Kick | Double Chop],,,Kick Double Chop,,no
-PAL,58,Frigibax,"0,55€",ambiguous,785461,Frigibax [Chilly | Bite],,,Chilly Bite,,no
-RCL,125,Grimmsnarl,"0,54€",ambiguous,458023,Grimmsnarl [Dark Oath | Energy Press],,,Dark Oath Energy Press,,no
-SSH,14,Rillaboom,"0,54€",ambiguous,427196,Rillaboom [Voltage Beat | Hammer In],,,Voltage Beat Hammer In,,no
+SSH,14,Rillaboom,"0,67€",ambiguous,427196,Rillaboom [Voltage Beat | Hammer In],,,Voltage Beat Hammer In,,no
+SSH,58,Inteleon,"0,64€",ambiguous,427216,Inteleon [Shady Dealings | Aqua Bullet],,,Shady Dealings Aqua Bullet,,no
+ROS,67,Meowth,"0,59€",ambiguous,282735,Meowth [Feelin' Fine | Fury Swipes],,,Feelin' Fine Fury Swipes,,no
+SUM,113,Oranguru,"0,59€",ambiguous,295425,Oranguru [Instruct | Psychic],,,Instruct Psychic,,no
+SP,85,Boltund V,"0,58€",ambiguous,608109,Boltund V [Smash Turn | Electrobullet],,,Electrify Bolt Storm,,no
 BKP,57,Garbodor,"0,50€",ambiguous,368705,Garbodor [Garbotoxin | Offensive Bomb],,,Garbotoxin Offensive Bomb,,no
-VIV,60,Zekrom,"0,50€",ambiguous,511720,Zekrom [Slash | Wild Shock],,,Slash Wild Shock,,no
-RCL,95,Galarian Sirfetch'd,"0,46€",ambiguous,457888,Galarian Sirfetch'd [Pierce | Meteor Assault],,,Pierce Meteor Assault,,no
-PLB,5,Tropius,"0,45€",ambiguous,281026,Tropius [Return | Energy Press],,,Return Energy Press,,no
+UL,60,Riolu,"0,50€",ambiguous,279216,Riolu [Kick | Double Chop],,,Kick Double Chop,,no
+PAL,58,Frigibax,"0,49€",ambiguous,785461,Frigibax [Chilly | Bite],,,Chilly Bite,,no
+VIV,60,Zekrom,"0,47€",ambiguous,511720,Zekrom [Slash | Wild Shock],,,Slash Wild Shock,,no
+SSH,34,Cinderace,"0,45€",ambiguous,427226,Cinderace [Libero | Flare Striker],,,Libero Flare Striker,,no
 STS,74,Cobalion,"0,45€",ambiguous,291640,Cobalion [Quick Guard | Revenge Blast],,,Quick Guard Revenge Blast,,no
-UPR,34,Empoleon,"0,45€",ambiguous,315965,Empoleon [Total Command | Whirlpool],,,Total Command Whirlpool,,no
 VIV,129,Duraludon,"0,42€",ambiguous,512355,Duraludon [Raging Claws | Power Blast],,,Raging Claws Power Blast,,no
-SSH,34,Cinderace,"0,39€",ambiguous,427226,Cinderace [Libero | Flare Striker],,,Libero Flare Striker,,no
-SUM,113,Oranguru,"0,39€",ambiguous,295425,Oranguru [Instruct | Psychic],,,Instruct Psychic,,no
-ROS,67,Meowth,"0,33€",ambiguous,282735,Meowth [Feelin' Fine | Fury Swipes],,,Feelin' Fine Fury Swipes,,no
-UL,48,Chinchou,"0,31€",ambiguous,279204,Chinchou [Ram | Lightning Ball],,,Ram Lightning Ball,,no
-SIT,147,Archeops,"0,29€",ambiguous,682194,Archeops [Primal Turbo | Speed Wing],,,Primal Turbo Speed Wing,,no
-UPR,32,Piplup,"0,29€",ambiguous,315963,Piplup [Peck | Wave Splash],,,Peck Wave Splash,,no
-UL,49,Horsea,"0,28€",ambiguous,279205,Horsea [Beat | Fin Smack],,,Beat Fin Smack,,no
+UPR,34,Empoleon,"0,41€",ambiguous,315965,Empoleon [Total Command | Whirlpool],,,Total Command Whirlpool,,no
+UPR,32,Piplup,"0,28€",ambiguous,315963,Piplup [Peck | Wave Splash],,,Peck Wave Splash,,no
 GRI,56,Oricorio,"0,27€",ambiguous,297508,Oricorio [Feather Dance | Pom-Pom Punch],,,Supernatural Dance Revelation Dance,,no
+UL,48,Chinchou,"0,27€",ambiguous,279204,Chinchou [Ram | Lightning Ball],,,Ram Lightning Ball,,no
+UL,49,Horsea,"0,27€",ambiguous,279205,Horsea [Beat | Fin Smack],,,Beat Fin Smack,,no
+GRI,55,Oricorio,"0,25€",ambiguous,297478,Oricorio [Passionate Dance | Kindle],,,Vital Dance Casual Slap,,no
+SIT,147,Archeops,"0,25€",ambiguous,682194,Archeops [Primal Turbo | Speed Wing],,,Primal Turbo Speed Wing,,no
 TEF,121,Miraidon,"0,24€",ambiguous,761975,Miraidon [Peak Acceleration | Sparking Strike],,,Peak Acceleration Sparking Strike,,no
-GRI,55,Oricorio,"0,23€",ambiguous,297478,Oricorio [Passionate Dance | Kindle],,,Vital Dance Casual Slap,,no
+VIV,61,Zeraora,"0,23€",ambiguous,511725,Zeraora [Fighting Lightning],,,Fighting Lightning,,no
 GRI,46,Oricorio,"0,22€",ambiguous,297517,Oricorio [Vital Dance | Casual Slap],,,Feather Dance Pom-Pom Punch,,no
-SLG,52,Zorua,"0,22€",ambiguous,302190,Zorua [Stampede | Ram],,,Stampede Ram,,no
 GRI,14,Oricorio,"0,21€",ambiguous,297518,Oricorio [Supernatural Dance | Revelation Dance],,,Passionate Dance Kindle,,no
-LOT,107,Poipole,"0,14€",ambiguous,365744,Poipole [Eye Opener | Peck],,,Eye Opener Peck,,no
-RCL,87,Alcremie,"0,12€",ambiguous,457853,Alcremie [Decorate | Draining Kiss],,,Decorate Draining Kiss,,no
-UL,55,Natu,"0,11€",ambiguous,279211,Natu [Peck | Teleport],,,Peck Teleport,,no
-SCR,96,Grimmsnarl,"0,08€",ambiguous,785950,Grimmsnarl [Goad 'n' Grab | Knuckle Sandwich],,,Goad 'n' Grab Knuckle Sandwich,,no
-SUM,24,Litten,"0,08€",ambiguous,294121,Litten [Bite | Flare],,,Bite Flare,,no
+SLG,52,Zorua,"0,20€",ambiguous,302190,Zorua [Stampede | Ram],,,Stampede Ram,,no
+UL,43,Aipom,"0,17€",ambiguous,279199,Aipom [Tail Code | Tail Smash],,,Tail Code Tail Smash,,no
+SCR,96,Grimmsnarl,"0,09€",ambiguous,785950,Grimmsnarl [Goad 'n' Grab | Knuckle Sandwich],,,Goad 'n' Grab Knuckle Sandwich,,no
 SSP,161,Terapagos,"0,07€",ambiguous,794534,Terapagos [Prism Charge | Hard Tackle],,,Prism Charge Hard Tackle,,no
+SUM,24,Litten,"0,07€",ambiguous,294121,Litten [Bite | Flare],,,Bite Flare,,no
 SVI,156,Lechonk,"0,07€",ambiguous,702451,Lechonk [Collect | Tackle],,,Whimsy Tackle,,no
 SVI,155,Lechonk,"0,06€",ambiguous,702450,Lechonk [Repelling Odor | Stampede],,,Collect Tackle,,no
+UL,55,Natu,"0,06€",ambiguous,279211,Natu [Peck | Teleport],,,Peck Teleport,,no
 PAL,167,Tandemaus,"0,05€",ambiguous,715642,Tandemaus [Attach | Smash Kick],,,Attach Smash Kick,,no
-SVI,105,Greavard,"0,05€",ambiguous,702401,Greavard [Underworld Stroll | Sharp Fang],,,Underworld Stroll Sharp Fang,,no
+SVI,142,Revavroom,"0,05€",ambiguous,702437,Revavroom [Rumbling Engine | Knock Away],,,Rumbling Engine Knock Away,,no
 SVI,154,Lechonk,"0,05€",ambiguous,702452,Lechonk [Whimsy Tackle],,,Repelling Odor Stampede,,no
-SVI,142,Revavroom,"0,04€",ambiguous,702437,Revavroom [Rumbling Engine | Knock Away],,,Rumbling Engine Knock Away,,no
+SCR,22,Reshiram,"0,04€",ambiguous,785875,Reshiram [Heat Blast],,,Heat Blast,,no
+SVI,105,Greavard,"0,04€",ambiguous,702401,Greavard [Underworld Stroll | Sharp Fang],,,Underworld Stroll Sharp Fang,,no
 SVI,164,Cyclizar,"0,04€",ambiguous,702460,Cyclizar [Touring | Speed Attack],,,Touring Speed Attack,,no
 SVI,52,Quaxly,"0,04€",ambiguous,689765,Quaxly [Pound | Kick],,,Pound Kick,,no
-PAR,132,Doublade,"0,03€",ambiguous,740670,Doublade [Slash | Slashing Strike],,,Slash Slashing Strike,,no
-SCR,22,Reshiram,"0,03€",ambiguous,785875,Reshiram [Heat Blast],,,Heat Blast,,no
+TEF,96,Great Tusk,"0,04€",ambiguous,760727,Great Tusk [Land Collapse | Giant Tusk],,,Lunge Out Wrathful Charge,,no
+SVI,70,Rotom,"0,03€",ambiguous,702366,Rotom [Junk Hunt | Thunder Shock],,,Junk Hunt Thunder Shock,,no
 TEF,118,Iron Treads,"0,03€",ambiguous,760748,Iron Treads [Dual Core | Wheel Pass],,,Dual Core Wheel Pass,,no
-TEF,96,Great Tusk,"0,03€",ambiguous,760726,Great Tusk [Lunge Out | Wrathful Charge],,,Lunge Out Wrathful Charge,,no
-VIV,61,Zeraora,"0,03€",ambiguous,511725,Zeraora [Fighting Lightning],,,Fighting Lightning,,no
 SUM,10,Dartrix,"0,02€",ambiguous,295316,Dartrix [Sharp Blade Quill | Leaf Blade],,,Sharp Blade Quill Leaf Blade,,no
-UL,43,Aipom,"0,02€",ambiguous,279199,Aipom [Tail Code | Tail Smash],,,Tail Code Tail Smash,,no
 SVP,148,Miraidon,"125,06€",correction,692234,Miraidon [Sharp Fang | Lightning Laser],769427,Miraidon [Electric Claws | Mach Bolt],Electric Claws Mach Bolt,5,no
-SP,241,Gengar,"60,84€",correction,505880,Gengar [Life Shaker | Hypnoblast],665984,Gengar [Netherworld Gate | Screaming Circle],Netherworld Gate Screaming Circle,2,no
-WP,27,Pikachu,"49,50€",correction,275445,Pikachu [Scratch | Thunderbolt],275446,Pikachu [Thundershock | Agility],Thundershock Agility,4,no
-WP,12,Mewtwo,"43,59€",correction,275422,Mewtwo [Energy Absorption | Psyburn],275431,Mewtwo [Energy Control | Telekinesis],Energy Control Telekinesis,3,no
-SVP,88,Pikachu,"33,10€",correction,780209,Pikachu [Scrappy Spark],751813,Pikachu [Growl | Pika Bolt],Growl Pika Bolt,10,no
-SP,52,Gengar,"29,43€",correction,665984,Gengar [Netherworld Gate | Screaming Circle],505880,Gengar [Life Shaker | Hypnoblast],Life Shaker Hypnoblast,2,no
+WP,12,Mewtwo,"47,51€",correction,275422,Mewtwo [Energy Absorption | Psyburn],275431,Mewtwo [Energy Control | Telekinesis],Energy Control Telekinesis,3,no
+SVP,88,Pikachu,"32,06€",correction,780209,Pikachu [Scrappy Spark],751813,Pikachu [Growl | Pika Bolt],Growl Pika Bolt,10,no
 UF,X,Unown,"27,30€",correction,276626,Unown [J] [Shuffle | Hidden Power],276637,Unown [X] [Shuffle | Hidden Power],Shuffle Hidden Power X,28,no
-SVP,95,Cleffa,"26,50€",correction,761128,Cleffa [Grasping Draw],751816,Cleffa [Twinkling Hope],Twinkling Hope,3,no
-SP,232,Charmander,"22,38€",correction,547031,Charmander [Collect | Flare],664338,Charmander [Tail on Fire],Tail on Fire,2,no
-SVP,121,Revavroom,"22,38€",correction,761122,Revavroom [Rumbling Engine | Knock Away],769421,Revavroom [Swagger | Huge Tackle],Swagger Huge Tackle,3,no
-UF,V,Unown,"21,70€",correction,276628,Unown [D] [Shuffle | Hidden Power],276636,Unown [V] [Shuffle | Hidden Power],Shuffle Hidden Power V,28,no
-UF,U,Unown,"21,16€",correction,276636,Unown [V] [Shuffle | Hidden Power],276642,Unown [U] [Shuffle | Hidden Power],Shuffle Hidden Power U,28,no
-UF,R,Unown,"17,41€",correction,276642,Unown [U] [Shuffle | Hidden Power],276643,Unown [R] [Shuffle | Hidden Power],Shuffle Hidden Power R,28,no
-UF,Q,Unown,"16,29€",correction,276634,Unown [L] [Shuffle | Hidden Power],276641,Unown [Q] [Shuffle | Hidden Power],Shuffle Hidden Power Q,28,no
-UF,N,Unown,"15,41€",correction,276641,Unown [Q] [Shuffle | Hidden Power],276624,Unown [N] [Shuffle | Hidden Power],Shuffle Hidden Power N,28,no
-UF,L,Unown,"15,09€",correction,276637,Unown [X] [Shuffle | Hidden Power],276634,Unown [L] [Shuffle | Hidden Power],Shuffle Hidden Power L,28,no
-UF,K,Unown,"15,08€",correction,276643,Unown [R] [Shuffle | Hidden Power],276621,Unown [K] [Shuffle | Hidden Power],Shuffle Hidden Power K,28,no
-UF,J,Unown,"14,41€",correction,276621,Unown [K] [Shuffle | Hidden Power],276626,Unown [J] [Shuffle | Hidden Power],Shuffle Hidden Power J,28,no
-SVP,161,Charizard ex,"13,72€",correction,740401,Charizard ex [Infernal Reign | Burning Darkness],791830,Charizard ex [Brave Wing | Explosive Vortex],Brave Wing Explosive Vortex,5,no
-UF,D,Unown,"12,45€",correction,276625,Unown [C] [Shuffle | Hidden Power],276628,Unown [D] [Shuffle | Hidden Power],Shuffle Hidden Power D,28,no
-UF,C,Unown,"12,28€",correction,276624,Unown [N] [Shuffle | Hidden Power],276625,Unown [C] [Shuffle | Hidden Power],Shuffle Hidden Power C,28,no
-SP,92,Charmander,"7,44€",correction,664338,Charmander [Tail on Fire],547031,Charmander [Collect | Flare],Collect Flare,2,no
-SP,157,Greninja V-UNION,"6,50€",correction,572156,Greninja V-UNION [Ninja Body | Aqua Edge],572157,Greninja V-UNION [Antidote Jutsu | Twister Shuriken],Antidote Jutsu Twister Shuriken,5,no
-SP,156,Greninja V-UNION,"5,67€",correction,572158,Greninja V-UNION [Feel the Way | Waterfall Bind],572156,Greninja V-UNION [Ninja Body | Aqua Edge],Ninja Body Aqua Edge,5,no
+UF,V,Unown,"25,60€",correction,276631,Unown [I] [Shuffle | Hidden Power],276636,Unown [V] [Shuffle | Hidden Power],Shuffle Hidden Power V,28,no
+SVP,95,Cleffa,"22,24€",correction,761128,Cleffa [Grasping Draw],751816,Cleffa [Twinkling Hope],Twinkling Hope,3,no
+SVP,121,Revavroom,"21,96€",correction,761122,Revavroom [Rumbling Engine | Knock Away],769421,Revavroom [Swagger | Huge Tackle],Swagger Huge Tackle,3,no
+UF,T,Unown,"21,16€",correction,276636,Unown [V] [Shuffle | Hidden Power],276645,Unown [T] [Shuffle | Hidden Power],Shuffle Hidden Power T,28,no
+SP,232,Charmander,"20,92€",correction,547031,Charmander [Collect | Flare],664338,Charmander [Tail on Fire],Tail on Fire,2,no
+UF,S,Unown,"20,64€",correction,276619,Unown [B] [Shuffle | Hidden Power],276644,Unown [S] [Shuffle | Hidden Power],Shuffle Hidden Power S,28,no
+UF,R,Unown,"17,98€",correction,276620,Unown [A] [Shuffle | Hidden Power],276643,Unown [R] [Shuffle | Hidden Power],Shuffle Hidden Power R,28,no
+UF,P,Unown,"16,37€",correction,276637,Unown [X] [Shuffle | Hidden Power],276633,Unown [P] [Shuffle | Hidden Power],Shuffle Hidden Power P,28,no
+UF,N,Unown,"16,22€",correction,276632,Unown [H] [Shuffle | Hidden Power],276624,Unown [N] [Shuffle | Hidden Power],Shuffle Hidden Power N,28,no
+UF,M,Unown,"15,61€",correction,276645,Unown [T] [Shuffle | Hidden Power],276622,Unown [M] [Shuffle | Hidden Power],Shuffle Hidden Power M,28,no
+UF,K,Unown,"15,13€",correction,276630,Unown [G] [Shuffle | Hidden Power],276621,Unown [K] [Shuffle | Hidden Power],Shuffle Hidden Power K,28,no
+UF,J,Unown,"15,08€",correction,276643,Unown [R] [Shuffle | Hidden Power],276626,Unown [J] [Shuffle | Hidden Power],Shuffle Hidden Power J,28,no
+UF,I,Unown,"14,41€",correction,276621,Unown [K] [Shuffle | Hidden Power],276631,Unown [I] [Shuffle | Hidden Power],Shuffle Hidden Power I,28,no
+UF,H,Unown,"14,40€",correction,276629,Unown [F] [Shuffle | Hidden Power],276632,Unown [H] [Shuffle | Hidden Power],Shuffle Hidden Power H,28,no
+SVP,161,Charizard ex,"13,26€",correction,740401,Charizard ex [Infernal Reign | Burning Darkness],791830,Charizard ex [Brave Wing | Explosive Vortex],Brave Wing Explosive Vortex,5,no
+UF,G,Unown,"12,90€",correction,276644,Unown [S] [Shuffle | Hidden Power],276630,Unown [G] [Shuffle | Hidden Power],Shuffle Hidden Power G,28,no
+UF,F,Unown,"12,84€",correction,276622,Unown [M] [Shuffle | Hidden Power],276629,Unown [F] [Shuffle | Hidden Power],Shuffle Hidden Power F,28,no
+UF,B,Unown,"12,28€",correction,276624,Unown [N] [Shuffle | Hidden Power],276619,Unown [B] [Shuffle | Hidden Power],Shuffle Hidden Power B,28,no
+UF,A,Unown,"11,82€",correction,276633,Unown [P] [Shuffle | Hidden Power],276620,Unown [A] [Shuffle | Hidden Power],Shuffle Hidden Power A,28,no
+SP,92,Charmander,"7,37€",correction,664338,Charmander [Tail on Fire],547031,Charmander [Collect | Flare],Collect Flare,2,no
+SP,157,Greninja V-UNION,"6,16€",correction,572156,Greninja V-UNION [Ninja Body | Aqua Edge],572157,Greninja V-UNION [Antidote Jutsu | Twister Shuriken],Antidote Jutsu Twister Shuriken,5,no
+SP,156,Greninja V-UNION,"5,38€",correction,572157,Greninja V-UNION [Antidote Jutsu | Twister Shuriken],572156,Greninja V-UNION [Ninja Body | Aqua Edge],Ninja Body Aqua Edge,5,no
+SP,210,Oricorio,"3,59€",correction,580165,Oricorio [Lesson in Zeal | Glistening Droplets],659062,Oricorio [Mixed Call | Razor Wing],Mixed Call Razor Wing,2,no
 SSH,15,Rillaboom,"3,13€",correction,701500,Rillaboom [Voltage Beat | Hammer In],436244,Rillaboom [Drum Roll | Drum Beating],Drum Roll Drum Beating,4,no
-PAF,120,Paldean Tauros,"2,59€",correction,751650,Paldean Tauros [Raging Horns | Blaze Dash],751659,Paldean Tauros [Raging Horns | Aqua Dive],Raging Horns Aqua Dive,3,no
-PAF,111,Paldean Tauros,"2,32€",correction,751659,Paldean Tauros [Raging Horns | Aqua Dive],751650,Paldean Tauros [Raging Horns | Blaze Dash],Raging Horns Blaze Dash,3,no
-SP,63,Pikachu V,"1,81€",correction,605848,Pikachu V [Lightning Blast],496545,Pikachu V [Pika Ball | Circle Circuit],Pika Ball Circle Circuit,8,no
-TEU,23,Squirtle,"1,55€",correction,368954,Squirtle [Floating Shell | Water Gun],368955,Squirtle [Tackle | Rain Splash],Tackle Rain Splash,2,no
-XY,88,Jigglypuff,"1,51€",correction,281424,Jigglypuff [Rollout | Heartfelt Song],281425,Jigglypuff [Body Slam],Body Slam,2,no
-RS,68,Ralts,"1,31€",correction,275714,Ralts [Confuse Ray],275716,Ralts [Pound | Link Blast],Pound Link Blast,3,no
-RS,67,Ralts,"1,26€",correction,275716,Ralts [Pound | Link Blast],275715,Ralts [Headbutt | Hypnoblast],Headbutt Hypnoblast,3,no
-SS,28,Anorith,"1,26€",correction,275804,Anorith [Fast Evolution | Pierce],275805,Anorith [Slash | Double Scratch],Slash Double Scratch,2,no
-SS,27,Anorith,"1,13€",correction,275805,Anorith [Slash | Double Scratch],275804,Anorith [Fast Evolution | Pierce],Fast Evolution Pierce,2,no
-30C,46,Pikachu,"1,02€",correction,907649,Pikachu [Charge-Up Dash | Pika Bolt],907653,Pikachu [Get Some Air | Smash Kick],Get Some Air Smash Kick,31,no
-SS,67,Lotad,"0,98€",correction,275843,Lotad [Rain Dish | Ram],275844,Lotad [Tackle | Blot],Tackle Blot,2,no
-30C,42,Pikachu,"0,93€",correction,907653,Pikachu [Get Some Air | Smash Kick],907649,Pikachu [Charge-Up Dash | Pika Bolt],Charge-Up Dash Pika Bolt,31,no
-TEU,22,Squirtle,"0,89€",correction,368955,Squirtle [Tackle | Rain Splash],368954,Squirtle [Floating Shell | Water Gun],Floating Shell Water Gun,2,no
-SP,210,Oricorio,"0,87€",correction,580165,Oricorio [Lesson in Zeal | Glistening Droplets],659062,Oricorio [Mixed Call | Razor Wing],Mixed Call Razor Wing,2,no
-PRC,46,Spheal,"0,86€",correction,273576,Spheal [Ball Roll],273577,Spheal [Ice Ball],Ice Ball,2,no
+PAF,172,Paldean Tauros,"2,92€",correction,751650,Paldean Tauros [Raging Horns | Blaze Dash],751711,Paldean Tauros [Raging Horns | Combat Tackle],Raging Horns Combat Tackle,3,no
+PAF,120,Paldean Tauros,"2,74€",correction,751711,Paldean Tauros [Raging Horns | Combat Tackle],751659,Paldean Tauros [Raging Horns | Aqua Dive],Raging Horns Aqua Dive,3,no
+PAF,111,Paldean Tauros,"2,28€",correction,751659,Paldean Tauros [Raging Horns | Aqua Dive],751650,Paldean Tauros [Raging Horns | Blaze Dash],Raging Horns Blaze Dash,3,no
+SP,63,Pikachu V,"1,80€",correction,605848,Pikachu V [Lightning Blast],496545,Pikachu V [Pika Ball | Circle Circuit],Pika Ball Circle Circuit,8,no
+SS,28,Anorith,"1,79€",correction,275804,Anorith [Fast Evolution | Pierce],275805,Anorith [Slash | Double Scratch],Slash Double Scratch,2,no
+TEU,23,Squirtle,"1,70€",correction,368954,Squirtle [Floating Shell | Water Gun],368955,Squirtle [Tackle | Rain Splash],Tackle Rain Splash,2,no
+RS,68,Ralts,"1,25€",correction,275714,Ralts [Confuse Ray],275716,Ralts [Pound | Link Blast],Pound Link Blast,3,no
+RS,67,Ralts,"1,17€",correction,275716,Ralts [Pound | Link Blast],275715,Ralts [Headbutt | Hypnoblast],Headbutt Hypnoblast,3,no
+SS,27,Anorith,"1,17€",correction,275805,Anorith [Slash | Double Scratch],275804,Anorith [Fast Evolution | Pierce],Fast Evolution Pierce,2,no
+TEU,22,Squirtle,"0,99€",correction,368955,Squirtle [Tackle | Rain Splash],368954,Squirtle [Floating Shell | Water Gun],Floating Shell Water Gun,2,no
+PRC,46,Spheal,"0,85€",correction,273576,Spheal [Ball Roll],273577,Spheal [Ice Ball],Ice Ball,2,no
+SSH,59,Inteleon,"0,82€",correction,450623,Inteleon [Shady Dealings | Aqua Bullet],436429,Inteleon [Silent Shot | Hydro Snipe],Silent Shot Hydro Snipe,4,no
 NVI,53,Reuniclus,"0,81€",correction,280175,Reuniclus [Future Sight | Net Force],280176,Reuniclus [Dizzy Punch | Mind Bend],Dizzy Punch Mind Bend,2,no
-PRC,45,Spheal,"0,81€",correction,273577,Spheal [Ice Ball],273576,Spheal [Ball Roll],Ball Roll,2,no
-RS,66,Ralts,"0,81€",correction,275715,Ralts [Headbutt | Hypnoblast],275714,Ralts [Confuse Ray],Confuse Ray,3,no
-SS,66,Lotad,"0,77€",correction,275844,Lotad [Tackle | Blot],275843,Lotad [Rain Dish | Ram],Rain Dish Ram,2,no
-XY,87,Jigglypuff,"0,70€",correction,281425,Jigglypuff [Body Slam],281424,Jigglypuff [Rollout | Heartfelt Song],Rollout Heartfelt Song,2,no
+RS,66,Ralts,"0,77€",correction,275715,Ralts [Headbutt | Hypnoblast],275714,Ralts [Confuse Ray],Confuse Ray,3,no
+PRC,45,Spheal,"0,73€",correction,273577,Spheal [Ice Ball],273576,Spheal [Ball Roll],Ball Roll,2,no
 NVI,52,Reuniclus,"0,67€",correction,280176,Reuniclus [Dizzy Punch | Mind Bend],280175,Reuniclus [Future Sight | Net Force],Future Sight Net Force,2,no
-UD,65,Scyther,"0,66€",correction,279289,Scyther [Afterimage Strike],279318,Scyther [Cut | Slashing Strike],Cut Slashing Strike,2,no
+UD,65,Scyther,"0,65€",correction,279289,Scyther [Afterimage Strike],279318,Scyther [Cut | Slashing Strike],Cut Slashing Strike,2,no
 30C,34,Pikachu,"0,63€",correction,907651,Pikachu [Agility],907641,Pikachu [Pika Chain],Pika Chain,31,no
 SP,168,Oricorio,"0,59€",correction,659062,Oricorio [Mixed Call | Razor Wing],580165,Oricorio [Lesson in Zeal | Glistening Droplets],Lesson in Zeal Glistening Droplets,2,no
-UD,36,Scyther,"0,51€",correction,279318,Scyther [Cut | Slashing Strike],279289,Scyther [Afterimage Strike],Afterimage Strike,2,no
-PLS,92,Durant,"0,49€",correction,280831,Durant [Gnaw | Hard Crunch],280832,Durant [Call for Backup | Metal Jail],Call for Backup Metal Jail,2,no
 PLS,113,Watchog,"0,47€",correction,280852,Watchog [Fast Swipe | Biting Fang],280853,Watchog [Second Bite | Low Kick],Second Bite Low Kick,2,no
-PLS,64,Trubbish,"0,45€",correction,280803,Trubbish [Pile Up | Sludge Toss],280804,Trubbish [Pound | Sludge Bomb],Pound Sludge Bomb,3,no
-PLS,112,Watchog,"0,35€",correction,280853,Watchog [Second Bite | Low Kick],280852,Watchog [Fast Swipe | Biting Fang],Fast Swipe Biting Fang,2,no
-UD,54,Houndour,"0,35€",correction,279306,Houndour [Sharp Fang],279307,Houndour [Jump On],Jump On,2,no
-PLS,91,Durant,"0,34€",correction,280832,Durant [Call for Backup | Metal Jail],280831,Durant [Gnaw | Hard Crunch],Gnaw Hard Crunch,2,no
-SSH,55,Sobble,"0,24€",correction,436414,Sobble [Water Gun],427166,Sobble [Pound | Water Gun],Pound Water Gun,2,no
-FCO,44,Wormadam,"0,22€",correction,289880,Wormadam [Strike Back | Iron Head],289868,Wormadam [Sand Spray | Twin Bursts],Sand Spray Twin Bursts,3,no
-NVI,68,Stunfisk,"0,21€",correction,280165,Stunfisk [Mud Shot | Thunder],280191,Stunfisk [Trickle | Thundershock],Trickle Thundershock,2,no
-BKT,116,Doduo,"0,20€",correction,286361,Doduo [Simultaneous Peck | Doduo Delivery],286362,Doduo [Double Stab | Doduo Delivery],Double Stab Doduo Delivery,2,no
-NVI,42,Stunfisk,"0,20€",correction,280191,Stunfisk [Trickle | Thundershock],280165,Stunfisk [Mud Shot | Thunder],Mud Shot Thunder,2,no
-TEU,3,Weedle,"0,19€",correction,368935,Weedle [Tangle Drag | Bug Bite],368936,Weedle [Reckless Charge],Reckless Charge,2,no
-UNM,7,Sewaddle,"0,16€",correction,387862,Sewaddle [Multiply | Gnaw],387867,Sewaddle [Swaddling Leaves | Surprise Attack],Swaddling Leaves Surprise Attack,2,no
-BKT,115,Doduo,"0,15€",correction,286362,Doduo [Double Stab | Doduo Delivery],286361,Doduo [Simultaneous Peck | Doduo Delivery],Simultaneous Peck Doduo Delivery,2,no
-PLS,63,Trubbish,"0,14€",correction,280804,Trubbish [Pound | Sludge Bomb],280803,Trubbish [Pile Up | Sludge Toss],Pile Up Sludge Toss,3,no
+UD,36,Scyther,"0,45€",correction,279318,Scyther [Cut | Slashing Strike],279289,Scyther [Afterimage Strike],Afterimage Strike,2,no
+PLS,64,Trubbish,"0,42€",correction,280803,Trubbish [Pile Up | Sludge Toss],280804,Trubbish [Pound | Sludge Bomb],Pound Sludge Bomb,3,no
+PLS,112,Watchog,"0,36€",correction,280853,Watchog [Second Bite | Low Kick],280852,Watchog [Fast Swipe | Biting Fang],Fast Swipe Biting Fang,2,no
+UD,54,Houndour,"0,34€",correction,279306,Houndour [Sharp Fang],279307,Houndour [Jump On],Jump On,2,no
+TEU,117,Dratini,"0,25€",correction,369044,Dratini [Dragon Rage],369045,Dratini [Defensive Scales | Rain Splash],Defensive Scales Rain Splash,2,no
+TEU,116,Dratini,"0,23€",correction,369045,Dratini [Defensive Scales | Rain Splash],369044,Dratini [Dragon Rage],Dragon Rage,2,no
+TEU,3,Weedle,"0,20€",correction,368935,Weedle [Tangle Drag | Bug Bite],368936,Weedle [Reckless Charge],Reckless Charge,2,no
+UNM,7,Sewaddle,"0,19€",correction,387862,Sewaddle [Multiply | Gnaw],387867,Sewaddle [Swaddling Leaves | Surprise Attack],Swaddling Leaves Surprise Attack,2,no
+SSH,55,Sobble,"0,16€",correction,436414,Sobble [Water Gun],427166,Sobble [Pound | Water Gun],Pound Water Gun,2,no
+PLF,55,Yamask,"0,13€",correction,280932,Yamask [Transfer Pain],280933,Yamask [Will-O-Wisp | Ram],Will-O-Wisp Ram,2,no
+UD,53,Houndour,"0,13€",correction,279307,Houndour [Jump On],279306,Houndour [Sharp Fang],Sharp Fang,2,no
+PLF,54,Yamask,"0,12€",correction,280933,Yamask [Will-O-Wisp | Ram],280932,Yamask [Transfer Pain],Transfer Pain,2,no
 SSH,54,Sobble,"0,12€",correction,427166,Sobble [Pound | Water Gun],436414,Sobble [Water Gun],Water Gun,2,no
-UD,53,Houndour,"0,12€",correction,279307,Houndour [Jump On],279306,Houndour [Sharp Fang],Sharp Fang,2,no
-PAR,154,Tandemaus,"0,11€",correction,740693,Tandemaus [Damage Rush],740694,Tandemaus [Tumble Over],Tumble Over,2,no
-SSH,146,Minccino,"0,11€",correction,436819,Minccino [Glance | Tail Slap],436824,Minccino [Tail Whap],Tail Whap,2,no
+SSH,33,Raboot,"0,11€",correction,436319,Raboot [Flame Charge | Magnum Kick],436324,Raboot [Kick | Heat Blast],Kick Heat Blast,2,no
 UNM,6,Sewaddle,"0,11€",correction,387867,Sewaddle [Swaddling Leaves | Surprise Attack],387862,Sewaddle [Multiply | Gnaw],Multiply Gnaw,2,no
-SSH,145,Minccino,"0,10€",correction,436824,Minccino [Tail Whap],436819,Minccino [Glance | Tail Slap],Glance Tail Slap,2,no
-SSH,11,Grookey,"0,08€",correction,436229,Grookey [Fury Swipes],427156,Grookey [Scratch | Beat],Scratch Beat,2,no
-PAR,83,Tinkatink,"0,07€",correction,740574,Tinkatink [Mountain Scrounging | Mumble],740575,Tinkatink [Boundless Power],Boundless Power,2,no
-LOR,121,Inkay,"0,06€",correction,674090,Inkay [Fickle Attack],674134,Inkay [Call for Family | Tackle],Call for Family Tackle,2,no
+PLS,63,Trubbish,"0,10€",correction,280804,Trubbish [Pound | Sludge Bomb],280803,Trubbish [Pile Up | Sludge Toss],Pile Up Sludge Toss,3,no
+SVI,102,Flittle,"0,07€",correction,702397,Flittle [Spinning Attack],702398,Flittle [Dash Off],Dash Off,3,no
+TEU,2,Weedle,"0,07€",correction,368936,Weedle [Reckless Charge],368935,Weedle [Tangle Drag | Bug Bite],Tangle Drag Bug Bite,2,no
 OBF,182,Lechonk,"0,06€",correction,725261,Lechonk [Disarming Voice],725262,Lechonk [Headbutt Bounce | Mud Shot],Headbutt Bounce Mud Shot,4,no
-PAR,153,Tandemaus,"0,06€",correction,740694,Tandemaus [Tumble Over],740693,Tandemaus [Damage Rush],Damage Rush,2,no
-SVI,102,Flittle,"0,06€",correction,702397,Flittle [Spinning Attack],702398,Flittle [Dash Off],Dash Off,3,no
 OBF,181,Lechonk,"0,05€",correction,725262,Lechonk [Headbutt Bounce | Mud Shot],725261,Lechonk [Disarming Voice],Disarming Voice,4,no
 OBF,76,Tadbulb,"0,05€",correction,725155,Tadbulb [Thunder Jolt],725156,Tadbulb [Shake and Discharge],Shake and Discharge,3,no
-LOR,77,Inkay,"0,04€",correction,674134,Inkay [Call for Family | Tackle],674090,Inkay [Fickle Attack],Fickle Attack,2,no
-TEU,2,Weedle,"0,04€",correction,368936,Weedle [Reckless Charge],368935,Weedle [Tangle Drag | Bug Bite],Tangle Drag Bug Bite,2,no
+SSH,32,Raboot,"0,05€",correction,436324,Raboot [Kick | Heat Blast],436319,Raboot [Flame Charge | Magnum Kick],Flame Charge Magnum Kick,2,no
+SVI,78,Wattrel,"0,04€",correction,702374,Wattrel [Collect | Glide],702375,Wattrel [Static Shock],Static Shock,2,no
 OBF,75,Tadbulb,"0,03€",correction,725156,Tadbulb [Shake and Discharge],725155,Tadbulb [Thunder Jolt],Thunder Jolt,3,no
-PAR,82,Tinkatink,"0,03€",correction,740575,Tinkatink [Boundless Power],740574,Tinkatink [Mountain Scrounging | Mumble],Mountain Scrounging Mumble,2,no
-CRI,31,Deoxys,"0,02€",correction,886425,Deoxys [Psy Protection],886423,Deoxys [Genome Charge | Psychic],Genome Charge Psychic,4,no
-SSH,10,Grookey,"0,02€",correction,427156,Grookey [Scratch | Beat],436229,Grookey [Fury Swipes],Fury Swipes,2,no
+SVI,77,Wattrel,"0,03€",correction,702375,Wattrel [Static Shock],702374,Wattrel [Collect | Glide],Collect Glide,2,no
 SP,60,Duraludon,,correction,886516,Duraludon [Metal Claw | Steel Beam],516324,Duraludon [Metal Sharpener | Power Beam],Metal Sharpener Power Beam,4,no
 SP,285,Pikachu V,"110,38€",held-chain-incomplete,576744,Pikachu V [Volt Tackle],692429,Pikachu V [Pika Drive],Pika Drive,8,no
-SVP,200,Eevee,"99,29€",held-chain-incomplete,806407,Eevee [Boosted Evolution | Reckless Charge],826138,Eevee [Call for Family | Gnaw],Call for Family Gnaw,4,no
-UF,Z,Unown,"34,57€",held-chain-incomplete,276646,Unown [?] [Shuffle | Hidden Power],276639,Unown [Z] [Shuffle | Hidden Power],Shuffle Hidden Power Z,28,no
-UF,Y,Unown,"27,69€",held-chain-incomplete,276638,Unown [!] [Shuffle | Hidden Power],276640,Unown [Y] [Shuffle | Hidden Power],Shuffle Hidden Power Y,28,no
-UF,W,Unown,"25,60€",held-chain-incomplete,276631,Unown [I] [Shuffle | Hidden Power],276635,Unown [W] [Shuffle | Hidden Power],Shuffle Hidden Power W,28,no
-30C,52,Pikachu,"25,34€",held-chain-incomplete,907939,Pikachu [Gnaw | Thunder Jolt],907659,Pikachu [Angry Bolt],Angry Bolt,31,no
-UF,T,Unown,"20,64€",held-chain-incomplete,276619,Unown [B] [Shuffle | Hidden Power],276645,Unown [T] [Shuffle | Hidden Power],Shuffle Hidden Power T,28,no
-UF,S,Unown,"17,98€",held-chain-incomplete,276620,Unown [A] [Shuffle | Hidden Power],276644,Unown [S] [Shuffle | Hidden Power],Shuffle Hidden Power S,28,no
-DX,18,Deoxys,"17,86€",held-chain-incomplete,276419,Deoxys [Form Change | Link Blast],276421,Deoxys [Form Change | Barrier Attack],Form Change Barrier Attack,5,no
-UF,P,Unown,"16,22€",held-chain-incomplete,276632,Unown [H] [Shuffle | Hidden Power],276633,Unown [P] [Shuffle | Hidden Power],Shuffle Hidden Power P,28,no
-UF,O,Unown,"15,61€",held-chain-incomplete,276645,Unown [T] [Shuffle | Hidden Power],276623,Unown [O] [Shuffle | Hidden Power],Shuffle Hidden Power O,28,no
-UF,M,Unown,"15,13€",held-chain-incomplete,276630,Unown [G] [Shuffle | Hidden Power],276622,Unown [M] [Shuffle | Hidden Power],Shuffle Hidden Power M,28,no
-UF,I,Unown,"14,40€",held-chain-incomplete,276629,Unown [F] [Shuffle | Hidden Power],276631,Unown [I] [Shuffle | Hidden Power],Shuffle Hidden Power I,28,no
-UF,H,Unown,"12,98€",held-chain-incomplete,276640,Unown [Y] [Shuffle | Hidden Power],276632,Unown [H] [Shuffle | Hidden Power],Shuffle Hidden Power H,28,no
-UF,G,Unown,"12,90€",held-chain-incomplete,276644,Unown [S] [Shuffle | Hidden Power],276630,Unown [G] [Shuffle | Hidden Power],Shuffle Hidden Power G,28,no
-UF,F,Unown,"12,84€",held-chain-incomplete,276622,Unown [M] [Shuffle | Hidden Power],276629,Unown [F] [Shuffle | Hidden Power],Shuffle Hidden Power F,28,no
+SVP,200,Eevee,"93,49€",held-chain-incomplete,806407,Eevee [Boosted Evolution | Reckless Charge],826138,Eevee [Call for Family | Gnaw],Call for Family Gnaw,4,no
+CRZ,GG30,Pikachu,"55,57€",held-chain-incomplete,691879,Pikachu [Wild Charge],691909,Pikachu [Pika Dash | Whimsy Tackle],Pika Dash Whimsy Tackle,2,no
+UF,Z,Unown,"47,61€",held-chain-incomplete,276638,Unown [!] [Shuffle | Hidden Power],276639,Unown [Z] [Shuffle | Hidden Power],Shuffle Hidden Power Z,28,no
+UF,Y,Unown,"34,57€",held-chain-incomplete,276646,Unown [?] [Shuffle | Hidden Power],276640,Unown [Y] [Shuffle | Hidden Power],Shuffle Hidden Power Y,28,no
+DX,18,Deoxys,"31,99€",held-chain-incomplete,276419,Deoxys [Form Change | Link Blast],276421,Deoxys [Form Change | Barrier Attack],Form Change Barrier Attack,5,no
+UF,W,Unown,"26,62€",held-chain-incomplete,276639,Unown [Z] [Shuffle | Hidden Power],276635,Unown [W] [Shuffle | Hidden Power],Shuffle Hidden Power W,28,no
+30C,52,Pikachu,"25,16€",held-chain-incomplete,907939,Pikachu [Gnaw | Thunder Jolt],907659,Pikachu [Angry Bolt],Angry Bolt,31,no
+UF,U,Unown,"21,70€",held-chain-incomplete,276628,Unown [D] [Shuffle | Hidden Power],276642,Unown [U] [Shuffle | Hidden Power],Shuffle Hidden Power U,28,no
+UF,Q,Unown,"17,41€",held-chain-incomplete,276642,Unown [U] [Shuffle | Hidden Power],276641,Unown [Q] [Shuffle | Hidden Power],Shuffle Hidden Power Q,28,no
+UF,O,Unown,"16,29€",held-chain-incomplete,276634,Unown [L] [Shuffle | Hidden Power],276623,Unown [O] [Shuffle | Hidden Power],Shuffle Hidden Power O,28,no
+UF,L,Unown,"15,41€",held-chain-incomplete,276641,Unown [Q] [Shuffle | Hidden Power],276634,Unown [L] [Shuffle | Hidden Power],Shuffle Hidden Power L,28,no
 UF,E,Unown,"12,60€",held-chain-incomplete,276623,Unown [O] [Shuffle | Hidden Power],276627,Unown [E] [Shuffle | Hidden Power],Shuffle Hidden Power E,28,no
-UF,B,Unown,"12,19€",held-chain-incomplete,276639,Unown [Z] [Shuffle | Hidden Power],276619,Unown [B] [Shuffle | Hidden Power],Shuffle Hidden Power B,28,no
-UF,A,Unown,"11,82€",held-chain-incomplete,276633,Unown [P] [Shuffle | Hidden Power],276620,Unown [A] [Shuffle | Hidden Power],Shuffle Hidden Power A,28,no
+UF,D,Unown,"12,45€",held-chain-incomplete,276625,Unown [C] [Shuffle | Hidden Power],276628,Unown [D] [Shuffle | Hidden Power],Shuffle Hidden Power D,28,no
+UF,C,Unown,"12,36€",held-chain-incomplete,276640,Unown [Y] [Shuffle | Hidden Power],276625,Unown [C] [Shuffle | Hidden Power],Shuffle Hidden Power C,28,no
+SP,142,Pikachu V-UNION,"9,23€",held-chain-incomplete,576740,Pikachu V-UNION [Disconnect],576741,Pikachu V-UNION [Electro Ball Together],Electro Ball Together,5,no
 SP,160,Mewtwo V-UNION,"8,70€",held-chain-incomplete,572159,Mewtwo V-UNION [Union Gain],572160,Mewtwo V-UNION [Super Regeneration],Super Regeneration,5,no
-SP,142,Pikachu V-UNION,"8,45€",held-chain-incomplete,576738,Pikachu V-UNION [Union Gain],576741,Pikachu V-UNION [Electro Ball Together],Electro Ball Together,5,no
-DS,35,Ditto,"7,97€",held-chain-incomplete,276825,Ditto [Geodude | Duplicate | Linear Attack],276798,Ditto [Duplicate | Energy Link],Duplicate Energy Link,10,no
-RG,55,Bulbasaur,"6,22€",held-chain-incomplete,276230,Bulbasaur [Sleep Poison | Razor Leaf],276231,Bulbasaur [Ram | Gouge],Ram Gouge,2,no
-SP,165,Zacian V-UNION,"4,85€",held-chain-incomplete,572163,Zacian V-UNION [Union Gain],572165,Zacian V-UNION [Steel Cut],Steel Cut,5,no
-SP,164,Zacian V-UNION,"4,63€",held-chain-incomplete,572165,Zacian V-UNION [Steel Cut],572164,Zacian V-UNION [Dance of the Crowned Sword],Dance of the Crowned Sword,5,no
-SP,71,Scorbunny,"3,50€",held-chain-incomplete,427086,Scorbunny [Super Singe],516354,Scorbunny [Me First | Live Coal],Me First Live Coal,4,no
-30C,51,Pikachu,"1,43€",held-chain-incomplete,907639,Pikachu [Scurry About],907658,Pikachu [Lightning Crash],Lightning Crash,31,no
-30C,50,Pikachu,"1,20€",held-chain-incomplete,907642,Pikachu [Rollout],907657,Pikachu [Satisfied Spark],Satisfied Spark,31,no
-30C,49,Pikachu,"1,14€",held-chain-incomplete,907657,Pikachu [Satisfied Spark],907656,Pikachu [Fighting Lightning],Fighting Lightning,31,no
-30C,48,Pikachu,"1,13€",held-chain-incomplete,907633,Pikachu [Peer At],907655,Pikachu [Store Up],Store Up,31,no
+DS,35,Ditto,"8,35€",held-chain-incomplete,276825,Ditto [Geodude | Duplicate | Linear Attack],276798,Ditto [Duplicate | Energy Link],Duplicate Energy Link,10,no
+SP,140,Pikachu V-UNION,"7,51€",held-chain-incomplete,576741,Pikachu V-UNION [Electro Ball Together],576739,Pikachu V-UNION [Shocking Shock],Shocking Shock,5,no
+RG,55,Bulbasaur,"6,37€",held-chain-incomplete,276230,Bulbasaur [Sleep Poison | Razor Leaf],276231,Bulbasaur [Ram | Gouge],Ram Gouge,2,no
+SP,95,Eevee,"5,07€",held-chain-incomplete,557975,Eevee [Signs of Evolution | Wild Kick],547026,Eevee [First Step | Tail Whap],First Step Tail Whap,7,no
+SP,164,Zacian V-UNION,"4,58€",held-chain-incomplete,572163,Zacian V-UNION [Union Gain],572164,Zacian V-UNION [Dance of the Crowned Sword],Dance of the Crowned Sword,5,no
+30C,51,Pikachu,"1,40€",held-chain-incomplete,907639,Pikachu [Scurry About],907658,Pikachu [Lightning Crash],Lightning Crash,31,no
+30C,50,Pikachu,"1,14€",held-chain-incomplete,907642,Pikachu [Rollout],907657,Pikachu [Satisfied Spark],Satisfied Spark,31,no
+30C,49,Pikachu,"1,11€",held-chain-incomplete,907657,Pikachu [Satisfied Spark],907656,Pikachu [Fighting Lightning],Fighting Lightning,31,no
+30C,48,Pikachu,"1,10€",held-chain-incomplete,907633,Pikachu [Peer At],907655,Pikachu [Store Up],Store Up,31,no
 30C,47,Pikachu,"1,07€",held-chain-incomplete,907638,Pikachu [Gnaw],907654,Pikachu [Play Rough],Play Rough,31,no
-30C,43,Pikachu,"0,93€",held-chain-incomplete,907655,Pikachu [Store Up],907650,Pikachu [Tropical Vibes],Tropical Vibes,31,no
-30C,41,Pikachu,"0,90€",held-chain-incomplete,907654,Pikachu [Play Rough],907648,Pikachu [Hang Down | Zap Kick],Hang Down Zap Kick,31,no
-SSH,59,Inteleon,"0,82€",held-chain-incomplete,450623,Inteleon [Shady Dealings | Aqua Bullet],436429,Inteleon [Silent Shot | Hydro Snipe],Silent Shot Hydro Snipe,4,no
-30C,40,Pikachu,"0,78€",held-chain-incomplete,907643,Pikachu [Slight Intrusion],907647,Pikachu [Overwriting Bolt],Overwriting Bolt,31,no
-30C,38,Pikachu,"0,68€",held-chain-incomplete,907640,Pikachu [Keep Hidden | Tiny Charge],907645,Pikachu [Targeted Spark],Targeted Spark,31,no
-30C,37,Pikachu,"0,67€",held-chain-incomplete,907632,Pikachu [Spark | 30],907644,Pikachu [Energized Tail | Pika Punch],Energized Tail Pika Punch,31,no
-30C,36,Pikachu,"0,65€",held-chain-incomplete,907630,Pikachu [Thunder Shock | 30],907643,Pikachu [Slight Intrusion],Slight Intrusion,31,no
+30C,46,Pikachu,"1,01€",held-chain-incomplete,907649,Pikachu [Charge-Up Dash | Pika Bolt],907653,Pikachu [Get Some Air | Smash Kick],Get Some Air Smash Kick,31,no
+30C,43,Pikachu,"0,93€",held-chain-incomplete,907653,Pikachu [Get Some Air | Smash Kick],907650,Pikachu [Tropical Vibes],Tropical Vibes,31,no
+30C,41,Pikachu,"0,92€",held-chain-incomplete,907654,Pikachu [Play Rough],907648,Pikachu [Hang Down | Zap Kick],Hang Down Zap Kick,31,no
+30C,42,Pikachu,"0,92€",held-chain-incomplete,907655,Pikachu [Store Up],907649,Pikachu [Charge-Up Dash | Pika Bolt],Charge-Up Dash Pika Bolt,31,no
+30C,40,Pikachu,"0,77€",held-chain-incomplete,907643,Pikachu [Slight Intrusion],907647,Pikachu [Overwriting Bolt],Overwriting Bolt,31,no
+30C,38,Pikachu,"0,67€",held-chain-incomplete,907640,Pikachu [Keep Hidden | Tiny Charge],907645,Pikachu [Targeted Spark],Targeted Spark,31,no
+30C,37,Pikachu,"0,66€",held-chain-incomplete,907632,Pikachu [Spark | 30],907644,Pikachu [Energized Tail | Pika Punch],Energized Tail Pika Punch,31,no
+30C,36,Pikachu,"0,64€",held-chain-incomplete,907650,Pikachu [Tropical Vibes],907643,Pikachu [Slight Intrusion],Slight Intrusion,31,no
+30C,32,Pikachu,"0,63€",held-chain-incomplete,907646,Pikachu [Iron Tail | 30],907639,Pikachu [Scurry About],Scurry About,31,no
 30C,33,Pikachu,"0,63€",held-chain-incomplete,907648,Pikachu [Hang Down | Zap Kick],907640,Pikachu [Keep Hidden | Tiny Charge],Keep Hidden Tiny Charge,31,no
-30C,32,Pikachu,"0,62€",held-chain-incomplete,907646,Pikachu [Iron Tail | 30],907639,Pikachu [Scurry About],Scurry About,31,no
-30C,28,Pikachu,"0,60€",held-chain-incomplete,907637,Pikachu [Mach Bolt],907635,Pikachu [Lonely Gaze | Pika Ball],Lonely Gaze Pika Ball,31,no
-30C,29,Pikachu,"0,60€",held-chain-incomplete,907645,Pikachu [Targeted Spark],907636,Pikachu [Find a Friend],Find a Friend,31,no
-30C,26,Pikachu,"0,59€",held-chain-incomplete,907644,Pikachu [Energized Tail | Pika Punch],907633,Pikachu [Peer At],Peer At,31,no
-BKT,8,Chespin,"0,48€",held-chain-incomplete,286253,Chespin [Nosh | Seed Bomb],286254,Chespin [Work | Seed Bomb],Work Seed Bomb,3,no
-LTR,74,Solosis,"0,40€",held-chain-incomplete,281224,Solosis [Rollout],281225,Solosis [Nap | Ram],Nap Ram,2,no
+30C,29,Pikachu,"0,61€",held-chain-incomplete,907634,Pikachu [Nap],907636,Pikachu [Find a Friend],Find a Friend,31,no
+30C,28,Pikachu,"0,58€",held-chain-incomplete,907645,Pikachu [Targeted Spark],907635,Pikachu [Lonely Gaze | Pika Ball],Lonely Gaze Pika Ball,31,no
+30C,26,Pikachu,"0,57€",held-chain-incomplete,907658,Pikachu [Lightning Crash],907633,Pikachu [Peer At],Peer At,31,no
+SSH,75,Boltund,"0,51€",held-chain-incomplete,436509,Boltund [Bite | Electrodash],436504,Boltund [Big Bite | Fighting Fangs],Big Bite Fighting Fangs,3,no
+BKT,8,Chespin,"0,43€",held-chain-incomplete,286253,Chespin [Nosh | Seed Bomb],286254,Chespin [Work | Seed Bomb],Work Seed Bomb,3,no
+LTR,74,Solosis,"0,43€",held-chain-incomplete,281224,Solosis [Rollout],281225,Solosis [Nap | Ram],Nap Ram,2,no
 EPO,10,Cottonee,"0,26€",held-chain-incomplete,279974,Cottonee [Absorb],279975,Cottonee [Cotton Guard],Cotton Guard,2,no
-BKT,132,Noibat,"0,21€",held-chain-incomplete,286377,Noibat [Blot],286378,Noibat [Mysterious Beam | Gust],Mysterious Beam Gust,2,no
-LOT,64,Popplio,"0,18€",held-chain-incomplete,365703,Popplio [Blot],365702,Popplio [Disarming Voice],Disarming Voice,2,no
+BKT,132,Noibat,"0,19€",held-chain-incomplete,286377,Noibat [Blot],286378,Noibat [Mysterious Beam | Gust],Mysterious Beam Gust,2,no
 DRX,42,Electrike,"0,17€",held-chain-incomplete,280480,Electrike [Tackle | Quick Attack],280481,Electrike [Quick Turn],Quick Turn,2,no
 UNB,27,Litten,"0,15€",held-chain-incomplete,372318,Litten [Singe],372319,Litten [Caturday | Big Bite],Caturday Big Bite,2,no
-EPO,70,Ferroseed,"0,11€",held-chain-incomplete,280036,Ferroseed [Pierce],280035,Ferroseed [Pin Missile],Pin Missile,2,no
-SVI,21,Smoliv,"0,10€",held-chain-incomplete,702316,Smoliv [Tackle],702317,Smoliv [Nutrients | Spray Fluid],Nutrients Spray Fluid,2,no
-SSH,153,Wooloo,"0,07€",held-chain-incomplete,436854,Wooloo [Expand],436859,Wooloo [Tackle | Headbutt],Tackle Headbutt,2,no
-UNM,92,Honedge,"0,07€",held-chain-incomplete,388272,Honedge [Slashing Cutter],388262,Honedge [Lucky Find | Pierce],Lucky Find Pierce,2,no
+SVI,21,Smoliv,"0,09€",held-chain-incomplete,702316,Smoliv [Tackle],702317,Smoliv [Nutrients | Spray Fluid],Nutrients Spray Fluid,2,no
+UNM,92,Honedge,"0,09€",held-chain-incomplete,388272,Honedge [Slashing Cutter],388262,Honedge [Lucky Find | Pierce],Lucky Find Pierce,2,no
+SVI,112,Riolu,"0,06€",held-chain-incomplete,702409,Riolu [Punch | Reckless Charge],702408,Riolu [Jab | Low Kick],Jab Low Kick,3,no
+TEF,97,Great Tusk,"0,06€",held-chain-incomplete,760726,Great Tusk [Lunge Out | Wrathful Charge],760727,Great Tusk [Land Collapse | Giant Tusk],Land Collapse Giant Tusk,3,no
+TWM,21,Poltchageist,"0,06€",held-chain-incomplete,769194,Poltchageist [Storehouse Hideaway | Hook],769195,Poltchageist [Tea Server | Surprise Attack],Tea Server Surprise Attack,3,no
+SVI,18,Tarountula,"0,05€",held-chain-incomplete,702312,Tarountula [String Haul | Bug Bite],702314,Tarountula [Surprise Attack],Surprise Attack,4,no
+SVI,59,Cetoddle,"0,05€",held-chain-incomplete,702353,Cetoddle [Tackle],702354,Cetoddle [Icicle | Sharp Fin],Icicle Sharp Fin,2,no
+SVI,74,Pawmi,"0,05€",held-chain-incomplete,702369,Pawmi [Jolt],702370,Pawmi [Light Punch | Zap Kick],Light Punch Zap Kick,2,no
 PAL,125,Glimmet,"0,04€",held-chain-incomplete,715599,Glimmet [Ascension],715600,Glimmet [Rock Throw],Rock Throw,2,no
-SVI,18,Tarountula,"0,04€",held-chain-incomplete,702312,Tarountula [String Haul | Bug Bite],702314,Tarountula [Surprise Attack],Surprise Attack,4,no
-SVI,74,Pawmi,"0,04€",held-chain-incomplete,702369,Pawmi [Jolt],702370,Pawmi [Light Punch | Zap Kick],Light Punch Zap Kick,2,no
+OBF,126,Paldean Wooper,"0,03€",held-chain-incomplete,725207,Paldean Wooper [Flop],725206,Paldean Wooper [Spit Poison],Spit Poison,2,no
 SVI,16,Tarountula,"0,02€",held-chain-incomplete,702313,Tarountula [String Shot],702312,Tarountula [String Haul | Bug Bite],String Haul Bug Bite,4,no
-TM,92,Celebi,"165,18€",no-candidate-matches,279622,Celebi [Forest Breath | Time Circle | Prime],,,Forest Breath Time Circle,,no
 UD,83,Raichu,"144,59€",no-candidate-matches,279336,Raichu [Voltage Increase | Mega Thunderbolt | Prime],,,Voltage Increase Mega Thunderbolt,,no
-UD,81,Espeon,"133,89€",no-candidate-matches,279334,Espeon [Evolution Memories | Solar Ray | Prime],,,Evolution Memories Solar Ray,,no
-UL,88,Tyranitar,"133,70€",no-candidate-matches,279244,Tyranitar [Darkness Howl | Power Claw | Megaton Tail | Prime],,,Darkness Howl Power Claw Megaton Tail,,no
-TM,93,Electrode,"64,21€",no-candidate-matches,279623,Electrode [Energymite | Gigashock | Prime],,,Energymite Gigashock,,no
-UL,84,Crobat,"63,13€",no-candidate-matches,279240,Crobat [Severe Poison | Skill Dive | Prime],,,Severe Poison Skill Dive,,no
-UD,86,Umbreon,"59,83€",no-candidate-matches,279339,Umbreon [Cloud-Covered Moon | Evoblast | Prime],,,Cloud-Covered Moon Evoblast,,no
-UL,86,Lanturn,"51,83€",no-candidate-matches,279242,Lanturn [Underwater Dive | Powerful Spark | Prime],,,Submerge Powerful Spark,,no
-PL,23,Dialga,"46,51€",no-candidate-matches,278543,Dialga [G] LV.X [Time Crystal | Remove Lost],,,Energy Stream Diamond Blow,,no
-DS,64,Ditto,"42,35€",no-candidate-matches,276826,Ditto [Pikachu | Duplicate | Thundershock],,,Duplicate Spiral Drain,,no
+TM,92,Celebi,"141,15€",no-candidate-matches,279622,Celebi [Forest Breath | Time Circle | Prime],,,Forest Breath Time Circle,,no
+UD,81,Espeon,"123,15€",no-candidate-matches,279334,Espeon [Evolution Memories | Solar Ray | Prime],,,Evolution Memories Solar Ray,,no
+UL,88,Tyranitar,"120,60€",no-candidate-matches,279244,Tyranitar [Darkness Howl | Power Claw | Megaton Tail | Prime],,,Darkness Howl Power Claw Megaton Tail,,no
+TM,93,Electrode,"71,06€",no-candidate-matches,279623,Electrode [Energymite | Gigashock | Prime],,,Energymite Gigashock,,no
+UD,86,Umbreon,"56,20€",no-candidate-matches,279339,Umbreon [Cloud-Covered Moon | Evoblast | Prime],,,Cloud-Covered Moon Evoblast,,no
+UL,84,Crobat,"55,32€",no-candidate-matches,279240,Crobat [Severe Poison | Skill Dive | Prime],,,Severe Poison Skill Dive,,no
+UL,86,Lanturn,"49,35€",no-candidate-matches,279242,Lanturn [Underwater Dive | Powerful Spark | Prime],,,Submerge Powerful Spark,,no
+PL,23,Dialga,"45,37€",no-candidate-matches,278543,Dialga [G] LV.X [Time Crystal | Remove Lost],,,Energy Stream Diamond Blow,,no
+DS,64,Ditto,"40,32€",no-candidate-matches,276826,Ditto [Pikachu | Duplicate | Thundershock],,,Duplicate Spiral Drain,,no
 DS,63,Ditto,"38,17€",no-candidate-matches,276799,Ditto [Bulbasaur | Duplicate | Toxic],,,Duplicate Thundershock,,no
-DS,62,Ditto,"35,19€",no-candidate-matches,276802,Ditto [Pikachu | Duplicate | Thunderbolt],,,Duplicate Linear Attack,,no
-UD,84,Scizor,"31,40€",no-candidate-matches,279337,Scizor [Red Armor | Metal Scissors | Prime],,,Red Armor Metal Scissors,,no
-UL,85,Kingdra,"30,10€",no-candidate-matches,279241,Kingdra [Spray Splash | Dragon Steam | Prime],,,Spray Splash Dragon Steam,,no
-DS,61,Ditto,"24,83€",no-candidate-matches,276801,Ditto [Mr. Mime | Duplicate | Copy],,,Duplicate Fireworks,,no
-DS,40,Ditto,"23,25€",no-candidate-matches,276824,Ditto [Charmander | Duplicate | Fireworks],,,Duplicate Smash Turn,,no
+DS,62,Ditto,"35,78€",no-candidate-matches,276802,Ditto [Pikachu | Duplicate | Thunderbolt],,,Duplicate Linear Attack,,no
+UD,84,Scizor,"34,69€",no-candidate-matches,279337,Scizor [Red Armor | Metal Scissors | Prime],,,Red Armor Metal Scissors,,no
+UL,85,Kingdra,"31,07€",no-candidate-matches,279241,Kingdra [Spray Splash | Dragon Steam | Prime],,,Spray Splash Dragon Steam,,no
+DS,61,Ditto,"24,97€",no-candidate-matches,276801,Ditto [Mr. Mime | Duplicate | Copy],,,Duplicate Fireworks,,no
+DS,40,Ditto,"23,72€",no-candidate-matches,276824,Ditto [Charmander | Duplicate | Fireworks],,,Duplicate Smash Turn,,no
 SV,SH7,Milotic,"21,16€",no-candidate-matches,371547,Milotic [C] Lv.58 [Aqua Tail | Wrap],,,Aqua Mirage Dwindling Wave 80-,,no
-DS,39,Ditto,"20,44€",no-candidate-matches,276798,Ditto [Duplicate | Energy Link],,,Duplicate Thunderbolt,,no
+DS,39,Ditto,"20,15€",no-candidate-matches,276798,Ditto [Duplicate | Energy Link],,,Duplicate Thunderbolt,,no
 DS,38,Ditto,"20,04€",no-candidate-matches,276800,Ditto [Charmander | Duplicate | Rage],,,Duplicate Copy,,no
-PL,37,Palkia,"18,64€",no-candidate-matches,278433,Palkia [G] Lv.78 [Splashing Turn | Pearl Breath],,,Tsunami Water Pulse,,no
 DS,19,Azumarill,"17,81€",no-candidate-matches,276877,Azumarill [Thick Fat | Bubblebeam],,,Bubblebeam Rolling Tackle,,no
-DS,37,Ditto,"17,59€",no-candidate-matches,276803,Ditto [Squirtle | Duplicate | Smash Turn],,,Duplicate Rage,,no
-DS,36,Ditto,"14,34€",no-candidate-matches,276827,Ditto [Squirtle | Duplicate | Spiral Drain],,,Duplicate Toxic,,no
+PL,37,Palkia,"16,61€",no-candidate-matches,278433,Palkia [G] Lv.78 [Splashing Turn | Pearl Breath],,,Tsunami Water Pulse,,no
+DS,37,Ditto,"16,53€",no-candidate-matches,276803,Ditto [Squirtle | Duplicate | Smash Turn],,,Duplicate Rage,,no
+DS,36,Ditto,"15,90€",no-candidate-matches,276827,Ditto [Squirtle | Duplicate | Spiral Drain],,,Duplicate Toxic,,no
 SP,161,Mewtwo V-UNION,"9,89€",no-candidate-matches,572161,Mewtwo V-UNION [Psysplosion],,,Psysplosion,,no
 PL,6,Dialga,"9,67€",no-candidate-matches,278428,Dialga [G] Lv.79 [Deafen | Second Strike],,,Time Aura Metal Burn,,no
 PL,5,Dialga,"8,38€",no-candidate-matches,371546,Dialga [G] Lv.79 [Deafen | Second Strike],,,Reverse Time Time-Space Traveling,,no
-SP,141,Pikachu V-UNION,"8,15€",no-candidate-matches,576741,Pikachu V-UNION [Electro Ball Together],,,Disconnect,,no
-CG,2,Blastoise,"6,12€",no-candidate-matches,277095,Blastoise [Water Pressure | Hydro Pump],,,Shield Veil Enraged Linear Attack Skull Bash,,no
+CG,2,Blastoise,"7,99€",no-candidate-matches,277095,Blastoise [Water Pressure | Hydro Pump],,,Shield Veil Enraged Linear Attack Skull Bash,,no
+SP,141,Pikachu V-UNION,"7,87€",no-candidate-matches,576738,Pikachu V-UNION [Union Gain],,,Disconnect,,no
 SV,5,Garchomp,"5,05€",no-candidate-matches,278751,Garchomp [C] Lv.62 [Claw Swipe | Earthquake],,,Dragon Intimidation Guard Claw Speed Impact 120-,,no
-SP,244,Scorbunny,"3,50€",no-candidate-matches,516354,Scorbunny [Me First | Live Coal],,,Flaring Dash Flare,,no
-SV,50,Arcanine,"2,67€",no-candidate-matches,278706,Arcanine [G] Lv.60 [Extreme Speed | Overrun],,,Overrun Combustion,,no
-UNB,6,Oddish,"2,06€",no-candidate-matches,372299,Oddish [Hook],,,Hook,,no
-E2,84,Horsea,"1,80€",no-candidate-matches,275158,Horsea [Bubble],,,Bubble,,no
+SP,244,Scorbunny,"3,50€",no-candidate-matches,427086,Scorbunny [Super Singe],,,Flaring Dash Flare,,no
+SV,50,Arcanine,"2,51€",no-candidate-matches,278706,Arcanine [G] Lv.60 [Extreme Speed | Overrun],,,Overrun Combustion,,no
+UNB,6,Oddish,"1,86€",no-candidate-matches,372299,Oddish [Hook],,,Hook,,no
 SP,21,Polteageist V,"1,52€",no-candidate-matches,461664,Polteageist V [Teapot of Surpises | Mind Bend],,,Teapot of Surprises Mind Bend,,no
-HP,15,Raichu,"1,39€",no-candidate-matches,277021,Raichu [Thundershock | Pika Bolt],,,Zzzap Metallic Thunder,,no
 SP,10,Gossifleur,"1,36€",no-candidate-matches,439958,Gossifleur [Sing],,,Sing,,no
+HP,15,Raichu,"1,34€",no-candidate-matches,277021,Raichu [Thundershock | Pika Bolt],,,Zzzap Metallic Thunder,,no
+FST,44,Cinderace V,"1,02€",no-candidate-matches,582178,Cinderace V [Flare | All-Out Shoot],,,Flare All-Out Shot,,no
 30C,45,Pikachu,"1,00€",no-candidate-matches,907647,Pikachu [Overwriting Bolt],,,Nightime Stroll Static Shock,,no
-30C,44,Pikachu,"0,99€",no-candidate-matches,907636,Pikachu [Find a Friend],,,Agility,,no
-FST,44,Cinderace V,"0,99€",no-candidate-matches,582178,Cinderace V [Flare | All-Out Shoot],,,Flare All-Out Shot,,no
-RS,74,Torchic,"0,93€",no-candidate-matches,275722,Torchic [Singe],,,Singe,,no
-UNB,10,Venonat,"0,80€",no-candidate-matches,372303,Venonat [Psybeam],,,Psybeam,,no
+RS,74,Torchic,"1,00€",no-candidate-matches,275722,Torchic [Singe],,,Singe,,no
+30C,44,Pikachu,"0,97€",no-candidate-matches,907636,Pikachu [Find a Friend],,,Agility,,no
+UNB,10,Venonat,"0,74€",no-candidate-matches,372303,Venonat [Psybeam],,,Psybeam,,no
 30C,39,Pikachu,"0,69€",no-candidate-matches,907635,Pikachu [Lonely Gaze | Pika Ball],,,Iron Tail,,no
-30C,35,Pikachu,"0,64€",no-candidate-matches,907650,Pikachu [Tropical Vibes],,,Rollout,,no
-30C,31,Pikachu,"0,61€",no-candidate-matches,907659,Pikachu [Angry Bolt],,,Gnaw,,no
-30C,27,Pikachu,"0,60€",no-candidate-matches,907634,Pikachu [Nap],,,Nap,,no
-30C,25,Pikachu,"0,58€",no-candidate-matches,907631,Pikachu [Volt Tackle | 30],,,Spark,,no
-30C,24,Pikachu,"0,57€",no-candidate-matches,907658,Pikachu [Lightning Crash],,,Volt Tackle,,no
-30C,23,Pikachu,"0,56€",no-candidate-matches,907656,Pikachu [Fighting Lightning],,,Thunder Shock,,no
-CG,19,Grovyle,"0,55€",no-candidate-matches,277113,Grovyle [Detect | Smash Kick],,,Scratch Agility,,no
-LOT,161,Kecleon,"0,25€",no-candidate-matches,365797,Kecleon [Unit Color I | Tongue Smack],,,Unit Color 1 Tongue Smack,,no
-UNM,149,Dragonair,"0,24€",no-candidate-matches,388537,Dragonair [Twister],,,Twister,,no
-UNB,68,Gastly,"0,22€",no-candidate-matches,372356,Gastly [Smog],,,Smog,,no
-LOT,65,Popplio,"0,20€",no-candidate-matches,365702,Popplio [Disarming Voice],,,Blot,,no
-UD,58,Murkrow,"0,17€",no-candidate-matches,279311,Murkrow [Astonish | UD],,,Astonish,,no
-EPO,71,Ferroseed,"0,16€",no-candidate-matches,280035,Ferroseed [Pin Missile],,,Pierce,,no
-PLF,71,Pawniard,"0,14€",no-candidate-matches,280949,Pawniard [Slash],,,Slash,,no
-PLF,72,Pawniard,"0,14€",no-candidate-matches,280950,Pawniard [Cut],,,Cut,,no
-CES,64,Shuppet,"0,13€",no-candidate-matches,361308,Shuppet [Perplex],,,Perplex,,no
-UNB,26,Litten,"0,12€",no-candidate-matches,372319,Litten [Caturday | Big Bite],,,Singe,,no
-RCL,21,Applin,"0,10€",no-candidate-matches,457558,Applin [Continuous Tumble],,,Withdraw,,no
+30C,35,Pikachu,"0,64€",no-candidate-matches,907630,Pikachu [Thunder Shock | 30],,,Rollout,,no
+30C,31,Pikachu,"0,62€",no-candidate-matches,907652,Pikachu [Nighttime Stroll | Static Shock],,,Gnaw,,no
+30C,27,Pikachu,"0,58€",no-candidate-matches,907637,Pikachu [Mach Bolt],,,Nap,,no
+30C,24,Pikachu,"0,57€",no-candidate-matches,907631,Pikachu [Volt Tackle | 30],,,Volt Tackle,,no
+30C,25,Pikachu,"0,57€",no-candidate-matches,907644,Pikachu [Energized Tail | Pika Punch],,,Spark,,no
+30C,23,Pikachu,"0,54€",no-candidate-matches,907656,Pikachu [Fighting Lightning],,,Thunder Shock,,no
+DR,63,Magnemite,"0,54€",no-candidate-matches,275940,Magnemite [Thundershock],,,Thundershock,,no
+CG,19,Grovyle,"0,45€",no-candidate-matches,277113,Grovyle [Detect | Smash Kick],,,Scratch Agility,,no
+UNM,149,Dragonair,"0,34€",no-candidate-matches,388537,Dragonair [Twister],,,Twister,,no
+UNB,68,Gastly,"0,23€",no-candidate-matches,372356,Gastly [Smog],,,Smog,,no
+LOT,65,Popplio,"0,18€",no-candidate-matches,365703,Popplio [Blot],,,Blot,,no
+UD,58,Murkrow,"0,16€",no-candidate-matches,279311,Murkrow [Astonish | UD],,,Astonish,,no
+CES,64,Shuppet,"0,12€",no-candidate-matches,361308,Shuppet [Perplex],,,Perplex,,no
+UNB,26,Litten,"0,11€",no-candidate-matches,372319,Litten [Caturday | Big Bite],,,Singe,,no
 SSH,112,Clobbopus,"0,09€",no-candidate-matches,436674,Clobbopus [Bind],,,Punch,,no
-SVI,136,Maschiff,"0,07€",no-candidate-matches,702431,Maschiff [Crunch],,,Crunch,,no
-SSH,152,Wooloo,"0,06€",no-candidate-matches,436859,Wooloo [Tackle | Headbutt],,,Expand,,no
+PAR,102,Nacli,"0,06€",no-candidate-matches,740616,Nacli [Corner],,,Corner,,no
+SSH,152,Wooloo,"0,06€",no-candidate-matches,436854,Wooloo [Expand],,,Expand,,no
 SSH,45,Goldeen,"0,06€",no-candidate-matches,436379,Goldeen [Horn Attack | SSH],,,Horn Attack,,no
 SSP,2,Exeggcute,"0,06€",no-candidate-matches,794257,Exeggcute [Absorb],,,Absorb,,no
+SVI,136,Maschiff,"0,06€",no-candidate-matches,702431,Maschiff [Crunch],,,Crunch,,no
 UD,62,Pineco,"0,06€",no-candidate-matches,279315,Pineco [Rollout],,,Rollout,,no
 SVI,39,Charcadet,"0,05€",no-candidate-matches,702334,Charcadet [Ember],,,Ember,,no
-OBF,127,Paldean Wooper,"0,04€",no-candidate-matches,725207,Paldean Wooper [Flop],,,Flop,,no
-PAR,102,Nacli,"0,04€",no-candidate-matches,740616,Nacli [Corner],,,Corner,,no
-PAR,14,Nymble,"0,04€",no-candidate-matches,740489,Nymble [Gnaw],,,Flop,,no
-CRI,34,Deoxys,"0,03€",no-candidate-matches,886426,Deoxys [Psyspeed],,,Psyspeed,,no
+OBF,127,Paldean Wooper,"0,04€",no-candidate-matches,725206,Paldean Wooper [Spit Poison],,,Flop,,no
+PAR,13,Nymble,"0,04€",no-candidate-matches,740489,Nymble [Gnaw],,,Gnaw,,no
+PAR,14,Nymble,"0,04€",no-candidate-matches,740490,Nymble [Flop],,,Flop,,no
+SSH,111,Clobbopus,"0,04€",no-candidate-matches,436679,Clobbopus [Punch],,,Bind,,no
 PAL,124,Glimmet,"0,03€",no-candidate-matches,715600,Glimmet [Rock Throw],,,Ascension,,no
-PAL,38,Charcadet,"0,03€",no-candidate-matches,715512,Charcadet [Kick],,,Kick,,no
-PAR,13,Nymble,"0,03€",no-candidate-matches,740490,Nymble [Flop],,,Gnaw,,no
 PAR,52,Wiglett,"0,03€",no-candidate-matches,740542,Wiglett [Vibration],,,Vibration,,no
-SSH,111,Clobbopus,"0,03€",no-candidate-matches,436679,Clobbopus [Punch],,,Bind,,no
+PAL,38,Charcadet,"0,02€",no-candidate-matches,715512,Charcadet [Kick],,,Kick,,no
 SV,70,Milotic,"0,02€",no-candidate-matches,278726,Milotic [C] Lv.58 [Aqua Tail | Wrap],,,Cleansing Ring Scale Blow 90-,,no
 SVI,73,Pawmi,"0,02€",no-candidate-matches,702370,Pawmi [Light Punch | Zap Kick],,,Jolt,,no
 UPR,96,Gible,"0,02€",no-candidate-matches,316022,Gible [Ascension],,,Ascension,,no
 SSH,209,Professor's Research,"10,19€",no-candidates,448168,Professor's Research - Professor Magnolia,,,,,no
-SSH,201,Professor's Research,"5,32€",no-candidates,437134,Professor's Research - Professor Magnolia,,,,,no
-SVI,241,Professor's Research,"2,31€",no-candidates,702536,Professor's Research - Professor Sada,,,,,no
-SVI,240,Professor's Research,"1,42€",no-candidates,702537,Professor's Research - Professor Turo,,,,,no
-SVI,190,Professor's Research,"0,13€",no-candidates,702485,Professor's Research - Professor Sada,,,,,no
+SSH,201,Professor's Research,"5,14€",no-candidates,437134,Professor's Research - Professor Magnolia,,,,,no
+SVI,241,Professor's Research,"2,28€",no-candidates,702536,Professor's Research - Professor Sada,,,,,no
+SVI,240,Professor's Research,"1,49€",no-candidates,702537,Professor's Research - Professor Turo,,,,,no
+SVI,190,Professor's Research,"0,14€",no-candidates,702485,Professor's Research - Professor Sada,,,,,no
 PRE,125,Professor's Research,"0,07€",no-candidates,805516,Professor's Research - Professor Oak,,,,,no
 SHF,60,Professor's Research,"0,05€",no-candidates,539323,Professor's Research - Professor Juniper,,,,,no
 SVP,224,Paradise Resort,"451,02€",no-card-text,727542,Paradise Resort,,,,,no
@@ -469,229 +430,210 @@ UNB,233,Pokégear 3.0,"28,07€",no-card-text,372733,Pokégear 3.0,,,,,no
 BKP,98a,Delinquent,"21,09€",no-card-text,782672,Delinquent,,,,,no
 BKT,146a,Professor's Letter,"13,38€",no-card-text,782671,Professor's Letter,,,,,no
 VIV,195,Leon,"13,15€",no-card-text,512620,Leon,,,,,no
-VIV,196,Nessa,"12,72€",no-card-text,512625,Nessa,,,,,no
+VIV,196,Nessa,"12,51€",no-card-text,512625,Nessa,,,,,no
 LOT,188a,Professor Elm's Lecture,"12,31€",no-card-text,451213,Professor Elm's Lecture,,,,,no
 SUM,158,Nest Ball,"11,81€",no-card-text,295471,Nest Ball,,,,,no
 UF,?,Unown,"11,50€",no-card-text,276635,Unown [W] [Shuffle | Hidden Power],,,,,no
+SIT,207,Serena,"10,20€",no-card-text,682241,Serena,,,,,no
 VIV,183,Nessa,"10,13€",no-card-text,512690,Nessa,,,,,no
-SIT,207,Serena,"10,03€",no-card-text,682241,Serena,,,,,no
 UPR,135a,Volkner,"9,72€",no-card-text,450493,Volkner,,,,,no
 CRE,214,Doctor,"8,70€",no-card-text,567322,Doctor,,,,,no
 VIV,193,Bea,"8,61€",no-card-text,512610,Bea,,,,,no
-CRE,190,Doctor,"7,92€",no-card-text,567298,Doctor,,,,,no
 VIV,180,Bea,"7,76€",no-card-text,512675,Bea,,,,,no
 SSH,207,Bede,"7,64€",no-card-text,437124,Bede,,,,,no
-SIT,193,Serena,"7,62€",no-card-text,682256,Serena,,,,,no
-RCL,202,Oleana,"7,33€",no-card-text,456583,Oleana,,,,,no
-RCL,191,Oleana,"7,30€",no-card-text,457323,Oleana,,,,,no
+CRE,190,Doctor,"7,57€",no-card-text,567298,Doctor,,,,,no
+SIT,193,Serena,"7,49€",no-card-text,682256,Serena,,,,,no
+RCL,202,Oleana,"7,40€",no-card-text,456583,Oleana,,,,,no
 ASR,202,Gardenia's Vigor,"7,08€",no-card-text,658863,Gardenia's Vigor,,,,,no
+RCL,191,Oleana,"6,85€",no-card-text,457323,Oleana,,,,,no
 VIV,182,Leon,"6,66€",no-card-text,512685,Leon,,,,,no
 SIT,204,Candice,"6,47€",no-card-text,682237,Candice,,,,,no
-SIT,205,Furisode Girl,"6,40€",no-card-text,682253,Furisode Girl,,,,,no
 VIV,194,Beauty,"6,36€",no-card-text,512680,Beauty,,,,,no
+SIT,205,Furisode Girl,"6,22€",no-card-text,682253,Furisode Girl,,,,,no
 SSH,199,Bede,"5,74€",no-card-text,437089,Bede,,,,,no
+ASR,184,Gardenia's Vigor,"5,69€",no-card-text,658845,Gardenia's Vigor,,,,,no
 UPR,153,Lusamine,"5,68€",no-card-text,449878,Lusamine,,,,,no
-ASR,184,Gardenia's Vigor,"5,59€",no-card-text,658845,Gardenia's Vigor,,,,,no
-SIT,189,Candice,"5,53€",no-card-text,682252,Candice,,,,,no
-SIT,206,Lance,"5,36€",no-card-text,682255,Lance,,,,,no
-SIT,190,Furisode Girl,"5,33€",no-card-text,682238,Furisode Girl,,,,,no
-ASR,188,Roxanne,"5,18€",no-card-text,658849,Roxanne,,,,,no
-VIV,192,Allister,"5,13€",no-card-text,512605,Allister,,,,,no
-VIV,179,Allister,"5,00€",no-card-text,512670,Allister,,,,,no
-SIT,192,Lance,"4,81€",no-card-text,682240,Lance,,,,,no
+SIT,189,Candice,"5,65€",no-card-text,682252,Candice,,,,,no
+SIT,190,Furisode Girl,"5,28€",no-card-text,682238,Furisode Girl,,,,,no
+SIT,206,Lance,"5,12€",no-card-text,682255,Lance,,,,,no
+VIV,192,Allister,"5,00€",no-card-text,512670,Allister,,,,,no
+VIV,179,Allister,"4,95€",no-card-text,512605,Allister,,,,,no
+ASR,188,Roxanne,"4,94€",no-card-text,658849,Roxanne,,,,,no
+SIT,192,Lance,"4,61€",no-card-text,682240,Lance,,,,,no
 ROS,92a,Trainers' Mail,"4,01€",no-card-text,297897,Trainers' Mail,,,,,no
-EVS,223,Gordie,"3,50€",no-card-text,574259,Gordie,,,,,no
-EVS,201,Gordie,"3,43€",no-card-text,574281,Gordie,,,,,no
-ROS,92,Trainers' Mail,"3,20€",no-card-text,282760,Trainers' Mail,,,,,no
-BRS,180,Roseanne's Backup,"3,09€",no-card-text,608726,Roseanne's Backup,,,,,no
+ROS,92,Trainers' Mail,"3,66€",no-card-text,282760,Trainers' Mail,,,,,no
+EVS,223,Gordie,"3,55€",no-card-text,574281,Gordie,,,,,no
+EVS,201,Gordie,"3,50€",no-card-text,574259,Gordie,,,,,no
 BUS,143,Guzma,"3,02€",no-card-text,312287,Guzma,,,,,no
 SVE,17,Grass Energy,"2,99€",no-card-text,903139,Grass Energy,,,,,no
 BUS,115a,Guzma,"2,89€",no-card-text,312262,Guzma,,,,,no
-BRS,172,Roseanne's Backup,"2,12€",no-card-text,608718,Roseanne's Backup,,,,,no
-SVP,220,Black Belt's Training,"2,02€",no-card-text,855672,Black Belt's Training,,,,,no
+SVP,220,Black Belt's Training,"2,08€",no-card-text,855672,Black Belt's Training,,,,,no
+SVP,219,Black Belt's Training,"2,04€",no-card-text,855673,Black Belt's Training,,,,,no
 SVE,23,Darkness Energy,"2,00€",no-card-text,903168,Darkness Energy,,,,,no
-SVP,219,Black Belt's Training,"1,96€",no-card-text,855673,Black Belt's Training,,,,,no
 BUS,115,Guzma,"1,49€",no-card-text,312218,Guzma,,,,,no
-SHF,68,Gym Trainer,"1,37€",no-card-text,539363,Gym Trainer,,,,,no
-LOT,187,Net Ball,"1,18€",no-card-text,365821,Net Ball,,,,,no
+SHF,68,Gym Trainer,"1,26€",no-card-text,539363,Gym Trainer,,,,,no
 SVE,11,Water Energy,"0,99€",no-card-text,903151,Water Energy,,,,,no
 SVE,15,Darkness Energy,"0,99€",no-card-text,903169,Darkness Energy,,,,,no
 SVE,24,Metal Energy,"0,95€",no-card-text,903172,Metal Energy,,,,,no
 SUM,161,Ultra Ball,"0,88€",no-card-text,312291,Ultra Ball,,,,,no
+SVE,18,Fire Energy,"0,75€",no-card-text,903143,Fire Energy,,,,,no
 SVE,13,Psychic Energy,"0,74€",no-card-text,903158,Psychic Energy,,,,,no
 PAF,231,Paldean Student,"0,64€",no-card-text,751777,Paldean Student,,,,,no
 SUM,136,Double Colorless Energy,"0,64€",no-card-text,312212,Double Colorless Energy,,,,,no
-PRE,134,Atticus,"0,62€",no-card-text,805527,Atticus,,,,,no
-PAF,230,Paldean Student,"0,61€",no-card-text,751778,Paldean Student,,,,,no
-UNM,208,Stadium Nav,"0,60€",no-card-text,388827,Stadium Nav,,,,,no
-PRE,133,Atticus,"0,56€",no-card-text,805528,Atticus,,,,,no
-SVE,10,Fire Energy,"0,56€",no-card-text,903144,Fire Energy,,,,,no
-FLI,113,Mysterious Treasure,"0,50€",no-card-text,368695,Mysterious Treasure,,,,,no
+PAF,230,Paldean Student,"0,62€",no-card-text,751778,Paldean Student,,,,,no
+PRE,133,Atticus,"0,57€",no-card-text,805527,Atticus,,,,,no
+PRE,134,Atticus,"0,57€",no-card-text,805528,Atticus,,,,,no
+UNM,208,Stadium Nav,"0,56€",no-card-text,388827,Stadium Nav,,,,,no
 UNB,189,Welder,"0,50€",no-card-text,407024,Welder,,,,,no
 SVE,20,Lightning Energy,"0,45€",no-card-text,903154,Lightning Energy,,,,,no
 SVE,7,Darkness Energy,"0,40€",no-card-text,903167,Darkness Energy,,,,,no
 GRI,125,Field Blower,"0,36€",no-card-text,312221,Field Blower,,,,,no
 SVE,14,Fighting Energy,"0,36€",no-card-text,903164,Fighting Energy,,,,,no
 SVE,9,Grass Energy,"0,30€",no-card-text,903137,Grass Energy,,,,,no
-SVE,16,Metal Energy,"0,29€",no-card-text,903170,Metal Energy,,,,,no
-TEU,145,Jasmine,"0,26€",no-card-text,369071,Jasmine,,,,,no
 SLG,68,Ultra Ball,"0,25€",no-card-text,368689,Ultra Ball,,,,,no
+TEU,145,Jasmine,"0,25€",no-card-text,369071,Jasmine,,,,,no
 SVE,12,Lightning Energy,"0,19€",no-card-text,903153,Lightning Energy,,,,,no
-UPR,126,Looker,"0,19€",no-card-text,316051,Looker,,,,,no
+SVE,16,Metal Energy,"0,19€",no-card-text,903170,Metal Energy,,,,,no
+SVE,10,Fire Energy,"0,18€",no-card-text,903145,Fire Energy,,,,,no
 SVE,3,Water Energy,"0,18€",no-card-text,903150,Water Energy,,,,,no
+UPR,126,Looker,"0,18€",no-card-text,316051,Looker,,,,,no
+ROS,86,Mega Turbo,"0,17€",no-card-text,282754,Mega Turbo,,,,,no
 SVE,4,Lightning Energy,"0,17€",no-card-text,903156,Lightning Energy,,,,,no
-ROS,86,Mega Turbo,"0,16€",no-card-text,282754,Mega Turbo,,,,,no
 SVE,6,Fighting Energy,"0,16€",no-card-text,903165,Fighting Energy,,,,,no
+UNM,204,Poké Maniac,"0,16€",no-card-text,388807,Poké Maniac,,,,,no
 UPR,129,Missing Clover,"0,16€",no-card-text,316054,Missing Clover,,,,,no
 SVE,1,Grass Energy,"0,15€",no-card-text,903140,Grass Energy,,,,,no
-UNM,204,Poké Maniac,"0,11€",no-card-text,388807,Poké Maniac,,,,,no
-SVE,2,Fire Energy,"0,10€",no-card-text,903146,Fire Energy,,,,,no
+VIV,147,Bea,"0,10€",no-card-text,512445,Bea,,,,,no
 SUM,132,Switch,"0,09€",no-card-text,295445,Switch,,,,,no
-VIV,147,Bea,"0,08€",no-card-text,512445,Bea,,,,,no
 SIT,160,Leafy Camo Poncho,"0,05€",no-card-text,682207,Leafy Camo Poncho,,,,,no
-SVI,175,Jacq,"0,04€",no-card-text,702471,Jacq,,,,,no
-SIT,159,Lance,"0,03€",no-card-text,682206,Lance,,,,,no
+SVE,2,Fire Energy,"0,05€",no-card-text,903142,Fire Energy,,,,,no
+SIT,159,Lance,"0,04€",no-card-text,682206,Lance,,,,,no
 SIT,167,Worker,"0,03€",no-card-text,682214,Worker,,,,,no
+SVI,175,Jacq,"0,03€",no-card-text,702471,Jacq,,,,,no
 TWM,159,Ogre's Mask,"0,03€",no-card-text,769333,Ogre's Mask,,,,,no
 BKT,149,Super Rod,"0,02€",no-card-text,295270,Super Rod,,,,,no
 CES,123,Acro Bike,"0,02€",no-card-text,407044,Acro Bike,,,,,no
 STS,114,Professor Sycamore,"0,02€",no-card-text,295231,Professor Sycamore,,,,,no
-SVE,18,Fire Energy,,no-card-text,903142,Fire Energy,,,,,no
 SVE,19,Water Energy,,no-card-text,903147,Water Energy,,,,,no
 SVE,21,Psychic Energy,,no-card-text,903157,Psychic Energy,,,,,no
 SVE,22,Fighting Energy,,no-card-text,903163,Fighting Energy,,,,,no
-30C,R,Mew,"3160,53€",reprint-collision,909509,Mew [Psychic | 30C],,,Psychic,,no
-30C,G,Mew,"2264,21€",reprint-collision,909510,Mew [Psychic | 30C],,,Psychic,,no
-30C,B,Mew,"1474,46€",reprint-collision,909511,Mew [Psychic | 30C],,,Psychic,,no
-GEN,RC29,Pikachu,"148,71€",reprint-collision,288538,Pikachu [Nuzzle | Quick Attack],,,Nuzzle Quick Attack,,no
+30C,R,Mew,"2554,34€",reprint-collision,909509,Mew [Psychic | 30C],,,Psychic,,no
+30C,G,Mew,"1975,52€",reprint-collision,909510,Mew [Psychic | 30C],,,Psychic,,no
 TM,100,Darkrai & Cresselia LEGEND,"140,77€",reprint-collision,279629,Darkrai & Cresselia LEGEND [Top],,,Lost Crisis Moon's Invite,,no
-MEW,168,Charmander,"78,68€",reprint-collision,733763,Charmander [Blazing Destruction | Steady Firebreathing],,,Blazing Destruction Steady Firebreathing,,no
+GEN,RC29,Pikachu,"139,46€",reprint-collision,288538,Pikachu [Nuzzle | Quick Attack],,,Nuzzle Quick Attack,,no
 UD,88,Kyogre & Groudon LEGEND,"77,85€",reprint-collision,279341,Kyogre & Groudon LEGEND [Mega Tidal Wave | Massive Eruption | Bottom],,,Mega Tidal Wave Massive Eruption,,no
 UL,93,Raikou & Suicune LEGEND,"75,39€",reprint-collision,279248,Raikou & Suicune LEGEND [Top],,,Thunderbolt Spear Aurora Gain,,no
 TM,102,Palkia & Dialga LEGEND,"72,00€",reprint-collision,279632,Palkia & Dialga LEGEND [Sudden Delete | Time Control | Bottom],,,Sudden Delete Time Control,,no
 TM,101,Palkia & Dialga LEGEND,"66,21€",reprint-collision,279631,Palkia & Dialga LEGEND [Top],,,Sudden Delete Time Control,,no
-UD,90,Rayquaza & Deoxys LEGEND,"65,40€",reprint-collision,279343,Rayquaza & Deoxys LEGEND [Ozone Buster | Space Virus | Bottom],,,Space Virus Ozone Buster,,no
-UD,89,Rayquaza & Deoxys LEGEND,"63,11€",reprint-collision,279342,Rayquaza & Deoxys LEGEND [Top],,,Space Virus Ozone Buster,,no
-TM,99,Darkrai & Cresselia LEGEND,"63,08€",reprint-collision,279630,Darkrai & Cresselia LEGEND [Lost Crisis | Moon's Invite | Bottom],,,Lost Crisis Moon's Invite,,no
-SSH,206,Snorlax VMAX,"58,83€",reprint-collision,427236,Snorlax VMAX [G-Max Fall],,,G-Max Fall,,no
-UL,92,Raikou & Suicune LEGEND,"57,25€",reprint-collision,279249,Raikou & Suicune LEGEND [Thunderbolt Spear | Aurora Gain | Bottom],,,Thunderbolt Spear Aurora Gain,,no
-30C,150,Pikachu ex,"47,41€",reprint-collision,907757,Pikachu ex [Zip-Zap Frenzy | Thunder],,,Zip-Zap Frenzy Thunder,,no
-SSH,142,Snorlax VMAX,"46,99€",reprint-collision,437119,Snorlax VMAX [G-Max Fall],,,G-Max Fall,,no
-CRZ,160,Pikachu,"45,38€",reprint-collision,691879,Pikachu [Wild Charge],,,Wild Charge,,no
-30C,149,Pikachu ex,"40,10€",reprint-collision,907756,Pikachu ex [Pika-Pika Parade | Thunderbolt],,,Pika-Pika Parade Thunderbolt,,no
-PAL,218,Paldean Tauros,"36,58€",reprint-collision,715693,Paldean Tauros [Raging Horns | Combat Tackle],,,Raging Horns Combat Tackle,,no
-MEW,205,Mew ex,"28,44€",reprint-collision,733788,Mew ex [Restart | Genome Hacking],,,Restart Genome Hacking,,no
-NP,3,Treecko,"25,41€",reprint-collision,275476,Treecko [Tail Slap | Razor Leaf],,,Tail Slap Razor Leaf,,no
-MEW,193,Mew ex,"23,93€",reprint-collision,733800,Mew ex [Restart | Genome Hacking],,,Restart Genome Hacking,,no
-SP,153,Pikachu,"23,73€",reprint-collision,672386,Pikachu [Thunder Shock | Holiday Calendar],,,Thunder Shock,,no
+UD,90,Rayquaza & Deoxys LEGEND,"63,11€",reprint-collision,279342,Rayquaza & Deoxys LEGEND [Top],,,Space Virus Ozone Buster,,no
+UD,89,Rayquaza & Deoxys LEGEND,"60,80€",reprint-collision,279343,Rayquaza & Deoxys LEGEND [Ozone Buster | Space Virus | Bottom],,,Space Virus Ozone Buster,,no
+UL,92,Raikou & Suicune LEGEND,"57,12€",reprint-collision,279249,Raikou & Suicune LEGEND [Thunderbolt Spear | Aurora Gain | Bottom],,,Thunderbolt Spear Aurora Gain,,no
+TM,99,Darkrai & Cresselia LEGEND,"56,92€",reprint-collision,279630,Darkrai & Cresselia LEGEND [Lost Crisis | Moon's Invite | Bottom],,,Lost Crisis Moon's Invite,,no
+SSH,206,Snorlax VMAX,"56,62€",reprint-collision,687429,Snorlax VMAX [G-Max Fall],,,G-Max Fall,,no
+CRZ,160,Pikachu,"49,20€",reprint-collision,691909,Pikachu [Pika Dash | Whimsy Tackle],,,Wild Charge,,no
+30C,150,Pikachu ex,"47,24€",reprint-collision,907757,Pikachu ex [Zip-Zap Frenzy | Thunder],,,Zip-Zap Frenzy Thunder,,no
+SSH,142,Snorlax VMAX,"45,65€",reprint-collision,437119,Snorlax VMAX [G-Max Fall],,,G-Max Fall,,no
+30C,149,Pikachu ex,"39,36€",reprint-collision,907756,Pikachu ex [Pika-Pika Parade | Thunderbolt],,,Pika-Pika Parade Thunderbolt,,no
+MEW,205,Mew ex,"28,55€",reprint-collision,733788,Mew ex [Restart | Genome Hacking],,,Restart Genome Hacking,,no
+NP,3,Treecko,"26,33€",reprint-collision,275489,Treecko [Pound | Sporadic Sponging],,,Tail Slap Razor Leaf,,no
+MEW,193,Mew ex,"23,31€",reprint-collision,733800,Mew ex [Restart | Genome Hacking],,,Restart Genome Hacking,,no
+SP,153,Pikachu,"23,15€",reprint-collision,672386,Pikachu [Thunder Shock | Holiday Calendar],,,Thunder Shock,,no
 SVP,159,Magneton,"17,54€",reprint-collision,799713,Magneton [Overvolt Discharge | Electric Ball],,,Overvolt Discharge Electric Ball,,no
-SVI,215,Riolu,"16,76€",reprint-collision,702511,Riolu [Punch | Reckless Charge],,,Punch Reckless Charge,,no
-CRZ,102,Rayquaza VMAX,"14,43€",reprint-collision,691820,Rayquaza VMAX [Azure Pulse | Max Burst],,,Azure Pulse Max Burst,,no
-SVP,196,Charizard ex,"14,39€",reprint-collision,751798,Charizard ex [Infernal Reign | Burning Darkness],,,Infernal Reign Burning Darkness,,no
-PAL,217,Tinkatuff,"13,40€",reprint-collision,715692,Tinkatuff [Play Rough | Pulverizing Press],,,Play Rough Pulverizing Press,,no
-CRZ,101,Rayquaza VMAX,"11,52€",reprint-collision,691821,Rayquaza VMAX [Azure Pulse | Max Burst],,,Azure Pulse Max Burst,,no
-SP,212,Eevee,"10,23€",reprint-collision,583202,Eevee [Be Prepared | Bite],,,Be Prepared Bite,,no
-PAL,216,Tinkatink,"8,64€",reprint-collision,715691,Tinkatink [Scrap Pickup | Fairy Wind],,,Scrap Pickup Fairy Wind,,no
-SP,190,Eevee,"7,99€",reprint-collision,491204,Eevee [Signs of Evolution | Wild Kick],,,Be Prepared Bite,,no
-SIT,TG5,Gardevoir,"7,52€",reprint-collision,682269,Gardevoir [Refinement | Magical Shot],,,Refinement Magical Shot,,no
-SVI,199,Tarountula,"7,37€",reprint-collision,702495,Tarountula [String Shot],,,String Shot,,no
-PAR,191,Wimpod,"6,83€",reprint-collision,740734,Wimpod [Sneaky Snacking | Ram],,,Sneaky Snacking Ram,,no
-SIT,210,Serperior VSTAR,"6,29€",reprint-collision,682244,Serperior VSTAR [Regal Blender | Star Winder],,,Regal Blender Star Winder,,no
-SIT,196,Serperior VSTAR,"6,20€",reprint-collision,682259,Serperior VSTAR [Regal Blender | Star Winder],,,Regal Blender Star Winder,,no
-SP,139,Pikachu V-UNION,"5,86€",reprint-collision,576740,Pikachu V-UNION [Disconnect],,,Union Gain,,no
-SP,175,Eevee,"5,43€",reprint-collision,568799,Eevee [Be Prepared | Bite],,,Be Prepared Bite,,no
+SVI,215,Riolu,"16,03€",reprint-collision,702511,Riolu [Punch | Reckless Charge],,,Punch Reckless Charge,,no
+SVP,196,Charizard ex,"13,83€",reprint-collision,751798,Charizard ex [Infernal Reign | Burning Darkness],,,Infernal Reign Burning Darkness,,no
+PAL,216,Tinkatink,"9,95€",reprint-collision,715691,Tinkatink [Scrap Pickup | Fairy Wind],,,Scrap Pickup Fairy Wind,,no
+SP,212,Eevee,"9,95€",reprint-collision,583202,Eevee [Be Prepared | Bite],,,Be Prepared Bite,,no
+SP,190,Eevee,"8,36€",reprint-collision,491204,Eevee [Signs of Evolution | Wild Kick],,,Be Prepared Bite,,no
+SIT,TG5,Gardevoir,"7,28€",reprint-collision,682269,Gardevoir [Refinement | Magical Shot],,,Refinement Magical Shot,,no
+SVI,199,Tarountula,"6,96€",reprint-collision,702495,Tarountula [String Shot],,,String Shot,,no
+SP,139,Pikachu V-UNION,"6,86€",reprint-collision,576739,Pikachu V-UNION [Shocking Shock],,,Union Gain,,no
+SIT,210,Serperior VSTAR,"6,17€",reprint-collision,682259,Serperior VSTAR [Regal Blender | Star Winder],,,Regal Blender Star Winder,,no
+SIT,196,Serperior VSTAR,"6,15€",reprint-collision,682244,Serperior VSTAR [Regal Blender | Star Winder],,,Regal Blender Star Winder,,no
+SP,175,Eevee,"5,74€",reprint-collision,547026,Eevee [First Step | Tail Whap],,,Be Prepared Bite,,no
 SP,116,Morpeko,"5,41€",reprint-collision,557973,Morpeko [Famished | Thunder Shock],,,Famished Thunder Shock,,no
-SP,127,Eevee,"5,33€",reprint-collision,557975,Eevee [Signs of Evolution | Wild Kick],,,Be Prepared Bite,,no
-SP,118,Eevee,"5,12€",reprint-collision,609464,Eevee [Be Prepared | Bite],,,Signs of Evolution Wild Kick,,no
-SP,31,Morpeko,"4,99€",reprint-collision,549431,Morpeko [Thunder Shock],,,Famished Thunder Shock,,no
-PAR,198,Gimmighoul,"4,93€",reprint-collision,740741,Gimmighoul [Continuous Coin Toss],,,Continuous Coin Toss,,no
-HL,44,Metang,"4,64€",reprint-collision,276117,Metang [Psyshock | Metal Ball],,,Levitate Tackle,,no
+SP,127,Eevee,"5,18€",reprint-collision,609464,Eevee [Be Prepared | Bite],,,Be Prepared Bite,,no
+SP,118,Eevee,"5,16€",reprint-collision,568799,Eevee [Be Prepared | Bite],,,Signs of Evolution Wild Kick,,no
+SP,31,Morpeko,"4,87€",reprint-collision,549431,Morpeko [Thunder Shock],,,Famished Thunder Shock,,no
+HL,44,Metang,"4,59€",reprint-collision,276117,Metang [Psyshock | Metal Ball],,,Levitate Tackle,,no
+SIT,139,Lugia VSTAR,"4,59€",reprint-collision,682186,Lugia VSTAR [Tempest Dive | Summoning Star],,,Summoning Star Tempest Dive,,no
 BUS,92a,Kirlia,"4,43€",reprint-collision,665136,Kirlia [Smack | Magical Shot],,,Smack Magical Shot,,no
-SIT,139,Lugia VSTAR,"4,32€",reprint-collision,682186,Lugia VSTAR [Tempest Dive | Summoning Star],,,Summoning Star Tempest Dive,,no
 RCL,182,Toxtricity V,"4,29€",reprint-collision,819399,Toxtricity V [Poison Jab | Electric Riot],,,Poison Jab Electric Riot,,no
-SP,145,Pikachu V,"4,10€",reprint-collision,604984,Pikachu V [Lightning Blast],,,Volt Tackle,,no
-SP,143,Pikachu V,"3,89€",reprint-collision,692429,Pikachu V [Pika Drive],,,Volt Tackle,,no
-PAR,219,Garchomp ex,"3,65€",reprint-collision,740762,Garchomp ex [Hydro Lander | Sonic Dive],,,Hydro Lander Sonic Dive,,no
-SVI,217,Klawf,"3,48€",reprint-collision,702513,Klawf [Vise Grip | Adrenaline Hammer],,,Vise Grip Adrenaline Hammer,,no
-SP,163,Zacian V-UNION,"3,42€",reprint-collision,572164,Zacian V-UNION [Dance of the Crowned Sword],,,Union Gain,,no
-VIV,168,Talonflame V,"3,38€",reprint-collision,512550,Talonflame V [Fast Flight | Bright Wing],,,Fast Flight Bright Wing,,no
-TEF,196,Raging Bolt ex,"3,30€",reprint-collision,760826,Raging Bolt ex [Burst Roar | Bellowing Thunder],,,Burst Roar Bellowing Thunder,,no
-SVP,74,Charizard ex,"3,04€",reprint-collision,821616,Charizard ex [Infernal Reign | Burning Darkness],,,Infernal Reign Burning Darkness,,no
-LOR,174,Kyurem V,"2,81€",reprint-collision,674180,Kyurem V [Rapid Freeze | Frost Smash],,,Rapid Freeze Frost Smash,,no
-SFA,80,Kingdra ex,"2,75€",reprint-collision,780975,Kingdra ex [King's Order | Hydro Pump],,,King's Order Hydro Pump,,no
-SP,12,Morpeko,"2,72€",reprint-collision,427106,Morpeko [Thunder Shock],,,Thunder Shock,,no
-SVI,227,Miraidon ex,"2,57€",reprint-collision,702523,Miraidon ex [Tandem Unit | Photon Blaster],,,Tandem Unit Photon Blaster,,no
+SP,145,Pikachu V,"3,86€",reprint-collision,692429,Pikachu V [Pika Drive],,,Volt Tackle,,no
+SP,143,Pikachu V,"3,82€",reprint-collision,604984,Pikachu V [Lightning Blast],,,Volt Tackle,,no
+SVI,217,Klawf,"3,43€",reprint-collision,702513,Klawf [Vise Grip | Adrenaline Hammer],,,Vise Grip Adrenaline Hammer,,no
+SP,163,Zacian V-UNION,"3,32€",reprint-collision,572164,Zacian V-UNION [Dance of the Crowned Sword],,,Union Gain,,no
+VIV,168,Talonflame V,"3,07€",reprint-collision,512550,Talonflame V [Fast Flight | Bright Wing],,,Fast Flight Bright Wing,,no
+TEF,196,Raging Bolt ex,"3,03€",reprint-collision,760826,Raging Bolt ex [Burst Roar | Bellowing Thunder],,,Burst Roar Bellowing Thunder,,no
+SVP,74,Charizard ex,"2,96€",reprint-collision,821616,Charizard ex [Infernal Reign | Burning Darkness],,,Infernal Reign Burning Darkness,,no
+LOR,174,Kyurem V,"2,74€",reprint-collision,674180,Kyurem V [Rapid Freeze | Frost Smash],,,Rapid Freeze Frost Smash,,no
+SFA,80,Kingdra ex,"2,62€",reprint-collision,780975,Kingdra ex [King's Order | Hydro Pump],,,King's Order Hydro Pump,,no
+SP,12,Morpeko,"2,49€",reprint-collision,427106,Morpeko [Thunder Shock],,,Thunder Shock,,no
+SVI,227,Miraidon ex,"2,46€",reprint-collision,702523,Miraidon ex [Tandem Unit | Photon Blaster],,,Tandem Unit Photon Blaster,,no
+SP,42,Eevee,"2,11€",reprint-collision,659064,Eevee [Be Prepared | Bite],,,Signs of Evolution Wild Kick,,no
 SVP,56,Charizard ex,"2,07€",reprint-collision,821617,Charizard ex [Infernal Reign | Burning Darkness],,,Infernal Reign Burning Darkness,,no
-EVS,40,Glaceon V,"1,94€",reprint-collision,574064,Glaceon V [Frozen Awakening | Heavy Snow],,,Frozen Awakening Heavy Snow,,no
-SP,42,Eevee,"1,94€",reprint-collision,659064,Eevee [Be Prepared | Bite],,,Signs of Evolution Wild Kick,,no
-TEF,191,Iron Crown ex,"1,90€",reprint-collision,760821,Iron Crown ex [Cobalt Command | Twin Shotels],,,Cobalt Command Twin Shotels,,no
-SSH,138,Zacian V,"1,87€",reprint-collision,427176,Zacian V [Intrepid Sword | Brave Blade],,,Intrepid Sword Brave Blade,,no
-SVP,84,Quaquaval ex,"1,87€",reprint-collision,751809,Quaquaval ex [Exciting Dance | Spiral Shot],,,Exciting Dance Spiral Shot,,no
+EVS,40,Glaceon V,"1,96€",reprint-collision,574064,Glaceon V [Frozen Awakening | Heavy Snow],,,Frozen Awakening Heavy Snow,,no
 SVI,231,Koraidon ex,"1,85€",reprint-collision,690999,Koraidon ex [Dino Cry | Wild Impact],,,Dino Cry Wild Impact,,no
-SVP,81,Skeledirge ex,"1,70€",reprint-collision,751806,Skeledirge ex [Vitality Song | Burning Voice],,,Vitality Song Burning Voice 270-,,no
-SVP,216,Team Rocket's Mewtwo ex,"1,38€",reprint-collision,830110,Team Rocket's Mewtwo ex [Power Saver | Erasure Ball],,,Power Saver Erasure Ball,,no
-SVI,234,Oinkologne ex,"1,31€",reprint-collision,702530,Oinkologne ex [Maddening Scent | Heavy Stomp],,,Maddening Scent Heavy Stomp,,no
-SSP,224,Archaludon ex,"1,27€",reprint-collision,794597,Archaludon ex [Assemble Alloy | Metal Defender],,,Assemble Alloy Metal Defender,,no
-SVP,205,Team Rocket's Mewtwo ex,"1,27€",reprint-collision,830111,Team Rocket's Mewtwo ex [Power Saver | Erasure Ball],,,Power Saver Erasure Ball,,no
-SSH,139,Zamazenta V,"1,26€",reprint-collision,427171,Zamazenta V [Dauntless Shield | Assault Tackle],,,Dauntless Shield Assault Tackle,,no
-30C,54,Pikachu ex,"1,20€",reprint-collision,907661,Pikachu ex [Zip-Zap Frenzy | Thunder],,,Zip-Zap Frenzy Thunder,,no
-30C,53,Pikachu ex,"1,15€",reprint-collision,907660,Pikachu ex [Pika-Pika Parade | Thunderbolt],,,Pika-Pika Parade Thunderbolt,,no
-SIT,33,Alolan Vulpix V,"1,13€",reprint-collision,682075,Alolan Vulpix V [White Drop | Frost Smash],,,White Drop Frost Smash,,no
-RCL,108,Sandaconda V,"0,91€",reprint-collision,457953,Sandaconda V [Sand Eater | Sand Breath],,,Sand Eater Sand Breath,,no
-SP,215,Morpeko V-UNION,"0,89€",reprint-collision,651354,Morpeko V-UNION [All You Can Eat],,,Union Gain,,no
-OBF,213,Glimmora ex,"0,80€",reprint-collision,725203,Glimmora ex [Dust Field | Poisonous Gem],,,Dust Field Poisonous Gem,,no
-OBF,216,Revavroom ex,"0,78€",reprint-collision,725236,Revavroom ex [Tune-Up | Wild Drift],,,Tune-Up Wild Drift,,no
-OBF,123,Glimmora ex,"0,69€",reprint-collision,725293,Glimmora ex [Dust Field | Poisonous Gem],,,Dust Field Poisonous Gem,,no
-OBF,156,Revavroom ex,"0,69€",reprint-collision,725296,Revavroom ex [Tune-Up | Wild Drift],,,Tune-Up Wild Drift,,no
-30C,30,Pikachu,"0,61€",reprint-collision,907652,Pikachu [Nighttime Stroll | Static Shock],,,Mach Bolt,,no
-LTR,73,Solosis,"0,38€",reprint-collision,281225,Solosis [Nap | Ram],,,Rollout,,no
-UNM,28,Litwick,"0,29€",reprint-collision,387972,Litwick [Find a Friend],,,Find a Friend,,no
-UNM,116,Riolu,"0,25€",reprint-collision,388372,Riolu [Kick],,,Kick,,no
-UNM,115,Riolu,"0,22€",reprint-collision,388382,Riolu [Kick],,,Kick,,no
-UNM,27,Litwick,"0,22€",reprint-collision,387967,Litwick [Find a Friend],,,Find a Friend,,no
-PLF,76,Deino,"0,18€",reprint-collision,280954,Deino [Slam],,,Slam,,no
+SVP,84,Quaquaval ex,"1,83€",reprint-collision,751809,Quaquaval ex [Exciting Dance | Spiral Shot],,,Exciting Dance Spiral Shot,,no
+TEF,191,Iron Crown ex,"1,83€",reprint-collision,760821,Iron Crown ex [Cobalt Command | Twin Shotels],,,Cobalt Command Twin Shotels,,no
+SSH,138,Zacian V,"1,69€",reprint-collision,427176,Zacian V [Intrepid Sword | Brave Blade],,,Intrepid Sword Brave Blade,,no
+SVP,81,Skeledirge ex,"1,62€",reprint-collision,751806,Skeledirge ex [Vitality Song | Burning Voice],,,Vitality Song Burning Voice 270-,,no
+SSH,139,Zamazenta V,"1,58€",reprint-collision,427171,Zamazenta V [Dauntless Shield | Assault Tackle],,,Dauntless Shield Assault Tackle,,no
+SVP,216,Team Rocket's Mewtwo ex,"1,41€",reprint-collision,830110,Team Rocket's Mewtwo ex [Power Saver | Erasure Ball],,,Power Saver Erasure Ball,,no
+SVP,205,Team Rocket's Mewtwo ex,"1,29€",reprint-collision,830111,Team Rocket's Mewtwo ex [Power Saver | Erasure Ball],,,Power Saver Erasure Ball,,no
+SVI,234,Oinkologne ex,"1,26€",reprint-collision,702530,Oinkologne ex [Maddening Scent | Heavy Stomp],,,Maddening Scent Heavy Stomp,,no
+SSP,224,Archaludon ex,"1,21€",reprint-collision,794597,Archaludon ex [Assemble Alloy | Metal Defender],,,Assemble Alloy Metal Defender,,no
+30C,54,Pikachu ex,"1,16€",reprint-collision,907661,Pikachu ex [Zip-Zap Frenzy | Thunder],,,Zip-Zap Frenzy Thunder,,no
+30C,53,Pikachu ex,"1,12€",reprint-collision,907660,Pikachu ex [Pika-Pika Parade | Thunderbolt],,,Pika-Pika Parade Thunderbolt,,no
+SIT,33,Alolan Vulpix V,"1,08€",reprint-collision,682075,Alolan Vulpix V [White Drop | Frost Smash],,,White Drop Frost Smash,,no
+SP,215,Morpeko V-UNION,"0,96€",reprint-collision,651354,Morpeko V-UNION [All You Can Eat],,,Union Gain,,no
+OBF,216,Revavroom ex,"0,79€",reprint-collision,725236,Revavroom ex [Tune-Up | Wild Drift],,,Tune-Up Wild Drift,,no
+OBF,213,Glimmora ex,"0,75€",reprint-collision,725203,Glimmora ex [Dust Field | Poisonous Gem],,,Dust Field Poisonous Gem,,no
+OBF,156,Revavroom ex,"0,72€",reprint-collision,725296,Revavroom ex [Tune-Up | Wild Drift],,,Tune-Up Wild Drift,,no
+OBF,123,Glimmora ex,"0,71€",reprint-collision,725293,Glimmora ex [Dust Field | Poisonous Gem],,,Dust Field Poisonous Gem,,no
+30C,30,Pikachu,"0,61€",reprint-collision,907659,Pikachu [Angry Bolt],,,Mach Bolt,,no
+UNM,116,Riolu,"0,35€",reprint-collision,388372,Riolu [Kick],,,Kick,,no
+LTR,73,Solosis,"0,33€",reprint-collision,281225,Solosis [Nap | Ram],,,Rollout,,no
+UNM,28,Litwick,"0,33€",reprint-collision,387972,Litwick [Find a Friend],,,Find a Friend,,no
+UNM,27,Litwick,"0,26€",reprint-collision,387967,Litwick [Find a Friend],,,Find a Friend,,no
+UNM,115,Riolu,"0,25€",reprint-collision,388382,Riolu [Kick],,,Kick,,no
+PLF,76,Deino,"0,19€",reprint-collision,280954,Deino [Slam],,,Slam,,no
 UNM,129,Murkrow,"0,17€",reprint-collision,388432,Murkrow [Astonish],,,Peck,,no
 SFA,20,Dusknoir,"0,15€",reprint-collision,780914,Dusknoir [Cursed Blast | Shadow Bind],,,Cursed Blast Shadow Bind,,no
-RCL,20,Applin,"0,09€",reprint-collision,457563,Applin [Withdraw],,,Continuous Tumble,,no
-SVI,115,Sandile,"0,09€",reprint-collision,702411,Sandile [Gnaw | Ram],,,Gnaw Ram,,no
-UNM,93,Honedge,"0,09€",reprint-collision,388262,Honedge [Lucky Find | Pierce],,,Slashing Cutter,,no
-PAL,108,Paldean Tauros,"0,08€",reprint-collision,715583,Paldean Tauros [Raging Horns | Combat Tackle],,,Raging Horns Combat Tackle,,no
-SHF,35,Morpeko,"0,08€",reprint-collision,539198,Morpeko [Famished | Thunder Shock],,,Famished Thunder Shock,,no
-SHF,36,Morpeko,"0,08€",reprint-collision,539203,Morpeko [Famished | Thunder Shock],,,Famished Thunder Shock,,no
-SVI,98,Fidough,"0,08€",reprint-collision,702394,Fidough [Springy | Flop],,,Springy Flop,,no
+UNM,93,Honedge,"0,11€",reprint-collision,388262,Honedge [Lucky Find | Pierce],,,Slashing Cutter,,no
+SHF,36,Morpeko,"0,08€",reprint-collision,539198,Morpeko [Famished | Thunder Shock],,,Famished Thunder Shock,,no
+SVI,115,Sandile,"0,08€",reprint-collision,702411,Sandile [Gnaw | Ram],,,Gnaw Ram,,no
+PAL,108,Paldean Tauros,"0,07€",reprint-collision,715583,Paldean Tauros [Raging Horns | Combat Tackle],,,Raging Horns Combat Tackle,,no
+SHF,35,Morpeko,"0,07€",reprint-collision,539203,Morpeko [Famished | Thunder Shock],,,Famished Thunder Shock,,no
 SIT,40,Milotic,"0,07€",reprint-collision,682082,Milotic [Water Arrow | Mellow Wave],,,Water Arrow Mellow Wave,,no
+SVI,113,Riolu,"0,07€",reprint-collision,702408,Riolu [Jab | Low Kick],,,Punch Reckless Charge,,no
+SVI,98,Fidough,"0,07€",reprint-collision,702394,Fidough [Springy | Flop],,,Springy Flop,,no
 TEF,138,Drampa,"0,07€",reprint-collision,760768,Drampa [Gentle Slap | Raging Cannon],,,Gentle Slap Raging Cannon,,no
-PAL,104,Tinkatuff,"0,06€",reprint-collision,715579,Tinkatuff [Play Rough | Pulverizing Press],,,Play Rough Pulverizing Press,,no
-PAL,13,Sprigatito,"0,06€",reprint-collision,715484,Sprigatito [Gather Sunlight | Seed Bomb],,,Dig Claws,,no
-SVI,113,Riolu,"0,06€",reprint-collision,702409,Riolu [Punch | Reckless Charge],,,Punch Reckless Charge,,no
 WHT,15,Simisear,"0,06€",reprint-collision,835930,Simisear [Gentle Slap],,,Gentle Slap,,no
+PAL,13,Sprigatito,"0,05€",reprint-collision,715484,Sprigatito [Gather Sunlight | Seed Bomb],,,Dig Claws,,no
 SCR,107,Archaludon,"0,05€",reprint-collision,785961,Archaludon [Metal Bridge | Iron Blaster],,,Metal Bridge Iron Blaster,,no
-SHF,12,Thwackey,"0,05€",reprint-collision,539083,Thwackey [Lay of the Land | Branch Poke],,,Lay of the Land Branch Poke,,no
 SVI,55,Wiglett,"0,05€",reprint-collision,702350,Wiglett [Twisting Strike],,,Twisting Strike,,no
+TEF,17,Sawsbuck,"0,05€",reprint-collision,760647,Sawsbuck [Changing Seasons | Superpowered Horns],,,Changing Seasons Superpowered Horns,,no
 TWM,85,Chimecho,"0,05€",reprint-collision,769259,Chimecho [Hyper Voice | Homeward Chime],,,Hyper Voice Homeward Chime,,no
 WHT,11,Tepig,"0,05€",reprint-collision,835923,Tepig [Tackle | Rollout | SV],,,Tackle Rollout,,no
-WHT,58,Scrafty,"0,05€",reprint-collision,836008,Scrafty [Ruffians Attack],,,Ruffians Attack,,no
 WHT,61,Zorua,"0,05€",reprint-collision,836014,Zorua [Take Down],,,Take Down,,no
-PAL,101,Tinkatink,"0,04€",reprint-collision,715576,Tinkatink [Scrap Pickup | Fairy Wind],,,Scrap Pickup Fairy Wind,,no
+PAL,12,Sprigatito,"0,04€",reprint-collision,715485,Sprigatito [Dig Claws],,,Gather Sunlight Seed Bomb,,no
 PAR,88,Gimmighoul,"0,04€",reprint-collision,740580,Gimmighoul [Continuous Coin Toss],,,Continuous Coin Toss,,no
+SHF,12,Thwackey,"0,04€",reprint-collision,539083,Thwackey [Lay of the Land | Branch Poke],,,Lay of the Land Branch Poke,,no
 SHF,29,Snom,"0,04€",reprint-collision,539168,Snom [Call for Family],,,Call for Family,,no
 SIT,26,Braixen,"0,04€",reprint-collision,682067,Braixen [Combustion | Flare Parade],,,Combustion Flare Parade,,no
 SSP,102,Phanpy,"0,04€",reprint-collision,794421,Phanpy [Headbutt],,,Headbutt,,no
 SSP,9,Shiinotic,"0,04€",reprint-collision,794264,Shiinotic [Calming Light | Spiral Rush],,,Calming Light Spiral Rush,,no
-SVI,58,Cetoddle,"0,04€",reprint-collision,702353,Cetoddle [Tackle],,,Tackle,,no
+SVI,20,Smoliv,"0,04€",reprint-collision,702317,Smoliv [Nutrients | Spray Fluid],,,Tackle,,no
+SVI,58,Cetoddle,"0,04€",reprint-collision,702354,Cetoddle [Icicle | Sharp Fin],,,Tackle,,no
 TEF,136,Minccino,"0,04€",reprint-collision,760766,Minccino [Beat | Cleaning Up],,,Beat Cleaning Up,,no
-TWM,20,Poltchageist,"0,04€",reprint-collision,769194,Poltchageist [Storehouse Hideaway | Hook],,,Storehouse Hideaway Hook,,no
-OBF,154,Varoom,"0,03€",reprint-collision,725234,Varoom [Spinning Draw],,,Spinning Draw,,no
-PAL,12,Sprigatito,"0,03€",reprint-collision,715485,Sprigatito [Dig Claws],,,Gather Sunlight Seed Bomb,,no
-POR,61,Raticate,"0,03€",reprint-collision,877477,Raticate [Scrape Off | Retaliatory Incisors],,,Scrape Off Retaliatory Incisors,,no
-POR,8,Spewpa,"0,03€",reprint-collision,877420,Spewpa [Hide],,,Hide,,no
+TWM,20,Poltchageist,"0,04€",reprint-collision,769195,Poltchageist [Tea Server | Surprise Attack],,,Storehouse Hideaway Hook,,no
+TWM,3,Pinsir,"0,04€",reprint-collision,769177,Pinsir [Slow Crunch | Superpowered Horns],,,Slow Crunch Superpowered Horns,,no
+WHT,58,Scrafty,"0,04€",reprint-collision,836008,Scrafty [Ruffians Attack],,,Ruffians Attack,,no
+PAL,101,Tinkatink,"0,03€",reprint-collision,715576,Tinkatink [Scrap Pickup | Fairy Wind],,,Scrap Pickup Fairy Wind,,no
 SSP,1,Exeggcute,"0,03€",reprint-collision,794256,Exeggcute [Precocious Evolution],,,Precocious Evolution,,no
 SVI,104,Greavard,"0,03€",reprint-collision,702400,Greavard [Graveyard Gamboling],,,Graveyard Gamboling,,no
-SVI,20,Smoliv,"0,03€",reprint-collision,702317,Smoliv [Nutrients | Spray Fluid],,,Tackle,,no
-TEF,17,Sawsbuck,"0,03€",reprint-collision,760647,Sawsbuck [Changing Seasons | Superpowered Horns],,,Changing Seasons Superpowered Horns,,no
 TEF,32,Litten,"0,03€",reprint-collision,760662,Litten [Fake Out],,,Fake Out,,no
 TEF,86,Excadrill,"0,03€",reprint-collision,760716,Excadrill [Mud Shot | Wild Tackle],,,Mud Shot Wild Tackle,,no
-TWM,3,Pinsir,"0,03€",reprint-collision,769177,Pinsir [Slow Crunch | Superpowered Horns],,,Slow Crunch Superpowered Horns,,no
 TWM,7,Sunflora,"0,03€",reprint-collision,769181,Sunflora [Redirected Sunlight | Mega Drain],,,Redirected Sunlight Mega Drain,,no
 WHT,68,Ferroseed,"0,03€",reprint-collision,836028,Ferroseed [Zzzt | Metal Claw],,,Zzzt Metal Claw,,no
 SP,159,Mewtwo V-UNION,"0,02€",reprint-collision,572160,Mewtwo V-UNION [Super Regeneration],,,Union Gain,,no

@@ -1,21 +1,29 @@
 {
  "_meta": {
   "title": "Victory Road — Replika-Sammlung",
-  "erzeugt_am": "2026-10-20",
+  "erzeugt_am": "2026-10-23",
   "quelle": "https://victoryroad.pro/champions-replica/",
-  "eintraege_mit_code": 90,
-  "team_count": 84,
-  "davon_auf_der_seite": 4,
+  "eintraege_mit_code": 100,
+  "team_count": 86,
+  "davon_auf_der_seite": 6,
   "behalten_vom_bestand": 80,
   "entfallen_nach_frist": 0,
   "behalten_tage": 28,
-  "ohne_paste": 86,
+  "ohne_paste": 94,
   "ohne_paste_codes": [
    "TB0C85121Q",
    "9NNN3N8A4G",
    "VE6L0UD1B2",
    "TB0C85121Q",
    "1PAN6UVF5B",
+   "5EQS0H68M0",
+   "5C9LNUSWUY",
+   "LFQF080C4K",
+   "JRHT5NU7YT",
+   "MD0U61Q01A",
+   "SRVVV1PQ1Q",
+   "VNG2L82NGQ",
+   "4A2NJKBK3X",
    "9979JV2YPM",
    "VQCP2UJ670",
    "K81FNUHF62",
@@ -91,14 +99,14 @@
    "3VTL67241W",
    "VQQY2CHPB6",
    "D2NNESJY2W",
-   "952A1FPCQL",
+   "KJ33FBGWKF",
    "88SS6FLWBS",
    "1VG00P17DE",
    "WDSKVB25L5",
    "08DGXVMXNN",
    "FH4H7J3X0Y"
   ],
-  "ohne_paste_stand": "2026-10-20",
+  "ohne_paste_stand": "2026-10-23",
   "hat_ev": false,
   "hinweis": "Die verlinkten Listen sind Open Team Lists und fuehren keine EVs und IVs."
  },
@@ -332,7 +340,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-10-20"
+   "zuletzt_gesehen": "2026-10-23"
   },
   {
    "rank": 2,
@@ -564,10 +572,473 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-10-20"
+   "zuletzt_gesehen": "2026-10-23"
   },
   {
    "rank": 3,
+   "trainer": "Simone Sanvito ( ☆Sanvy )",
+   "ergebnis": "Nice Regional Championships Top 4 (October 18th)",
+   "team_name": "Simone Sanvito's Top 4 Nice Regional Championships",
+   "format": "",
+   "replica_code": "8UPWUEA1AR",
+   "ots_url": "https://www.vrpastes.com/H0NBcV0M",
+   "paste_id": "H0NBcV0M",
+   "team_vorschau": [
+    "Staraptor Mega",
+    "Tyranitar Mega",
+    "Excadrill",
+    "Gholdengo",
+    "Milotic",
+    "Sinistcha"
+   ],
+   "pokemon": [
+    {
+     "name": "Tyranitar",
+     "name_de": "Despotar",
+     "item": "Tyranitarite",
+     "item_de": "Despotarnit",
+     "ability": "Sand Stream",
+     "ability_de": "Sandsturm",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Rock Slide",
+      "Knock Off",
+      "Dragon Dance",
+      "Protect"
+     ],
+     "moves_de": [
+      "Steinhagel",
+      "Abschlag",
+      "Drachentanz",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Rock",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 134,
+      "def": 110,
+      "spa": 95,
+      "spd": 100,
+      "spe": 61
+     },
+     "evs": ""
+    },
+    {
+     "name": "Excadrill",
+     "name_de": "Stalobor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Sand Rush",
+     "ability_de": "Sandscharrer",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "High Horsepower",
+      "Iron Head",
+      "Rock Slide",
+      "Protect"
+     ],
+     "moves_de": [
+      "Pferdestärke",
+      "Eisenschädel",
+      "Steinhagel",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Ground",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 110,
+      "atk": 135,
+      "def": 60,
+      "spa": 50,
+      "spd": 65,
+      "spe": 88
+     },
+     "evs": ""
+    },
+    {
+     "name": "Gholdengo",
+     "name_de": "Monetigo",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Good as Gold",
+     "ability_de": "Goldkörper",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Shadow Ball",
+      "Make It Rain",
+      "Nasty Plot",
+      "Protect"
+     ],
+     "moves_de": [
+      "Spukball",
+      "Goldrausch",
+      "Ränkeschmied",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Steel",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 87,
+      "atk": 60,
+      "def": 95,
+      "spa": 133,
+      "spd": 91,
+      "spe": 84
+     },
+     "evs": ""
+    },
+    {
+     "name": "Milotic",
+     "name_de": "Milotic",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Competitive",
+     "ability_de": "Unbeugsamkeit",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Scald",
+      "Ice Beam",
+      "Icy Wind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Siedewasser",
+      "Eisstrahl",
+      "Eissturm",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 60,
+      "def": 79,
+      "spa": 100,
+      "spd": 125,
+      "spe": 81
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sinistcha",
+     "name_de": "Fatalitcha",
+     "item": "Rocky Helmet",
+     "item_de": "Beulenhelm",
+     "ability": "Hospitality",
+     "ability_de": "Gastlichkeit",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Matcha Gotcha",
+      "Strength Sap",
+      "Rage Powder",
+      "Protect"
+     ],
+     "moves_de": [
+      "Quirlschuss",
+      "Kraftabsorber",
+      "Wutpulver",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 71,
+      "atk": 60,
+      "def": 106,
+      "spa": 121,
+      "spd": 80,
+      "spe": 70
+     },
+     "evs": ""
+    },
+    {
+     "name": "Staraptor",
+     "name_de": "Staraptor",
+     "item": "Staraptite",
+     "item_de": "Staraptornit",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Close Combat",
+      "Brave Bird",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Nahkampf",
+      "Sturzflug",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Normal",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 120,
+      "def": 70,
+      "spa": 50,
+      "spd": 60,
+      "spe": 100
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-23"
+  },
+  {
+   "rank": 4,
+   "trainer": "Luis Sánchez ( Luixen )",
+   "ergebnis": "Nice Regional Championships Top 64 (October 18th)",
+   "team_name": "KIRITO BALANCE",
+   "format": "",
+   "replica_code": "WRYRHCSLS2",
+   "ots_url": "https://www.vrpastes.com/htksaPPH",
+   "paste_id": "htksaPPH",
+   "team_vorschau": [
+    "Raichu Mega Y",
+    "Staraptor Mega",
+    "Primarina",
+    "Ceruledge",
+    "Garchomp",
+    "Rillaboom"
+   ],
+   "pokemon": [
+    {
+     "name": "Raichu",
+     "name_de": "Raichu",
+     "item": "Raichunite Y",
+     "item_de": "Raichunit Y",
+     "ability": "Lightning Rod",
+     "ability_de": "Blitzfänger",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Zap Cannon",
+      "Focus Blast",
+      "Fake Out",
+      "Protect"
+     ],
+     "moves_de": [
+      "Blitzkanone",
+      "Fokusstoß",
+      "Mogelhieb",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Electric"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 90,
+      "def": 55,
+      "spa": 90,
+      "spd": 80,
+      "spe": 110
+     },
+     "evs": ""
+    },
+    {
+     "name": "Rillaboom",
+     "name_de": "Gortrom",
+     "item": "Miracle Seed",
+     "item_de": "Wundersaat",
+     "ability": "Grassy Surge",
+     "ability_de": "Gras-Erzeuger",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Fake Out",
+      "Wood Hammer",
+      "Grassy Glide",
+      "High Horsepower"
+     ],
+     "moves_de": [
+      "Mogelhieb",
+      "Holzhammer",
+      "Grasrutsche",
+      "Pferdestärke"
+     ],
+     "typen": [
+      "Grass"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 125,
+      "def": 90,
+      "spa": 60,
+      "spd": 70,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Primarina",
+     "name_de": "Primarene",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Liquid Voice",
+     "ability_de": "Plätscherstimme",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Hyper Voice",
+      "Moonblast",
+      "Calm Mind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schallwelle",
+      "Mondgewalt",
+      "Gedankengut",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 74,
+      "def": 74,
+      "spa": 126,
+      "spd": 116,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Ceruledge",
+     "name_de": "Azugladis",
+     "item": "Grassy Seed",
+     "item_de": "Gras-Samen",
+     "ability": "Flash Fire",
+     "ability_de": "Feuerfänger",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Shadow Sneak",
+      "Bitter Blade",
+      "Swords Dance",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schattenstoß",
+      "Reueschwert",
+      "Schwerttanz",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 75,
+      "atk": 125,
+      "def": 80,
+      "spa": 60,
+      "spd": 100,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Earthquake",
+      "Stomping Tantrum",
+      "Dragon Claw",
+      "Rock Slide"
+     ],
+     "moves_de": [
+      "Erdbeben",
+      "Fruststampfer",
+      "Drachenklaue",
+      "Steinhagel"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Staraptor",
+     "name_de": "Staraptor",
+     "item": "Staraptite",
+     "item_de": "Staraptornit",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Close Combat",
+      "Brave Bird",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Nahkampf",
+      "Sturzflug",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Normal",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 120,
+      "def": 70,
+      "spa": 50,
+      "spd": 60,
+      "spe": 100
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-replika",
+   "zuletzt_gesehen": "2026-10-23"
+  },
+  {
+   "rank": 5,
    "trainer": "Justin Tang ( panda )",
    "ergebnis": "An early meta team (September 12th)",
    "team_name": "LET'S GO PERISH",
@@ -795,10 +1266,10 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-10-20"
+   "zuletzt_gesehen": "2026-10-23"
   },
   {
-   "rank": 4,
+   "rank": 6,
    "trainer": "Justin Cerioni ( byte 24 )",
    "ergebnis": "An early meta team (September 12th)",
    "team_name": "Untitled Team",
@@ -1027,10 +1498,10 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-10-20"
+   "zuletzt_gesehen": "2026-10-23"
   },
   {
-   "rank": 5,
+   "rank": 7,
    "trainer": "Takuma Yamazaki ( ワトソン )",
    "ergebnis": "Worlds 2026 1st (August 28th)",
    "team_name": "Untitled Team",
@@ -1263,7 +1734,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 6,
+   "rank": 8,
    "trainer": "Vikram T.",
    "ergebnis": "Worlds 2026 1st (SR) (August 28th)",
    "team_name": "Untitled Team",
@@ -1497,7 +1968,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 7,
+   "rank": 9,
    "trainer": "Hiroshi Onishi ( coな )",
    "ergebnis": "Worlds 2026 2nd (August 28th)",
    "team_name": "Untitled Team",
@@ -1730,7 +2201,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 8,
+   "rank": 10,
    "trainer": "Pedro Feitosa ( ºvº )",
    "ergebnis": "VR July Challenge Champion (25-26 July)",
    "team_name": "Untitled Team",
@@ -1964,7 +2435,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 9,
+   "rank": 11,
    "trainer": "Matteo Boschmans (Matteo)",
    "ergebnis": "r/VGC Kickoff 1st (18 June 2026)",
    "team_name": "Untitled Team",
@@ -2196,7 +2667,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 10,
+   "rank": 12,
    "trainer": "Hirseknabe (Obler)",
    "ergebnis": "r/VGC Kickoff 2nd (18 June 2026)",
    "team_name": "Untitled Team",
@@ -2428,7 +2899,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 11,
+   "rank": 13,
    "trainer": "Iruto Konno ( VRアンセナ )",
    "ergebnis": "TeraSquareOff 1st",
    "team_name": "Untitled Team",
@@ -2661,7 +3132,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 12,
+   "rank": 14,
    "trainer": "João Felipe Leite (Thacrow)",
    "ergebnis": "Worlds 2026 Top 4 (August 28th)",
    "team_name": "Untitled Team",
@@ -2894,7 +3365,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 13,
+   "rank": 15,
    "trainer": "Esa I.",
    "ergebnis": "Worlds 2026 Top 4 (SR) (August 28th)",
    "team_name": "Untitled Team",
@@ -3127,7 +3598,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 14,
+   "rank": 16,
    "trainer": "Yuya Wakasugi ( ゆー )",
    "ergebnis": "Worlds 2026 Top 8 (August 28th)",
    "team_name": "Untitled Team",
@@ -3360,7 +3831,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 15,
+   "rank": 17,
    "trainer": "Stefano Greppi ( Ste )",
    "ergebnis": "Worlds 2026 Top 8 (August 28th)",
    "team_name": "Untitled Team",
@@ -3593,7 +4064,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 16,
+   "rank": 18,
    "trainer": "Giovanni Piscitelli ( Genius )",
    "ergebnis": "Worlds 2026 Top 8 (August 28th)",
    "team_name": "Untitled Team",
@@ -3826,7 +4297,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 17,
+   "rank": 19,
    "trainer": "Shohei Kimura ( ナンス )",
    "ergebnis": "Worlds 2026 Top 16 (August 28th)",
    "team_name": "Untitled Team",
@@ -4059,7 +4530,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 18,
+   "rank": 20,
    "trainer": "Carson St. Denis (Boo)",
    "ergebnis": "Worlds 2026 Top 16 (August 28th)",
    "team_name": "Untitled Team",
@@ -4293,7 +4764,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 19,
+   "rank": 21,
    "trainer": "Cary D’Ortona ( Cary )",
    "ergebnis": "Worlds 2026 Top 16 (August 28th)",
    "team_name": "Untitled Team",
@@ -4525,7 +4996,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 20,
+   "rank": 22,
    "trainer": "Emilio Forbes ( エミリオ )",
    "ergebnis": "Worlds 2026 Top 16 (August 28th)",
    "team_name": "Untitled Team",
@@ -4756,7 +5227,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 21,
+   "rank": 23,
    "trainer": "Navjit Joshi ( NJ11 )",
    "ergebnis": "Worlds 2026 Top 16 (August 28th)",
    "team_name": "Untitled Team",
@@ -4988,7 +5459,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 22,
+   "rank": 24,
    "trainer": "Justin Tang ( Panda )",
    "ergebnis": "Worlds 2026 Top 16 (August 28th)",
    "team_name": "Untitled Team",
@@ -5221,7 +5692,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 23,
+   "rank": 25,
    "trainer": "Narawitch Naenna ( MyStars 🙂 )",
    "ergebnis": "Worlds 2026 Top 32 (August 28th)",
    "team_name": "Untitled Team",
@@ -5455,7 +5926,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 24,
+   "rank": 26,
    "trainer": "Nikolaj Høj Nielsen ( Nikolaj_H )",
    "ergebnis": "Worlds 2026 Top 32 (August 28th)",
    "team_name": "Untitled Team",
@@ -5687,7 +6158,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 25,
+   "rank": 27,
    "trainer": "Jonathan Marston ( Jono )",
    "ergebnis": "Worlds 2026 Top 32 (August 28th)",
    "team_name": "Untitled Team",
@@ -5920,7 +6391,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 26,
+   "rank": 28,
    "trainer": "Behzad Muntazir ( Saten )",
    "ergebnis": "Worlds 2026 Top 64 (August 28th)",
    "team_name": "Untitled Team",
@@ -6153,7 +6624,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 27,
+   "rank": 29,
    "trainer": "Brandon Davis ( Brandon )",
    "ergebnis": "Worlds 2026 Top 64 (August 28th)",
    "team_name": "Untitled Team",
@@ -6385,7 +6856,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 28,
+   "rank": 30,
    "trainer": "Elijah Peeples ( Thazkid )",
    "ergebnis": "VR July Challenge Top 8 (25-26 July)",
    "team_name": "Untitled Team",
@@ -6618,7 +7089,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 29,
+   "rank": 31,
    "trainer": "Joaquin Roquett ( JoRoVGC )",
    "ergebnis": "VR July Challenge Top 16 (25-26 July)",
    "team_name": "Untitled Team",
@@ -6851,7 +7322,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 30,
+   "rank": 32,
    "trainer": "Tota Nambu ( X )",
    "ergebnis": "VR July Challenge Top 16 (25-26 July)",
    "team_name": "Untitled Team",
@@ -7085,7 +7556,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 31,
+   "rank": 33,
    "trainer": "Adrià Martínez ( Adrinho )",
    "ergebnis": "VR July Challenge Top 16 (25-26 July)",
    "team_name": "Untitled Team",
@@ -7318,7 +7789,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 32,
+   "rank": 34,
    "trainer": "Davide Cognetta ( Davide )",
    "ergebnis": "Global VGC Welcome Tour Top 4 (25 July)",
    "team_name": "Untitled Team",
@@ -7552,7 +8023,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 33,
+   "rank": 35,
    "trainer": "Rishi Gupta ( MrRishi )",
    "ergebnis": "Venezuela Grand Charity Top 4 (18-19 July)",
    "team_name": "Untitled Team",
@@ -7785,7 +8256,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 34,
+   "rank": 36,
    "trainer": "Izzy ( Izzy )",
    "ergebnis": "The Grand Champions Festival: Encore Top 128 (11-12 July)",
    "team_name": "Untitled Team",
@@ -8019,7 +8490,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 35,
+   "rank": 37,
    "trainer": "Kshaunish Shaik ( Twilite0 )",
    "ergebnis": "The Grand Champions Festival: Encore Top 128 (11-12 July)",
    "team_name": "Untitled Team",
@@ -8252,7 +8723,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 36,
+   "rank": 38,
    "trainer": "Adam Wright ( PokeReplays )",
    "ergebnis": "The Grand Champions Festival: Encore Top 128 (11-12 July)",
    "team_name": "Untitled Team",
@@ -8485,7 +8956,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 37,
+   "rank": 39,
    "trainer": "Jeongso Lee (미월)",
    "ergebnis": "VR June Challenge #2 Top 4 (20-21 June)",
    "team_name": "Untitled Team",
@@ -8719,7 +9190,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 38,
+   "rank": 40,
    "trainer": "Hiroto Hayasaki ( アルベガ )",
    "ergebnis": "VR June Challenge #2 Top 8 (20-21 June)",
    "team_name": "Untitled Team",
@@ -8952,7 +9423,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 39,
+   "rank": 41,
    "trainer": "Matteo Centrone ( Kyogrus24 )",
    "ergebnis": "Smogon VGC Major Live 2026 Top 8 (20-21 June)",
    "team_name": "Untitled Team",
@@ -9185,7 +9656,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 40,
+   "rank": 42,
    "trainer": "Atsushi Namba ( ばるなん )",
    "ergebnis": "Origins Top 4",
    "team_name": "Untitled Team",
@@ -9419,7 +9890,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 41,
+   "rank": 43,
    "trainer": "Wataru Arai ( ヤウコ )",
    "ergebnis": "Origins Top 16",
    "team_name": "Untitled Team",
@@ -9652,7 +10123,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 42,
+   "rank": 44,
    "trainer": "Fuyubare ( ふゆばれ )",
    "ergebnis": "Season M-4 3rd Place (5 August)",
    "team_name": "Untitled Team",
@@ -9885,7 +10356,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 43,
+   "rank": 45,
    "trainer": "Mariruri ( まりるり )",
    "ergebnis": "Season M-4 7th Place (5 August)",
    "team_name": "Untitled Team",
@@ -10118,7 +10589,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 44,
+   "rank": 46,
    "trainer": "Kaito Arii ( ヤニカス )",
    "ergebnis": "Season M-4 13th Place (5 August)",
    "team_name": "Untitled Team",
@@ -10351,7 +10822,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 45,
+   "rank": 47,
    "trainer": "Ryotaro Kimura ( エル )",
    "ergebnis": "Season M-4 31th Place (5 August)",
    "team_name": "Untitled Team",
@@ -10582,7 +11053,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 46,
+   "rank": 48,
    "trainer": "Eunjo ( 은조순 )",
    "ergebnis": "Season M-4 35th Place (5 August)",
    "team_name": "Untitled Team",
@@ -10815,7 +11286,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 47,
+   "rank": 49,
    "trainer": "Chiu Chih-Hung ( Syuan )",
    "ergebnis": "Season M-4 41th Place (5 August)",
    "team_name": "M-4 HTR",
@@ -11047,7 +11518,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 48,
+   "rank": 50,
    "trainer": "Suraimu ( ぐっうみせみ )",
    "ergebnis": "Season M-4 64th Place (5 August)",
    "team_name": "Untitled Team",
@@ -11280,7 +11751,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 49,
+   "rank": 51,
    "trainer": "阿塔Atalanta ( 阿塔喵♡ )",
    "ergebnis": "Season M-4 68th Place (5 August)",
    "team_name": "Untitled Team",
@@ -11512,7 +11983,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 50,
+   "rank": 52,
    "trainer": "Koji Morimoto ( ちゃぐま )",
    "ergebnis": "Season M-4 73rd Place (5 August)",
    "team_name": "Untitled Team",
@@ -11745,7 +12216,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 51,
+   "rank": 53,
    "trainer": "Charge ( ちゃあじ )",
    "ergebnis": "Season M-4 90th Place (5 August)",
    "team_name": "Untitled Team",
@@ -11978,7 +12449,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 52,
+   "rank": 54,
    "trainer": "Ei ( ライトニング )",
    "ergebnis": "Season M-4 129th Place (5 August)",
    "team_name": "Untitled Team",
@@ -12212,7 +12683,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 53,
+   "rank": 55,
    "trainer": "Michael Uko ( DDee )",
    "ergebnis": "Season M-4 136th Place (5 August)",
    "team_name": "Untitled Team",
@@ -12445,7 +12916,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 54,
+   "rank": 56,
    "trainer": "Kaede ( kaede(kaede) )",
    "ergebnis": "Season M-4 152nd Place (5 August)",
    "team_name": "Untitled Team",
@@ -12678,7 +13149,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 55,
+   "rank": 57,
    "trainer": "Ricardo ( Rixoh )",
    "ergebnis": "Season M-4 180th Place (5 August)",
    "team_name": "Untitled Team",
@@ -12911,7 +13382,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 56,
+   "rank": 58,
    "trainer": "Thomas Caouette ( TimmyTrails )",
    "ergebnis": "Season M-4 291th Place (5 August)",
    "team_name": "Untitled Team",
@@ -13143,7 +13614,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 57,
+   "rank": 59,
    "trainer": "Michael Kelsch ( Michi )",
    "ergebnis": "Shared team (5 August)",
    "team_name": "Untitled Team",
@@ -13376,7 +13847,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 58,
+   "rank": 60,
    "trainer": "JustLatroy ( JustLatroy )",
    "ergebnis": "Shared team (5 August)",
    "team_name": "Untitled Team",
@@ -13602,7 +14073,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 59,
+   "rank": 61,
    "trainer": "Kakku ( かっくー )",
    "ergebnis": "Shared team (5 August)",
    "team_name": "Untitled Team",
@@ -13835,7 +14306,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 60,
+   "rank": 62,
    "trainer": "CJ Schoenthaler ( Ceej )",
    "ergebnis": "Shared team (28 July)",
    "team_name": "Untitled Team",
@@ -14068,7 +14539,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 61,
+   "rank": 63,
    "trainer": "Emanuele Briganti ( Lele )",
    "ergebnis": "Shared team (28 July)",
    "team_name": "Untitled Team",
@@ -14301,7 +14772,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 62,
+   "rank": 64,
    "trainer": "Koen Van Cann ( Koen )",
    "ergebnis": "Shared team (28 July)",
    "team_name": "Untitled Team",
@@ -14535,7 +15006,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 63,
+   "rank": 65,
    "trainer": "Kaede ( kaede(kaede) )",
    "ergebnis": "Shared team (28 July)",
    "team_name": "Untitled Team",
@@ -14768,7 +15239,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 64,
+   "rank": 66,
    "trainer": "Shohei Kimura ( ナンス )",
    "ergebnis": "Season M-3 1st place (22 July)",
    "team_name": "Untitled Team",
@@ -15001,7 +15472,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 65,
+   "rank": 67,
    "trainer": "Rinya Kobayashi ( R )",
    "ergebnis": "Season M-3 2nd place (22 July)",
    "team_name": "Untitled Team",
@@ -15235,7 +15706,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 66,
+   "rank": 68,
    "trainer": "Online ( おんらいね )",
    "ergebnis": "Season M-3 6th place (22 July)",
    "team_name": "Untitled Team",
@@ -15469,7 +15940,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 67,
+   "rank": 69,
    "trainer": "Yosuke Takayanagi ( やなぎ )",
    "ergebnis": "Season M-3 9th place (22 July)",
    "team_name": "Untitled Team",
@@ -15703,7 +16174,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 68,
+   "rank": 70,
    "trainer": "Liao Xinyu ( 諸伏高明 )",
    "ergebnis": "Season M-3 10th place (22 July)",
    "team_name": "Untitled Team",
@@ -15937,7 +16408,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 69,
+   "rank": 71,
    "trainer": "Michael Kelsch ( Michi )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -16171,7 +16642,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 70,
+   "rank": 72,
    "trainer": "Hiroshi Onishi ( coな )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -16403,7 +16874,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 71,
+   "rank": 73,
    "trainer": "Shoma Honami ( ビエラ )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -16636,7 +17107,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 72,
+   "rank": 74,
    "trainer": "Yasuharu Shimizu ( そらみつ )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -16870,7 +17341,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 73,
+   "rank": 75,
    "trainer": "Shohei Kimura ( SHOHEI )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -17103,7 +17574,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 74,
+   "rank": 76,
    "trainer": "Ryota Otsubo ( カヌ )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -17336,7 +17807,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 75,
+   "rank": 77,
    "trainer": "Yuta Ishigaki ( アルビレオ )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -17570,7 +18041,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 76,
+   "rank": 78,
    "trainer": "Wolfe Glick ( Wolfey )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -17802,7 +18273,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 77,
+   "rank": 79,
    "trainer": "Shoma Honami ( ビエラ )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -18034,7 +18505,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 78,
+   "rank": 80,
    "trainer": "À Gómez & M Martí ( Verbatim )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -18267,7 +18738,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 79,
+   "rank": 81,
    "trainer": "Kaito Arii ( ナーク )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -18501,7 +18972,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 80,
+   "rank": 82,
    "trainer": "Eric Rios ( Eric )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -18734,7 +19205,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 81,
+   "rank": 83,
    "trainer": "James Baek ( James )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -18966,7 +19437,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 82,
+   "rank": 84,
    "trainer": "Hyuma Hara ( あーにゃ )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -19198,7 +19669,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 83,
+   "rank": 85,
    "trainer": "Tota Nambu ( X )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",
@@ -19432,7 +19903,7 @@
    "nicht_mehr_auf_quelle": true
   },
   {
-   "rank": 84,
+   "rank": 86,
    "trainer": "Shohei Kimura ( ナンス )",
    "ergebnis": "Shared team (22 July)",
    "team_name": "Untitled Team",

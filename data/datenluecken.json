@@ -1,10 +1,11 @@
 {
  "_meta": {
-  "erzeugt": "2026-10-22T05:10:16Z",
+  "erzeugt": "2026-10-23T04:05:15Z",
   "erzeuger": "scripts/datenluecken.py",
-  "anzahl": 8,
+  "anzahl": 9,
   "jeKlasse": {
-   "kartentyp": 8
+   "kartentyp": 8,
+   "nutzungsdaten": 1
   },
   "klassen": {
    "mega-faehigkeit": {
@@ -112,6 +113,15 @@
    "titelEn": "Grass Energy (MEE 9) — no card type in the database (2036x)",
    "wo": "data/tournament_decklists_per_player.csv → Spalte type",
    "ansicht": "deck-builder",
+   "vorschlag": null
+  },
+  {
+   "id": "nutzungsdaten/trevenant",
+   "klasse": "nutzungsdaten",
+   "titel": "Trombork — kein Nutzungsdatensatz",
+   "titelEn": "Trevenant — no usage record",
+   "wo": "data/champions_usage.json → pokemon[Trevenant]",
+   "ansicht": "side-quest",
    "vorschlag": null
   }
  ]

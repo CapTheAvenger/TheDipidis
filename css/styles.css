@@ -7748,6 +7748,45 @@ details[open] > .tier-trending-summary::after {
 .bj-history-edit-btn:hover { background: rgba(37,99,235,.1); }
 .bj-history-delete-btn:hover { background: rgba(231,76,60,.1); }
 
+/* UI-150 (24.10.2026): Battle Journal, Matchzeile. Die drei Textknoepfe (Bearbeiten, Loeschen, Kopieren)
+   hatten 28 px Breite fuer Woerter von 36-50 px: die Beschriftung lief ueber den Knopfrand und ineinander
+   (live am iPhone und gemessen am Desktop, 26 px Innenbreite gegen 36-42 px Text). Jetzt ist die Breite
+   die des Textes; am Telefon stehen die Knoepfe in einer eigenen Zeile unter dem Match, die Ergebnis-Pille
+   oben rechts. `.bj-history-actions` wird dort zu `display: contents`, damit jeder Knopf sein Gitterfeld bekommt. */
+.bj-history-edit-btn,
+.bj-history-delete-btn,
+.bj-history-copy-btn {
+    width: auto;
+    min-width: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.bj-history-brick-btn { min-height: 28px; }
+@media (max-width: 768px) {
+    .bj-history-item {
+        grid-template-columns: 44px repeat(3, minmax(0, 1fr));
+        gap: 8px 6px;
+        padding: 10px 12px;
+    }
+    .bj-history-item .bj-history-item-main { grid-column: 1 / 4; grid-row: 1; }
+    .bj-history-item .bj-history-actions { display: contents; }
+    .bj-history-item .battle-journal-result-pill { grid-column: 4; grid-row: 1; justify-self: end; align-self: start; }
+    .bj-history-item .bj-history-brick-btn { grid-column: 1; grid-row: 2; }
+    .bj-history-item .bj-history-edit-btn { grid-column: 2; grid-row: 2; }
+    .bj-history-item .bj-history-delete-btn { grid-column: 3; grid-row: 2; }
+    .bj-history-item .bj-history-copy-btn { grid-column: 4; grid-row: 2; }
+    .bj-history-item .bj-history-brick-btn,
+    .bj-history-item .bj-history-edit-btn,
+    .bj-history-item .bj-history-delete-btn,
+    .bj-history-item .bj-history-copy-btn {
+        width: 100%;
+        min-width: 0;
+        padding: 0 4px;
+        justify-content: center;
+    }
+}
+
 .bj-history-brick-btn {
     background: none;
     color: var(--ink);

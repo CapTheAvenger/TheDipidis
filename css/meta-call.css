@@ -2064,6 +2064,7 @@
     .mc-rec-name-text {
         flex: 1 1 100%;
         min-width: 0;
+        overflow-wrap: anywhere; /* UI-151: bei 320 px ragte „Dragapult“ 7 px aus der Spalte */
     }
     .mc-rec-counterpick-tag,
     .mc-rec-mine-tag {

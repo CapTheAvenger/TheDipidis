@@ -116,6 +116,10 @@
         cursor: pointer;
     }
     .ds-tabbar-btn .ds-tabbar-gl { font-size: var(--fs-lg); line-height: 1; }
+    /* UI-151: bei 360 px ragte „CHAMPIONS“ ueber seine Spalte (76 px Text in 72 px) und lag bei 390 px 5 px neben
+       „META CALL“. 10 px und engere Laufweite: das laengste Wort braucht dann ~62 px, jede Beschriftung bleibt in
+       ihrer Spalte. Schriftboden 10 px (test-schriftboden) bleibt gewahrt. */
+    .ds-tabbar-btn { font-size: 10px; letter-spacing: .04em; overflow-wrap: anywhere; }
     .ds-tabbar-btn[aria-current="page"] { color: var(--brand-ink); }
 
     /* Damit die Leiste den letzten Inhalt nicht verdeckt.

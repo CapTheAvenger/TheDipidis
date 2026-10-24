@@ -2808,7 +2808,8 @@
   }
   .city-league-info-table-header {
     font-size: 0.65em !important;
-    padding: 7px 4px !important;
+    padding: 7px 3px !important;
+    letter-spacing: 0 !important;
   }
   /* Pokémon icons — small enough not to dominate the now-shrunken cell. */
   .city-league-info-table-cell-archetype .tcg-pokemon-icon {
@@ -3150,4 +3151,14 @@
     #meta-call .mc-mct-haken { width: 24px; height: 24px; }
     #meta-call .mc-runden-info { min-width: 24px; min-height: 24px; display: inline-flex; align-items: center; justify-content: center; }
     #city-league .archetype-jump-link { display: inline-flex; align-items: center; min-height: 24px; }
+}
+
+/* UI-151 (24.10.2026): Deck-Analyse vergangene Turniere — die zweite Filterzeile (Deck, Karten-Share) war nur
+   163 px breit (Flex-Spalte ohne Breite), die Zeile darueber 334 px. Gleiche Breite wie die anderen Dropdowns. */
+@media (max-width: 768px) {
+  #past-meta .control-row { width: 100%; box-sizing: border-box; }
+}
+/* UI-151: bei 320 px war „Varianten“ im Tabellenkopf 6 px zu breit fuer seine Zelle. */
+@media (max-width: 340px) {
+  #city-league.fs-scale .city-league-info-table-header { white-space: normal !important; overflow-wrap: anywhere !important; padding: 7px 2px !important; }
 }

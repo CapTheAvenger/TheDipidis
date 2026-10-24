@@ -12049,6 +12049,15 @@ td.arc-mu-major.arc-mu-major-bilanz {
    ebenso mit !important) - das Menue wurde an der eigenen Zeile abgeschnitten
    und lag unter den Folgezeilen. Nur solange ein Menue offen ist, wird die
    Zeile ueberlaufend und liegt ueber ihren Nachbarn. */
+/* UI-149 (24.10.2026): Auf dem Telefon schneidet main.tabs-container (mobile-responsive.css:
+   overflow: hidden !important) alles ab, was ueber seine Unterkante ragt. Beim letzten Deck der
+   Liste war damit der Rest des Mehr-Menues weg (live 24.10., iPhone). Solange ein Menue offen ist,
+   darf der Container nicht schneiden; die ID-freie Regel schlaegt die !important-Regel ueber die
+   Spezifitaet des :has()-Arguments. */
+.tabs-container:has(details.deck-mehr[open]) {
+  overflow: visible !important;
+}
+
 .saved-deck-item:has(details.deck-mehr[open]) {
   overflow: visible !important;
   position: relative;

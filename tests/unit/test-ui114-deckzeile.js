@@ -73,7 +73,7 @@ describe('UI-114: Deckzeile Meine Decks', () => {
       const menue = { getBoundingClientRect: () => ({ bottom: unten, height: 430 }) };
       const el = { open: true, classList: { add: (k) => klassen.add(k), remove: (k) => klassen.delete(k) },
         closest: () => null, querySelector: () => menue, getBoundingClientRect: () => ({ top: oben }) };
-      const ctx = { window: { innerHeight: koerper ? 1588 : 988 }, document: { querySelectorAll: () => [],
+      const ctx = { window: { innerHeight: koerper ? 1588 : 988, scrollY: 0, scrollBy: () => {} }, document: { querySelectorAll: () => [], querySelector: () => null, documentElement: { scrollHeight: 988 },
         body: koerper ? { clientHeight: 1268, getBoundingClientRect: () => ({ top: 0 }) } : null },
         getComputedStyle: () => ({ overflowY: 'auto' }), el };
       vm.runInNewContext(q.slice(q.indexOf('function dsDeckMehrToggle('), q.indexOf('window.dsDeckMehrToggle')) + '; dsDeckMehrToggle(el);', ctx);

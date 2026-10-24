@@ -2698,7 +2698,7 @@
 .my-deck-card-btn--wish-on    { background: #E91E63; }
 .my-deck-card-btn--delete     { background: #c0392b; font-size: 11px; }
 
-/* UI-148 (24.10.2026): Unter `pointer: coarse` setzt css/tippziele.css
+/* UI-147 (24.10.2026): Unter `pointer: coarse` setzt css/tippziele.css
    `button:not(...) { min-height: 44px !important }` (0,7,1) — die Klassenregel
    oben (0,1,0) verlor, alle sieben Knoepfe waren 44 px hoch und deckten 72 %
    der Karte zu. Wie bei der Deck-Analyse (UI-142): ID im Selektor + !important,

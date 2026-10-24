@@ -104,7 +104,28 @@ function dsDeckMehrToggle(el) {
     if (sc && sc.clientHeight && typeof getComputedStyle === 'function' && /auto|scroll/.test(getComputedStyle(sc).overflowY)) {
       grenze = Math.min(grenze, sc.getBoundingClientRect().top + sc.clientHeight);
     }
-    if (r.bottom > grenze - 8 && oben > r.height + 8) el.classList.add('deck-mehr--oben');
+    /* UI-149 (24.10.): die feste Tableiste unten verdeckt die letzten Menuepunkte; ihre Oberkante
+       ist die untere Grenze (live 24.10.: „Loeschen" lag unter der Leiste). */
+    const leiste = document.querySelector('.ds-tabbar');
+    if (leiste && getComputedStyle(leiste).position === 'fixed') {
+      const lt = leiste.getBoundingClientRect().top;
+      if (lt > 0) grenze = Math.min(grenze, lt);
+    }
+    if (r.bottom > grenze - 8) {
+      /* Das Menue ragt unten ueber die Grenze. Drei Wege, in dieser Reihenfolge:
+         1) oben ist Platz -> nach oben klappen, 2) die Seite laesst sich weit genug nach unten
+         schieben, 3) nach oben klappen und die Seite nach oben schieben (Ende der Liste). */
+      const koerper = sc && sc.scrollHeight > sc.clientHeight && /auto|scroll/.test(getComputedStyle(sc).overflowY);
+      const stand = koerper ? sc.scrollTop : window.scrollY;
+      const maximal = koerper ? sc.scrollHeight - sc.clientHeight : document.documentElement.scrollHeight - window.innerHeight;
+      const schiebe = (dy) => { if (koerper) sc.scrollBy(0, dy); else window.scrollBy(0, dy); };
+      const runter = Math.ceil(r.bottom - grenze + 12);
+      const hoch = Math.ceil(r.height + 12 - oben);
+      if (oben > r.height + 8) el.classList.add('deck-mehr--oben');
+      else if (maximal - stand >= runter) schiebe(runter);
+      else if (stand >= hoch) { el.classList.add('deck-mehr--oben'); schiebe(-hoch); }
+      else schiebe(Math.max(0, maximal - stand));
+    }
   }
   document.querySelectorAll('details.deck-mehr[open]').forEach(d => { if (d !== el) d.open = false; });
 }

@@ -1,5 +1,5 @@
 /*
- * Kartenkachel in "Meine Decks" am Telefon messen (UI-148, 24.10.2026) — MIT Touch, MIT Kartenbild.
+ * Kartenkachel in "Meine Decks" am Telefon messen (UI-147, 24.10.2026) — MIT Touch, MIT Kartenbild.
  * Warum: auf Hausis iPhone deckten die sieben Knoepfe der Kachel (−, ★, +, Preis, Kiste, Herz, ✕) die ganze
  * Karte zu. Gleiche Familie wie UI-142: css/tippziele.css `button:not(…) { min-height: 44px !important }`
  * unter `pointer: coarse` schlaegt die Klassenregel `.my-deck-card-btn`.

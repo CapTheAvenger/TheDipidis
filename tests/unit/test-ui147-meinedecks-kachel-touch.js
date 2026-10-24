@@ -1,5 +1,5 @@
 /**
- * UI-148 (Hausi, 24.10.2026): Kartenkachel in "Meine Decks" am iPhone — alle sieben Knoepfe waren 44 px hoch
+ * UI-147 (Hausi, 24.10.2026): Kartenkachel in "Meine Decks" am iPhone — alle sieben Knoepfe waren 44 px hoch
  * und deckten 72 % der Karte zu. Ursache: css/tippziele.css `button:not(...) { min-height: 44px !important }`
  * unter `pointer: coarse` (Spezifitaet 0,7,1) schlaegt die Klassenregel `.my-deck-card-btn` (0,1,0).
  * Die Regel mit ID + !important holt die Knoepfe auf die Hoehe der Klasse (18 px, <= 900 px: 15 px) zurueck.
@@ -30,7 +30,7 @@ function spez(sel) {
 }
 const gr = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 
-describe('UI-148 Meine Decks: Kartenknoepfe bleiben klein unter Touch', () => {
+describe('UI-147 Meine Decks: Kartenknoepfe bleiben klein unter Touch', () => {
   it('Regel mit ID, min-height 0 und !important ist da', () => {
     const b = block(MOBIL, '#decks-grid .my-deck-card-btn');
     assert.ok(b, 'Regel fehlt');

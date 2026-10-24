@@ -12273,3 +12273,14 @@ td.arc-mu-major.arc-mu-major-bilanz {
 .saved-deck-item .deck-mehr-menue .deck-mehr-item:focus-visible { background: var(--surface-2); }
 .saved-deck-item .deck-mehr-menue .deck-btn-delete { color: var(--danger, #e5534b); }
 .saved-deck-item .deck-mehr.deck-mehr--oben .deck-mehr-menue { top: auto; bottom: calc(100% + 4px); }
+
+/* UI-146 (24.10.2026): Das offene "Mehr"-Menue ragt ueber die Zeilen darunter.
+   Ursache: die Deckzeile traegt inline overflow:hidden (und mobile-responsive.css
+   ebenso mit !important) - das Menue wurde an der eigenen Zeile abgeschnitten
+   und lag unter den Folgezeilen. Nur solange ein Menue offen ist, wird die
+   Zeile ueberlaufend und liegt ueber ihren Nachbarn. */
+.saved-deck-item:has(details.deck-mehr[open]) {
+  overflow: visible !important;
+  position: relative;
+  z-index: 60;
+}

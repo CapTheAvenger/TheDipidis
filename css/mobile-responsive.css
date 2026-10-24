@@ -2698,6 +2698,22 @@
 .my-deck-card-btn--wish-on    { background: #E91E63; }
 .my-deck-card-btn--delete     { background: #c0392b; font-size: 11px; }
 
+/* UI-148 (24.10.2026): Unter `pointer: coarse` setzt css/tippziele.css
+   `button:not(...) { min-height: 44px !important }` (0,7,1) — die Klassenregel
+   oben (0,1,0) verlor, alle sieben Knoepfe waren 44 px hoch und deckten 72 %
+   der Karte zu. Wie bei der Deck-Analyse (UI-142): ID im Selektor + !important,
+   die Hoehe bleibt die der Klasse (18 px, ≤ 900 px: 15 px). */
+#decks-grid .my-deck-card-btn {
+  min-height: 0 !important;
+  min-width: 0 !important;
+}
+/* Untere Zeile: der Preis (bis „331,99€") bekommt die Breite, Kiste/Herz/✕ je ein Viertel weniger. */
+@media (max-width: 900px) {
+  #decks-grid .my-deck-card-row--four { grid-template-columns: 2.6fr 1.3fr 1fr 1fr; }
+  #decks-grid .my-deck-card-btn--market { font-size: 10px; letter-spacing: -0.02em; }
+  #decks-grid .my-deck-card-btn--coll { font-size: 10px; white-space: nowrap; letter-spacing: -0.05em; }
+}
+
 /* Mobile (≤ 900px) — slightly tighter buttons, mirrors what the deck
    builder already does at #cityLeagueMyDeckGrid scope. 15px tall is
    the proportion the user identified as "correct". */

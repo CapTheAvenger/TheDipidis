@@ -1,5 +1,6 @@
 id_expansion,expansion_code,name,release_date,code_source,n_singles
 6381,,MEGA Start Deck 100 Battle Collection,2025-11-10,,774
+6328,,Mission Reward Vol. 1 Pack,2025-04-07,,471
 1645,,Single Strike & Rapid Strike Master Limited,0000-00-00,,432
 4388,,Start Deck 100 Deck,2021-12-22,,430
 3324,,5 Pack GET! Campaign,2020-06-10,,422
@@ -7,7 +8,6 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 2916,SP,Sword & Shield Ultra-Premium Collection - Charizard Promos,2019-12-02,tcg,386
 6673,,,2026-07-28,,380
 5519,,Shiny Treasure ex,2023-10-20,,360
-6328,,Mission Reward Vol. 1 Pack,2025-04-07,,358
 6582,,CSM2DC: Shining Synergy GX Starter Deck,2024-11-14,,357
 3214,,12th Pokémon Card Gym Promo Sword & Shield,2020-05-25,,354
 5318,PAL,Paldea Evolved,2023-03-24,tcg,337
@@ -280,6 +280,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4049,,Rising Fist,2021-03-18,,105
 1552,CG,EX Crystal Guardians,0000-00-00,tcg,104
 1572,EPO,Emerging Powers,0000-00-00,tcg,104
+6922,,CSVH6C: Happy Set Trainers’ Pokémon Box Set,2026-10-15,,104
 1540,SS,EX Sandstorm,0000-00-00,tcg,103
 3989,,Expansion Pack 20th Anniversary,2021-03-18,,103
 5257,,Triplet Beat,2023-02-03,,103
@@ -334,6 +335,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 2351,DRM,Dragon Majesty,2018-07-19,tcg,93
 2394,,WCD 2016: Bebe Deck,2016-12-20,,93
 4441,,Battle Region,2022-02-21,,93
+1842,SLG,Shining Legends,2017-08-25,tcg,92
 2739,,WCD 2019: Fire Box,2019-10-10,,92
 4302,,Intense Fight in the Destroyed Sky,2021-05-28,,92
 5022,,The Town on No Map,2022-03-24,,92
@@ -342,7 +344,6 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6189,,Mega Brave,2025-06-30,,92
 6190,,Mega Symphonia,2025-06-30,,92
 6335,,CSVH1C: Simplified Chinese Happy Card Set,2025-01-03,,92
-1842,SLG,Shining Legends,2017-08-25,tcg,91
 3697,,Rapid Strike Master,2021-01-22,,91
 3712,,Single Strike Master,2021-01-22,,91
 4029,,Emerald Break,2021-03-18,,91
@@ -784,3 +785,4 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6303,,Pikachu & Eevee Quicksand Card Display Pendant Gift Box,2024-12-11,,4
 4352,,,2021-06-29,,2
 6683,,,2026-08-05,,2
+6925,,CBB7C: Gem Pack Vol. 7,2026-10-20,,1

@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "last_updated": "2026-10-25",
+    "last_updated": "2026-10-26",
     "window_days": 14,
-    "window_start": "2026-10-11",
-    "window_end": "2026-10-25",
+    "window_start": "2026-10-12",
+    "window_end": "2026-10-26",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
     "content_to": "2026-10-22",
-    "samples_outside_window": 156,
-    "team_count": 84,
-    "teams_with_samples": 83,
-    "sample_count": 504,
+    "samples_outside_window": 174,
+    "team_count": 82,
+    "teams_with_samples": 81,
+    "sample_count": 492,
     "species_count": 80,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
@@ -3083,48 +3083,6 @@
     },
     {
       "species": "Salamence",
-      "evs": "20 HP / 10 SpA / 18 SpD / 18 Spe",
-      "nature": "Modest",
-      "date": "11 Oct 2026",
-      "replica": "K81FNUHF62"
-    },
-    {
-      "species": "Raichu",
-      "evs": "28 HP / 5 Def / 10 SpD / 23 Spe",
-      "nature": "Timid",
-      "date": "11 Oct 2026",
-      "replica": "K81FNUHF62"
-    },
-    {
-      "species": "Arcanine-Hisui",
-      "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "11 Oct 2026",
-      "replica": "K81FNUHF62"
-    },
-    {
-      "species": "Milotic",
-      "evs": "32 HP / 18 Def / 16 Spe",
-      "nature": "Calm",
-      "date": "11 Oct 2026",
-      "replica": "K81FNUHF62"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "27 HP / 1 Def / 23 SpD / 15 Spe",
-      "nature": "Modest",
-      "date": "11 Oct 2026",
-      "replica": "K81FNUHF62"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 15 Atk / 1 Def / 10 SpD / 8 Spe",
-      "nature": "Adamant",
-      "date": "11 Oct 2026",
-      "replica": "K81FNUHF62"
-    },
-    {
-      "species": "Salamence",
       "evs": "1 HP / 1 Atk / 32 SpA / 32 Spe",
       "nature": "Naive",
       "date": "12 Oct 2026",
@@ -3164,48 +3122,6 @@
       "nature": "Careful",
       "date": "12 Oct 2026",
       "replica": "Q7CS64N6GL"
-    },
-    {
-      "species": "Metagross",
-      "evs": "12 HP / 15 Atk / 11 Def / 28 Spe",
-      "nature": "Jolly",
-      "date": "11 Oct 2026",
-      "replica": "C2GW4YRA3E"
-    },
-    {
-      "species": "Kommo-o",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "11 Oct 2026",
-      "replica": "C2GW4YRA3E"
-    },
-    {
-      "species": "Arcanine-Hisui",
-      "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
-      "nature": "Jolly",
-      "date": "11 Oct 2026",
-      "replica": "C2GW4YRA3E"
-    },
-    {
-      "species": "Milotic",
-      "evs": "32 HP / 27 Def / 5 SpD / 2 Spe",
-      "nature": "Calm",
-      "date": "11 Oct 2026",
-      "replica": "C2GW4YRA3E"
-    },
-    {
-      "species": "Indeedee-F",
-      "evs": "32 HP / 25 Def / 9 SpD",
-      "nature": "Bold",
-      "date": "11 Oct 2026",
-      "replica": "C2GW4YRA3E"
-    },
-    {
-      "species": "Sinistcha",
-      "evs": "32 HP / 4 Def / 30 SpD",
-      "nature": "Bold",
-      "date": "11 Oct 2026",
-      "replica": "C2GW4YRA3E"
     },
     {
       "species": "Blaziken",

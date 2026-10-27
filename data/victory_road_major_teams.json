@@ -7,6 +7,18 @@
   "tiefe": 32,
   "turniere": [
    {
+    "name": "Puebla Regional",
+    "url": "https://victoryroad.pro/2027-puebla/",
+    "beginn": "2026-10-24",
+    "ende": "2026-10-25",
+    "format": "M-C OTS",
+    "sieger": "Kyle Livinghouse",
+    "platzierungen_gesamt": 136,
+    "mit_replica_code": 0,
+    "mit_ots": 136,
+    "gezogen": 32
+   },
+   {
     "name": "Thailand Premier Ball League Bangkok",
     "url": "https://victoryroad.pro/2027-thailand-pbl/",
     "beginn": "2026-10-24",
@@ -31,11 +43,7598 @@
     "gezogen": 29
    }
   ],
-  "team_count": 45,
+  "team_count": 77,
   "hat_ev": false,
   "hinweis": "Open Team Lists fuehren keine EVs und IVs. Art, Item, Faehigkeit, Attacken und Wesen stehen so da, wie sie gespielt wurden; die Verteilung der Fleisspunkte nicht."
  },
  "teams": [
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 1,
+   "swiss": "9-2",
+   "trainer": "Kyle Livinghouse",
+   "trainer_tag": "Animus",
+   "preis": "2027 Worlds $6,000 350 CP",
+   "replica_code": "",
+   "ots_url": "https://www.vrpastes.com/bDtHdJaC",
+   "paste_id": "bDtHdJaC",
+   "team_name": "Kyle Livinghouse's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Froslass Mega",
+    "Sneasler",
+    "Kingambit",
+    "Whimsicott",
+    "Garchomp"
+   ],
+   "pokemon": [
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "White Herb",
+     "item_de": "Schlohkraut",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Close Combat",
+      "Dire Claw",
+      "Rock Tomb",
+      "Protect"
+     ],
+     "moves_de": [
+      "Nahkampf",
+      "Unheilsklauen",
+      "Felsgrab",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Whimsicott",
+     "name_de": "Elfun",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Protect",
+      "Encore",
+      "Moonblast",
+      "Tailwind"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Zugabe",
+      "Mondgewalt",
+      "Rückenwind"
+     ],
+     "typen": [
+      "Grass",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 67,
+      "def": 85,
+      "spa": 77,
+      "spd": 75,
+      "spe": 116
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Weather Ball",
+      "Protect",
+      "Heat Wave",
+      "Solar Beam"
+     ],
+     "moves_de": [
+      "Meteorologe",
+      "Schutzschild",
+      "Hitzewelle",
+      "Solarstrahl"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Chople Berry",
+     "item_de": "Rospelbeere",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Sucker Punch",
+      "Iron Head",
+      "Kowtow Cleave",
+      "Low Kick"
+     ],
+     "moves_de": [
+      "Tiefschlag",
+      "Eisenschädel",
+      "Kniefallspalter",
+      "Fußkick"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Rock Slide",
+      "Earthquake",
+      "Dragon Claw",
+      "Protect"
+     ],
+     "moves_de": [
+      "Steinhagel",
+      "Erdbeben",
+      "Drachenklaue",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Froslass",
+     "name_de": "Frosdedje",
+     "item": "Froslassite",
+     "item_de": "Frosdedjenit",
+     "ability": "Cursed Body",
+     "ability_de": "Tastfluch",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Blizzard",
+      "Aurora Veil",
+      "Shadow Ball",
+      "Protect"
+     ],
+     "moves_de": [
+      "Blizzard",
+      "Auroraschleier",
+      "Spukball",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Ice",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 70,
+      "atk": 80,
+      "def": 70,
+      "spa": 80,
+      "spd": 70,
+      "spe": 110
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 1
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 1,
+   "swiss": "4-0",
+   "trainer": "Eder U. Z.",
+   "trainer_tag": "",
+   "preis": "2027 Worlds $1,000 350 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/6FOPyjbv",
+   "paste_id": "6FOPyjbv",
+   "team_name": "Eder Ulises Z.'s 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Swampert Mega",
+    "Pelipper",
+    "Venusaur",
+    "Grimmsnarl",
+    "Archaludon"
+   ],
+   "pokemon": [
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Tailwind",
+      "Weather Ball",
+      "Hurricane",
+      "Wide Guard"
+     ],
+     "moves_de": [
+      "Rückenwind",
+      "Meteorologe",
+      "Orkan",
+      "Rundumschutz"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Swampert",
+     "name_de": "Sumpex",
+     "item": "Swampertite",
+     "item_de": "Sumpexnit",
+     "ability": "Torrent",
+     "ability_de": "Sturzbach",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Earthquake",
+      "Ice Punch",
+      "Wave Crash",
+      "Protect"
+     ],
+     "moves_de": [
+      "Erdbeben",
+      "Eishieb",
+      "Wellentackle",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 110,
+      "def": 90,
+      "spa": 85,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Venusaur",
+     "name_de": "Bisaflor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Chlorophyll",
+     "ability_de": "Chlorophyll",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Sludge Bomb",
+      "Leaf Storm",
+      "Sleep Powder"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Matschbombe",
+      "Blättersturm",
+      "Schlafpuder"
+     ],
+     "typen": [
+      "Grass",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 82,
+      "def": 83,
+      "spa": 100,
+      "spd": 100,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Protect",
+      "Heat Wave",
+      "Hurricane",
+      "Weather Ball"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Hitzewelle",
+      "Orkan",
+      "Meteorologe"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Snarl",
+      "Dragon Pulse",
+      "Electro Shot",
+      "Protect"
+     ],
+     "moves_de": [
+      "Standpauke",
+      "Drachenpuls",
+      "Stromstrahl",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Grimmsnarl",
+     "name_de": "Olangaar",
+     "item": "Light Clay",
+     "item_de": "Lichtlehm",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Sassy",
+     "nature_de": "Forsch",
+     "moves": [
+      "Parting Shot",
+      "Spirit Break",
+      "Reflect",
+      "Light Screen"
+     ],
+     "moves_de": [
+      "Abgangstirade",
+      "Seelenbruch",
+      "Reflektor",
+      "Lichtschild"
+     ],
+     "typen": [
+      "Dark",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 120,
+      "def": 65,
+      "spa": 95,
+      "spd": 75,
+      "spe": 60
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 2
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 1,
+   "swiss": "3-1",
+   "trainer": "Lucrecia S. V.",
+   "trainer_tag": "",
+   "preis": "2027 Worlds $1,000 350 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/1wvZkudB",
+   "paste_id": "1wvZkudB",
+   "team_name": "Lucrecia Samara V.'s 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Swampert Mega",
+    "Basculegion",
+    "Sneasler",
+    "Pelipper",
+    "Archaludon",
+    "Indeedee F"
+   ],
+   "pokemon": [
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Electro Shot",
+      "Dragon Pulse",
+      "Flash Cannon",
+      "Protect"
+     ],
+     "moves_de": [
+      "Stromstrahl",
+      "Drachenpuls",
+      "Lichtkanone",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Basculegion",
+     "name_de": "Salmagnis",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Adaptability",
+     "ability_de": "Anpassung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Wave Crash",
+      "Last Respects",
+      "Flip Turn",
+      "Phantom Force"
+     ],
+     "moves_de": [
+      "Wellentackle",
+      "Letzte Ehre",
+      "Rollwende",
+      "Phantomkraft"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 112,
+      "def": 65,
+      "spa": 80,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "Psychic Seed",
+     "item_de": "Psycho-Samen",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Poison Jab",
+      "Close Combat",
+      "Rock Slide",
+      "Throat Chop"
+     ],
+     "moves_de": [
+      "Gifthieb",
+      "Nahkampf",
+      "Steinhagel",
+      "Neck Strike"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Swampert",
+     "name_de": "Sumpex",
+     "item": "Swampertite",
+     "item_de": "Sumpexnit",
+     "ability": "Torrent",
+     "ability_de": "Sturzbach",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Wave Crash",
+      "Earthquake",
+      "Ice Punch",
+      "Protect"
+     ],
+     "moves_de": [
+      "Wellentackle",
+      "Erdbeben",
+      "Eishieb",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 110,
+      "def": 90,
+      "spa": 85,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Hurricane",
+      "Weather Ball",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Orkan",
+      "Meteorologe",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Indeedee-F",
+     "name_de": "Servol [Weiblich]",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Psychic Surge",
+     "ability_de": "Psycho-Erzeuger",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Psychic",
+      "Follow Me",
+      "Trick Room",
+      "Imprison"
+     ],
+     "moves_de": [
+      "Psychokinese",
+      "Spotlight",
+      "Bizarroraum",
+      "Begrenzer"
+     ],
+     "typen": [
+      "Psychic",
+      "Normal"
+     ],
+     "base_stats": {
+      "hp": 70,
+      "atk": 55,
+      "def": 65,
+      "spa": 95,
+      "spd": 105,
+      "spe": 85
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 3
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 2,
+   "swiss": "10-1",
+   "trainer": "Renzo Navarro",
+   "trainer_tag": "Renzo",
+   "preis": "$4,000 325 CP",
+   "replica_code": "",
+   "ots_url": "https://www.vrpastes.com/bQZl80KE",
+   "paste_id": "bQZl80KE",
+   "team_name": "Renzo Navarro's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Raichu Mega Y",
+    "Staraptor Mega",
+    "Arcanine Hisui",
+    "Gholdengo",
+    "Primarina",
+    "Rillaboom"
+   ],
+   "pokemon": [
+    {
+     "name": "Staraptor",
+     "name_de": "Staraptor",
+     "item": "Staraptite",
+     "item_de": "Staraptornit",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Close Combat",
+      "Brave Bird",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Nahkampf",
+      "Sturzflug",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Normal",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 120,
+      "def": 70,
+      "spa": 50,
+      "spd": 60,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Raichu",
+     "name_de": "Raichu",
+     "item": "Raichunite Y",
+     "item_de": "Raichunit Y",
+     "ability": "Lightning Rod",
+     "ability_de": "Blitzfänger",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Zap Cannon",
+      "Focus Blast",
+      "Fake Out",
+      "Protect"
+     ],
+     "moves_de": [
+      "Blitzkanone",
+      "Fokusstoß",
+      "Mogelhieb",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Electric"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 90,
+      "def": 55,
+      "spa": 90,
+      "spd": 80,
+      "spe": 110
+     },
+     "evs": ""
+    },
+    {
+     "name": "Arcanine-Hisui",
+     "name_de": "Arkani [Hisui-Form]",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Rock Head",
+     "ability_de": "Steinhaupt",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Flare Blitz",
+      "Extreme Speed",
+      "Rock Slide",
+      "Protect"
+     ],
+     "moves_de": [
+      "Flammenblitz",
+      "Turbotempo",
+      "Steinhagel",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Rock"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 80,
+      "spa": 95,
+      "spd": 80,
+      "spe": 90
+     },
+     "evs": ""
+    },
+    {
+     "name": "Primarina",
+     "name_de": "Primarene",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Liquid Voice",
+     "ability_de": "Plätscherstimme",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Hyper Voice",
+      "Moonblast",
+      "Calm Mind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schallwelle",
+      "Mondgewalt",
+      "Gedankengut",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 74,
+      "def": 74,
+      "spa": 126,
+      "spd": 116,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Gholdengo",
+     "name_de": "Monetigo",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Good as Gold",
+     "ability_de": "Goldkörper",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Make It Rain",
+      "Shadow Ball",
+      "Nasty Plot",
+      "Protect"
+     ],
+     "moves_de": [
+      "Goldrausch",
+      "Spukball",
+      "Ränkeschmied",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Steel",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 87,
+      "atk": 60,
+      "def": 95,
+      "spa": 133,
+      "spd": 91,
+      "spe": 84
+     },
+     "evs": ""
+    },
+    {
+     "name": "Rillaboom",
+     "name_de": "Gortrom",
+     "item": "Miracle Seed",
+     "item_de": "Wundersaat",
+     "ability": "Grassy Surge",
+     "ability_de": "Gras-Erzeuger",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Wood Hammer",
+      "Grassy Glide",
+      "High Horsepower",
+      "Fake Out"
+     ],
+     "moves_de": [
+      "Holzhammer",
+      "Grasrutsche",
+      "Pferdestärke",
+      "Mogelhieb"
+     ],
+     "typen": [
+      "Grass"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 125,
+      "def": 90,
+      "spa": 60,
+      "spd": 70,
+      "spe": 85
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 4
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 2,
+   "swiss": "3-1",
+   "trainer": "Svaanik B.",
+   "trainer_tag": "",
+   "preis": "$750 325 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/zVRTIzfa",
+   "paste_id": "zVRTIzfa",
+   "team_name": "Svaanik B.'s 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Floette Mega",
+    "Garchomp Mega Z",
+    "Gholdengo",
+    "Sneasler",
+    "Farigiraf",
+    "Rillaboom"
+   ],
+   "pokemon": [
+    {
+     "name": "Rillaboom",
+     "name_de": "Gortrom",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Grassy Surge",
+     "ability_de": "Gras-Erzeuger",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Wood Hammer",
+      "Grassy Glide",
+      "Fake Out",
+      "High Horsepower"
+     ],
+     "moves_de": [
+      "Holzhammer",
+      "Grasrutsche",
+      "Mogelhieb",
+      "Pferdestärke"
+     ],
+     "typen": [
+      "Grass"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 125,
+      "def": 90,
+      "spa": 60,
+      "spd": 70,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Farigiraf",
+     "name_de": "Farigiraf",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Armor Tail",
+     "ability_de": "Schweifrüstung",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Psychic",
+      "Trick Room",
+      "Helping Hand",
+      "Protect"
+     ],
+     "moves_de": [
+      "Psychokinese",
+      "Bizarroraum",
+      "Rechte Hand",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Normal",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 90,
+      "def": 70,
+      "spa": 110,
+      "spd": 70,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "Grassy Seed",
+     "item_de": "Gras-Samen",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Dire Claw",
+      "Close Combat",
+      "Fake Out",
+      "Rock Tomb"
+     ],
+     "moves_de": [
+      "Unheilsklauen",
+      "Nahkampf",
+      "Mogelhieb",
+      "Felsgrab"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Garchompite Z",
+     "item_de": "Knakracknit Z",
+     "ability": "Sand Veil",
+     "ability_de": "Sandschleier",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Draco Meteor",
+      "Flamethrower",
+      "Power Gem",
+      "Protect"
+     ],
+     "moves_de": [
+      "Draco Meteor",
+      "Flammenwurf",
+      "Juwelenkraft",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Floette-Eternal",
+     "name_de": "Floette [Ewigblütler]",
+     "item": "Floettite",
+     "item_de": "Floetteonit",
+     "ability": "Flower Veil",
+     "ability_de": "Blütenhülle",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Moonblast",
+      "Dazzling Gleam",
+      "Calm Mind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Mondgewalt",
+      "Zauberschein",
+      "Gedankengut",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 74,
+      "atk": 65,
+      "def": 67,
+      "spa": 125,
+      "spd": 128,
+      "spe": 92
+     },
+     "evs": ""
+    },
+    {
+     "name": "Gholdengo",
+     "name_de": "Monetigo",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Good as Gold",
+     "ability_de": "Goldkörper",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Make It Rain",
+      "Shadow Ball",
+      "Nasty Plot",
+      "Protect"
+     ],
+     "moves_de": [
+      "Goldrausch",
+      "Spukball",
+      "Ränkeschmied",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Steel",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 87,
+      "atk": 60,
+      "def": 95,
+      "spa": 133,
+      "spd": 91,
+      "spe": 84
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 5
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 2,
+   "swiss": "3-1",
+   "trainer": "Susana S.",
+   "trainer_tag": "",
+   "preis": "$750 325 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/h1eXdyY1",
+   "paste_id": "h1eXdyY1",
+   "team_name": "Susana S.'s 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Tyranitar Mega",
+    "Garchomp Mega Z",
+    "Sneasler",
+    "Corviknight",
+    "Excadrill",
+    "Indeedee"
+   ],
+   "pokemon": [
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "White Herb",
+     "item_de": "Schlohkraut",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Protect",
+      "Coaching",
+      "Dire Claw",
+      "Close Combat"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Coaching",
+      "Unheilsklauen",
+      "Nahkampf"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Garchompite Z",
+     "item_de": "Knakracknit Z",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Protect",
+      "Dragon Pulse",
+      "Earth Power",
+      "Flamethrower"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Drachenpuls",
+      "Erdkräfte",
+      "Flammenwurf"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Indeedee",
+     "name_de": "Servol",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Psychic Surge",
+     "ability_de": "Psycho-Erzeuger",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Helping Hand",
+      "Trick",
+      "Mystical Fire",
+      "Expanding Force"
+     ],
+     "moves_de": [
+      "Rechte Hand",
+      "Trickbetrug",
+      "Magieflamme",
+      "Flächenmacht"
+     ],
+     "typen": [
+      "Psychic",
+      "Normal"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 65,
+      "def": 55,
+      "spa": 105,
+      "spd": 95,
+      "spe": 95
+     },
+     "evs": ""
+    },
+    {
+     "name": "Excadrill",
+     "name_de": "Stalobor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Sand Rush",
+     "ability_de": "Sandscharrer",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Protect",
+      "Rock Slide",
+      "Iron Head",
+      "High Horsepower"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Steinhagel",
+      "Eisenschädel",
+      "Pferdestärke"
+     ],
+     "typen": [
+      "Ground",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 110,
+      "atk": 135,
+      "def": 60,
+      "spa": 50,
+      "spd": 65,
+      "spe": 88
+     },
+     "evs": ""
+    },
+    {
+     "name": "Corviknight",
+     "name_de": "Krarmor",
+     "item": "Psychic Seed",
+     "item_de": "Psycho-Samen",
+     "ability": "Mirror Armor",
+     "ability_de": "Spiegelrüstung",
+     "nature": "Careful",
+     "nature_de": "Sacht",
+     "moves": [
+      "Roost",
+      "Bulk Up",
+      "Power Trip",
+      "Brave Bird"
+     ],
+     "moves_de": [
+      "Ruheort",
+      "Protzer",
+      "Überheblichkeit",
+      "Sturzflug"
+     ],
+     "typen": [
+      "Flying",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 98,
+      "atk": 87,
+      "def": 105,
+      "spa": 53,
+      "spd": 85,
+      "spe": 67
+     },
+     "evs": ""
+    },
+    {
+     "name": "Tyranitar",
+     "name_de": "Despotar",
+     "item": "Tyranitarite",
+     "item_de": "Despotarnit",
+     "ability": "Sand Stream",
+     "ability_de": "Sandsturm",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Protect",
+      "Low Kick",
+      "Knock Off",
+      "Rock Slide"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Fußkick",
+      "Abschlag",
+      "Steinhagel"
+     ],
+     "typen": [
+      "Rock",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 134,
+      "def": 110,
+      "spa": 95,
+      "spd": 100,
+      "spe": 61
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 6
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 3,
+   "swiss": "10-1",
+   "trainer": "Arthur Mosca",
+   "trainer_tag": "Thurmos",
+   "preis": "$2,000 300 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/qW4iurB9",
+   "paste_id": "qW4iurB9",
+   "team_name": "Arthur Mosca's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Staraptor Mega",
+    "Tyranitar Mega",
+    "Excadrill",
+    "Gholdengo",
+    "Milotic",
+    "Sinistcha"
+   ],
+   "pokemon": [
+    {
+     "name": "Tyranitar",
+     "name_de": "Despotar",
+     "item": "Tyranitarite",
+     "item_de": "Despotarnit",
+     "ability": "Sand Stream",
+     "ability_de": "Sandsturm",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Rock Slide",
+      "Knock Off",
+      "Dragon Dance",
+      "Protect"
+     ],
+     "moves_de": [
+      "Steinhagel",
+      "Abschlag",
+      "Drachentanz",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Rock",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 134,
+      "def": 110,
+      "spa": 95,
+      "spd": 100,
+      "spe": 61
+     },
+     "evs": ""
+    },
+    {
+     "name": "Gholdengo",
+     "name_de": "Monetigo",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Good as Gold",
+     "ability_de": "Goldkörper",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Shadow Ball",
+      "Make It Rain",
+      "Nasty Plot",
+      "Protect"
+     ],
+     "moves_de": [
+      "Spukball",
+      "Goldrausch",
+      "Ränkeschmied",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Steel",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 87,
+      "atk": 60,
+      "def": 95,
+      "spa": 133,
+      "spd": 91,
+      "spe": 84
+     },
+     "evs": ""
+    },
+    {
+     "name": "Excadrill",
+     "name_de": "Stalobor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Sand Rush",
+     "ability_de": "Sandscharrer",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "High Horsepower",
+      "Iron Head",
+      "Rock Slide",
+      "Protect"
+     ],
+     "moves_de": [
+      "Pferdestärke",
+      "Eisenschädel",
+      "Steinhagel",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Ground",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 110,
+      "atk": 135,
+      "def": 60,
+      "spa": 50,
+      "spd": 65,
+      "spe": 88
+     },
+     "evs": ""
+    },
+    {
+     "name": "Milotic",
+     "name_de": "Milotic",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Competitive",
+     "ability_de": "Unbeugsamkeit",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Scald",
+      "Ice Beam",
+      "Icy Wind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Siedewasser",
+      "Eisstrahl",
+      "Eissturm",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 60,
+      "def": 79,
+      "spa": 100,
+      "spd": 125,
+      "spe": 81
+     },
+     "evs": ""
+    },
+    {
+     "name": "Staraptor",
+     "name_de": "Staraptor",
+     "item": "Staraptite",
+     "item_de": "Staraptornit",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Brave Bird",
+      "Close Combat",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Sturzflug",
+      "Nahkampf",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Normal",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 120,
+      "def": 70,
+      "spa": 50,
+      "spd": 60,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sinistcha",
+     "name_de": "Fatalitcha",
+     "item": "Rocky Helmet",
+     "item_de": "Beulenhelm",
+     "ability": "Hospitality",
+     "ability_de": "Gastlichkeit",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Matcha Gotcha",
+      "Strength Sap",
+      "Rage Powder",
+      "Protect"
+     ],
+     "moves_de": [
+      "Quirlschuss",
+      "Kraftabsorber",
+      "Wutpulver",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 71,
+      "atk": 60,
+      "def": 106,
+      "spa": 121,
+      "spd": 80,
+      "spe": 70
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 7
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 3,
+   "swiss": "3-1",
+   "trainer": "Yaretzi M.",
+   "trainer_tag": "",
+   "preis": "$500 300 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/MnNErzyn",
+   "paste_id": "MnNErzyn",
+   "team_name": "Yaretzi M.'s 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Tyranitar Mega",
+    "Staraptor Mega",
+    "Gholdengo",
+    "Milotic",
+    "Sinistcha",
+    "Excadrill"
+   ],
+   "pokemon": [
+    {
+     "name": "Gholdengo",
+     "name_de": "Monetigo",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Good as Gold",
+     "ability_de": "Goldkörper",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Thunderbolt",
+      "Protect",
+      "Make It Rain",
+      "Shadow Ball"
+     ],
+     "moves_de": [
+      "Donnerblitz",
+      "Schutzschild",
+      "Goldrausch",
+      "Spukball"
+     ],
+     "typen": [
+      "Steel",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 87,
+      "atk": 60,
+      "def": 95,
+      "spa": 133,
+      "spd": 91,
+      "spe": 84
+     },
+     "evs": ""
+    },
+    {
+     "name": "Excadrill",
+     "name_de": "Stalobor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Sand Rush",
+     "ability_de": "Sandscharrer",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Iron Head",
+      "Earthquake",
+      "Protect",
+      "Rock Slide"
+     ],
+     "moves_de": [
+      "Eisenschädel",
+      "Erdbeben",
+      "Schutzschild",
+      "Steinhagel"
+     ],
+     "typen": [
+      "Ground",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 110,
+      "atk": 135,
+      "def": 60,
+      "spa": 50,
+      "spd": 65,
+      "spe": 88
+     },
+     "evs": ""
+    },
+    {
+     "name": "Tyranitar",
+     "name_de": "Despotar",
+     "item": "Tyranitarite",
+     "item_de": "Despotarnit",
+     "ability": "Sand Stream",
+     "ability_de": "Sandsturm",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Rock Slide",
+      "Knock Off",
+      "Earthquake",
+      "Protect"
+     ],
+     "moves_de": [
+      "Steinhagel",
+      "Abschlag",
+      "Erdbeben",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Rock",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 134,
+      "def": 110,
+      "spa": 95,
+      "spd": 100,
+      "spe": 61
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sinistcha",
+     "name_de": "Fatalitcha",
+     "item": "Focus Band",
+     "item_de": "Fokusband",
+     "ability": "Hospitality",
+     "ability_de": "Gastlichkeit",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Rage Powder",
+      "Protect",
+      "Shadow Ball",
+      "Matcha Gotcha"
+     ],
+     "moves_de": [
+      "Wutpulver",
+      "Schutzschild",
+      "Spukball",
+      "Quirlschuss"
+     ],
+     "typen": [
+      "Grass",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 71,
+      "atk": 60,
+      "def": 106,
+      "spa": 121,
+      "spd": 80,
+      "spe": 70
+     },
+     "evs": ""
+    },
+    {
+     "name": "Milotic",
+     "name_de": "Milotic",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Competitive",
+     "ability_de": "Unbeugsamkeit",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Ice Beam",
+      "Muddy Water",
+      "Dragon Pulse",
+      "Protect"
+     ],
+     "moves_de": [
+      "Eisstrahl",
+      "Lehmbrühe",
+      "Drachenpuls",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 60,
+      "def": 79,
+      "spa": 100,
+      "spd": 125,
+      "spe": 81
+     },
+     "evs": ""
+    },
+    {
+     "name": "Staraptor",
+     "name_de": "Staraptor",
+     "item": "Staraptite",
+     "item_de": "Staraptornit",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Dual Wingbeat",
+      "Protect",
+      "Close Combat",
+      "Tailwind"
+     ],
+     "moves_de": [
+      "Doppelflügel",
+      "Schutzschild",
+      "Nahkampf",
+      "Rückenwind"
+     ],
+     "typen": [
+      "Normal",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 120,
+      "def": 70,
+      "spa": 50,
+      "spd": 60,
+      "spe": 100
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 8
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 3,
+   "swiss": "3-1",
+   "trainer": "Óliver I. A.",
+   "trainer_tag": "",
+   "preis": "$500 300 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/HCFWed3c",
+   "paste_id": "HCFWed3c",
+   "team_name": "Oliver Isaac A.'s 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Swampert Mega",
+    "Pelipper",
+    "Venusaur",
+    "Grimmsnarl",
+    "Archaludon"
+   ],
+   "pokemon": [
+    {
+     "name": "Swampert",
+     "name_de": "Sumpex",
+     "item": "Swampertite",
+     "item_de": "Sumpexnit",
+     "ability": "Torrent",
+     "ability_de": "Sturzbach",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Earthquake",
+      "Wave Crash",
+      "Ice Punch",
+      "Protect"
+     ],
+     "moves_de": [
+      "Erdbeben",
+      "Wellentackle",
+      "Eishieb",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 110,
+      "def": 90,
+      "spa": 85,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Heat Wave",
+      "Hurricane",
+      "Weather Ball",
+      "Protect"
+     ],
+     "moves_de": [
+      "Hitzewelle",
+      "Orkan",
+      "Meteorologe",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Grimmsnarl",
+     "name_de": "Olangaar",
+     "item": "Light Clay",
+     "item_de": "Lichtlehm",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Sassy",
+     "nature_de": "Forsch",
+     "moves": [
+      "Spirit Break",
+      "Light Screen",
+      "Reflect",
+      "Parting Shot"
+     ],
+     "moves_de": [
+      "Seelenbruch",
+      "Lichtschild",
+      "Reflektor",
+      "Abgangstirade"
+     ],
+     "typen": [
+      "Dark",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 120,
+      "def": 65,
+      "spa": 95,
+      "spd": 75,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Venusaur",
+     "name_de": "Bisaflor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Chlorophyll",
+     "ability_de": "Chlorophyll",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Sleep Powder",
+      "Leaf Storm",
+      "Sludge Bomb",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schlafpuder",
+      "Blättersturm",
+      "Matschbombe",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 82,
+      "def": 83,
+      "spa": 100,
+      "spd": 100,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Tailwind",
+      "Hurricane",
+      "Weather Ball",
+      "Wide Guard"
+     ],
+     "moves_de": [
+      "Rückenwind",
+      "Orkan",
+      "Meteorologe",
+      "Rundumschutz"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Electro Shot",
+      "Flash Cannon",
+      "Dragon Pulse",
+      "Protect"
+     ],
+     "moves_de": [
+      "Stromstrahl",
+      "Lichtkanone",
+      "Drachenpuls",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 9
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 4,
+   "swiss": "9-2",
+   "trainer": "Zach Holowiak",
+   "trainer_tag": "Zach",
+   "preis": "$2,000 300 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/3f6hHCbq",
+   "paste_id": "3f6hHCbq",
+   "team_name": "Zach Holowiak's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Raichu Mega Y",
+    "Blaziken Mega",
+    "Sneasler",
+    "Kingambit",
+    "Primarina",
+    "Rillaboom"
+   ],
+   "pokemon": [
+    {
+     "name": "Rillaboom",
+     "name_de": "Gortrom",
+     "item": "Miracle Seed",
+     "item_de": "Wundersaat",
+     "ability": "Grassy Surge",
+     "ability_de": "Gras-Erzeuger",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Grassy Glide",
+      "Wood Hammer",
+      "Fake Out",
+      "U-turn"
+     ],
+     "moves_de": [
+      "Grasrutsche",
+      "Holzhammer",
+      "Mogelhieb",
+      "Kehrtwende"
+     ],
+     "typen": [
+      "Grass"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 125,
+      "def": 90,
+      "spa": 60,
+      "spd": 70,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Blaziken",
+     "name_de": "Lohgock",
+     "item": "Blazikenite",
+     "item_de": "Lohgocknit",
+     "ability": "Speed Boost",
+     "ability_de": "Temposchub",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Detect",
+      "Flare Blitz",
+      "Close Combat",
+      "Rock Slide"
+     ],
+     "moves_de": [
+      "Scanner",
+      "Flammenblitz",
+      "Nahkampf",
+      "Steinhagel"
+     ],
+     "typen": [
+      "Fire",
+      "Fighting"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 120,
+      "def": 70,
+      "spa": 110,
+      "spd": 70,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Black Glasses",
+     "item_de": "Schattenbrille",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Sucker Punch",
+      "Kowtow Cleave",
+      "Swords Dance",
+      "Protect"
+     ],
+     "moves_de": [
+      "Tiefschlag",
+      "Kniefallspalter",
+      "Schwerttanz",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "Grassy Seed",
+     "item_de": "Gras-Samen",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Rock Slide",
+      "Close Combat",
+      "Dire Claw",
+      "Protect"
+     ],
+     "moves_de": [
+      "Steinhagel",
+      "Nahkampf",
+      "Unheilsklauen",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Primarina",
+     "name_de": "Primarene",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Liquid Voice",
+     "ability_de": "Plätscherstimme",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Calm Mind",
+      "Hyper Voice",
+      "Moonblast"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Gedankengut",
+      "Schallwelle",
+      "Mondgewalt"
+     ],
+     "typen": [
+      "Water",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 74,
+      "def": 74,
+      "spa": 126,
+      "spd": 116,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Raichu",
+     "name_de": "Raichu",
+     "item": "Raichunite Y",
+     "item_de": "Raichunit Y",
+     "ability": "Lightning Rod",
+     "ability_de": "Blitzfänger",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Fake Out",
+      "Zap Cannon",
+      "Focus Blast",
+      "Protect"
+     ],
+     "moves_de": [
+      "Mogelhieb",
+      "Blitzkanone",
+      "Fokusstoß",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Electric"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 90,
+      "def": 55,
+      "spa": 90,
+      "spd": 80,
+      "spe": 110
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 10
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 4,
+   "swiss": "2-2",
+   "trainer": "Leonardo S. F.",
+   "trainer_tag": "",
+   "preis": "$500 300 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/jWj6J9Nz",
+   "paste_id": "jWj6J9Nz",
+   "team_name": "Leonardo Sebastián F.'s 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Tyranitar Mega",
+    "Sneasler",
+    "Excadrill",
+    "Garchomp",
+    "Rillaboom"
+   ],
+   "pokemon": [
+    {
+     "name": "Excadrill",
+     "name_de": "Stalobor",
+     "item": "Soft Sand",
+     "item_de": "Pudersand",
+     "ability": "Sand Rush",
+     "ability_de": "Sandscharrer",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Drill Run",
+      "Rock Slide",
+      "Iron Head",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schlagbohrer",
+      "Steinhagel",
+      "Eisenschädel",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Ground",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 110,
+      "atk": 135,
+      "def": 60,
+      "spa": 50,
+      "spd": 65,
+      "spe": 88
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Protect",
+      "Stomping Tantrum",
+      "Dragon Claw",
+      "Rock Slide"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Fruststampfer",
+      "Drachenklaue",
+      "Steinhagel"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "White Herb",
+     "item_de": "Schlohkraut",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Dire Claw",
+      "Fake Out",
+      "Close Combat",
+      "Protect"
+     ],
+     "moves_de": [
+      "Unheilsklauen",
+      "Mogelhieb",
+      "Nahkampf",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Tyranitar",
+     "name_de": "Despotar",
+     "item": "Tyranitarite",
+     "item_de": "Despotarnit",
+     "ability": "Sand Stream",
+     "ability_de": "Sandsturm",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Protect",
+      "Ice Punch",
+      "Rock Slide",
+      "Knock Off"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Eishieb",
+      "Steinhagel",
+      "Abschlag"
+     ],
+     "typen": [
+      "Rock",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 134,
+      "def": 110,
+      "spa": 95,
+      "spd": 100,
+      "spe": 61
+     },
+     "evs": ""
+    },
+    {
+     "name": "Rillaboom",
+     "name_de": "Gortrom",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Grassy Surge",
+     "ability_de": "Gras-Erzeuger",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Grassy Glide",
+      "Wood Hammer",
+      "Protect",
+      "Fake Out"
+     ],
+     "moves_de": [
+      "Grasrutsche",
+      "Holzhammer",
+      "Schutzschild",
+      "Mogelhieb"
+     ],
+     "typen": [
+      "Grass"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 125,
+      "def": 90,
+      "spa": 60,
+      "spd": 70,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Solar Power",
+     "ability_de": "Solarkraft",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Heat Wave",
+      "Solar Beam",
+      "Weather Ball",
+      "Protect"
+     ],
+     "moves_de": [
+      "Hitzewelle",
+      "Solarstrahl",
+      "Meteorologe",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 11
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 4,
+   "swiss": "3-1",
+   "trainer": "Eduardo A.",
+   "trainer_tag": "",
+   "preis": "$500 300 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/5BB5Uip7",
+   "paste_id": "5BB5Uip7",
+   "team_name": "Eduardo A.'s 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Absol Mega Z",
+    "Metagross Mega",
+    "Armarouge",
+    "Drampa",
+    "Kommo O",
+    "Indeedee F"
+   ],
+   "pokemon": [
+    {
+     "name": "Drampa",
+     "name_de": "Sen-Long",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Cloud Nine",
+     "ability_de": "Wolke Sieben",
+     "nature": "Quiet",
+     "nature_de": "Ruhig",
+     "moves": [
+      "Dragon Pulse",
+      "Heat Wave",
+      "Protect",
+      "Earth Power"
+     ],
+     "moves_de": [
+      "Drachenpuls",
+      "Hitzewelle",
+      "Schutzschild",
+      "Erdkräfte"
+     ],
+     "typen": [
+      "Normal",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 60,
+      "def": 85,
+      "spa": 135,
+      "spd": 91,
+      "spe": 36
+     },
+     "evs": ""
+    },
+    {
+     "name": "Indeedee-F",
+     "name_de": "Servol [Weiblich]",
+     "item": "Rocky Helmet",
+     "item_de": "Beulenhelm",
+     "ability": "Psychic Surge",
+     "ability_de": "Psycho-Erzeuger",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Follow Me",
+      "Psychic",
+      "Helping Hand",
+      "Trick Room"
+     ],
+     "moves_de": [
+      "Spotlight",
+      "Psychokinese",
+      "Rechte Hand",
+      "Bizarroraum"
+     ],
+     "typen": [
+      "Psychic",
+      "Normal"
+     ],
+     "base_stats": {
+      "hp": 70,
+      "atk": 55,
+      "def": 65,
+      "spa": 95,
+      "spd": 105,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Armarouge",
+     "name_de": "Crimanzo",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Weak Armor",
+     "ability_de": "Bruchrüstung",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Expanding Force",
+      "Armor Cannon",
+      "Protect",
+      "Aura Sphere"
+     ],
+     "moves_de": [
+      "Flächenmacht",
+      "Rüstungskanone",
+      "Schutzschild",
+      "Aurasphäre"
+     ],
+     "typen": [
+      "Fire",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 60,
+      "def": 100,
+      "spa": 125,
+      "spd": 80,
+      "spe": 75
+     },
+     "evs": ""
+    },
+    {
+     "name": "Metagross",
+     "name_de": "Metagross",
+     "item": "Metagrossite",
+     "item_de": "Metagrossnit",
+     "ability": "Clear Body",
+     "ability_de": "Neutraltorso",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Iron Head",
+      "Psychic Fangs",
+      "Steel Roller",
+      "Brick Break"
+     ],
+     "moves_de": [
+      "Eisenschädel",
+      "Psychobeißer",
+      "Eisenwalze",
+      "Durchbruch"
+     ],
+     "typen": [
+      "Steel",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 135,
+      "def": 130,
+      "spa": 95,
+      "spd": 90,
+      "spe": 70
+     },
+     "evs": ""
+    },
+    {
+     "name": "Absol",
+     "name_de": "Absol",
+     "item": "Absolite Z",
+     "item_de": "Absolnit Z",
+     "ability": "Justified",
+     "ability_de": "Redlichkeit",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Night Slash",
+      "Shadow Claw",
+      "Detect",
+      "Icy Wind"
+     ],
+     "moves_de": [
+      "Nachthieb",
+      "Dunkelklaue",
+      "Scanner",
+      "Eissturm"
+     ],
+     "typen": [
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 65,
+      "atk": 130,
+      "def": 60,
+      "spa": 75,
+      "spd": 60,
+      "spe": 75
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kommo-o",
+     "name_de": "Grandiras",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Soundproof",
+     "ability_de": "Lärmschutz",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Clanging Scales",
+      "Aura Sphere",
+      "Protect",
+      "Vacuum Wave"
+     ],
+     "moves_de": [
+      "Schuppenrasseln",
+      "Aurasphäre",
+      "Schutzschild",
+      "Vakuumwelle"
+     ],
+     "typen": [
+      "Dragon",
+      "Fighting"
+     ],
+     "base_stats": {
+      "hp": 75,
+      "atk": 110,
+      "def": 125,
+      "spa": 100,
+      "spd": 105,
+      "spe": 85
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 12
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 5,
+   "swiss": "9-2",
+   "trainer": "David Rodríguez",
+   "trainer_tag": "davidness",
+   "preis": "$1,000 280 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/ivFSug3r",
+   "paste_id": "ivFSug3r",
+   "team_name": "David Rodriguez's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Garchomp",
+    "Sneasler",
+    "Kingambit",
+    "Whimsicott",
+    "Basculegion"
+   ],
+   "pokemon": [
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Chople Berry",
+     "item_de": "Rospelbeere",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Kowtow Cleave",
+      "Low Kick",
+      "Sucker Punch",
+      "Iron Head"
+     ],
+     "moves_de": [
+      "Kniefallspalter",
+      "Fußkick",
+      "Tiefschlag",
+      "Eisenschädel"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Dragon Claw",
+      "Earthquake",
+      "Rock Slide",
+      "Protect"
+     ],
+     "moves_de": [
+      "Drachenklaue",
+      "Erdbeben",
+      "Steinhagel",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Whimsicott",
+     "name_de": "Elfun",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Moonblast",
+      "Tailwind",
+      "Encore",
+      "Protect"
+     ],
+     "moves_de": [
+      "Mondgewalt",
+      "Rückenwind",
+      "Zugabe",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 67,
+      "def": 85,
+      "spa": 77,
+      "spd": 75,
+      "spe": 116
+     },
+     "evs": ""
+    },
+    {
+     "name": "Basculegion",
+     "name_de": "Salmagnis",
+     "item": "Mystic Water",
+     "item_de": "Zauberwasser",
+     "ability": "Adaptability",
+     "ability_de": "Anpassung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Wave Crash",
+      "Aqua Jet",
+      "Last Respects",
+      "Protect"
+     ],
+     "moves_de": [
+      "Wellentackle",
+      "Wasserdüse",
+      "Letzte Ehre",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 112,
+      "def": 65,
+      "spa": 80,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Weather Ball",
+      "Heat Wave",
+      "Solar Beam",
+      "Protect"
+     ],
+     "moves_de": [
+      "Meteorologe",
+      "Hitzewelle",
+      "Solarstrahl",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "White Herb",
+     "item_de": "Schlohkraut",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Close Combat",
+      "Dire Claw",
+      "Fake Out",
+      "Protect"
+     ],
+     "moves_de": [
+      "Nahkampf",
+      "Unheilsklauen",
+      "Mogelhieb",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 13
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 6,
+   "swiss": "9-2",
+   "trainer": "Otoniel Longorio",
+   "trainer_tag": "",
+   "preis": "$1,000 280 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/Pjo8NVAH",
+   "paste_id": "Pjo8NVAH",
+   "team_name": "Otoniel Longorio López's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Aerodactyl Mega",
+    "Farigiraf",
+    "Kingambit",
+    "Sylveon",
+    "Garchomp"
+   ],
+   "pokemon": [
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Heat Wave",
+      "Weather Ball",
+      "Solar Beam"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Hitzewelle",
+      "Meteorologe",
+      "Solarstrahl"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Farigiraf",
+     "name_de": "Farigiraf",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Armor Tail",
+     "ability_de": "Schweifrüstung",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Psychic",
+      "Trick Room",
+      "Thunderbolt",
+      "Helping Hand"
+     ],
+     "moves_de": [
+      "Psychokinese",
+      "Bizarroraum",
+      "Donnerblitz",
+      "Rechte Hand"
+     ],
+     "typen": [
+      "Normal",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 90,
+      "def": 70,
+      "spa": 110,
+      "spd": 70,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Aerodactyl",
+     "name_de": "Aerodactyl",
+     "item": "Aerodactylite",
+     "item_de": "Aerodactylonit",
+     "ability": "Unnerve",
+     "ability_de": "Anspannung",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Tailwind",
+      "Rock Slide",
+      "Protect",
+      "Dual Wingbeat"
+     ],
+     "moves_de": [
+      "Rückenwind",
+      "Steinhagel",
+      "Schutzschild",
+      "Doppelflügel"
+     ],
+     "typen": [
+      "Rock",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 105,
+      "def": 65,
+      "spa": 60,
+      "spd": 75,
+      "spe": 130
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Low Kick",
+      "Kowtow Cleave",
+      "Iron Head",
+      "Sucker Punch"
+     ],
+     "moves_de": [
+      "Fußkick",
+      "Kniefallspalter",
+      "Eisenschädel",
+      "Tiefschlag"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Earthquake",
+      "Dragon Claw",
+      "Stomping Tantrum",
+      "Rock Slide"
+     ],
+     "moves_de": [
+      "Erdbeben",
+      "Drachenklaue",
+      "Fruststampfer",
+      "Steinhagel"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sylveon",
+     "name_de": "Feelinara",
+     "item": "Fairy Feather",
+     "item_de": "Feendaune",
+     "ability": "Pixilate",
+     "ability_de": "Feenschicht",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Detect",
+      "Hyper Voice",
+      "Hyper Beam",
+      "Quick Attack"
+     ],
+     "moves_de": [
+      "Scanner",
+      "Schallwelle",
+      "Hyperstrahl",
+      "Ruckzuckhieb"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 65,
+      "def": 65,
+      "spa": 110,
+      "spd": 130,
+      "spe": 60
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 14
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 7,
+   "swiss": "9-2",
+   "trainer": "Chase Matteo",
+   "trainer_tag": "Chase",
+   "preis": "$1,000 280 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/Wc7PKKX7",
+   "paste_id": "Wc7PKKX7",
+   "team_name": "Chase Matteo's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Garchomp",
+    "Grimmsnarl",
+    "Archaludon",
+    "Pelipper",
+    "Venusaur"
+   ],
+   "pokemon": [
+    {
+     "name": "Grimmsnarl",
+     "name_de": "Olangaar",
+     "item": "Light Clay",
+     "item_de": "Lichtlehm",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Impish",
+     "nature_de": "Pfiffig",
+     "moves": [
+      "Light Screen",
+      "Reflect",
+      "Parting Shot",
+      "Spirit Break"
+     ],
+     "moves_de": [
+      "Lichtschild",
+      "Reflektor",
+      "Abgangstirade",
+      "Seelenbruch"
+     ],
+     "typen": [
+      "Dark",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 120,
+      "def": 65,
+      "spa": 95,
+      "spd": 75,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Weather Ball",
+      "Hurricane",
+      "Protect",
+      "Tailwind"
+     ],
+     "moves_de": [
+      "Meteorologe",
+      "Orkan",
+      "Schutzschild",
+      "Rückenwind"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Dragon Claw",
+      "Earthquake",
+      "Rock Slide",
+      "Bulldoze"
+     ],
+     "moves_de": [
+      "Drachenklaue",
+      "Erdbeben",
+      "Steinhagel",
+      "Dampfwalze"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Venusaur",
+     "name_de": "Bisaflor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Chlorophyll",
+     "ability_de": "Chlorophyll",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Sludge Bomb",
+      "Sleep Powder",
+      "Earth Power",
+      "Protect"
+     ],
+     "moves_de": [
+      "Matschbombe",
+      "Schlafpuder",
+      "Erdkräfte",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 82,
+      "def": 83,
+      "spa": 100,
+      "spd": 100,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Dragon Pulse",
+      "Protect",
+      "Electro Shot",
+      "Snarl"
+     ],
+     "moves_de": [
+      "Drachenpuls",
+      "Schutzschild",
+      "Stromstrahl",
+      "Standpauke"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Heat Wave",
+      "Weather Ball",
+      "Hurricane"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Hitzewelle",
+      "Meteorologe",
+      "Orkan"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 15
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 8,
+   "swiss": "9-2",
+   "trainer": "Luis Pérez",
+   "trainer_tag": "MylAth",
+   "preis": "$1,000 280 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/42ZG1uZv",
+   "paste_id": "42ZG1uZv",
+   "team_name": "Luis Perez Alcocer's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Garchomp Mega Z",
+    "Incineroar",
+    "Farigiraf",
+    "Sylveon",
+    "Venusaur"
+   ],
+   "pokemon": [
+    {
+     "name": "Incineroar",
+     "name_de": "Fuegro",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Relaxed",
+     "nature_de": "Locker",
+     "moves": [
+      "Fake Out",
+      "Snarl",
+      "Flare Blitz",
+      "Parting Shot"
+     ],
+     "moves_de": [
+      "Mogelhieb",
+      "Standpauke",
+      "Flammenblitz",
+      "Abgangstirade"
+     ],
+     "typen": [
+      "Fire",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 90,
+      "spa": 80,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Venusaur",
+     "name_de": "Bisaflor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Chlorophyll",
+     "ability_de": "Chlorophyll",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Earth Power",
+      "Sludge Bomb",
+      "Sleep Powder",
+      "Protect"
+     ],
+     "moves_de": [
+      "Erdkräfte",
+      "Matschbombe",
+      "Schlafpuder",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 82,
+      "def": 83,
+      "spa": 100,
+      "spd": 100,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Heat Wave",
+      "Ancient Power",
+      "Weather Ball",
+      "Protect"
+     ],
+     "moves_de": [
+      "Hitzewelle",
+      "Antik-Kraft",
+      "Meteorologe",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Garchompite Z",
+     "item_de": "Knakracknit Z",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Power Gem",
+      "Draco Meteor",
+      "Earth Power",
+      "Protect"
+     ],
+     "moves_de": [
+      "Juwelenkraft",
+      "Draco Meteor",
+      "Erdkräfte",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sylveon",
+     "name_de": "Feelinara",
+     "item": "Fairy Feather",
+     "item_de": "Feendaune",
+     "ability": "Pixilate",
+     "ability_de": "Feenschicht",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Detect",
+      "Hyper Voice",
+      "Yawn",
+      "Quick Attack"
+     ],
+     "moves_de": [
+      "Scanner",
+      "Schallwelle",
+      "Gähner",
+      "Ruckzuckhieb"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 65,
+      "def": 65,
+      "spa": 110,
+      "spd": 130,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Farigiraf",
+     "name_de": "Farigiraf",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Armor Tail",
+     "ability_de": "Schweifrüstung",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Psychic",
+      "Protect",
+      "Trick Room",
+      "Thunderbolt"
+     ],
+     "moves_de": [
+      "Psychokinese",
+      "Schutzschild",
+      "Bizarroraum",
+      "Donnerblitz"
+     ],
+     "typen": [
+      "Normal",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 90,
+      "def": 70,
+      "spa": 110,
+      "spd": 70,
+      "spe": 60
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 16
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 9,
+   "swiss": "9-2",
+   "trainer": "Jimmy Suárez",
+   "trainer_tag": "Sley",
+   "preis": "$750 200 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/8fRRvXTY",
+   "paste_id": "8fRRvXTY",
+   "team_name": "Jimmy Suarez's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Raichu Mega Y",
+    "Floette Mega",
+    "Incineroar",
+    "Basculegion",
+    "Volcarona",
+    "Rillaboom"
+   ],
+   "pokemon": [
+    {
+     "name": "Floette-Eternal",
+     "name_de": "Floette [Ewigblütler]",
+     "item": "Floettite",
+     "item_de": "Floetteonit",
+     "ability": "Flower Veil",
+     "ability_de": "Blütenhülle",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Moonblast",
+      "Dazzling Gleam",
+      "Calm Mind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Mondgewalt",
+      "Zauberschein",
+      "Gedankengut",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 74,
+      "atk": 65,
+      "def": 67,
+      "spa": 125,
+      "spd": 128,
+      "spe": 92
+     },
+     "evs": ""
+    },
+    {
+     "name": "Basculegion",
+     "name_de": "Salmagnis",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Adaptability",
+     "ability_de": "Anpassung",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Wave Crash",
+      "Last Respects",
+      "Flip Turn",
+      "Soak"
+     ],
+     "moves_de": [
+      "Wellentackle",
+      "Letzte Ehre",
+      "Rollwende",
+      "Überflutung"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 112,
+      "def": 65,
+      "spa": 80,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    },
+    {
+     "name": "Volcarona",
+     "name_de": "Ramoth",
+     "item": "Grassy Seed",
+     "item_de": "Gras-Samen",
+     "ability": "Flame Body",
+     "ability_de": "Flammkörper",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Heat Wave",
+      "Giga Drain",
+      "Quiver Dance",
+      "Protect"
+     ],
+     "moves_de": [
+      "Hitzewelle",
+      "Gigasauger",
+      "Falterreigen",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Bug",
+      "Fire"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 60,
+      "def": 65,
+      "spa": 135,
+      "spd": 105,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Incineroar",
+     "name_de": "Fuegro",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Impish",
+     "nature_de": "Pfiffig",
+     "moves": [
+      "Fake Out",
+      "Flare Blitz",
+      "Throat Chop",
+      "Parting Shot"
+     ],
+     "moves_de": [
+      "Mogelhieb",
+      "Flammenblitz",
+      "Neck Strike",
+      "Abgangstirade"
+     ],
+     "typen": [
+      "Fire",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 90,
+      "spa": 80,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Rillaboom",
+     "name_de": "Gortrom",
+     "item": "Miracle Seed",
+     "item_de": "Wundersaat",
+     "ability": "Grassy Surge",
+     "ability_de": "Gras-Erzeuger",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Fake Out",
+      "Grassy Glide",
+      "Wood Hammer",
+      "U-turn"
+     ],
+     "moves_de": [
+      "Mogelhieb",
+      "Grasrutsche",
+      "Holzhammer",
+      "Kehrtwende"
+     ],
+     "typen": [
+      "Grass"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 125,
+      "def": 90,
+      "spa": 60,
+      "spd": 70,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Raichu",
+     "name_de": "Raichu",
+     "item": "Raichunite Y",
+     "item_de": "Raichunit Y",
+     "ability": "Lightning Rod",
+     "ability_de": "Blitzfänger",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Fake Out",
+      "Zap Cannon",
+      "Focus Blast",
+      "Protect"
+     ],
+     "moves_de": [
+      "Mogelhieb",
+      "Blitzkanone",
+      "Fokusstoß",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Electric"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 90,
+      "def": 55,
+      "spa": 90,
+      "spd": 80,
+      "spe": 110
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 17
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 10,
+   "swiss": "9-2",
+   "trainer": "Alexander Canseco",
+   "trainer_tag": "CansecoChann",
+   "preis": "$750 200 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/xGUOnMDk",
+   "paste_id": "xGUOnMDk",
+   "team_name": "alexander canseco salas's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Delphox Mega",
+    "Staraptor Mega",
+    "Sneasler",
+    "Kingambit",
+    "Torkoal",
+    "Farigiraf"
+   ],
+   "pokemon": [
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Poison Touch",
+     "ability_de": "Giftgriff",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Close Combat",
+      "Rock Slide",
+      "Poison Jab",
+      "Fake Out"
+     ],
+     "moves_de": [
+      "Nahkampf",
+      "Steinhagel",
+      "Gifthieb",
+      "Mogelhieb"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Farigiraf",
+     "name_de": "Farigiraf",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Armor Tail",
+     "ability_de": "Schweifrüstung",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Helping Hand",
+      "Psychic",
+      "Protect",
+      "Trick Room"
+     ],
+     "moves_de": [
+      "Rechte Hand",
+      "Psychokinese",
+      "Schutzschild",
+      "Bizarroraum"
+     ],
+     "typen": [
+      "Normal",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 90,
+      "def": 70,
+      "spa": 110,
+      "spd": 70,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Staraptor",
+     "name_de": "Staraptor",
+     "item": "Staraptite",
+     "item_de": "Staraptornit",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Brave Bird",
+      "Close Combat",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Sturzflug",
+      "Nahkampf",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Normal",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 120,
+      "def": 70,
+      "spa": 50,
+      "spd": 60,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Delphox",
+     "name_de": "Fennexis",
+     "item": "Delphoxite",
+     "item_de": "Fennexisnit",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Heat Wave",
+      "Psychic",
+      "Nasty Plot",
+      "Protect"
+     ],
+     "moves_de": [
+      "Hitzewelle",
+      "Psychokinese",
+      "Ränkeschmied",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 75,
+      "atk": 69,
+      "def": 72,
+      "spa": 114,
+      "spd": 100,
+      "spe": 104
+     },
+     "evs": ""
+    },
+    {
+     "name": "Torkoal",
+     "name_de": "Qurtel",
+     "item": "Charcoal",
+     "item_de": "Holzkohle",
+     "ability": "Drought",
+     "ability_de": "Dürre",
+     "nature": "Quiet",
+     "nature_de": "Ruhig",
+     "moves": [
+      "Eruption",
+      "Earth Power",
+      "Weather Ball",
+      "Protect"
+     ],
+     "moves_de": [
+      "Eruption",
+      "Erdkräfte",
+      "Meteorologe",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire"
+     ],
+     "base_stats": {
+      "hp": 70,
+      "atk": 85,
+      "def": 140,
+      "spa": 85,
+      "spd": 70,
+      "spe": 20
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Kowtow Cleave",
+      "Sucker Punch",
+      "Iron Head",
+      "Protect"
+     ],
+     "moves_de": [
+      "Kniefallspalter",
+      "Tiefschlag",
+      "Eisenschädel",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 18
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 11,
+   "swiss": "9-2",
+   "trainer": "Ernesto Serpa",
+   "trainer_tag": "SkrollexVG",
+   "preis": "$750 200 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/gDDHl7VE",
+   "paste_id": "gDDHl7VE",
+   "team_name": "Ernesto Serpa's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Delphox Mega",
+    "Floette Mega",
+    "Incineroar",
+    "Kingambit",
+    "Sneasler",
+    "Sinistcha"
+   ],
+   "pokemon": [
+    {
+     "name": "Incineroar",
+     "name_de": "Fuegro",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Careful",
+     "nature_de": "Sacht",
+     "moves": [
+      "Fake Out",
+      "Flare Blitz",
+      "Snarl",
+      "Parting Shot"
+     ],
+     "moves_de": [
+      "Mogelhieb",
+      "Flammenblitz",
+      "Standpauke",
+      "Abgangstirade"
+     ],
+     "typen": [
+      "Fire",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 90,
+      "spa": 80,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Poison Touch",
+     "ability_de": "Giftgriff",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Poison Jab",
+      "Close Combat",
+      "Fake Out",
+      "Quick Guard"
+     ],
+     "moves_de": [
+      "Gifthieb",
+      "Nahkampf",
+      "Mogelhieb",
+      "Rapidschutz"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Floette-Eternal",
+     "name_de": "Floette [Ewigblütler]",
+     "item": "Floettite",
+     "item_de": "Floetteonit",
+     "ability": "Flower Veil",
+     "ability_de": "Blütenhülle",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Dazzling Gleam",
+      "Draining Kiss",
+      "Calm Mind"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Zauberschein",
+      "Diebeskuss",
+      "Gedankengut"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 74,
+      "atk": 65,
+      "def": 67,
+      "spa": 125,
+      "spd": 128,
+      "spe": 92
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sinistcha-Masterpiece",
+     "name_de": "Fatalitcha [Edle Form]",
+     "item": "Occa Berry",
+     "item_de": "Koakobeere",
+     "ability": "Hospitality",
+     "ability_de": "Gastlichkeit",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Matcha Gotcha",
+      "Trick Room",
+      "Rage Powder",
+      "Protect"
+     ],
+     "moves_de": [
+      "Quirlschuss",
+      "Bizarroraum",
+      "Wutpulver",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 71,
+      "atk": 60,
+      "def": 106,
+      "spa": 121,
+      "spd": 80,
+      "spe": 70
+     },
+     "evs": ""
+    },
+    {
+     "name": "Delphox",
+     "name_de": "Fennexis",
+     "item": "Delphoxite",
+     "item_de": "Fennexisnit",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Heat Wave",
+      "Nasty Plot",
+      "Psychic",
+      "Protect"
+     ],
+     "moves_de": [
+      "Hitzewelle",
+      "Ränkeschmied",
+      "Psychokinese",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 75,
+      "atk": 69,
+      "def": 72,
+      "spa": 114,
+      "spd": 100,
+      "spe": 104
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Kowtow Cleave",
+      "Sucker Punch",
+      "Swords Dance",
+      "Protect"
+     ],
+     "moves_de": [
+      "Kniefallspalter",
+      "Tiefschlag",
+      "Schwerttanz",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 19
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 12,
+   "swiss": "8-3",
+   "trainer": "Jonathan Barradas",
+   "trainer_tag": "",
+   "preis": "$750 200 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/FctB7M7R",
+   "paste_id": "FctB7M7R",
+   "team_name": "Jonathan Josue Barradas Ruiz's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Golisopod Mega",
+    "Raichu Mega X",
+    "Basculegion F",
+    "Pelipper",
+    "Grimmsnarl",
+    "Archaludon"
+   ],
+   "pokemon": [
+    {
+     "name": "Golisopod",
+     "name_de": "Tectass",
+     "item": "Golisopite",
+     "item_de": "Tectassnit",
+     "ability": "Emergency Exit",
+     "ability_de": "Rückzug",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Protect",
+      "Leech Life",
+      "Iron Head",
+      "Sucker Punch"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Blutsauger",
+      "Eisenschädel",
+      "Tiefschlag"
+     ],
+     "typen": [
+      "Bug",
+      "Water"
+     ],
+     "base_stats": {
+      "hp": 75,
+      "atk": 125,
+      "def": 140,
+      "spa": 60,
+      "spd": 90,
+      "spe": 40
+     },
+     "evs": ""
+    },
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Electro Shot",
+      "Dragon Pulse",
+      "Snarl",
+      "Protect"
+     ],
+     "moves_de": [
+      "Stromstrahl",
+      "Drachenpuls",
+      "Standpauke",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Grimmsnarl",
+     "name_de": "Olangaar",
+     "item": "Light Clay",
+     "item_de": "Lichtlehm",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Careful",
+     "nature_de": "Sacht",
+     "moves": [
+      "Spirit Break",
+      "Reflect",
+      "Light Screen",
+      "Parting Shot"
+     ],
+     "moves_de": [
+      "Seelenbruch",
+      "Reflektor",
+      "Lichtschild",
+      "Abgangstirade"
+     ],
+     "typen": [
+      "Dark",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 120,
+      "def": 65,
+      "spa": 95,
+      "spd": 75,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Mystic Water",
+     "item_de": "Zauberwasser",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Weather Ball",
+      "Hurricane",
+      "Muddy Water",
+      "Tailwind"
+     ],
+     "moves_de": [
+      "Meteorologe",
+      "Orkan",
+      "Lehmbrühe",
+      "Rückenwind"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Raichu",
+     "name_de": "Raichu",
+     "item": "Raichunite X",
+     "item_de": "Raichunit X",
+     "ability": "Lightning Rod",
+     "ability_de": "Blitzfänger",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Volt Switch",
+      "Fake Out",
+      "Volt Tackle",
+      "Feint"
+     ],
+     "moves_de": [
+      "Voltwechsel",
+      "Mogelhieb",
+      "Volttackle",
+      "Offenlegung"
+     ],
+     "typen": [
+      "Electric"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 90,
+      "def": 55,
+      "spa": 90,
+      "spd": 80,
+      "spe": 110
+     },
+     "evs": ""
+    },
+    {
+     "name": "Basculegion-F",
+     "name_de": "Salmagnis [Weiblich]",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Swift Swim",
+     "ability_de": "Wassertempo",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Muddy Water",
+      "Shadow Ball",
+      "Ice Beam"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Lehmbrühe",
+      "Spukball",
+      "Eisstrahl"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 92,
+      "def": 65,
+      "spa": 100,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 20
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 13,
+   "swiss": "8-3",
+   "trainer": "Emanuel Hernández",
+   "trainer_tag": "",
+   "preis": "$750 200 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/hZG7YZzn",
+   "paste_id": "hZG7YZzn",
+   "team_name": "Emanuel Hernandez's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Raichu Mega Y",
+    "Primarina",
+    "Kingambit",
+    "Arcanine Hisui",
+    "Sneasler",
+    "Rillaboom"
+   ],
+   "pokemon": [
+    {
+     "name": "Primarina",
+     "name_de": "Primarene",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Liquid Voice",
+     "ability_de": "Plätscherstimme",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Hyper Voice",
+      "Moonblast",
+      "Calm Mind"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Schallwelle",
+      "Mondgewalt",
+      "Gedankengut"
+     ],
+     "typen": [
+      "Water",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 74,
+      "def": 74,
+      "spa": 126,
+      "spd": 116,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Rillaboom",
+     "name_de": "Gortrom",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Grassy Surge",
+     "ability_de": "Gras-Erzeuger",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Wood Hammer",
+      "Grassy Glide",
+      "High Horsepower",
+      "Fake Out"
+     ],
+     "moves_de": [
+      "Holzhammer",
+      "Grasrutsche",
+      "Pferdestärke",
+      "Mogelhieb"
+     ],
+     "typen": [
+      "Grass"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 125,
+      "def": 90,
+      "spa": 60,
+      "spd": 70,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Raichu",
+     "name_de": "Raichu",
+     "item": "Raichunite Y",
+     "item_de": "Raichunit Y",
+     "ability": "Lightning Rod",
+     "ability_de": "Blitzfänger",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Protect",
+      "Zap Cannon",
+      "Focus Blast",
+      "Fake Out"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Blitzkanone",
+      "Fokusstoß",
+      "Mogelhieb"
+     ],
+     "typen": [
+      "Electric"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 90,
+      "def": 55,
+      "spa": 90,
+      "spd": 80,
+      "spe": 110
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "White Herb",
+     "item_de": "Schlohkraut",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Protect",
+      "Close Combat",
+      "Dire Claw",
+      "Rock Slide"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Nahkampf",
+      "Unheilsklauen",
+      "Steinhagel"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Protect",
+      "Kowtow Cleave",
+      "Sucker Punch",
+      "Swords Dance"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Kniefallspalter",
+      "Tiefschlag",
+      "Schwerttanz"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    },
+    {
+     "name": "Arcanine-Hisui",
+     "name_de": "Arkani [Hisui-Form]",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Rock Head",
+     "ability_de": "Steinhaupt",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Protect",
+      "Flare Blitz",
+      "Head Smash",
+      "Extreme Speed"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Flammenblitz",
+      "Kopfstoß",
+      "Turbotempo"
+     ],
+     "typen": [
+      "Fire",
+      "Rock"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 80,
+      "spa": 95,
+      "spd": 80,
+      "spe": 90
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 21
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 14,
+   "swiss": "8-3",
+   "trainer": "Enrique Grimaldo",
+   "trainer_tag": "EGrim",
+   "preis": "$750 200 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/4w7xlTYk",
+   "paste_id": "4w7xlTYk",
+   "team_name": "Enrique Grimaldo's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Floette Mega",
+    "Basculegion",
+    "Incineroar",
+    "Pelipper",
+    "Sinistcha",
+    "Archaludon"
+   ],
+   "pokemon": [
+    {
+     "name": "Sinistcha-Masterpiece",
+     "name_de": "Fatalitcha [Edle Form]",
+     "item": "Colbur Berry",
+     "item_de": "Burleobeere",
+     "ability": "Hospitality",
+     "ability_de": "Gastlichkeit",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Matcha Gotcha",
+      "Rage Powder",
+      "Trick Room",
+      "Protect"
+     ],
+     "moves_de": [
+      "Quirlschuss",
+      "Wutpulver",
+      "Bizarroraum",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 71,
+      "atk": 60,
+      "def": 106,
+      "spa": 121,
+      "spd": 80,
+      "spe": 70
+     },
+     "evs": ""
+    },
+    {
+     "name": "Basculegion",
+     "name_de": "Salmagnis",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Adaptability",
+     "ability_de": "Anpassung",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Wave Crash",
+      "Last Respects",
+      "Phantom Force",
+      "Flip Turn"
+     ],
+     "moves_de": [
+      "Wellentackle",
+      "Letzte Ehre",
+      "Phantomkraft",
+      "Rollwende"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 112,
+      "def": 65,
+      "spa": 80,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    },
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Electro Shot",
+      "Dragon Pulse",
+      "Protect",
+      "Flash Cannon"
+     ],
+     "moves_de": [
+      "Stromstrahl",
+      "Drachenpuls",
+      "Schutzschild",
+      "Lichtkanone"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Floette-Eternal",
+     "name_de": "Floette [Ewigblütler]",
+     "item": "Floettite",
+     "item_de": "Floetteonit",
+     "ability": "Flower Veil",
+     "ability_de": "Blütenhülle",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Calm Mind",
+      "Moonblast",
+      "Dazzling Gleam",
+      "Protect"
+     ],
+     "moves_de": [
+      "Gedankengut",
+      "Mondgewalt",
+      "Zauberschein",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 74,
+      "atk": 65,
+      "def": 67,
+      "spa": 125,
+      "spd": 128,
+      "spe": 92
+     },
+     "evs": ""
+    },
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Hurricane",
+      "Weather Ball",
+      "Tailwind",
+      "Wide Guard"
+     ],
+     "moves_de": [
+      "Orkan",
+      "Meteorologe",
+      "Rückenwind",
+      "Rundumschutz"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Incineroar",
+     "name_de": "Fuegro",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Flare Blitz",
+      "Fake Out",
+      "Parting Shot",
+      "Throat Chop"
+     ],
+     "moves_de": [
+      "Flammenblitz",
+      "Mogelhieb",
+      "Abgangstirade",
+      "Neck Strike"
+     ],
+     "typen": [
+      "Fire",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 90,
+      "spa": 80,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 22
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 15,
+   "swiss": "8-3",
+   "trainer": "Javier Loyo",
+   "trainer_tag": "Taquito",
+   "preis": "$750 200 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/LOddeqdq",
+   "paste_id": "LOddeqdq",
+   "team_name": "José Javier Loyo Gutiérrez's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Garchomp Mega Z",
+    "Pelipper",
+    "Venusaur",
+    "Grimmsnarl",
+    "Archaludon"
+   ],
+   "pokemon": [
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Garchompite Z",
+     "item_de": "Knakracknit Z",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Draco Meteor",
+      "Earth Power",
+      "Power Gem",
+      "Protect"
+     ],
+     "moves_de": [
+      "Draco Meteor",
+      "Erdkräfte",
+      "Juwelenkraft",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Dragon Pulse",
+      "Protect",
+      "Electro Shot",
+      "Snarl"
+     ],
+     "moves_de": [
+      "Drachenpuls",
+      "Schutzschild",
+      "Stromstrahl",
+      "Standpauke"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Venusaur",
+     "name_de": "Bisaflor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Chlorophyll",
+     "ability_de": "Chlorophyll",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Sludge Bomb",
+      "Leaf Storm",
+      "Protect",
+      "Sleep Powder"
+     ],
+     "moves_de": [
+      "Matschbombe",
+      "Blättersturm",
+      "Schutzschild",
+      "Schlafpuder"
+     ],
+     "typen": [
+      "Grass",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 82,
+      "def": 83,
+      "spa": 100,
+      "spd": 100,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Grimmsnarl",
+     "name_de": "Olangaar",
+     "item": "Light Clay",
+     "item_de": "Lichtlehm",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Careful",
+     "nature_de": "Sacht",
+     "moves": [
+      "Parting Shot",
+      "Spirit Break",
+      "Reflect",
+      "Light Screen"
+     ],
+     "moves_de": [
+      "Abgangstirade",
+      "Seelenbruch",
+      "Reflektor",
+      "Lichtschild"
+     ],
+     "typen": [
+      "Dark",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 120,
+      "def": 65,
+      "spa": 95,
+      "spd": 75,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Weather Ball",
+      "Tailwind",
+      "Hurricane",
+      "Wide Guard"
+     ],
+     "moves_de": [
+      "Meteorologe",
+      "Rückenwind",
+      "Orkan",
+      "Rundumschutz"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Weather Ball",
+      "Heat Wave",
+      "Helping Hand",
+      "Protect"
+     ],
+     "moves_de": [
+      "Meteorologe",
+      "Hitzewelle",
+      "Rechte Hand",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 23
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 16,
+   "swiss": "8-3",
+   "trainer": "Alejandro Rolón",
+   "trainer_tag": "Lego0",
+   "preis": "$750 200 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/qgmRMlhm",
+   "paste_id": "qgmRMlhm",
+   "team_name": "Alejandro Rolón's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Floette Mega",
+    "Salamence Mega",
+    "Basculegion",
+    "Kingambit",
+    "Incineroar",
+    "Vivillon"
+   ],
+   "pokemon": [
+    {
+     "name": "Floette-Eternal",
+     "name_de": "Floette [Ewigblütler]",
+     "item": "Floettite",
+     "item_de": "Floetteonit",
+     "ability": "Flower Veil",
+     "ability_de": "Blütenhülle",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Moonblast",
+      "Dazzling Gleam",
+      "Calm Mind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Mondgewalt",
+      "Zauberschein",
+      "Gedankengut",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 74,
+      "atk": 65,
+      "def": 67,
+      "spa": 125,
+      "spd": 128,
+      "spe": 92
+     },
+     "evs": ""
+    },
+    {
+     "name": "Basculegion",
+     "name_de": "Salmagnis",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Adaptability",
+     "ability_de": "Anpassung",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Last Respects",
+      "Aqua Jet",
+      "Flip Turn",
+      "Wave Crash"
+     ],
+     "moves_de": [
+      "Letzte Ehre",
+      "Wasserdüse",
+      "Rollwende",
+      "Wellentackle"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 112,
+      "def": 65,
+      "spa": 80,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    },
+    {
+     "name": "Vivillon",
+     "name_de": "Vivillon",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Compound Eyes",
+     "ability_de": "Facettenauge",
+     "nature": "Bashful",
+     "nature_de": "Zaghaft",
+     "moves": [
+      "Sleep Powder",
+      "Hurricane",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schlafpuder",
+      "Orkan",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Bug",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 52,
+      "def": 50,
+      "spa": 90,
+      "spd": 50,
+      "spe": 89
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Sucker Punch",
+      "Iron Head",
+      "Kowtow Cleave",
+      "Low Kick"
+     ],
+     "moves_de": [
+      "Tiefschlag",
+      "Eisenschädel",
+      "Kniefallspalter",
+      "Fußkick"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    },
+    {
+     "name": "Salamence",
+     "name_de": "Brutalanda",
+     "item": "Salamencite",
+     "item_de": "Brutalandanit",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Hyper Voice",
+      "Tailwind",
+      "Flamethrower",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schallwelle",
+      "Rückenwind",
+      "Flammenwurf",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 135,
+      "def": 80,
+      "spa": 110,
+      "spd": 80,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Incineroar",
+     "name_de": "Fuegro",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Careful",
+     "nature_de": "Sacht",
+     "moves": [
+      "Parting Shot",
+      "Fake Out",
+      "Flare Blitz",
+      "Throat Chop"
+     ],
+     "moves_de": [
+      "Abgangstirade",
+      "Mogelhieb",
+      "Flammenblitz",
+      "Neck Strike"
+     ],
+     "typen": [
+      "Fire",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 90,
+      "spa": 80,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 24
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 17,
+   "swiss": "8-3",
+   "trainer": "Joshua Denk",
+   "trainer_tag": "",
+   "preis": "160 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/lu3OsHzT",
+   "paste_id": "lu3OsHzT",
+   "team_name": "Joshua Denk's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Incineroar",
+    "Sylveon",
+    "Toxapex",
+    "Venusaur",
+    "Garchomp"
+   ],
+   "pokemon": [
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Heat Wave",
+      "Weather Ball",
+      "Ancient Power",
+      "Protect"
+     ],
+     "moves_de": [
+      "Hitzewelle",
+      "Meteorologe",
+      "Antik-Kraft",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Venusaur",
+     "name_de": "Bisaflor",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Chlorophyll",
+     "ability_de": "Chlorophyll",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Leaf Storm",
+      "Sludge Bomb",
+      "Earth Power",
+      "Protect"
+     ],
+     "moves_de": [
+      "Blättersturm",
+      "Matschbombe",
+      "Erdkräfte",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 82,
+      "def": 83,
+      "spa": 100,
+      "spd": 100,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Dragon Claw",
+      "Earthquake",
+      "Rock Slide",
+      "Stomping Tantrum"
+     ],
+     "moves_de": [
+      "Drachenklaue",
+      "Erdbeben",
+      "Steinhagel",
+      "Fruststampfer"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Incineroar",
+     "name_de": "Fuegro",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Impish",
+     "nature_de": "Pfiffig",
+     "moves": [
+      "Flare Blitz",
+      "Throat Chop",
+      "Fake Out",
+      "Parting Shot"
+     ],
+     "moves_de": [
+      "Flammenblitz",
+      "Neck Strike",
+      "Mogelhieb",
+      "Abgangstirade"
+     ],
+     "typen": [
+      "Fire",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 90,
+      "spa": 80,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Toxapex",
+     "name_de": "Aggrostella",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Regenerator",
+     "ability_de": "Belebekraft",
+     "nature": "Relaxed",
+     "nature_de": "Locker",
+     "moves": [
+      "Infestation",
+      "Toxic",
+      "Wide Guard",
+      "Baneful Bunker"
+     ],
+     "moves_de": [
+      "Plage",
+      "Toxin",
+      "Rundumschutz",
+      "Bunker"
+     ],
+     "typen": [
+      "Poison",
+      "Water"
+     ],
+     "base_stats": {
+      "hp": 50,
+      "atk": 63,
+      "def": 152,
+      "spa": 53,
+      "spd": 142,
+      "spe": 35
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sylveon",
+     "name_de": "Feelinara",
+     "item": "Fairy Feather",
+     "item_de": "Feendaune",
+     "ability": "Pixilate",
+     "ability_de": "Feenschicht",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Hyper Voice",
+      "Quick Attack",
+      "Yawn",
+      "Detect"
+     ],
+     "moves_de": [
+      "Schallwelle",
+      "Ruckzuckhieb",
+      "Gähner",
+      "Scanner"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 65,
+      "def": 65,
+      "spa": 110,
+      "spd": 130,
+      "spe": 60
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 25
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 18,
+   "swiss": "8-3",
+   "trainer": "Xavier Méndez",
+   "trainer_tag": "Xavi",
+   "preis": "160 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/VRnWQmEF",
+   "paste_id": "VRnWQmEF",
+   "team_name": "Xavier Méndez's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Garchomp Mega Z",
+    "Incineroar",
+    "Sneasler",
+    "Torkoal",
+    "Farigiraf",
+    "Sylveon"
+   ],
+   "pokemon": [
+    {
+     "name": "Farigiraf",
+     "name_de": "Farigiraf",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Armor Tail",
+     "ability_de": "Schweifrüstung",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Psychic",
+      "Protect",
+      "Trick Room",
+      "Helping Hand"
+     ],
+     "moves_de": [
+      "Psychokinese",
+      "Schutzschild",
+      "Bizarroraum",
+      "Rechte Hand"
+     ],
+     "typen": [
+      "Normal",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 90,
+      "def": 70,
+      "spa": 110,
+      "spd": 70,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Torkoal",
+     "name_de": "Qurtel",
+     "item": "Charcoal",
+     "item_de": "Holzkohle",
+     "ability": "Drought",
+     "ability_de": "Dürre",
+     "nature": "Quiet",
+     "nature_de": "Ruhig",
+     "moves": [
+      "Eruption",
+      "Weather Ball",
+      "Earth Power",
+      "Protect"
+     ],
+     "moves_de": [
+      "Eruption",
+      "Meteorologe",
+      "Erdkräfte",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire"
+     ],
+     "base_stats": {
+      "hp": 70,
+      "atk": 85,
+      "def": 140,
+      "spa": 85,
+      "spd": 70,
+      "spe": 20
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Garchompite Z",
+     "item_de": "Knakracknit Z",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Draco Meteor",
+      "Earth Power",
+      "Protect",
+      "Power Gem"
+     ],
+     "moves_de": [
+      "Draco Meteor",
+      "Erdkräfte",
+      "Schutzschild",
+      "Juwelenkraft"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Incineroar",
+     "name_de": "Fuegro",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Sassy",
+     "nature_de": "Forsch",
+     "moves": [
+      "Flare Blitz",
+      "Snarl",
+      "Fake Out",
+      "Parting Shot"
+     ],
+     "moves_de": [
+      "Flammenblitz",
+      "Standpauke",
+      "Mogelhieb",
+      "Abgangstirade"
+     ],
+     "typen": [
+      "Fire",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 90,
+      "spa": 80,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "White Herb",
+     "item_de": "Schlohkraut",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Fake Out",
+      "Dire Claw",
+      "Close Combat",
+      "Rock Slide"
+     ],
+     "moves_de": [
+      "Mogelhieb",
+      "Unheilsklauen",
+      "Nahkampf",
+      "Steinhagel"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sylveon",
+     "name_de": "Feelinara",
+     "item": "Fairy Feather",
+     "item_de": "Feendaune",
+     "ability": "Pixilate",
+     "ability_de": "Feenschicht",
+     "nature": "Quiet",
+     "nature_de": "Ruhig",
+     "moves": [
+      "Hyper Voice",
+      "Detect",
+      "Moonblast",
+      "Yawn"
+     ],
+     "moves_de": [
+      "Schallwelle",
+      "Scanner",
+      "Mondgewalt",
+      "Gähner"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 65,
+      "def": 65,
+      "spa": 110,
+      "spd": 130,
+      "spe": 60
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 26
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 19,
+   "swiss": "8-3",
+   "trainer": "Leonardo Chinchilla",
+   "trainer_tag": "LEO★SSQ",
+   "preis": "160 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/V8gXQvMP",
+   "paste_id": "V8gXQvMP",
+   "team_name": "Leonardo Chinchilla's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Basculegion",
+    "Kingambit",
+    "Sneasler",
+    "Whimsicott",
+    "Garchomp"
+   ],
+   "pokemon": [
+    {
+     "name": "Basculegion",
+     "name_de": "Salmagnis",
+     "item": "Mystic Water",
+     "item_de": "Zauberwasser",
+     "ability": "Adaptability",
+     "ability_de": "Anpassung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Last Respects",
+      "Aqua Jet",
+      "Wave Crash",
+      "Protect"
+     ],
+     "moves_de": [
+      "Letzte Ehre",
+      "Wasserdüse",
+      "Wellentackle",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 112,
+      "def": 65,
+      "spa": 80,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Chople Berry",
+     "item_de": "Rospelbeere",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Kowtow Cleave",
+      "Sucker Punch",
+      "Iron Head",
+      "Low Kick"
+     ],
+     "moves_de": [
+      "Kniefallspalter",
+      "Tiefschlag",
+      "Eisenschädel",
+      "Fußkick"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    },
+    {
+     "name": "Whimsicott",
+     "name_de": "Elfun",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Moonblast",
+      "Tailwind",
+      "Encore",
+      "Protect"
+     ],
+     "moves_de": [
+      "Mondgewalt",
+      "Rückenwind",
+      "Zugabe",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 67,
+      "def": 85,
+      "spa": 77,
+      "spd": 75,
+      "spe": 116
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "White Herb",
+     "item_de": "Schlohkraut",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Rock Tomb",
+      "Close Combat",
+      "Dire Claw",
+      "Protect"
+     ],
+     "moves_de": [
+      "Felsgrab",
+      "Nahkampf",
+      "Unheilsklauen",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Earthquake",
+      "Rock Slide",
+      "Dragon Claw",
+      "Protect"
+     ],
+     "moves_de": [
+      "Erdbeben",
+      "Steinhagel",
+      "Drachenklaue",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Heat Wave",
+      "Weather Ball",
+      "Solar Beam",
+      "Protect"
+     ],
+     "moves_de": [
+      "Hitzewelle",
+      "Meteorologe",
+      "Solarstrahl",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 27
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 20,
+   "swiss": "8-3",
+   "trainer": "Bruno Pérez",
+   "trainer_tag": "",
+   "preis": "160 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/gMH2gG7M",
+   "paste_id": "gMH2gG7M",
+   "team_name": "Bruno Pérez's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Golisopod Mega",
+    "Garchomp Mega Z",
+    "Basculegion",
+    "Pelipper",
+    "Meowstic",
+    "Archaludon"
+   ],
+   "pokemon": [
+    {
+     "name": "Meowstic",
+     "name_de": "Psiaugon",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Fake Out",
+      "Light Screen",
+      "Rain Dance",
+      "Trick Room"
+     ],
+     "moves_de": [
+      "Mogelhieb",
+      "Lichtschild",
+      "Regentanz",
+      "Bizarroraum"
+     ],
+     "typen": [
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 74,
+      "atk": 48,
+      "def": 76,
+      "spa": 83,
+      "spd": 81,
+      "spe": 104
+     },
+     "evs": ""
+    },
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Weather Ball",
+      "Hurricane",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Meteorologe",
+      "Orkan",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Garchompite Z",
+     "item_de": "Knakracknit Z",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Draco Meteor",
+      "Power Gem",
+      "Earth Power",
+      "Protect"
+     ],
+     "moves_de": [
+      "Draco Meteor",
+      "Juwelenkraft",
+      "Erdkräfte",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Golisopod",
+     "name_de": "Tectass",
+     "item": "Golisopite",
+     "item_de": "Tectassnit",
+     "ability": "Emergency Exit",
+     "ability_de": "Rückzug",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Leech Life",
+      "Iron Head",
+      "Sucker Punch",
+      "Protect"
+     ],
+     "moves_de": [
+      "Blutsauger",
+      "Eisenschädel",
+      "Tiefschlag",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Bug",
+      "Water"
+     ],
+     "base_stats": {
+      "hp": 75,
+      "atk": 125,
+      "def": 140,
+      "spa": 60,
+      "spd": 90,
+      "spe": 40
+     },
+     "evs": ""
+    },
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Electro Shot",
+      "Flash Cannon",
+      "Draco Meteor",
+      "Protect"
+     ],
+     "moves_de": [
+      "Stromstrahl",
+      "Lichtkanone",
+      "Draco Meteor",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Basculegion",
+     "name_de": "Salmagnis",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Swift Swim",
+     "ability_de": "Wassertempo",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Wave Crash",
+      "Last Respects",
+      "Aqua Jet",
+      "Protect"
+     ],
+     "moves_de": [
+      "Wellentackle",
+      "Letzte Ehre",
+      "Wasserdüse",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 112,
+      "def": 65,
+      "spa": 80,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 28
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 21,
+   "swiss": "8-3",
+   "trainer": "Rin Leiba",
+   "trainer_tag": "Rin",
+   "preis": "160 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/nLfggF3w",
+   "paste_id": "nLfggF3w",
+   "team_name": "Rin Leiba Alamilla's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Incineroar",
+    "Sylveon",
+    "Toxapex",
+    "Venusaur",
+    "Garchomp"
+   ],
+   "pokemon": [
+    {
+     "name": "Sylveon",
+     "name_de": "Feelinara",
+     "item": "Fairy Feather",
+     "item_de": "Feendaune",
+     "ability": "Pixilate",
+     "ability_de": "Feenschicht",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Detect",
+      "Hyper Voice",
+      "Yawn",
+      "Quick Attack"
+     ],
+     "moves_de": [
+      "Scanner",
+      "Schallwelle",
+      "Gähner",
+      "Ruckzuckhieb"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 65,
+      "def": 65,
+      "spa": 110,
+      "spd": 130,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Incineroar",
+     "name_de": "Fuegro",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Impish",
+     "nature_de": "Pfiffig",
+     "moves": [
+      "Flare Blitz",
+      "Throat Chop",
+      "Fake Out",
+      "Parting Shot"
+     ],
+     "moves_de": [
+      "Flammenblitz",
+      "Neck Strike",
+      "Mogelhieb",
+      "Abgangstirade"
+     ],
+     "typen": [
+      "Fire",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 90,
+      "spa": 80,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Protect",
+      "Weather Ball",
+      "Ancient Power",
+      "Heat Wave"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Meteorologe",
+      "Antik-Kraft",
+      "Hitzewelle"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Venusaur",
+     "name_de": "Bisaflor",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Chlorophyll",
+     "ability_de": "Chlorophyll",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Leaf Storm",
+      "Sludge Bomb",
+      "Protect",
+      "Earth Power"
+     ],
+     "moves_de": [
+      "Blättersturm",
+      "Matschbombe",
+      "Schutzschild",
+      "Erdkräfte"
+     ],
+     "typen": [
+      "Grass",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 82,
+      "def": 83,
+      "spa": 100,
+      "spd": 100,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Choice Scarf",
+     "item_de": "Wahlschal",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Rock Slide",
+      "Dragon Claw",
+      "Stomping Tantrum",
+      "Earthquake"
+     ],
+     "moves_de": [
+      "Steinhagel",
+      "Drachenklaue",
+      "Fruststampfer",
+      "Erdbeben"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Toxapex",
+     "name_de": "Aggrostella",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Regenerator",
+     "ability_de": "Belebekraft",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Infestation",
+      "Wide Guard",
+      "Baneful Bunker",
+      "Toxic"
+     ],
+     "moves_de": [
+      "Plage",
+      "Rundumschutz",
+      "Bunker",
+      "Toxin"
+     ],
+     "typen": [
+      "Poison",
+      "Water"
+     ],
+     "base_stats": {
+      "hp": 50,
+      "atk": 63,
+      "def": 152,
+      "spa": 53,
+      "spd": 142,
+      "spe": 35
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 29
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 22,
+   "swiss": "8-3",
+   "trainer": "Marcus Dion",
+   "trainer_tag": "striider",
+   "preis": "160 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/N3hkH6X3",
+   "paste_id": "N3hkH6X3",
+   "team_name": "Marcus Dion's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Golisopod Mega",
+    "Raichu Mega X",
+    "Basculegion F",
+    "Sneasler",
+    "Pelipper",
+    "Archaludon"
+   ],
+   "pokemon": [
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Damp Rock",
+     "item_de": "Nassbrocken",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Weather Ball",
+      "Hurricane",
+      "Helping Hand",
+      "Wide Guard"
+     ],
+     "moves_de": [
+      "Meteorologe",
+      "Orkan",
+      "Rechte Hand",
+      "Rundumschutz"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Golisopod",
+     "name_de": "Tectass",
+     "item": "Golisopite",
+     "item_de": "Tectassnit",
+     "ability": "Emergency Exit",
+     "ability_de": "Rückzug",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Protect",
+      "Leech Life",
+      "Sucker Punch",
+      "Iron Head"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Blutsauger",
+      "Tiefschlag",
+      "Eisenschädel"
+     ],
+     "typen": [
+      "Bug",
+      "Water"
+     ],
+     "base_stats": {
+      "hp": 75,
+      "atk": 125,
+      "def": 140,
+      "spa": 60,
+      "spd": 90,
+      "spe": 40
+     },
+     "evs": ""
+    },
+    {
+     "name": "Raichu",
+     "name_de": "Raichu",
+     "item": "Raichunite X",
+     "item_de": "Raichunit X",
+     "ability": "Lightning Rod",
+     "ability_de": "Blitzfänger",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Volt Tackle",
+      "Volt Switch",
+      "Fake Out",
+      "Feint"
+     ],
+     "moves_de": [
+      "Volttackle",
+      "Voltwechsel",
+      "Mogelhieb",
+      "Offenlegung"
+     ],
+     "typen": [
+      "Electric"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 90,
+      "def": 55,
+      "spa": 90,
+      "spd": 80,
+      "spe": 110
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "Electric Seed",
+     "item_de": "Elektro-Samen",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Protect",
+      "Close Combat",
+      "Swords Dance",
+      "Poison Jab"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Nahkampf",
+      "Schwerttanz",
+      "Gifthieb"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Basculegion-F",
+     "name_de": "Salmagnis [Weiblich]",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Swift Swim",
+     "ability_de": "Wassertempo",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Muddy Water",
+      "Ice Beam",
+      "Shadow Ball"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Lehmbrühe",
+      "Eisstrahl",
+      "Spukball"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 92,
+      "def": 65,
+      "spa": 100,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    },
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Protect",
+      "Electro Shot",
+      "Snarl",
+      "Dragon Pulse"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Stromstrahl",
+      "Standpauke",
+      "Drachenpuls"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 30
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 23,
+   "swiss": "8-3",
+   "trainer": "David Soto",
+   "trainer_tag": "IngeVGC",
+   "preis": "160 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/7CKMAgiu",
+   "paste_id": "7CKMAgiu",
+   "team_name": "David Israel Soto's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Garchomp Mega Z",
+    "Incineroar",
+    "Farigiraf",
+    "Sylveon",
+    "Venusaur"
+   ],
+   "pokemon": [
+    {
+     "name": "Incineroar",
+     "name_de": "Fuegro",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Intimidate",
+     "ability_de": "Bedroher",
+     "nature": "Relaxed",
+     "nature_de": "Locker",
+     "moves": [
+      "Flare Blitz",
+      "Parting Shot",
+      "Fake Out",
+      "Snarl"
+     ],
+     "moves_de": [
+      "Flammenblitz",
+      "Abgangstirade",
+      "Mogelhieb",
+      "Standpauke"
+     ],
+     "typen": [
+      "Fire",
+      "Dark"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 90,
+      "spa": 80,
+      "spd": 90,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Venusaur",
+     "name_de": "Bisaflor",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Chlorophyll",
+     "ability_de": "Chlorophyll",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Sleep Powder",
+      "Sludge Bomb",
+      "Earth Power",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schlafpuder",
+      "Matschbombe",
+      "Erdkräfte",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Grass",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 82,
+      "def": 83,
+      "spa": 100,
+      "spd": 100,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Heat Wave",
+      "Weather Ball",
+      "Ancient Power"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Hitzewelle",
+      "Meteorologe",
+      "Antik-Kraft"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Garchompite Z",
+     "item_de": "Knakracknit Z",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Power Gem",
+      "Earth Power",
+      "Draco Meteor"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Juwelenkraft",
+      "Erdkräfte",
+      "Draco Meteor"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Farigiraf",
+     "name_de": "Farigiraf",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Armor Tail",
+     "ability_de": "Schweifrüstung",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Trick Room",
+      "Psychic",
+      "Thunderbolt"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Bizarroraum",
+      "Psychokinese",
+      "Donnerblitz"
+     ],
+     "typen": [
+      "Normal",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 90,
+      "def": 70,
+      "spa": 110,
+      "spd": 70,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sylveon",
+     "name_de": "Feelinara",
+     "item": "Fairy Feather",
+     "item_de": "Feendaune",
+     "ability": "Pixilate",
+     "ability_de": "Feenschicht",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Detect",
+      "Hyper Voice",
+      "Quick Attack",
+      "Yawn"
+     ],
+     "moves_de": [
+      "Scanner",
+      "Schallwelle",
+      "Ruckzuckhieb",
+      "Gähner"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 65,
+      "def": 65,
+      "spa": 110,
+      "spd": 130,
+      "spe": 60
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 31
+  },
+  {
+   "turnier": "Puebla Regional",
+   "turnier_url": "https://victoryroad.pro/2027-puebla/",
+   "turnier_datum": "2026-10-25",
+   "platz": 24,
+   "swiss": "8-3",
+   "trainer": "José Ramón Castillo",
+   "trainer_tag": "",
+   "preis": "160 CP",
+   "replica_code": "",
+   "ots_url": "https://vrpastes.com/3eGfuMqj",
+   "paste_id": "3eGfuMqj",
+   "team_name": "José Ramon Castillo Nuñez's 2027 Puebla Regional Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Basculegion F",
+    "Pelipper",
+    "Venusaur",
+    "Grimmsnarl",
+    "Archaludon"
+   ],
+   "pokemon": [
+    {
+     "name": "Grimmsnarl",
+     "name_de": "Olangaar",
+     "item": "Light Clay",
+     "item_de": "Lichtlehm",
+     "ability": "Prankster",
+     "ability_de": "Strolch",
+     "nature": "Careful",
+     "nature_de": "Sacht",
+     "moves": [
+      "Parting Shot",
+      "Light Screen",
+      "Spirit Break",
+      "Reflect"
+     ],
+     "moves_de": [
+      "Abgangstirade",
+      "Lichtschild",
+      "Seelenbruch",
+      "Reflektor"
+     ],
+     "typen": [
+      "Dark",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 120,
+      "def": 65,
+      "spa": 95,
+      "spd": 75,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Venusaur",
+     "name_de": "Bisaflor",
+     "item": "Wide Lens",
+     "item_de": "Großlinse",
+     "ability": "Chlorophyll",
+     "ability_de": "Chlorophyll",
+     "nature": "Calm",
+     "nature_de": "Still",
+     "moves": [
+      "Protect",
+      "Sleep Powder",
+      "Giga Drain",
+      "Earth Power"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Schlafpuder",
+      "Gigasauger",
+      "Erdkräfte"
+     ],
+     "typen": [
+      "Grass",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 82,
+      "def": 83,
+      "spa": 100,
+      "spd": 100,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Weather Ball",
+      "Hurricane",
+      "Heat Wave"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Meteorologe",
+      "Orkan",
+      "Hitzewelle"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Archaludon",
+     "name_de": "Briduradon",
+     "item": "Leftovers",
+     "item_de": "Überreste",
+     "ability": "Stamina",
+     "ability_de": "Zähigkeit",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Electro Shot",
+      "Dragon Pulse",
+      "Flash Cannon"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Stromstrahl",
+      "Drachenpuls",
+      "Lichtkanone"
+     ],
+     "typen": [
+      "Steel",
+      "Dragon"
+     ],
+     "base_stats": {
+      "hp": 90,
+      "atk": 105,
+      "def": 130,
+      "spa": 125,
+      "spd": 65,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Pelipper",
+     "name_de": "Pelipper",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Drizzle",
+     "ability_de": "Niesel",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Helping Hand",
+      "Tailwind",
+      "Weather Ball",
+      "Hurricane"
+     ],
+     "moves_de": [
+      "Rechte Hand",
+      "Rückenwind",
+      "Meteorologe",
+      "Orkan"
+     ],
+     "typen": [
+      "Water",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 60,
+      "atk": 50,
+      "def": 100,
+      "spa": 95,
+      "spd": 70,
+      "spe": 65
+     },
+     "evs": ""
+    },
+    {
+     "name": "Basculegion-F",
+     "name_de": "Salmagnis [Weiblich]",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Swift Swim",
+     "ability_de": "Wassertempo",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Protect",
+      "Shadow Ball",
+      "Muddy Water",
+      "Ice Beam"
+     ],
+     "moves_de": [
+      "Schutzschild",
+      "Spukball",
+      "Lehmbrühe",
+      "Eisstrahl"
+     ],
+     "typen": [
+      "Water",
+      "Ghost"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 92,
+      "def": 65,
+      "spa": 100,
+      "spd": 75,
+      "spe": 78
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 32
+  },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
    "turnier_url": "https://victoryroad.pro/2027-thailand-pbl/",
@@ -271,7 +7870,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 1
+   "rank": 33
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -509,7 +8108,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 2
+   "rank": 34
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -747,7 +8346,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 3
+   "rank": 35
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -984,7 +8583,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 4
+   "rank": 36
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -1221,7 +8820,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 5
+   "rank": 37
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -1459,7 +9058,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 6
+   "rank": 38
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -1697,7 +9296,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 7
+   "rank": 39
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -1934,7 +9533,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 8
+   "rank": 40
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -2170,7 +9769,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 9
+   "rank": 41
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -2407,7 +10006,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 10
+   "rank": 42
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -2644,7 +10243,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 11
+   "rank": 43
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -2880,7 +10479,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 12
+   "rank": 44
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -3117,7 +10716,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 13
+   "rank": 45
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -3354,7 +10953,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 14
+   "rank": 46
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -3591,7 +11190,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 15
+   "rank": 47
   },
   {
    "turnier": "Thailand Premier Ball League Bangkok",
@@ -3828,7 +11427,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 16
+   "rank": 48
   },
   {
    "turnier": "VR October Challenge #4",
@@ -4065,7 +11664,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 17
+   "rank": 49
   },
   {
    "turnier": "VR October Challenge #4",
@@ -4302,7 +11901,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 18
+   "rank": 50
   },
   {
    "turnier": "VR October Challenge #4",
@@ -4537,7 +12136,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 19
+   "rank": 51
   },
   {
    "turnier": "VR October Challenge #4",
@@ -4774,7 +12373,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 20
+   "rank": 52
   },
   {
    "turnier": "VR October Challenge #4",
@@ -5009,7 +12608,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 21
+   "rank": 53
   },
   {
    "turnier": "VR October Challenge #4",
@@ -5245,7 +12844,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 22
+   "rank": 54
   },
   {
    "turnier": "VR October Challenge #4",
@@ -5482,7 +13081,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 23
+   "rank": 55
   },
   {
    "turnier": "VR October Challenge #4",
@@ -5719,7 +13318,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 24
+   "rank": 56
   },
   {
    "turnier": "VR October Challenge #4",
@@ -5955,7 +13554,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 25
+   "rank": 57
   },
   {
    "turnier": "VR October Challenge #4",
@@ -6190,7 +13789,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 26
+   "rank": 58
   },
   {
    "turnier": "VR October Challenge #4",
@@ -6427,7 +14026,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 27
+   "rank": 59
   },
   {
    "turnier": "VR October Challenge #4",
@@ -6664,7 +14263,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 28
+   "rank": 60
   },
   {
    "turnier": "VR October Challenge #4",
@@ -6902,7 +14501,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 29
+   "rank": 61
   },
   {
    "turnier": "VR October Challenge #4",
@@ -7138,7 +14737,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 30
+   "rank": 62
   },
   {
    "turnier": "VR October Challenge #4",
@@ -7376,7 +14975,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 31
+   "rank": 63
   },
   {
    "turnier": "VR October Challenge #4",
@@ -7613,7 +15212,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 32
+   "rank": 64
   },
   {
    "turnier": "VR October Challenge #4",
@@ -7850,7 +15449,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 33
+   "rank": 65
   },
   {
    "turnier": "VR October Challenge #4",
@@ -8085,7 +15684,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 34
+   "rank": 66
   },
   {
    "turnier": "VR October Challenge #4",
@@ -8322,7 +15921,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 35
+   "rank": 67
   },
   {
    "turnier": "VR October Challenge #4",
@@ -8560,7 +16159,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 36
+   "rank": 68
   },
   {
    "turnier": "VR October Challenge #4",
@@ -8796,7 +16395,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 37
+   "rank": 69
   },
   {
    "turnier": "VR October Challenge #4",
@@ -9032,7 +16631,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 38
+   "rank": 70
   },
   {
    "turnier": "VR October Challenge #4",
@@ -9269,7 +16868,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 39
+   "rank": 71
   },
   {
    "turnier": "VR October Challenge #4",
@@ -9505,7 +17104,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 40
+   "rank": 72
   },
   {
    "turnier": "VR October Challenge #4",
@@ -9741,7 +17340,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 41
+   "rank": 73
   },
   {
    "turnier": "VR October Challenge #4",
@@ -9977,7 +17576,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 42
+   "rank": 74
   },
   {
    "turnier": "VR October Challenge #4",
@@ -10214,7 +17813,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 43
+   "rank": 75
   },
   {
    "turnier": "VR October Challenge #4",
@@ -10450,7 +18049,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 44
+   "rank": 76
   },
   {
    "turnier": "VR October Challenge #4",
@@ -10685,7 +18284,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 45
+   "rank": 77
   }
  ]
 }

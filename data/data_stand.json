@@ -1,5 +1,5 @@
 {
-  "erzeugt_am": "2026-10-27T12:27:56+00:00",
+  "erzeugt_am": "2026-10-27T13:45:58+00:00",
   "quelle": "Zeitpunkt des Laufs fuer geaenderte Dateien, sonst fortgeschrieben",
   "dateien": {
     "limitless_online_decks.csv": "2026-10-27T07:06:44+00:00",
@@ -17,9 +17,9 @@
     "city_league_archetypes_comparison.csv": "2026-10-27T07:06:44+00:00",
     "city_league_archetypes_deck_stats.csv": "2026-10-27T07:06:44+00:00",
     "tournament_cards_data_overview.csv": "2026-10-27T11:32:31+00:00",
-    "limitless_online_fenster.csv": "2026-10-23T07:08:23+00:00",
+    "limitless_online_fenster.csv": "2026-10-27T13:45:58+00:00",
     "online_tournament_dated_cards.csv": "2026-10-27T11:32:31+00:00",
-    "current_meta_card_data.csv": "2026-10-27T11:32:31+00:00",
+    "current_meta_card_data.csv": "2026-10-27T13:45:58+00:00",
     "labs_tournament_matchups.csv": "2026-10-27T07:06:44+00:00",
     "online_api_archetypes.csv": "2026-10-27T03:52:41+00:00",
     "online_api_tournaments.csv": "2026-10-27T03:52:41+00:00",

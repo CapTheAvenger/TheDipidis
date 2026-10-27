@@ -401,3 +401,46 @@
     #current-analysis .current-meta-cards-header { margin-bottom: 10px; }
     #current-analysis .ds-legend { margin: 6px 0 8px; }
 }
+
+
+/* ── UI-153: Schnellwahl (Sprites der Tier-1-bis-3-Decks) ────────────── */
+#current-analysis .cm-quickwahl {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0 0;
+}
+#current-analysis .cm-quickwahl[hidden] { display: none; }
+#current-analysis #cmQuickWahl .cm-qw-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex: 0 0 auto;
+    width: auto !important;
+    min-width: 44px;
+    min-height: 44px !important;
+    margin: 0;
+    padding: 4px 6px;
+    border: 1px solid var(--line, rgba(255,255,255,.14));
+    border-radius: 10px;
+    background: var(--surface-2, rgba(255,255,255,.05));
+    color: var(--text-primary, inherit);
+    cursor: pointer;
+}
+#current-analysis #cmQuickWahl .cm-qw-btn:hover { border-color: var(--accent, #7c8cff); }
+#current-analysis #cmQuickWahl .cm-qw-btn[aria-pressed="true"] {
+    border-color: var(--accent, #7c8cff);
+    background: rgba(124,140,255,.22);
+}
+#current-analysis #cmQuickWahl .cm-qw-btn:focus-visible { outline: 2px solid var(--accent, #7c8cff); outline-offset: 2px; }
+#current-analysis #cmQuickWahl .cm-qw-kurz { font-size: 12px; font-weight: 700; }
+#current-analysis #cmQuickWahl .cm-qw-trenner {
+    align-self: stretch;
+    width: 1px;
+    margin: 4px 4px;
+    background: var(--line, rgba(255,255,255,.18));
+}
+.top256-labs-link { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
+.top256-labs-link:hover { text-decoration: underline; }

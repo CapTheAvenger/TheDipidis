@@ -2517,6 +2517,7 @@ const translations = {
        Screenreader lasen die Seite auf Englisch vor, waehrend das
        title-Attribut daneben korrekt uebersetzt wurde. */
     'aria.analysisDepth':          'Analysis depth',
+    'aria.cmQuickWahl':            'Quick pick: Tier 1 to 3 decks',
     'aria.antiTechTarget':         'Anti-tech target deck',
     'aria.auth':                   'Authentication',
     'aria.backNav':                'Back navigation',
@@ -5446,6 +5447,7 @@ const translations = {
        Screenreader lasen die Seite auf Englisch vor, waehrend das
        title-Attribut daneben korrekt uebersetzt wurde. */
     'aria.analysisDepth':          'Analysetiefe',
+    'aria.cmQuickWahl':            'Schnellwahl: Decks aus Tier 1 bis 3',
     'aria.antiTechTarget':         'Zieldeck für Anti-Tech',
     'aria.auth':                   'Anmeldung',
     'aria.backNav':                'Zurück',

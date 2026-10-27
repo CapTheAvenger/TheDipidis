@@ -1106,6 +1106,7 @@
 
             // Convert native <select> to custom searchable dropdown
             if (typeof initSearchableSelect === 'function') initSearchableSelect(select);
+            if (typeof cmQuickWahlZeichnen === 'function') cmQuickWahlZeichnen();   // UI-153
 
             // Mirror the same option groups into the Cooking-mode fusion
             // select so users can pair the primary archetype with a second
@@ -2868,10 +2869,19 @@
                 : `The number before each event = Day 2 lists of this archetype in that event. `
                   + `${tourList.length} ${tourList.length === 1 ? 'event' : 'events'} in the current meta window, ${_summe256} lists in total. `
                   + `The “data from” window does not apply to this list.`;
+            /* UI-153 (Hausi 27.10.2026): Turniername -> Limitless-Labs-Seite des Decks
+               (labs.limitlesstcg.com/<Turnier-Nr.>/decks/<deck-slug>), damit man die
+               einzelne Liste schnell ansehen kann. Aufloesung ueber Datum + Name
+               (cmLabsLinkFuer) — gibt es keine eindeutige Zuordnung, bleibt der Name
+               ein normaler Text. Geraten wird nicht. */
+            const _labsRef256 = typeof cmLabsReferenzen === 'function' ? await cmLabsReferenzen() : null;
+            tourList.forEach(t => { t.labsUrl = (_labsRef256 && typeof cmLabsLinkFuer === 'function') ? cmLabsLinkFuer(_labsRef256, t.name, t.date, archetype) : ''; });
             listEl.innerHTML = tourList.map(t =>
                 `<div class="top256-entry">` +
                 `<span class="top256-count">${t.count}\u00d7</span>` +
-                `<span class="top256-tournament">${t.name}</span>` +
+                (t.labsUrl
+                    ? `<a class="top256-tournament top256-labs-link" href="${escapeHtmlAttr(t.labsUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtmlAttr(_de256 ? 'Liste auf Limitless Labs ansehen' : 'View the list on Limitless Labs')}">${t.name}</a>`
+                    : `<span class="top256-tournament">${t.name}</span>`) +
                 (t.date ? `<span class="top256-date">(${(() => { const _d = (typeof parseEnglishTournamentDate === 'function') ? parseEnglishTournamentDate(t.date) : null; return _d ? _d.toLocaleDateString((typeof getLang === 'function' && getLang() === 'en') ? 'en-GB' : 'de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : t.date; })()})</span>` : '') +  /* F2-12 (07.10.2026): „(26th September 2026)" auf Deutsch */
                 `</div>`
             ).join('')
@@ -6132,3 +6142,176 @@ document.addEventListener('languageChanged', () => {
  * Reiters („Daten: 27.9.2026 (älteste von 3 Quellen)“) ist entfernt — der
  * Stand steht auf „Aktuelles Meta“. Die Ueberschrift nennt stattdessen das
  * Format (js/ds-nav.js, formatMarke). */
+
+
+/* UI-153 (Hausi 27.10.2026): Schnellwahl in der Deck-Analyse.
+ *
+ * WUNSCH: „einfach nur die Sprites der Archetypen aus Tier 1, 2, 3 als Button,
+ * dass dann das Deck ausgewaehlt wird — besser, als sich durchs ganze Menue zu
+ * scrollen.“
+ *
+ * Die Tier-Einteilung entsteht in renderCurrentMetaTierList() (Meta-Seite) und
+ * liegt danach in window._cmTierGruppen; hier wird sie NICHT neu gerechnet.
+ * Ein Knopf erscheint nur, wenn das Deck auch im Auswahlfeld steht — ein Knopf
+ * ohne Wirkung waere schlechter als keiner. Gewaehlt wird ueber dasselbe Feld
+ * und dieselbe Ladefunktion wie beim Antippen einer Tier-Kachel
+ * (navigateToCurrentMetaWithDeck). */
+function cmQuickWahlKnoepfe(gruppen, optionen, gewaehlt) {
+    const verfuegbar = new Map();
+    (optionen || []).forEach(function (o) {
+        const w = String(o || '').trim();
+        if (w) verfuegbar.set(w.toLowerCase(), w);
+    });
+    const out = [];
+    const schon = new Set();
+    (gruppen || []).forEach(function (g, i) {
+        (g.namen || []).forEach(function (name) {
+            const wert = verfuegbar.get(String(name || '').trim().toLowerCase());
+            if (!wert || schon.has(wert)) return;
+            schon.add(wert);
+            out.push({
+                wert: wert,
+                tier: i + 1,
+                aktiv: String(gewaehlt || '').trim().toLowerCase() === wert.toLowerCase()
+            });
+        });
+    });
+    return out;
+}
+
+function cmQuickWahlZeichnen() {
+    const host = document.getElementById('cmQuickWahl');
+    const select = document.getElementById('currentMetaDeckSelect');
+    if (!host || !select) return;
+    const optionen = Array.from(select.options).map(function (o) { return o.value; }).filter(Boolean);
+    const knoepfe = cmQuickWahlKnoepfe(window._cmTierGruppen, optionen, select.value);
+    if (!knoepfe.length) { host.hidden = true; host.innerHTML = ''; return; }
+    const sym = function (name) {
+        return (window.ArchetypeIcons && typeof window.ArchetypeIcons.getIconHtml === 'function')
+            ? window.ArchetypeIcons.getIconHtml(name, { size: 'md', layout: 'inline', alt: '' })
+            : '';
+    };
+    let letzte = 0;
+    host.innerHTML = knoepfe.map(function (k) {
+        const trenner = (letzte && k.tier !== letzte) ? '<span class="cm-qw-trenner" aria-hidden="true"></span>' : '';
+        letzte = k.tier;
+        const anzeige = (typeof stripExSuffix === 'function') ? stripExSuffix(k.wert) : k.wert;
+        const bild = sym(k.wert);
+        return trenner + '<button type="button" class="cm-qw-btn" data-archetype="' + escapeHtmlAttr(k.wert) + '"'
+            + ' data-tier="' + k.tier + '" aria-pressed="' + (k.aktiv ? 'true' : 'false') + '"'
+            + ' title="' + escapeHtmlAttr(anzeige) + ' (Tier ' + k.tier + ')" aria-label="' + escapeHtmlAttr(anzeige) + '">'
+            + (bild || '<span class="cm-qw-kurz">' + escapeHtml(anzeige.slice(0, 3)) + '</span>') + '</button>';
+    }).join('');
+    host.hidden = false;
+}
+
+async function cmQuickWahlWaehlen(wert) {
+    const select = document.getElementById('currentMetaDeckSelect');
+    if (!select || !wert) return;
+    const treffer = Array.from(select.options).find(function (o) {
+        return String(o.value || '').toLowerCase() === String(wert).toLowerCase();
+    });
+    if (!treffer) return;
+    select.value = treffer.value;
+    window.currentMetaArchetype = treffer.value;
+    if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
+    cmQuickWahlZeichnen();
+    if (typeof loadCurrentMetaDeckData === 'function') await loadCurrentMetaDeckData(treffer.value);
+    cmQuickWahlZeichnen();
+}
+
+document.addEventListener('click', function (e) {
+    const btn = e.target && e.target.closest ? e.target.closest('#cmQuickWahl .cm-qw-btn') : null;
+    if (!btn) return;
+    cmQuickWahlWaehlen(btn.getAttribute('data-archetype'));
+});
+document.addEventListener('cm:tierGruppen', cmQuickWahlZeichnen);
+document.addEventListener('change', function (e) {
+    if (e.target && e.target.id === 'currentMetaDeckSelect') cmQuickWahlZeichnen();
+});
+document.addEventListener('languageChanged', cmQuickWahlZeichnen);
+window.cmQuickWahlKnoepfe = cmQuickWahlKnoepfe;
+window.cmQuickWahlZeichnen = cmQuickWahlZeichnen;
+
+
+/* UI-153: Labs-Verweise fuer die Day-2-Liste. Zwei kleine Dateien, einmal geladen:
+ *   labs_tournaments.json          -> Turnier-Nr. je Datum/Name
+ *   labs_tournament_decks.csv      -> Deck-Name <-> Deck-Slug
+ * Ein Deck-Name, hinter dem ZWEI Slugs stehen (Okidogi, Alakazam, Tyranitar,
+ * Toxtricity Box), bekommt keinen Deck-Link, sondern den der Turnier-Deckliste. */
+let _cmLabsRefVersprechen = null;
+function cmLabsReferenzen() {
+    if (!_cmLabsRefVersprechen) {
+        _cmLabsRefVersprechen = (async function () {
+            try {
+                const base = (typeof BASE_PATH !== 'undefined') ? BASE_PATH : '';
+                const [tr, zeilen] = await Promise.all([
+                    fetch(base + 'labs_tournaments.json').then(function (r) { return r.ok ? r.json() : []; }),
+                    fetchAndParseCSV(base + 'labs_tournament_decks.csv', ',')
+                ]);
+                return cmLabsReferenzenBauen(tr, zeilen);
+            } catch (e) {
+                _cmLabsRefVersprechen = null;
+                return { turniere: [], slugs: new Map() };
+            }
+        })();
+    }
+    return _cmLabsRefVersprechen;
+}
+
+function cmLabsReferenzenBauen(turniere, deckZeilen) {
+    const slugs = new Map();
+    (deckZeilen || []).forEach(function (r) {
+        if (!r || !r.deck_name || !r.deck_slug) return;
+        const k = String(r.deck_name).trim().toLowerCase();
+        if (!slugs.has(k)) slugs.set(k, new Set());
+        slugs.get(k).add(String(r.deck_slug).trim());
+    });
+    return { turniere: Array.isArray(turniere) ? turniere : [], slugs: slugs };
+}
+
+function cmLabsTurnierName(name) {
+    return String(name || '').toLowerCase()
+        .replace(/\s*[\u2013\u2014-]\s*limitless\s*$/, '')
+        .replace(/\bchampionship\b/g, '')
+        .replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function cmLabsDatumIso(datum) {
+    const d = (typeof parseEnglishTournamentDate === 'function') ? parseEnglishTournamentDate(datum) : null;
+    if (!d || isNaN(d)) return '';
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function cmLabsLinkFuer(ref, turnierName, turnierDatum, archetyp) {
+    if (!ref || !Array.isArray(ref.turniere)) return '';
+    const iso = cmLabsDatumIso(turnierDatum);
+    if (!iso) return '';
+    const mitId = ref.turniere.filter(function (t) { return t && t.tournament_date && t.tournament_id; });
+    let amTag = mitId.filter(function (t) { return t.tournament_date === iso; });
+    if (!amTag.length) {
+        /* Limitless und Labs fuehren dasselbe Turnier teils mit einem Tag Unterschied
+           (Louisville: 10.10. dort, 09.10. hier). Dann zaehlt nur ein EINDEUTIGER Treffer. */
+        const t0 = Date.parse(iso + 'T00:00:00Z');
+        amTag = mitId.filter(function (t) {
+            const d = Date.parse(t.tournament_date + 'T00:00:00Z');
+            return Math.abs(d - t0) <= 86400000;
+        });
+    }
+    if (!amTag.length) return '';
+    let treffer = null;
+    if (amTag.length === 1) {
+        treffer = amTag[0];
+    } else {
+        const ziel = cmLabsTurnierName(turnierName);
+        const gleich = amTag.filter(function (t) { return cmLabsTurnierName(t.tournament_name) === ziel; });
+        if (gleich.length === 1) treffer = gleich[0];
+    }
+    if (!treffer) return '';
+    const basis = 'https://labs.limitlesstcg.com/' + encodeURIComponent(String(treffer.tournament_id));
+    const sl = ref.slugs && ref.slugs.get(String(archetyp || '').trim().toLowerCase());
+    if (sl && sl.size === 1) return basis + '/decks/' + encodeURIComponent(Array.from(sl)[0]);
+    return basis + '/decks';
+}
+window.cmLabsLinkFuer = cmLabsLinkFuer;
+window.cmLabsReferenzenBauen = cmLabsReferenzenBauen;

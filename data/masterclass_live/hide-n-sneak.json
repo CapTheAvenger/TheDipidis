@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-10-27T03:53:07Z",
+  "erzeugt_am": "2026-10-27T07:07:19Z",
   "id": "hide-n-sneak",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -17,8 +17,8 @@
     ],
     "slug": "dragapult-ex",
     "vor_ort": [
-     292,
-     231,
+     293,
+     230,
      93
     ]
    },
@@ -34,7 +34,7 @@
     "vor_ort": [
      70,
      116,
-     41
+     42
     ]
    },
    {
@@ -62,7 +62,7 @@
     ],
     "slug": "slowking-scr",
     "vor_ort": [
-     130,
+     127,
      48,
      50
     ]
@@ -377,7 +377,7 @@
     ],
     "slug": "dragapult-dudunsparce",
     "vor_ort": [
-     7,
+     5,
      1,
      1
     ]
@@ -664,7 +664,7 @@
     "vor_ort": [
      1,
      3,
-     1
+     0
     ]
    },
    {
@@ -678,7 +678,7 @@
     "slug": "mega-absol-box",
     "vor_ort": [
      2,
-     4,
+     3,
      0
     ]
    },
@@ -1022,8 +1022,8 @@
     ],
     "slug": "mega-absol-mega-audino",
     "vor_ort": [
-     0,
-     0,
+     1,
+     4,
      0
     ]
    },
@@ -1494,6 +1494,21 @@
    },
    {
     "anteil": "0,02",
+    "name": "Igglybuff",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "igglybuff-30c",
+    "vor_ort": [
+     2,
+     2,
+     1
+    ]
+   },
+   {
+    "anteil": "0,02",
     "name": "Terapagos Noctowl",
     "online": [
      1,
@@ -1629,6 +1644,36 @@
    },
    {
     "anteil": "0,00",
+    "name": "alakazam-slowking",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "alakazam-slowking",
+    "vor_ort": [
+     3,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,00",
+    "name": "dragapult-alakazam",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "dragapult-alakazam",
+    "vor_ort": [
+     1,
+     1,
+     0
+    ]
+   },
+   {
+    "anteil": "0,00",
     "name": "hydrapple-ogerpon",
     "online": [
      0,
@@ -1641,23 +1686,38 @@
      0,
      0
     ]
+   },
+   {
+    "anteil": "0,00",
+    "name": "relicanth-pbl",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "relicanth-pbl",
+    "vor_ort": [
+     1,
+     0,
+     0
+    ]
    }
   ],
   "liste_online": {
-   "bilanz": "9-1-0",
-   "datum": "22.10.2026",
+   "bilanz": "7-0-0",
+   "datum": "25.10.2026",
    "karten": [
     [
      4,
-     "Dunsparce",
-     "JTG",
-     "120"
+     "Poltchageist",
+     "PBL",
+     "5"
     ],
     [
      4,
-     "Dudunsparce",
-     "TEF",
-     "129"
+     "Sinistcha",
+     "PBL",
+     "6"
     ],
     [
      4,
@@ -1666,7 +1726,7 @@
      "33"
     ],
     [
-     3,
+     4,
      "Banette",
      "PBL",
      "34"
@@ -1679,18 +1739,6 @@
     ],
     [
      2,
-     "Poltchageist",
-     "PBL",
-     "5"
-    ],
-    [
-     2,
-     "Sinistcha",
-     "PBL",
-     "6"
-    ],
-    [
-     1,
      "Lillie's Clefairy ex",
      "JTG",
      "56"
@@ -1703,24 +1751,30 @@
     ],
     [
      1,
-     "Fan Rotom",
-     "SCR",
-     "118"
+     "Spiritomb",
+     "PBL",
+     "35"
     ],
     [
      1,
-     "Shaymin",
-     "DRI",
-     "10"
+     "Latias ex",
+     "SSP",
+     "76"
     ],
     [
      4,
+     "Explorer's Guidance",
+     "TEF",
+     "147"
+    ],
+    [
+     3,
      "Lillie's Determination",
      "MEG",
      "119"
     ],
     [
-     4,
+     3,
      "Gwynn",
      "PBL",
      "78"
@@ -1732,10 +1786,10 @@
      "114"
     ],
     [
-     4,
-     "Poké Pad",
+     2,
+     "Naveen",
      "POR",
-     "81"
+     "79"
     ],
     [
      4,
@@ -1744,22 +1798,16 @@
      "131"
     ],
     [
-     2,
+     3,
      "Night Stretcher",
      "ASC",
      "196"
     ],
     [
-     1,
-     "Buddy-Buddy Poffin",
-     "TEF",
-     "144"
-    ],
-    [
-     1,
-     "Switch",
-     "MEG",
-     "130"
+     3,
+     "Poké Pad",
+     "POR",
+     "81"
     ],
     [
      2,
@@ -1768,19 +1816,13 @@
      "80"
     ],
     [
-     1,
-     "Jamming Tower",
-     "TWM",
-     "153"
-    ],
-    [
      4,
      "Telepathic Psychic Energy",
      "POR",
      "88"
     ],
     [
-     2,
+     3,
      "Psychic Energy",
      "MEE",
      "13"
@@ -1793,9 +1835,9 @@
     ]
    ],
    "platz": 1,
-   "spieler": "Tobias Freitag",
-   "turnier": "SEASAC League Challenge #11 (SEASON 6) [50 CODES]",
-   "von": 110
+   "spieler": "MrCarva",
+   "turnier": "Monster Collectibles After Hours season 2 #5",
+   "von": 79
   },
   "listen_vor_ort": [
    {
@@ -2080,14 +2122,14 @@
   "name": "Dhelmise",
   "online": {
    "anteil": "4,77",
-   "anteil14": "5,63",
+   "anteil14": "6,34",
    "bilanz": [
     1997,
     2236,
     24
    ],
    "bis": "26.10.2026",
-   "fenster14": "09.10.–23.10.2026",
+   "fenster14": "13.10.–27.10.2026",
    "format": "TEF–30C",
    "kurz_anteil": "7,10",
    "kurz_bilanz": [
@@ -2100,7 +2142,7 @@
    "kurz_von": "20.10.2026",
    "listen": 866,
    "seit": "18.09.2026",
-   "trend14": "1,5",
+   "trend14": "2,09",
    "turniere": 116
   },
   "vor_ort": {

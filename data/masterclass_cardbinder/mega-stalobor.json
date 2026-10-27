@@ -9,15 +9,15 @@
   "archetyp_kennungen": [
    "mega-excadrill-ex"
   ],
-  "gebaut": "2026-10-23T07:08:23+00:00",
-  "karten": 235,
+  "gebaut": "2026-10-27T07:06:44+00:00",
+  "karten": 237,
   "metas": [
    "TEF-30C",
    "Champions League (JP)",
    "TEF-PBL"
   ],
-  "doppelte_turniere_uebersprungen": 15,
-  "turniere_gesamt": 335,
+  "doppelte_turniere_uebersprungen": 16,
+  "turniere_gesamt": 343,
   "hinweis": "Jede Zeile kommt aus einer Quelle unter data/. Nichts ist hochgerechnet. Fehlt ein Preis oder ein Bild, steht dort nichts — geraten wird nicht.",
   "rangfolge_bei_doppelten_turnieren": [
    "online_api",
@@ -30,12 +30,12 @@
   {
    "id": "TEF-30C",
    "name": "TEF-30C",
-   "hinweis": "Fuer 4 der 114 Turniere in diesem Meta fuehrt keine Quelle das Format selbst. Es ist aus dem Turnierdatum abgeleitet: online wechselt das Format am Set-Release, und genau dieses Fenster steht in data/format_window.json und data/sets_metadata.json. Gegenprobe am 25.09.2026 an 452 Turnieren, die ihr Format selbst fuehren: 445 Mal stimmt die Ableitung, 7 Mal nicht — alle sieben am Release-Tag von 30C, an dem beide Formate nebeneinander laufen.",
-   "turniere": 114,
-   "turniere_abgeleitet": 4,
-   "listen": 675,
+   "hinweis": "Fuer 3 der 122 Turniere in diesem Meta fuehrt keine Quelle das Format selbst. Es ist aus dem Turnierdatum abgeleitet: online wechselt das Format am Set-Release, und genau dieses Fenster steht in data/format_window.json und data/sets_metadata.json. Gegenprobe am 25.09.2026 an 452 Turnieren, die ihr Format selbst fuehren: 445 Mal stimmt die Ableitung, 7 Mal nicht — alle sieben am Release-Tag von 30C, an dem beide Formate nebeneinander laufen.",
+   "turniere": 122,
+   "turniere_abgeleitet": 3,
+   "listen": 715,
    "von": "2026-09-18",
-   "bis": "2026-10-23",
+   "bis": "2026-10-26",
    "meta_quellen": [
     "format_window.json + sets_metadata.json"
    ]
@@ -78,19 +78,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_065_R_EN_LG.png",
    "preis": {
-    "eur": 0.66,
+    "eur": 0.68,
     "eur_niedrig": 0.19,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Mega-Excadrill-ex-V1-PBL065?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 675,
-     "listen_gesamt": 675,
+     "listen_mit_karte": 715,
+     "listen_gesamt": 715,
      "anteil": 100.0,
-     "schnitt": 2.02,
+     "schnitt": 2.04,
      "hoechstzahl": 2,
-     "turniere": 114
+     "turniere": 122
     },
     "TEF-PBL": {
      "listen_mit_karte": 2468,
@@ -110,8 +110,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 3144,
-    "listen_gesamt": 3144,
+    "listen_mit_karte": 3184,
+    "listen_gesamt": 3184,
     "anteil": 100.0,
     "schnitt": 2.04,
     "hoechstzahl": 2
@@ -135,19 +135,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_046_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Drilbur-V1-PBL046?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 674,
-     "listen_gesamt": 675,
+     "listen_mit_karte": 714,
+     "listen_gesamt": 715,
      "anteil": 99.9,
-     "schnitt": 3.26,
+     "schnitt": 3.27,
      "hoechstzahl": 4,
-     "turniere": 114
+     "turniere": 122
     },
     "TEF-PBL": {
      "listen_mit_karte": 2458,
@@ -167,8 +167,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 3133,
-    "listen_gesamt": 3144,
+    "listen_mit_karte": 3173,
+    "listen_gesamt": 3184,
     "anteil": 99.7,
     "schnitt": 3.29,
     "hoechstzahl": 4
@@ -192,19 +192,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_067_R_EN_LG.png",
    "preis": {
-    "eur": 0.97,
+    "eur": 0.86,
     "eur_niedrig": 0.1,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Black-Bolt/Genesect-ex-V1-BLK067?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 675,
-     "listen_gesamt": 675,
-     "anteil": 100.0,
-     "schnitt": 2.0,
+     "listen_mit_karte": 714,
+     "listen_gesamt": 715,
+     "anteil": 99.9,
+     "schnitt": 2.01,
      "hoechstzahl": 2,
-     "turniere": 114
+     "turniere": 122
     },
     "TEF-PBL": {
      "listen_mit_karte": 2448,
@@ -224,10 +224,10 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 3124,
-    "listen_gesamt": 3144,
-    "anteil": 99.4,
-    "schnitt": 1.98,
+    "listen_mit_karte": 3163,
+    "listen_gesamt": 3184,
+    "anteil": 99.3,
+    "schnitt": 1.99,
     "hoechstzahl": 2
    },
    "quellen": [
@@ -249,19 +249,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_114_R_EN_LG.png",
    "preis": {
-    "eur": 1.79,
+    "eur": 1.76,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Metang-TEF114?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 669,
-     "listen_gesamt": 675,
-     "anteil": 99.1,
+     "listen_mit_karte": 709,
+     "listen_gesamt": 715,
+     "anteil": 99.2,
      "schnitt": 3.92,
      "hoechstzahl": 4,
-     "turniere": 114
+     "turniere": 122
     },
     "TEF-PBL": {
      "listen_mit_karte": 2433,
@@ -281,8 +281,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 3103,
-    "listen_gesamt": 3144,
+    "listen_mit_karte": 3143,
+    "listen_gesamt": 3184,
     "anteil": 98.7,
     "schnitt": 3.91,
     "hoechstzahl": 4
@@ -306,19 +306,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_176_R_EN_LG.png",
    "preis": {
-    "eur": 0.22,
+    "eur": 0.27,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Petrel-V1-DRI176?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 673,
-     "listen_gesamt": 675,
-     "anteil": 99.7,
-     "schnitt": 3.86,
+     "listen_mit_karte": 709,
+     "listen_gesamt": 715,
+     "anteil": 99.2,
+     "schnitt": 3.85,
      "hoechstzahl": 4,
-     "turniere": 114
+     "turniere": 122
     },
     "TEF-PBL": {
      "listen_mit_karte": 2420,
@@ -338,9 +338,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 3094,
-    "listen_gesamt": 3144,
-    "anteil": 98.4,
+    "listen_mit_karte": 3130,
+    "listen_gesamt": 3184,
+    "anteil": 98.3,
     "schnitt": 3.76,
     "hoechstzahl": 4
    },
@@ -363,19 +363,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_061_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Metagross-CRI061?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 663,
-     "listen_gesamt": 675,
-     "anteil": 98.2,
-     "schnitt": 1.37,
+     "listen_mit_karte": 701,
+     "listen_gesamt": 715,
+     "anteil": 98.0,
+     "schnitt": 1.38,
      "hoechstzahl": 2,
-     "turniere": 114
+     "turniere": 122
     },
     "TEF-PBL": {
      "listen_mit_karte": 2407,
@@ -395,9 +395,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 3071,
-    "listen_gesamt": 3144,
-    "anteil": 97.7,
+    "listen_mit_karte": 3109,
+    "listen_gesamt": 3184,
+    "anteil": 97.6,
     "schnitt": 1.54,
     "hoechstzahl": 2
    },
@@ -423,16 +423,16 @@
     "eur": 0.13,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Buddy-Buddy-Poffin-TEF144?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 649,
-     "listen_gesamt": 675,
+     "listen_mit_karte": 687,
+     "listen_gesamt": 715,
      "anteil": 96.1,
      "schnitt": 3.12,
      "hoechstzahl": 4,
-     "turniere": 114
+     "turniere": 122
     },
     "TEF-PBL": {
      "listen_mit_karte": 2406,
@@ -452,10 +452,10 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 3056,
-    "listen_gesamt": 3144,
+    "listen_mit_karte": 3094,
+    "listen_gesamt": 3184,
     "anteil": 97.2,
-    "schnitt": 2.65,
+    "schnitt": 2.66,
     "hoechstzahl": 4
    },
    "quellen": [
@@ -477,19 +477,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Jumbo-Ice-Cream-PFL091?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 641,
-     "listen_gesamt": 675,
-     "anteil": 95.0,
+     "listen_mit_karte": 676,
+     "listen_gesamt": 715,
+     "anteil": 94.5,
      "schnitt": 2.14,
      "hoechstzahl": 4,
-     "turniere": 114
+     "turniere": 122
     },
     "TEF-PBL": {
      "listen_mit_karte": 2329,
@@ -509,9 +509,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2971,
-    "listen_gesamt": 3144,
-    "anteil": 94.5,
+    "listen_mit_karte": 3006,
+    "listen_gesamt": 3184,
+    "anteil": 94.4,
     "schnitt": 2.23,
     "hoechstzahl": 4
    },
@@ -534,19 +534,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_114_R_EN_LG.png",
    "preis": {
-    "eur": 0.24,
+    "eur": 0.22,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Bosss-Orders-Ghetsis-MEG114?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 579,
-     "listen_gesamt": 675,
-     "anteil": 85.8,
+     "listen_mit_karte": 612,
+     "listen_gesamt": 715,
+     "anteil": 85.6,
      "schnitt": 1.77,
      "hoechstzahl": 3,
-     "turniere": 111
+     "turniere": 120
     },
     "TEF-PBL": {
      "listen_mit_karte": 2198,
@@ -566,9 +566,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2778,
-    "listen_gesamt": 3144,
-    "anteil": 88.4,
+    "listen_mit_karte": 2811,
+    "listen_gesamt": 3184,
+    "anteil": 88.3,
     "schnitt": 2.1,
     "hoechstzahl": 3
    },
@@ -591,19 +591,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_164_R_EN_LG.png",
    "preis": {
-    "eur": 0.06,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Energy-Recycler-DRI164?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 579,
-     "listen_gesamt": 675,
-     "anteil": 85.8,
+     "listen_mit_karte": 608,
+     "listen_gesamt": 715,
+     "anteil": 85.0,
      "schnitt": 0.95,
      "hoechstzahl": 2,
-     "turniere": 112
+     "turniere": 120
     },
     "TEF-PBL": {
      "listen_mit_karte": 2126,
@@ -623,9 +623,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2706,
-    "listen_gesamt": 3144,
-    "anteil": 86.1,
+    "listen_mit_karte": 2735,
+    "listen_gesamt": 3184,
+    "anteil": 85.9,
     "schnitt": 1.05,
     "hoechstzahl": 2
    },
@@ -651,13 +651,13 @@
     "eur": 0.02,
     "eur_niedrig": 0.05,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution-Energies/Basic-Metal-Energy-V1-MEE008?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 131,
-     "listen_gesamt": 675,
-     "anteil": 19.4,
+     "listen_gesamt": 715,
+     "anteil": 18.3,
      "schnitt": 16.2,
      "hoechstzahl": 15,
      "turniere": 19
@@ -673,8 +673,8 @@
    },
    "gesamt": {
     "listen_mit_karte": 2591,
-    "listen_gesamt": 3143,
-    "anteil": 82.4,
+    "listen_gesamt": 3183,
+    "anteil": 81.4,
     "schnitt": 15.75,
     "hoechstzahl": 18
    },
@@ -689,8 +689,8 @@
      "name_de": null,
      "set": "MEE",
      "nummer": "16",
-     "listen_mit_karte": 545,
-     "schnitt": 15.88,
+     "listen_mit_karte": 585,
+     "schnitt": 15.9,
      "preis": null
     },
     {
@@ -700,7 +700,7 @@
      "nummer": "98",
      "listen_mit_karte": 8,
      "schnitt": 17.25,
-     "preis": 0.62
+     "preis": 0.59
     }
    ]
   },
@@ -716,19 +716,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_131_R_EN_LG.png",
    "preis": {
-    "eur": 0.13,
+    "eur": 0.12,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Ultra-Ball-MEG131?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 442,
-     "listen_gesamt": 675,
-     "anteil": 65.5,
+     "listen_mit_karte": 466,
+     "listen_gesamt": 715,
+     "anteil": 65.2,
      "schnitt": 0.82,
      "hoechstzahl": 2,
-     "turniere": 108
+     "turniere": 116
     },
     "TEF-PBL": {
      "listen_mit_karte": 2050,
@@ -748,9 +748,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2493,
-    "listen_gesamt": 3144,
-    "anteil": 79.3,
+    "listen_mit_karte": 2517,
+    "listen_gesamt": 3184,
+    "anteil": 79.1,
     "schnitt": 1.09,
     "hoechstzahl": 3
    },
@@ -773,19 +773,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_154_R_EN_LG.png",
    "preis": {
-    "eur": 0.1,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Kieran-V1-TWM154?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 458,
-     "listen_gesamt": 675,
-     "anteil": 67.9,
-     "schnitt": 0.83,
+     "listen_mit_karte": 490,
+     "listen_gesamt": 715,
+     "anteil": 68.5,
+     "schnitt": 0.84,
      "hoechstzahl": 2,
-     "turniere": 112
+     "turniere": 120
     },
     "TEF-PBL": {
      "listen_mit_karte": 1971,
@@ -797,8 +797,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2429,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 2461,
+    "listen_gesamt": 3183,
     "anteil": 77.3,
     "schnitt": 1.11,
     "hoechstzahl": 2
@@ -824,16 +824,16 @@
     "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Beldum-TEF113?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 474,
-     "listen_gesamt": 675,
+     "listen_mit_karte": 502,
+     "listen_gesamt": 715,
      "anteil": 70.2,
-     "schnitt": 2.97,
+     "schnitt": 2.96,
      "hoechstzahl": 4,
-     "turniere": 110
+     "turniere": 119
     },
     "TEF-PBL": {
      "listen_mit_karte": 1908,
@@ -853,9 +853,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2383,
-    "listen_gesamt": 3144,
-    "anteil": 75.8,
+    "listen_mit_karte": 2411,
+    "listen_gesamt": 3184,
+    "anteil": 75.7,
     "schnitt": 3.08,
     "hoechstzahl": 4
    },
@@ -878,19 +878,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_119_R_EN_LG.png",
    "preis": {
-    "eur": 0.55,
+    "eur": 0.53,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Lillies-Determination-V1-MEG119?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 412,
-     "listen_gesamt": 675,
-     "anteil": 61.0,
-     "schnitt": 1.92,
+     "listen_mit_karte": 433,
+     "listen_gesamt": 715,
+     "anteil": 60.6,
+     "schnitt": 1.9,
      "hoechstzahl": 4,
-     "turniere": 106
+     "turniere": 114
     },
     "TEF-PBL": {
      "listen_mit_karte": 1809,
@@ -910,10 +910,10 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2222,
-    "listen_gesamt": 3144,
-    "anteil": 70.7,
-    "schnitt": 2.22,
+    "listen_mit_karte": 2243,
+    "listen_gesamt": 3184,
+    "anteil": 70.4,
+    "schnitt": 2.21,
     "hoechstzahl": 4
    },
    "quellen": [
@@ -935,19 +935,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_142_R_EN_LG.png",
    "preis": {
-    "eur": 4.86,
-    "eur_niedrig": 1.99,
+    "eur": 4.43,
+    "eur_niedrig": 1.98,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Fezandipiti-ex-V1-ASC142?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 475,
-     "listen_gesamt": 675,
-     "anteil": 70.4,
+     "listen_mit_karte": 496,
+     "listen_gesamt": 715,
+     "anteil": 69.4,
      "schnitt": 0.77,
      "hoechstzahl": 1,
-     "turniere": 110
+     "turniere": 117
     },
     "TEF-PBL": {
      "listen_mit_karte": 1561,
@@ -967,9 +967,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2037,
-    "listen_gesamt": 3144,
-    "anteil": 64.8,
+    "listen_mit_karte": 2058,
+    "listen_gesamt": 3184,
+    "anteil": 64.6,
     "schnitt": 0.7,
     "hoechstzahl": 1
    },
@@ -995,16 +995,16 @@
     "eur": 0.13,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Special-Red-Card-V1-CRI082?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 477,
-     "listen_gesamt": 675,
-     "anteil": 70.7,
+     "listen_mit_karte": 504,
+     "listen_gesamt": 715,
+     "anteil": 70.5,
      "schnitt": 0.92,
      "hoechstzahl": 2,
-     "turniere": 108
+     "turniere": 116
     },
     "TEF-PBL": {
      "listen_mit_karte": 1548,
@@ -1024,9 +1024,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 2026,
-    "listen_gesamt": 3144,
-    "anteil": 64.4,
+    "listen_mit_karte": 2053,
+    "listen_gesamt": 3184,
+    "anteil": 64.5,
     "schnitt": 0.75,
     "hoechstzahl": 2
    },
@@ -1052,16 +1052,16 @@
     "eur": 0.47,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Scarlet-Violet/Pokegear-30-SV1en186?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 421,
-     "listen_gesamt": 675,
-     "anteil": 62.4,
+     "listen_mit_karte": 444,
+     "listen_gesamt": 715,
+     "anteil": 62.1,
      "schnitt": 1.8,
      "hoechstzahl": 4,
-     "turniere": 105
+     "turniere": 113
     },
     "TEF-PBL": {
      "listen_mit_karte": 1432,
@@ -1081,10 +1081,10 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1854,
-    "listen_gesamt": 3144,
+    "listen_mit_karte": 1877,
+    "listen_gesamt": 3184,
     "anteil": 59.0,
-    "schnitt": 1.44,
+    "schnitt": 1.45,
     "hoechstzahl": 4
    },
    "quellen": [
@@ -1106,19 +1106,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_178_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.09,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Transceiver-DRI178?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 261,
-     "listen_gesamt": 675,
-     "anteil": 38.7,
-     "schnitt": 1.62,
+     "listen_mit_karte": 279,
+     "listen_gesamt": 715,
+     "anteil": 39.0,
+     "schnitt": 1.63,
      "hoechstzahl": 4,
-     "turniere": 93
+     "turniere": 101
     },
     "TEF-PBL": {
      "listen_mit_karte": 1514,
@@ -1130,9 +1130,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1775,
-    "listen_gesamt": 3143,
-    "anteil": 56.5,
+    "listen_mit_karte": 1793,
+    "listen_gesamt": 3183,
+    "anteil": 56.3,
     "schnitt": 2.14,
     "hoechstzahl": 4
    },
@@ -1153,19 +1153,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png",
    "preis": {
-    "eur": 0.13,
+    "eur": 0.11,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Gravity-Mountain-V1-SSP177?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 260,
-     "listen_gesamt": 675,
-     "anteil": 38.5,
-     "schnitt": 0.55,
+     "listen_mit_karte": 280,
+     "listen_gesamt": 715,
+     "anteil": 39.2,
+     "schnitt": 0.56,
      "hoechstzahl": 1,
-     "turniere": 94
+     "turniere": 102
     },
     "TEF-PBL": {
      "listen_mit_karte": 1363,
@@ -1185,9 +1185,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1624,
-    "listen_gesamt": 3144,
-    "anteil": 51.7,
+    "listen_mit_karte": 1644,
+    "listen_gesamt": 3184,
+    "anteil": 51.6,
     "schnitt": 0.63,
     "hoechstzahl": 1
    },
@@ -1209,19 +1209,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_055_R_EN_LG.png",
    "preis": {
-    "eur": 0.66,
+    "eur": 0.67,
     "eur_niedrig": 0.09,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Mega-Skarmory-ex-V1-POR055?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 412,
-     "listen_gesamt": 675,
-     "anteil": 61.0,
+     "listen_mit_karte": 435,
+     "listen_gesamt": 715,
+     "anteil": 60.8,
      "schnitt": 0.7,
      "hoechstzahl": 1,
-     "turniere": 107
+     "turniere": 115
     },
     "TEF-PBL": {
      "listen_mit_karte": 1164,
@@ -1233,9 +1233,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1576,
-    "listen_gesamt": 3143,
-    "anteil": 50.1,
+    "listen_mit_karte": 1599,
+    "listen_gesamt": 3183,
+    "anteil": 50.2,
     "schnitt": 0.64,
     "hoechstzahl": 1
    },
@@ -1257,19 +1257,19 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png",
    "preis": {
-    "eur": 2.84,
-    "eur_niedrig": 1.6,
+    "eur": 3.03,
+    "eur_niedrig": 1.5,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Precious-Trolley-SSP185?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 296,
-     "listen_gesamt": 675,
-     "anteil": 43.9,
-     "schnitt": 0.58,
+     "listen_mit_karte": 310,
+     "listen_gesamt": 715,
+     "anteil": 43.4,
+     "schnitt": 0.57,
      "hoechstzahl": 1,
-     "turniere": 98
+     "turniere": 106
     },
     "TEF-PBL": {
      "listen_mit_karte": 1244,
@@ -1289,9 +1289,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1541,
-    "listen_gesamt": 3144,
-    "anteil": 49.0,
+    "listen_mit_karte": 1555,
+    "listen_gesamt": 3184,
+    "anteil": 48.8,
     "schnitt": 0.59,
     "hoechstzahl": 1
    },
@@ -1313,19 +1313,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png",
    "preis": {
-    "eur": 0.11,
+    "eur": 0.1,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Air-Balloon-ASC181?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 108,
-     "listen_gesamt": 675,
-     "anteil": 16.0,
-     "schnitt": 0.4,
+     "listen_mit_karte": 113,
+     "listen_gesamt": 715,
+     "anteil": 15.8,
+     "schnitt": 0.39,
      "hoechstzahl": 2,
-     "turniere": 65
+     "turniere": 69
     },
     "TEF-PBL": {
      "listen_mit_karte": 1349,
@@ -1337,9 +1337,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1457,
-    "listen_gesamt": 3143,
-    "anteil": 46.4,
+    "listen_mit_karte": 1462,
+    "listen_gesamt": 3183,
+    "anteil": 45.9,
     "schnitt": 0.7,
     "hoechstzahl": 2
    },
@@ -1361,19 +1361,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Switch-MEG130?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 439,
-     "listen_gesamt": 675,
-     "anteil": 65.0,
+     "listen_mit_karte": 462,
+     "listen_gesamt": 715,
+     "anteil": 64.6,
      "schnitt": 0.76,
      "hoechstzahl": 2,
-     "turniere": 113
+     "turniere": 121
     },
     "TEF-PBL": {
      "listen_mit_karte": 920,
@@ -1385,9 +1385,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1359,
-    "listen_gesamt": 3143,
-    "anteil": 43.2,
+    "listen_mit_karte": 1382,
+    "listen_gesamt": 3183,
+    "anteil": 43.4,
     "schnitt": 0.61,
     "hoechstzahl": 2
    },
@@ -1409,19 +1409,19 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_152_R_EN_LG.png",
    "preis": {
-    "eur": 15.6,
+    "eur": 16.32,
     "eur_niedrig": 10.0,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Heros-Cape-TEF152?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 340,
-     "listen_gesamt": 675,
-     "anteil": 50.4,
+     "listen_mit_karte": 356,
+     "listen_gesamt": 715,
+     "anteil": 49.8,
      "schnitt": 0.63,
      "hoechstzahl": 1,
-     "turniere": 107
+     "turniere": 113
     },
     "TEF-PBL": {
      "listen_mit_karte": 982,
@@ -1433,9 +1433,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1322,
-    "listen_gesamt": 3143,
-    "anteil": 42.1,
+    "listen_mit_karte": 1338,
+    "listen_gesamt": 3183,
+    "anteil": 42.0,
     "schnitt": 0.56,
     "hoechstzahl": 1
    },
@@ -1457,19 +1457,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png",
    "preis": {
-    "eur": 0.17,
+    "eur": 0.16,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Night-Stretcher-ASC196?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 189,
-     "listen_gesamt": 675,
-     "anteil": 28.0,
+     "listen_mit_karte": 193,
+     "listen_gesamt": 715,
+     "anteil": 27.0,
      "schnitt": 0.52,
      "hoechstzahl": 2,
-     "turniere": 86
+     "turniere": 89
     },
     "TEF-PBL": {
      "listen_mit_karte": 871,
@@ -1481,9 +1481,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1060,
-    "listen_gesamt": 3143,
-    "anteil": 33.7,
+    "listen_mit_karte": 1064,
+    "listen_gesamt": 3183,
+    "anteil": 33.4,
     "schnitt": 0.58,
     "hoechstzahl": 2
    },
@@ -1504,19 +1504,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png",
    "preis": {
-    "eur": 0.1,
+    "eur": 0.11,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Shaymin-V1-DRI010?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 310,
-     "listen_gesamt": 675,
-     "anteil": 45.9,
+     "listen_mit_karte": 325,
+     "listen_gesamt": 715,
+     "anteil": 45.5,
      "schnitt": 0.58,
      "hoechstzahl": 1,
-     "turniere": 100
+     "turniere": 107
     },
     "TEF-PBL": {
      "listen_mit_karte": 715,
@@ -1528,9 +1528,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 1025,
-    "listen_gesamt": 3143,
-    "anteil": 32.6,
+    "listen_mit_karte": 1040,
+    "listen_gesamt": 3183,
+    "anteil": 32.7,
     "schnitt": 0.44,
     "hoechstzahl": 1
    },
@@ -1551,19 +1551,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_146_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Brocks-Scouting-V1-JTG146?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 409,
-     "listen_gesamt": 675,
+     "listen_mit_karte": 433,
+     "listen_gesamt": 715,
      "anteil": 60.6,
-     "schnitt": 1.99,
+     "schnitt": 1.98,
      "hoechstzahl": 4,
-     "turniere": 109
+     "turniere": 117
     },
     "TEF-PBL": {
      "listen_mit_karte": 543,
@@ -1583,10 +1583,10 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 953,
-    "listen_gesamt": 3144,
-    "anteil": 30.3,
-    "schnitt": 1.49,
+    "listen_mit_karte": 977,
+    "listen_gesamt": 3184,
+    "anteil": 30.7,
+    "schnitt": 1.5,
     "hoechstzahl": 4
    },
    "quellen": [
@@ -1611,16 +1611,16 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Beldum-CRI059?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 224,
-     "listen_gesamt": 675,
-     "anteil": 33.2,
-     "schnitt": 1.78,
+     "listen_mit_karte": 240,
+     "listen_gesamt": 715,
+     "anteil": 33.6,
+     "schnitt": 1.77,
      "hoechstzahl": 4,
-     "turniere": 94
+     "turniere": 101
     },
     "TEF-PBL": {
      "listen_mit_karte": 591,
@@ -1632,16 +1632,15 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 815,
-    "listen_gesamt": 3143,
-    "anteil": 25.9,
-    "schnitt": 1.35,
+    "listen_mit_karte": 831,
+    "listen_gesamt": 3183,
+    "anteil": 26.1,
+    "schnitt": 1.36,
     "hoechstzahl": 4
    },
    "quellen": [
     "majors",
-    "online_api",
-    "online_datiert"
+    "online_api"
    ]
   },
   {
@@ -1656,19 +1655,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_076_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Judge-POR076?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 176,
-     "listen_gesamt": 675,
-     "anteil": 26.1,
+     "listen_mit_karte": 188,
+     "listen_gesamt": 715,
+     "anteil": 26.3,
      "schnitt": 0.67,
      "hoechstzahl": 4,
-     "turniere": 87
+     "turniere": 94
     },
     "TEF-PBL": {
      "listen_mit_karte": 403,
@@ -1680,9 +1679,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 579,
-    "listen_gesamt": 3143,
-    "anteil": 18.4,
+    "listen_mit_karte": 591,
+    "listen_gesamt": 3183,
+    "anteil": 18.6,
     "schnitt": 0.48,
     "hoechstzahl": 4
    },
@@ -1704,16 +1703,16 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_080_R_EN_LG.png",
    "preis": {
-    "eur": 0.51,
+    "eur": 0.5,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/White-Flare/Brave-Bangle-WHT080?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 39,
-     "listen_gesamt": 675,
-     "anteil": 5.8,
+     "listen_gesamt": 715,
+     "anteil": 5.5,
      "schnitt": 0.34,
      "hoechstzahl": 1,
      "turniere": 31
@@ -1729,8 +1728,8 @@
    },
    "gesamt": {
     "listen_mit_karte": 532,
-    "listen_gesamt": 3143,
-    "anteil": 16.9,
+    "listen_gesamt": 3183,
+    "anteil": 16.7,
     "schnitt": 0.3,
     "hoechstzahl": 1
    },
@@ -1754,16 +1753,16 @@
     "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Tool-Scrapper-ASC212?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 85,
-     "listen_gesamt": 675,
-     "anteil": 12.6,
+     "listen_mit_karte": 89,
+     "listen_gesamt": 715,
+     "anteil": 12.4,
      "schnitt": 0.35,
      "hoechstzahl": 1,
-     "turniere": 53
+     "turniere": 56
     },
     "TEF-PBL": {
      "listen_mit_karte": 336,
@@ -1775,8 +1774,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 421,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 425,
+    "listen_gesamt": 3183,
     "anteil": 13.4,
     "schnitt": 0.32,
     "hoechstzahl": 1
@@ -1798,19 +1797,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_079_R_EN_LG.png",
    "preis": {
-    "eur": 0.02,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Philippe-V1-CRI079?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 47,
-     "listen_gesamt": 675,
-     "anteil": 7.0,
+     "listen_mit_karte": 49,
+     "listen_gesamt": 715,
+     "anteil": 6.9,
      "schnitt": 0.25,
      "hoechstzahl": 1,
-     "turniere": 36
+     "turniere": 38
     },
     "TEF-PBL": {
      "listen_mit_karte": 263,
@@ -1822,9 +1821,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 310,
-    "listen_gesamt": 3143,
-    "anteil": 9.9,
+    "listen_mit_karte": 312,
+    "listen_gesamt": 3183,
+    "anteil": 9.8,
     "schnitt": 0.23,
     "hoechstzahl": 1
    },
@@ -1848,16 +1847,16 @@
     "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Factory-DRI173?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 29,
-     "listen_gesamt": 675,
-     "anteil": 4.3,
-     "schnitt": 0.43,
+     "listen_mit_karte": 32,
+     "listen_gesamt": 715,
+     "anteil": 4.5,
+     "schnitt": 0.42,
      "hoechstzahl": 2,
-     "turniere": 25
+     "turniere": 28
     },
     "TEF-PBL": {
      "listen_mit_karte": 238,
@@ -1869,8 +1868,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 267,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 270,
+    "listen_gesamt": 3183,
     "anteil": 8.5,
     "schnitt": 0.29,
     "hoechstzahl": 2
@@ -1892,16 +1891,16 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_062_R_EN_LG.png",
    "preis": {
-    "eur": 4.92,
-    "eur_niedrig": 2.5,
+    "eur": 4.84,
+    "eur_niedrig": 3.0,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Meowth-ex-V1-POR062?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 32,
-     "listen_gesamt": 675,
-     "anteil": 4.7,
+     "listen_gesamt": 715,
+     "anteil": 4.5,
      "schnitt": 0.21,
      "hoechstzahl": null,
      "turniere": 27
@@ -1917,8 +1916,8 @@
    },
    "gesamt": {
     "listen_mit_karte": 264,
-    "listen_gesamt": 3143,
-    "anteil": 8.4,
+    "listen_gesamt": 3183,
+    "anteil": 8.3,
     "schnitt": 0.2,
     "hoechstzahl": 1
    },
@@ -1939,19 +1938,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png",
    "preis": {
-    "eur": 0.15,
+    "eur": 0.16,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Rare-Candy-V1-MEG125?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 152,
-     "listen_gesamt": 675,
-     "anteil": 22.5,
-     "schnitt": 0.49,
+     "listen_mit_karte": 156,
+     "listen_gesamt": 715,
+     "anteil": 21.8,
+     "schnitt": 0.48,
      "hoechstzahl": 1,
-     "turniere": 75
+     "turniere": 78
     },
     "TEF-PBL": {
      "listen_mit_karte": 107,
@@ -1963,9 +1962,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 259,
-    "listen_gesamt": 3143,
-    "anteil": 8.2,
+    "listen_mit_karte": 263,
+    "listen_gesamt": 3183,
+    "anteil": 8.3,
     "schnitt": 0.41,
     "hoechstzahl": 1
    },
@@ -1987,19 +1986,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_064_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.1,
     "eur_niedrig": 0.02,
     "url": null,
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 73,
-     "listen_gesamt": 675,
-     "anteil": 10.8,
-     "schnitt": 0.38,
+     "listen_mit_karte": 80,
+     "listen_gesamt": 715,
+     "anteil": 11.2,
+     "schnitt": 0.39,
      "hoechstzahl": 2,
-     "turniere": 47
+     "turniere": 51
     },
     "TEF-PBL": {
      "listen_mit_karte": 178,
@@ -2011,9 +2010,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 251,
-    "listen_gesamt": 3143,
-    "anteil": 8.0,
+    "listen_mit_karte": 258,
+    "listen_gesamt": 3183,
+    "anteil": 8.1,
     "schnitt": 0.28,
     "hoechstzahl": 2
    },
@@ -2034,19 +2033,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_070_R_EN_LG.png",
    "preis": {
-    "eur": 0.45,
+    "eur": 0.49,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Empoleon-ex-V1-PFL070?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 154,
-     "listen_gesamt": 675,
-     "anteil": 22.8,
+     "listen_mit_karte": 158,
+     "listen_gesamt": 715,
+     "anteil": 22.1,
      "schnitt": 0.46,
      "hoechstzahl": 1,
-     "turniere": 77
+     "turniere": 80
     },
     "TEF-PBL": {
      "listen_mit_karte": 78,
@@ -2058,10 +2057,10 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 232,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 236,
+    "listen_gesamt": 3183,
     "anteil": 7.4,
-    "schnitt": 0.41,
+    "schnitt": 0.4,
     "hoechstzahl": 1
    },
    "quellen": [
@@ -2082,19 +2081,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_027_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Piplup-V1-PFL027?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 153,
-     "listen_gesamt": 675,
-     "anteil": 22.7,
+     "listen_mit_karte": 157,
+     "listen_gesamt": 715,
+     "anteil": 22.0,
      "schnitt": 0.76,
      "hoechstzahl": 2,
-     "turniere": 76
+     "turniere": 79
     },
     "TEF-PBL": {
      "listen_mit_karte": 76,
@@ -2106,8 +2105,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 229,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 233,
+    "listen_gesamt": 3183,
     "anteil": 7.3,
     "schnitt": 0.64,
     "hoechstzahl": 2
@@ -2116,53 +2115,6 @@
     "majors",
     "online_api",
     "online_datiert"
-   ]
-  },
-  {
-   "name": "Battle Cage",
-   "name_de": "Kampfkäfig",
-   "set": "PFL",
-   "nummer": "85",
-   "typ": "Stadium",
-   "gruppe": "stadium",
-   "gruppe_name": "Stadion",
-   "gruppe_rang": 5,
-   "ace": null,
-   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_085_R_EN_LG.png",
-   "preis": {
-    "eur": 0.11,
-    "eur_niedrig": 0.02,
-    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Battle-Cage-V1-PFL085?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
-   },
-   "je_meta": {
-    "TEF-30C": {
-     "listen_mit_karte": 64,
-     "listen_gesamt": 675,
-     "anteil": 9.5,
-     "schnitt": 0.37,
-     "hoechstzahl": 1,
-     "turniere": 46
-    },
-    "TEF-PBL": {
-     "listen_mit_karte": 146,
-     "listen_gesamt": 2468,
-     "anteil": 5.9,
-     "schnitt": 0.2,
-     "hoechstzahl": null,
-     "turniere": 109
-    }
-   },
-   "gesamt": {
-    "listen_mit_karte": 210,
-    "listen_gesamt": 3143,
-    "anteil": 6.7,
-    "schnitt": 0.25,
-    "hoechstzahl": 1
-   },
-   "quellen": [
-    "majors",
-    "online_api"
    ]
   },
   {
@@ -2177,19 +2129,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_180_R_EN_LG.png",
    "preis": {
-    "eur": 0.09,
+    "eur": 0.12,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Watchtower-DRI180?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 62,
-     "listen_gesamt": 675,
+     "listen_mit_karte": 66,
+     "listen_gesamt": 715,
      "anteil": 9.2,
-     "schnitt": 0.5,
+     "schnitt": 0.51,
      "hoechstzahl": 4,
-     "turniere": 49
+     "turniere": 51
     },
     "TEF-PBL": {
      "listen_mit_karte": 148,
@@ -2201,11 +2153,58 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 210,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 214,
+    "listen_gesamt": 3183,
     "anteil": 6.7,
-    "schnitt": 0.29,
+    "schnitt": 0.3,
     "hoechstzahl": 4
+   },
+   "quellen": [
+    "majors",
+    "online_api"
+   ]
+  },
+  {
+   "name": "Battle Cage",
+   "name_de": "Kampfkäfig",
+   "set": "PFL",
+   "nummer": "85",
+   "typ": "Stadium",
+   "gruppe": "stadium",
+   "gruppe_name": "Stadion",
+   "gruppe_rang": 5,
+   "ace": null,
+   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_085_R_EN_LG.png",
+   "preis": {
+    "eur": 0.1,
+    "eur_niedrig": 0.02,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Battle-Cage-V1-PFL085?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
+    "stand": "2026-10-27T06:25:15.118676"
+   },
+   "je_meta": {
+    "TEF-30C": {
+     "listen_mit_karte": 67,
+     "listen_gesamt": 715,
+     "anteil": 9.4,
+     "schnitt": 0.36,
+     "hoechstzahl": 1,
+     "turniere": 49
+    },
+    "TEF-PBL": {
+     "listen_mit_karte": 146,
+     "listen_gesamt": 2468,
+     "anteil": 5.9,
+     "schnitt": 0.2,
+     "hoechstzahl": null,
+     "turniere": 109
+    }
+   },
+   "gesamt": {
+    "listen_mit_karte": 213,
+    "listen_gesamt": 3183,
+    "anteil": 6.7,
+    "schnitt": 0.25,
+    "hoechstzahl": 1
    },
    "quellen": [
     "majors",
@@ -2224,19 +2223,19 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png",
    "preis": {
-    "eur": 8.61,
-    "eur_niedrig": 6.0,
+    "eur": 8.58,
+    "eur_niedrig": 4.5,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Secret-Box-TWM163?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 21,
-     "listen_gesamt": 675,
+     "listen_mit_karte": 22,
+     "listen_gesamt": 715,
      "anteil": 3.1,
-     "schnitt": 0.47,
+     "schnitt": 0.46,
      "hoechstzahl": 1,
-     "turniere": 17
+     "turniere": 18
     },
     "TEF-PBL": {
      "listen_mit_karte": 179,
@@ -2248,9 +2247,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 200,
-    "listen_gesamt": 3143,
-    "anteil": 6.4,
+    "listen_mit_karte": 201,
+    "listen_gesamt": 3183,
+    "anteil": 6.3,
     "schnitt": 0.2,
     "hoechstzahl": 1
    },
@@ -2271,15 +2270,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_071_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Ethans-Pichu-DRI071?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 7,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 1.0,
      "schnitt": 0.19,
      "hoechstzahl": null,
@@ -2296,8 +2295,8 @@
    },
    "gesamt": {
     "listen_mit_karte": 192,
-    "listen_gesamt": 3143,
-    "anteil": 6.1,
+    "listen_gesamt": 3183,
+    "anteil": 6.0,
     "schnitt": 0.17,
     "hoechstzahl": null
    },
@@ -2317,19 +2316,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_148_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Full-Metal-Lab-TEF148?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 36,
-     "listen_gesamt": 675,
-     "anteil": 5.3,
-     "schnitt": 0.34,
+     "listen_mit_karte": 39,
+     "listen_gesamt": 715,
+     "anteil": 5.5,
+     "schnitt": 0.33,
      "hoechstzahl": null,
-     "turniere": 31
+     "turniere": 34
     },
     "TEF-PBL": {
      "listen_mit_karte": 139,
@@ -2341,10 +2340,10 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 175,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 178,
+    "listen_gesamt": 3183,
     "anteil": 5.6,
-    "schnitt": 0.24,
+    "schnitt": 0.25,
     "hoechstzahl": null
    },
    "quellen": [
@@ -2366,16 +2365,16 @@
     "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Psyduck-V1-ASC039?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 90,
-     "listen_gesamt": 675,
-     "anteil": 13.3,
-     "schnitt": 0.35,
+     "listen_mit_karte": 92,
+     "listen_gesamt": 715,
+     "anteil": 12.9,
+     "schnitt": 0.34,
      "hoechstzahl": 1,
-     "turniere": 58
+     "turniere": 60
     },
     "TEF-PBL": {
      "listen_mit_karte": 83,
@@ -2387,8 +2386,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 173,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 175,
+    "listen_gesamt": 3183,
     "anteil": 5.5,
     "schnitt": 0.26,
     "hoechstzahl": 1
@@ -2413,16 +2412,16 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Community-Center-TWM146?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 22,
-     "listen_gesamt": 675,
-     "anteil": 3.3,
-     "schnitt": 0.34,
+     "listen_mit_karte": 24,
+     "listen_gesamt": 715,
+     "anteil": 3.4,
+     "schnitt": 0.35,
      "hoechstzahl": 1,
-     "turniere": 21
+     "turniere": 23
     },
     "TEF-PBL": {
      "listen_mit_karte": 142,
@@ -2434,8 +2433,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 164,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 166,
+    "listen_gesamt": 3183,
     "anteil": 5.2,
     "schnitt": 0.2,
     "hoechstzahl": 1
@@ -2460,16 +2459,16 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/AZs-Tranquility-V1-CRI076?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 22,
-     "listen_gesamt": 675,
-     "anteil": 3.3,
+     "listen_mit_karte": 26,
+     "listen_gesamt": 715,
+     "anteil": 3.6,
      "schnitt": 0.28,
      "hoechstzahl": 2,
-     "turniere": 22
+     "turniere": 26
     },
     "TEF-PBL": {
      "listen_mit_karte": 129,
@@ -2481,9 +2480,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 151,
-    "listen_gesamt": 3143,
-    "anteil": 4.8,
+    "listen_mit_karte": 155,
+    "listen_gesamt": 3183,
+    "anteil": 4.9,
     "schnitt": 0.18,
     "hoechstzahl": 2
    },
@@ -2506,12 +2505,12 @@
    "preis": null,
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 11,
-     "listen_gesamt": 675,
-     "anteil": 1.6,
-     "schnitt": 0.56,
+     "listen_mit_karte": 12,
+     "listen_gesamt": 715,
+     "anteil": 1.7,
+     "schnitt": 0.53,
      "hoechstzahl": 1,
-     "turniere": 10
+     "turniere": 11
     },
     "TEF-PBL": {
      "listen_mit_karte": 121,
@@ -2523,8 +2522,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 132,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 133,
+    "listen_gesamt": 3183,
     "anteil": 4.2,
     "schnitt": 0.27,
     "hoechstzahl": 1
@@ -2546,19 +2545,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_118_R_EN_LG.png",
    "preis": {
-    "eur": 0.03,
+    "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Iron-Defender-MEG118?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 73,
-     "listen_gesamt": 675,
-     "anteil": 10.8,
-     "schnitt": 0.3,
+     "listen_mit_karte": 74,
+     "listen_gesamt": 715,
+     "anteil": 10.3,
+     "schnitt": 0.29,
      "hoechstzahl": 1,
-     "turniere": 49
+     "turniere": 50
     },
     "TEF-PBL": {
      "listen_mit_karte": 56,
@@ -2578,8 +2577,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 130,
-    "listen_gesamt": 3144,
+    "listen_mit_karte": 131,
+    "listen_gesamt": 3184,
     "anteil": 4.1,
     "schnitt": 0.26,
     "hoechstzahl": 1
@@ -2602,19 +2601,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_081_R_EN_LG.png",
    "preis": {
-    "eur": 0.49,
+    "eur": 0.43,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Poke-Pad-V1-POR081?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 9,
-     "listen_gesamt": 675,
-     "anteil": 1.3,
-     "schnitt": 0.43,
+     "listen_mit_karte": 11,
+     "listen_gesamt": 715,
+     "anteil": 1.5,
+     "schnitt": 0.53,
      "hoechstzahl": 2,
-     "turniere": 9
+     "turniere": 10
     },
     "TEF-PBL": {
      "listen_mit_karte": 91,
@@ -2626,10 +2625,10 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 100,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 102,
+    "listen_gesamt": 3183,
     "anteil": 3.2,
-    "schnitt": 0.31,
+    "schnitt": 0.33,
     "hoechstzahl": 2
    },
    "quellen": [
@@ -2650,19 +2649,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_051_R_EN_LG.png",
    "preis": {
-    "eur": 0.16,
+    "eur": 0.17,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Articuno-DRI051?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 58,
-     "listen_gesamt": 675,
-     "anteil": 8.6,
+     "listen_mit_karte": 60,
+     "listen_gesamt": 715,
+     "anteil": 8.4,
      "schnitt": 0.37,
      "hoechstzahl": 1,
-     "turniere": 33
+     "turniere": 35
     },
     "TEF-PBL": {
      "listen_mit_karte": 32,
@@ -2674,8 +2673,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 90,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 92,
+    "listen_gesamt": 3183,
     "anteil": 2.9,
     "schnitt": 0.38,
     "hoechstzahl": 1
@@ -2697,19 +2696,19 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_162_R_EN_LG.png",
    "preis": {
-    "eur": 0.78,
+    "eur": 0.8,
     "eur_niedrig": 0.03,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Team-Rockets-Kangaskhan-ex-ASC162?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 58,
-     "listen_gesamt": 675,
-     "anteil": 8.6,
+     "listen_mit_karte": 60,
+     "listen_gesamt": 715,
+     "anteil": 8.4,
      "schnitt": 0.37,
      "hoechstzahl": 1,
-     "turniere": 33
+     "turniere": 35
     },
     "TEF-PBL": {
      "listen_mit_karte": 31,
@@ -2721,9 +2720,9 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 89,
-    "listen_gesamt": 3143,
-    "anteil": 2.8,
+    "listen_mit_karte": 91,
+    "listen_gesamt": 3183,
+    "anteil": 2.9,
     "schnitt": 0.38,
     "hoechstzahl": 1
    },
@@ -2744,15 +2743,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_078_R_EN_LG.png",
    "preis": {
-    "eur": 0.11,
+    "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Flutter-Mane-TEF078?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 4,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.6,
      "schnitt": 0.07,
      "hoechstzahl": null,
@@ -2769,7 +2768,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 86,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 2.7,
     "schnitt": 0.14,
     "hoechstzahl": null
@@ -2793,16 +2792,16 @@
     "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Pokemon-Catcher-POR082?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 7,
-     "listen_gesamt": 675,
-     "anteil": 1.0,
+     "listen_mit_karte": 8,
+     "listen_gesamt": 715,
+     "anteil": 1.1,
      "schnitt": 0.15,
      "hoechstzahl": null,
-     "turniere": 7
+     "turniere": 8
     },
     "TEF-PBL": {
      "listen_mit_karte": 77,
@@ -2814,8 +2813,8 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 84,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 85,
+    "listen_gesamt": 3183,
     "anteil": 2.7,
     "schnitt": 0.14,
     "hoechstzahl": null
@@ -2836,15 +2835,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_150_R_EN_LG.png",
    "preis": {
-    "eur": 0.13,
+    "eur": 0.15,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Handheld-Fan-TWM150?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.5,
      "hoechstzahl": null,
@@ -2861,7 +2860,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 80,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 2.5,
     "schnitt": 0.14,
     "hoechstzahl": null
@@ -2882,16 +2881,16 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_130_R_EN_LG.png",
    "preis": {
-    "eur": 0.58,
+    "eur": 0.65,
     "eur_niedrig": 0.1,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Archaludon-ex-V1-SSP130?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 15,
-     "listen_gesamt": 675,
-     "anteil": 2.2,
+     "listen_gesamt": 715,
+     "anteil": 2.1,
      "schnitt": 0.28,
      "hoechstzahl": null,
      "turniere": 15
@@ -2907,8 +2906,8 @@
    },
    "gesamt": {
     "listen_mit_karte": 52,
-    "listen_gesamt": 3143,
-    "anteil": 1.7,
+    "listen_gesamt": 3183,
+    "anteil": 1.6,
     "schnitt": 0.22,
     "hoechstzahl": 1
    },
@@ -2932,13 +2931,13 @@
     "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Duraludon-SCR106?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 15,
-     "listen_gesamt": 675,
-     "anteil": 2.2,
+     "listen_gesamt": 715,
+     "anteil": 2.1,
      "schnitt": 0.32,
      "hoechstzahl": null,
      "turniere": 15
@@ -2954,8 +2953,8 @@
    },
    "gesamt": {
     "listen_mit_karte": 52,
-    "listen_gesamt": 3143,
-    "anteil": 1.7,
+    "listen_gesamt": 3183,
+    "anteil": 1.6,
     "schnitt": 0.3,
     "hoechstzahl": 2
    },
@@ -2976,16 +2975,16 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_143_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.09,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Black-Belts-Training-V1-JTG143?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 10,
-     "listen_gesamt": 675,
-     "anteil": 1.5,
+     "listen_gesamt": 715,
+     "anteil": 1.4,
      "schnitt": 0.3,
      "hoechstzahl": 1,
      "turniere": 10
@@ -3001,7 +3000,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 45,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 1.4,
     "schnitt": 0.17,
     "hoechstzahl": 1
@@ -3023,16 +3022,16 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_016_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Budew-V1-ASC016?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 6,
-     "listen_gesamt": 675,
-     "anteil": 0.9,
+     "listen_gesamt": 715,
+     "anteil": 0.8,
      "schnitt": 0.18,
      "hoechstzahl": null,
      "turniere": 6
@@ -3048,13 +3047,59 @@
    },
    "gesamt": {
     "listen_mit_karte": 42,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 1.3,
     "schnitt": 0.14,
     "hoechstzahl": 1
    },
    "quellen": [
     "majors",
+    "online_api"
+   ]
+  },
+  {
+   "name": "Wally's Compassion",
+   "name_de": "Heikos Mitgefühl",
+   "set": "MEG",
+   "nummer": "132",
+   "typ": "Supporter",
+   "gruppe": "supporter",
+   "gruppe_name": "Supporter",
+   "gruppe_rang": 2,
+   "ace": null,
+   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_132_R_EN_LG.png",
+   "preis": {
+    "eur": 0.11,
+    "eur_niedrig": 0.02,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Wallys-Compassion-V1-MEG132?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
+    "stand": "2026-10-27T06:25:15.118676"
+   },
+   "je_meta": {
+    "TEF-30C": {
+     "listen_mit_karte": 8,
+     "listen_gesamt": 715,
+     "anteil": 1.1,
+     "schnitt": 0.18,
+     "hoechstzahl": null,
+     "turniere": 8
+    },
+    "TEF-PBL": {
+     "listen_mit_karte": 34,
+     "listen_gesamt": 2468,
+     "anteil": 1.4,
+     "schnitt": 0.11,
+     "hoechstzahl": null,
+     "turniere": 30
+    }
+   },
+   "gesamt": {
+    "listen_mit_karte": 42,
+    "listen_gesamt": 3183,
+    "anteil": 1.3,
+    "schnitt": 0.12,
+    "hoechstzahl": null
+   },
+   "quellen": [
     "online_api"
    ]
   },
@@ -3070,15 +3115,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_151_R_EN_LG.png",
    "preis": {
-    "eur": 0.06,
+    "eur": 0.09,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Heavy-Baton-TEF151?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.14,
      "hoechstzahl": null,
@@ -3095,55 +3140,9 @@
    },
    "gesamt": {
     "listen_mit_karte": 41,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 1.3,
     "schnitt": 0.15,
-    "hoechstzahl": null
-   },
-   "quellen": [
-    "online_api"
-   ]
-  },
-  {
-   "name": "Wally's Compassion",
-   "name_de": "Heikos Mitgefühl",
-   "set": "MEG",
-   "nummer": "132",
-   "typ": "Supporter",
-   "gruppe": "supporter",
-   "gruppe_name": "Supporter",
-   "gruppe_rang": 2,
-   "ace": null,
-   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_132_R_EN_LG.png",
-   "preis": {
-    "eur": 0.12,
-    "eur_niedrig": 0.02,
-    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Wallys-Compassion-V1-MEG132?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
-   },
-   "je_meta": {
-    "TEF-30C": {
-     "listen_mit_karte": 7,
-     "listen_gesamt": 675,
-     "anteil": 1.0,
-     "schnitt": 0.17,
-     "hoechstzahl": null,
-     "turniere": 7
-    },
-    "TEF-PBL": {
-     "listen_mit_karte": 34,
-     "listen_gesamt": 2468,
-     "anteil": 1.4,
-     "schnitt": 0.11,
-     "hoechstzahl": null,
-     "turniere": 30
-    }
-   },
-   "gesamt": {
-    "listen_mit_karte": 41,
-    "listen_gesamt": 3143,
-    "anteil": 1.3,
-    "schnitt": 0.12,
     "hoechstzahl": null
    },
    "quellen": [
@@ -3165,16 +3164,16 @@
     "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Lumiose-City-V1-POR077?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 31,
-     "listen_gesamt": 675,
+     "listen_mit_karte": 33,
+     "listen_gesamt": 715,
      "anteil": 4.6,
-     "schnitt": 0.61,
+     "schnitt": 0.54,
      "hoechstzahl": 2,
-     "turniere": 27
+     "turniere": 29
     },
     "TEF-PBL": {
      "listen_mit_karte": 3,
@@ -3186,10 +3185,10 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 34,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 36,
+    "listen_gesamt": 3183,
     "anteil": 1.1,
-    "schnitt": 0.58,
+    "schnitt": 0.52,
     "hoechstzahl": 2
    },
    "quellen": [
@@ -3210,15 +3209,15 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.03,
+    "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Stevens-Skarmory-DRI142?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 2,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.3,
      "schnitt": 0.1,
      "hoechstzahl": null,
@@ -3235,7 +3234,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 33,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 1.0,
     "schnitt": 0.09,
     "hoechstzahl": null
@@ -3259,13 +3258,13 @@
     "eur": 0.16,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Jamming-Tower-TWM153?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 8,
-     "listen_gesamt": 675,
-     "anteil": 1.2,
+     "listen_gesamt": 715,
+     "anteil": 1.1,
      "schnitt": 0.31,
      "hoechstzahl": 1,
      "turniere": 7
@@ -3281,7 +3280,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 32,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 1.0,
     "schnitt": 0.17,
     "hoechstzahl": 1
@@ -3303,15 +3302,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_123_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.09,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Heatran-TWM123?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 3,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.4,
      "schnitt": 0.21,
      "hoechstzahl": null,
@@ -3328,7 +3327,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 31,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 1.0,
     "schnitt": 0.1,
     "hoechstzahl": null
@@ -3349,15 +3348,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_084_R_EN_LG.png",
    "preis": {
-    "eur": 1.16,
+    "eur": 1.13,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/White-Flare/Hilda-V1-WHT084?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 3,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.4,
      "schnitt": 0.46,
      "hoechstzahl": null,
@@ -3374,7 +3373,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 29,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.9,
     "schnitt": 0.22,
     "hoechstzahl": null
@@ -3398,12 +3397,12 @@
     "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Dialga-MEG095?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 4,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.6,
      "schnitt": 0.11,
      "hoechstzahl": null,
@@ -3420,7 +3419,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 26,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.8,
     "schnitt": 0.09,
     "hoechstzahl": null
@@ -3441,15 +3440,15 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png",
    "preis": {
-    "eur": 10.51,
-    "eur_niedrig": 6.0,
+    "eur": 10.44,
+    "eur_niedrig": 5.9,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Unfair-Stamp-TWM165?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 2,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.3,
      "schnitt": 0.6,
      "hoechstzahl": 1,
@@ -3466,7 +3465,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 26,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.8,
     "schnitt": 0.22,
     "hoechstzahl": 1
@@ -3488,10 +3487,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_054_R_EN_LG.png",
    "preis": {
-    "eur": 0.1,
+    "eur": 0.09,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Shrouded-Fable/Academy-at-Night-SFA054?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -3526,15 +3525,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_076_R_EN_LG.png",
    "preis": {
-    "eur": 5.78,
-    "eur_niedrig": 3.0,
+    "eur": 5.88,
+    "eur_niedrig": 3.8,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Latias-ex-V1-SSP076?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 3,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.4,
      "schnitt": 0.23,
      "hoechstzahl": null,
@@ -3551,7 +3550,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 25,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.8,
     "schnitt": 0.1,
     "hoechstzahl": null
@@ -3575,12 +3574,12 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Stevens-Beldum-DRI143?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 7,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 1.0,
      "schnitt": 0.53,
      "hoechstzahl": null,
@@ -3597,7 +3596,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 24,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.8,
     "schnitt": 0.39,
     "hoechstzahl": null
@@ -3618,16 +3617,16 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_145_R_EN_LG.png",
    "preis": {
-    "eur": 0.62,
+    "eur": 0.54,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Stevens-Metagross-ex-DRI145?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 6,
-     "listen_gesamt": 675,
-     "anteil": 0.9,
+     "listen_gesamt": 715,
+     "anteil": 0.8,
      "schnitt": 0.51,
      "hoechstzahl": null,
      "turniere": 6
@@ -3643,7 +3642,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 24,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.8,
     "schnitt": 0.33,
     "hoechstzahl": null
@@ -3664,15 +3663,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_094_R_EN_LG.png",
    "preis": {
-    "eur": 0.45,
+    "eur": 0.54,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Mega-Mawile-ex-V1-MEG094?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 5,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.7,
      "schnitt": 0.2,
      "hoechstzahl": null,
@@ -3689,7 +3688,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 23,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.7,
     "schnitt": 0.12,
     "hoechstzahl": null
@@ -3713,13 +3712,13 @@
     "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Stevens-Metang-DRI144?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 6,
-     "listen_gesamt": 675,
-     "anteil": 0.9,
+     "listen_gesamt": 715,
+     "anteil": 0.8,
      "schnitt": 0.34,
      "hoechstzahl": null,
      "turniere": 6
@@ -3735,7 +3734,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 23,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.7,
     "schnitt": 0.23,
     "hoechstzahl": null
@@ -3759,12 +3758,12 @@
     "eur": 0.1,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Crushing-Hammer-POR071?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 1.0,
      "hoechstzahl": null,
@@ -3781,7 +3780,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 22,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.7,
     "schnitt": 0.3,
     "hoechstzahl": null
@@ -3802,19 +3801,19 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_157_R_EN_LG.png",
    "preis": {
-    "eur": 0.87,
+    "eur": 0.88,
     "eur_niedrig": 0.15,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Prime-Catcher-TEF157?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 13,
-     "listen_gesamt": 675,
-     "anteil": 1.9,
-     "schnitt": 0.31,
+     "listen_mit_karte": 14,
+     "listen_gesamt": 715,
+     "anteil": 2.0,
+     "schnitt": 0.3,
      "hoechstzahl": 1,
-     "turniere": 12
+     "turniere": 13
     },
     "TEF-PBL": {
      "listen_mit_karte": 8,
@@ -3826,14 +3825,60 @@
     }
    },
    "gesamt": {
-    "listen_mit_karte": 21,
-    "listen_gesamt": 3143,
+    "listen_mit_karte": 22,
+    "listen_gesamt": 3183,
     "anteil": 0.7,
     "schnitt": 0.26,
     "hoechstzahl": 1
    },
    "quellen": [
     "majors",
+    "online_api"
+   ]
+  },
+  {
+   "name": "Orthworm ex",
+   "name_de": "Schlurm-ex",
+   "set": "SCR",
+   "nummer": "110",
+   "typ": "Basic",
+   "gruppe": "pokemon",
+   "gruppe_name": "Pokémon",
+   "gruppe_rang": 1,
+   "ace": null,
+   "bild": null,
+   "preis": {
+    "eur": 0.57,
+    "eur_niedrig": 0.05,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Orthworm-ex-V1-SCR110?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
+    "stand": "2026-10-27T06:25:15.118676"
+   },
+   "je_meta": {
+    "TEF-30C": {
+     "listen_mit_karte": 6,
+     "listen_gesamt": 715,
+     "anteil": 0.8,
+     "schnitt": 0.17,
+     "hoechstzahl": null,
+     "turniere": 6
+    },
+    "TEF-PBL": {
+     "listen_mit_karte": 15,
+     "listen_gesamt": 2468,
+     "anteil": 0.6,
+     "schnitt": 0.07,
+     "hoechstzahl": null,
+     "turniere": 14
+    }
+   },
+   "gesamt": {
+    "listen_mit_karte": 21,
+    "listen_gesamt": 3183,
+    "anteil": 0.7,
+    "schnitt": 0.1,
+    "hoechstzahl": null
+   },
+   "quellen": [
     "online_api"
    ]
   },
@@ -3849,15 +3894,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_072_R_EN_LG.png",
    "preis": {
-    "eur": 0.05,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Energy-Search-POR072?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.08,
      "hoechstzahl": null,
@@ -3874,55 +3919,9 @@
    },
    "gesamt": {
     "listen_mit_karte": 20,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.6,
     "schnitt": 0.12,
-    "hoechstzahl": null
-   },
-   "quellen": [
-    "online_api"
-   ]
-  },
-  {
-   "name": "Orthworm ex",
-   "name_de": "Schlurm-ex",
-   "set": "SCR",
-   "nummer": "110",
-   "typ": "Basic",
-   "gruppe": "pokemon",
-   "gruppe_name": "Pokémon",
-   "gruppe_rang": 1,
-   "ace": null,
-   "bild": null,
-   "preis": {
-    "eur": 0.54,
-    "eur_niedrig": 0.05,
-    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Orthworm-ex-V1-SCR110?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
-   },
-   "je_meta": {
-    "TEF-30C": {
-     "listen_mit_karte": 4,
-     "listen_gesamt": 675,
-     "anteil": 0.6,
-     "schnitt": 0.14,
-     "hoechstzahl": null,
-     "turniere": 4
-    },
-    "TEF-PBL": {
-     "listen_mit_karte": 15,
-     "listen_gesamt": 2468,
-     "anteil": 0.6,
-     "schnitt": 0.07,
-     "hoechstzahl": null,
-     "turniere": 14
-    }
-   },
-   "gesamt": {
-    "listen_mit_karte": 19,
-    "listen_gesamt": 3143,
-    "anteil": 0.6,
-    "schnitt": 0.08,
     "hoechstzahl": null
    },
    "quellen": [
@@ -3941,24 +3940,24 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/30C/30C_066_R_EN_LG.png",
    "preis": {
-    "eur": 1.9,
-    "eur_niedrig": 0.45,
+    "eur": 1.61,
+    "eur_niedrig": 0.35,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/30th-Celebration/Mew-ex-V1-30C066?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
-     "listen_mit_karte": 17,
-     "listen_gesamt": 675,
+     "listen_mit_karte": 18,
+     "listen_gesamt": 715,
      "anteil": 2.5,
      "schnitt": 0.16,
      "hoechstzahl": null,
-     "turniere": 13
+     "turniere": 14
     }
    },
    "gesamt": {
-    "listen_mit_karte": 17,
-    "listen_gesamt": 675,
+    "listen_mit_karte": 18,
+    "listen_gesamt": 715,
     "anteil": 2.5,
     "schnitt": 0.16,
     "hoechstzahl": null
@@ -3982,7 +3981,7 @@
     "eur": 0.1,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution-Energies/Basic-Psychic-Energy-V1-MEE005?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4028,15 +4027,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_107_R_EN_LG.png",
    "preis": {
-    "eur": 0.05,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Archaludon-V1-SCR107?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 4,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.6,
      "schnitt": 0.1,
      "hoechstzahl": null,
@@ -4053,7 +4052,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 16,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.5,
     "schnitt": 0.18,
     "hoechstzahl": 1
@@ -4078,12 +4077,12 @@
     "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Archaludon-PFL075?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 5,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.7,
      "schnitt": 0.16,
      "hoechstzahl": null,
@@ -4100,7 +4099,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 16,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.5,
     "schnitt": 0.12,
     "hoechstzahl": null
@@ -4121,15 +4120,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_104_R_EN_LG.png",
    "preis": {
-    "eur": 1.76,
+    "eur": 1.83,
     "eur_niedrig": 0.25,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Mega-Kangaskhan-ex-V1-MEG104?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 4,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.6,
      "schnitt": 0.28,
      "hoechstzahl": null,
@@ -4146,7 +4145,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 16,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.5,
     "schnitt": 0.23,
     "hoechstzahl": null
@@ -4167,10 +4166,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_072_R_EN_LG.png",
    "preis": {
-    "eur": 0.03,
+    "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Antique-Armor-Fossil-PBL072?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4205,10 +4204,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_062_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Bastiodon-V1-PBL062?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4243,15 +4242,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_056_R_EN_LG.png",
    "preis": {
-    "eur": 1.86,
-    "eur_niedrig": 0.5,
+    "eur": 1.85,
+    "eur_niedrig": 0.45,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Lillies-Clefairy-ex-V1-JTG056?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 5,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.7,
      "schnitt": 0.19,
      "hoechstzahl": null,
@@ -4268,7 +4267,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 14,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.4,
     "schnitt": 0.13,
     "hoechstzahl": null
@@ -4289,10 +4288,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_170_R_EN_LG.png",
    "preis": {
-    "eur": 0.14,
+    "eur": 0.13,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Cyrano-V1-SSP170?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4330,7 +4329,7 @@
     "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Drilbur-SSP108?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4365,10 +4364,10 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_162_R_EN_LG.png",
    "preis": {
-    "eur": 0.36,
-    "eur_niedrig": 0.07,
+    "eur": 0.32,
+    "eur_niedrig": 0.08,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Scoop-Up-Cyclone-TWM162?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4406,7 +4405,7 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Shieldon-PBL061?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4444,12 +4443,12 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Black-Bolt/Drilbur-V1-BLK045?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.43,
      "hoechstzahl": null,
@@ -4466,7 +4465,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 11,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.17,
     "hoechstzahl": null
@@ -4487,10 +4486,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png",
    "preis": {
-    "eur": 0.11,
+    "eur": 0.13,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Enhanced-Hammer-V1-TWM148?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4525,10 +4524,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_098_R_EN_LG.png",
    "preis": {
-    "eur": 1.47,
+    "eur": 1.43,
     "eur_niedrig": 0.5,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Ns-Zoroark-ex-V1-JTG098?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4563,10 +4562,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_097_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Ns-Zorua-JTG097?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4601,15 +4600,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_080_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Prism-Tower-V1-CRI080?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.12,
      "hoechstzahl": null,
@@ -4626,7 +4625,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 11,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.09,
     "hoechstzahl": null
@@ -4647,10 +4646,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_084_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.1,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Relicanth-V1-TEF084?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4685,15 +4684,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_087_R_EN_LG.png",
    "preis": {
-    "eur": 0.13,
+    "eur": 0.11,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Dawn-V1-PFL087?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.15,
      "hoechstzahl": null,
@@ -4710,7 +4709,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 10,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.2,
     "hoechstzahl": null
@@ -4731,10 +4730,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_157_R_EN_LG.png",
    "preis": {
-    "eur": 0.05,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Ruffian-V1-JTG157?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4772,12 +4771,12 @@
     "eur": 0.23,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution-Energies/Basic-Water-Energy-V1-MEE003?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.08,
      "hoechstzahl": null,
@@ -4794,7 +4793,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 10,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.1,
     "hoechstzahl": null
@@ -4816,15 +4815,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_064_R_EN_LG.png",
    "preis": {
-    "eur": 0.94,
+    "eur": 0.93,
     "eur_niedrig": 0.3,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Wellspring-Mask-Ogerpon-ex-V1-TWM064?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.08,
      "hoechstzahl": null,
@@ -4841,7 +4840,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 10,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.09,
     "hoechstzahl": null
@@ -4865,12 +4864,12 @@
     "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Gwynn-V1-PBL078?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 2,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.3,
      "schnitt": 0.21,
      "hoechstzahl": null,
@@ -4887,7 +4886,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 9,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.2,
     "hoechstzahl": null
@@ -4908,10 +4907,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_121_R_EN_LG.png",
    "preis": {
-    "eur": 0.05,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Mega-Signal-V1-MEG121?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -4946,15 +4945,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_161_R_EN_LG.png",
    "preis": {
-    "eur": 1.02,
+    "eur": 1.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Mist-Energy-TEF161?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 2,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.3,
      "schnitt": 0.18,
      "hoechstzahl": null,
@@ -4971,7 +4970,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 9,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.14,
     "hoechstzahl": null
@@ -4992,10 +4991,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png",
    "preis": {
-    "eur": 0.11,
+    "eur": 0.1,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Buddy-Buddy-Poffin-ASC184?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5030,15 +5029,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_083_R_EN_LG.png",
    "preis": {
-    "eur": 0.05,
+    "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/White-Flare/Harlequin-V1-WHT083?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 2,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.3,
      "schnitt": 0.62,
      "hoechstzahl": 1,
@@ -5055,7 +5054,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 8,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.22,
     "hoechstzahl": 1
@@ -5077,15 +5076,15 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_167_R_EN_LG.png",
    "preis": {
-    "eur": 4.4,
-    "eur_niedrig": 1.9,
+    "eur": 4.41,
+    "eur_niedrig": 2.0,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Legacy-Energy-TWM167?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.33,
      "hoechstzahl": null,
@@ -5102,7 +5101,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 8,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.11,
     "hoechstzahl": null
@@ -5123,15 +5122,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_156_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Reciprocating-Ticket-JTG156?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 5,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.7,
      "schnitt": 0.14,
      "hoechstzahl": null,
@@ -5148,7 +5147,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 8,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.12,
     "hoechstzahl": null
@@ -5172,12 +5171,12 @@
     "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Sacred-Ash-DRI168?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 2,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.3,
      "schnitt": 0.21,
      "hoechstzahl": null,
@@ -5194,7 +5193,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 8,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.3,
     "schnitt": 0.11,
     "hoechstzahl": null
@@ -5218,7 +5217,7 @@
     "eur": 0.22,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Team-Rockets-Petrel-ASC207?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5253,10 +5252,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/30C/30C_128_R_EN_LG.png",
    "preis": {
-    "eur": 0.13,
+    "eur": 0.15,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/30th-Celebration/Ultra-Ball-30C128?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5291,15 +5290,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_032_R_EN_LG.png",
    "preis": {
-    "eur": 0.03,
+    "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Deoxys-CRI032?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 4,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.6,
      "schnitt": 0.3,
      "hoechstzahl": null,
@@ -5316,7 +5315,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 7,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.21,
     "hoechstzahl": null
@@ -5337,10 +5336,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_149_R_EN_LG.png",
    "preis": {
-    "eur": 0.09,
+    "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Festival-Grounds-TWM149?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5375,15 +5374,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_040_R_EN_LG.png",
    "preis": {
-    "eur": 0.11,
+    "eur": 0.09,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Shrouded-Fable/Genesect-SFA040?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 3,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.4,
      "schnitt": 0.13,
      "hoechstzahl": null,
@@ -5400,7 +5399,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 7,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.1,
     "hoechstzahl": null
@@ -5421,10 +5420,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png",
    "preis": {
-    "eur": 0.23,
+    "eur": 0.28,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Bosss-Orders-Corbeau-V1-ASC183?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5459,10 +5458,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_028_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.09,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Cinderace-MEG028?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5497,15 +5496,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.1,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Energy-Switch-MEG115?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.17,
      "hoechstzahl": null,
@@ -5522,7 +5521,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 6,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.1,
     "hoechstzahl": null
@@ -5543,10 +5542,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_146_R_EN_LG.png",
    "preis": {
-    "eur": 0.16,
+    "eur": 0.17,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Eri-V1-TEF146?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5584,12 +5583,12 @@
     "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Black-Bolt/Fennel-V1-BLK082?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 3,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.4,
      "schnitt": 0.18,
      "hoechstzahl": null,
@@ -5606,7 +5605,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 6,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.14,
     "hoechstzahl": null
@@ -5627,15 +5626,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_150_R_EN_LG.png",
    "preis": {
-    "eur": 0.03,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Hand-Trimmer-TEF150?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 3,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.4,
      "schnitt": 0.18,
      "hoechstzahl": null,
@@ -5652,7 +5651,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 6,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.12,
     "hoechstzahl": null
@@ -5673,10 +5672,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_113_R_EN_LG.png",
    "preis": {
-    "eur": 0.06,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Prismatic-Evolutions/Kieran-V1-PRE113?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5711,15 +5710,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_155_R_EN_LG.png",
    "preis": {
-    "eur": 0.16,
+    "eur": 0.13,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Lanas-Aid-V1-TWM155?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 2,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.3,
      "schnitt": 0.17,
      "hoechstzahl": null,
@@ -5736,7 +5735,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 6,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.15,
     "hoechstzahl": null
@@ -5757,10 +5756,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_152_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Ns-Castle-JTG152?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5795,10 +5794,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_197_R_EN_LG.png",
    "preis": {
-    "eur": 0.1,
+    "eur": 0.12,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Nighttime-Mine-ASC197?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5833,10 +5832,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png",
    "preis": {
-    "eur": 0.56,
+    "eur": 0.62,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Black-Bolt/Pokegear-30-BLK084?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5871,15 +5870,15 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.03,
+    "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Beldum-JTG061?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 1.33,
      "hoechstzahl": null,
@@ -5896,7 +5895,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 5,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.56,
     "hoechstzahl": null
@@ -5917,10 +5916,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_112_R_EN_LG.png",
    "preis": {
-    "eur": 1.11,
+    "eur": 1.08,
     "eur_niedrig": 0.2,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Cornerstone-Mask-Ogerpon-ex-V1-TWM112?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5955,10 +5954,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_076_R_EN_LG.png",
    "preis": {
-    "eur": 0.03,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Fossil-Quarry-PBL076?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -5993,10 +5992,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png",
    "preis": {
-    "eur": 0.59,
+    "eur": 0.57,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Lillies-Determination-ASC192?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6031,10 +6030,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_070_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Patrat-CRI070?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6069,15 +6068,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_159_R_EN_LG.png",
    "preis": {
-    "eur": 0.16,
+    "eur": 0.15,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Spike-Energy-V1-JTG159?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.33,
      "hoechstzahl": null,
@@ -6094,7 +6093,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 5,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.14,
     "hoechstzahl": null
@@ -6118,7 +6117,7 @@
     "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/30th-Celebration/Switch-30C127?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6153,15 +6152,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_131_R_EN_LG.png",
    "preis": {
-    "eur": 0.09,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Tatsugiri-V1-TWM131?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 2,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.3,
      "schnitt": 0.17,
      "hoechstzahl": null,
@@ -6178,7 +6177,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 5,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.12,
     "hoechstzahl": null
@@ -6207,7 +6206,7 @@
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.67,
      "hoechstzahl": null,
@@ -6224,7 +6223,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 5,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.2,
     "schnitt": 0.34,
     "hoechstzahl": null
@@ -6245,10 +6244,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png",
    "preis": {
-    "eur": 0.1,
+    "eur": 0.11,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Ultra-Ball-V1-ASC213?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6283,10 +6282,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_073_R_EN_LG.png",
    "preis": {
-    "eur": 0.5,
+    "eur": 0.55,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Cinccino-ex-V1-CRI073?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6321,10 +6320,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png",
    "preis": {
-    "eur": 0.11,
+    "eur": 0.13,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Shrouded-Fable/Colresss-Tenacity-V1-SFA057?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6362,7 +6361,7 @@
     "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Cramorant-V1-TWM058?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6397,15 +6396,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_129_R_EN_LG.png",
    "preis": {
-    "eur": 0.9,
+    "eur": 0.75,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Dudunsparce-TEF129?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.2,
      "hoechstzahl": null,
@@ -6422,7 +6421,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 4,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.15,
     "hoechstzahl": null
@@ -6443,15 +6442,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_120_R_EN_LG.png",
    "preis": {
-    "eur": 1.93,
-    "eur_niedrig": 0.03,
+    "eur": 1.61,
+    "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Dunsparce-JTG120?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.2,
      "hoechstzahl": null,
@@ -6468,7 +6467,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 4,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.15,
     "hoechstzahl": null
@@ -6489,10 +6488,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEE/MEE_006_R_EN_LG.png",
    "preis": {
-    "eur": 0.02,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution-Energies/Basic-Fighting-Energy-V1-MEE006?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6528,15 +6527,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_157_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Lucian-V1-TWM157?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 4,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.6,
      "schnitt": 1.4,
      "hoechstzahl": 4,
@@ -6545,7 +6544,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 4,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.6,
     "schnitt": 1.4,
     "hoechstzahl": 4
@@ -6565,12 +6564,12 @@
    "gruppe_name": "Pokémon",
    "gruppe_rang": 1,
    "ace": null,
-   "bild": null,
+   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_064_R_EN_LG.png",
    "preis": {
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Black-Bolt/Pawniard-V1-BLK064?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6608,12 +6607,12 @@
     "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Prismatic-Evolutions/Regigigas-PRE086?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.11,
      "hoechstzahl": null,
@@ -6630,7 +6629,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 4,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.31,
     "hoechstzahl": 1
@@ -6655,12 +6654,12 @@
     "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Zamazenta-V1-DRI146?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.12,
      "hoechstzahl": null,
@@ -6677,7 +6676,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 4,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.06,
     "hoechstzahl": null
@@ -6701,12 +6700,12 @@
     "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Biancas-Devotion-V1-TEF142?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.17,
      "hoechstzahl": null,
@@ -6723,7 +6722,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 3,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.16,
     "hoechstzahl": null
@@ -6744,10 +6743,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_171_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Scarlet-Violet/Energy-Retrieval-SV1en171?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6782,15 +6781,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_151_R_EN_LG.png",
    "preis": {
-    "eur": 0.1,
+    "eur": 0.09,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Hassel-V1-TWM151?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.14,
      "hoechstzahl": null,
@@ -6807,7 +6806,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 3,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.15,
     "hoechstzahl": null
@@ -6828,10 +6827,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.07,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Magearna-JTG107?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6866,10 +6865,10 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_154_R_EN_LG.png",
    "preis": {
-    "eur": 0.85,
+    "eur": 0.96,
     "eur_niedrig": 0.15,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Maximum-Belt-TEF154?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6907,7 +6906,7 @@
     "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Minccino-CRI072?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6942,10 +6941,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/30C/30C_126_R_EN_LG.png",
    "preis": {
-    "eur": 0.28,
+    "eur": 0.27,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/30th-Celebration/Poke-Pad-30C126?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -6983,12 +6982,12 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Prinplup-PFL028?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.25,
      "hoechstzahl": null,
@@ -7005,7 +7004,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 3,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.15,
     "hoechstzahl": null
@@ -7029,7 +7028,7 @@
     "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Super-Potion-JTG158?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7042,7 +7041,7 @@
     },
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 1.0,
      "hoechstzahl": 1,
@@ -7051,13 +7050,59 @@
    },
    "gesamt": {
     "listen_mit_karte": 3,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.37,
     "hoechstzahl": 1
    },
    "quellen": [
     "majors",
+    "online_api"
+   ]
+  },
+  {
+   "name": "Team Rocket's Chingling",
+   "name_de": "Team Rockets Klingplim",
+   "set": "DRI",
+   "nummer": "85",
+   "typ": "Basic",
+   "gruppe": "pokemon",
+   "gruppe_name": "Pokémon",
+   "gruppe_rang": 1,
+   "ace": null,
+   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_085_R_EN_LG.png",
+   "preis": {
+    "eur": 0.05,
+    "eur_niedrig": 0.02,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Chingling-DRI085?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
+    "stand": "2026-10-27T06:25:15.118676"
+   },
+   "je_meta": {
+    "TEF-30C": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 715,
+     "anteil": 0.1,
+     "schnitt": 0.5,
+     "hoechstzahl": null,
+     "turniere": 1
+    },
+    "TEF-PBL": {
+     "listen_mit_karte": 2,
+     "listen_gesamt": 2468,
+     "anteil": 0.1,
+     "schnitt": 0.08,
+     "hoechstzahl": null,
+     "turniere": 2
+    }
+   },
+   "gesamt": {
+    "listen_mit_karte": 3,
+    "listen_gesamt": 3183,
+    "anteil": 0.1,
+    "schnitt": 0.22,
+    "hoechstzahl": null
+   },
+   "quellen": [
     "online_api"
    ]
   },
@@ -7073,10 +7118,10 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_162_R_EN_LG.png",
    "preis": {
-    "eur": 0.59,
+    "eur": 0.47,
     "eur_niedrig": 0.05,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Amulet-of-Hope-SSP162?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7111,10 +7156,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_079_R_EN_LG.png",
    "preis": {
-    "eur": 0.02,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Clefable-TWM079?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7152,7 +7197,7 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Clefairy-V1-POR030?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7187,10 +7232,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_133_R_EN_LG.png",
    "preis": {
-    "eur": 0.14,
+    "eur": 0.11,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Crispin-V1-SCR133?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7225,10 +7270,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.88,
+    "eur": 0.84,
     "eur_niedrig": 0.47,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/SV-Black-Star-Promos/Dialga-ex-SVP180?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7266,12 +7311,12 @@
     "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Duraludon-PFL074?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.11,
      "hoechstzahl": null,
@@ -7288,7 +7333,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 2,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.08,
     "hoechstzahl": null
@@ -7309,10 +7354,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_175_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Dusk-Ball-SSP175?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7347,10 +7392,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.04,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Prismatic-Evolutions/Friends-in-Paldea-V1-PRE109?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7385,10 +7430,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEE/MEE_001_R_EN_LG.png",
    "preis": {
-    "eur": 0.02,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution-Energies/Basic-Grass-Energy-V1-MEE001?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7424,10 +7469,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_138_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Kofu-V1-SCR138?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7462,10 +7507,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_115_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Metagross-V1-TEF115?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7503,7 +7548,7 @@
     "eur": 0.11,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Mortys-Conviction-V1-TEF155?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7541,7 +7586,7 @@
     "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Occa-Berry-SCR140?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7576,10 +7621,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 8.41,
-    "eur_niedrig": 4.0,
+    "eur": 7.69,
+    "eur_niedrig": 3.9,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/MEP-Black-Star-Promos/Piplup-MEP042?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7617,7 +7662,7 @@
     "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Poke-Ball-POR080?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7652,10 +7697,10 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_062_R_EN_LG.png",
    "preis": {
-    "eur": 0.5,
+    "eur": 0.51,
     "eur_niedrig": 0.1,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Shrouded-Fable/Poke-Vital-A-SFA062?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7693,7 +7738,7 @@
     "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Pokemon-Center-Lady-MEG123?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7728,10 +7773,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_024_R_EN_LG.png",
    "preis": {
-    "eur": 0.06,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Rabsca-TEF024?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7807,12 +7852,12 @@
     "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Prismatic-Evolutions/Roto-Stick-PRE127?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.4,
      "hoechstzahl": null,
@@ -7829,47 +7874,9 @@
    },
    "gesamt": {
     "listen_mit_karte": 2,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.31,
-    "hoechstzahl": null
-   },
-   "quellen": [
-    "online_api"
-   ]
-  },
-  {
-   "name": "Team Rocket's Chingling",
-   "name_de": "Team Rockets Klingplim",
-   "set": "DRI",
-   "nummer": "85",
-   "typ": "Basic",
-   "gruppe": "pokemon",
-   "gruppe_name": "Pokémon",
-   "gruppe_rang": 1,
-   "ace": null,
-   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_085_R_EN_LG.png",
-   "preis": {
-    "eur": 0.03,
-    "eur_niedrig": 0.02,
-    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Chingling-DRI085?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
-   },
-   "je_meta": {
-    "TEF-PBL": {
-     "listen_mit_karte": 2,
-     "listen_gesamt": 2468,
-     "anteil": 0.1,
-     "schnitt": 0.08,
-     "hoechstzahl": null,
-     "turniere": 2
-    }
-   },
-   "gesamt": {
-    "listen_mit_karte": 2,
-    "listen_gesamt": 2468,
-    "anteil": 0.1,
-    "schnitt": 0.08,
     "hoechstzahl": null
    },
    "quellen": [
@@ -7888,10 +7895,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_209_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Team-Rockets-Transceiver-V1-ASC209?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -7929,12 +7936,12 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Tremendous-Bomb-V1-PBL082?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.17,
      "hoechstzahl": null,
@@ -7951,7 +7958,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 2,
-    "listen_gesamt": 3143,
+    "listen_gesamt": 3183,
     "anteil": 0.1,
     "schnitt": 0.12,
     "hoechstzahl": null
@@ -7972,10 +7979,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_215_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Waitress-ASC215?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8010,10 +8017,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_142_R_EN_LG.png",
    "preis": {
-    "eur": 0.05,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Accompanying-Flute-TWM142?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8051,7 +8058,7 @@
     "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Acerolas-Mischief-V1-MEG113?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8086,10 +8093,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.03,
+    "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Babiri-Berry-SSP163?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8124,10 +8131,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_048_R_EN_LG.png",
    "preis": {
-    "eur": 0.55,
-    "eur_niedrig": 0.1,
+    "eur": 0.62,
+    "eur_niedrig": 0.05,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Black-Kyurem-ex-V1-SSP048?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8162,10 +8169,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_141_R_EN_LG.png",
    "preis": {
-    "eur": 1.03,
-    "eur_niedrig": 0.35,
+    "eur": 0.98,
+    "eur_niedrig": 0.2,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Bloodmoon-Ursaluna-ex-V1-TWM141?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8203,7 +8210,7 @@
     "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Boxed-Order-TEF143?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8241,7 +8248,7 @@
     "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Brambleghast-TEF021?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8279,7 +8286,7 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Bramblin-TEF020?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8303,6 +8310,44 @@
    ]
   },
   {
+   "name": "Carmine",
+   "name_de": "Hana",
+   "set": "TWM",
+   "nummer": "145",
+   "typ": "Supporter",
+   "gruppe": "supporter",
+   "gruppe_name": "Supporter",
+   "gruppe_rang": 2,
+   "ace": null,
+   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_145_R_EN_LG.png",
+   "preis": {
+    "eur": 0.09,
+    "eur_niedrig": 0.02,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Carmine-V1-TWM145?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
+    "stand": "2026-10-27T06:25:15.118676"
+   },
+   "je_meta": {
+    "TEF-30C": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 715,
+     "anteil": 0.1,
+     "schnitt": 0.5,
+     "hoechstzahl": null,
+     "turniere": 1
+    }
+   },
+   "gesamt": {
+    "listen_mit_karte": 1,
+    "listen_gesamt": 715,
+    "anteil": 0.1,
+    "schnitt": 0.5,
+    "hoechstzahl": null
+   },
+   "quellen": [
+    "online_api"
+   ]
+  },
+  {
    "name": "Chien-Pao",
    "name_de": "Baojian",
    "set": "SSP",
@@ -8314,10 +8359,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_056_R_EN_LG.png",
    "preis": {
-    "eur": 0.09,
+    "eur": 0.11,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Chien-Pao-SSP056?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8352,10 +8397,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_145_R_EN_LG.png",
    "preis": {
-    "eur": 0.08,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Ciphermaniacs-Codebreaking-V1-TEF145?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8390,15 +8435,15 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.41,
+    "eur": 0.49,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Cobalion-ex-V1-CRI064?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.2,
      "hoechstzahl": null,
@@ -8407,7 +8452,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 0.2,
     "hoechstzahl": null
@@ -8428,10 +8473,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_012_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.11,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Crustle-V1-DRI012?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8469,7 +8514,7 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution-Energies/Basic-Darkness-Energy-V1-MEE007?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8505,10 +8550,10 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_134_R_EN_LG.png",
    "preis": {
-    "eur": 0.37,
+    "eur": 0.46,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Deluxe-Bomb-SCR134?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8543,15 +8588,15 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.07,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/30th-Celebration/Dialga-30C103?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.15,
      "hoechstzahl": null,
@@ -8560,7 +8605,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 0.15,
     "hoechstzahl": null
@@ -8581,10 +8626,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_085_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Drilbur-TEF085?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8622,7 +8667,7 @@
     "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Prismatic-Evolutions/Dusclops-PRE036?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8657,10 +8702,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_037_R_EN_LG.png",
    "preis": {
-    "eur": 0.19,
+    "eur": 0.17,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Prismatic-Evolutions/Dusknoir-PRE037?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8695,10 +8740,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_035_R_EN_LG.png",
    "preis": {
-    "eur": 0.06,
+    "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Prismatic-Evolutions/Duskull-PRE035?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8736,7 +8781,7 @@
     "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Dwebble-DRI011?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8771,10 +8816,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_116_R_EN_LG.png",
    "preis": {
-    "eur": 0.05,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Fighting-Gong-V1-MEG116?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8812,7 +8857,7 @@
     "eur": 0.07,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/White-Flare/Frillish-V1-WHT044?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8850,12 +8895,12 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Furfrou-POR067?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 1.0,
      "hoechstzahl": 1,
@@ -8864,7 +8909,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 1.0,
     "hoechstzahl": 1
@@ -8885,15 +8930,15 @@
    "ace": true,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_136_R_EN_LG.png",
    "preis": {
-    "eur": 0.52,
+    "eur": 0.5,
     "eur_niedrig": 0.04,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Grand-Tree-SCR136?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.06,
      "hoechstzahl": null,
@@ -8902,7 +8947,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 0.06,
     "hoechstzahl": null
@@ -8926,7 +8971,7 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Granite-Cave-DRI166?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -8961,10 +9006,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_111_R_EN_LG.png",
    "preis": {
-    "eur": 0.02,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Prismatic-Evolutions/Haban-Berry-PRE111?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9002,7 +9047,7 @@
     "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Journey-Together/Iriss-Fighting-Spirit-V1-JTG149?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9037,10 +9082,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.08,
+    "eur": 0.1,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Iron-Crown-SSP132?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9075,15 +9120,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/30C/30C_102_R_EN_LG.png",
    "preis": {
-    "eur": 0.44,
+    "eur": 0.47,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/30th-Celebration/Jirachi-ex-V1-30C102?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.08,
      "hoechstzahl": null,
@@ -9092,7 +9137,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 0.08,
     "hoechstzahl": null
@@ -9116,7 +9161,7 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Stellar-Crown/Lacey-V1-SCR139?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9149,12 +9194,12 @@
    "gruppe_name": "Supporter",
    "gruppe_rang": 2,
    "ace": null,
-   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_120_R_EN_LG.png",
+   "bild": null,
    "preis": {
-    "eur": 0.03,
+    "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Lt-Surges-Bargain-V1-MEG120?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9189,10 +9234,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_158_R_EN_LG.png",
    "preis": {
-    "eur": 0.1,
+    "eur": 0.11,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Lucky-Helmet-TWM158?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9227,10 +9272,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_074_R_EN_LG.png",
    "preis": {
-    "eur": 0.06,
+    "eur": 0.08,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Lunatone-MEG074?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9265,10 +9310,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_172_R_EN_LG.png",
    "preis": {
-    "eur": 1.07,
-    "eur_niedrig": 0.13,
+    "eur": 1.18,
+    "eur_niedrig": 0.19,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Mega-Audino-ex-V1-ASC172?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9303,10 +9348,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_041_R_EN_LG.png",
    "preis": {
-    "eur": 0.44,
+    "eur": 0.53,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Phantasmal-Flames/Mega-Diancie-ex-PFL041?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9344,7 +9389,7 @@
     "eur": 0.02,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Chaos-Rising/Metang-V1-CRI060?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9379,10 +9424,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.04,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Black-Bolt/Minccino-V1-BLK075?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9417,10 +9462,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_095_R_EN_LG.png",
    "preis": {
-    "eur": 0.3,
+    "eur": 0.29,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Twilight-Masquerade/Munkidori-TWM095?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9455,10 +9500,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_079_R_EN_LG.png",
    "preis": {
-    "eur": 0.05,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Perfect-Order/Naveen-V1-POR079?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9496,7 +9541,7 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Pikipek-PBL066?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9531,10 +9576,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_063_R_EN_LG.png",
    "preis": {
-    "eur": 0.06,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Shrouded-Fable/Powerglass-V1-SFA063?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9572,7 +9617,7 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Rellor-DRI024?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9610,7 +9655,7 @@
     "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Rellor-TEF023?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9645,15 +9690,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_127_R_EN_LG.png",
    "preis": {
-    "eur": 0.11,
+    "eur": 0.1,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Risky-Ruins-MEG127?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.33,
      "hoechstzahl": null,
@@ -9662,7 +9707,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 0.33,
     "hoechstzahl": null
@@ -9683,15 +9728,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_160_R_EN_LG.png",
    "preis": {
-    "eur": 0.15,
+    "eur": 0.13,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Salvatore-V1-TEF160?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.08,
      "hoechstzahl": null,
@@ -9700,7 +9745,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 0.08,
     "hoechstzahl": null
@@ -9721,15 +9766,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_111_R_EN_LG.png",
    "preis": {
-    "eur": 0.77,
+    "eur": 0.73,
     "eur_niedrig": 0.1,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Temporal-Forces/Scizor-ex-V1-TEF111?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.12,
      "hoechstzahl": null,
@@ -9738,7 +9783,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 0.12,
     "hoechstzahl": null
@@ -9759,10 +9804,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_147_R_EN_LG.png",
    "preis": {
-    "eur": 0.63,
+    "eur": 0.66,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Slaking-ex-V1-SSP147?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9797,10 +9842,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_075_R_EN_LG.png",
    "preis": {
-    "eur": 0.03,
+    "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Mega-Evolution/Solrock-MEG075?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9835,10 +9880,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.04,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Stevens-Carbink-DRI086?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9873,10 +9918,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_187_R_EN_LG.png",
    "preis": {
-    "eur": 0.03,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Surging-Sparks/Surfer-V1-SSP187?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9900,6 +9945,44 @@
    ]
   },
   {
+   "name": "Team Rocket's Archer",
+   "name_de": "Team Rockets Atlas",
+   "set": "DRI",
+   "nummer": "170",
+   "typ": "Supporter",
+   "gruppe": "supporter",
+   "gruppe_name": "Supporter",
+   "gruppe_rang": 2,
+   "ace": null,
+   "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_170_R_EN_LG.png",
+   "preis": {
+    "eur": 0.06,
+    "eur_niedrig": 0.02,
+    "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Archer-V1-DRI170?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
+    "stand": "2026-10-27T06:25:15.118676"
+   },
+   "je_meta": {
+    "TEF-30C": {
+     "listen_mit_karte": 1,
+     "listen_gesamt": 715,
+     "anteil": 0.1,
+     "schnitt": 0.5,
+     "hoechstzahl": null,
+     "turniere": 1
+    }
+   },
+   "gesamt": {
+    "listen_mit_karte": 1,
+    "listen_gesamt": 715,
+    "anteil": 0.1,
+    "schnitt": 0.5,
+    "hoechstzahl": null
+   },
+   "quellen": [
+    "online_api"
+   ]
+  },
+  {
    "name": "Team Rocket's Meowth",
    "name_de": "Team Rockets Mauzi",
    "set": "DRI",
@@ -9911,10 +9994,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.06,
+    "eur": 0.04,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Meowth-V1-DRI149?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9949,10 +10032,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.66,
-    "eur_niedrig": 0.04,
+    "eur": 0.64,
+    "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Persian-ex-V1-DRI150?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -9987,15 +10070,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_179_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Destined-Rivals/Team-Rockets-Venture-Bomb-DRI179?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.17,
      "hoechstzahl": null,
@@ -10004,7 +10087,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 0.17,
     "hoechstzahl": null
@@ -10025,10 +10108,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_068_R_EN_LG.png",
    "preis": {
-    "eur": 0.04,
+    "eur": 0.05,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Toucannon-V1-PBL068?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -10066,7 +10149,7 @@
     "eur": 0.03,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Pitch-Black/Trumbeak-PBL067?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -10101,15 +10184,15 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/30C/30C_100_R_EN_LG.png",
    "preis": {
-    "eur": 0.07,
+    "eur": 0.06,
     "eur_niedrig": 0.02,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/30th-Celebration/Yveltal-30C100?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-30C": {
      "listen_mit_karte": 1,
-     "listen_gesamt": 675,
+     "listen_gesamt": 715,
      "anteil": 0.1,
      "schnitt": 0.2,
      "hoechstzahl": null,
@@ -10118,7 +10201,7 @@
    },
    "gesamt": {
     "listen_mit_karte": 1,
-    "listen_gesamt": 675,
+    "listen_gesamt": 715,
     "anteil": 0.1,
     "schnitt": 0.2,
     "hoechstzahl": null
@@ -10139,10 +10222,10 @@
    "ace": null,
    "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVP/SVP_198_R_EN_LG.png",
    "preis": {
-    "eur": 0.64,
+    "eur": 0.75,
     "eur_niedrig": 0.19,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/SV-Black-Star-Promos/Zacian-ex-SVP198?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -10177,10 +10260,10 @@
    "ace": null,
    "bild": null,
    "preis": {
-    "eur": 0.61,
-    "eur_niedrig": 0.09,
+    "eur": 0.67,
+    "eur_niedrig": 0.1,
     "url": "https://www.cardmarket.com/en/Pokemon/Products/Singles/Ascended-Heroes/Zangoose-ex-ASC167?utm_source=limitlesstcg&utm_medium=text&utm_campaign=card_prices",
-    "stand": "2026-10-23T06:27:57.254979"
+    "stand": "2026-10-27T06:25:15.118676"
    },
    "je_meta": {
     "TEF-PBL": {
@@ -10315,8 +10398,8 @@
   {
    "gegner": "Dragapult",
    "gegner_slug": "dragapult-ex",
-   "partien": 647,
-   "siegquote": 42.5,
+   "partien": 649,
+   "siegquote": 42.84,
    "meta": "TEF-30C",
    "turniere": 5,
    "quelle": "labs_tournament_matchups_TEF-30C.csv"
@@ -10333,8 +10416,8 @@
   {
    "gegner": "Basic Box",
    "gegner_slug": "basic-box-m",
-   "partien": 228,
-   "siegquote": 41.96,
+   "partien": 231,
+   "siegquote": 41.41,
    "meta": "TEF-30C",
    "turniere": 5,
    "quelle": "labs_tournament_matchups_TEF-30C.csv"
@@ -10547,15 +10630,6 @@
    "quelle": "labs_tournament_matchups_TEF-30C.csv"
   },
   {
-   "gegner": "Dragapult Dudunsparce",
-   "gegner_slug": "dragapult-dudunsparce",
-   "partien": 23,
-   "siegquote": 63.77,
-   "meta": "TEF-30C",
-   "turniere": 5,
-   "quelle": "labs_tournament_matchups_TEF-30C.csv"
-  },
-  {
    "gegner": "Mega Greninja",
    "gegner_slug": "mega-greninja-ex",
    "partien": 22,
@@ -10569,6 +10643,15 @@
    "gegner_slug": "ethan-typhlosion",
    "partien": 18,
    "siegquote": 12.96,
+   "meta": "TEF-30C",
+   "turniere": 5,
+   "quelle": "labs_tournament_matchups_TEF-30C.csv"
+  },
+  {
+   "gegner": "Dragapult Dudunsparce",
+   "gegner_slug": "dragapult-dudunsparce",
+   "partien": 18,
+   "siegquote": 59.26,
    "meta": "TEF-30C",
    "turniere": 5,
    "quelle": "labs_tournament_matchups_TEF-30C.csv"
@@ -10619,15 +10702,6 @@
    "quelle": "labs_tournament_matchups_TEF-30C.csv"
   },
   {
-   "gegner": "Kangaskhan Bouffalant",
-   "gegner_slug": "kangaskhan-bouffalant",
-   "partien": 14,
-   "siegquote": 35.71,
-   "meta": "TEF-30C",
-   "turniere": 5,
-   "quelle": "labs_tournament_matchups_TEF-30C.csv"
-  },
-  {
    "gegner": "Mew Box",
    "gegner_slug": "mew-ex-30c",
    "partien": 14,
@@ -10650,6 +10724,15 @@
    "gegner_slug": "beedrill-ex-cri",
    "partien": 12,
    "siegquote": 61.11,
+   "meta": "TEF-30C",
+   "turniere": 5,
+   "quelle": "labs_tournament_matchups_TEF-30C.csv"
+  },
+  {
+   "gegner": "Kangaskhan Bouffalant",
+   "gegner_slug": "kangaskhan-bouffalant",
+   "partien": 11,
+   "siegquote": 45.45,
    "meta": "TEF-30C",
    "turniere": 5,
    "quelle": "labs_tournament_matchups_TEF-30C.csv"
@@ -10830,6 +10913,15 @@
    "gegner_slug": "mega-lopunny-ex",
    "partien": 3,
    "siegquote": 66.67,
+   "meta": "TEF-30C",
+   "turniere": 5,
+   "quelle": "labs_tournament_matchups_TEF-30C.csv"
+  },
+  {
+   "gegner": "Dragapult Alakazam",
+   "gegner_slug": "dragapult-alakazam",
+   "partien": 3,
+   "siegquote": 33.33,
    "meta": "TEF-30C",
    "turniere": 5,
    "quelle": "labs_tournament_matchups_TEF-30C.csv"

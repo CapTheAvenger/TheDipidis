@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-10-27T03:53:07Z",
+  "erzeugt_am": "2026-10-27T07:07:19Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -17,8 +17,8 @@
     ],
     "slug": "dragapult-ex",
     "vor_ort": [
-     115,
-     128,
+     116,
+     127,
      46
     ]
    },
@@ -33,7 +33,7 @@
     "slug": "basic-box-m",
     "vor_ort": [
      45,
-     77,
+     78,
      8
     ]
    },
@@ -377,7 +377,7 @@
     ],
     "slug": "dragapult-dudunsparce",
     "vor_ort": [
-     5,
+     4,
      1,
      0
     ]
@@ -663,7 +663,7 @@
     "slug": "kangaskhan-bouffalant",
     "vor_ort": [
      4,
-     2,
+     1,
      1
     ]
    },
@@ -1412,7 +1412,7 @@
     ],
     "slug": "igglybuff-30c",
     "vor_ort": [
-     0,
+     2,
      0,
      0
     ]
@@ -1494,6 +1494,36 @@
    },
    {
     "anteil": "0,00",
+    "name": "dragapult-alakazam",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "dragapult-alakazam",
+    "vor_ort": [
+     0,
+     1,
+     0
+    ]
+   },
+   {
+    "anteil": "0,00",
+    "name": "relicanth-pbl",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "relicanth-pbl",
+    "vor_ort": [
+     0,
+     0,
+     1
+    ]
+   },
+   {
+    "anteil": "0,00",
     "name": "sylveon-pre",
     "online": [
      0,
@@ -1509,8 +1539,8 @@
    }
   ],
   "liste_online": {
-   "bilanz": "12-2-0",
-   "datum": "19.10.2026",
+   "bilanz": "5-0-0",
+   "datum": "26.10.2026",
    "karten": [
     [
      3,
@@ -1519,7 +1549,7 @@
      "60"
     ],
     [
-     3,
+     4,
      "Mega Sharpedo ex",
      "PFL",
      "61"
@@ -1544,39 +1574,27 @@
     ],
     [
      2,
-     "Tatsugiri",
-     "TWM",
-     "131"
-    ],
-    [
-     2,
      "Munkidori",
      "TWM",
      "95"
     ],
     [
-     1,
-     "Fezandipiti ex",
-     "ASC",
-     "142"
+     2,
+     "Tatsugiri",
+     "TWM",
+     "131"
     ],
     [
      1,
-     "Pecharunt",
-     "SVP",
-     "149"
-    ],
-    [
-     4,
-     "Boss's Orders",
+     "Yveltal",
      "MEG",
-     "114"
+     "88"
     ],
     [
-     4,
-     "Judge",
-     "POR",
-     "76"
+     1,
+     "Psyduck",
+     "ASC",
+     "39"
     ],
     [
      4,
@@ -1585,16 +1603,22 @@
      "119"
     ],
     [
-     1,
-     "Team Rocket's Petrel",
-     "DRI",
-     "176"
+     4,
+     "Boss's Orders",
+     "MEG",
+     "114"
     ],
     [
-     4,
-     "Ultra Ball",
-     "MEG",
-     "131"
+     3,
+     "Judge",
+     "POR",
+     "76"
+    ],
+    [
+     1,
+     "Black Belt's Training",
+     "JTG",
+     "143"
     ],
     [
      4,
@@ -1603,28 +1627,40 @@
      "144"
     ],
     [
-     4,
+     3,
      "Poké Pad",
      "POR",
      "81"
     ],
     [
-     1,
+     3,
+     "Ultra Ball",
+     "MEG",
+     "131"
+    ],
+    [
+     2,
      "Night Stretcher",
      "ASC",
      "196"
     ],
     [
      1,
-     "Unfair Stamp",
-     "TWM",
-     "165"
+     "Special Red Card",
+     "CRI",
+     "82"
     ],
     [
      3,
      "Binding Mochi",
      "PRE",
      "95"
+    ],
+    [
+     1,
+     "Hero's Cape",
+     "TEF",
+     "152"
     ],
     [
      2,
@@ -1646,9 +1682,9 @@
     ]
    ],
    "platz": 1,
-   "spieler": "Patty_Maldonado",
-   "turnier": "🏆Moujii's Dojo🏆 (Late Registration Available!)",
-   "von": 203
+   "spieler": "theknagai",
+   "turnier": "Vault Of Games | 🌙 NOT SO Midnight Madness #20",
+   "von": 56
   },
   "listen_vor_ort": [
    {
@@ -1933,14 +1969,14 @@
   "name": "Sharpedo Toxtricity",
   "online": {
    "anteil": "3,22",
-   "anteil14": "4,36",
+   "anteil14": "4,24",
    "bilanz": [
     1361,
     1493,
     24
    ],
    "bis": "26.10.2026",
-   "fenster14": "09.10.–23.10.2026",
+   "fenster14": "13.10.–27.10.2026",
    "format": "TEF–30C",
    "kurz_anteil": "3,55",
    "kurz_bilanz": [
@@ -1953,7 +1989,7 @@
    "kurz_von": "20.10.2026",
    "listen": 584,
    "seit": "18.09.2026",
-   "trend14": "1,68",
+   "trend14": "0,89",
    "turniere": 116
   },
   "vor_ort": {

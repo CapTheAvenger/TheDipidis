@@ -1,5 +1,13 @@
 [
   {
+    "tournament_id": "0078",
+    "tournament_name": "Regional Championship Puebla",
+    "tournament_date": "2026-10-24",
+    "tournament_type": "regional",
+    "country": "MX",
+    "total_players": 0
+  },
+  {
     "tournament_id": "0077",
     "tournament_name": "Regional Championship Nice",
     "tournament_date": "2026-10-17",

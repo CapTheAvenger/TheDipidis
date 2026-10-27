@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt": "2026-10-27T05:20:55Z",
+  "erzeugt": "2026-10-27T07:24:57Z",
   "erzeuger": "scripts/datenluecken.py",
   "anzahl": 8,
   "jeKlasse": {
@@ -43,8 +43,8 @@
   {
    "id": "kartentyp/mee-10",
    "klasse": "kartentyp",
-   "titel": "Fire Energy (MEE 10) — kein Kartentyp in der Datenbank (3000x)",
-   "titelEn": "Fire Energy (MEE 10) — no card type in the database (3000x)",
+   "titel": "Fire Energy (MEE 10) — kein Kartentyp in der Datenbank (3186x)",
+   "titelEn": "Fire Energy (MEE 10) — no card type in the database (3186x)",
    "wo": "data/tournament_decklists_per_player.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -52,8 +52,8 @@
   {
    "id": "kartentyp/mee-11",
    "klasse": "kartentyp",
-   "titel": "Water Energy (MEE 11) — kein Kartentyp in der Datenbank (1491x)",
-   "titelEn": "Water Energy (MEE 11) — no card type in the database (1491x)",
+   "titel": "Water Energy (MEE 11) — kein Kartentyp in der Datenbank (1599x)",
+   "titelEn": "Water Energy (MEE 11) — no card type in the database (1599x)",
    "wo": "data/tournament_decklists_per_player.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -61,8 +61,8 @@
   {
    "id": "kartentyp/mee-12",
    "klasse": "kartentyp",
-   "titel": "Lightning Energy (MEE 12) — kein Kartentyp in der Datenbank (809x)",
-   "titelEn": "Lightning Energy (MEE 12) — no card type in the database (809x)",
+   "titel": "Lightning Energy (MEE 12) — kein Kartentyp in der Datenbank (878x)",
+   "titelEn": "Lightning Energy (MEE 12) — no card type in the database (878x)",
    "wo": "data/tournament_decklists_per_player.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -70,8 +70,8 @@
   {
    "id": "kartentyp/mee-13",
    "klasse": "kartentyp",
-   "titel": "Psychic Energy (MEE 13) — kein Kartentyp in der Datenbank (5692x)",
-   "titelEn": "Psychic Energy (MEE 13) — no card type in the database (5692x)",
+   "titel": "Psychic Energy (MEE 13) — kein Kartentyp in der Datenbank (6108x)",
+   "titelEn": "Psychic Energy (MEE 13) — no card type in the database (6108x)",
    "wo": "data/tournament_decklists_per_player.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -79,8 +79,8 @@
   {
    "id": "kartentyp/mee-14",
    "klasse": "kartentyp",
-   "titel": "Fighting Energy (MEE 14) — kein Kartentyp in der Datenbank (1640x)",
-   "titelEn": "Fighting Energy (MEE 14) — no card type in the database (1640x)",
+   "titel": "Fighting Energy (MEE 14) — kein Kartentyp in der Datenbank (1778x)",
+   "titelEn": "Fighting Energy (MEE 14) — no card type in the database (1778x)",
    "wo": "data/tournament_decklists_per_player.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -88,8 +88,8 @@
   {
    "id": "kartentyp/mee-15",
    "klasse": "kartentyp",
-   "titel": "Darkness Energy (MEE 15) — kein Kartentyp in der Datenbank (3879x)",
-   "titelEn": "Darkness Energy (MEE 15) — no card type in the database (3879x)",
+   "titel": "Darkness Energy (MEE 15) — kein Kartentyp in der Datenbank (4142x)",
+   "titelEn": "Darkness Energy (MEE 15) — no card type in the database (4142x)",
    "wo": "data/tournament_decklists_per_player.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -97,8 +97,8 @@
   {
    "id": "kartentyp/mee-16",
    "klasse": "kartentyp",
-   "titel": "Metal Energy (MEE 16) — kein Kartentyp in der Datenbank (620x)",
-   "titelEn": "Metal Energy (MEE 16) — no card type in the database (620x)",
+   "titel": "Metal Energy (MEE 16) — kein Kartentyp in der Datenbank (645x)",
+   "titelEn": "Metal Energy (MEE 16) — no card type in the database (645x)",
    "wo": "data/tournament_decklists_per_player.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -106,8 +106,8 @@
   {
    "id": "kartentyp/mee-9",
    "klasse": "kartentyp",
-   "titel": "Grass Energy (MEE 9) — kein Kartentyp in der Datenbank (2173x)",
-   "titelEn": "Grass Energy (MEE 9) — no card type in the database (2173x)",
+   "titel": "Grass Energy (MEE 9) — kein Kartentyp in der Datenbank (2330x)",
+   "titelEn": "Grass Energy (MEE 9) — no card type in the database (2330x)",
    "wo": "data/tournament_decklists_per_player.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null

@@ -13,6 +13,14 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6a7e005ecdc0391d7fa65824,2026-08-19,PBL,122,Dragapult Dudunsparce,21.0
 6a7a215f2b308b6067b5051b,2026-08-18,PBL,163,Clefairy Ogerpon,30.0
 6a819f1978baaa6d1c22139a,2026-08-18,PBL,178,N's Zoroark,18.0
+6ad67c92115c12b73a5a7dbe,2026-10-26,30C,145,Alakazam Dudunsparce,21.0
+6ade738c97e21d82e5c6f13b,2026-10-26,30C,165,Dragapult,24.0
+6ad783bd8a8383117e3f00c5,2026-10-26,30C,173,Ogerpon Meganium Hydrapple,33.0
+6ad6629b8a8383117e3ef670,2026-10-26,30C,232,Dragapult,28.0
+6adc422e91617679e849fa05,2026-10-25,30C,125,Ogerpon Meganium Arboliva,27.0
+6ad6cdde115c12b73a5a8251,2026-10-25,30C,169,Kangaskhan Bouffalant,31.0
+6abe8331880ed327106e0e64,2026-10-24,30C,143,Igglybuff,6.0
+decklists,2026-10-24,30C,397,Sharpedo Toxtricity,33.0
 6ad92350115c12b73a5a9419,2026-10-22,30C,109,Mega Excadrill,27.0
 6ad2d3e18a8383117e3ed889,2026-10-22,30C,197,Dragapult,34.0
 6ad80838115c12b73a5a8b28,2026-10-22,30C,110,Dhelmise,27.0
@@ -20,10 +28,11 @@ tournament_id,tournament_date,format,player_count,winner_archetype,winner_winrat
 6ad02719115c12b73a5a446f,2026-10-21,30C,168,Starmie Froslass,30.0
 6ad807f28a8383117e3f063d,2026-10-21,30C,102,Blaziken,28.0
 6ac5bce085920e4d25365cc1,2026-10-21,30C,112,Slowking,21.0
+6ad749ed115c12b73a5a83c0,2026-10-20,30C,106,Absol Audino,19.0
 6ad24689115c12b73a5a53f3,2026-10-20,30C,136,Dragapult,28.0
 6ad47a9f8a8383117e3ee7d0,2026-10-20,30C,117,Basic Box,24.0
 6acd2914115c12b73a5a2514,2026-10-19,30C,149,Dragapult,24.0
-6ad4e8fe8a8383117e3eeae5,2026-10-19,30C,128,Dragapult,18.0
+6ad4e8fe8a8383117e3eeae5,2026-10-19,30C,128,Dragapult Alakazam,18.0
 6ace21698a8383117e3eaf39,2026-10-19,30C,203,Sharpedo Toxtricity,36.0
 6ad47a5f8a8383117e3ee7cf,2026-10-19,30C,115,Basic Box,27.0
 6ad246f68a8383117e3ed0a1,2026-10-19,30C,179,Basic Box,27.0
@@ -53,7 +62,7 @@ keychain,2026-10-10,30C,285,Dragapult,31.0
 6ac419c7245696afb3517125,2026-10-09,30C,120,Sharpedo Toxtricity,28.0
 6ab27786f127b1b52c27f7e0,2026-10-09,30C,106,Ethan's Typhlosion,15.0
 6ac86d5785920e4d25367576,2026-10-09,30C,118,Dragapult Dudunsparce,30.0
-6abfbd4b85920e4d25361c1c,2026-10-08,30C,207,Dragapult Dudunsparce,34.0
+6abfbd4b85920e4d25361c1c,2026-10-08,30C,207,Dragapult,34.0
 6abf3e58880ed327106e18e4,2026-10-08,30C,133,Mega Greninja,27.0
 6abe7436783097f8dcb7512c,2026-10-07,30C,110,Crustle,19.0
 6ac395ae85920e4d253644b0,2026-10-07,30C,122,Dhelmise,28.0
@@ -85,13 +94,3 @@ did-you-know,2026-10-03,30C,405,Basic Box,31.0
 6ab2760de905c1db68747acc,2026-09-29,30C,128,Dragapult,27.0
 6aba4937880ed327106de5c9,2026-09-29,30C,181,Ogerpon Meganium Hydrapple,24.0
 6abb77fb783097f8dcb73419,2026-09-29,30C,101,Alakazam Dudunsparce,27.0
-6ab1d79de905c1db687477e0,2026-09-28,30C,191,Toxtricity Box,21.0
-6aba3f73880ed327106de5ae,2026-09-28,30C,153,Dragapult Blaziken,21.0
-6ab2c734e905c1db68747e74,2026-09-28,30C,199,Dragapult,33.0
-6ab7b105880ed327106dd0b4,2026-09-28,30C,111,Dhelmise,27.0
-6ab1beb7f127b1b52c27f23a,2026-09-28,30C,232,Basic Box,33.0
-6ab7b116783097f8dcb711b1,2026-09-27,30C,130,Toxtricity Box,30.0
-6aaf6bc6f127b1b52c27dab5,2026-09-27,30C,175,Lopunny Dudunsparce,28.0
-lets-go,2026-09-26,30C,434,Lopunny Dudunsparce,34.0
-6ab2f87be905c1db687481b9,2026-09-25,30C,138,Ogerpon Meganium Arboliva,28.0
-6ab27598e905c1db68747acb,2026-09-25,30C,118,Rocket's Honchkrow,25.0

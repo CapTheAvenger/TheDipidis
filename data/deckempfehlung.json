@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-10-23 07:08:10+00:00",
+ "erzeugt": "2026-10-27 07:06:30+00:00",
  "format": "TEF-30C",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -21,28 +21,28 @@
  ],
  "ankerspieler_gesamt": 5248,
  "online_abdeckung": {
-  "schnappschuss": "2026-10-23",
-  "anteil_unbekannt": 1.1,
+  "schnappschuss": "2026-10-27",
+  "anteil_unbekannt": 2.72,
   "groesste_unbekannte": [
    {
+    "deck": "Igglybuff",
+    "anteil": 0.78
+   },
+   {
+    "deck": "Absol Audino",
+    "anteil": 0.62
+   },
+   {
     "deck": "Mega Zygarde",
-    "anteil": 0.17
+    "anteil": 0.16
    },
    {
     "deck": "Zygarde Barbaracle",
     "anteil": 0.09
    },
    {
-    "deck": "Erika's Victreebel",
-    "anteil": 0.07
-   },
-   {
-    "deck": "Iono's Bellibolt",
-    "anteil": 0.07
-   },
-   {
-    "deck": "Sinistcha Ogerpon",
-    "anteil": 0.07
+    "deck": "Dragapult Alakazam",
+    "anteil": 0.08
    }
   ]
  },

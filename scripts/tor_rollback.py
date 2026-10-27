@@ -73,6 +73,10 @@ FAMILIEN = [
     ("turnierdaten", re.compile(r"^data/(labs_[^/]+|tournament_decklists_per_player[^/]*"
                                 r"|player_continuity[^/]*|deckempfehlung[^/]*"
                                 r"|masterclass[^/]*(/.+)?)$")),
+    # SC-42 (27.10.2026): das Online-Fenster und seine Kopfdaten. Wochenlauf
+    # #189 hielt die CSV zurueck und lieferte die Meta-Datei — auf main stand
+    # die Tabelle fuer 09.–23.10. unter dem Kopf 13.–27.10.
+    ("onlinefenster", re.compile(r"^data/limitless_online_fenster(\.csv|_meta\.json)$")),
 ]
 # SC-36 (17.10.2026): Bilder gehoeren zur Familie. Replica #161 rollte
 # data/champions_item_sprites.json zurueck, die im selben Lauf gespiegelten

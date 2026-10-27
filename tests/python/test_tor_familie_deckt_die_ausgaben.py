@@ -104,3 +104,13 @@ def test_turnierdaten_gehen_nur_gemeinsam_zurueck():
     gross = [x for x in e if len(x) > 1]
     assert len(gross) == 1 and len(gross[0]) == 5, e
     assert ["data/price_data.csv"] in e, "eine fremde Datei darf nicht in die Familie geraten"
+
+
+def test_das_online_fenster_geht_nur_mit_seinem_kopf_zurueck():
+    """SC-42 (27.10.2026): Wochenlauf #189 hielt limitless_online_fenster.csv
+    zurueck und lieferte die _meta.json — Tabelle und Kopf aus zwei Wochen."""
+    e = tor_rollback.einheiten(["data/limitless_online_fenster.csv",
+                                "data/limitless_online_fenster_meta.json",
+                                "data/limitless_online_decks.csv"])
+    assert ["data/limitless_online_fenster.csv", "data/limitless_online_fenster_meta.json"] in e, e
+    assert ["data/limitless_online_decks.csv"] in e, "eine fremde Datei darf nicht hinein"

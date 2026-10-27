@@ -320,25 +320,48 @@ def test_zu_viele_umbenennungen_ergeben_gar_kein_fenster(welt):
     assert fehler and "weichen um" in fehler
 
 
+def _komplette_bestaende(rows, grenze):
+    """Decks, deren Fensterzuwachs ihrem ganzen Bestand entspricht, OBWOHL
+    der Erzeuger einen so grossen Erstauftritt nicht als neu zaehlen darf."""
+    return [r["deck_name"] for r in rows
+            if int(r["count_fenster"]) > grenze
+            and r["count_fenster"] == r["count_kumulativ"]]
+
+
 def test_die_echte_datei_traegt_keinen_kompletten_bestand():
     """Nachpruefung an der ausgelieferten Datei selbst.
 
     In der ersten Fassung stand "Alakazam Dusknoir" mit
     count_fenster 86 — genau seinem Kumulativstand.
+
+    SC-42 (27.10.2026): die Grenze ist die des Erzeugers
+    (ERSTAUFTRITT_MAX), nicht eine eigene. Bis dahin rief die Zusicherung
+    schon ab 20 Listen „Umbenennung“; Dragapult Alakazam (24) und Relicanth
+    (23) tauchten am 27.10. zum ersten Mal auf, der Erzeuger zaehlte sie
+    nach seiner Regel richtig als neu — und Wochenlauf #189 hielt die Datei
+    zurueck.
     """
-    import os
     pfad = os.path.join(WURZEL, "data", "limitless_online_fenster.csv")
     if not os.path.exists(pfad):
         pytest.skip("noch nicht erzeugt")
     with io.open(pfad, encoding="utf-8-sig") as f:
         f.readline()
         rows = list(csv.DictReader(f, delimiter=";"))
-    gleich = [r["deck_name"] for r in rows
-              if int(r["count_fenster"]) > 20
-              and r["count_fenster"] == r["count_kumulativ"]]
+    gleich = _komplette_bestaende(rows, _modul().ERSTAUFTRITT_MAX)
     assert gleich == [], (
         "Decks, deren Fensterzuwachs ihrem ganzen Bestand entspricht — "
         "das ist der Umbenennungsfall: " + ", ".join(gleich))
+
+
+def test_ein_kleiner_erstauftritt_ist_neu_ein_grosser_nicht():
+    """Die Regel oben an gebauten Zeilen: der Fall vom 27.10. (24 Listen)
+    ist erlaubt, der Fall Alakazam Dusknoir (86) bleibt rot."""
+    grenze = _modul().ERSTAUFTRITT_MAX
+    z = lambda n, c: {"deck_name": n, "count_fenster": str(c), "count_kumulativ": str(c)}
+    assert _komplette_bestaende([z("Dragapult Alakazam", 24), z("Relicanth", 23)], grenze) == []
+    assert _komplette_bestaende([z("Alakazam Dusknoir", 86)], grenze) == ["Alakazam Dusknoir"]
+    assert _komplette_bestaende([z("Grenzfall", grenze)], grenze) == []
+    assert _komplette_bestaende([z("Darueber", grenze + 1)], grenze) == ["Darueber"]
 
 
 def test_die_basis_ueberspringt_den_zaehlersturz_einer_rotation(welt, tmp_path):

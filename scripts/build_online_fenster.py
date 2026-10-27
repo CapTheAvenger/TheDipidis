@@ -92,6 +92,14 @@ SPALTEN = [
 ]
 
 
+
+# SC-42 (27.10.2026): ein Deck, das zum ersten Mal mit hoechstens so vielen
+# Listen auftaucht, gilt als im Fenster entstanden — sein ganzer Bestand ist
+# Fensterzuwachs. Darueber ist es eine Umbenennung oder ein Schwellenwechsel
+# der Quelle (Erlaeuterung in baue()). Wochenlauf #189 hielt die Datei zurueck,
+# weil die Zusicherung schon ab 20 Listen „Umbenennung“ rief.
+ERSTAUFTRITT_MAX = 50
+
 def _staende():
     """Alle Tagesstaende, nach Datum sortiert."""
     if not os.path.isdir(VERLAUF):
@@ -319,7 +327,8 @@ def baue(fenster_tage=FENSTER_TAGE):
     #
     # Das ist die Hausregel "melden, nicht still reparieren": kein
     # geschaetzter Zaehler, sondern eine 0 mit Begruendung.
-    ERSTAUFTRITT_MAX = 50
+    # Die Grenze steht als ERSTAUFTRITT_MAX auf Modulebene (SC-42): die
+    # Zusicherung an der ausgelieferten Datei liest DIESELBE Zahl.
 
     fenster_staende = [(st, pf) for st, pf in staende
                        if basis_stamm < st < heute_stamm]

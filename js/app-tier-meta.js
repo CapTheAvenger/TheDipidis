@@ -1944,6 +1944,15 @@
                 tierGroups['tier-trending'] = tierGroups['tier-trending'].slice(0, 20);
             }
 
+            /* UI-153 (Hausi 27.10.2026): die Deck-Analyse zeigt die Decks der
+               Tier 1 bis 3 als Sprite-Knoepfe zur Schnellwahl. Die Einteilung
+               entsteht nur hier — sie wird nicht ein zweites Mal gerechnet,
+               sondern hier abgelegt und per Ereignis gemeldet. */
+            window._cmTierGruppen = ['tier-1', 'tier-2', 'tier-3'].map(function (k) {
+                return { tier: k, namen: (tierGroups[k] || []).map(function (d) { return d.archetype; }) };
+            });
+            document.dispatchEvent(new CustomEvent('cm:tierGruppen'));
+
             // DIE DECK-SUCHE STAND HIER BIS ZUM 01.09.2026.
             //
             // Gemeldet: "darunter ist auch noch eine Suchleiste, die

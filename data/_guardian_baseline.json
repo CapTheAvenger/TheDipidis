@@ -147,11 +147,11 @@
   "online_api_tournaments.csv": 552,
   "opgg_champions_moves.json": 2072,
   "pokemon_go_liste.json": 981,
-  "pokemon_go_shiny.json": 1001,
+  "pokemon_go_shiny.json": 1002,
   "price_data.csv": 20601,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-10-30 09:35 UTC",
+ "generated": "2026-10-31 09:33 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -164,7 +164,7 @@
  },
  "kartentext_de_gefuellt": 14638,
  "price_integrity": {
-  "duplicate_idproducts": 69,
+  "duplicate_idproducts": 68,
   "match_methods": {
    "live-verified": 5752,
    "manual-pin": 78,

@@ -444,3 +444,39 @@
 }
 .top256-labs-link { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
 .top256-labs-link:hover { text-decoration: underline; }
+
+/* UI-154: Japan — „Meistgespielte Karten“ nur aus Japan. Eigene Klassen
+   (jp-karte*), weil die top-card-Regeln an #currentMetaContent hängen. */
+#cityLeagueContent .jp-karten { margin: 24px 0 8px; }
+#cityLeagueContent .jp-karten-kopf {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 8px 0 12px;
+}
+#cityLeagueContent .jp-karten-info { flex: 1 1 220px; font-size: var(--fs-sm); color: var(--ink); }
+#cityLeagueContent .jp-karten-kopieren { flex: 0 0 auto; width: auto !important; min-height: 44px; }
+#cityLeagueContent .jp-karten-leer { font-size: var(--fs-sm); color: var(--ink); }
+#cityLeagueContent .jp-karten-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px;
+}
+#cityLeagueContent .jp-karte {
+    border-radius: 6px; overflow: hidden; background: var(--surface-1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10); min-width: 0;
+}
+#cityLeagueContent .jp-karte-bild { position: relative; }
+#cityLeagueContent .jp-karte-bild img {
+    width: 100%; aspect-ratio: 2.5 / 3.5; object-fit: cover; display: block;
+}
+#cityLeagueContent .jp-karte-rang {
+    position: absolute; top: 3px; left: 3px; padding: 2px 5px; border-radius: 6px;
+    background: #10151f; color: #fff; font-weight: 900; font-size: var(--fs-xs); line-height: 1;
+}
+#cityLeagueContent .jp-karte-text { padding: 4px 5px 6px; text-align: center; }
+#cityLeagueContent .jp-karte-name {
+    font-size: var(--fs-sm); font-weight: 800; color: var(--ink); line-height: 1.15;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#cityLeagueContent .jp-karte-anteil { font-size: var(--fs-xs); font-weight: 700; color: var(--brand-ink); }
+#cityLeagueContent .jp-karte-detail { font-size: var(--fs-xs); color: var(--ink); }
+@media (max-width: 480px) {
+    #cityLeagueContent .jp-karten-grid { grid-template-columns: repeat(3, 1fr); }
+}
+

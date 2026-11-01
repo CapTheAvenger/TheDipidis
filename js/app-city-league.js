@@ -1558,12 +1558,14 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                         <div id="cityLeagueCombinedTable"></div>
                     </div>
                 </div>
+                <div id="cityLeagueJpKarten" class="jp-karten"></div>
                 <div class="city-league-info-generated-block">
                     <span class="city-league-info-generated-date">${t('cl.generated')} ${generatedDate}</span>
                     <span class="city-league-info-generated-total">${t('cl.totalTracked')} ${totalArchetypes}</span>
                 </div>`;
             
             content.innerHTML = html;
+            if (typeof cityLeagueJpKartenZeichnen === 'function') cityLeagueJpKartenZeichnen();
             
             // Store sorted data globally for filtering
             window.cityLeagueSortedData = sorted;
@@ -5429,6 +5431,11 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             // Zaehler stehen auch dann schon da, wenn nur die Analyse
             // geladen ist — und blieben deshalb deutsch stehen.
             _relabelCityLeagueDateRangeHints();
+            /* UI-154: der Block „nur in Japan“ steht im selben Reiter. */
+            if (typeof cityLeagueJpKartenZeichnen === 'function'
+                && document.querySelector('#cityLeagueJpKarten .jp-karten-grid, #cityLeagueJpKarten .jp-karten-leer')) {
+                cityLeagueJpKartenZeichnen();
+            }
             // Steht die Deck-Ansicht auf "nichts gewaehlt", tragen die
             // beiden Zaehler den Text aus clearCityLeagueDeckView(); der
             // wird sonst nie wieder angefasst ("0 Karten" / "/ 0 Gesamt").
@@ -5535,3 +5542,168 @@ function _markeHinweis(schnittGesamt, schnittEnthalten, maximum, inListen, liste
         : ('In ' + k + ' of ' + n + ' lists, averaging ' + z(e, 2) + ' copies there (over all lists '
            + z(g, 2) + '), at most ' + m + ' in a single one.');
 }
+
+
+/* UI-154 (Hausi, 01.11.2026): unter der Japan-Seite „Meistgespielte Karten“
+   NUR aus Japan — alle genutzten Karten, die es nur als japanischer Druck
+   gibt, damit sich daraus eine Liste an Freunde schicken laesst.
+
+   WAS „NUR JAPAN“ HEISST: der Druck in den Turnierdaten ist ein japanischer
+   (Bilddatei mit „_JP_“, Ordner /tpc/). Das Scraper-Ergebnis fuehrt fuer
+   jede Karte den internationalen Druck, sobald es ihn gibt — eine Karte, die
+   auch in einem anderen Set steht, taucht hier also unter dem anderen
+   Set-Kuerzel auf und faellt aus dieser Liste (gemessen 01.11.2026: 1279
+   Zeilen mit _JP_, alle M6; 23 Karten, keine davon mit einem zweiten Druck).
+   Das Set-Kuerzel steht NICHT im Code: kommt M6A oder das naechste Set in die
+   Daten, erscheint es von allein.
+
+   ZAEHLUNG: Listen, nicht Archetypen. Eine Karte in 52 von 268 Archetypen
+   sagt wenig, wenn dieselben Archetypen kaum gespielt werden. Je Gruppe
+   (Turnier, Archetyp) zaehlt total_decks_in_archetype einmal; „in n Listen“
+   ist die Summe von deck_inclusion_count ueber die Zeilen der Karte.
+   Verbunden wird ueber (set_code, set_number), nie ueber den Namen. */
+function cityLeagueJpDruck(zeile) {
+    return /_JP_/.test(String((zeile && zeile.image_url) || ''));
+}
+
+function _clZahl(x) {
+    var z = parseFloat(String(x == null ? '' : x).replace(',', '.'));
+    return isFinite(z) ? z : 0;
+}
+
+function cityLeagueJpKartenBerechnen(zeilen) {
+    var gruppen = {};
+    var karten = {};
+    (zeilen || []).forEach(function (r) {
+        var gk = (r.tournament_id || r.period || '') + '|' + (r.archetype || '');
+        if (!(gk in gruppen)) gruppen[gk] = _clZahl(r.total_decks_in_archetype);
+        if (!cityLeagueJpDruck(r)) return;
+        var ck = (r.set_code || '') + '|' + (r.set_number || '');
+        var k = karten[ck];
+        if (!k) {
+            k = karten[ck] = {
+                name: r.card_name, set_code: r.set_code, set_number: r.set_number,
+                image_url: r.image_url, type: r.type,
+                archetypen: {}, listen: 0, maxKopien: 0
+            };
+        }
+        k.archetypen[r.archetype] = true;
+        k.listen += _clZahl(r.deck_inclusion_count);
+        k.maxKopien = Math.max(k.maxKopien, _clZahl(r.max_count));
+    });
+    var gesamt = Object.keys(gruppen).reduce(function (a, g) { return a + gruppen[g]; }, 0);
+    var liste = Object.keys(karten).map(function (ck) {
+        var k = karten[ck];
+        return {
+            name: k.name, set_code: k.set_code, set_number: k.set_number,
+            image_url: k.image_url, type: k.type,
+            archetypen: Object.keys(k.archetypen).length,
+            listen: k.listen, maxKopien: k.maxKopien,
+            anteil: gesamt > 0 ? (k.listen / gesamt) * 100 : 0
+        };
+    });
+    liste.sort(function (a, b) {
+        return (b.listen - a.listen) || (b.archetypen - a.archetypen)
+            || String(a.name).localeCompare(String(b.name));
+    });
+    var sets = [];
+    liste.forEach(function (k) { if (sets.indexOf(k.set_code) === -1) sets.push(k.set_code); });
+    return { karten: liste, listenGesamt: gesamt, sets: sets };
+}
+
+/* Eine Zeile je Karte: „4× Talonflame ex (M6 62)“ — die Kopienzahl ist das
+   Hoechste, was in EINER Liste gespielt wurde, also was man fuer ein Deck
+   braucht. */
+function cityLeagueJpListeText(karten) {
+    return (karten || []).map(function (k) {
+        return Math.max(1, k.maxKopien) + '\u00d7 ' + k.name
+            + ' (' + k.set_code + ' ' + k.set_number + ')';
+    }).join('\n');
+}
+
+function cityLeagueJpKartenHtml(erg, de) {
+    var tx = function (a, b) { return de ? a : b; };
+    var pct = function (x) {
+        /* Eine Karte in einer einzigen Liste ist NICHT 0,0 % — das liesse
+           sich als „nie gespielt“ lesen. Unter der Anzeigegrenze steht „<0,1“. */
+        if (x > 0 && x < 0.05) return (de ? '<0,1' : '<0.1') + ' %';
+        var t = (Math.round(x * 10) / 10).toFixed(1);
+        return (de ? t.replace('.', ',') : t) + ' %';
+    };
+    var zahl = function (x) { return Number(x).toLocaleString(de ? 'de-DE' : 'en-GB'); };
+    var titel = tx('Meistgespielte Karten \u2013 nur in Japan', 'Most played cards \u2013 Japan only');
+    var h = '<h2 class="city-league-info-table-title">' + escapeHtml(titel) + '</h2>';
+    if (!erg.karten.length) {
+        return h + '<p class="jp-karten-leer">' + escapeHtml(tx(
+            'Aktuell gibt es in den Daten keine Karte, die nur als japanischer Print existiert.',
+            'The data currently has no card that exists only as a Japanese print.')) + '</p>';
+    }
+    h += '<div class="jp-karten-kopf"><span class="jp-karten-info">'
+        + escapeHtml(tx(
+            'Nur japanische Prints (' + erg.sets.join(', ') + '): ' + erg.karten.length
+                + ' Karten, gez\u00e4hlt \u00fcber ' + zahl(erg.listenGesamt) + ' Listen.',
+            'Japanese prints only (' + erg.sets.join(', ') + '): ' + erg.karten.length
+                + ' cards, counted over ' + zahl(erg.listenGesamt) + ' lists.'))
+        + '</span><button type="button" class="btn-modern jp-karten-kopieren" '
+        + 'onclick="cityLeagueJpListeKopieren()">'
+        + escapeHtml(tx('Liste kopieren', 'Copy list')) + '</button></div>';
+    h += '<div class="jp-karten-grid">';
+    erg.karten.forEach(function (k, i) {
+        h += '<div class="jp-karte">'
+            + '<div class="jp-karte-bild"><img src="' + escapeHtml(k.image_url || '') + '" alt="'
+            + escapeHtml(k.name) + '" loading="lazy">'
+            + '<span class="jp-karte-rang">#' + (i + 1) + '</span></div>'
+            + '<div class="jp-karte-text"><div class="jp-karte-name">' + escapeHtml(k.name) + '</div>'
+            + '<div class="jp-karte-anteil">' + pct(k.anteil) + ' ' + escapeHtml(tx('der Listen', 'of lists')) + '</div>'
+            + '<div class="jp-karte-detail">' + zahl(k.listen) + ' ' + escapeHtml(tx('Listen', 'lists'))
+            + ' \u00b7 ' + escapeHtml(tx('bis ', 'up to ')) + Math.max(1, k.maxKopien) + '\u00d7</div>'
+            + '<div class="jp-karte-detail">' + escapeHtml(k.set_code + ' ' + k.set_number) + '</div></div></div>';
+    });
+    return h + '</div>';
+}
+
+async function cityLeagueJpKartenZeichnen() {
+    var mount = document.getElementById('cityLeagueJpKarten');
+    if (!mount) return;
+    var format = window.currentCityLeagueFormat || 'current';
+    /* Der Schnappschuss „Vergangenes Meta“ ist ein eingefrorenes Format;
+       „aktuell nur in Japan“ ist dort keine Aussage. */
+    if (format !== 'current') { mount.innerHTML = ''; return; }
+    var zeilen = [];
+    try { zeilen = await getCityLeagueAnalysisData(format); } catch (e) { zeilen = []; }
+    mount = document.getElementById('cityLeagueJpKarten');
+    if (!mount || (window.currentCityLeagueFormat || 'current') !== format) return;
+    if (!zeilen || !zeilen.length) { mount.innerHTML = ''; return; }
+    var erg = cityLeagueJpKartenBerechnen(zeilen);
+    window._cityLeagueJpListe = erg.karten;
+    mount.innerHTML = cityLeagueJpKartenHtml(erg, (typeof getLang !== 'function') || getLang() !== 'en');
+}
+
+async function cityLeagueJpListeKopieren() {
+    var text = cityLeagueJpListeText(window._cityLeagueJpListe || []);
+    if (!text) return;
+    var de = (typeof getLang !== 'function') || getLang() !== 'en';
+    var ok = false;
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            ok = true;
+        }
+    } catch (e) { ok = false; }
+    if (!ok) {
+        try {
+            var ta = document.createElement('textarea');
+            ta.value = text; ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+        } catch (e2) { ok = false; }
+    }
+    if (typeof showToast === 'function') {
+        showToast(ok ? (de ? 'Liste kopiert' : 'List copied')
+                     : (de ? 'Kopieren nicht m\u00f6glich' : 'Copy failed'), ok ? 'success' : 'error');
+    }
+}
+window.cityLeagueJpListeKopieren = cityLeagueJpListeKopieren;
+window.cityLeagueJpKartenBerechnen = cityLeagueJpKartenBerechnen;

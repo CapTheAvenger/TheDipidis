@@ -302,6 +302,12 @@ jobs:
           # Seite im Repo da und live 404, und das faellt niemandem auf,
           # weil sie in keinem Menue steht.
           cp -r posts _site/posts
+          # TCG Showdown (01.11.2026): Selbstspiel-Simulator unter /showdown/.
+          # Der Ordner ist ein fertiger Build aus dem privaten Repo
+          # CapTheAvenger/tcgshowdown (scripts/showdown_einspielen.sh dort) —
+          # hier wird nichts gebaut. Positivliste wie tutorial/ und posts/:
+          # ohne diese Zeile ist die Seite im Repo da und live 404.
+          cp -r showdown _site/showdown
           # masterclass/ wird NICHT mehr kopiert (17.10.2026): die gekauften
           # Ausarbeitungen liegen nur noch in Hausis Konto (Firestore), das
           # Repo ist oeffentlich. Ihre Zahlen kommen aus

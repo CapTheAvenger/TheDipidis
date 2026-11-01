@@ -611,11 +611,11 @@
                                 <button id="menu-btn-proxy" class="menu-item menu-subitem" data-tab-id="proxy" onclick="switchTabAndUpdateMenu('proxy')" data-i18n="menu.proxyPrinter" role="menuitem">
                                     <span class="menu-item-label">Proxy Printer</span>
                                 </button>
-                                <!-- Playtester: TCG Showdown unter /showdown/ (seit 01.11.2026 auf
-                                     dieser Seite, Selbstspiel im Browser). Neuer Tab, damit die
-                                     Sitzung hier bleibt. -->
-                                <button id="menu-btn-showdown" class="menu-item menu-subitem" onclick="openShowdownExternal()" role="menuitem" data-i18n-title="showdown.menuTitle" title="Open TCG Showdown — play both sides yourself">
-                                    <span class="menu-item-label" data-i18n="showdown.menuLabel">Playtester (TCG Showdown)</span>
+                                <!-- External Playtester: TCG Showdown handoff. Replaces
+                                     the retired in-app sandbox. Opens in a new tab so
+                                     we don't lose the user's session. -->
+                                <button id="menu-btn-showdown" class="menu-item menu-subitem" onclick="openShowdownExternal()" role="menuitem" data-i18n-title="showdown.menuTitle" title="Open TCG Showdown in a new tab — external playtester">
+                                    <span class="menu-item-label" data-i18n="showdown.menuLabel">Playtester (TCG Showdown ↗)</span>
                                 </button>
                                 <button id="menu-btn-calculator" class="menu-item menu-subitem" data-tab-id="calculator" onclick="switchTabAndUpdateMenu('calculator')" data-i18n="menu.calculator" role="menuitem">
                                     <span class="menu-item-label">Probability Calculator</span>
@@ -1001,7 +1001,7 @@
                                 <div class="action-divider"></div>
                                 <div class="city-league-action-group deck-builder-secondary-actions">
                                     <button class="btn-modern deck-builder-testdraw-btn" onclick="openDrawSimulator('cityLeague')" data-i18n="btn.testDraw">Test Draw</button>
-                                    <button class="btn-modern" onclick="openInShowdownFromBuilder('cityLeague')" data-i18n-title="showdown.buttonTitle" title="Hand this deck over to TCG Showdown (new tab)"><span data-i18n="showdown.buttonLabel">🎮 TCG Showdown</span></button>
+                                    <button class="btn-modern" onclick="openInShowdownFromBuilder('cityLeague')" data-i18n-title="showdown.buttonTitle" title="Copy deck and open TCG Showdown in a new tab"><span data-i18n="showdown.buttonLabel">📋 TCG Showdown ↗</span></button>
                                     <button class="btn-modern tertiary-danger city-league-clear-btn deck-builder-clear-btn" onclick="clearDeck('cityLeague')" data-i18n="btn.clear">Clear</button>
                                 </div>
                             </div>
@@ -1754,7 +1754,7 @@
                             <div class="action-divider"></div>
                             <div class="current-meta-action-group deck-builder-secondary-actions">
                                 <button class="btn-modern deck-builder-testdraw-btn" onclick="openDrawSimulator('currentMeta')" data-i18n="cl.testDraw">Test Draw</button>
-                                <button class="btn-modern" onclick="openInShowdownFromBuilder('currentMeta')" data-i18n-title="showdown.buttonTitle" title="Hand this deck over to TCG Showdown (new tab)"><span data-i18n="showdown.buttonLabel">🎮 TCG Showdown</span></button>
+                                <button class="btn-modern" onclick="openInShowdownFromBuilder('currentMeta')" data-i18n-title="showdown.buttonTitle" title="Copy deck and open TCG Showdown in a new tab"><span data-i18n="showdown.buttonLabel">📋 TCG Showdown ↗</span></button>
                                 <button class="btn-modern tertiary-danger deck-builder-clear-btn" onclick="clearDeck('currentMeta')" id="currentMetaClearDeckBtn" data-i18n="cl.clear">Clear</button>
                             </div>
                         </div>
@@ -2286,7 +2286,7 @@
                             <div class="action-divider"></div>
                             <div class="past-meta-action-group deck-builder-secondary-actions">
                                 <button class="btn-modern deck-builder-testdraw-btn" onclick="openDrawSimulator('pastMeta')" data-i18n="cl.testDraw">Test Draw</button>
-                                <button class="btn-modern" onclick="openInShowdownFromBuilder('pastMeta')" data-i18n-title="showdown.buttonTitle" title="Hand this deck over to TCG Showdown (new tab)"><span data-i18n="showdown.buttonLabel">🎮 TCG Showdown</span></button>
+                                <button class="btn-modern" onclick="openInShowdownFromBuilder('pastMeta')" data-i18n-title="showdown.buttonTitle" title="Copy deck and open TCG Showdown in a new tab"><span data-i18n="showdown.buttonLabel">📋 TCG Showdown ↗</span></button>
                                 <button class="btn-modern tertiary-danger deck-builder-clear-btn" onclick="clearDeck('pastMeta')" id="pastMetaClearDeckBtn" data-i18n="cl.clear">Clear</button>
                             </div>
                         </div>

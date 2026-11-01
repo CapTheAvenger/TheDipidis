@@ -1,9 +1,14 @@
 /*
  * TCG Showdown deck-handoff helper.
  *
- * Builds a PTCG Live decklist string from one of our deck sources,
- * copies it to the clipboard, then opens https://tcg-showdown.com/
- * in a new tab. The user pastes into Showdown's import field.
+ * Seit 01.11.2026 laeuft TCG Showdown auf dieser Seite selbst
+ * (thedipidis.app/showdown/, Selbstspiel im Browser, Quelle: privates
+ * Repo CapTheAvenger/tcgshowdown, Build liegt in showdown/). Die Uebergabe
+ * schreibt die Deckliste (PTCG-Live-Text) unter UEBERGABE_KEY in
+ * localStorage — gleiche Herkunft, also liest Showdown sie direkt ein und
+ * waehlt das Deck fuer Spieler 1 vor. Kein Einfuegen mehr noetig; die
+ * Zwischenablage bekommt die Liste trotzdem, falls jemand sie woanders
+ * braucht.
  *
  * Sources currently wired:
  *   - 'cityLeague'  / 'currentMeta' / 'pastMeta'  — Deck-Builder state
@@ -20,7 +25,9 @@
 (function () {
     'use strict';
 
-    const SHOWDOWN_URL = 'https://tcg-showdown.com/';
+    const SHOWDOWN_URL = '/showdown/';
+    // Muss zu client/src/local/uebergabe.ts (UEBERGABE_KEY) im Showdown-Repo passen.
+    const UEBERGABE_KEY = 'thedipidis-showdown-uebergabe';
 
     function _toast(msg, kind) {
         if (typeof window.showToast === 'function') {
@@ -122,48 +129,27 @@
 
     function _openShowdownAfterCopy(deckString, opts) {
         opts = opts || {};
-        const successMsg = _i18n('showdown.toastCopied',
-            'Deck copied! Opening TCG Showdown — paste to import.',
-            'Deck kopiert! TCG Showdown öffnet sich — zum Importieren einfügen.');
+        const successMsg = _i18n('showdown.toastHandoff',
+            'Deck handed over — TCG Showdown is opening.',
+            'Deck übergeben — TCG Showdown öffnet sich.');
         const emptyMsg = _i18n('showdown.toastEmpty',
             'Your deck is empty — nothing to copy.',
             'Dein Deck ist leer — nichts zu kopieren.');
-        const errorMsg = _i18n('showdown.toastClipboardFail',
-            'Could not copy to clipboard. Opening TCG Showdown anyway...',
-            'Konnte nicht in die Zwischenablage kopieren. Öffne TCG Showdown trotzdem...');
 
         if (!deckString) {
             _toast(emptyMsg, 'warning');
             return;
         }
-
-        const openSite = () => window.open(SHOWDOWN_URL, '_blank', 'noopener,noreferrer');
-
+        try {
+            localStorage.setItem(UEBERGABE_KEY, JSON.stringify({
+                name: opts.name || '', text: deckString, ts: Date.now(),
+            }));
+        } catch (_e) { /* privates Fenster: Showdown startet dann ohne Vorauswahl */ }
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(deckString).then(() => {
-                _toast(successMsg, 'success');
-                openSite();
-            }).catch(() => {
-                _toast(errorMsg, 'warning');
-                openSite();
-            });
-        } else {
-            // Fallback for very old browsers — copy via hidden textarea.
-            try {
-                const ta = document.createElement('textarea');
-                ta.value = deckString;
-                ta.style.position = 'fixed';
-                ta.style.opacity = '0';
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-                _toast(successMsg, 'success');
-            } catch (_e) {
-                _toast(errorMsg, 'warning');
-            }
-            openSite();
+            navigator.clipboard.writeText(deckString).catch(() => {});
         }
+        _toast(successMsg, 'success');
+        window.open(SHOWDOWN_URL, '_blank', 'noopener');
     }
 
     // Called from Deck-Builder views (City League, Current Meta, Past
@@ -177,13 +163,14 @@
     // copyDeckAndOpenLimitless for the Showdown handoff.
     function copyDeckAndOpenShowdown(deckIndex) {
         const deckString = _buildDeckListFromSaved(deckIndex);
-        _openShowdownAfterCopy(deckString, { source: 'savedDeck', deckIndex });
+        const deck = window.userDecks && window.userDecks[deckIndex];
+        _openShowdownAfterCopy(deckString, { source: 'savedDeck', deckIndex, name: deck && deck.name });
     }
 
     // Plain "open the site" — used by the main-menu link. Doesn't
-    // touch the clipboard since the user hasn't selected a deck yet.
+    // hand over a deck since the user hasn't selected one yet.
     function openShowdownExternal() {
-        window.open(SHOWDOWN_URL, '_blank', 'noopener,noreferrer');
+        window.open(SHOWDOWN_URL, '_blank', 'noopener');
     }
 
     // Expose globals so HTML inline onclick handlers can call them.

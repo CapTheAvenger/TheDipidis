@@ -133,6 +133,28 @@
                     `
                 },
                 {
+                    groupId: 'filter-stage',
+                    targetId: 'stageFilterOptions',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('stageFilterOptions')" role="button" tabindex="0" aria-expanded="false">
+                            <span data-i18n="cdb.filterStage">Stage</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options collapsed" id="stageFilterOptions"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-reg-mark',
+                    targetId: 'regMarkFilterOptions',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('regMarkFilterOptions')" role="button" tabindex="0" aria-expanded="false">
+                            <span data-i18n="cdb.filterRegMark">Regulation Mark</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options collapsed" id="regMarkFilterOptions"></div>
+                    `
+                },
+                {
                     groupId: 'filter-main-pokemon',
                     targetId: 'mainPokemonList',
                     html: `
@@ -369,6 +391,7 @@
                 try { populateCategoryFilter(); } catch (e) { console.error('[Cards Tab] populateCategoryFilter error:', e); }
                 try { await loadPokemonTypeMap(); } catch (e) { console.error('[Cards Tab] loadPokemonTypeMap error:', e); }
                 try { populateElementTypeFilter(); } catch (e) { console.error('[Cards Tab] populateElementTypeFilter error:', e); }
+                try { populateStageFilter(); populateRegMarkFilter(); } catch (e) { console.error('[Cards Tab] populateStage/RegMarkFilter error:', e); }
                 try { await populateSetFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateSetFilter error:', e); }
                 try { setupCardFilters(); } catch (e) { console.error('[Cards Tab] setupCardFilters error:', e); }
                 try { initializeCardsFilterPanel(); } catch (e) { console.error('[Cards Tab] initializeCardsFilterPanel error:', e); }
@@ -1248,6 +1271,58 @@
             return null;
         }
 
+        /* UI-156: Stage-Filter. Stufe einer Pokémon-Karte aus card.type; Vorsatzbuchstaben
+           (D/M/W = Dunkel, Mega, ...) zählen zur Stufe, "Mega Evolution", V, VMAX usw. sind keine. */
+        function cardStageOf(card) {
+            const m = /^[A-Z]?(Basic|Stage 1|Stage 2)$/.exec(String((card && card.type) || '').trim());
+            if (!m) return null;
+            return m[1] === 'Basic' ? 'basic' : (m[1] === 'Stage 1' ? 'stage1' : 'stage2');
+        }
+
+        function populateStageFilter() {
+            const container = document.getElementById('stageFilterOptions');
+            if (!container) return;
+            const stufen = [
+                { value: 'basic', label: t('cdb.stageBasic') },
+                { value: 'stage1', label: 'Stage 1' },
+                { value: 'stage2', label: 'Stage 2' }
+            ];
+            container.innerHTML = stufen.map(st => (
+                `<label class="label-block"><input type="checkbox" value="${st.value}" onchange="filterAndRenderCards()"> ${escapeHtml(st.label)}</label>`
+            )).join('');
+        }
+
+        /* UI-156: Regulation-Mark-Filter. Marken kommen aus data/regulation_marks.json,
+           verbunden wird nur über (Set, Nummer), nie über den Namen. Karten ohne Marke
+           in den Daten fallen heraus, solange eine Marke gewählt ist. */
+        function regMarkOfCard(card, markenK, druckMarkeFn) {
+            if (!card || !markenK || typeof druckMarkeFn !== 'function') return null;
+            const set = String(card.set || '').toUpperCase();
+            const nr = String(card.number || '');
+            if (!set || !nr) return null;
+            return druckMarkeFn(markenK, set + '-' + nr) || null;
+        }
+
+        function regMarkIndexKontext(daten, lib) {
+            if (!daten || !daten.marks || !lib || typeof lib.kontext !== 'function') return null;
+            const sets = Object.keys(daten.marks).reduce((a, m) => a.concat(Object.keys(daten.marks[m] || {})), []);
+            for (const set of sets) {
+                const k = lib.kontext(daten, set);
+                if (k) return k;
+            }
+            return null;
+        }
+
+        function populateRegMarkFilter() {
+            const container = document.getElementById('regMarkFilterOptions');
+            if (!container) return;
+            const marken = ['G', 'H', 'I', 'J'];
+            container.innerHTML = marken.map(m => (
+                `<label class="label-block"><input type="checkbox" value="${m}" onchange="filterAndRenderCards()"> ${m}</label>`
+            )).join('');
+            _regMarkenLaden();
+        }
+
         function populateElementTypeFilter() {
             const container = document.getElementById('elementTypeFilterOptions');
             if (!container) return;
@@ -1941,6 +2016,8 @@
             const selectedRarities = Array.from(document.querySelectorAll('#rarityFilterOptions input:checked')).map(cb => cb.value);
             const selectedCategories = Array.from(document.querySelectorAll('#categoryFilterOptions input:checked')).map(cb => cb.value);
             const selectedElementTypes = Array.from(document.querySelectorAll('#elementTypeFilterOptions input:checked')).map(cb => cb.value);
+            const selectedStages = Array.from(document.querySelectorAll('#stageFilterOptions input:checked')).map(cb => cb.value);
+            const selectedRegMarks = Array.from(document.querySelectorAll('#regMarkFilterOptions input:checked')).map(cb => cb.value);
             const selectedDeckCoverages = Array.from(document.querySelectorAll('#deckCoverageFilterOptions input:checked')).map(cb => parseFloat(cb.value));
             const selectedMainPokemons = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value);
             const selectedArchetypes = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
@@ -1975,6 +2052,9 @@
                 selectedRarities,
                 selectedCategories,
                 selectedElementTypes,
+                selectedStages,
+                selectedRegMarks,
+                regMarkenDa: !!_regMarkenDaten,
                 selectedDeckCoverages,
                 selectedMainPokemons,
                 selectedArchetypes,
@@ -2034,6 +2114,11 @@
                 }
             }
             
+            let regMarkK = null;
+            if (selectedRegMarks.length > 0) {
+                _regMarkenLaden();
+                regMarkK = regMarkIndexKontext(_regMarkenDaten, window.ArchetypBox && window.ArchetypBox.marken);
+            }
             window.filteredCardsData = window.allCardsData.filter(card => {
                 // Skip invalid cards (allow missing image_url — UI will show placeholder)
                 if (!card || !card.name || card.name === 'name') {
@@ -2183,6 +2268,18 @@
                     }
                 }
                 
+                // Stage filter (UI-156)
+                if (selectedStages.length > 0) {
+                    const stufe = cardStageOf(card);
+                    if (!stufe || !selectedStages.includes(stufe)) return false;
+                }
+
+                // Regulation Mark filter (UI-156)
+                if (selectedRegMarks.length > 0) {
+                    const marke = regMarkOfCard(card, regMarkK, window.ArchetypBox && window.ArchetypBox.marken && window.ArchetypBox.marken.druckMarke);
+                    if (!marke || !selectedRegMarks.includes(marke)) return false;
+                }
+
                 // Element Type filter (Fire, Water, Grass, etc.)
                 if (selectedElementTypes.length > 0) {
                     const elementType = getCardElementType(card);

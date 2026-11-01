@@ -125,3 +125,29 @@ html[data-theme="dark"] .cb-seg-btn:not(.active) { color: var(--ink); border-col
 @media (max-width: 700px) {
   #current-meta .ds-sec:has(#matchupHeatmapContainer) { display: none; }
 }
+
+/* UI-157 (Hausi, 01.11.2026, iPhone): die Einzelkarten-Ansicht schnitt oben das
+   Kartenbild an und unten die „Gespielt in“-Liste ab. Ursache: das Fenster war
+   fest 100 % hoch, ohne Bildlauf, der Inhalt mittig ausgerichtet. Seit die Liste
+   darunter steht, ist der Inhalt hoeher als der Bildschirm und ragt oben UND unten
+   ueber den Rand, ohne dass man hinkommt. Die Bedingung ist „Inhalt hoeher als das
+   Fenster“, nicht eine Breite: das Fenster scrollt, auto-Raender zentrieren nur,
+   solange Platz ist, und der Rand haelt Abstand zum sicheren Bereich. */
+#singleCardModal.active {
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start !important;
+    box-sizing: border-box;
+    padding: calc(env(safe-area-inset-top, 0px) + 12px) 0 calc(env(safe-area-inset-bottom, 0px) + 24px);
+}
+#singleCardModal .single-card-modal-content {
+    margin: auto !important;
+    max-height: none !important;
+    flex-shrink: 0;
+}
+#singleCardModal .single-card-modal-content img {
+    max-height: 70vh;
+    max-height: 70dvh;
+}

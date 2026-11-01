@@ -152,6 +152,20 @@
   pointer-events: none;
 }
 
+/* UI-155 (Hausi, 01.11.2026, iPhone): "Wenn ich ueber die Card database eine
+   Karte gross oeffne, kann ich das Fenster nicht wieder verlassen."
+   Ursache: viewport-fit=cover + black-translucent (index.html) legen die Seite
+   bis UNTER die Statusleiste/Dynamic Island. Beide Grossansichten setzten den
+   Schliessen-Knopf fest auf top:10-12px — dort liegt auf dem iPhone die
+   Statusleiste, der Knopf ist verdeckt und ein Tipp dorthin zaehlt als
+   "nach oben scrollen". Der Abstand gehoert an die Bedingung (der sichere
+   Bereich), nicht an ein Handyband: ohne Aussparung bleibt es bei 12 px. */
+#singleCardModal .single-card-close,
+#fullscreenCardModal .fullscreen-close {
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    right: calc(env(safe-area-inset-right, 0px) + 12px);
+}
+
 /* DAS LABEL BRAUCHT EINEN ANKER — NICHT `position: relative`
    (05.09.2026, live gefunden und gemessen).
 

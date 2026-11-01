@@ -4,7 +4,7 @@
   "quelle": "https://github.com/flibustier/pokemon-tcg-pocket-database",
   "quelle_url": "https://raw.githubusercontent.com/flibustier/pokemon-tcg-pocket-database/main/dist/sets.json",
   "hinweis": "Nichts hier ist geraten. Wofür die Seite keinen Namen führt, steht in ohne_namen und bleibt in der Oberfläche die blanke Kennung.",
-  "anzahl": 24,
+  "anzahl": 27,
   "in_kartenlisten": [
    "A1",
    "A1a",
@@ -30,9 +30,7 @@
    "P-A",
    "P-B"
   ],
-  "ohne_namen": [
-   "C1"
-  ],
+  "ohne_namen": [],
   "nicht_mehr_auf_der_quellseite": [],
   "geaendert_in_diesem_lauf": [],
   "nachgetragen": [],
@@ -67,7 +65,10 @@
   "B4": "Ruler of the Skies",
   "B4a": "Team Rocket's Ambition",
   "B4b": "Deluxe Pack: Mega",
+  "C1": "Dual Fusion",
   "P-A": "Promo A",
-  "P-B": "Promo B"
+  "P-B": "Promo B",
+  "PROMO-C": "Promo C",
+  "SP1": "Special Pack: First Partners"
  }
 }

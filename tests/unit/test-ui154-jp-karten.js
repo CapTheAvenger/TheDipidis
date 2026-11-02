@@ -31,7 +31,7 @@ function schneide(quelle, name) {
 function laden(quelle) {
     const ctx = vm.createContext({ Object, Math, String, Number, isFinite, parseFloat, Array,
         escapeHtml: (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') });
-    vm.runInContext(['cityLeagueJpDruck', '_clZahl', 'cityLeagueJpKartenBerechnen', 'cityLeagueJpListeText', 'cityLeagueJpKartenHtml']
+    vm.runInContext("var CITY_LEAGUE_JP_ELEMENTE = ['Grass','Fire','Water','Lightning','Psychic','Fighting','Darkness','Metal','Dragon','Colorless'];\n" + ['cityLeagueJpDruck', '_clZahl', 'cityLeagueJpDex', 'cityLeagueJpElement', 'cityLeagueJpKategorie', 'cityLeagueJpSortieren', 'cityLeagueJpKartenBerechnen', 'cityLeagueJpListeText', 'cityLeagueJpKartenHtml']
         .map((n) => schneide(quelle, n)).join('\n'), ctx);
     return ctx;
 }

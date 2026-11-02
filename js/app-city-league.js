@@ -5606,11 +5606,71 @@ function cityLeagueJpKartenBerechnen(zeilen) {
         return (b.listen - a.listen) || (b.archetypen - a.archetypen)
             || String(a.name).localeCompare(String(b.name));
     });
+    liste.forEach(function (k, i) { k.rang = i + 1; });   // Rang = Platz nach Beliebtheit, bleibt beim Umsortieren
+    liste = cityLeagueJpSortieren(liste);
     var sets = [];
     liste.forEach(function (k) { if (sets.indexOf(k.set_code) === -1) sets.push(k.set_code); });
     return { karten: liste, listenGesamt: gesamt, sets: sets };
 }
 
+/* UI-158 (Hausi, 02.11.2026): erst Pokémon, dann Supporter, Item, Tool, Stadion,
+   Spezial-Energie, Basis-Energie; die Pokémon nach Element in der Reihenfolge der
+   Kartendatenbank (Gras, Feuer, Wasser, Elektro, Psycho, Kampf, Finsternis, Metall,
+   Drache, Farblos), innerhalb des Elements nach Pokedex-Nummer (Entwicklungslinien
+   stehen so nebeneinander), dann Basis vor Phase 1 vor Phase 2, dann meistgespielt.
+   Bei den Nicht-Pokemon zaehlt die Beliebtheit. Die Deck-Sortierung der App
+   (sortCardsByType) stellt erst die beliebteste Linie nach vorn und erst dann das
+   Element — das ist hier ausdruecklich nicht gewollt, deshalb eine eigene Reihenfolge.
+   Die Japan-Daten fuehren kein Element; es kommt wie in der Kartendatenbank aus der
+   Pokedex-Typ-Tabelle (Hauptyp der Art). Nicht gefunden = ans Ende der Pokemon. */
+var CITY_LEAGUE_JP_ELEMENTE = ['Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Dragon', 'Colorless'];
+function cityLeagueJpDex(name) {
+    var dexMap = (typeof window !== 'undefined' && window.pokedexNumbers) || null;
+    if (!dexMap) return 0;
+    var roh = String(name || '').toLowerCase().trim();
+    var basis = roh.replace(/^[a-z\u00e4\u00f6\u00fc\u00df]+'s\s+/, '')
+        .replace(/\b(ex|vmax|vstar|v-union|v|gx|mega)\b/g, '').replace(/\s+/g, ' ').trim();
+    return parseInt(dexMap[roh], 10) || parseInt(dexMap[basis], 10) || 0;
+}
+function cityLeagueJpElement(name) {
+    var tabelle = (typeof window !== 'undefined' && window.pokemonTypeMap) || null;
+    var dex = cityLeagueJpDex(name);
+    return tabelle && dex > 0 ? (tabelle[String(dex)] || '') : '';
+}
+function cityLeagueJpKategorie(typ) {
+    var t = String(typ || '').toLowerCase();
+    if (t.indexOf('special energy') !== -1) return 6;
+    if (t.indexOf('energy') !== -1) return 7;
+    if (t.indexOf('supporter') !== -1) return 2;
+    if (t.indexOf('stadium') !== -1) return 4.5;
+    if (t.indexOf('tool') !== -1) return 4;
+    if (t.indexOf('item') !== -1 || t.indexOf('trainer') !== -1) return 3;
+    return 1;   // Pokemon (Basic, Stage 1, Stage 2, Mega ...)
+}
+function cityLeagueJpSortieren(liste) {
+    var stufe = function (typ) {
+        var t = String(typ || '').replace(/\s+/g, '').toLowerCase();
+        return /stage2$/.test(t) ? 3 : /stage1$/.test(t) ? 2 : 1;
+    };
+    var ele = function (k) {
+        var i = CITY_LEAGUE_JP_ELEMENTE.indexOf(k.energy_type || cityLeagueJpElement(k.name));
+        return i === -1 ? 99 : i;
+    };
+    return liste.slice().sort(function (a, b) {
+        var ka = cityLeagueJpKategorie(a.type), kb = cityLeagueJpKategorie(b.type);
+        if (ka !== kb) return ka - kb;
+        if (ka === 1) {
+            var ea = ele(a), eb = ele(b);
+            if (ea !== eb) return ea - eb;
+            var da = cityLeagueJpDex(a.name) || 99999, db = cityLeagueJpDex(b.name) || 99999;
+            if (da !== db) return da - db;
+            var sa = stufe(a.type), sb = stufe(b.type);
+            if (sa !== sb) return sa - sb;
+        }
+        return (b.listen - a.listen) || (b.archetypen - a.archetypen)
+            || String(a.name).localeCompare(String(b.name));
+    });
+}
 /* Eine Zeile je Karte: „4× Talonflame ex (M6 62)“ — die Kopienzahl ist das
    Hoechste, was in EINER Liste gespielt wurde, also was man fuer ein Deck
    braucht. */
@@ -5652,7 +5712,7 @@ function cityLeagueJpKartenHtml(erg, de) {
         h += '<div class="jp-karte">'
             + '<div class="jp-karte-bild"><img src="' + escapeHtml(k.image_url || '') + '" alt="'
             + escapeHtml(k.name) + '" loading="lazy">'
-            + '<span class="jp-karte-rang">#' + (i + 1) + '</span></div>'
+            + '<span class="jp-karte-rang">#' + (k.rang || i + 1) + '</span></div>'
             + '<div class="jp-karte-text"><div class="jp-karte-name">' + escapeHtml(k.name) + '</div>'
             + '<div class="jp-karte-anteil">' + pct(k.anteil) + ' ' + escapeHtml(tx('der Listen', 'of lists')) + '</div>'
             + '<div class="jp-karte-detail">' + zahl(k.listen) + ' ' + escapeHtml(tx('Listen', 'lists'))
@@ -5674,6 +5734,16 @@ async function cityLeagueJpKartenZeichnen() {
     mount = document.getElementById('cityLeagueJpKarten');
     if (!mount || (window.currentCityLeagueFormat || 'current') !== format) return;
     if (!zeilen || !zeilen.length) { mount.innerHTML = ''; return; }
+    /* Die Typ-Tabelle gehoert zur Kartendatenbank und ist hier nicht geladen; ohne sie
+       laesst sich die Element-Reihenfolge nicht bilden. Eigener kleiner Abruf. */
+    if (!window.pokemonTypeMap && typeof fetch === 'function') {
+        try {
+            var tr = await fetch('data/pokemon_type_map.json');
+            if (tr.ok) window.pokemonTypeMap = await tr.json();
+        } catch (e) { /* ohne Tabelle: Pokemon nach Entwicklungslinie statt nach Element */ }
+        mount = document.getElementById('cityLeagueJpKarten');
+        if (!mount) return;
+    }
     var erg = cityLeagueJpKartenBerechnen(zeilen);
     window._cityLeagueJpListe = erg.karten;
     mount.innerHTML = cityLeagueJpKartenHtml(erg, (typeof getLang !== 'function') || getLang() !== 'en');

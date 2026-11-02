@@ -1269,6 +1269,29 @@ jobs:
         with:
           node-version: '20'
 
+      # DECKVORLAGEN FUER TCG SHOWDOWN (02.11.2026, Bestellung Hausi)
+      #
+      # Tier 1–3 des aktuellen Metas (dieselbe Rechnung wie die Seite), je
+      # Archetyp die bestplatzierte Liste des juengsten Majors mit Listen,
+      # sonst die beste Online-Liste. Laeuft NACH dem Rueckweg nach data/,
+      # weil es die frischen Turnier- und Online-Listen liest; ein neues
+      # Major wird dadurch am Dienstag nach dem Wochenende von selbst zur
+      # Quelle. Ein Major ohne Listen im Bestand meldet ::warning::.
+      #
+      # `set +e`: misslingt der Erzeuger, bleibt die Vorlagendatei des
+      # letzten Laufs stehen (mit ihrem eigenen _meta.major) — laut gemeldet,
+      # der Wochenlauf mit den frischen Turnierdaten geht trotzdem durch.
+      - name: Showdown-Vorlagen neu erzeugen
+        run: |
+          set +e
+          node scripts/showdown_vorlagen.js
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            git checkout -- data/showdown_vorlagen.json 2>/dev/null
+            echo "::warning::Showdown-Vorlagen nicht erzeugt (Code $rc) — es bleibt der Stand des letzten Laufs"
+          fi
+          exit 0
+
       # SC-39 (17.10.2026, aus SC-34): hier lief bis heute ein eigenes Tor ohne
       # Zurueckrollen. Eine einzige rote Zusicherung warf die frischen Daten
       # der ganzen Woche weg (Wochenlauf #181, 13.10.: alles bis auf zwei

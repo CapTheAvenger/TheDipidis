@@ -5562,6 +5562,17 @@ function _markeHinweis(schnittGesamt, schnittEnthalten, maximum, inListen, liste
    (Turnier, Archetyp) zaehlt total_decks_in_archetype einmal; „in n Listen“
    ist die Summe von deck_inclusion_count ueber die Zeilen der Karte.
    Verbunden wird ueber (set_code, set_number), nie ueber den Namen. */
+/* UI-159 (Hausi, 02.11.2026): „Legendary“-Stadien bestehen aus zwei Haelften mit gleichem Namen
+   (z. B. M6 75 und M6 76); von JEDER Seite darf man nur 2 im Deck haben. Die Japan-Daten fuehren
+   die Gesamtmenge nach NAMEN (4) bei genau EINER der beiden Nummern — gemessen 02.11.2026: in
+   179 Archetyp-/Turnier-Gruppen kommt nie 75 und 76 zusammen vor, max_count ist 4. „bis 4×“ je
+   Nummer ist dort falsch; je Nummer sind es hoechstens 2 (4 nach Namen = 2 + 2). */
+function cityLeagueJpMaxProNummer(name, typ, max) {
+    if (/^legendary\s/i.test(String(name || '')) && /stadium/i.test(String(typ || ''))) {
+        return Math.min(2, Math.ceil(max / 2));
+    }
+    return max;
+}
 function cityLeagueJpDruck(zeile) {
     return /_JP_/.test(String((zeile && zeile.image_url) || ''));
 }
@@ -5589,7 +5600,7 @@ function cityLeagueJpKartenBerechnen(zeilen) {
         }
         k.archetypen[r.archetype] = true;
         k.listen += _clZahl(r.deck_inclusion_count);
-        k.maxKopien = Math.max(k.maxKopien, _clZahl(r.max_count));
+        k.maxKopien = Math.max(k.maxKopien, cityLeagueJpMaxProNummer(r.card_name, r.type, _clZahl(r.max_count)));
     });
     var gesamt = Object.keys(gruppen).reduce(function (a, g) { return a + gruppen[g]; }, 0);
     var liste = Object.keys(karten).map(function (ck) {

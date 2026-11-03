@@ -108,6 +108,12 @@ def befunde(daten):
             continue
         woerter = len(s.split())
         satz = re.search(r"[a-zäöüß]{2,}[.!?](?:\s|$)", s) and woerter >= 3
+        # Ein Turniername ist kein Satz. Wochenlauf #195 (03.11.2026) blieb
+        # an /aktuell/liste_online/turnier = "Sunny's Weekly #280 Smoke on
+        # the Water!" haengen — der Name kommt woertlich von der Quelle,
+        # das Ausrufezeichen ist seins. Laenge und Wortzahl gelten weiter.
+        if pfad.endswith("/turnier"):
+            satz = False
         if len(s) > 120 or woerter > 12 or satz:
             aus.append("freier Text in %s: %r" % (pfad, s[:80]))
     return aus

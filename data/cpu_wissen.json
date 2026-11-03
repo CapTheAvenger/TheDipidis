@@ -7,6 +7,13 @@
       "matchups": "'Eigenes Deck|Gegnerdeck' -> dieselben Felder, ergaenzen die Deckregeln"
     }
   },
-  "decks": {},
+  "decks": {
+    "Slowking": {
+      "nichtAufBank": [
+        "Kyurem"
+      ],
+      "quelle": "Hausi 03.11.2026 (Partie gegen die CPU): Kyurem gehört in dieses Deck nur als Ziel von Slowkings Seek Inspiration und wird nie gelegt."
+    }
+  },
   "matchups": {}
 }

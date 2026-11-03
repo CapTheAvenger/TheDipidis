@@ -785,15 +785,22 @@ jobs:
       # player_continuity.csv und laesst leer, wo es keine gibt. Er muss
       # NACH dem player-continuity-Scraper und NACH der Ruecksicherung
       # nach data/ laufen — beides ist oben der Fall — und vor dem
-      # Commit. Faellt er um, bleibt der committete Stand.
+      # Commit.
+      #
+      # SC-43 (03.11.2026): hier stand bei rc != 0 ein `git checkout` der
+      # Deckdateien. Der warf fuenf Wochenlaeufe lang die frisch gelesenen
+      # Zeilen von Puebla und Danzig weg, weil die Gegenprobe an EINEM
+      # umbenannten Nizza-Spieler scheiterte. Die Quoten sind Beiwerk, die
+      # Deckzeilen sind die Nutzlast: faellt das Skript um, bleiben die
+      # frischen Dateien stehen, die Quoten darin sind dann leer oder alt,
+      # und das Tor prueft den Stand wie jeden anderen.
       - name: Top-Cut-Quoten aus den Platzierungen fuellen
         run: |
           set +e
           python3 -u scripts/fuelle_conv_rate.py
           rc=$?
           if [ "$rc" -ne 0 ]; then
-              echo "::warning::fuelle_conv_rate exited with $rc — CSVs unveraendert"
-              git checkout -- data/labs_tournament_decks.csv data/labs_tournament_decks_*.csv 2>/dev/null
+              echo "::warning::fuelle_conv_rate exited with $rc — Quoten nicht gefuellt, Deckdateien bleiben frisch"
           fi
           exit 0
 

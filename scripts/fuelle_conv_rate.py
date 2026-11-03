@@ -132,6 +132,7 @@ def main():
     # Gegenprobe: wo labs top8_count selbst fuehrt, muss die Rate dazu
     # passen. Faellt das um, stimmt die Zuordnung nicht.
     abweichend = []
+    abweichend_schluessel = set()
     for z in zeilen:
         roh = (z.get("top8_count") or "").strip()
         rate = (z.get("top8_conv_rate") or "").strip()
@@ -142,16 +143,34 @@ def main():
         except (ValueError, ZeroDivisionError, KeyError):
             continue
         if abs(erwartet - float(rate)) > 1e-6:
+            abweichend_schluessel.add((z.get("tournament_id"), z.get("deck_slug")))
             abweichend.append(f"{z['tournament_id']}/{z['deck_slug']}: "
                               f"top8_count={roh} -> {erwartet:.6f}, "
                               f"gerechnet {rate}")
     if abweichend:
-        print(f"  ! {len(abweichend)} Gegenproben abweichend, NICHTS "
-              f"geschrieben:")
+        # SC-43 (03.11.2026): bis hierhin hiess es "NICHTS geschrieben" mit
+        # rc 1, und der Wochenlauf warf daraufhin per `git checkout` die
+        # GANZEN frischen Deckdateien weg — fuenf Wochenlaeufe lang
+        # Puebla und Danzig, weil labs in Nizza EINEN Spieler umbenannt
+        # hatte (0077 Platz 7: other -> mega-absol-mega-audino) und
+        # player_continuity.csv das nicht nachzog. Eine Abweichung ist ein
+        # Befund fuer die Zeile, nicht fuer den Bestand: die Zelle bleibt
+        # leer (= unbekannt), die Paare werden gemeldet, geschrieben wird.
+        print(f"  ! {len(abweichend)} Gegenproben abweichend — diese Zellen "
+              f"bleiben leer, der Rest wird geschrieben:")
         for a in abweichend[:10]:
             print("    " + a)
-        return 1
-    print("Gegenprobe gegen top8_count: keine Abweichung")
+        print("::warning::fuelle_conv_rate: %d Gegenprobe(n) abweichend "
+              "(player_continuity.csv und labs top8_count widersprechen "
+              "sich), Zellen leer gelassen: %s"
+              % (len(abweichend), "; ".join(a.split(":")[0] for a in abweichend[:10])),
+              flush=True)
+        for z in zeilen:
+            if (z.get("tournament_id"), z.get("deck_slug")) in abweichend_schluessel:
+                for spalte, _ in SPALTEN:
+                    z[spalte] = ""
+    else:
+        print("Gegenprobe gegen top8_count: keine Abweichung")
 
     if nur_pruefen:
         print("(--pruefen: nichts geschrieben)")

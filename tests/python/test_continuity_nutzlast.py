@@ -259,9 +259,12 @@ def test_zusatzfelder_stolpern_den_writer_nicht(pcs, tmp_path):
 def _bestandszeilen(n, mit_id=True):
     # Die ersten acht Plaetze im Top-Cut: so sieht jedes abgeschlossene
     # Turnier im Bestand aus. Ohne ihn ist der Stand eine Momentaufnahme
-    # (test_continuity_laufendes_turnier.py, 29.09.2026).
+    # (test_continuity_laufendes_turnier.py, 29.09.2026). Mit Deck: ohne
+    # ist der Stand seit SC-43 (03.11.2026) eine Momentaufnahme vor der
+    # Deckzuordnung — hier geht es um Zeilenzahl und Schluessel.
     return [{'tournament_id': '0070', 'player_id': str(i) if mit_id else '',
-             'place': str(i + 1), 'topcut': '1' if i < 8 else '0'}
+             'place': str(i + 1), 'topcut': '1' if i < 8 else '0',
+             'deck_slug': 'dragapult-ex'}
             for i in range(n)]
 
 

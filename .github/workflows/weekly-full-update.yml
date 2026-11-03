@@ -843,6 +843,18 @@ jobs:
         run: |
           python3 scripts/sanity_check_data.py data
 
+      - name: Dateien ueber GitHubs 100-MiB-Grenze zuruecksetzen
+        # BEFUND Wochenlauf #196 (03.11.2026): Tor gruen, Push dreimal vom
+        # pre-receive-Hook abgelehnt — data/tournament_decklists_per_player.csv
+        # 106,51 MB > 100 MB. Der Ablauf hielt das fuer "main churns too
+        # fast" und verwarf den ganzen Wochenstand samt Labs-Dateien.
+        # Jetzt: die zu grosse Datei geht VOR dem Tor auf den Stand von
+        # main zurueck und wird als ::error:: benannt; der Rest wird
+        # gepusht. Bestandsschutz, keine Loesung — die ist SC-45 (Auszug je
+        # Format). tests/python/test_github_dateigrenze.py haelt beides.
+        run: |
+          python3 scripts/github_dateigrenze.py data
+
       - name: Tournament coverage reconciliation (cross-pipeline gap check)
         # Companion to the row-count gate above. That one catches EMPTY files;
         # this one catches a tournament that was scraped on one surface (labs)

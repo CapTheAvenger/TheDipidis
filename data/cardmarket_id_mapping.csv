@@ -9617,7 +9617,7 @@ NP,18,275491,live-verified,Mudkip
 NP,19,275492,unique,Whismur
 NP,20,275493,unique,Ludicolo
 NP,21,275494,unique,Jirachi
-NP,22,275495,unique,Beldum
+NP,22,275495,priced-by-date(1↔2),Beldum
 NP,23,275496,unique,Metang
 NP,24,275497,live-verified,Chimecho
 NP,25,275498,live-verified,Flygon
@@ -16238,7 +16238,7 @@ UF,5,276651,unique,Flareon
 UF,6,276652,unique,Forretress
 UF,7,276653,unique,Houndoom
 UF,8,276654,unique,Jolteon
-UF,9,276655,unique,Meganium
+UF,9,276655,priced-by-date(1↔2),Meganium
 UF,10,276656,unique,Octillery
 UF,11,276657,unique,Poliwrath
 UF,12,276658,unique,Porygon2

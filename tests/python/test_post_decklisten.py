@@ -95,7 +95,12 @@ def test_das_fenster_ist_nicht_leer(gebaut):
         'Gruppierung nicht greift (leere tournament_id) und nicht, dass '
         'niemand gespielt hat')
     listen = sum(len(v) for v in gebaut['sieben_tage'].values())
-    assert listen >= 50, f'nur {listen} Listen im Fenster'
+    # Hier stand `listen >= 50` — ein Wochenwert, keine Regel (WZ-22). Am
+    # 03.11.2026 trug das Fenster 28.10.–03.11. genau 48 Top-8-Listen, und
+    # das Tor hielt den ganzen Wochenlauf an (#193–#195). Die Regel ist:
+    # jede Archetyp-Gruppe traegt mindestens eine Liste.
+    assert listen >= len(gebaut['sieben_tage']), f'nur {listen} Listen im Fenster'
+    assert all(v for v in gebaut['sieben_tage'].values()), 'eine Archetyp-Gruppe ohne Liste'
 
 
 def test_jede_liste_hat_sechzig_karten(gebaut):

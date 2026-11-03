@@ -180,3 +180,10 @@ describe('CPU-Wissen fuer TCG Showdown (data/cpu_wissen.json)', () => {
         }
     });
 });
+
+describe('Spielserver fuer „Mit Kumpel“ (data/showdown_server.json)', () => {
+    it('nennt eine https-Adresse — der Client nimmt nichts anderes an', () => {
+        const d = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'showdown_server.json'), 'utf8'));
+        assert.match(d.url, /^https:\/\/[a-z0-9.-]+$/);
+    });
+});

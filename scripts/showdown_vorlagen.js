@@ -258,7 +258,21 @@ function legaleDrucke(rm, fw, karten) {
         const ok = gruppe.some((g) => { const i = g.lastIndexOf('-'); const b = marke(g.slice(0, i).toUpperCase(), g.slice(i + 1)); return b && erlaubt.includes(b); });
         if (ok) gruppe.forEach((g) => legal.add(g.toUpperCase()));
     }
-    return { erlaubt, drucke: [...legal].sort() };
+    // Nachdruck-Gruppen mit mindestens einem legalen Druck: damit bildet der
+    // Simulator einen Druck, den er nicht kennt (z. B. Boss's Orders RCL 189),
+    // auf einen Druck DERSELBEN Karte ab — ueber die Gruppe, nie ueber den Namen.
+    const gesehen = new Set(), gruppen = [];
+    for (const k of karten) {
+        const eigener = `${String(k.set).toUpperCase()}-${k.number}`;
+        const g = String(k.international_prints || '').split(',').map((x) => x.trim().toUpperCase()).filter(Boolean);
+        if (!g.includes(eigener.toUpperCase())) g.push(eigener.toUpperCase());
+        if (g.length < 2 || !g.some((x) => legal.has(x))) continue;
+        const schl = g.slice().sort().join(',');
+        if (gesehen.has(schl)) continue;
+        gesehen.add(schl); gruppen.push(g.slice().sort());
+    }
+    gruppen.sort((a, b) => a[0].localeCompare(b[0]));
+    return { erlaubt, drucke: [...legal].sort(), gruppen };
 }
 
 // ── Hauptlauf ───────────────────────────────────────────────────────────
@@ -320,15 +334,17 @@ function erzeuge() {
 const ZIEL_LEGAL = path.join(DATA, 'showdown_legal.json');
 function erzeugeLegal() {
     const fw = JSON.parse(lies('format_window.json'));
-    const { erlaubt, drucke } = legaleDrucke(JSON.parse(lies('regulation_marks.json')), fw, csv(lies('all_cards_database.csv'), ','));
+    const { erlaubt, drucke, gruppen } = legaleDrucke(JSON.parse(lies('regulation_marks.json')), fw, csv(lies('all_cards_database.csv'), ','));
     return {
         _meta: {
             beschreibung: 'Standard-legale Drucke (SET-NUMMER) fuer TCG Showdown: eigene Marke oder ein Nachdruck der Gruppe (international_prints) mit erlaubter Regulierungsmarke. Basis-Energie ist immer legal. Erzeugt von scripts/showdown_vorlagen.js.',
             format: `${String(fw.oldest_legal_set).toUpperCase()}-${String(fw.current_set).toUpperCase()}`,
             erlaubte_marken: erlaubt,
             anzahl: drucke.length,
+            gruppen: 'Nachdruck-Gruppen (international_prints) mit mindestens einem legalen Druck; der Simulator ersetzt einen unbekannten Druck durch einen bekannten derselben Gruppe.',
         },
         drucke,
+        gruppen,
     };
 }
 

@@ -144,3 +144,24 @@ describe('Showdown-Vorlagen: Standard-legale Drucke', () => {
         }
     });
 });
+
+describe('Showdown-Vorlagen: Nachdruck-Gruppen fuer unbekannte Drucke', () => {
+    const rm = { marks: { G: { SVI: '1-198' }, H: { TEF: '1-218', ASC: '183' } } };
+    const fw = { oldest_legal_set: 'TEF' };
+    const karten = [
+        { set: 'RCL', number: '189', international_prints: 'ASC-183,RCL-189,SWSH-1' },
+        { set: 'SVI', number: '1', international_prints: 'SVI-1,PAL-9' },   // ohne legalen Druck
+        { set: 'TEF', number: '5', international_prints: '' },              // Einzeldruck
+    ];
+    const erg = V.legaleDrucke(rm, fw, karten);
+    it('eine Gruppe mit legalem Druck wird mitgeliefert, mit allen Drucken', () => {
+        assert.ok(erg.gruppen.some((g) => g.includes('RCL-189') && g.includes('ASC-183') && g.includes('SWSH-1')));
+    });
+    it('eine Gruppe ohne legalen Druck und ein Einzeldruck nicht', () => {
+        assert.ok(!erg.gruppen.some((g) => g.includes('SVI-1')));
+        assert.ok(!erg.gruppen.some((g) => g.includes('TEF-5')));
+    });
+    it('der alte Druck einer legalen Gruppe ist selbst legal', () => {
+        assert.ok(erg.drucke.includes('RCL-189'));
+    });
+});

@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-03T03:44:48Z",
+  "erzeugt_am": "2026-11-03T23:25:40Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -17,9 +17,9 @@
     ],
     "slug": "dragapult-ex",
     "vor_ort": [
-     116,
-     127,
-     46
+     154,
+     172,
+     73
     ]
    },
    {
@@ -32,9 +32,9 @@
     ],
     "slug": "basic-box-m",
     "vor_ort": [
-     45,
-     78,
-     8
+     72,
+     112,
+     10
     ]
    },
    {
@@ -47,9 +47,9 @@
     ],
     "slug": "n-zoroark",
     "vor_ort": [
-     54,
-     30,
-     10
+     65,
+     38,
+     21
     ]
    },
    {
@@ -62,9 +62,9 @@
     ],
     "slug": "dhelmise-pbl",
     "vor_ort": [
-     50,
-     7,
-     13
+     70,
+     16,
+     23
     ]
    },
    {
@@ -77,9 +77,9 @@
     ],
     "slug": "slowking-scr",
     "vor_ort": [
-     51,
-     52,
-     6
+     66,
+     66,
+     7
     ]
    },
    {
@@ -92,9 +92,9 @@
     ],
     "slug": "alakazam-dudunsparce",
     "vor_ort": [
-     39,
-     17,
-     5
+     53,
+     26,
+     13
     ]
    },
    {
@@ -107,9 +107,9 @@
     ],
     "slug": "dragapult-dusknoir",
     "vor_ort": [
-     30,
-     34,
-     10
+     48,
+     40,
+     12
     ]
    },
    {
@@ -122,9 +122,9 @@
     ],
     "slug": "mega-excadrill-ex",
     "vor_ort": [
-     24,
-     34,
-     7
+     31,
+     48,
+     12
     ]
    },
    {
@@ -137,9 +137,9 @@
     ],
     "slug": "ogerpon-meganium-hydrapple",
     "vor_ort": [
-     9,
-     39,
-     8
+     10,
+     66,
+     11
     ]
    },
    {
@@ -152,8 +152,8 @@
     ],
     "slug": "alakazam-dusknoir",
     "vor_ort": [
-     17,
-     16,
+     23,
+     23,
      4
     ]
    },
@@ -167,9 +167,9 @@
     ],
     "slug": "dragapult-blaziken",
     "vor_ort": [
-     43,
-     23,
-     12
+     60,
+     33,
+     20
     ]
    },
    {
@@ -182,8 +182,8 @@
     ],
     "slug": "lucario-hariyama",
     "vor_ort": [
-     13,
-     19,
+     17,
+     26,
      5
     ]
    },
@@ -197,9 +197,9 @@
     ],
     "slug": "lopunny-dudunsparce",
     "vor_ort": [
-     20,
+     24,
      3,
-     5
+     9
     ]
    },
    {
@@ -212,9 +212,9 @@
     ],
     "slug": "festival-lead",
     "vor_ort": [
-     10,
-     42,
-     9
+     14,
+     55,
+     13
     ]
    },
    {
@@ -227,9 +227,9 @@
     ],
     "slug": "crustle-dri",
     "vor_ort": [
-     13,
-     22,
-     10
+     16,
+     32,
+     12
     ]
    },
    {
@@ -242,9 +242,9 @@
     ],
     "slug": "lopunny-dusknoir",
     "vor_ort": [
-     16,
-     10,
-     0
+     20,
+     13,
+     2
     ]
    },
    {
@@ -257,9 +257,9 @@
     ],
     "slug": "cynthia-garchomp-ex",
     "vor_ort": [
-     3,
-     12,
-     4
+     4,
+     14,
+     5
     ]
    },
    {
@@ -272,9 +272,9 @@
     ],
     "slug": "mega-greninja-ex",
     "vor_ort": [
+     5,
      3,
-     3,
-     1
+     2
     ]
    },
    {
@@ -287,9 +287,9 @@
     ],
     "slug": "grimmsnarl-froslass",
     "vor_ort": [
-     3,
-     1,
-     0
+     9,
+     6,
+     1
     ]
    },
    {
@@ -302,8 +302,8 @@
     ],
     "slug": "rockets-honchkrow",
     "vor_ort": [
-     6,
      9,
+     14,
      6
     ]
    },
@@ -317,9 +317,9 @@
     ],
     "slug": "mega-lucario-ex",
     "vor_ort": [
-     6,
-     4,
-     4
+     9,
+     7,
+     6
     ]
    },
    {
@@ -332,8 +332,8 @@
     ],
     "slug": "greninja-ex",
     "vor_ort": [
-     5,
-     2,
+     7,
+     3,
      0
     ]
    },
@@ -347,8 +347,8 @@
     ],
     "slug": "dragapult-dudunsparce",
     "vor_ort": [
-     4,
-     1,
+     6,
+     3,
      0
     ]
    },
@@ -363,7 +363,7 @@
     "slug": "ogerpon-meganium-arboliva",
     "vor_ort": [
      1,
-     2,
+     5,
      3
     ]
    },
@@ -377,9 +377,9 @@
     ],
     "slug": "toucannon-pbl",
     "vor_ort": [
+     3,
      2,
-     0,
-     1
+     2
     ]
    },
    {
@@ -393,7 +393,7 @@
     "slug": "beedrill-ex-cri",
     "vor_ort": [
      1,
-     1,
+     2,
      0
     ]
    },
@@ -422,7 +422,7 @@
     ],
     "slug": "mega-starmie-ex",
     "vor_ort": [
-     2,
+     3,
      2,
      1
     ]
@@ -437,8 +437,8 @@
     ],
     "slug": "hops-trevenant",
     "vor_ort": [
+     4,
      2,
-     0,
      3
     ]
    },
@@ -452,9 +452,9 @@
     ],
     "slug": "rocket-mewtwo-ex",
     "vor_ort": [
-     2,
-     6,
-     3
+     4,
+     10,
+     5
     ]
    },
    {
@@ -467,9 +467,9 @@
     ],
     "slug": "ethan-typhlosion",
     "vor_ort": [
-     3,
+     6,
      2,
-     0
+     1
     ]
    },
    {
@@ -483,7 +483,7 @@
     "slug": "raging-bolt-ogerpon",
     "vor_ort": [
      5,
-     7,
+     9,
      0
     ]
    },
@@ -497,7 +497,7 @@
     ],
     "slug": "starmie-froslass",
     "vor_ort": [
-     1,
+     2,
      0,
      0
     ]
@@ -512,9 +512,9 @@
     ],
     "slug": "seaking-pre",
     "vor_ort": [
-     1,
-     9,
-     4
+     3,
+     11,
+     5
     ]
    },
    {
@@ -542,8 +542,8 @@
     ],
     "slug": "mega-venusaur-ex",
     "vor_ort": [
-     0,
-     0,
+     1,
+     2,
      0
     ]
    },
@@ -558,7 +558,7 @@
     "slug": "stevens-metagross",
     "vor_ort": [
      0,
-     0,
+     1,
      0
     ]
    },
@@ -589,7 +589,7 @@
     "vor_ort": [
      0,
      1,
-     0
+     1
     ]
    },
    {
@@ -602,7 +602,7 @@
     ],
     "slug": "toxtricity-box",
     "vor_ort": [
-     0,
+     1,
      3,
      0
     ]
@@ -647,7 +647,7 @@
     ],
     "slug": "kangaskhan-bouffalant",
     "vor_ort": [
-     4,
+     5,
      1,
      1
     ]
@@ -692,7 +692,7 @@
     ],
     "slug": "mega-absol-mega-audino",
     "vor_ort": [
-     0,
+     2,
      0,
      0
     ]
@@ -722,7 +722,7 @@
     ],
     "slug": "hydreigon-ex",
     "vor_ort": [
-     0,
+     1,
      0,
      0
     ]
@@ -873,7 +873,7 @@
     "slug": "clefairy-ogerpon",
     "vor_ort": [
      0,
-     2,
+     3,
      0
     ]
    },
@@ -932,7 +932,7 @@
     ],
     "slug": "mega-dragonite-ex",
     "vor_ort": [
-     1,
+     2,
      1,
      0
     ]
@@ -948,7 +948,7 @@
     "slug": "ogerpon-meganium",
     "vor_ort": [
      0,
-     0,
+     1,
      0
     ]
    },
@@ -1007,7 +1007,7 @@
     ],
     "slug": "hop-zacian",
     "vor_ort": [
-     1,
+     2,
      2,
      1
     ]
@@ -1052,7 +1052,7 @@
     ],
     "slug": "rocket-spidops",
     "vor_ort": [
-     1,
+     2,
      0,
      0
     ]
@@ -1202,7 +1202,7 @@
     ],
     "slug": "palafin-ex",
     "vor_ort": [
-     0,
+     1,
      1,
      0
     ]
@@ -1248,6 +1248,21 @@
     "slug": "diancie-dusknoir",
     "vor_ort": [
      0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,04",
+    "name": "Archaludon",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "archaludon-ex",
+    "vor_ort": [
+     1,
      0,
      0
     ]
@@ -1324,7 +1339,7 @@
     "vor_ort": [
      0,
      0,
-     0
+     1
     ]
    },
    {
@@ -1553,154 +1568,7 @@
     ]
    }
   ],
-  "liste_online": {
-   "bilanz": "5-0-0",
-   "datum": "26.10.2026",
-   "karten": [
-    [
-     3,
-     "Carvanha",
-     "PFL",
-     "60"
-    ],
-    [
-     4,
-     "Mega Sharpedo ex",
-     "PFL",
-     "61"
-    ],
-    [
-     2,
-     "Toxel",
-     "PFL",
-     "67"
-    ],
-    [
-     2,
-     "Toxtricity",
-     "PFL",
-     "68"
-    ],
-    [
-     2,
-     "Pecharunt ex",
-     "SFA",
-     "39"
-    ],
-    [
-     2,
-     "Munkidori",
-     "TWM",
-     "95"
-    ],
-    [
-     2,
-     "Tatsugiri",
-     "TWM",
-     "131"
-    ],
-    [
-     1,
-     "Yveltal",
-     "MEG",
-     "88"
-    ],
-    [
-     1,
-     "Psyduck",
-     "ASC",
-     "39"
-    ],
-    [
-     4,
-     "Lillie's Determination",
-     "MEG",
-     "119"
-    ],
-    [
-     4,
-     "Boss's Orders",
-     "MEG",
-     "114"
-    ],
-    [
-     3,
-     "Judge",
-     "POR",
-     "76"
-    ],
-    [
-     1,
-     "Black Belt's Training",
-     "JTG",
-     "143"
-    ],
-    [
-     4,
-     "Buddy-Buddy Poffin",
-     "TEF",
-     "144"
-    ],
-    [
-     3,
-     "Poké Pad",
-     "POR",
-     "81"
-    ],
-    [
-     3,
-     "Ultra Ball",
-     "MEG",
-     "131"
-    ],
-    [
-     2,
-     "Night Stretcher",
-     "ASC",
-     "196"
-    ],
-    [
-     1,
-     "Special Red Card",
-     "CRI",
-     "82"
-    ],
-    [
-     3,
-     "Binding Mochi",
-     "PRE",
-     "95"
-    ],
-    [
-     1,
-     "Hero's Cape",
-     "TEF",
-     "152"
-    ],
-    [
-     2,
-     "Team Rocket's Watchtower",
-     "DRI",
-     "180"
-    ],
-    [
-     1,
-     "Gravity Mountain",
-     "SSP",
-     "177"
-    ],
-    [
-     9,
-     "Darkness Energy",
-     "MEE",
-     "15"
-    ]
-   ],
-   "platz": 1,
-   "spieler": "theknagai",
-   "turnier": "Vault Of Games | 🌙 NOT SO Midnight Madness #20",
-   "von": 56
-  },
+  "liste_online": null,
   "listen_vor_ort": [
    {
     "bilanz": "14-3-0",
@@ -1984,14 +1852,14 @@
   "name": "Sharpedo Toxtricity",
   "online": {
    "anteil": "3,16",
-   "anteil14": "3,89",
+   "anteil14": "3,45",
    "bilanz": [
     1460,
     1630,
     25
    ],
    "bis": "02.11.2026",
-   "fenster14": "16.10.–30.10.2026",
+   "fenster14": "20.10.–03.11.2026",
    "format": "TEF–30C",
    "kurz_anteil": "2,69",
    "kurz_bilanz": [
@@ -2004,7 +1872,7 @@
    "kurz_von": "27.10.2026",
    "listen": 639,
    "seit": "18.09.2026",
-   "trend14": "0,08",
+   "trend14": "-0,64",
    "turniere": 128
   },
   "vor_ort": {
@@ -2012,17 +1880,47 @@
    "summe": {
     "anteil": "1,94",
     "bilanz": [
-     671,
-     666,
-     206
+     908,
+     926,
+     311
     ],
-    "day2": 32,
-    "decks": 193,
+    "day2": 40,
+    "decks": 269,
     "sieg": 0,
-    "spieler": 9929,
+    "spieler": 13889,
     "top8": 1
    },
    "turniere": [
+    {
+     "anteil": "2,30",
+     "bilanz": [
+      111,
+      133,
+      53
+     ],
+     "datum": "31.10.2026",
+     "day2": 3,
+     "decks": 40,
+     "name": "Gdańsk",
+     "sieg": 0,
+     "spieler": 1738,
+     "top8": 0
+    },
+    {
+     "anteil": "1,62",
+     "bilanz": [
+      126,
+      127,
+      52
+     ],
+     "datum": "24.10.2026",
+     "day2": 5,
+     "decks": 36,
+     "name": "Puebla",
+     "sieg": 0,
+     "spieler": 2222,
+     "top8": 0
+    },
     {
      "anteil": "2,40",
      "bilanz": [

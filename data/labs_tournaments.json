@@ -1,11 +1,19 @@
 [
   {
+    "tournament_id": "0079",
+    "tournament_name": "Regional Championship Gdańsk",
+    "tournament_date": "2026-10-31",
+    "tournament_type": "regional",
+    "country": "PL",
+    "total_players": 1738
+  },
+  {
     "tournament_id": "0078",
     "tournament_name": "Regional Championship Puebla",
     "tournament_date": "2026-10-24",
     "tournament_type": "regional",
     "country": "MX",
-    "total_players": 0
+    "total_players": 2222
   },
   {
     "tournament_id": "0077",

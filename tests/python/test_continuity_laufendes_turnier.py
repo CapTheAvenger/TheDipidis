@@ -47,8 +47,10 @@ def lade_modul():
 
 
 def zeile(tid, platz, name, w, l, day2, topcut, pid):
+    # deck_slug gesetzt: seit SC-43 (03.11.2026) ist ein Bestand ohne Decks
+    # nicht fertig — hier geht es um den Top-Cut, nicht um die Decks.
     return dict(tournament_id=tid, tournament_date='2026-09-26', meta='TEF-30C',
-                place=str(platz), player_name=name, country='DE', deck_slug='',
+                place=str(platz), player_name=name, country='DE', deck_slug='dragapult-ex',
                 deck_archetype='', wins=str(w), losses=str(l), ties='0',
                 player_id=str(pid), points=str(3 * w), day2=str(day2),
                 topcut=str(topcut), dropped='0', drop_round='', dqed='0')
@@ -56,7 +58,7 @@ def zeile(tid, platz, name, w, l, day2, topcut, pid):
 
 def abruf(platz, name, w, l, day2, topcut, pid):
     """So, wie scrape_standings_full eine Zeile zurueckgibt."""
-    return dict(place=platz, player_name=name, country='DE', deck_slug='',
+    return dict(place=platz, player_name=name, country='DE', deck_slug='dragapult-ex',
                 wins=w, losses=l, ties=0, player_id=str(pid), points=3 * w,
                 day2=day2, topcut=topcut, dropped=0, drop_round='', dqed=0)
 

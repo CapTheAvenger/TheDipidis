@@ -520,6 +520,14 @@ def bestand_je_turnier(out_path: str) -> Dict[str, List[Dict]]:
 # gelegentlich ein, zwei Spieler mehr als in den Standings stehen.
 VOLLSTAENDIG_AB = 0.95
 
+# Wie viele Zeilen eines Bestands ein Deck tragen muessen. labs schreibt die
+# Standings VOR der Deckzuordnung: am 27.10.2026 06:47 UTC hatte Puebla
+# (0078) 2.234 Zeilen mit player_id und Top-Cut, aber 0 mit deck_slug —
+# `--resume` hielt das fuer fertig und holte es nie wieder (SC-43).
+# Heute tragen 2.222 von 2.234 Zeilen ein Deck; die 18 anderen Turniere
+# der Datei liegen alle ueber 99 %.
+DECKS_AB = 0.95
+
 
 def bestand_ist_fertig(zeilen: List[Dict], teilnehmer: int) -> tuple:
     """Darf --resume dieses Turnier ueberspringen?
@@ -551,7 +559,62 @@ def bestand_ist_fertig(zeilen: List[Dict], teilnehmer: int) -> tuple:
     if not ist_abgeschlossen(zeilen):
         return False, ('kein Top-Cut im Bestand — Momentaufnahme eines '
                        'laufenden Turniers')
+    mit_deck = sum(1 for r in zeilen if (r.get('deck_slug') or '').strip())
+    if mit_deck < len(zeilen) * DECKS_AB:
+        return False, ('%d von %d Zeilen ohne Deck — Standings vor der '
+                       'Deckzuordnung (SC-43)' % (len(zeilen) - mit_deck, len(zeilen)))
     return True, ''
+
+
+def aktives_format() -> str:
+    """Das Format, dessen Majors der Labs-Scraper jede Woche neu liest.
+
+    Dieselbe Regel wie dort (`_active_in_person_meta_key`), nicht eine
+    zweite. Leer, wenn der Labs-Scraper nicht importierbar ist — dann
+    gilt nur `bestand_ist_fertig`."""
+    try:
+        from scrapers import labs_tournament_scraper as _labs
+    except ImportError:
+        try:
+            import labs_tournament_scraper as _labs       # Direktaufruf im Ordner
+        except ImportError:
+            return ''
+    try:
+        return str(_labs._active_in_person_meta_key() or '')
+    except Exception as e:                                   # noqa: BLE001
+        logger.warning("aktives Format nicht bestimmbar: %s: %s", type(e).__name__, e)
+        return ''
+
+
+def zu_holen(target: List[Dict], vorhanden: Dict[str, List[Dict]],
+             meta_map: Dict[str, str], aktiv: str) -> List[tuple]:
+    """Welche Turniere `--resume` trotz Bestand neu holt, mit Grund.
+
+    Zwei Gruende, beide SC-43 (03.11.2026):
+      1. der Bestand ist nicht fertig (`bestand_ist_fertig`);
+      2. das Turnier gehoert zum aktiven Format. labs ordnet Spieler
+         nachtraeglich um (Nizza 0077, Platz 7: `other` ->
+         `mega-absol-mega-audino`), und der Labs-Scraper liest diese
+         Turniere jede Woche neu — eine Platzierungsdatei, die dabei
+         stehen bleibt, widerspricht der Deckdatei, und der Schritt
+         "Top-Cut-Quoten fuellen" faellt um.
+    Gibt [(turnier, grund)] zurueck; grund '' = kein Bestand."""
+    raus = []
+    for t in target:
+        tid_r = str(t.get('tournament_id'))
+        bestand = vorhanden.get(tid_r, [])
+        if not bestand:
+            raus.append((t, ''))
+            continue
+        fertig, grund = bestand_ist_fertig(bestand, _ganz(t.get('total_players')))
+        if not fertig:
+            raus.append((t, grund))
+            continue
+        datum = (t.get('tournament_date') or '').strip()
+        meta = meta_fuer_turnier(t, tid_r, datum, meta_map)
+        if aktiv and meta == aktiv:
+            raus.append((t, 'aktives Format %s — labs ordnet noch um' % aktiv))
+    return raus
 
 
 def ist_abgeschlossen(zeilen: List[Dict]) -> bool:
@@ -634,15 +697,10 @@ def main():
         vorhanden = bestand_je_turnier(out_path)
         before = len(target)
         behalten = []
-        for t in target:
-            tid_r = str(t.get('tournament_id'))
-            fertig, grund = bestand_ist_fertig(
-                vorhanden.get(tid_r, []), _ganz(t.get('total_players')))
-            if fertig:
-                continue
-            if vorhanden.get(tid_r):
+        for t, grund in zu_holen(target, vorhanden, meta_map, aktives_format()):
+            if grund:
                 logger.info("--resume: tid=%s wird trotz Bestand neu geholt "
-                            "(%s)", tid_r, grund)
+                            "(%s)", t.get('tournament_id'), grund)
             behalten.append(t)
         target = behalten
         logger.info("--resume: %d / %d tids fertig, %d zu holen",

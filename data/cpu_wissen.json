@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "zweck": "Regeln fuer den CPU-Gegner in TCG Showdown (thedipidis.app/showdown/). Leer = allgemeine Regeln.",
+    "quellen": "Nur aus Masterclasses (Matchup-Plaene) oder Hausis Rueckmeldungen nach einer Partie — jede Regel nennt ihre Quelle.",
+    "schema": {
+      "decks": "Archetypname -> { angreifer, bankZuerst, nichtAufBank, unterstuetzer, nieSpielen, zieleZuerst, bossNurBeiKo, quelle }",
+      "matchups": "'Eigenes Deck|Gegnerdeck' -> dieselben Felder, ergaenzen die Deckregeln"
+    }
+  },
+  "decks": {},
+  "matchups": {}
+}

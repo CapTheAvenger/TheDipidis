@@ -165,3 +165,18 @@ describe('Showdown-Vorlagen: Nachdruck-Gruppen fuer unbekannte Drucke', () => {
         assert.ok(erg.drucke.includes('RCL-189'));
     });
 });
+
+describe('CPU-Wissen fuer TCG Showdown (data/cpu_wissen.json)', () => {
+    const w = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'cpu_wissen.json'), 'utf8'));
+    const FELDER = new Set(['angreifer', 'bankZuerst', 'nichtAufBank', 'unterstuetzer', 'nieSpielen', 'zieleZuerst', 'bossNurBeiKo', 'quelle']);
+    it('jede Regel nennt ihre Quelle (Masterclass oder Rueckmeldung Hausi) und kennt nur bekannte Felder', () => {
+        assert.ok(w.decks && typeof w.decks === 'object' && w.matchups && typeof w.matchups === 'object', 'decks/matchups fehlen');
+        for (const [bereich, eintraege] of [['decks', w.decks], ['matchups', w.matchups]]) {
+            for (const [name, r] of Object.entries(eintraege)) {
+                assert.ok(typeof r.quelle === 'string' && /[A-Za-zÄÖÜäöü]{3}/.test(r.quelle), `${bereich}/${name}: ohne Quelle`);
+                for (const k of Object.keys(r)) assert.ok(FELDER.has(k), `${bereich}/${name}: unbekanntes Feld ${k}`);
+                if (bereich === 'matchups') assert.ok(/.\|./.test(name), `${name}: Matchup braucht „Deck|Gegner“`);
+            }
+        }
+    });
+});

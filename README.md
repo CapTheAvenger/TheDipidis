@@ -129,7 +129,7 @@ All scrapers live under `backend/scrapers/`. The main ones:
 | `city_league_archetype_scraper.py` | `data/city_league_archetypes.csv` | Weekly Full Update |
 | `online_tournament_scraper.py` | `data/online_tournament_dated_cards.csv` | Weekly Full Update |
 | `labs_tournament_scraper.py` | `data/labs_tournament_decks.csv` | Weekly Full Update |
-| `per_decklist_scraper.py` | `data/tournament_decklists_per_player.csv` | Tuesdays |
+| `per_decklist_scraper.py` | `data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv` (Auszuege je Format und Monat, SC-45) | Tuesdays |
 | `cardmarket_id_mapper.py` + `cardmarket_price_merger.py` | `data/price_data.csv` | Daily 08:00 UTC |
 | `champions_replica_scraper.py` | Side-quest doubles teams | Daily 10:00 UTC |
 | `player_continuity_scraper.py` | `data/player_continuity.csv` | Manual |

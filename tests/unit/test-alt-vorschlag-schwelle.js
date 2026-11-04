@@ -26,7 +26,7 @@
  * Die Verfaelschungsproben stehen im Journal (claude/da31-...): ALPHA auf 0,5 =>
  * (i) rot; Tor zurueck auf "gap > 50" => (ii) und (iii) rot.
  *
- * Die echten Daten (data/tournament_decklists_per_player.csv) werden NICHT
+ * Die echten Daten (data/tournament_decklists_per_player_*.csv) werden NICHT
  * erzwungen: wie viele Vorschlaege entstehen, haengt von der Datenlage der Woche
  * ab (heute 0, und das ist ehrlich: kein Abstand ist von Zufall zu unterscheiden).
  * Sie werden auf stderr gemeldet, und die Zaehler muessen aufgehen.
@@ -44,7 +44,10 @@ const vm = require('node:vm');
 const WURZEL = path.join(__dirname, '..', '..');
 const KONS_PFAD = path.join(WURZEL, 'js', 'deck-builder-consistency.js');
 const KONS = fs.readFileSync(KONS_PFAD, 'utf8');
-const CSV_PFAD = path.join(WURZEL, 'data', 'tournament_decklists_per_player.csv');
+// SC-45 (04.11.2026): der Bestand liegt als Auszuege je Format und Monat
+const ppa = require(path.join(WURZEL, 'scripts', 'per-player-auszuege.js'));
+const DATA = path.join(WURZEL, 'data');
+const bestandDa = () => ppa.pfade(DATA).length > 0;
 
 /* Der Zaehlerbau: dieselbe Datei, aber mit Strichliste an jedem Tor.
    Die Anker sind Quelltextzeilen — faellt einer weg, bricht der Test
@@ -123,7 +126,7 @@ async function aufbauen() {
   const sbRein = sandkasten(KONS, {});
   SCHWELLEN = sbRein.MostConsistencyBuilder.ALT_SUGGESTION_SCHWELLEN;
 
-  if (!fs.existsSync(CSV_PFAD)) return;
+  if (!bestandDa()) return;
 
   let quelle = KONS;
   for (const [a, b] of ZAEHLER_ANKER) {
@@ -140,7 +143,7 @@ async function aufbauen() {
   await M.loadData();
 
   const Papa = require(path.join(WURZEL, 'node_modules', 'papaparse'));
-  const rows = Papa.parse(fs.readFileSync(CSV_PFAD, 'utf8'),
+  const rows = Papa.parse(ppa.text(DATA),
                           { header: true, skipEmptyLines: true }).data;
   const archetypen = [...new Set(rows.map(r => (r.deck_archetype || '').trim())
                                      .filter(Boolean))].sort();
@@ -190,8 +193,8 @@ describe('Alternativvorschlag — die echten Daten (nur Beobachtung)', () => {
   });
 
   it('die Datenlage steht — sonst ist die ganze Messung oben ein Nichts', () => {
-    assert.ok(fs.existsSync(CSV_PFAD),
-      'data/tournament_decklists_per_player.csv fehlt — die Messungen oben '
+    assert.ok(bestandDa(),
+      'data/tournament_decklists_per_player_*.csv fehlt — die Messungen oben '
       + 'laufen dann leer durch und behaupten nichts. Datei wiederherstellen.');
     assert.ok(MESSUNG, 'die Messung ist nicht gelaufen');
     assert.ok(MESSUNG.gebaut > 0,

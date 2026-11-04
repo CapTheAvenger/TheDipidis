@@ -42,7 +42,9 @@ HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))
 DATEN = os.path.join(WURZEL, "data")
 QUELLE = os.path.join(WURZEL, "backend", "scrapers", "per_decklist_scraper.py")
-PER_PLAYER = os.path.join(DATEN, "tournament_decklists_per_player.csv")
+PER_PLAYER = DATEN   # SC-45: Ordner mit den Auszuegen je Format und Monat
+sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+import per_player_auszuege as _ppa  # noqa: E402
 LABS = os.path.join(DATEN, "labs_tournament_decks.csv")
 
 
@@ -99,8 +101,8 @@ def test_andere_turniere_bleiben_unberuehrt(jh):
 def _per_player_daten():
     """{limitless_tid: {datum: zeilen}} aus der Einzellisten-Datei."""
     aus = {}
-    with open(PER_PLAYER, encoding="utf-8", newline="") as f:
-        for r in csv.DictReader(f):
+    if True:
+        for r in _ppa.quelle_zeilen(PER_PLAYER):
             lid = (r.get("limitless_tournament_id") or "").strip()
             d = (r.get("tournament_date") or "").strip()
             aus.setdefault(lid, {}).setdefault(d, 0)
@@ -133,9 +135,9 @@ def test_die_beiden_dateien_sind_sich_ueber_die_daten_einig():
             labs.setdefault(r["tournament_id"], (r.get("tournament_date") or "").strip())
 
     abweichungen = []
-    with open(PER_PLAYER, encoding="utf-8", newline="") as f:
+    if True:
         gesehen = set()
-        for r in csv.DictReader(f):
+        for r in _ppa.quelle_zeilen(PER_PLAYER):
             tid = (r.get("tournament_id") or "").strip()
             d = (r.get("tournament_date") or "").strip()
             if not tid or (tid, d) in gesehen:

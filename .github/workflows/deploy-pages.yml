@@ -60,6 +60,9 @@ jobs:
         run: npm install --no-save papaparse
 
       - name: Run JS unit tests
+        env:
+          # fester Heap wie in scripts/run-js-unit-tests.sh (SC-45)
+          NODE_OPTIONS: --max-old-space-size=4096
         run: |
           TOTAL_PASS=0
           TOTAL_FAIL=0
@@ -328,8 +331,10 @@ jobs:
       # Major."
       #
       # WARUM HIER UND NICHT ALS COMMIT: die Quelle
-      # data/tournament_decklists_per_player.csv ist 45 MB gross und
-      # 202.685 Zeilen lang. posts/index.html laeuft im Browser, oft am
+      # data/tournament_decklists_per_player_*.csv (seit SC-45 Auszuege je
+      # Format und Monat; 04.11.2026 zusammen 99,5 MiB, 470.777 Zeilen —
+      # der Monolith lag ueber GitHubs 100-MiB-Grenze) ist zu gross fuer
+      # den Browser. posts/index.html laeuft im Browser, oft am
       # Telefon — sie kann die Quelle nicht laden. Die abgeleitete Datei
       # ist gemessen 197 KB (19 KB gzip) und steht in zwei Sekunden.
       # (545 KB stand hier bis zum 26.09.2026 — vor der Top-8-Schwelle.)

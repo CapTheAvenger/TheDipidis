@@ -211,10 +211,17 @@ function loadY2(rows) {
             },
         },
     };
+    // SC-45 (04.11.2026): der Motor liest erst das Verzeichnis der
+    // Auszuege und laedt die Dateien darin; hier EIN Auszug ohne Format,
+    // damit der Ersatz-Bestand unabhaengig vom Formatfenster geladen wird.
+    const fetch = async (url) => (String(url).includes('per_player_verzeichnis')
+        ? { ok: true, json: async () => ({ auszuege: [
+            { schluessel: 'ERSATZ', meta: '', datei: 'tournament_decklists_per_player_ERSATZ.csv' }] }) }
+        : { ok: false, json: async () => null });
     // Neutralize the file's own `(typeof window !== 'undefined' ? window
     // : globalThis)` tail by providing a `window` in scope.
     new Function('window', 'globalThis', 'Papa', 'document', 'fetch',
-        src)(sandbox, sandbox, sandbox.Papa, undefined, undefined);
+        src)(sandbox, sandbox, sandbox.Papa, undefined, fetch);
     if (!sandbox.MostConsistencyBuilder) {
         throw new Error('module did not register MostConsistencyBuilder');
     }

@@ -250,7 +250,8 @@ describe('Deck-Builder: die Turniergroesse wird auch unter der Limitless-ID gefu
          * Die Zusicherung gilt deshalb je Herkunft: Papier MUSS eine
          * Kennung tragen (das war der NAIC-Fehler), Online DARF keine
          * haben (sonst waere eine erfunden worden). */
-        const zeilen = lies('data/tournament_decklists_per_player.csv').split('\n');
+        // SC-45: Auszuege je Format und Monat, als ein Text
+        const zeilen = require(path.join(ROOT, 'scripts', 'per-player-auszuege.js')).text(path.join(ROOT, 'data')).split('\n');
         const kopf = zeilen[0].replace(/^﻿/, '').split(',');
         const iTid = kopf.indexOf('tournament_id');
         const iLim = kopf.indexOf('limitless_tournament_id');

@@ -31,7 +31,11 @@ import pytest
 HIER = os.path.dirname(os.path.abspath(__file__))
 WURZEL = os.path.normpath(os.path.join(HIER, "..", ".."))
 QUELLE = os.path.join(WURZEL, "backend", "scrapers", "per_decklist_scraper.py")
-BESTAND = os.path.join(WURZEL, "data", "tournament_decklists_per_player.csv")
+BESTAND = os.path.join(WURZEL, "data")   # SC-45: Ordner mit den Auszuegen
+
+# SC-45 (04.11.2026): der Bestand liegt als Auszuege je Format und Monat
+sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+import per_player_auszuege as _ppa  # noqa: E402
 KONTINUITAET = os.path.join(WURZEL, "data", "player_continuity.csv")
 
 BILANZSPALTEN = ("wins", "losses", "ties")
@@ -62,10 +66,9 @@ def _ist_genullt(z):
 
 @pytest.fixture(scope="module")
 def bestand():
-    if not os.path.exists(BESTAND):
-        pytest.skip("data/tournament_decklists_per_player.csv fehlt")
-    with open(BESTAND, newline="", encoding="utf-8") as f:
-        return list(csv.DictReader(f))
+    if not _ppa.quelle_vorhanden(BESTAND):
+        pytest.skip("data/tournament_decklists_per_player_*.csv fehlt")
+    return list(_ppa.quelle_zeilen(BESTAND))
 
 
 @pytest.fixture(scope="module")

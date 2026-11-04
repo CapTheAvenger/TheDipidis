@@ -58,7 +58,12 @@ LABS_MU = os.path.join(DATEN, "labs_tournament_matchups.csv")
 FENSTER = os.path.join(DATEN, "limitless_online_fenster.csv")
 FENSTER_META = os.path.join(DATEN, "limitless_online_fenster_meta.json")
 BESTE_ONLINE = os.path.join(DATEN, "online_best_decklists.json")
-LISTEN_VOR_ORT = os.path.join(DATEN, "tournament_decklists_per_player.csv")
+# SC-45 (04.11.2026): die Decklisten je Spieler liegen als Auszuege je Format
+# und Monat in data/; LISTEN_VOR_ORT ist der Ordner (eine einzelne CSV geht
+# weiter, z. B. in Tests).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import per_player_auszuege as ppa  # noqa: E402
+LISTEN_VOR_ORT = DATEN
 
 csv.field_size_limit(10 ** 9)
 
@@ -257,29 +262,28 @@ def beste_online(name):
 def beste_vor_ort(wuensche, turniere=None):
     """wuensche: {(deck_name_lower, meta): id}. Die VOR_ORT_LISTEN
     bestplatzierten Papier-Listen je Deck im Format, eine Zeile je Karte in
-    tournament_decklists_per_player.csv (86 MB, einmal gelesen)."""
+    tournament_decklists_per_player_*.csv (Auszuege, einmal gelesen)."""
     gef = {}
-    with open(LISTEN_VOR_ORT, encoding="utf-8-sig") as f:
-        for r in csv.DictReader(f):
-            if r.get("quelle") != "papier":
-                continue
-            k = ((r.get("deck_archetype") or "").strip().lower(), r.get("meta"))
-            if k not in wuensche:
-                continue
-            platz = _int(r.get("place"))
-            if not platz:
-                continue
-            sl = (r["tournament_id"], r["player_name"])
-            # Name und Spielerzahl aus labs_tournament_decks.csv (dieselbe
-            # Turniernummer) — die Listen-Datei schreibt „Regional Lousville,
-            # KY – Limitless“ und laesst die Spielerzahl oft leer.
-            tn = (turniere or {}).get(r["tournament_id"]) or {}
-            e = gef.setdefault(wuensche[k], {}).setdefault(sl, {
-                "platz": platz, "turnier": tn.get("name") or _kurzname(r["tournament_name"]),
-                "datum": _datum(r["tournament_date"]), "spieler": (r["player_name"] or "")[:40],
-                "bilanz": "%s-%s-%s" % (_int(r["wins"]), _int(r["losses"]), _int(r["ties"])),
-                "von": tn.get("spieler") or _int(r.get("spielerzahl")), "karten": []})
-            e["karten"].append([_int(r["count"]), r["card_name"], r["set_code"], r["set_number"]])
+    for r in ppa.quelle_zeilen(LISTEN_VOR_ORT):
+        if r.get("quelle") != "papier":
+            continue
+        k = ((r.get("deck_archetype") or "").strip().lower(), r.get("meta"))
+        if k not in wuensche:
+            continue
+        platz = _int(r.get("place"))
+        if not platz:
+            continue
+        sl = (r["tournament_id"], r["player_name"])
+        # Name und Spielerzahl aus labs_tournament_decks.csv (dieselbe
+        # Turniernummer) — die Listen-Datei schreibt „Regional Lousville,
+        # KY – Limitless“ und laesst die Spielerzahl oft leer.
+        tn = (turniere or {}).get(r["tournament_id"]) or {}
+        e = gef.setdefault(wuensche[k], {}).setdefault(sl, {
+            "platz": platz, "turnier": tn.get("name") or _kurzname(r["tournament_name"]),
+            "datum": _datum(r["tournament_date"]), "spieler": (r["player_name"] or "")[:40],
+            "bilanz": "%s-%s-%s" % (_int(r["wins"]), _int(r["losses"]), _int(r["ties"])),
+            "von": tn.get("spieler") or _int(r.get("spielerzahl")), "karten": []})
+        e["karten"].append([_int(r["count"]), r["card_name"], r["set_code"], r["set_number"]])
     aus = {}
     for gid, listen in gef.items():
         reihe = sorted(listen.values(), key=lambda e: (e["platz"], e["datum"][6:] + e["datum"][3:5] + e["datum"][:2]))

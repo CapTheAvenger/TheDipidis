@@ -44,6 +44,17 @@ if [ ! -d "$ORDNER" ]; then
     exit 1
 fi
 
+# FESTER HEAP (SC-45, 04.11.2026). Pokepricelab-Index #42 (41753542572):
+# drei Dateien starben im Tor nach 15-17 s als ganzer Prozess ("test
+# failed", keine einzelne Zusicherung) — genau die drei, die den
+# 99,5-MiB-Bestand der Decklisten je Spieler in den Heap laden
+# (test-tag2-grundgesamtheit, test-r5-duenne-basis,
+# test-alt-vorschlag-schwelle). Lokal reproduziert: "JavaScript heap out
+# of memory" bei 2 GB. Vier Laeufe davor und danach auf demselben Commit
+# waren gruen; Nodes Vorgabe haengt vom Speicher des Laeufers ab. Deshalb
+# hier eine feste Grenze, die `node --test` an die Kindprozesse weitergibt.
+export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=4096"
+
 for f in "$ORDNER"/test-*.js; do
     if [ ! -s "$f" ]; then
         LEERE+=("$f")

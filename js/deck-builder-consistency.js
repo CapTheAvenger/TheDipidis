@@ -75,7 +75,20 @@
   'use strict';
 
   // ── Tuning constants ──────────────────────────────────────────────
-  const DATA_URL = 'data/tournament_decklists_per_player.csv';
+  /* SC-45 (04.11.2026): die Decklisten je Spieler liegen als Auszuege je
+     Format und Monat in data/ — der Monolith (99,5 MiB, mit Puebla/Danzig
+     106,5 MiB) lag ueber GitHubs 100-MiB-Grenze und wurde hier komplett
+     im Browser geladen. Das Verzeichnis nennt die Auszuege; geladen werden
+     nur die des laufenden Formats (oldest_legal_set-current_set aus
+     data/format_window.json, 54 MB statt 99,5 gemessen am 04.11.). Alte
+     Formate gingen schon vorher nicht in den Bau ein: build() wirft sie
+     ueber opts.minDate (in_person_legal_date) heraus. Gibt es fuer das
+     Format noch keinen Auszug (Rotation), werden alle geladen — dann
+     greift wie bisher das Formattor. */
+  const DATA_URL = 'data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv';
+  const VERZEICHNIS_URL = 'data/tournament_decklists_per_player_verzeichnis.json';
+  const FORMAT_WINDOW_URL = 'data/format_window.json';
+  let _geladeneAuszuege = [];   // Dateinamen der geladenen Auszuege (Nachweis)
 
   /* DIE GRUNDGESAMTHEIT IST DER TOP CUT, NICHT DAS FELD (07.09.2026).
      Nachgezaehlt in data/tournament_decklists_per_player.csv gegen
@@ -673,12 +686,60 @@
     return { sizes, piloten, bruecke };
   }
 
+  /** Format-Schluessel wie in den Dateinamen der Auszuege (TEF-30C). */
+  async function _aktuellesMeta() {
+    try {
+      const fw = (global.window && global.window._formatWindow) || null;
+      let w = fw && fw.oldest_legal_set && fw.current_set ? fw : null;
+      if (!w) {
+        const r = await fetch(FORMAT_WINDOW_URL + '?t=' + Date.now());
+        if (r.ok) w = await r.json();
+      }
+      if (w && w.oldest_legal_set && w.current_set) {
+        return String(w.oldest_legal_set).toUpperCase() + '-' + String(w.current_set).toUpperCase();
+      }
+    } catch (e) {
+      console.warn('[MostConsistencyBuilder] format_window nicht lesbar:', e);
+    }
+    return null;
+  }
+
+  /** Welche Auszuege zu laden sind: die des Formats, sonst alle. */
+  function auszuegeWaehlen(verzeichnis, metaKey) {
+    const alle = (verzeichnis && Array.isArray(verzeichnis.auszuege) ? verzeichnis.auszuege : [])
+      .filter((a) => a && a.datei)
+      .slice()
+      .sort((a, b) => String(a.schluessel || '').localeCompare(String(b.schluessel || '')));
+    if (!metaKey) return alle;
+    const passend = alle.filter((a) => String(a.meta || '').toUpperCase() === String(metaKey).toUpperCase());
+    return passend.length ? passend : alle;
+  }
+
+  async function _loadRows() {
+    let verzeichnis = null;
+    try {
+      const r = await fetch(VERZEICHNIS_URL + '?t=' + Date.now());
+      if (r.ok) verzeichnis = await r.json();
+    } catch (e) {
+      console.warn('[MostConsistencyBuilder] Verzeichnis der Auszuege nicht lesbar:', e);
+    }
+    const metaKey = await _aktuellesMeta();
+    const auszuege = auszuegeWaehlen(verzeichnis, metaKey);
+    _geladeneAuszuege = auszuege.map((a) => a.datei);
+    if (!auszuege.length) {
+      console.warn('[MostConsistencyBuilder] keine Auszuege im Verzeichnis — kein Bestand');
+      return [];
+    }
+    const teile = await Promise.all(auszuege.map((a) => _loadCsv('data/' + a.datei)));
+    return [].concat(...teile);
+  }
+
   async function _loadAll() {
     if (_allRows) return;
     if (_loadPromise) return _loadPromise;
     _loadPromise = (async () => {
       const [rows, labsGroessen, aceSpecs] = await Promise.all([
-        _loadCsv(DATA_URL),
+        _loadRows(),
         _loadTournamentSizes(),
         _loadAceSpecNames(),
       ]);
@@ -2235,6 +2296,7 @@
     }
     return {
       quelle:            DATA_URL,
+      auszuege:          _geladeneAuszuege.slice(),
       felder:            ['deck_archetype', 'tournament_date'],
       min_date:          grenze,
       schwelle:          MIN_WEIGHTED_LISTS,
@@ -2256,6 +2318,8 @@
   global.MostConsistencyBuilder = {
     build,
     loadData:           _loadAll,
+    auszuegeWaehlen,
+    geladeneAuszuege:   () => _geladeneAuszuege.slice(),
     isAvailable,
     listsForArchetype,
     datenbasisSatz,

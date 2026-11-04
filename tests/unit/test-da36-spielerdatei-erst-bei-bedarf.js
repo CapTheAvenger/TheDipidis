@@ -6,7 +6,10 @@
  * Global/Japan, Vergangene Formate) oder beim ersten Aufruf.
  *
  * AUSGEFUEHRT: das echte Modul laeuft in einer Attrappe; gezaehlt wird,
- * wie oft Papa.parse die Datei anfordert.
+ * wie oft der Bestand angefordert wird. Seit SC-45 (04.11.2026) liegt er
+ * als Auszuege je Format und Monat; der Ladevorgang beginnt mit dem Abruf
+ * des Verzeichnisses (data/tournament_decklists_per_player_verzeichnis.json),
+ * und genau der wird gezaehlt — er faellt synchron beim Start des Ladens.
  */
 'use strict';
 const { describe, it } = require('node:test');
@@ -16,7 +19,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const SRC = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'deck-builder-consistency.js'), 'utf8');
-const DATEI = 'data/tournament_decklists_per_player.csv';
+const DATEI = 'data/tournament_decklists_per_player_verzeichnis.json';
 
 function laden(aktiverReiter) {
     const abrufe = [];
@@ -31,7 +34,7 @@ function laden(aktiverReiter) {
         },
         setTimeout: (fn) => { zeitgeber.push(fn); return 0; },
         Papa: { parse: (url, o) => { abrufe.push(String(url).split('?')[0]); o.complete({ data: [] }); } },
-        fetch: async () => ({ ok: false, json: async () => null, text: async () => '' }),
+        fetch: async (url) => { abrufe.push(String(url).split('?')[0]); return { ok: false, json: async () => null, text: async () => '' }; },
         switchTab: (t) => { reiter.push(t); return true; },
     };
     ctx.window = ctx;

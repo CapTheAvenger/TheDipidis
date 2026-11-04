@@ -121,6 +121,10 @@ old\ Data\ for\ Claude/
 
 # Large monolith CSV (replaced by per-meta chunks + manifest)
 data/tournament_cards_data_cards.csv
+# SC-45 (04.11.2026): der Monolith der Decklisten je Spieler lag mit
+# Puebla/Danzig bei 106,5 MiB; GitHub nimmt 100. Im Repo liegen nur die
+# Auszuege je Format und Monat (scripts/per_player_auszuege.py).
+data/tournament_decklists_per_player.csv
 
 # Pre-processed per-archetype JSON chunks (generated, not deployed)
 data/city_league_cards/
@@ -138,7 +142,7 @@ backend/core/data/
 
 # Die Listen der Post-Seite entstehen beim Deploy, nicht im Repo
 # (26.09.2026). .github/workflows/deploy-pages.yml baut sie aus
-# data/tournament_decklists_per_player.csv nach _site/data/. Sie hier zu
+# den Auszuegen data/tournament_decklists_per_player_*.csv nach _site/data/. Sie hier zu
 # fuehren hiesse: bei jedem Scrape eine halbe Megabyte neu in die
 # Geschichte, und ein „letzte 7 Tage", das bis zum naechsten Commit
 # altert. Lokal darf sie liegen — fuer die Abnahme im Browser.

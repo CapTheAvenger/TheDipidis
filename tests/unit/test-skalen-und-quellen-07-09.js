@@ -507,7 +507,10 @@ describe('B5 — der Rueckfall unter die Mindestzahl ist nicht mehr stumm', () =
                 k.forEach((n, i) => { r[n] = t[i]; }); return r;
             }) });
         } };
-        sb.fetch = async () => ({ ok: false });
+        // SC-45: der Motor fragt erst das Verzeichnis der Auszuege; hier EIN Auszug ohne Format
+        sb.fetch = async (url) => (/per_player_verzeichnis/.test(url)
+            ? { ok: true, json: async () => ({ auszuege: [{ schluessel: 'ERSATZ', meta: '', datei: 'tournament_decklists_per_player_ERSATZ.csv' }] }) }
+            : { ok: false });
         vm.createContext(sb);
         vm.runInContext(KONS, sb);
         const M = sb.MostConsistencyBuilder;

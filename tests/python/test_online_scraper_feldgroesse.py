@@ -20,13 +20,16 @@ Zwei Luecken in derselben Datei, beide aus derselben Umstellung:
 
 import csv
 import os
+import sys
 import re
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SCRAPER = os.path.join(WURZEL, "backend", "scrapers",
                        "limitless_online_decklist_scraper.py")
 PAPIER = os.path.join(WURZEL, "backend", "scrapers", "per_decklist_scraper.py")
-CSV_DATEI = os.path.join(WURZEL, "data", "tournament_decklists_per_player.csv")
+CSV_DATEI = os.path.join(WURZEL, "data")   # SC-45: Ordner mit den Auszuegen je Format und Monat
+sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+import per_player_auszuege as _ppa  # noqa: E402
 
 
 def _quelle(pfad):
@@ -103,16 +106,15 @@ def test_bestand_bleibt_lesbar_mit_und_ohne_die_neue_spalte():
     eine zweite Zahl danebenzuschreiben hiesse, zwei Wahrheiten zu
     pflegen.
     """
-    if not os.path.exists(CSV_DATEI):
+    if not _ppa.quelle_vorhanden(CSV_DATEI):
         return
-    with open(CSV_DATEI, encoding="utf-8-sig", newline="") as f:
-        rd = csv.DictReader(f)
-        if "spielerzahl" not in (rd.fieldnames or []):
+    if True:
+        if "spielerzahl" not in (_ppa.kopfzeile(CSV_DATEI) or []):
             return          # Bestand vor dem 10.09.2026 — nichts zu pruefen
         papier_gefuellt = 0
         online_leer = 0
         online = 0
-        for r in rd:
+        for r in _ppa.quelle_zeilen(CSV_DATEI):
             wert = (r.get("spielerzahl") or "").strip()
             if r.get("quelle") == "papier" and wert:
                 papier_gefuellt += 1

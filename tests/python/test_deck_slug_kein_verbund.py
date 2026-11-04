@@ -29,6 +29,7 @@ repariert; das steht so im Fehlertext.
 import csv
 import io
 import os
+import sys
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DOK = os.path.join(WURZEL, "data", "_consumers.md")
@@ -43,7 +44,9 @@ def _lies(name):
         return list(csv.DictReader(fh, delimiter=trenn))
 
 
-DECKLISTEN = _lies("tournament_decklists_per_player.csv")
+sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+import per_player_auszuege as _ppa  # noqa: E402  (SC-45: Auszuege je Format und Monat)
+DECKLISTEN = list(_ppa.zeilen(os.path.join(WURZEL, "data")))
 LABS = _lies("labs_tournament_decks.csv")
 
 

@@ -427,11 +427,12 @@ def drucke_ohne_kartentyp():
     """
     import csv as _csv
 
-    pfad = os.path.join(DATA, "tournament_decklists_per_player.csv")
-    if not os.path.exists(pfad):
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(DATA), "scripts"))
+    import per_player_auszuege as ppa  # SC-45: Auszuege je Format und Monat
+    if not ppa.pfade(DATA):
         return NICHT_MESSBAR
     try:
-        import sys
         sys.path.insert(0, os.path.join(os.path.dirname(DATA), "backend", "core"))
         import card_scraper_shared as css
         db = css.CardDatabaseLookup()
@@ -442,17 +443,16 @@ def drucke_ohne_kartentyp():
 
     zaehler = {}
     namen = {}
-    with open(pfad, encoding="utf-8-sig") as f:
-        for r in _csv.DictReader(f):
-            satz = (r.get("set_code") or "").strip()
-            nummer = (r.get("set_number") or "").strip()
-            if not satz or not nummer:
-                continue
-            if db.typ_von_druck(satz, nummer):
-                continue
-            schluessel = f"{satz} {nummer}"
-            zaehler[schluessel] = zaehler.get(schluessel, 0) + 1
-            namen.setdefault(schluessel, (r.get("card_name") or "").strip())
+    for r in ppa.zeilen(DATA):
+        satz = (r.get("set_code") or "").strip()
+        nummer = (r.get("set_number") or "").strip()
+        if not satz or not nummer:
+            continue
+        if db.typ_von_druck(satz, nummer):
+            continue
+        schluessel = f"{satz} {nummer}"
+        zaehler[schluessel] = zaehler.get(schluessel, 0) + 1
+        namen.setdefault(schluessel, (r.get("card_name") or "").strip())
 
     heraus = []
     for schluessel, anzahl in sorted(zaehler.items()):
@@ -464,7 +464,7 @@ def drucke_ohne_kartentyp():
                      f"({anzahl}x)",
             "titelEn": f"{name} ({schluessel}) — no card type in the database "
                        f"({anzahl}x)",
-            "wo": "data/tournament_decklists_per_player.csv → Spalte type",
+            "wo": "data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv → Spalte type",
             "ansicht": "deck-builder",
             "vorschlag": None,
         })

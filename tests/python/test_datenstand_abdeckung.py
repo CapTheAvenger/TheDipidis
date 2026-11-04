@@ -80,10 +80,15 @@ def test_die_beiden_turnierdateien_werden_gefuehrt():
     d = _stand()
     quelle = open(os.path.join(WURZEL, "scripts", "build_data_stand.py"),
                   encoding="utf-8").read()
-    for name in ("tournament_decklists_per_player.csv", "player_continuity.csv"):
+    for name in ("tournament_decklists_per_player_*_*.csv", "player_continuity.csv"):
+        # SC-45: die Decklisten je Spieler als Auszuege (Glob in DATEIEN_GLOB)
         assert f'"{name}"' in quelle, (
             f"{name} steht nicht in der Liste des Bauers")
-        gefuehrt = name in d["dateien"] or name in d["ohne_stand"]
+        if "*" in name:
+            praefix = name.split("*", 1)[0]
+            gefuehrt = any(k.startswith(praefix) for k in list(d["dateien"]) + list(d["ohne_stand"]))
+        else:
+            gefuehrt = name in d["dateien"] or name in d["ohne_stand"]
         assert gefuehrt, f"{name} taucht in data_stand.json gar nicht auf"
 
 

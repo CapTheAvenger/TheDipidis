@@ -39,6 +39,8 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DATA = os.path.join(ROOT, "data")
+sys.path.insert(0, HERE)
+import per_player_auszuege as ppa  # noqa: E402  (SC-45: Decklisten je Spieler als Auszuege)
 BASELINE = os.path.join(DATA, "_guardian_baseline.json")
 
 # Sets deliberately kept out of sets.json — mirrors SUPERSEDED_SETS in
@@ -2762,10 +2764,16 @@ def tote_spalten():
         # iterierte ueber die Schluessel des inneren Wortverzeichnisses und
         # meldete brav "purpose und required sind leer" fuer jede Datei.
         spalten = eintrag.get("required", []) if isinstance(eintrag, dict) else eintrag
-        pfad = os.path.join(DATA, datei)
-        if not os.path.exists(pfad):
-            continue
-        zeilen = list(read_csv(pfad))
+        if datei == ppa.MONOLITH:
+            # SC-45: liegt als Auszuege je Format und Monat; der Monolith
+            # selbst darf nicht mehr in data/ sein. Geprueft wird das
+            # laufende Format (die aelteren Auszuege aendern sich nicht).
+            zeilen = list(ppa.zeilen(DATA, meta=_aktuelles_meta())) or list(ppa.zeilen(DATA))
+        else:
+            pfad = os.path.join(DATA, datei)
+            if not os.path.exists(pfad):
+                continue
+            zeilen = list(read_csv(pfad))
         if not zeilen:
             continue
         leer = []
@@ -2830,13 +2838,14 @@ def check_druck_herkunft(findings):
     kaputt, sie sind ungeprueft — und der Unterschied gehoert in die
     Meldung, sonst gewoehnt man sich an einen roten Waechter.
     """
-    pfad = os.path.join(DATA, "tournament_decklists_per_player.csv")
-    if not os.path.exists(pfad):
+    # Auszuege in DATA (Repo); eine einzelne Datei nur noch in gesetzten Faellen
+    quelle = DATA if ppa.pfade(DATA) else os.path.join(DATA, ppa.MONOLITH)
+    if not ppa.quelle_vorhanden(quelle):
         return
     gesamt = 0
     ohne = 0
     ueber_namen = 0
-    for r in read_csv(pfad):
+    for r in ppa.quelle_zeilen(quelle):
         gesamt += 1
         q = (col(r, "druck_quelle") or "").strip().lower()
         if not q:

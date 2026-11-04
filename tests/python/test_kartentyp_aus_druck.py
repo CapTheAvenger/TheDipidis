@@ -38,6 +38,8 @@ import sys
 import pytest
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(WURZEL, 'scripts'))
+import per_player_auszuege as _ppa  # noqa: E402  (SC-45: Auszuege je Format und Monat)
 sys.path.insert(0, os.path.join(WURZEL, 'backend', 'core'))
 
 from bs4 import BeautifulSoup  # noqa: E402
@@ -152,15 +154,14 @@ def test_jeder_typwert_wird_vom_frontend_einsortiert(css):
     db = css.CardDatabaseLookup()
     if not db.nach_druck:
         pytest.skip('Kartendatenbank in dieser Umgebung nicht vorhanden')
-    import csv as _csv
-    pfad = os.path.join(WURZEL, 'data', 'tournament_decklists_per_player.csv')
-    if not os.path.exists(pfad):
+    pfad = os.path.join(WURZEL, 'data')   # SC-45: Ordner mit den Auszuegen
+    if not _ppa.quelle_vorhanden(pfad):
         pytest.skip('Zeilendatei nicht vorhanden')
     erlaubt = {'Basic', 'Stage 1', 'Stage 2', 'Supporter', 'Item', 'Tool',
                'Stadium', 'Basic Energy', 'Special Energy'}
     gesehen = set()
-    with open(pfad, encoding='utf-8-sig') as f:
-        for r in _csv.DictReader(f):
+    if True:
+        for r in _ppa.quelle_zeilen(pfad):
             gesehen.add(db.typ_von_druck((r.get('set_code') or '').strip(),
                                          (r.get('set_number') or '').strip()))
     # BENANNT STATT NULL (23.09.2026). Hier stand `'' not in gesehen`.
@@ -189,13 +190,12 @@ def test_die_ausgelieferte_spalte_ist_gefuellt():
     scripts/fuelle_kartentyp.py nachgezogen — ohne einen einzigen
     Abruf, weil der Typ lokal steht (CLAUDE.md: *never re-fetch data
     you already have*)."""
-    import csv as _csv
-    pfad = os.path.join(WURZEL, 'data', 'tournament_decklists_per_player.csv')
-    if not os.path.exists(pfad):
+    pfad = os.path.join(WURZEL, 'data')   # SC-45: Ordner mit den Auszuegen
+    if not _ppa.quelle_vorhanden(pfad):
         pytest.skip('Zeilendatei nicht vorhanden')
     n = leer = 0
-    with open(pfad, encoding='utf-8-sig') as f:
-        for r in _csv.DictReader(f):
+    if True:
+        for r in _ppa.quelle_zeilen(pfad):
             n += 1
             if not (r.get('type') or '').strip():
                 leer += 1
@@ -240,12 +240,17 @@ def test_das_fuellskript_schreibt_nur_ohne_zutun_nichts(tmp_path):
     """Ohne --schreiben wird berichtet, nicht geaendert."""
     import importlib.util
     import csv as _csv
-    quelle = os.path.join(WURZEL, 'data', 'tournament_decklists_per_player.csv')
-    if not os.path.exists(quelle):
+    quelle = os.path.join(WURZEL, 'data')   # SC-45: Ordner mit den Auszuegen
+    if not _ppa.quelle_vorhanden(quelle):
         pytest.skip('Zeilendatei nicht vorhanden')
     ziel = tmp_path / 'p.csv'
-    with open(quelle, encoding='utf-8-sig') as f:
-        zeilen = list(_csv.DictReader(f))[:50]
+    zeilen = []
+    for r in _ppa.quelle_zeilen(quelle):
+        if not (r.get('type') or '').strip():
+            continue        # ein Druck, den die Datenbank nicht kennt, bliebe leer — der Fall oben
+        zeilen.append(r)
+        if len(zeilen) >= 50:
+            break
     spalten = list(zeilen[0].keys())
     for r in zeilen:
         r['type'] = ''
@@ -289,8 +294,8 @@ def _benannte_drucke_pruefen(pfad, db):
             pytest.skip('Kartendatenbank in dieser Umgebung nicht vorhanden')
 
     offen = {}
-    with open(pfad, encoding='utf-8-sig') as f:
-        for r in _csv.DictReader(f):
+    if True:
+        for r in _ppa.quelle_zeilen(pfad):
             satz = (r.get('set_code') or '').strip()
             nummer = (r.get('set_number') or '').strip()
             if not satz or not nummer:

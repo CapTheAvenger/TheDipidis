@@ -42,7 +42,9 @@ import pytest
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SKRIPT = os.path.join(WURZEL, 'scripts', 'build_post_decklists.py')
-QUELLE = os.path.join(WURZEL, 'data', 'tournament_decklists_per_player.csv')
+QUELLE = os.path.join(WURZEL, 'data')   # SC-45: Ordner mit den Auszuegen je Format und Monat
+sys.path.insert(0, os.path.join(WURZEL, 'scripts'))
+import per_player_auszuege as _ppa  # noqa: E402
 
 
 def _modul():
@@ -55,8 +57,8 @@ def _modul():
 @pytest.fixture(scope='module')
 def gebaut():
     """Einmal bauen, viele Zusicherungen — der Lauf kostet rund zwei Sekunden."""
-    if not os.path.exists(QUELLE):
-        pytest.skip('data/tournament_decklists_per_player.csv fehlt')
+    if not _ppa.quelle_vorhanden(QUELLE):
+        pytest.skip('data/tournament_decklists_per_player_*.csv fehlt')
     m = _modul()
     daten, fehler = m.bauen()
     assert fehler is None, f'der Bau meldet: {fehler}'
@@ -72,8 +74,8 @@ def test_das_fenster_endet_am_letzten_turniertag(gebaut):
     Post-Seite zeigt deshalb `von` und `bis` — und die muessen stimmen.
     """
     letztes = ''
-    with open(QUELLE, newline='', encoding='utf-8') as f:
-        for r in csv.DictReader(f):
+    if True:
+        for r in _ppa.quelle_zeilen(QUELLE):
             d = (r.get('tournament_date') or '').strip()
             if d > letztes:
                 letztes = d
@@ -156,8 +158,8 @@ def test_kein_platz_jenseits_der_top_32(gebaut):
 def test_das_major_ist_das_letzte(gebaut):
     """Nicht irgendein Papier-Turnier — das juengste."""
     daten = {}
-    with open(QUELLE, newline='', encoding='utf-8') as f:
-        for r in csv.DictReader(f):
+    if True:
+        for r in _ppa.quelle_zeilen(QUELLE):
             if (r.get('quelle') or '').strip() != 'papier':
                 continue
             d = (r.get('tournament_date') or '').strip()
@@ -403,8 +405,8 @@ def test_das_major_nennt_die_zahl_der_gefuehrten_plaetze(gebaut):
     assert m['gefuehrt'] > 0, 'das Major nennt keine Zahl gefuehrter Plaetze'
     # Nachgezaehlt in der Quelle, nicht uebernommen.
     spieler = set()
-    with open(QUELLE, newline='', encoding='utf-8') as f:
-        for r in csv.DictReader(f):
+    if True:
+        for r in _ppa.quelle_zeilen(QUELLE):
             if (r.get('quelle') or '').strip() != 'papier':
                 continue
             if (r.get('tournament_date') or '').strip() != m['datum']:
@@ -467,8 +469,8 @@ def test_der_nenner_einer_platzierung_ist_das_feld_nicht_die_zahl_der_listen(geb
 
     # Der Sollwert kommt aus den labs-Dateien, ueber die Turnierkennung.
     tid = None
-    with open(QUELLE, newline='', encoding='utf-8') as f:
-        for r in csv.DictReader(f):
+    if True:
+        for r in _ppa.quelle_zeilen(QUELLE):
             if ((r.get('quelle') or '').strip() == 'papier'
                     and (r.get('tournament_date') or '').strip() == m['datum']
                     and (r.get('tournament_name') or '').strip() == m['name']):

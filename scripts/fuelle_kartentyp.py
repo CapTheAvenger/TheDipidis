@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fuellt die Spalte `type` in data/tournament_decklists_per_player.csv.
+"""Fuellt die Spalte `type` in den Decklisten je Spieler (data/tournament_decklists_per_player_*.csv).
 
 BEFUND (06.09.2026)
 -------------------
@@ -48,7 +48,13 @@ import sys
 WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(WURZEL, "backend", "core"))
 
-ZIEL = os.path.join(WURZEL, "data", "tournament_decklists_per_player.csv")
+sys.path.insert(0, os.path.join(WURZEL, "scripts"))
+import per_player_auszuege as ppa  # noqa: E402
+
+# SC-45 (04.11.2026): der Bestand liegt als Auszuege je Format und Monat in
+# data/. Ohne --datei laeuft das Skript ueber ALLE Auszuege (eine Datei nach
+# der anderen, die Kartendatenbank wird einmal geladen).
+ZIEL = os.path.join(WURZEL, "data")
 
 
 def _kartendatenbank():
@@ -57,11 +63,23 @@ def _kartendatenbank():
     return css.CardDatabaseLookup()
 
 
-def lauf(pfad: str, schreiben: bool) -> int:
+def lauf(pfad: str, schreiben: bool, db=None) -> int:
+    """Eine Datei; ein Ordner (SC-45) = jeder Auszug darin nacheinander."""
+    if os.path.isdir(pfad):
+        pfade = ppa.pfade(pfad)
+        if not pfade:
+            print(f"::error::keine Auszuege in {pfad}")
+            return 1
+        db = db or _kartendatenbank()
+        rc = 0
+        for p in pfade:
+            print(f"-- {os.path.basename(p)}")
+            rc = max(rc, lauf(p, schreiben, db))
+        return rc
     if not os.path.exists(pfad):
         print(f"::error::{pfad} fehlt")
         return 1
-    db = _kartendatenbank()
+    db = db or _kartendatenbank()
     if not db.nach_druck:
         print("::error::Kartendatenbank leer — ohne sie waere jede Fuellung "
               "geraten. Nichts geaendert.")

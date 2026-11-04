@@ -65,7 +65,14 @@ import os
 import sys
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-QUELLE = os.path.join(WURZEL, 'data', 'tournament_decklists_per_player.csv')
+sys.path.insert(0, os.path.join(WURZEL, 'scripts'))
+import per_player_auszuege as ppa  # noqa: E402
+
+# Seit SC-45 (04.11.2026) liegen die Decklisten je Spieler als Auszuege je
+# Format und Monat in data/ (scripts/per_player_auszuege.py); QUELLE ist der
+# Ordner. Eine einzelne CSV geht weiter (Tests, Arbeitsordner der Scraper).
+QUELLE = os.path.join(WURZEL, 'data')
+QUELLE_NAME = 'data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv'
 # Die Feldgroesse der Papier-Turniere steht NICHT in der Quelle oben —
 # siehe feldgroessen() weiter unten.
 LABS = os.path.join(WURZEL, 'data')
@@ -171,55 +178,54 @@ def listen_lesen(pfad):
     """Eine Zeile je (Turnier, Spieler) mit ihren Karten."""
     listen = {}
     turniere = {}
-    with open(pfad, newline='', encoding='utf-8') as f:
-        for r in csv.DictReader(f):
-            # DIE KENNUNG IST NICHT IMMER DIE ERSTE SPALTE.
-            #
-            # Gemessen am 26.09.2026: `tournament_id` ist bei ALLEN
-            # Online-Turnieren leer — nur die Papier-Turniere tragen sie.
-            # Wer auf ihr gruppiert, wirft alle Online-Listen eines
-            # Spielers in einen Topf: der Schluessel ('', 'Aya') trug 48
-            # Zeilen aus zwei Turnieren vom 08.09. und 18.09., Platz 12
-            # und Platz 2, zusammen 120 Karten. Genau daran ist der
-            # erste Bau gescheitert — er verwarf jede Online-Liste als
-            # „nicht 60 Karten" und lieferte null Archetypen.
-            tid = ((r.get('tournament_id') or '').strip()
-                   or (r.get('limitless_tournament_id') or '').strip())
-            spieler = (r.get('player_name') or '').strip()
-            if not tid or not spieler:
-                continue
-            datum = (r.get('tournament_date') or '').strip()
-            turniere[tid] = {
-                'name': (r.get('tournament_name') or '').strip(),
-                'datum': datum,
-                'meta': (r.get('meta') or '').strip(),
-                'quelle': (r.get('quelle') or '').strip(),
-                'spieler': _zahl(r.get('spielerzahl'), 0),
+    for r in ppa.quelle_zeilen(pfad):
+        # DIE KENNUNG IST NICHT IMMER DIE ERSTE SPALTE.
+        #
+        # Gemessen am 26.09.2026: `tournament_id` ist bei ALLEN
+        # Online-Turnieren leer — nur die Papier-Turniere tragen sie.
+        # Wer auf ihr gruppiert, wirft alle Online-Listen eines
+        # Spielers in einen Topf: der Schluessel ('', 'Aya') trug 48
+        # Zeilen aus zwei Turnieren vom 08.09. und 18.09., Platz 12
+        # und Platz 2, zusammen 120 Karten. Genau daran ist der
+        # erste Bau gescheitert — er verwarf jede Online-Liste als
+        # „nicht 60 Karten" und lieferte null Archetypen.
+        tid = ((r.get('tournament_id') or '').strip()
+               or (r.get('limitless_tournament_id') or '').strip())
+        spieler = (r.get('player_name') or '').strip()
+        if not tid or not spieler:
+            continue
+        datum = (r.get('tournament_date') or '').strip()
+        turniere[tid] = {
+            'name': (r.get('tournament_name') or '').strip(),
+            'datum': datum,
+            'meta': (r.get('meta') or '').strip(),
+            'quelle': (r.get('quelle') or '').strip(),
+            'spieler': _zahl(r.get('spielerzahl'), 0),
+        }
+        k = (tid, spieler)
+        e = listen.get(k)
+        if e is None:
+            e = listen[k] = {
+                'tid': tid,
+                'spieler': spieler,
+                'archetyp': (r.get('deck_archetype') or '').strip(),
+                'platz': _zahl(r.get('place'), 0),
+                'w': _zahl(r.get('wins'), 0),
+                'l': _zahl(r.get('losses'), 0),
+                't': _zahl(r.get('ties'), 0),
+                'karten': [],
+                'gesamt': 0,
             }
-            k = (tid, spieler)
-            e = listen.get(k)
-            if e is None:
-                e = listen[k] = {
-                    'tid': tid,
-                    'spieler': spieler,
-                    'archetyp': (r.get('deck_archetype') or '').strip(),
-                    'platz': _zahl(r.get('place'), 0),
-                    'w': _zahl(r.get('wins'), 0),
-                    'l': _zahl(r.get('losses'), 0),
-                    't': _zahl(r.get('ties'), 0),
-                    'karten': [],
-                    'gesamt': 0,
-                }
-            anzahl = _zahl(r.get('count'), 0)
-            if anzahl <= 0:
-                continue
-            e['karten'].append([
-                (r.get('card_name') or '').strip(),
-                (r.get('set_code') or '').strip().upper(),
-                (r.get('set_number') or '').strip().upper(),
-                anzahl,
-            ])
-            e['gesamt'] += anzahl
+        anzahl = _zahl(r.get('count'), 0)
+        if anzahl <= 0:
+            continue
+        e['karten'].append([
+            (r.get('card_name') or '').strip(),
+            (r.get('set_code') or '').strip().upper(),
+            (r.get('set_number') or '').strip().upper(),
+            anzahl,
+        ])
+        e['gesamt'] += anzahl
     return listen, turniere
 
 
@@ -241,7 +247,7 @@ def rang(e, feld):
 
 
 def bauen():
-    if not os.path.exists(QUELLE):
+    if not ppa.quelle_vorhanden(QUELLE):
         return None, 'Quelle fehlt: ' + QUELLE
     listen, turniere = listen_lesen(QUELLE)
     if not listen:
@@ -352,7 +358,7 @@ def bauen():
         'v': 1,
         'gebaut': datetime.datetime.now(datetime.timezone.utc)
                   .strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'quelle': 'data/tournament_decklists_per_player.csv',
+        'quelle': QUELLE_NAME,
         'fenster': {'von': von.isoformat(), 'bis': bis.isoformat(),
                     'tage': FENSTER_TAGE, 'erfolg_platz': ERFOLG_PLATZ},
         'verworfen_unvollstaendig': verworfen,
@@ -369,7 +375,7 @@ def leer(grund):
         'v': 1,
         'gebaut': datetime.datetime.now(datetime.timezone.utc)
                   .strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'quelle': 'data/tournament_decklists_per_player.csv',
+        'quelle': QUELLE_NAME,
         'fenster': None, 'verworfen_unvollstaendig': 0,
         'je_archetyp': JE_ARCHETYP,
         'bild_praefix': PRAEFIX, 'bilder': {},

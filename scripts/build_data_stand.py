@@ -117,7 +117,8 @@ DATEIEN = [
     # 09.09.2026 dazu: beide sind Grundlage sichtbarer Ansichten
     # (Deck Builder, Typical Build, Turnierbestand) und tragen ein
     # Turnierdatum je Zeile — siehe INHALT_BIS unten.
-    "tournament_decklists_per_player.csv",
+    # tournament_decklists_per_player.csv: seit SC-45 (04.11.2026) nur noch
+    # als Auszuege je Format und Monat, siehe DATEIEN_GLOB.
     "player_continuity.csv",
     # 09.09.2026 dazu: die drei Dateien der Champions-Nachtlaeufe. Sie
     # stehen in data/_consumers.md als oeffentliche Schnittstelle, waren
@@ -154,6 +155,10 @@ DATEIEN_GLOB = (
     # aelteren nicht — sie wuerden die Liste "ohne Stand" fuellen, ohne
     # dass jemand etwas davon haette.
     "labs_tournament_decks_*.csv",
+    # SC-45: die Decklisten je Spieler, je Format und Monat; das Verzeichnis
+    # daneben (tournament_decklists_per_player_verzeichnis.json) traegt kein
+    # Turnierdatum und bleibt draussen.
+    "tournament_decklists_per_player_*_*.csv",
 )
 
 
@@ -206,7 +211,7 @@ INHALT_BIS = {
     # (Deck Builder, Typical Build, Turnierbestand) und tragen ein
     # Turnierdatum je Zeile — es gab keinen Grund, sie auszulassen
     # ausser dem, dass sie niemand nachgetragen hat.
-    "tournament_decklists_per_player.csv": "tournament_date",
+    # (tournament_decklists_per_player_*: siehe inhalt_bis_tabelle)
     "player_continuity.csv": "tournament_date",
     # 10.09.2026 dazu. Beide Kartendateien der City League fuehren je
     # Zeile ein Turnierdatum; nur die Archetypdateien standen bisher hier.
@@ -223,7 +228,8 @@ def inhalt_bis_tabelle():
     for name in gefuehrte_dateien():
         if name.startswith(("online_api_cards_", "online_api_matchups_")):
             heraus[name] = "date"
-        elif name.startswith("labs_tournament_decks_"):
+        elif name.startswith(("labs_tournament_decks_",
+                              "tournament_decklists_per_player_")):
             heraus[name] = "tournament_date"
     return heraus
 

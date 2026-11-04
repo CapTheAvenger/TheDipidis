@@ -1034,7 +1034,11 @@ SYNC_PATTERNS = [
     # backend/scrapers/per_decklist_scraper.py (per-decklist-scrape.yml
     # workflow). Without this file the consumers fall back to the
     # archetype-aggregated stats — degraded gracefully but less precise.
-    "tournament_decklists_per_player.csv",
+    # SC-45 (04.11.2026): NICHT mehr hier. Der Monolith (106,5 MiB mit
+    # Puebla/Danzig) darf nicht nach data/ — GitHub nimmt keine Datei ueber
+    # 100 MiB. Die Ablaeufe teilen ihn nach den Scrapern in Auszuege je
+    # Format und Monat (scripts/per_player_auszuege.py aufteilen) und
+    # sichern nur die nach data/.
     # Champions Side Quest — VGCPastes Google-Sheet derived team list.
     # Refreshed von backend/scrapers/champions_replica_scraper.py, und
     # zwar TAEGLICH aus champions-replica-scrape.yml (04:00 UTC, --top 40).

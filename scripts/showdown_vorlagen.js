@@ -34,6 +34,7 @@ const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..');
 const DATA = path.join(ROOT, 'data');
+const ppa = require('./per-player-auszuege');
 const ZIEL = path.join(DATA, 'showdown_vorlagen.json');
 
 // ── Hilfen ──────────────────────────────────────────────────────────────
@@ -174,7 +175,8 @@ function waehleMajor(majors, jeTurnier) {
 function majorListen(formatKey) {
     const majors = JSON.parse(lies('labs_tournaments.json'));
     const jeTurnier = new Map();
-    for (const r of csv(lies('tournament_decklists_per_player.csv'), ',')) {
+    // SC-45: Auszuege je Format und Monat, nur die des gewuenschten Formats
+    for (const r of csv(ppa.text(DATA, formatKey), ',')) {
         if (!r.tournament_id || r.meta !== formatKey) continue; // Online-Listen haben keine tournament_id
         if (!jeTurnier.has(r.tournament_id)) jeTurnier.set(r.tournament_id, []);
         jeTurnier.get(r.tournament_id).push(r);

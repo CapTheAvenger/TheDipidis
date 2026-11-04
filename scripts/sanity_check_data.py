@@ -129,10 +129,8 @@ THRESHOLDS: Dict[str, int] = {
     'price_data.csv':                        15_000,  # 20 242 observed
     'cardmarket_id_mapping.csv':             10_000,  # 17 220 observed
 
-    # ── Per-decklist (Phase Y): currently only Turin is covered (see
-    # F-D09). Threshold 0 = watch-but-allow-empty until the backfill
-    # workflow lands; the moment any data appears we'll see it.
-    'tournament_decklists_per_player.csv':   0,
+    # ── Per-decklist: seit SC-45 (04.11.2026) Auszuege je Format und
+    # Monat (tournament_decklists_per_player_*.csv), siehe GLOB_RULES.
 
     # ── City League Japan: in summer break as of 2026-06; the four
     # "current" CSVs are intentionally header-only. Threshold 0
@@ -192,6 +190,9 @@ GLOB_RULES: tuple = (
     # hoert sie auf zu wachsen, sobald das Fenster vorbei ist.
     'online_api_cards_*.csv',
     'online_api_matchups_*.csv',
+    # SC-45 (04.11.2026): die Decklisten je Spieler, je Format und Monat —
+    # der Monolith lag mit Puebla/Danzig bei 106,5 MiB, GitHub nimmt 100.
+    'tournament_decklists_per_player_*_*.csv',
 )
 GLOB_MAX_LOSS = 0.10   # mehr als 10 % weniger Zeilen als in HEAD = Revert
 
@@ -212,7 +213,6 @@ GLOB_MAX_LOSS = 0.10   # mehr als 10 % weniger Zeilen als in HEAD = Revert
 # feste Untergrenze — die faengt den leeren Lauf, nicht die Rotation.
 KUMULATIV: tuple = (
     'player_continuity.csv',
-    'tournament_decklists_per_player.csv',
     'all_cards_database.csv',
     'all_cards_merged.csv',
     'price_data.csv',

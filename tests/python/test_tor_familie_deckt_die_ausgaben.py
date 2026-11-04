@@ -98,7 +98,7 @@ def test_der_wochenlauf_faehrt_das_tor_mit_zurueckrollen():
 
 def test_turnierdaten_gehen_nur_gemeinsam_zurueck():
     e = tor_rollback.einheiten([
-        "data/labs_tournament_decks_TEF-30C.csv", "data/tournament_decklists_per_player.csv",
+        "data/labs_tournament_decks_TEF-30C.csv", "data/tournament_decklists_per_player_TEF-30C_2026-10.csv",
         "data/player_continuity.csv", "data/deckempfehlung.json",
         "data/masterclass_live/dragapult.json", "data/price_data.csv"])
     gross = [x for x in e if len(x) > 1]

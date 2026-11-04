@@ -35,7 +35,7 @@ on:
         type: string
         default: ''
       resume:
-        description: 'Skip tournaments already in tournament_decklists_per_player.csv'
+        description: 'Skip tournaments already in the decklist store (tournament_decklists_per_player_*.csv)'
         type: boolean
         default: true
       max_tournaments:
@@ -127,7 +127,6 @@ jobs:
                    tournament_cards_data_overview.csv \
                    labs_tournament_id_overrides.json \
                    labs_tournament_decks.csv \
-                   tournament_decklists_per_player.csv \
                    player_continuity.csv \
                    all_cards_database.csv \
                    all_cards_database.json \
@@ -153,7 +152,17 @@ jobs:
           for f in data/labs_tournament_decks_*.csv; do
             cp "$f" "backend/core/data/$(basename "$f")"
           done
+          # SC-45 (04.11.2026): die Decklisten je Spieler liegen in data/
+          # als Auszuege je Format und Monat (der Monolith lag mit
+          # Puebla/Danzig bei 106,5 MiB, GitHub nimmt 100). Der Scraper
+          # kennt weiter nur den Monolithen in seinem Arbeitsordner —
+          # also Auszuege saeen und dort zusammensetzen.
+          for f in data/tournament_decklists_per_player_*.csv \
+                   data/tournament_decklists_per_player_verzeichnis.json; do
+            cp "$f" "backend/core/data/$(basename "$f")"
+          done
           shopt -u nullglob
+          python3 scripts/per_player_auszuege.py zusammensetzen backend/core/data
 
       - name: Run per-decklist scraper
         env:
@@ -295,12 +304,16 @@ jobs:
           fi
           exit 0  # never block — partial data is still data
 
-      - name: Copy output back to data/
+      - name: Auszuege je Format und Monat nach data/ (SC-45)
+        # Der Monolith bleibt im Arbeitsordner (unverfolgt). Nach data/
+        # gehen nur die Auszuege plus Verzeichnis; ein Auszug, dessen
+        # Schluessel es nicht mehr gibt, wird dort entfernt. Der
+        # Schrumpf-Waechter im Skript (Stopp unter 0,5) schuetzt die
+        # Historie vor einem halb gesaeten Arbeitsordner.
         run: |
           if [ -f backend/core/data/tournament_decklists_per_player.csv ]; then
-            cp backend/core/data/tournament_decklists_per_player.csv \
-               data/tournament_decklists_per_player.csv
-            wc -l data/tournament_decklists_per_player.csv
+            python3 scripts/per_player_auszuege.py aufteilen backend/core/data --ziel data
+            python3 scripts/per_player_auszuege.py stand data
           fi
 
       # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
@@ -369,8 +382,9 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
-          git add data/tournament_decklists_per_player.csv data/data_stand.json \
-                  data/datenluecken.json
+          # -A mit git-Muster: auch ein entfernter Auszug (Schluessel weg) geht mit
+          git add -A -- 'data/tournament_decklists_per_player_*'
+          git add data/data_stand.json data/datenluecken.json
           if git diff --cached --quiet; then
             echo "No changes — skipping push."
             echo "pushed=false" >> "$GITHUB_OUTPUT"

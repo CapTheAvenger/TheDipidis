@@ -97,7 +97,8 @@ describe('Wie viele Online-Listen gerade ohne Feldgroesse dastehen', () => {
     const GRUNDSTAND_ANTEIL = 305 / 1319;   // 23,1 %
     const OBERGRENZE        = 0.40;          // Grundstand + rund 17 pp Luft
 
-    const zeilen = lies('data/tournament_decklists_per_player.csv').split('\n');
+    // SC-45: Auszuege je Format und Monat, als ein Text
+    const zeilen = require(path.join(WURZEL, 'scripts', 'per-player-auszuege.js')).text(path.join(WURZEL, 'data')).split('\n');
     const kopf = zeilen[0].replace(/^﻿/, '').split(',');
     const iQ = kopf.indexOf('quelle');
     const iL = kopf.indexOf('limitless_tournament_id');

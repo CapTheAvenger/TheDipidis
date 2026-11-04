@@ -111,6 +111,7 @@ def test_jeder_scraper_ablauf_saet_und_holt_zurueck():
             r"cp\s+[\"']?data/", text) is not None
         holt = re.search(r"cp\s+[\"']?\$?\{?q\}?[\"']?\s+[\"']?data/", text) \
             or re.search(r"cp\s+[\"']?backend/core/data/", text) \
+            or "per_player_auszuege.py aufteilen backend/core/data --ziel data" in text \
             or "SYNC_PATTERNS" in text \
             or "prepare_card_data" in text
         if not saet:

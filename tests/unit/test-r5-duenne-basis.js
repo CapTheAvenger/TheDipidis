@@ -159,7 +159,8 @@ function csvZeilen(text) {
 
 /** Die Listen der Datei, mit demselben Schluessel wie _loadAll. */
 function listenAusDatei() {
-    const rows = csvZeilen(lies('data/tournament_decklists_per_player.csv'));
+    // SC-45: Auszuege je Format und Monat, als ein Text
+    const rows = csvZeilen(require(path.join(WURZEL, 'scripts', 'per-player-auszuege.js')).text(path.join(WURZEL, 'data')));
     const proListe = new Map();
     for (const r of rows) {
         const arch = (r.deck_archetype || '').trim();
@@ -186,7 +187,7 @@ describe('B2 — die Aufteilung wird gezaehlt, nicht abgeschrieben', () => {
 
     it('die Datei liefert ueberhaupt Listen (sonst besteht alles leer)', () => {
         assert.notEqual(listen.length, 0,
-            'data/tournament_decklists_per_player.csv ergibt keine einzige Liste — '
+            'data/tournament_decklists_per_player_*.csv ergibt keine einzige Liste — '
             + 'dann prueft dieser Block nichts');
         assert.equal(typeof FW.in_person_legal_date, 'string',
             'data/format_window.json fuehrt kein in_person_legal_date mehr');
@@ -224,7 +225,7 @@ describe('B2 — die Aufteilung wird gezaehlt, nicht abgeschrieben', () => {
            deepStrictEqual vergleicht sonst die Prototypen und faellt, obwohl
            die Zahlen gleich sind. */
         assert.deepEqual(JSON.parse(JSON.stringify(lage.verteilung)), sollVerteilung);
-        assert.equal(lage.quelle, 'data/tournament_decklists_per_player.csv');
+        assert.equal(lage.quelle, 'data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv');
         assert.deepEqual(Array.from(lage.felder), ['deck_archetype', 'tournament_date']);
         assert.equal(lage.min_date, grenze);
         assert.equal(lage.schwelle, M.MIN_WEIGHTED_LISTS);
@@ -291,7 +292,7 @@ describe('B2 — die Aufteilung wird gezaehlt, nicht abgeschrieben', () => {
             + String(lage.listen_gesamt)), b.hint);
         assert.ok(b.hint.includes('auf ' + lage.archetypen + ' Archetypen'), b.hint);
         assert.ok(b.hint.includes(lage.unter_schwelle + ' davon'), b.hint);
-        assert.ok(b.hint.includes('data/tournament_decklists_per_player.csv'),
+        assert.ok(b.hint.includes('data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv'),
             'die Datenquelle steht nicht im Text: ' + b.hint);
         assert.ok(b.hint.includes('deck_archetype') && b.hint.includes('tournament_date'),
             'die Felder stehen nicht im Text: ' + b.hint);
@@ -324,7 +325,7 @@ describe('B2 — die Aufteilung wird gezaehlt, nicht abgeschrieben', () => {
         const b = befund('de')._duenneBasisBefund({
             archetyp: 'X', n_lists: 1, schwelle: 3,
             lage: {
-                quelle: 'data/tournament_decklists_per_player.csv',
+                quelle: 'data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv',
                 felder: ['deck_archetype', 'tournament_date'],
                 min_date: '2026-07-31', schwelle: 3,
                 listen_gesamt: 9, listen_im_fenster: 7, archetypen: 3,

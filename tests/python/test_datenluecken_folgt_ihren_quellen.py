@@ -34,6 +34,11 @@ def quellen():
     namen = set(re.findall(r'_lies\("([^"]+)"\)', src))
     namen |= set(re.findall(r'"(champions_[a-z_]+\.json)"', src))
     namen |= set(re.findall(r'"([a-z_]+\.csv)"', src))
+    if "per_player_auszuege" in src:
+        # SC-45 (04.11.2026): die Decklisten je Spieler liegen als Auszuege
+        # data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv; die
+        # Ablaeufe committen sie als Muster 'data/tournament_decklists_per_player_*'
+        namen.add("tournament_decklists_per_player_")
     return namen | UEBER_DIE_KARTENDATENBANK
 
 
@@ -82,7 +87,7 @@ def _ablaeufe():
 
 def test_die_quellen_sind_gefunden():
     q = quellen()
-    assert "tournament_decklists_per_player.csv" in q and "champions_usage.json" in q, sorted(q)
+    assert "tournament_decklists_per_player_" in q and "champions_usage.json" in q, sorted(q)
 
 
 def test_wer_eine_quelle_schreibt_schreibt_das_inventar_mit():
@@ -100,7 +105,8 @@ jobs:
         run: python3 scripts/build_data_stand.py
       - name: Commit + push
         run: |
-          git add data/tournament_decklists_per_player.csv data/data_stand.json
+          git add -A -- 'data/tournament_decklists_per_player_*'
+          git add data/data_stand.json
           git commit -m x
 """
     assert len(befunde("probe.yml", alt)) == 2

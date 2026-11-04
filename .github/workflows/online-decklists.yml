@@ -103,14 +103,24 @@ jobs:
       - name: backend/core/data/ aus data/ saeen
         run: |
           mkdir -p backend/core/data
-          for f in tournament_decklists_per_player.csv \
-                   all_cards_database.csv \
+          for f in all_cards_database.csv \
                    all_cards_database.json \
                    japanese_cards_database.csv \
                    sets.json \
                    format_window.json; do
             if [ -f "data/$f" ]; then cp "data/$f" "backend/core/data/$f"; fi
           done
+          # SC-45 (04.11.2026): die Decklisten je Spieler liegen in data/ als
+          # Auszuege je Format und Monat (Monolith > 100 MiB). Der Scraper
+          # kennt nur den Monolithen in seinem Arbeitsordner: saeen, dort
+          # zusammensetzen, nach dem Lauf wieder aufteilen.
+          shopt -s nullglob
+          for f in data/tournament_decklists_per_player_*.csv \
+                   data/tournament_decklists_per_player_verzeichnis.json; do
+            cp "$f" "backend/core/data/$(basename "$f")"
+          done
+          shopt -u nullglob
+          python3 scripts/per_player_auszuege.py zusammensetzen backend/core/data
 
       - name: Online-Einzellisten holen
         env:
@@ -175,16 +185,16 @@ jobs:
             exit $rc
           fi
 
-      - name: Ergebnis nach data/ zurueckschreiben
+      - name: Ergebnis als Auszuege je Format und Monat nach data/ (SC-45)
         if: ${{ success() && inputs.trocken != true }}
         run: |
           if [ -f backend/core/data/tournament_decklists_per_player.csv ]; then
-            cp backend/core/data/tournament_decklists_per_player.csv \
-               data/tournament_decklists_per_player.csv
+            python3 scripts/per_player_auszuege.py aufteilen backend/core/data --ziel data
+            python3 scripts/per_player_auszuege.py stand data
           fi
 
       # DAS LUECKEN-INVENTAR (30.09.2026): scripts/datenluecken.py rechnet
-      # aus data/tournament_decklists_per_player.csv. Wer sie schreibt, schreibt das Inventar
+      # aus data/tournament_decklists_per_player_*.csv. Wer sie schreibt, schreibt das Inventar
       # mit — sonst urteilt data/datenluecken.json ueber den alten Stand und
       # das Tor ist zu (Online-Einzellisten #3, 30.09.2026).
       # tests/python/test_datenluecken_folgt_ihren_quellen.py haelt das fest.
@@ -249,8 +259,8 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           echo "pushed=false" >> "$GITHUB_OUTPUT"
-          git add data/tournament_decklists_per_player.csv data/data_stand.json \
-                  data/datenluecken.json
+          git add -A -- 'data/tournament_decklists_per_player_*'
+          git add data/data_stand.json data/datenluecken.json
           if git diff --cached --quiet; then
             echo "unveraendert — kein Push."
             exit 0

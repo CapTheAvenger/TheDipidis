@@ -51,10 +51,17 @@ const zahlKomma = new Function(ZAHL_KOMMA_SRC + '\nreturn zahlKomma;')();
 
 const WURZEL = path.join(__dirname, '..', '..');
 const D = (n) => path.join(WURZEL, 'data', n);
+// SC-45 (04.11.2026): die Decklisten je Spieler liegen als Auszuege je Format
+// und Monat; der Monolith ist weg. Der Motor liest das Verzeichnis und laedt
+// die Auszuege des laufenden Formats; hier wird der ganze Bestand als ein
+// Text gelesen.
+const ppa = require(path.join(WURZEL, 'scripts', 'per-player-auszuege.js'));
+const PER_PLAYER_TEXT = () => ppa.text(path.join(WURZEL, 'data'));
 
 // ── CSV-Leser fuer die Nachzaehlung ─────────────────────────────────
 function liesCsv(datei, trenner) {
-    const txt = fs.readFileSync(D(datei), 'utf8').replace(/^﻿/, '');
+    const txt = (datei === 'tournament_decklists_per_player.csv' ? PER_PLAYER_TEXT()
+        : fs.readFileSync(D(datei), 'utf8')).replace(/^﻿/, '');
     const res = Papa.parse(txt, {
         header: true, skipEmptyLines: true,
         delimiter: trenner || ',',
@@ -121,8 +128,7 @@ const ERHEBUNG = TURNIERE.map(erhebe);
 const ONLINE_FELD_AUS_ZEILE = (() => {
     const m = new Map();
     try {
-        const zeilen = fs.readFileSync(
-            D('tournament_decklists_per_player.csv'), 'utf8').split('\n');
+        const zeilen = PER_PLAYER_TEXT().split('\n');
         const kopf = zeilen[0].replace(/^﻿/, '').split(',');
         const iQ = kopf.indexOf('quelle');
         const iL = kopf.indexOf('limitless_tournament_id');
@@ -187,6 +193,13 @@ function ladeMotor(ersatz) {
         },
         fetch(url) {
             const rein = String(url).split('?')[0].replace(/^data\//, '');
+            // Ein Ersatz-Bestand kommt als EIN Auszug ohne Format herein:
+            // auszuegeWaehlen findet nichts zum Format und nimmt alle.
+            if (rein === 'tournament_decklists_per_player_verzeichnis.json'
+                && Object.prototype.hasOwnProperty.call(E, 'tournament_decklists_per_player.csv')) {
+                return Promise.resolve({ ok: true, json: () => Promise.resolve({ auszuege: [
+                    { schluessel: 'ERSATZ', meta: '', datei: 'tournament_decklists_per_player.csv' }] }) });
+            }
             return Promise.resolve({
                 ok: true,
                 json: () => Promise.resolve(JSON.parse(fs.readFileSync(D(rein), 'utf8'))),

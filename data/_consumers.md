@@ -536,6 +536,24 @@ genutzte Attacke ohne Eintrag, keine ohne Typ, kein Nachtrag ohne
 Nutzungsbeleg, Obergrenze und Leer-Abbruch im Bauer, und die
 CI-Reihenfolge in beiden Laeufen.
 
+## Decklisten je Spieler als Auszuege je Format und Monat (SC-45, 04.11.2026)
+
+Dateien: `tournament_decklists_per_player_<META>_<JJJJ-MM>.csv` (Waechter: `FRONTEND_PFLICHTSPALTEN` unter dem alten Namen, geprueft am laufenden Format).
+
+Der Monolith `tournament_decklists_per_player.csv` liegt nicht mehr im Repo: mit
+Puebla und Danzig war er 106,5 MiB gross, GitHub nimmt keine Datei ueber 100 MiB
+(Wochenlauf #196 verwarf deshalb den ganzen Wochenstand). Im Repo liegen
+Auszuege je Format und Monat des Turnierdatums plus das Verzeichnis
+`tournament_decklists_per_player_verzeichnis.json` (`auszuege[]` mit
+`schluessel`, `meta`, `monat`, `datei`, `zeilen`, `bytes`; `meta_keys`).
+Gleiche Spalten wie bisher. Leser: Python ueber `scripts/per_player_auszuege.py`
+(`zeilen()`, `pfade()`, `text()`), Node ueber `scripts/per-player-auszuege.js`,
+das Frontend (`js/deck-builder-consistency.js`) ueber das Verzeichnis — es laedt
+nur die Auszuege des laufenden Formats. Die Scraper arbeiten weiter auf dem
+Monolithen in `backend/core/data/`; die Ablaeufe setzen ihn vor dem Lauf aus den
+Auszuegen zusammen (`zusammensetzen`) und teilen ihn danach wieder auf
+(`aufteilen`, Schrumpf-Waechter: unter 0,5 der bisherigen Zeilen nichts schreiben).
+
 ## Zwei Spalten heissen `deck_slug` und meinen nicht dasselbe
 
 GEMESSEN am 10.09.2026. Beide Dateien fuehren eine Spalte dieses Namens:

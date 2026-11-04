@@ -196,7 +196,6 @@ jobs:
               limitless_online_decks_comparison.csv \
               limitless_online_decks_matchups.csv \
               player_continuity.csv \
-              tournament_decklists_per_player.csv \
               champions_replica_teams.json \
           ; do
               if [ -f "data/$f" ]; then
@@ -230,6 +229,23 @@ jobs:
                   echo "  seeded labs chunk: $(basename "$chunk")"
               fi
           done
+          # SC-45 (04.11.2026): die Decklisten je Spieler liegen in data/ als
+          # Auszuege je Format und Monat — der Monolith lag mit Puebla und
+          # Danzig bei 106,5 MiB, GitHub nimmt keine Datei ueber 100 MiB
+          # (Wochenlauf #196 verwarf deshalb den ganzen Wochenstand). Die
+          # beiden Scraper (Papier, Online) kennen weiter nur den Monolithen
+          # in backend/core/data/: Auszuege saeen und dort zusammensetzen;
+          # nach den Scrapern teilt "Decklisten je Spieler als Auszuege"
+          # ihn wieder auf. Ohne Saat liefe --resume gegen einen leeren
+          # Bestand und holte jedes Major neu.
+          for chunk in data/tournament_decklists_per_player_*.csv \
+                       data/tournament_decklists_per_player_verzeichnis.json; do
+              if [ -f "$chunk" ]; then
+                  cp "$chunk" "backend/core/data/$(basename "$chunk")"
+                  echo "  seeded per-player chunk: $(basename "$chunk")"
+              fi
+          done
+          python3 scripts/per_player_auszuege.py zusammensetzen backend/core/data
 
           # ZEITMARKE FUER DEN RUECKWEG (25.09.2026). Alles, was NACH
           # diesem Punkt in backend/core/data landet, hat DIESER Lauf
@@ -751,7 +767,7 @@ jobs:
           # hier absichtlich: dieser Lauf scraped sie nicht mehr (s. o.), also
           # darf er sie auch nicht zurueckschreiben. Sonst kopiert er den
           # geseedeten Stand ueber eine womoeglich neuere Datei.
-          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv tournament_decklists_per_player.csv; do
+          for f in labs_tournament_decks.csv labs_tournament_matchups.csv labs_tournaments.json player_continuity.csv; do
               if [ -f "backend/core/data/$f" ]; then
                   cp "backend/core/data/$f" "data/$f"
                   sz=$(stat -c%s "data/$f")
@@ -773,6 +789,27 @@ jobs:
               echo "  ✓ synced chunk $base ($sz B)"
           done
           shopt -u nullglob
+          exit 0
+
+      - name: Decklisten je Spieler als Auszuege nach data/ (SC-45)
+        # Der Monolith bleibt im Arbeitsordner (unverfolgt, .gitignore).
+        # Nach data/ gehen nur die Auszuege je Format und Monat plus
+        # Verzeichnis; ein Auszug ohne Schluessel im Monolithen wird dort
+        # entfernt. Schrumpf-Waechter im Skript: unter 0,5 der bisherigen
+        # Zeilen nichts schreiben (rc 2, sichtbar) — ein halb gesaeter
+        # Arbeitsordner darf die Historie nicht ueberschreiben.
+        run: |
+          set +e
+          if [ -f backend/core/data/tournament_decklists_per_player.csv ]; then
+              python3 scripts/per_player_auszuege.py aufteilen backend/core/data --ziel data
+              rc=$?
+              if [ "$rc" -ne 0 ]; then
+                  echo "::warning::per_player_auszuege aufteilen exited with $rc — Auszuege in data/ unveraendert"
+              fi
+              python3 scripts/per_player_auszuege.py stand data
+          else
+              echo "::warning::backend/core/data/tournament_decklists_per_player.csv fehlt — Auszuege in data/ unveraendert"
+          fi
           exit 0
 
       # Die drei Top-Cut-Quoten stehen im Scraper-Schema, werden von der
@@ -939,7 +976,8 @@ jobs:
           python3 scripts/repariere_ace_spec.py --schreiben
 
       - name: Kartentyp im Decklistenbestand nachziehen
-        # WOZU: data/tournament_decklists_per_player.csv fuehrt eine
+        # WOZU: data/tournament_decklists_per_player_*.csv (SC-45: Auszuege
+        # je Format und Monat, alle nacheinander) fuehrt eine
         # Spalte `type` (Basic, Item, Supporter …). Sie kommt aus der
         # Kartendatenbank; ein Druck, den die Datenbank nicht kennt,
         # bleibt leer.

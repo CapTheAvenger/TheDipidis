@@ -18,8 +18,11 @@ function schneide(q, name) {
     }
     throw new Error('Klammer offen: ' + name);
 }
+const UTILS = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'app-utils.js'), 'utf8');
 const elemente = /var CITY_LEAGUE_JP_ELEMENTE = [^;]*;/.exec(JS)[0];
 const ctx = vm.createContext({ window: {}, Object, Math, String, Number, isFinite, parseFloat, parseInt, Array });
+const nummern = /const LEGENDARY_STADIEN_NUMMERN = [^;]*;/.exec(UTILS)[0].replace('const ', 'var ');
+vm.runInContext(nummern + '\n' + ['istLegendaryStadion', 'legendaryFaktor'].map((n) => schneide(UTILS, n)).join('\n'), ctx);
 vm.runInContext(elemente + '\n' + ['cityLeagueJpDruck', 'cityLeagueJpMaxProNummer', '_clZahl', 'cityLeagueJpDex', 'cityLeagueJpElement',
     'cityLeagueJpKategorie', 'cityLeagueJpSortieren', 'cityLeagueJpKartenBerechnen', 'cityLeagueJpListeText'].map((n) => schneide(JS, n)).join('\n'), ctx);
 const JP = (n) => 'https://x/tpc/M6/M6_' + n + '_R_JP_LG.png';
@@ -39,12 +42,45 @@ describe('UI-159 Legendary-Stadien: je Seite hoechstens 2', () => {
         assert.match(text, /2× Legendary Lava Cave \(M6 76\)/);
         assert.doesNotMatch(text, /4×/);
     });
-    it('andere Karten behalten ihre Menge (4× Stadion ohne „Legendary“, 4× Pokémon)', () => {
-        assert.equal(ctx.cityLeagueJpMaxProNummer('Gym', 'Stadium', 4), 4);
-        assert.equal(ctx.cityLeagueJpMaxProNummer('Talonflame ex', 'Stage 2', 4), 4);
-        assert.equal(ctx.cityLeagueJpMaxProNummer('Legendary Lava Cave', 'Stadium', 2), 1);
+    it('erkannt wird am Set-Code, nicht am Namen: gleicher Name bei anderer Nummer bleibt bei 4', () => {
+        assert.equal(ctx.cityLeagueJpMaxProNummer('M6', '75', 4), 2);
+        assert.equal(ctx.cityLeagueJpMaxProNummer('M6', '076', 4), 2);
+        assert.equal(ctx.cityLeagueJpMaxProNummer('M6', '70', 4), 4);
+        assert.equal(ctx.cityLeagueJpMaxProNummer('M5', '75', 4), 4);
+        const erg = ctx.cityLeagueJpKartenBerechnen([z({ card_name: 'Anderer Name', set_number: '76', image_url: JP(76) })]);
+        assert.equal(erg.karten[0].maxKopien, 2);
     });
-    it('Pokémon, die „Legendary“ im Namen tragen, werden nicht gedeckelt', () => {
-        assert.equal(ctx.cityLeagueJpMaxProNummer('Legendary Pokemon X', 'Basic', 4), 4);
+    it('fuehren die Daten schon je Nummer (max 2), bleibt es bei 2', () => {
+        assert.equal(ctx.cityLeagueJpMaxProNummer('M6', '75', 2), 2);
+        assert.equal(ctx.legendaryFaktor('M6', '75', 2), 1);
+        assert.equal(ctx.legendaryFaktor('M6', '75', 4), 0.5);
+    });
+    it('Pokémon mit „Legendary“ im Namen werden nicht gedeckelt', () => {
+        assert.equal(ctx.cityLeagueJpMaxProNummer('M5', '12', 4), 4);
+    });
+    it('die Nummernliste stimmt mit der Kartendatenbank: alle sechs sind Stadien namens „Legendary …“, paarweise gleicher Name', () => {
+        const csv = fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'japanese_cards_database.csv'), 'utf8').split(/\r?\n/);
+        const kopf = csv[0].split(',');
+        const i = (n) => kopf.indexOf(n);
+        const zeilen = csv.slice(1).map((l) => l.split(','));
+        const liste = /LEGENDARY_STADIEN_NUMMERN = \{ M6: \[([^\]]*)\]/.exec(UTILS)[1].match(/\d+/g);
+        assert.ok(liste.length >= 6);
+        const namen = {};
+        liste.forEach((nr) => {
+            const r = zeilen.find((x) => x[i('set')] === 'M6' && x[i('number')] === nr);
+            assert.ok(r, 'M6 ' + nr + ' fehlt in der Kartendatenbank');
+            assert.match(r[i('name')], /^Legendary /);
+            assert.match(r[i('type')], /Stadium/);
+            namen[nr] = r[i('name')];
+        });
+        for (let k = 0; k < liste.length; k += 2) assert.equal(namen[liste[k]], namen[liste[k + 1]], 'Paar ' + liste[k]);
+    });
+    it('die Deck-Uebersicht (Abzeichen und Ø) nutzt den Faktor — Text, weil die Funktion zu gross zum Ausfuehren ist', () => {
+        const q = JS.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+        assert.ok(q.length > JS.length * 0.3);
+        assert.match(q, /legendaryFaktor\(setCode, setNumber, rawMaxCount\)/);
+        assert.match(q, /Math\.ceil\(rawMaxCount \* legendaryFaktor1\)/);
+        assert.equal((q.match(/avgCount(?:Overall|InUsed)Raw \* legendaryFaktor1/g) || []).length, 2);
+        assert.match(q, /\* legendaryFaktor0/);
     });
 });

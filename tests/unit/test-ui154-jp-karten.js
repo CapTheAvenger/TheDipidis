@@ -33,6 +33,9 @@ function laden(quelle) {
         escapeHtml: (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') });
     vm.runInContext("var CITY_LEAGUE_JP_ELEMENTE = ['Grass','Fire','Water','Lightning','Psychic','Fighting','Darkness','Metal','Dragon','Colorless'];\n" + ['cityLeagueJpDruck', 'cityLeagueJpMaxProNummer', '_clZahl', 'cityLeagueJpDex', 'cityLeagueJpElement', 'cityLeagueJpKategorie', 'cityLeagueJpSortieren', 'cityLeagueJpKartenBerechnen', 'cityLeagueJpListeText', 'cityLeagueJpKartenHtml']
         .map((n) => schneide(quelle, n)).join('\n'), ctx);
+    const UT = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'app-utils.js'), 'utf8');
+    vm.runInContext(/const LEGENDARY_STADIEN_NUMMERN = [^;]*;/.exec(UT)[0].replace('const ', 'var ') + '\n' +
+        ['istLegendaryStadion', 'legendaryFaktor'].map((n) => schneide(UT, n)).join('\n'), ctx);
     return ctx;
 }
 const JP = 'https://x/tpc/M6/M6_62_R_JP_LG.png', EN = 'https://x/tpci/TWM/TWM_1_R_EN_LG.png';

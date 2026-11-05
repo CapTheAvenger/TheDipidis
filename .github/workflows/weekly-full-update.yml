@@ -1347,6 +1347,22 @@ jobs:
             git checkout -- data/showdown_vorlagen.json 2>/dev/null
             echo "::warning::Showdown-Vorlagen nicht erzeugt (Code $rc) — es bleibt der Stand des letzten Laufs"
           fi
+          # Japan-Vorlagen (05.11.2026, Bestellung Hausi): Tier 1–3 des Japan-
+          # Metas wie die Seite „City League“. Danach die Karten, die es nur in
+          # Japan gibt — inoffizielle Uebersetzung von Limitless (Entscheidung
+          # Hausi), jede Karte wird nur einmal geholt.
+          node scripts/showdown_vorlagen_jp.js
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            git checkout -- data/showdown_vorlagen_jp.json 2>/dev/null
+            echo "::warning::Japan-Vorlagen nicht erzeugt (Code $rc) — es bleibt der Stand des letzten Laufs"
+          fi
+          python3 scripts/showdown_jp_karten.py
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            git checkout -- data/showdown_jp_karten.json 2>/dev/null
+            echo "::warning::JP-Karten fuer Showdown nicht geholt (Code $rc) — es bleibt der Stand des letzten Laufs"
+          fi
           exit 0
 
       # SC-39 (17.10.2026, aus SC-34): hier lief bis heute ein eigenes Tor ohne

@@ -1,0 +1,146 @@
+{
+ "_meta": {
+  "beschreibung": "Karten ohne internationalen Druck fuer TCG Showdown, inoffizielle englische Uebersetzung von limitlesstcg.com (cards/jp, translate=en). Erzeugt von scripts/showdown_jp_karten.py.",
+  "quelle": "https://limitlesstcg.com/cards/jp/<SET>/<NR>?translate=en",
+  "anzahl": 6,
+  "fehlend": []
+ },
+ "karten": [
+  {
+   "id": "jp-m6-mega-rayquaza-ex-58",
+   "name": "Mega Rayquaza ex",
+   "setCode": "M6",
+   "number": "58",
+   "imageUrl": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M6/M6_58_R_JP_LG.png",
+   "jp": true,
+   "inoffiziell": true,
+   "cardType": "pokemon",
+   "hp": 280,
+   "energyType": "colorless",
+   "stage": 0,
+   "attacks": [
+    {
+     "name": "Storm Emeralda",
+     "cost": "RL*",
+     "damage": 50,
+     "damageText": "50×",
+     "effect": "This attack does 50 damage for each Fire Energy and Lightning Energy attached to all of your Pokémon.",
+     "manual": true
+    }
+   ],
+   "ability": {
+    "name": "Roar of the Ruler",
+    "effect": "You may use this Ability when you play this Pokémon from your hand onto your Bench. Look at the top 4 cards of your deck and attach up to 1 Basic Energy card you find there to this Pokémon. Shuffle the other cards and put them on the bottom of your deck.",
+    "manual": true
+   },
+   "weakness": "lightning",
+   "resistance": "fighting",
+   "retreatCost": "**",
+   "mechanic": "ex",
+   "mega": true
+  },
+  {
+   "id": "jp-m6-talonflame-ex-62",
+   "name": "Talonflame ex",
+   "setCode": "M6",
+   "number": "62",
+   "imageUrl": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M6/M6_62_R_JP_LG.png",
+   "jp": true,
+   "inoffiziell": true,
+   "cardType": "pokemon",
+   "hp": 280,
+   "energyType": "colorless",
+   "stage": 2,
+   "attacks": [
+    {
+     "name": "Talon Hunt",
+     "cost": "**",
+     "damage": 150,
+     "effect": "You may search your deck for up to 2 cards and put them into your hand. Then, shuffle your deck.",
+     "manual": true
+    }
+   ],
+   "evolvesFrom": "Fletchinder",
+   "ability": {
+    "name": "Exciting Dive",
+    "effect": "If this Pokémon is in your hand and you have any Colorless Mega Evolution Pokémon ex in play, you may use this Ability. Put this Pokémon onto your Bench.",
+    "manual": true
+   },
+   "weakness": "lightning",
+   "resistance": "fighting",
+   "retreatCost": "",
+   "mechanic": "ex"
+  },
+  {
+   "id": "jp-m6-adventuring-lantern-64",
+   "name": "Adventuring Lantern",
+   "setCode": "M6",
+   "number": "64",
+   "imageUrl": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M6/M6_64_R_JP_LG.png",
+   "jp": true,
+   "inoffiziell": true,
+   "cardType": "trainer",
+   "trainerType": "item",
+   "effect": "Search your deck for a Basic Fire Energy card and a Basic Lightning Energy card and put them into your hand. Then, shuffle your deck.",
+   "manual": true
+  },
+  {
+   "id": "jp-m6-legendary-lava-cave-75",
+   "name": "Legendary Lava Cave",
+   "setCode": "M6",
+   "number": "75",
+   "imageUrl": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M6/M6_75_R_JP_LG.png",
+   "jp": true,
+   "inoffiziell": true,
+   "cardType": "trainer",
+   "trainerType": "stadium",
+   "effect": "You must play 2 different Legendary Lava Cave cards at once. Both cards act as a single Stadium while in play. Evolution Pokémon in play have no Abilities.",
+   "manual": true
+  },
+  {
+   "id": "jp-mem-smoliv-6",
+   "name": "Smoliv",
+   "setCode": "MEM",
+   "number": "6",
+   "imageUrl": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/MEM/MEM_6_R_JP_LG.png",
+   "jp": true,
+   "inoffiziell": true,
+   "cardType": "pokemon",
+   "hp": 60,
+   "energyType": "grass",
+   "stage": 0,
+   "attacks": [
+    {
+     "name": "Spray Fluid",
+     "cost": "G",
+     "damage": 20
+    }
+   ],
+   "weakness": "fire",
+   "retreatCost": "*"
+  },
+  {
+   "id": "jp-mem-dolliv-7",
+   "name": "Dolliv",
+   "setCode": "MEM",
+   "number": "7",
+   "imageUrl": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/MEM/MEM_7_R_JP_LG.png",
+   "jp": true,
+   "inoffiziell": true,
+   "cardType": "pokemon",
+   "hp": 90,
+   "energyType": "grass",
+   "stage": 1,
+   "attacks": [
+    {
+     "name": "Leaf Step",
+     "cost": "G",
+     "damage": 40
+    }
+   ],
+   "evolvesFrom": "Smoliv",
+   "weakness": "fire",
+   "retreatCost": "*"
+  }
+ ]
+}

@@ -4,10 +4,10 @@
   "quelle": "https://leekduck.com/shiny/pms.json",
   "quelle_name": "LeekDuck Shiny Checklist",
   "vom_betreiber_benannt": "2026-09-09",
-  "stand": "2026/11/04",
+  "stand": "2026/11/05",
   "lesart_treffer": "Shiny ist veroeffentlicht und damit fangbar",
   "lesart_kein_treffer": "kein veroeffentlichtes Shiny zum Stand der Quelle — anders als bei der Artenliste ist das hier belastbar: jeder Eintrag traegt ein Datum, und die Datei wird gepflegt.",
-  "angekuendigt_uebersprungen": 5,
+  "angekuendigt_uebersprungen": 1,
   "angekuendigt_hinweis": "Eintraege mit einem Veroeffentlichungsdatum in der Zukunft. Sie stehen in der Quelle, sind aber noch nicht fangbar.",
   "eintraege_quelle": 1497,
   "grundformen": 861,
@@ -15,7 +15,7 @@
   "regionalformen": {
    "alola": 18,
    "galar": 18,
-   "hisui": 12,
+   "hisui": 14,
    "paldea": 2
   }
  },
@@ -994,6 +994,8 @@
    503,
    549,
    628,
+   705,
+   706,
    713,
    724
   ],

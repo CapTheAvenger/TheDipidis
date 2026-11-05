@@ -141,17 +141,17 @@
   "champions_type_chart.json": 183,
   "cm_expansions.csv": 788,
   "japanese_cards_database.csv": 1076,
-  "online_api_archetypes.csv": 24450,
-  "online_api_cards_TEF-30C.csv": 175320,
-  "online_api_matchups_TEF-30C.csv": 53449,
-  "online_api_tournaments.csv": 559,
+  "online_api_archetypes.csv": 24488,
+  "online_api_cards_TEF-30C.csv": 176465,
+  "online_api_matchups_TEF-30C.csv": 53769,
+  "online_api_tournaments.csv": 560,
   "opgg_champions_moves.json": 2072,
   "pokemon_go_liste.json": 981,
-  "pokemon_go_shiny.json": 1004,
+  "pokemon_go_shiny.json": 1006,
   "price_data.csv": 20601,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-11-04 09:34 UTC",
+ "generated": "2026-11-05 09:34 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -164,7 +164,7 @@
  },
  "kartentext_de_gefuellt": 14638,
  "price_integrity": {
-  "duplicate_idproducts": 63,
+  "duplicate_idproducts": 62,
   "match_methods": {
    "live-verified": 5802,
    "manual-pin": 78,

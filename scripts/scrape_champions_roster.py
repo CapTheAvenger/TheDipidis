@@ -68,6 +68,19 @@ POKEDEX_PATH = os.path.join(ROOT, "data", "champions_pokedex.json")
 # zweites Mal angelegt. Dieselben zwei Faelle kennt auch
 # js/app-side-quest-pokedex.js (TEAM_AUSNAHMEN) — dort fuer die
 # Auftrittszaehlung, hier fuer die Kaderergaenzung.
+#
+# VP-01 (06.11.2026): dieselbe Regel gilt fuer die KADERQUELLE. Seit dem
+# 27.10.2026 listet pokebase.app `floette-eternal` statt `floette`
+# (gemessen am Kader von Lauf 41971828519: base_count 328 wie vorher,
+# Floette-Eternal neu, Floette weg). Ohne diese Abbildung stand die
+# Grundform von Floette-Mega nicht mehr im Kader, aus_mega() legte
+# "Floette" ein zweites Mal an — und die Zusicherung „die ergaenzten
+# Grundformen sind BELEGT" fand fuer "floette" keine Nutzungszeile
+# (championsbattledata fuehrt sie als floette-eternal). Zehn
+# Usage-Laeufe und zehn Replica-Laeufe rollten deshalb vom 27.10. bis
+# 05.11. die ganze Champions-Familie zurueck, die Seite stand auf dem
+# 26.10. Die Abbildung greift jetzt in slug_to_smogon(), also fuer
+# jeden Namen, der aus einem Slug entsteht.
 TEAM_UNTER_GRUNDFORM = {
     "Floette-Eternal": "Floette",
     "Maushold-Four": "Maushold",
@@ -361,7 +374,52 @@ def slug_to_smogon(slug):
     out = [parts[0].capitalize()]
     for p in parts[1:]:
         out.append("o" if p == "o" else p.capitalize())
-    return "-".join(out)
+    name = "-".join(out)
+    # Eine Form, die der Pokedex unter der Grundform fuehrt, heisst auch
+    # aus der Kaderquelle so (VP-01, siehe TEAM_UNTER_GRUNDFORM).
+    return TEAM_UNTER_GRUNDFORM.get(name, name)
+
+
+def kader_aus_slugs(slugs, smogon):
+    """pokebase-Slugs -> Smogon-Namen mit Basiswerten (der Kader).
+
+    Doppelte faellt die Liste zusammen: seit pokebase `floette-eternal`
+    fuehrt (27.10.2026), bildet slug_to_smogon() den Slug auf die
+    Grundform "Floette" ab — eine Grundform, die so schon im Kader steht,
+    kommt nicht zweimal herein.
+    """
+    base = []
+    for s in slugs:
+        if s.startswith("page-"):        # JS chunk filename, not a Pokémon
+            continue
+        nm = slug_to_smogon(s)
+        if nm in base:
+            continue
+        if nm in smogon and "baseStats" in smogon[nm]:
+            base.append(nm)
+    return base
+
+
+def grundformen_aus_megas(schluessel, vorhanden, smogon):
+    """OHNE GRUNDFORM KEINE MEGA-FORM — die Ergaenzung (siehe main()).
+
+    Gibt (aus_mega, ohne_werte) zurueck: Grundformen, die nur ueber ihre
+    Mega-Form im Kader stehen und Smogon-Werte haben, und die Paare
+    (Mega, Grundform), fuer die es keine Werte gibt.
+    """
+    aus_mega = []
+    ohne_werte = []
+    for k in schluessel:
+        if "-Mega" not in k:
+            continue
+        grundform = k.split("-Mega")[0]
+        if grundform in vorhanden or grundform in aus_mega:
+            continue
+        if grundform in smogon and "baseStats" in smogon[grundform]:
+            aus_mega.append(grundform)
+        else:
+            ohne_werte.append((k, grundform))
+    return aus_mega, ohne_werte
 
 
 def main():
@@ -374,13 +432,7 @@ def main():
         print(f"ERROR fetching pokebase: {e}", file=sys.stderr)
         return 1
 
-    base = []
-    for s in slugs:
-        if s.startswith("page-"):        # JS chunk filename, not a Pokémon
-            continue
-        nm = slug_to_smogon(s)
-        if nm in smogon and "baseStats" in smogon[nm]:
-            base.append(nm)
+    base = kader_aus_slugs(slugs, smogon)
     if len(base) < 40:
         print(f"ERROR: only {len(base)} base species parsed — refusing to overwrite",
               file=sys.stderr)
@@ -422,18 +474,7 @@ def main():
     # (CLAUDE.md, "Eine Regel gehoert an ihre Bedingung"). Eine Handliste
     # waere in einer Woche falsch — in beide Richtungen.
     vorhanden = set(base) | set(megas) | set(formen)
-    aus_mega = []
-    ohne_werte = []
-    for k in megas + base:
-        if "-Mega" not in k:
-            continue
-        grundform = k.split("-Mega")[0]
-        if grundform in vorhanden or grundform in aus_mega:
-            continue
-        if grundform in smogon and "baseStats" in smogon[grundform]:
-            aus_mega.append(grundform)
-        else:
-            ohne_werte.append((k, grundform))
+    aus_mega, ohne_werte = grundformen_aus_megas(megas + base, vorhanden, smogon)
     if aus_mega:
         print("Grundformen aus vorhandenen Mega-Formen ergaenzt (%d): %s"
               % (len(aus_mega), ", ".join(sorted(aus_mega))))

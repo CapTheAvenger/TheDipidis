@@ -6496,7 +6496,7 @@ details[open] > .tier-trending-summary::after {
     max-height: min(88vh, 820px);
     overflow-y: auto;
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-    border-radius: 999px 999px 0 0;
+    border-radius: 24px 24px 0 0;
     padding: 16px 16px 18px;
     box-shadow: 0 -10px 38px rgba(15, 23, 42, 0.25);
 }
@@ -8058,7 +8058,7 @@ details[open] > .tier-trending-summary::after {
 
 @media (min-width: 760px) {
     .battle-journal-sheet {
-        border-radius: 999px;
+        border-radius: 24px;
         margin-bottom: 18px;
     }
 
@@ -8091,7 +8091,7 @@ details[open] > .tier-trending-summary::after {
     .battle-journal-sheet {
         width: 100%;
         max-height: 92vh;
-        border-radius: 999px 999px 0 0;
+        border-radius: 24px 24px 0 0;
         padding-bottom: calc(20px + env(safe-area-inset-bottom));
     }
 

@@ -4122,12 +4122,13 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 const resolvedPercentage = Number.isFinite(rawPercentage) && rawPercentage > 0
                     ? rawPercentage
                     : (totalDecksInArchetype > 0 && decksWithCard > 0 ? (decksWithCard / totalDecksInArchetype) * 100 : 0);
-                const avgCountOverallValue = Number.isFinite(avgCountOverallRaw) && avgCountOverallRaw > 0
+                const legendaryFaktor0 = legendaryFaktor(setCode, setNumber, parseInt(card.max_count) || 0);
+                const avgCountOverallValue = (Number.isFinite(avgCountOverallRaw) && avgCountOverallRaw > 0
                     ? avgCountOverallRaw
-                    : (totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype) : 0);
-                const avgCountInUsedValue = Number.isFinite(avgCountInUsedRaw) && avgCountInUsedRaw > 0
+                    : (totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype) : 0)) * legendaryFaktor0;
+                const avgCountInUsedValue = (Number.isFinite(avgCountInUsedRaw) && avgCountInUsedRaw > 0
                     ? avgCountInUsedRaw
-                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
+                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0)) * legendaryFaktor0;
 
                 const percentage = zahlKomma(Math.min(100, Math.max(0, resolvedPercentage)));
                 const avgCountOverall = Math.max(0, avgCountOverallValue).toFixed(2).replace('.', ',');
@@ -4374,8 +4375,9 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                 const totalCount = safeParseFloat(card.total_count || 0);
                 const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
                 // finalMaxCount = highest copies of this card (across all int prints) used in any single deck
+                const legendaryFaktor1 = legendaryFaktor(setCode, setNumber, rawMaxCount);
                 const finalMaxCount = rawMaxCount > 0
-                    ? Math.min(legalMaxCopies, rawMaxCount)
+                    ? Math.min(legalMaxCopies, Math.ceil(rawMaxCount * legendaryFaktor1))
                     : 0;
                 
                 // CRITICAL: ALWAYS show green marker ONLY on the exact version that is in the deck
@@ -4416,11 +4418,11 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
                     ? rawPercentage
                     : (totalDecksInArchetype > 0 && decksWithCard > 0 ? (decksWithCard / totalDecksInArchetype) * 100 : 0);
                 const avgCountOverallValue = Number.isFinite(avgCountOverallRaw) && avgCountOverallRaw > 0
-                    ? avgCountOverallRaw
-                    : (totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype) : 0);
+                    ? avgCountOverallRaw * legendaryFaktor1
+                    : (totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype) * legendaryFaktor1 : 0);
                 const avgCountInUsedValue = Number.isFinite(avgCountInUsedRaw) && avgCountInUsedRaw > 0
-                    ? avgCountInUsedRaw
-                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
+                    ? avgCountInUsedRaw * legendaryFaktor1
+                    : (decksWithCard > 0 ? (totalCount / decksWithCard) * legendaryFaktor1 : 0);
 
                 // finalMaxCount already declared above, do not redeclare here.
                 const finalAvgUsed = Math.min(legalMaxCopies, avgCountInUsedValue);
@@ -5567,11 +5569,8 @@ function _markeHinweis(schnittGesamt, schnittEnthalten, maximum, inListen, liste
    die Gesamtmenge nach NAMEN (4) bei genau EINER der beiden Nummern — gemessen 02.11.2026: in
    179 Archetyp-/Turnier-Gruppen kommt nie 75 und 76 zusammen vor, max_count ist 4. „bis 4×“ je
    Nummer ist dort falsch; je Nummer sind es hoechstens 2 (4 nach Namen = 2 + 2). */
-function cityLeagueJpMaxProNummer(name, typ, max) {
-    if (/^legendary\s/i.test(String(name || '')) && /stadium/i.test(String(typ || ''))) {
-        return Math.min(2, Math.ceil(max / 2));
-    }
-    return max;
+function cityLeagueJpMaxProNummer(setCode, setNumber, max) {
+    return Math.min(max, Math.ceil(max * legendaryFaktor(setCode, setNumber, max)));
 }
 function cityLeagueJpDruck(zeile) {
     return /_JP_/.test(String((zeile && zeile.image_url) || ''));
@@ -5600,7 +5599,7 @@ function cityLeagueJpKartenBerechnen(zeilen) {
         }
         k.archetypen[r.archetype] = true;
         k.listen += _clZahl(r.deck_inclusion_count);
-        k.maxKopien = Math.max(k.maxKopien, cityLeagueJpMaxProNummer(r.card_name, r.type, _clZahl(r.max_count)));
+        k.maxKopien = Math.max(k.maxKopien, cityLeagueJpMaxProNummer(r.set_code, r.set_number, _clZahl(r.max_count)));
     });
     var gesamt = Object.keys(gruppen).reduce(function (a, g) { return a + gruppen[g]; }, 0);
     var liste = Object.keys(karten).map(function (ck) {

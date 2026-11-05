@@ -629,6 +629,19 @@ function showTableSkeleton(containerOrId, opts) {
             }, 0);
         }
 
+        /* UI-160 (Hausi, 05.11.2026): Legendary-Stadien bestehen aus zwei Haelften; man spielt sie nur
+           zusammen, also von JEDER Nummer hoechstens 2. Erkannt wird die Haelfte an (Set, Nummer), nie am
+           Namen. Die Japan-Daten fuehren die Gesamtmenge nach Namen (bis 4) bei EINER Nummer; je Nummer
+           gilt dann die Haelfte. Fuehren die Daten schon je Nummer (max <= 2), bleibt der Wert. */
+        const LEGENDARY_STADIEN_NUMMERN = { M6: ['71', '72', '73', '74', '75', '76'] };
+        function istLegendaryStadion(setCode, setNumber) {
+            const liste = LEGENDARY_STADIEN_NUMMERN[String(setCode || '').trim().toUpperCase()];
+            return !!liste && liste.indexOf(String(setNumber == null ? '' : setNumber).trim().replace(/^0+(?=\d)/, '')) !== -1;
+        }
+        function legendaryFaktor(setCode, setNumber, rawMax) {
+            return istLegendaryStadion(setCode, setNumber) && Number(rawMax) > 2 ? 0.5 : 1;
+        }
+
         function getLegalMaxCopies(cardNameOrCard, fallbackCard = null) {
             const cardLike = (typeof cardNameOrCard === 'string')
                 ? (fallbackCard || { card_name: cardNameOrCard, name: cardNameOrCard })

@@ -1,20 +1,146 @@
 {
   "_meta": {
-    "last_updated": "2026-10-26",
+    "last_updated": "2026-11-06",
     "window_days": 14,
-    "window_start": "2026-10-12",
-    "window_end": "2026-10-26",
+    "window_start": "2026-10-23",
+    "window_end": "2026-11-06",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
-    "content_to": "2026-10-22",
-    "samples_outside_window": 174,
-    "team_count": 82,
-    "teams_with_samples": 81,
-    "sample_count": 492,
-    "species_count": 80,
+    "content_to": "2026-11-03",
+    "samples_outside_window": 210,
+    "team_count": 66,
+    "teams_with_samples": 64,
+    "sample_count": 390,
+    "species_count": 63,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
   "samples": [
+    {
+      "species": "Tyranitar",
+      "evs": "18 HP / 16 Atk / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "1V4XVBR3Y6"
+    },
+    {
+      "species": "Excadrill",
+      "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "1V4XVBR3Y6"
+    },
+    {
+      "species": "Milotic",
+      "evs": "32 HP / 17 Def / 8 SpA / 5 SpD / 4 Spe",
+      "nature": "Calm",
+      "date": "2 Nov 2026",
+      "replica": "1V4XVBR3Y6"
+    },
+    {
+      "species": "Sinistcha",
+      "evs": "29 HP / 14 Def / 23 SpD",
+      "nature": "Bold",
+      "date": "2 Nov 2026",
+      "replica": "1V4XVBR3Y6"
+    },
+    {
+      "species": "Staraptor",
+      "evs": "29 HP / 1 Atk / 4 SpD / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "1V4XVBR3Y6"
+    },
+    {
+      "species": "Gholdengo",
+      "evs": "27 HP / 12 Def / 17 SpD / 10 Spe",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "1V4XVBR3Y6"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "16 HP / 20 Atk / 30 Spe",
+      "nature": "Adamant",
+      "date": "25 Oct 2026",
+      "replica": "0QK4AB237U"
+    },
+    {
+      "species": "Whimsicott",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "25 Oct 2026",
+      "replica": "0QK4AB237U"
+    },
+    {
+      "species": "Charizard",
+      "evs": "20 HP / 32 Def / 1 SpA / 13 Spe",
+      "nature": "Modest",
+      "date": "25 Oct 2026",
+      "replica": "0QK4AB237U"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "32 HP / 25 Atk / 8 Def / 1 SpD",
+      "nature": "Adamant",
+      "date": "25 Oct 2026",
+      "replica": "0QK4AB237U"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "6 HP / 28 Atk / 32 Spe",
+      "nature": "Jolly",
+      "date": "25 Oct 2026",
+      "replica": "0QK4AB237U"
+    },
+    {
+      "species": "Froslass",
+      "evs": "32 HP / 2 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "25 Oct 2026",
+      "replica": "0QK4AB237U"
+    },
+    {
+      "species": "Salamence",
+      "evs": "21 HP / 20 SpA / 2 SpD / 23 Spe",
+      "nature": "Modest",
+      "date": "24 Oct 2026",
+      "replica": "3NY791SDCM"
+    },
+    {
+      "species": "Floette-Eternal",
+      "evs": "27 HP / 22 Def / 15 SpA / 2 Spe",
+      "nature": "Modest",
+      "date": "24 Oct 2026",
+      "replica": "3NY791SDCM"
+    },
+    {
+      "species": "Rillaboom",
+      "evs": "24 HP / 32 Atk / 1 Def / 1 SpD / 8 Spe",
+      "nature": "Adamant",
+      "date": "24 Oct 2026",
+      "replica": "3NY791SDCM"
+    },
+    {
+      "species": "Incineroar",
+      "evs": "30 HP / 13 Def / 21 SpD / 2 Spe",
+      "nature": "Careful",
+      "date": "24 Oct 2026",
+      "replica": "3NY791SDCM"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "28 HP / 14 Atk / 1 Def / 15 SpD / 8 Spe",
+      "nature": "Jolly",
+      "date": "24 Oct 2026",
+      "replica": "3NY791SDCM"
+    },
+    {
+      "species": "Basculegion",
+      "evs": "32 Atk / 2 Def / 32 Spe",
+      "nature": "Jolly",
+      "date": "24 Oct 2026",
+      "replica": "3NY791SDCM"
+    },
     {
       "species": "Charizard-Mega-Y",
       "evs": "16 HP / 18 Def / 6 SpA / 26 Spe",
@@ -772,6 +898,48 @@
       "replica": "U7C92RMPR1"
     },
     {
+      "species": "Garchomp",
+      "evs": "9 HP / 20 Atk / 22 SpD / 15 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "C8BN5AKEH8"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "32 Atk / 2 Def / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "C8BN5AKEH8"
+    },
+    {
+      "species": "Floette-Eternal",
+      "evs": "28 HP / 14 Def / 5 SpA / 19 Spe",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "C8BN5AKEH8"
+    },
+    {
+      "species": "Incineroar",
+      "evs": "32 HP / 4 Def / 30 SpD",
+      "nature": "Sassy",
+      "date": "2 Nov 2026",
+      "replica": "C8BN5AKEH8"
+    },
+    {
+      "species": "Rillaboom",
+      "evs": "17 HP / 31 Atk / 10 SpD / 8 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "C8BN5AKEH8"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "32 HP / 32 Atk / 1 Def / 1 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "C8BN5AKEH8"
+    },
+    {
       "species": "Pelipper",
       "evs": "30 HP / 1 Def / 2 SpA / 31 SpD / 2 Spe",
       "nature": "Calm",
@@ -1066,6 +1234,90 @@
       "replica": "QD8979FGEC"
     },
     {
+      "species": "Salamence",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "28 Oct 2026",
+      "replica": "LRA7PMUAAF"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "32 HP / 32 Atk / 2 Spe",
+      "nature": "Adamant",
+      "date": "28 Oct 2026",
+      "replica": "LRA7PMUAAF"
+    },
+    {
+      "species": "Glimmora",
+      "evs": "32 SpA / 2 SpD / 32 Spe",
+      "nature": "Modest",
+      "date": "28 Oct 2026",
+      "replica": "LRA7PMUAAF"
+    },
+    {
+      "species": "Rillaboom",
+      "evs": "32 HP / 30 Atk / 4 Spe",
+      "nature": "Adamant",
+      "date": "28 Oct 2026",
+      "replica": "LRA7PMUAAF"
+    },
+    {
+      "species": "Volcarona",
+      "evs": "32 HP / 20 Def / 14 Spe",
+      "nature": "Bold",
+      "date": "28 Oct 2026",
+      "replica": "LRA7PMUAAF"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "14 HP / 20 Atk / 32 Spe",
+      "nature": "Adamant",
+      "date": "28 Oct 2026",
+      "replica": "LRA7PMUAAF"
+    },
+    {
+      "species": "Dragonite",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "25 Oct 2026",
+      "replica": "3TSWSCNCQM"
+    },
+    {
+      "species": "Delphox",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "25 Oct 2026",
+      "replica": "3TSWSCNCQM"
+    },
+    {
+      "species": "Basculegion",
+      "evs": "12 HP / 13 Atk / 19 Def / 6 SpD / 16 Spe",
+      "nature": "Adamant",
+      "date": "25 Oct 2026",
+      "replica": "3TSWSCNCQM"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "32 Atk / 2 Def / 32 Spe",
+      "nature": "Jolly",
+      "date": "25 Oct 2026",
+      "replica": "3TSWSCNCQM"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "32 HP / 32 Atk / 2 Spe",
+      "nature": "Adamant",
+      "date": "25 Oct 2026",
+      "replica": "3TSWSCNCQM"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Adamant",
+      "date": "25 Oct 2026",
+      "replica": "3TSWSCNCQM"
+    },
+    {
       "species": "Charizard",
       "evs": "20 HP / 30 Def / 1 SpA / 15 Spe",
       "nature": "Modest",
@@ -1234,6 +1486,762 @@
       "replica": "GQQ9S7XG43"
     },
     {
+      "species": "Salamence",
+      "evs": "1 HP / 24 SpA / 9 SpD / 32 Spe",
+      "nature": "Modest",
+      "date": "3 Nov 2026",
+      "replica": "JQDVTFK10X"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "32 HP / 2 Atk / 6 Def / 4 SpD / 22 Spe",
+      "nature": "Adamant",
+      "date": "3 Nov 2026",
+      "replica": "JQDVTFK10X"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "32 HP / 20 Atk / 11 Def / 2 SpD / 1 Spe",
+      "nature": "Adamant",
+      "date": "3 Nov 2026",
+      "replica": "JQDVTFK10X"
+    },
+    {
+      "species": "Basculegion",
+      "evs": "1 HP / 20 Atk / 13 Def / 32 Spe",
+      "nature": "Jolly",
+      "date": "3 Nov 2026",
+      "replica": "JQDVTFK10X"
+    },
+    {
+      "species": "Whimsicott",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "3 Nov 2026",
+      "replica": "JQDVTFK10X"
+    },
+    {
+      "species": "Charizard",
+      "evs": "30 HP / 31 Def / 1 SpA / 4 Spe",
+      "nature": "Modest",
+      "date": "3 Nov 2026",
+      "replica": "JQDVTFK10X"
+    },
+    {
+      "species": "Whimsicott",
+      "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "2 Nov 2026",
+      "replica": "RK5BCHW4S0"
+    },
+    {
+      "species": "Charizard",
+      "evs": "20 HP / 20 Def / 12 SpA / 14 Spe",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "RK5BCHW4S0"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "7 HP / 20 Atk / 1 Def / 6 SpD / 32 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "RK5BCHW4S0"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "31 Atk / 3 Def / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "RK5BCHW4S0"
+    },
+    {
+      "species": "Basculegion",
+      "evs": "18 Atk / 25 Def / 23 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "RK5BCHW4S0"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "32 HP / 25 Atk / 8 Def / 1 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "RK5BCHW4S0"
+    },
+    {
+      "species": "Glimmora",
+      "evs": "31 HP / 20 SpA / 1 SpD / 14 Spe",
+      "nature": "Modest",
+      "date": "3 Nov 2026",
+      "replica": "6CNDDNSNSW"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "32 HP / 32 Atk / 1 SpD / 1 Spe",
+      "nature": "Adamant",
+      "date": "3 Nov 2026",
+      "replica": "6CNDDNSNSW"
+    },
+    {
+      "species": "Salamence",
+      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
+      "nature": "Timid",
+      "date": "3 Nov 2026",
+      "replica": "6CNDDNSNSW"
+    },
+    {
+      "species": "Rillaboom",
+      "evs": "30 HP / 25 Atk / 11 Spe",
+      "nature": "Adamant",
+      "date": "3 Nov 2026",
+      "replica": "6CNDDNSNSW"
+    },
+    {
+      "species": "Volcarona",
+      "evs": "22 HP / 21 Def / 23 Spe",
+      "nature": "Timid",
+      "date": "3 Nov 2026",
+      "replica": "6CNDDNSNSW"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Adamant",
+      "date": "3 Nov 2026",
+      "replica": "6CNDDNSNSW"
+    },
+    {
+      "species": "Glimmora",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "1 Nov 2026",
+      "replica": "MC027MKNDF"
+    },
+    {
+      "species": "Froslass",
+      "evs": "32 HP / 10 SpA / 1 SpD / 23 Spe",
+      "nature": "Modest",
+      "date": "1 Nov 2026",
+      "replica": "MC027MKNDF"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "8 HP / 32 Atk / 26 Spe",
+      "nature": "Adamant",
+      "date": "1 Nov 2026",
+      "replica": "MC027MKNDF"
+    },
+    {
+      "species": "Whimsicott",
+      "evs": "32 HP / 16 Def / 1 SpA / 5 SpD / 12 Spe",
+      "nature": "Timid",
+      "date": "1 Nov 2026",
+      "replica": "MC027MKNDF"
+    },
+    {
+      "species": "Staraptor",
+      "evs": "27 HP / 4 Atk / 1 Def / 2 SpD / 32 Spe",
+      "nature": "Jolly",
+      "date": "1 Nov 2026",
+      "replica": "MC027MKNDF"
+    },
+    {
+      "species": "Armarouge",
+      "evs": "31 HP / 5 SpA / 22 SpD / 8 Spe",
+      "nature": "Modest",
+      "date": "1 Nov 2026",
+      "replica": "MC027MKNDF"
+    },
+    {
+      "species": "Incineroar",
+      "evs": "32 HP / 14 Def / 20 SpD",
+      "nature": "Sassy",
+      "date": "2 Nov 2026",
+      "replica": "5GCS285NPL"
+    },
+    {
+      "species": "Sylveon",
+      "evs": "14 HP / 32 Def / 20 SpA",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "5GCS285NPL"
+    },
+    {
+      "species": "Farigiraf",
+      "evs": "29 HP / 16 Def / 21 SpD",
+      "nature": "Calm",
+      "date": "2 Nov 2026",
+      "replica": "5GCS285NPL"
+    },
+    {
+      "species": "Charizard",
+      "evs": "32 HP / 23 Def / 1 SpA / 10 SpD",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "5GCS285NPL"
+    },
+    {
+      "species": "Annihilape",
+      "evs": "32 HP / 5 Atk / 29 SpD",
+      "nature": "Brave",
+      "date": "2 Nov 2026",
+      "replica": "5GCS285NPL"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "6 HP / 28 Atk / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "5GCS285NPL"
+    },
+    {
+      "species": "Aerodactyl",
+      "evs": "6 HP / 28 Atk / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "BKS8L17LK5"
+    },
+    {
+      "species": "Farigiraf",
+      "evs": "31 HP / 21 Def / 14 SpD",
+      "nature": "Bold",
+      "date": "2 Nov 2026",
+      "replica": "BKS8L17LK5"
+    },
+    {
+      "species": "Sylveon",
+      "evs": "20 HP / 16 Def / 20 SpA / 10 Spe",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "BKS8L17LK5"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "BKS8L17LK5"
+    },
+    {
+      "species": "Charizard",
+      "evs": "32 HP / 9 Def / 1 SpA / 24 SpD",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "BKS8L17LK5"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "BKS8L17LK5"
+    },
+    {
+      "species": "Basculegion-F",
+      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "RJWTJGEJH1"
+    },
+    {
+      "species": "Pelipper",
+      "evs": "32 HP / 10 Def / 11 SpA / 7 SpD / 6 Spe",
+      "nature": "Bold",
+      "date": "2 Nov 2026",
+      "replica": "RJWTJGEJH1"
+    },
+    {
+      "species": "Golisopod",
+      "evs": "32 HP / 32 Atk / 2 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "RJWTJGEJH1"
+    },
+    {
+      "species": "Archaludon",
+      "evs": "30 HP / 1 SpA / 25 SpD / 10 Spe",
+      "nature": "Calm",
+      "date": "2 Nov 2026",
+      "replica": "RJWTJGEJH1"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "20 HP / 20 Atk / 10 Def / 16 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "RJWTJGEJH1"
+    },
+    {
+      "species": "Raichu",
+      "evs": "30 HP / 4 Def / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "RJWTJGEJH1"
+    },
+    {
+      "species": "Archaludon",
+      "evs": "32 HP / 1 Def / 1 SpA / 29 SpD / 3 Spe",
+      "nature": "Bold",
+      "date": "2 Nov 2026",
+      "replica": "MGKLWBSEVE"
+    },
+    {
+      "species": "Raichu-Mega-X",
+      "evs": "30 HP / 4 Def / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "MGKLWBSEVE"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "30 HP / 14 Atk / 4 SpD / 18 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "MGKLWBSEVE"
+    },
+    {
+      "species": "Pelipper",
+      "evs": "32 HP / 10 Def / 17 SpA / 7 SpD",
+      "nature": "Bold",
+      "date": "2 Nov 2026",
+      "replica": "MGKLWBSEVE"
+    },
+    {
+      "species": "Basculegion-F",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "MGKLWBSEVE"
+    },
+    {
+      "species": "Golisopod-Mega",
+      "evs": "31 HP / 30 Atk / 4 SpD / 1 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "MGKLWBSEVE"
+    },
+    {
+      "species": "Blaziken",
+      "evs": "4 HP / 29 Atk / 1 Def / 32 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "SN0Q5JTUCH"
+    },
+    {
+      "species": "Rillaboom",
+      "evs": "31 HP / 11 Atk / 22 SpD / 2 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "SN0Q5JTUCH"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "21 HP / 10 Atk / 3 SpD / 32 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "SN0Q5JTUCH"
+    },
+    {
+      "species": "Basculegion",
+      "evs": "4 HP / 26 Atk / 8 Def / 28 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "SN0Q5JTUCH"
+    },
+    {
+      "species": "Kingambit",
+      "evs": "32 HP / 32 Atk / 1 SpD / 1 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "SN0Q5JTUCH"
+    },
+    {
+      "species": "Froslass",
+      "evs": "30 HP / 4 Def / 4 SpA / 4 SpD / 24 Spe",
+      "nature": "Timid",
+      "date": "2 Nov 2026",
+      "replica": "SN0Q5JTUCH"
+    },
+    {
+      "species": "Archaludon",
+      "evs": "27 HP / 5 Def / 1 SpA / 32 SpD / 1 Spe",
+      "nature": "Bold",
+      "date": "3 Nov 2026",
+      "replica": "BGR86EBGRT"
+    },
+    {
+      "species": "Delphox",
+      "evs": "26 HP / 8 Def / 32 Spe",
+      "nature": "Timid",
+      "date": "3 Nov 2026",
+      "replica": "BGR86EBGRT"
+    },
+    {
+      "species": "Incineroar",
+      "evs": "32 HP / 5 Atk / 5 SpD / 24 Spe",
+      "nature": "Adamant",
+      "date": "3 Nov 2026",
+      "replica": "BGR86EBGRT"
+    },
+    {
+      "species": "Pelipper",
+      "evs": "29 HP / 10 Def / 9 SpD / 18 Spe",
+      "nature": "Bold",
+      "date": "3 Nov 2026",
+      "replica": "BGR86EBGRT"
+    },
+    {
+      "species": "Raichu",
+      "evs": "25 HP / 9 Def / 32 Spe",
+      "nature": "Timid",
+      "date": "3 Nov 2026",
+      "replica": "BGR86EBGRT"
+    },
+    {
+      "species": "Sinistcha",
+      "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "3 Nov 2026",
+      "replica": "BGR86EBGRT"
+    },
+    {
+      "species": "Swampert",
+      "evs": "18 HP / 30 Atk / 18 Spe",
+      "nature": "Adamant",
+      "date": "2 Nov 2026",
+      "replica": "UXBHR9D5RK"
+    },
+    {
+      "species": "Pelipper",
+      "evs": "32 HP / 11 Def / 15 SpD / 8 Spe",
+      "nature": "Bold",
+      "date": "2 Nov 2026",
+      "replica": "UXBHR9D5RK"
+    },
+    {
+      "species": "Staraptor",
+      "evs": "29 HP / 1 Atk / 4 SpD / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "UXBHR9D5RK"
+    },
+    {
+      "species": "Gholdengo",
+      "evs": "7 HP / 27 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "2 Nov 2026",
+      "replica": "UXBHR9D5RK"
+    },
+    {
+      "species": "Sinistcha",
+      "evs": "31 HP / 4 Def / 31 SpD",
+      "nature": "Bold",
+      "date": "2 Nov 2026",
+      "replica": "UXBHR9D5RK"
+    },
+    {
+      "species": "Archaludon",
+      "evs": "30 HP / 4 Def / 25 SpD / 7 Spe",
+      "nature": "Calm",
+      "date": "2 Nov 2026",
+      "replica": "UXBHR9D5RK"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "6 HP / 28 Atk / 32 Spe",
+      "nature": "Jolly",
+      "date": "2 Nov 2026",
+      "replica": "EN43XY37V1"
+    },
+    {
+      "species": "Sylveon",
+      "evs": "13 HP / 32 Def / 21 SpA",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "EN43XY37V1"
+    },
+    {
+      "species": "Farigiraf",
+      "evs": "29 HP / 16 Def / 21 SpD",
+      "nature": "Calm",
+      "date": "2 Nov 2026",
+      "replica": "EN43XY37V1"
+    },
+    {
+      "species": "Incineroar",
+      "evs": "32 HP / 14 Def / 20 SpD",
+      "nature": "Sassy",
+      "date": "2 Nov 2026",
+      "replica": "EN43XY37V1"
+    },
+    {
+      "species": "Annihilape",
+      "evs": "32 HP / 5 Atk / 29 SpD",
+      "nature": "Brave",
+      "date": "2 Nov 2026",
+      "replica": "EN43XY37V1"
+    },
+    {
+      "species": "Charizard",
+      "evs": "32 HP / 23 Def / 1 SpA / 10 SpD",
+      "nature": "Modest",
+      "date": "2 Nov 2026",
+      "replica": "EN43XY37V1"
+    },
+    {
+      "species": "Charizard",
+      "evs": "17 HP / 12 Def / 13 SpA / 1 SpD / 23 Spe",
+      "nature": "Timid",
+      "date": "27 Oct 2026",
+      "replica": "5BM86P0C7E"
+    },
+    {
+      "species": "Toxapex",
+      "evs": "32 HP / 8 Def / 26 SpD",
+      "nature": "Bold",
+      "date": "27 Oct 2026",
+      "replica": "5BM86P0C7E"
+    },
+    {
+      "species": "Sylveon",
+      "evs": "31 HP / 25 Def / 10 SpA",
+      "nature": "Modest",
+      "date": "27 Oct 2026",
+      "replica": "5BM86P0C7E"
+    },
+    {
+      "species": "Venusaur",
+      "evs": "4 HP / 30 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "27 Oct 2026",
+      "replica": "5BM86P0C7E"
+    },
+    {
+      "species": "Incineroar",
+      "evs": "31 HP / 21 Def / 12 SpD / 2 Spe",
+      "nature": "Impish",
+      "date": "27 Oct 2026",
+      "replica": "5BM86P0C7E"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "14 HP / 20 Atk / 32 Spe",
+      "nature": "Adamant",
+      "date": "27 Oct 2026",
+      "replica": "5BM86P0C7E"
+    },
+    {
+      "species": "Golisopod",
+      "evs": "29 HP / 30 Atk / 7 Spe",
+      "nature": "Adamant",
+      "date": "26 Oct 2026",
+      "replica": "06QQRF03CE"
+    },
+    {
+      "species": "Archaludon",
+      "evs": "27 HP / 15 SpA / 11 SpD / 13 Spe",
+      "nature": "Modest",
+      "date": "26 Oct 2026",
+      "replica": "06QQRF03CE"
+    },
+    {
+      "species": "Basculegion",
+      "evs": "13 HP / 28 Atk / 25 Spe",
+      "nature": "Adamant",
+      "date": "26 Oct 2026",
+      "replica": "06QQRF03CE"
+    },
+    {
+      "species": "Meowstic",
+      "evs": "32 HP / 15 Def / 19 SpD",
+      "nature": "Calm",
+      "date": "26 Oct 2026",
+      "replica": "06QQRF03CE"
+    },
+    {
+      "species": "Pelipper",
+      "evs": "2 Def / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "26 Oct 2026",
+      "replica": "06QQRF03CE"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "2 Def / 32 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "26 Oct 2026",
+      "replica": "06QQRF03CE"
+    },
+    {
+      "species": "Golisopod",
+      "evs": "32 HP / 32 Atk / 2 SpD",
+      "nature": "Brave",
+      "date": "30 Oct 2026",
+      "replica": "199JW2B5GE"
+    },
+    {
+      "species": "Pelipper",
+      "evs": "31 HP / 2 Def / 15 SpA / 17 SpD / 1 Spe",
+      "nature": "Calm",
+      "date": "30 Oct 2026",
+      "replica": "199JW2B5GE"
+    },
+    {
+      "species": "Indeedee-F",
+      "evs": "32 HP / 25 Def / 4 SpA / 5 SpD",
+      "nature": "Relaxed",
+      "date": "30 Oct 2026",
+      "replica": "199JW2B5GE"
+    },
+    {
+      "species": "Archaludon",
+      "evs": "32 HP / 1 Def / 1 SpA / 20 SpD / 12 Spe",
+      "nature": "Bold",
+      "date": "30 Oct 2026",
+      "replica": "199JW2B5GE"
+    },
+    {
+      "species": "Basculegion",
+      "evs": "4 HP / 21 Atk / 13 Def / 28 Spe",
+      "nature": "Jolly",
+      "date": "30 Oct 2026",
+      "replica": "199JW2B5GE"
+    },
+    {
+      "species": "Gardevoir",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "30 Oct 2026",
+      "replica": "199JW2B5GE"
+    },
+    {
+      "species": "Indeedee-F",
+      "evs": "32 HP / 32 Def / 2 SpD",
+      "nature": "Relaxed",
+      "date": "25 Oct 2026",
+      "replica": "PUMVJSDMM2"
+    },
+    {
+      "species": "Starmie",
+      "evs": "12 HP / 29 Atk / 1 Def / 24 Spe",
+      "nature": "Hasty",
+      "date": "25 Oct 2026",
+      "replica": "PUMVJSDMM2"
+    },
+    {
+      "species": "Politoed",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "25 Oct 2026",
+      "replica": "PUMVJSDMM2"
+    },
+    {
+      "species": "Archaludon",
+      "evs": "32 HP / 8 Def / 2 SpA / 11 SpD / 13 Spe",
+      "nature": "Modest",
+      "date": "25 Oct 2026",
+      "replica": "PUMVJSDMM2"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "21 HP / 10 Atk / 5 Def / 30 Spe",
+      "nature": "Adamant",
+      "date": "25 Oct 2026",
+      "replica": "PUMVJSDMM2"
+    },
+    {
+      "species": "Gengar",
+      "evs": "25 HP / 7 Def / 2 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "25 Oct 2026",
+      "replica": "PUMVJSDMM2"
+    },
+    {
+      "species": "Pelipper",
+      "evs": "30 HP / 4 Def / 1 SpA / 30 SpD / 1 Spe",
+      "nature": "Calm",
+      "date": "25 Oct 2026",
+      "replica": "L5RBYL90F2"
+    },
+    {
+      "species": "Archaludon",
+      "evs": "32 HP / 1 Def / 32 SpD / 1 Spe",
+      "nature": "Bold",
+      "date": "25 Oct 2026",
+      "replica": "L5RBYL90F2"
+    },
+    {
+      "species": "Venusaur",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "25 Oct 2026",
+      "replica": "L5RBYL90F2"
+    },
+    {
+      "species": "Charizard",
+      "evs": "8 HP / 30 Def / 10 SpA / 18 Spe",
+      "nature": "Timid",
+      "date": "25 Oct 2026",
+      "replica": "L5RBYL90F2"
+    },
+    {
+      "species": "Grimmsnarl",
+      "evs": "32 HP / 25 Def / 9 SpD",
+      "nature": "Careful",
+      "date": "25 Oct 2026",
+      "replica": "L5RBYL90F2"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "13 Def / 21 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "25 Oct 2026",
+      "replica": "L5RBYL90F2"
+    },
+    {
+      "species": "Pelipper",
+      "evs": "2 Def / 32 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "24 Oct 2026",
+      "replica": "QGFP9HR7QT"
+    },
+    {
+      "species": "Archaludon",
+      "evs": "32 HP / 1 Def / 1 SpA / 32 Spe",
+      "nature": "Bold",
+      "date": "24 Oct 2026",
+      "replica": "QGFP9HR7QT"
+    },
+    {
+      "species": "Basculegion-F",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "24 Oct 2026",
+      "replica": "QGFP9HR7QT"
+    },
+    {
+      "species": "Golisopod-Mega",
+      "evs": "32 HP / 30 Atk / 1 Def / 2 SpD / 1 Spe",
+      "nature": "Adamant",
+      "date": "24 Oct 2026",
+      "replica": "QGFP9HR7QT"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Adamant",
+      "date": "24 Oct 2026",
+      "replica": "QGFP9HR7QT"
+    },
+    {
+      "species": "Raichu-Mega-X",
+      "evs": "32 HP / 2 Def / 32 Spe",
+      "nature": "Jolly",
+      "date": "24 Oct 2026",
+      "replica": "QGFP9HR7QT"
+    },
+    {
       "species": "Tyranitar",
       "evs": "18 HP / 16 Atk / 32 Spe",
       "nature": "Jolly",
@@ -1274,6 +2282,48 @@
       "nature": "Jolly",
       "date": "20 Oct 2026",
       "replica": "8UPWUEA1AR"
+    },
+    {
+      "species": "Camerupt",
+      "evs": "32 HP / 32 SpA / 2 Spe",
+      "nature": "Quiet",
+      "date": "18 Oct 2026",
+      "replica": "B1V7P36K13"
+    },
+    {
+      "species": "Raichu",
+      "evs": "32 HP / 11 Def / 23 Spe",
+      "nature": "Timid",
+      "date": "18 Oct 2026",
+      "replica": "B1V7P36K13"
+    },
+    {
+      "species": "Farigiraf",
+      "evs": "31 HP / 20 Def / 1 SpA / 14 SpD",
+      "nature": "Bold",
+      "date": "18 Oct 2026",
+      "replica": "B1V7P36K13"
+    },
+    {
+      "species": "Incineroar",
+      "evs": "32 HP / 32 Atk / 2 SpD",
+      "nature": "Brave",
+      "date": "18 Oct 2026",
+      "replica": "B1V7P36K13"
+    },
+    {
+      "species": "Sylveon",
+      "evs": "13 HP / 21 Def / 32 SpA",
+      "nature": "Modest",
+      "date": "18 Oct 2026",
+      "replica": "B1V7P36K13"
+    },
+    {
+      "species": "Rillaboom",
+      "evs": "32 HP / 28 Atk / 6 SpD",
+      "nature": "Adamant",
+      "date": "18 Oct 2026",
+      "replica": "B1V7P36K13"
     },
     {
       "species": "Incineroar",
@@ -1360,48 +2410,6 @@
       "replica": "5C9LNUSWUY"
     },
     {
-      "species": "Metagross",
-      "evs": "7 HP / 32 Atk / 27 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "LFQF080C4K"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "LFQF080C4K"
-    },
-    {
-      "species": "Indeedee-F",
-      "evs": "32 HP / 26 Def / 8 SpD",
-      "nature": "Bold",
-      "date": "18 Oct 2026",
-      "replica": "LFQF080C4K"
-    },
-    {
-      "species": "Whimsicott",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "18 Oct 2026",
-      "replica": "LFQF080C4K"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "32 HP / 12 Atk / 17 Def / 5 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "LFQF080C4K"
-    },
-    {
-      "species": "Charizard",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "18 Oct 2026",
-      "replica": "LFQF080C4K"
-    },
-    {
       "species": "Delphox",
       "evs": "8 HP / 4 Def / 22 SpA / 32 Spe",
       "nature": "Timid",
@@ -1486,1978 +2494,256 @@
       "replica": "WRYRHCSLS2"
     },
     {
-      "species": "Froslass-Mega",
-      "evs": "25 HP / 2 Def / 20 SpA / 1 SpD / 18 Spe",
+      "species": "Farigiraf",
+      "evs": "29 HP / 22 Def / 15 SpD",
+      "nature": "Calm",
+      "date": "29 Oct 2026",
+      "replica": "9KDKCQ8YAY"
+    },
+    {
+      "species": "Camerupt",
+      "evs": "32 HP / 2 Def / 32 SpA",
+      "nature": "Quiet",
+      "date": "29 Oct 2026",
+      "replica": "9KDKCQ8YAY"
+    },
+    {
+      "species": "Sylveon",
+      "evs": "31 HP / 13 Def / 21 SpA / 1 SpD",
       "nature": "Modest",
-      "date": "18 Oct 2026",
-      "replica": "MD0U61Q01A"
+      "date": "29 Oct 2026",
+      "replica": "9KDKCQ8YAY"
     },
     {
-      "species": "Kingambit",
-      "evs": "32 HP / 32 Atk / 1 Def / 1 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "MD0U61Q01A"
-    },
-    {
-      "species": "Milotic",
-      "evs": "32 HP / 18 Def / 9 SpA / 5 SpD / 2 Spe",
-      "nature": "Modest",
-      "date": "18 Oct 2026",
-      "replica": "MD0U61Q01A"
-    },
-    {
-      "species": "Raichu-Mega-X",
-      "evs": "32 HP / 3 Def / 5 SpA / 26 Spe",
+      "species": "Raichu",
+      "evs": "30 HP / 12 Def / 24 Spe",
       "nature": "Timid",
-      "date": "18 Oct 2026",
-      "replica": "MD0U61Q01A"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "14 HP / 20 Atk / 2 Def / 30 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "MD0U61Q01A"
-    },
-    {
-      "species": "Volcarona",
-      "evs": "31 HP / 29 Def / 6 Spe",
-      "nature": "Timid",
-      "date": "18 Oct 2026",
-      "replica": "MD0U61Q01A"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 15 Atk / 9 Def / 6 SpD / 4 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "SRVVV1PQ1Q"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "18 Oct 2026",
-      "replica": "SRVVV1PQ1Q"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "24 HP / 32 Atk / 9 SpD / 1 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "SRVVV1PQ1Q"
+      "date": "29 Oct 2026",
+      "replica": "9KDKCQ8YAY"
     },
     {
       "species": "Incineroar",
-      "evs": "27 HP / 7 Def / 20 SpD / 12 Spe",
-      "nature": "Careful",
-      "date": "18 Oct 2026",
-      "replica": "SRVVV1PQ1Q"
-    },
-    {
-      "species": "Delphox",
-      "evs": "10 HP / 9 Def / 15 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "18 Oct 2026",
-      "replica": "SRVVV1PQ1Q"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "22 HP / 22 Def / 5 SpA / 17 Spe",
-      "nature": "Modest",
-      "date": "18 Oct 2026",
-      "replica": "SRVVV1PQ1Q"
-    },
-    {
-      "species": "Primarina",
-      "evs": "22 HP / 24 Def / 4 SpA / 16 Spe",
-      "nature": "Modest",
-      "date": "18 Oct 2026",
-      "replica": "VNG2L82NGQ"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "24 HP / 15 Atk / 14 SpD / 13 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "VNG2L82NGQ"
-    },
-    {
-      "species": "Volcarona",
-      "evs": "27 HP / 31 Def / 8 Spe",
-      "nature": "Bold",
-      "date": "18 Oct 2026",
-      "replica": "VNG2L82NGQ"
-    },
-    {
-      "species": "Glimmora",
-      "evs": "5 HP / 9 Def / 20 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "18 Oct 2026",
-      "replica": "VNG2L82NGQ"
-    },
-    {
-      "species": "Salamence",
-      "evs": "8 HP / 10 SpA / 16 SpD / 32 Spe",
-      "nature": "Timid",
-      "date": "18 Oct 2026",
-      "replica": "VNG2L82NGQ"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "30 Atk / 4 Def / 32 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "VNG2L82NGQ"
-    },
-    {
-      "species": "Raichu",
-      "evs": "32 HP / 2 SpD / 32 Spe",
-      "nature": "Timid",
-      "date": "19 Oct 2026",
-      "replica": "4A2NJKBK3X"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "27 HP / 22 SpD / 17 Spe",
-      "nature": "Modest",
-      "date": "19 Oct 2026",
-      "replica": "4A2NJKBK3X"
-    },
-    {
-      "species": "Arcanine-Hisui",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "19 Oct 2026",
-      "replica": "4A2NJKBK3X"
-    },
-    {
-      "species": "Annihilape",
-      "evs": "4 HP / 32 Atk / 2 SpD / 28 Spe",
-      "nature": "Adamant",
-      "date": "19 Oct 2026",
-      "replica": "4A2NJKBK3X"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "24 HP / 25 Atk / 2 SpD / 15 Spe",
-      "nature": "Adamant",
-      "date": "19 Oct 2026",
-      "replica": "4A2NJKBK3X"
-    },
-    {
-      "species": "Staraptor",
-      "evs": "24 HP / 10 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "19 Oct 2026",
-      "replica": "4A2NJKBK3X"
-    },
-    {
-      "species": "Charizard",
-      "evs": "20 HP / 32 Def / 1 SpA / 13 Spe",
-      "nature": "Modest",
-      "date": "20 Oct 2026",
-      "replica": "08D8P37WUD"
-    },
-    {
-      "species": "Whimsicott",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "20 Oct 2026",
-      "replica": "08D8P37WUD"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "12 HP / 20 Atk / 4 SpD / 30 Spe",
-      "nature": "Adamant",
-      "date": "20 Oct 2026",
-      "replica": "08D8P37WUD"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "18 Atk / 28 Def / 20 Spe",
-      "nature": "Adamant",
-      "date": "20 Oct 2026",
-      "replica": "08D8P37WUD"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "6 HP / 28 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "20 Oct 2026",
-      "replica": "08D8P37WUD"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "32 HP / 25 Atk / 9 Def",
-      "nature": "Adamant",
-      "date": "20 Oct 2026",
-      "replica": "08D8P37WUD"
-    },
-    {
-      "species": "Swampert",
-      "evs": "18 HP / 30 Atk / 18 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "9979JV2YPM"
-    },
-    {
-      "species": "Pelipper",
-      "evs": "30 HP / 11 Def / 7 SpA / 7 SpD / 11 Spe",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "9979JV2YPM"
-    },
-    {
-      "species": "Staraptor",
-      "evs": "29 HP / 1 Atk / 4 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "9979JV2YPM"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "7 HP / 27 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "9979JV2YPM"
-    },
-    {
-      "species": "Sinistcha",
-      "evs": "31 HP / 4 Def / 31 SpD",
-      "nature": "Relaxed",
-      "date": "12 Oct 2026",
-      "replica": "9979JV2YPM"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "30 HP / 1 SpA / 25 SpD / 10 Spe",
-      "nature": "Calm",
-      "date": "12 Oct 2026",
-      "replica": "9979JV2YPM"
-    },
-    {
-      "species": "Floette-Mega",
-      "evs": "28 HP / 23 Def / 6 SpA / 9 Spe",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "62NGNS441A"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "26 HP / 25 Atk / 6 Def / 9 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "62NGNS441A"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "20 Atk / 14 Def / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "62NGNS441A"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "18 HP / 15 Atk / 4 Def / 19 SpD / 10 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "62NGNS441A"
-    },
-    {
-      "species": "Salamence",
-      "evs": "31 HP / 1 Def / 6 SpA / 11 SpD / 17 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "62NGNS441A"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "6 HP / 31 Atk / 29 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "62NGNS441A"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "29 HP / 13 Def / 24 SpD",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "2QWVB7XA7U"
-    },
-    {
-      "species": "Pelipper",
-      "evs": "32 HP / 2 Def / 17 SpA / 12 SpD / 3 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "2QWVB7XA7U"
-    },
-    {
-      "species": "Golisopod",
-      "evs": "31 HP / 32 Atk / 3 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "2QWVB7XA7U"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "30 HP / 1 Def / 25 SpD / 10 Spe",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "2QWVB7XA7U"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "21 HP / 11 Atk / 1 Def / 1 SpD / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "2QWVB7XA7U"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "4 HP / 9 Def / 30 SpA / 23 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "2QWVB7XA7U"
-    },
-    {
-      "species": "Charizard",
-      "evs": "16 HP / 18 Def / 3 SpA / 29 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "J0JKDSS5VV"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "30 HP / 10 Def / 26 SpD",
-      "nature": "Impish",
-      "date": "12 Oct 2026",
-      "replica": "J0JKDSS5VV"
-    },
-    {
-      "species": "Venusaur",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "J0JKDSS5VV"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "18 HP / 10 Atk / 9 Def / 1 SpD / 28 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "J0JKDSS5VV"
-    },
-    {
-      "species": "Toxapex",
-      "evs": "32 HP / 18 Def / 16 SpD",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "J0JKDSS5VV"
-    },
-    {
-      "species": "Sylveon",
-      "evs": "25 HP / 28 Def / 10 SpA / 3 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "J0JKDSS5VV"
-    },
-    {
-      "species": "Whimsicott",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "1TK6W03RVK"
-    },
-    {
-      "species": "Charizard-Mega-Y",
-      "evs": "20 HP / 32 Def / 1 SpA / 13 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "1TK6W03RVK"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "18 Atk / 28 Def / 20 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "1TK6W03RVK"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "32 HP / 25 Atk / 9 Def",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "1TK6W03RVK"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "16 HP / 20 Atk / 30 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "1TK6W03RVK"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "1TK6W03RVK"
-    },
-    {
-      "species": "Torkoal",
-      "evs": "30 HP / 28 SpA / 8 SpD",
-      "nature": "Quiet",
-      "date": "12 Oct 2026",
-      "replica": "UVYDE4XLQB"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "2 Def / 32 SpA / 15 SpD / 17 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "UVYDE4XLQB"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "29 HP / 24 Def / 13 SpD",
-      "nature": "Sassy",
-      "date": "12 Oct 2026",
-      "replica": "UVYDE4XLQB"
-    },
-    {
-      "species": "Venusaur",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "UVYDE4XLQB"
-    },
-    {
-      "species": "Alcremie",
-      "evs": "32 HP / 32 Def / 2 SpD",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "UVYDE4XLQB"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "14 HP / 32 Atk / 20 SpD",
-      "nature": "Brave",
-      "date": "12 Oct 2026",
-      "replica": "UVYDE4XLQB"
-    },
-    {
-      "species": "Milotic",
-      "evs": "32 HP / 13 Def / 6 SpD / 15 Spe",
-      "nature": "Calm",
-      "date": "12 Oct 2026",
-      "replica": "JC77DNAD2P"
-    },
-    {
-      "species": "Froslass",
-      "evs": "4 HP / 32 SpA / 30 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "JC77DNAD2P"
-    },
-    {
-      "species": "Indeedee-F",
-      "evs": "32 HP / 32 Def / 2 SpD",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "JC77DNAD2P"
-    },
-    {
-      "species": "Raichu",
-      "evs": "32 HP / 9 Def / 25 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "JC77DNAD2P"
-    },
-    {
-      "species": "Armarouge",
-      "evs": "4 HP / 32 SpA / 30 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "JC77DNAD2P"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "JC77DNAD2P"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "6 HP / 28 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "R2RWRDXEUF"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "32 HP / 20 Def / 14 SpD",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "R2RWRDXEUF"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "R2RWRDXEUF"
-    },
-    {
-      "species": "Sylveon",
-      "evs": "27 HP / 32 SpA / 7 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "R2RWRDXEUF"
-    },
-    {
-      "species": "Aerodactyl",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "R2RWRDXEUF"
-    },
-    {
-      "species": "Charizard",
-      "evs": "24 HP / 9 Def / 31 SpA / 2 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "R2RWRDXEUF"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "GX6HA3X08F"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "GX6HA3X08F"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "30 HP / 15 Def / 21 SpD",
-      "nature": "Sassy",
-      "date": "12 Oct 2026",
-      "replica": "GX6HA3X08F"
-    },
-    {
-      "species": "Sylveon",
-      "evs": "30 HP / 14 Def / 20 SpA / 2 SpD",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "GX6HA3X08F"
-    },
-    {
-      "species": "Pyroar",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "GX6HA3X08F"
-    },
-    {
-      "species": "Torkoal",
-      "evs": "30 HP / 32 SpA / 4 SpD",
-      "nature": "Quiet",
-      "date": "12 Oct 2026",
-      "replica": "GX6HA3X08F"
-    },
-    {
-      "species": "Aerodactyl",
-      "evs": "15 HP / 11 Atk / 8 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "4UC8YMQRSL"
-    },
-    {
-      "species": "Charizard",
-      "evs": "12 HP / 25 Def / 6 SpA / 23 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "4UC8YMQRSL"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "4UC8YMQRSL"
-    },
-    {
-      "species": "Sylveon",
-      "evs": "20 HP / 4 Def / 21 SpA / 21 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "4UC8YMQRSL"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "27 HP / 20 Def / 19 SpD",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "4UC8YMQRSL"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "6 HP / 27 Atk / 1 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "4UC8YMQRSL"
-    },
-    {
-      "species": "Basculegion-F",
-      "evs": "1 Def / 32 SpA / 1 SpD / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "M9C6GW0YJ4"
-    },
-    {
-      "species": "Golisopod",
-      "evs": "32 HP / 31 Atk / 1 SpD / 2 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "M9C6GW0YJ4"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "30 HP / 1 Def / 1 SpA / 19 SpD / 15 Spe",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "M9C6GW0YJ4"
-    },
-    {
-      "species": "Pelipper",
-      "evs": "32 HP / 10 Def / 17 SpA / 7 SpD",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "M9C6GW0YJ4"
-    },
-    {
-      "species": "Raichu",
-      "evs": "24 HP / 1 Atk / 10 Def / 3 SpD / 28 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "M9C6GW0YJ4"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "23 HP / 20 Atk / 5 SpD / 18 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "M9C6GW0YJ4"
-    },
-    {
-      "species": "Watchog",
-      "evs": "32 HP / 2 Atk / 32 Def",
-      "nature": "Impish",
-      "date": "12 Oct 2026",
-      "replica": "41EGDYHJ6K"
-    },
-    {
-      "species": "Charizard",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "41EGDYHJ6K"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "41EGDYHJ6K"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "41EGDYHJ6K"
-    },
-    {
-      "species": "Venusaur",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "41EGDYHJ6K"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "28 HP / 32 SpA / 6 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "41EGDYHJ6K"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "32 HP / 1 Def / 5 SpA / 25 SpD / 3 Spe",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "6UTUGC9ET3"
-    },
-    {
-      "species": "Golisopod",
       "evs": "32 HP / 32 Atk / 2 SpD",
+      "nature": "Brave",
+      "date": "29 Oct 2026",
+      "replica": "9KDKCQ8YAY"
+    },
+    {
+      "species": "Rillaboom",
+      "evs": "32 HP / 27 Atk / 6 SpD / 1 Spe",
       "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "6UTUGC9ET3"
+      "date": "29 Oct 2026",
+      "replica": "9KDKCQ8YAY"
     },
     {
       "species": "Floette-Eternal",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "6UTUGC9ET3"
-    },
-    {
-      "species": "Pelipper",
-      "evs": "32 HP / 10 Def / 9 SpA / 15 SpD",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "6UTUGC9ET3"
-    },
-    {
-      "species": "Basculegion-F",
-      "evs": "2 HP / 32 SpA / 32 Spe",
+      "evs": "16 HP / 12 Def / 29 SpA / 9 Spe",
       "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "6UTUGC9ET3"
+      "date": "28 Oct 2026",
+      "replica": "EGJR0PYH5A"
     },
     {
-      "species": "Sneasler",
+      "species": "Kingambit",
       "evs": "2 HP / 32 Atk / 32 Spe",
       "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "6UTUGC9ET3"
+      "date": "28 Oct 2026",
+      "replica": "EGJR0PYH5A"
     },
     {
-      "species": "Politoed",
-      "evs": "32 HP / 30 SpA / 4 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "VG08GAG6UF"
+      "species": "Rillaboom",
+      "evs": "22 HP / 15 Atk / 1 Def / 14 SpD / 14 Spe",
+      "nature": "Adamant",
+      "date": "28 Oct 2026",
+      "replica": "EGJR0PYH5A"
+    },
+    {
+      "species": "Salamence",
+      "evs": "29 HP / 31 SpD / 6 Spe",
+      "nature": "Timid",
+      "date": "28 Oct 2026",
+      "replica": "EGJR0PYH5A"
     },
     {
       "species": "Garchomp",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "VG08GAG6UF"
-    },
-    {
-      "species": "Golisopod",
-      "evs": "32 HP / 32 Atk / 1 SpD / 1 Spe",
+      "evs": "30 HP / 2 Atk / 4 Def / 8 SpD / 22 Spe",
       "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "VG08GAG6UF"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "29 HP / 20 Def / 17 SpD",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "VG08GAG6UF"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "32 HP / 17 SpD / 17 Spe",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "VG08GAG6UF"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "10 HP / 30 Atk / 8 SpD / 18 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "VG08GAG6UF"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "32 HP / 11 Def / 5 SpA / 18 Spe",
-      "nature": "Modest",
-      "date": "13 Oct 2026",
-      "replica": "2168D2FJ0V"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-      "nature": "Timid",
-      "date": "13 Oct 2026",
-      "replica": "2168D2FJ0V"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
-      "nature": "Adamant",
-      "date": "13 Oct 2026",
-      "replica": "2168D2FJ0V"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 25 Atk / 4 SpD / 5 Spe",
-      "nature": "Adamant",
-      "date": "13 Oct 2026",
-      "replica": "2168D2FJ0V"
+      "date": "28 Oct 2026",
+      "replica": "EGJR0PYH5A"
     },
     {
       "species": "Volcarona",
-      "evs": "32 HP / 17 Def / 17 Spe",
+      "evs": "32 HP / 25 Def / 1 SpD / 8 Spe",
       "nature": "Bold",
-      "date": "13 Oct 2026",
-      "replica": "2168D2FJ0V"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-      "nature": "Timid",
-      "date": "13 Oct 2026",
-      "replica": "2168D2FJ0V"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "32 HP / 9 Def / 20 SpD / 5 Spe",
-      "nature": "Careful",
-      "date": "13 Oct 2026",
-      "replica": "8UPCLMXT9W"
-    },
-    {
-      "species": "Raichu",
-      "evs": "28 HP / 6 Def / 32 Spe",
-      "nature": "Timid",
-      "date": "13 Oct 2026",
-      "replica": "8UPCLMXT9W"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "26 HP / 26 Atk / 11 SpD / 3 Spe",
-      "nature": "Adamant",
-      "date": "13 Oct 2026",
-      "replica": "8UPCLMXT9W"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "11 Atk / 23 Def / 32 Spe",
-      "nature": "Jolly",
-      "date": "13 Oct 2026",
-      "replica": "8UPCLMXT9W"
-    },
-    {
-      "species": "Volcarona",
-      "evs": "32 HP / 11 Def / 5 SpA / 18 Spe",
-      "nature": "Modest",
-      "date": "13 Oct 2026",
-      "replica": "8UPCLMXT9W"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "27 HP / 18 Def / 5 SpA / 16 Spe",
-      "nature": "Modest",
-      "date": "13 Oct 2026",
-      "replica": "8UPCLMXT9W"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "17 HP / 15 Atk / 20 SpD / 14 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "NM8H38LF1P"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "29 HP / 5 Atk / 17 Def / 10 SpD / 5 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "NM8H38LF1P"
-    },
-    {
-      "species": "Dragonite",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "NM8H38LF1P"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "27 HP / 2 Def / 7 SpA / 16 SpD / 14 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "NM8H38LF1P"
-    },
-    {
-      "species": "Raichu",
-      "evs": "2 HP / 32 Def / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "NM8H38LF1P"
-    },
-    {
-      "species": "Primarina",
-      "evs": "14 HP / 32 Def / 4 SpA / 16 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "NM8H38LF1P"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "32 HP / 20 Def / 14 SpD",
-      "nature": "Sassy",
-      "date": "12 Oct 2026",
-      "replica": "BGA5A31VJX"
-    },
-    {
-      "species": "Kommo-o",
-      "evs": "10 HP / 24 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "BGA5A31VJX"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "30 HP / 5 Atk / 1 Def / 30 SpD",
-      "nature": "Brave",
-      "date": "12 Oct 2026",
-      "replica": "BGA5A31VJX"
-    },
-    {
-      "species": "Politoed",
-      "evs": "32 HP / 20 Def / 14 SpD",
-      "nature": "Calm",
-      "date": "12 Oct 2026",
-      "replica": "BGA5A31VJX"
-    },
-    {
-      "species": "Gengar",
-      "evs": "32 HP / 26 SpD / 8 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "BGA5A31VJX"
-    },
-    {
-      "species": "Annihilape",
-      "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "BGA5A31VJX"
+      "date": "28 Oct 2026",
+      "replica": "EGJR0PYH5A"
     },
     {
       "species": "Staraptor",
-      "evs": "25 HP / 9 Atk / 32 Spe",
+      "evs": "26 HP / 6 Atk / 2 SpD / 32 Spe",
       "nature": "Jolly",
-      "date": "13 Oct 2026",
-      "replica": "HNQF9RDNR0"
+      "date": "25 Oct 2026",
+      "replica": "47RPQ8H6X8"
     },
     {
-      "species": "Primarina",
-      "evs": "14 HP / 32 Def / 4 SpA / 16 Spe",
-      "nature": "Modest",
-      "date": "13 Oct 2026",
-      "replica": "HNQF9RDNR0"
+      "species": "Raichu",
+      "evs": "29 HP / 8 Def / 29 Spe",
+      "nature": "Timid",
+      "date": "25 Oct 2026",
+      "replica": "47RPQ8H6X8"
     },
     {
       "species": "Gholdengo",
-      "evs": "17 HP / 17 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "13 Oct 2026",
-      "replica": "HNQF9RDNR0"
+      "evs": "27 HP / 6 SpA / 19 SpD / 14 Spe",
+      "nature": "Calm",
+      "date": "25 Oct 2026",
+      "replica": "47RPQ8H6X8"
     },
     {
       "species": "Arcanine-Hisui",
       "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
       "nature": "Jolly",
-      "date": "13 Oct 2026",
-      "replica": "HNQF9RDNR0"
+      "date": "25 Oct 2026",
+      "replica": "47RPQ8H6X8"
     },
     {
       "species": "Rillaboom",
-      "evs": "32 HP / 16 Atk / 1 Def / 10 SpD / 7 Spe",
+      "evs": "8 HP / 25 Atk / 4 Def / 2 SpD / 27 Spe",
       "nature": "Adamant",
-      "date": "13 Oct 2026",
-      "replica": "HNQF9RDNR0"
+      "date": "25 Oct 2026",
+      "replica": "47RPQ8H6X8"
     },
     {
-      "species": "Raichu",
-      "evs": "32 HP / 2 Def / 32 Spe",
-      "nature": "Timid",
-      "date": "13 Oct 2026",
-      "replica": "HNQF9RDNR0"
-    },
-    {
-      "species": "Raichu",
-      "evs": "32 HP / 5 Def / 29 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "DW4QTDPM0J"
-    },
-    {
-      "species": "Kommo-o",
-      "evs": "10 HP / 1 Def / 28 SpA / 1 SpD / 26 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "DW4QTDPM0J"
-    },
-    {
-      "species": "Arcanine-Hisui",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "DW4QTDPM0J"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "24 HP / 16 Atk / 11 SpD / 15 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "DW4QTDPM0J"
-    },
-    {
-      "species": "Froslass",
-      "evs": "7 HP / 27 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "DW4QTDPM0J"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "26 HP / 17 Atk / 14 Def / 9 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "DW4QTDPM0J"
-    },
-    {
-      "species": "Gardevoir-Mega",
-      "evs": "17 HP / 17 Def / 32 SpA",
-      "nature": "Quiet",
-      "date": "12 Oct 2026",
-      "replica": "TC3QKLUP3B"
-    },
-    {
-      "species": "Camerupt-Mega",
-      "evs": "32 HP / 32 SpA / 2 SpD",
-      "nature": "Quiet",
-      "date": "12 Oct 2026",
-      "replica": "TC3QKLUP3B"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "3 HP / 32 Atk / 15 Def / 1 SpD / 15 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "TC3QKLUP3B"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "32 HP / 32 Atk / 2 SpD",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "TC3QKLUP3B"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "12 HP / 20 Def / 14 SpA / 20 SpD",
+      "species": "Primarina",
+      "evs": "21 HP / 18 Def / 4 SpA / 23 Spe",
       "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "TC3QKLUP3B"
-    },
-    {
-      "species": "Indeedee-F",
-      "evs": "32 HP / 32 Def / 2 SpA",
-      "nature": "Relaxed",
-      "date": "12 Oct 2026",
-      "replica": "TC3QKLUP3B"
-    },
-    {
-      "species": "Dragonite",
-      "evs": "9 HP / 25 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "6BPFLQ63KW"
-    },
-    {
-      "species": "Delphox",
-      "evs": "9 HP / 14 Def / 11 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "6BPFLQ63KW"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "32 Atk / 2 Def / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "6BPFLQ63KW"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "6BPFLQ63KW"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "6BPFLQ63KW"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "24 HP / 32 Atk / 2 SpD / 8 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "6BPFLQ63KW"
-    },
-    {
-      "species": "Raichu",
-      "evs": "17 HP / 21 Def / 28 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "A78VNCAMXA"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "1 HP / 32 Atk / 1 SpD / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "A78VNCAMXA"
-    },
-    {
-      "species": "Volcarona",
-      "evs": "16 HP / 24 Def / 2 SpA / 24 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "A78VNCAMXA"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "26 Atk / 13 Def / 27 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "A78VNCAMXA"
-    },
-    {
-      "species": "Salamence",
-      "evs": "13 HP / 13 SpA / 16 SpD / 24 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "A78VNCAMXA"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "17 HP / 5 Atk / 1 Def / 30 SpD / 13 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "A78VNCAMXA"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "28 Atk / 13 Def / 25 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "XMBHK6NCG3"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "32 HP / 5 Atk / 12 Def / 17 SpD",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "XMBHK6NCG3"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "14 HP / 7 SpA / 31 SpD / 14 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "XMBHK6NCG3"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "26 HP / 16 Def / 5 SpA / 19 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "XMBHK6NCG3"
-    },
-    {
-      "species": "Aerodactyl",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "XMBHK6NCG3"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "27 HP / 25 Atk / 14 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "XMBHK6NCG3"
-    },
-    {
-      "species": "Delphox",
-      "evs": "4 HP / 30 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "8CDXNTN2BN"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "30 HP / 32 Atk / 1 SpD / 3 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "8CDXNTN2BN"
+      "date": "25 Oct 2026",
+      "replica": "47RPQ8H6X8"
     },
     {
       "species": "Sinistcha",
       "evs": "32 HP / 14 Def / 19 SpD / 1 Spe",
       "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "8CDXNTN2BN"
+      "date": "25 Oct 2026",
+      "replica": "WB89UA0F2Y"
     },
     {
       "species": "Incineroar",
-      "evs": "27 HP / 2 Def / 10 SpD / 27 Spe",
+      "evs": "27 HP / 10 SpD / 29 Spe",
       "nature": "Careful",
-      "date": "12 Oct 2026",
-      "replica": "8CDXNTN2BN"
+      "date": "25 Oct 2026",
+      "replica": "WB89UA0F2Y"
+    },
+    {
+      "species": "Delphox",
+      "evs": "15 HP / 19 Def / 32 Spe",
+      "nature": "Timid",
+      "date": "25 Oct 2026",
+      "replica": "WB89UA0F2Y"
     },
     {
       "species": "Sneasler",
       "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
       "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "8CDXNTN2BN"
+      "date": "25 Oct 2026",
+      "replica": "WB89UA0F2Y"
     },
     {
       "species": "Floette-Eternal",
-      "evs": "17 HP / 22 Def / 5 SpA / 22 Spe",
+      "evs": "20 HP / 20 Def / 7 SpA / 19 Spe",
       "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "8CDXNTN2BN"
-    },
-    {
-      "species": "Arcanine-Hisui",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "C5J7JNM08S"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 5 Atk / 15 SpD / 14 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "C5J7JNM08S"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "27 HP / 7 SpA / 20 SpD / 12 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "C5J7JNM08S"
-    },
-    {
-      "species": "Staraptor",
-      "evs": "28 HP / 2 Atk / 4 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "C5J7JNM08S"
-    },
-    {
-      "species": "Raichu",
-      "evs": "25 HP / 16 Def / 25 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "C5J7JNM08S"
-    },
-    {
-      "species": "Primarina",
-      "evs": "21 HP / 16 Def / 14 SpA / 15 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "C5J7JNM08S"
-    },
-    {
-      "species": "Golisopod",
-      "evs": "31 HP / 10 Atk / 24 SpD / 1 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "E9FSGE1E20"
-    },
-    {
-      "species": "Raichu",
-      "evs": "32 HP / 1 Def / 1 SpD / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "E9FSGE1E20"
-    },
-    {
-      "species": "Pelipper",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "E9FSGE1E20"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "30 HP / 1 Def / 25 SpD / 10 Spe",
-      "nature": "Calm",
-      "date": "12 Oct 2026",
-      "replica": "E9FSGE1E20"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "29 HP / 18 Def / 19 SpD",
-      "nature": "Quiet",
-      "date": "12 Oct 2026",
-      "replica": "E9FSGE1E20"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "32 HP / 10 Def / 1 SpD / 23 Spe",
-      "nature": "Impish",
-      "date": "12 Oct 2026",
-      "replica": "E9FSGE1E20"
-    },
-    {
-      "species": "Ninetales",
-      "evs": "2 Def / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "637PKEXGBS"
-    },
-    {
-      "species": "Annihilape",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "637PKEXGBS"
-    },
-    {
-      "species": "Delphox",
-      "evs": "3 HP / 11 Def / 20 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "637PKEXGBS"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "30 HP / 16 Def / 20 SpD",
-      "nature": "Careful",
-      "date": "12 Oct 2026",
-      "replica": "637PKEXGBS"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 15 Atk / 11 Def / 8 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "637PKEXGBS"
-    },
-    {
-      "species": "Dragonite",
-      "evs": "8 HP / 26 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "637PKEXGBS"
+      "date": "25 Oct 2026",
+      "replica": "WB89UA0F2Y"
     },
     {
       "species": "Kingambit",
-      "evs": "24 HP / 32 Atk / 1 SpD / 9 Spe",
+      "evs": "30 HP / 32 Atk / 1 SpD / 3 Spe",
       "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "1L43FDTM2U"
+      "date": "25 Oct 2026",
+      "replica": "WB89UA0F2Y"
     },
     {
-      "species": "Salamence",
+      "species": "Ninetales-Alola",
       "evs": "2 HP / 32 SpA / 32 Spe",
       "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "1L43FDTM2U"
-    },
-    {
-      "species": "Volcarona",
-      "evs": "29 HP / 16 Def / 20 SpD / 1 Spe",
-      "nature": "Calm",
-      "date": "12 Oct 2026",
-      "replica": "1L43FDTM2U"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 15 Atk / 6 SpD / 13 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "1L43FDTM2U"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "28 HP / 7 Def / 15 SpA / 16 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "1L43FDTM2U"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "17 HP / 10 Atk / 7 SpD / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "1L43FDTM2U"
-    },
-    {
-      "species": "Pelipper",
-      "evs": "31 HP / 2 Def / 32 SpD / 1 Spe",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "5K16F4SV1X"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "32 HP / 1 Def / 3 SpA / 25 SpD / 5 Spe",
-      "nature": "Bold",
-      "date": "12 Oct 2026",
-      "replica": "5K16F4SV1X"
-    },
-    {
-      "species": "Golisopod",
-      "evs": "32 HP / 32 Atk / 2 SpD",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "5K16F4SV1X"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "5K16F4SV1X"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "5 HP / 12 Atk / 17 Def / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "5K16F4SV1X"
-    },
-    {
-      "species": "Basculegion-F",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "5K16F4SV1X"
-    },
-    {
-      "species": "Metagross",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "PK3AF17W7Y"
-    },
-    {
-      "species": "Charizard",
-      "evs": "16 HP / 7 Def / 16 SpA / 27 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "PK3AF17W7Y"
-    },
-    {
-      "species": "Dragapult",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "PK3AF17W7Y"
-    },
-    {
-      "species": "Indeedee",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "PK3AF17W7Y"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "PK3AF17W7Y"
-    },
-    {
-      "species": "Milotic",
-      "evs": "32 HP / 16 Def / 5 SpD / 13 Spe",
-      "nature": "Calm",
-      "date": "12 Oct 2026",
-      "replica": "PK3AF17W7Y"
-    },
-    {
-      "species": "Staraptor",
-      "evs": "1 HP / 32 Atk / 1 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "1RQ00RK04D"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "1RQ00RK04D"
-    },
-    {
-      "species": "Raichu",
-      "evs": "32 HP / 10 Def / 24 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "1RQ00RK04D"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 18 Atk / 12 SpD / 4 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "1RQ00RK04D"
-    },
-    {
-      "species": "Arcanine-Hisui",
-      "evs": "1 HP / 32 Atk / 1 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "1RQ00RK04D"
-    },
-    {
-      "species": "Milotic",
-      "evs": "32 HP / 25 SpA / 9 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "1RQ00RK04D"
-    },
-    {
-      "species": "Dragapult",
-      "evs": "32 Atk / 2 Def / 32 Spe",
-      "nature": "Adamant",
-      "date": "15 Oct 2026",
-      "replica": "3LNRVHHJUB"
-    },
-    {
-      "species": "Gardevoir",
-      "evs": "17 HP / 8 Def / 30 SpA / 11 Spe",
-      "nature": "Modest",
-      "date": "15 Oct 2026",
-      "replica": "3LNRVHHJUB"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "15 Oct 2026",
-      "replica": "3LNRVHHJUB"
+      "date": "26 Oct 2026",
+      "replica": "L2EXSMKPJX"
     },
     {
       "species": "Indeedee-F",
-      "evs": "32 HP / 25 Def / 9 SpD",
-      "nature": "Bold",
-      "date": "15 Oct 2026",
-      "replica": "3LNRVHHJUB"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "32 Atk / 2 Def / 32 Spe",
-      "nature": "Adamant",
-      "date": "15 Oct 2026",
-      "replica": "3LNRVHHJUB"
-    },
-    {
-      "species": "Charizard",
-      "evs": "12 HP / 14 Def / 16 SpA / 24 Spe",
-      "nature": "Timid",
-      "date": "15 Oct 2026",
-      "replica": "3LNRVHHJUB"
+      "evs": "32 HP / 32 Def / 2 SpD",
+      "nature": "Relaxed",
+      "date": "26 Oct 2026",
+      "replica": "L2EXSMKPJX"
     },
     {
       "species": "Salamence",
-      "evs": "1 HP / 1 Atk / 32 SpA / 32 Spe",
-      "nature": "Naive",
-      "date": "12 Oct 2026",
-      "replica": "Q7CS64N6GL"
-    },
-    {
-      "species": "Starmie",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "12 Oct 2026",
-      "replica": "Q7CS64N6GL"
-    },
-    {
-      "species": "Pelipper",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "12 Oct 2026",
-      "replica": "Q7CS64N6GL"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "32 HP / 5 SpA / 26 SpD / 3 Spe",
-      "nature": "Modest",
-      "date": "12 Oct 2026",
-      "replica": "Q7CS64N6GL"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "26 HP / 25 Atk / 5 Def / 5 SpD / 5 Spe",
-      "nature": "Adamant",
-      "date": "12 Oct 2026",
-      "replica": "Q7CS64N6GL"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "31 HP / 20 Def / 13 SpD / 2 Spe",
-      "nature": "Careful",
-      "date": "12 Oct 2026",
-      "replica": "Q7CS64N6GL"
+      "evs": "19 HP / 5 Atk / 18 SpD / 24 Spe",
+      "nature": "Hasty",
+      "date": "26 Oct 2026",
+      "replica": "L2EXSMKPJX"
     },
     {
       "species": "Blaziken",
-      "evs": "14 HP / 20 Atk / 1 Def / 1 SpD / 30 Spe",
+      "evs": "4 HP / 30 Atk / 32 Spe",
       "nature": "Adamant",
-      "date": "22 Oct 2026",
-      "replica": "XRYULNM61Y"
+      "date": "26 Oct 2026",
+      "replica": "L2EXSMKPJX"
     },
     {
       "species": "Kingambit",
-      "evs": "32 HP / 17 Atk / 16 Def / 1 Spe",
+      "evs": "2 HP / 32 Atk / 32 Spe",
       "nature": "Adamant",
-      "date": "22 Oct 2026",
-      "replica": "XRYULNM61Y"
+      "date": "26 Oct 2026",
+      "replica": "L2EXSMKPJX"
     },
     {
-      "species": "Primarina",
-      "evs": "24 HP / 28 Def / 14 SpA",
-      "nature": "Quiet",
-      "date": "22 Oct 2026",
-      "replica": "XRYULNM61Y"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "24 HP / 30 Def / 12 SpD",
-      "nature": "Bold",
-      "date": "22 Oct 2026",
-      "replica": "XRYULNM61Y"
-    },
-    {
-      "species": "Torkoal",
-      "evs": "32 HP / 32 SpA / 2 SpD",
-      "nature": "Quiet",
-      "date": "22 Oct 2026",
-      "replica": "XRYULNM61Y"
-    },
-    {
-      "species": "Venusaur",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "22 Oct 2026",
-      "replica": "XRYULNM61Y"
-    },
-    {
-      "species": "Beedrill",
-      "evs": "1 HP / 32 Atk / 1 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "18 Oct 2026",
-      "replica": "4KWLQW2D2E"
-    },
-    {
-      "species": "Sceptile",
-      "evs": "2 Def / 32 SpA / 32 Spe",
+      "species": "Gengar",
+      "evs": "14 HP / 20 SpA / 32 Spe",
       "nature": "Timid",
-      "date": "18 Oct 2026",
-      "replica": "4KWLQW2D2E"
+      "date": "26 Oct 2026",
+      "replica": "L2EXSMKPJX"
     },
     {
-      "species": "Archaludon",
-      "evs": "32 HP / 5 SpA / 26 SpD / 3 Spe",
+      "species": "Floette-Eternal",
+      "evs": "16 HP / 12 Def / 29 SpA / 9 Spe",
       "nature": "Modest",
-      "date": "18 Oct 2026",
-      "replica": "4KWLQW2D2E"
+      "date": "24 Oct 2026",
+      "replica": "0790HHX12R"
     },
     {
-      "species": "Pelipper",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "18 Oct 2026",
-      "replica": "4KWLQW2D2E"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "31 HP / 20 Def / 13 SpD / 2 Spe",
-      "nature": "Careful",
-      "date": "18 Oct 2026",
-      "replica": "4KWLQW2D2E"
+      "species": "Kingambit",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Adamant",
+      "date": "24 Oct 2026",
+      "replica": "0790HHX12R"
     },
     {
       "species": "Rillaboom",
-      "evs": "26 HP / 25 Atk / 5 Def / 5 SpD / 5 Spe",
+      "evs": "22 HP / 15 Atk / 1 Def / 14 SpD / 14 Spe",
       "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "4KWLQW2D2E"
+      "date": "24 Oct 2026",
+      "replica": "0790HHX12R"
     },
     {
-      "species": "Hawlucha",
-      "evs": "32 Atk / 2 Def / 32 Spe",
+      "species": "Aerodactyl",
+      "evs": "16 HP / 12 Atk / 1 Def / 11 SpD / 26 Spe",
       "nature": "Jolly",
-      "date": "16 Oct 2026",
-      "replica": "X08YRXV2LU"
-    },
-    {
-      "species": "Drampa",
-      "evs": "24 HP / 17 Def / 25 SpA",
-      "nature": "Modest",
-      "date": "16 Oct 2026",
-      "replica": "X08YRXV2LU"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "18 HP / 15 Atk / 30 SpD / 3 Spe",
-      "nature": "Adamant",
-      "date": "16 Oct 2026",
-      "replica": "X08YRXV2LU"
-    },
-    {
-      "species": "Hippowdon",
-      "evs": "25 HP / 22 Def / 19 SpD",
-      "nature": "Impish",
-      "date": "16 Oct 2026",
-      "replica": "X08YRXV2LU"
-    },
-    {
-      "species": "Glimmora",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "16 Oct 2026",
-      "replica": "X08YRXV2LU"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "32 HP / 31 Atk / 1 Def / 2 Spe",
-      "nature": "Adamant",
-      "date": "16 Oct 2026",
-      "replica": "X08YRXV2LU"
-    },
-    {
-      "species": "Armarouge",
-      "evs": "32 HP / 2 Def / 32 SpA",
-      "nature": "Quiet",
-      "date": "15 Oct 2026",
-      "replica": "58SF7GD3WV"
-    },
-    {
-      "species": "Mawile",
-      "evs": "32 HP / 32 Atk / 2 Def",
-      "nature": "Brave",
-      "date": "15 Oct 2026",
-      "replica": "58SF7GD3WV"
-    },
-    {
-      "species": "Indeedee-F",
-      "evs": "32 HP / 25 Def / 9 SpD",
-      "nature": "Relaxed",
-      "date": "15 Oct 2026",
-      "replica": "58SF7GD3WV"
-    },
-    {
-      "species": "Torkoal",
-      "evs": "32 HP / 1 Def / 32 SpA / 1 SpD",
-      "nature": "Quiet",
-      "date": "15 Oct 2026",
-      "replica": "58SF7GD3WV"
-    },
-    {
-      "species": "Hatterene",
-      "evs": "32 HP / 2 Def / 32 SpA",
-      "nature": "Quiet",
-      "date": "15 Oct 2026",
-      "replica": "58SF7GD3WV"
-    },
-    {
-      "species": "Decidueye-Hisui",
-      "evs": "32 HP / 32 Atk / 2 SpD",
-      "nature": "Brave",
-      "date": "15 Oct 2026",
-      "replica": "58SF7GD3WV"
-    },
-    {
-      "species": "Vivillon",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "15 Oct 2026",
-      "replica": "2Q2G3VQG8L"
-    },
-    {
-      "species": "Raichu",
-      "evs": "28 HP / 5 Def / 10 SpD / 23 Spe",
-      "nature": "Timid",
-      "date": "15 Oct 2026",
-      "replica": "2Q2G3VQG8L"
-    },
-    {
-      "species": "Golisopod",
-      "evs": "32 HP / 32 Atk / 2 SpD",
-      "nature": "Adamant",
-      "date": "15 Oct 2026",
-      "replica": "2Q2G3VQG8L"
-    },
-    {
-      "species": "Pelipper",
-      "evs": "32 HP / 32 SpA / 2 Spe",
-      "nature": "Modest",
-      "date": "15 Oct 2026",
-      "replica": "2Q2G3VQG8L"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "32 HP / 1 Def / 1 SpA / 25 SpD / 7 Spe",
-      "nature": "Bold",
-      "date": "15 Oct 2026",
-      "replica": "2Q2G3VQG8L"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "25 HP / 30 Def / 11 SpD",
-      "nature": "Relaxed",
-      "date": "15 Oct 2026",
-      "replica": "2Q2G3VQG8L"
-    },
-    {
-      "species": "Charizard",
-      "evs": "24 HP / 16 Def / 9 SpA / 17 Spe",
-      "nature": "Modest",
-      "date": "14 Oct 2026",
-      "replica": "FKCY78DKWR"
-    },
-    {
-      "species": "Whimsicott",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "14 Oct 2026",
-      "replica": "FKCY78DKWR"
-    },
-    {
-      "species": "Gholdengo",
-      "evs": "13 HP / 18 Def / 14 SpA / 21 Spe",
-      "nature": "Timid",
-      "date": "14 Oct 2026",
-      "replica": "FKCY78DKWR"
-    },
-    {
-      "species": "Glimmora",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "14 Oct 2026",
-      "replica": "FKCY78DKWR"
-    },
-    {
-      "species": "Staraptor",
-      "evs": "15 HP / 23 Atk / 28 Spe",
-      "nature": "Jolly",
-      "date": "14 Oct 2026",
-      "replica": "FKCY78DKWR"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "32 Atk / 2 Def / 32 Spe",
-      "nature": "Jolly",
-      "date": "14 Oct 2026",
-      "replica": "FKCY78DKWR"
-    },
-    {
-      "species": "Dragonite",
-      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-      "nature": "Modest",
-      "date": "14 Oct 2026",
-      "replica": "7ATL96V93J"
-    },
-    {
-      "species": "Froslass",
-      "evs": "26 HP / 2 Def / 5 SpA / 1 SpD / 32 Spe",
-      "nature": "Timid",
-      "date": "14 Oct 2026",
-      "replica": "7ATL96V93J"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "14 Oct 2026",
-      "replica": "7ATL96V93J"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "14 Oct 2026",
-      "replica": "7ATL96V93J"
-    },
-    {
-      "species": "Baxcalibur",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "14 Oct 2026",
-      "replica": "7ATL96V93J"
+      "date": "24 Oct 2026",
+      "replica": "0790HHX12R"
     },
     {
       "species": "Garchomp",
-      "evs": "2 HP / 31 Atk / 1 SpD / 32 Spe",
+      "evs": "5 HP / 30 Atk / 1 Def / 1 SpD / 29 Spe",
       "nature": "Adamant",
-      "date": "14 Oct 2026",
-      "replica": "7ATL96V93J"
+      "date": "24 Oct 2026",
+      "replica": "0790HHX12R"
     },
     {
-      "species": "Pelipper",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "14 Oct 2026",
-      "replica": "0PJRTPUDRQ"
-    },
-    {
-      "species": "Archaludon",
-      "evs": "27 HP / 6 Def / 1 SpA / 32 SpD",
-      "nature": "Calm",
-      "date": "14 Oct 2026",
-      "replica": "0PJRTPUDRQ"
-    },
-    {
-      "species": "Greninja",
-      "evs": "15 Atk / 19 SpA / 32 Spe",
-      "nature": "Mild",
-      "date": "14 Oct 2026",
-      "replica": "0PJRTPUDRQ"
-    },
-    {
-      "species": "Swampert",
-      "evs": "12 HP / 32 SpA / 22 Spe",
-      "nature": "Modest",
-      "date": "14 Oct 2026",
-      "replica": "0PJRTPUDRQ"
-    },
-    {
-      "species": "Talonflame",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "14 Oct 2026",
-      "replica": "0PJRTPUDRQ"
-    },
-    {
-      "species": "Tsareena",
-      "evs": "24 HP / 12 Atk / 30 Spe",
-      "nature": "Jolly",
-      "date": "14 Oct 2026",
-      "replica": "0PJRTPUDRQ"
+      "species": "Volcarona",
+      "evs": "32 HP / 25 Def / 1 SpD / 8 Spe",
+      "nature": "Bold",
+      "date": "24 Oct 2026",
+      "replica": "0790HHX12R"
     }
   ]
 }

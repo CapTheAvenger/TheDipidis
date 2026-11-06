@@ -7,11 +7,11 @@
 "letztes_wort": "data/champions_namen_entschieden.json"
 },
 "counts": {
-"moves": 928,
+"moves": 930,
 "items": 581
 },
 "aus_entscheidungsdatei": {
-"moves": 2,
+"moves": 4,
 "items": 48
 }
 },
@@ -304,6 +304,7 @@
 "Freeze-Dry": "Gefriertrockner",
 "Freezing Glare": "Eisiger Blick",
 "Freezy Frost": "Klirrfrost",
+"Frenzy Plant": "Flora-Statue",
 "Frost Breath": "Eisesodem",
 "Frustration": "Frustration",
 "Fury Attack": "Furienschlag",
@@ -606,6 +607,7 @@
 "Poison Fang": "Giftzahn",
 "Poison Gas": "Giftwolke",
 "Poison Jab": "Gifthieb",
+"Poison Powder": "Giftpuder",
 "Poison Sting": "Giftstachel",
 "Poison Tail": "Giftschweif",
 "Pollen Puff": "Pollenknödel",

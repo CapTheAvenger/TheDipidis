@@ -13,11 +13,10 @@
   "aus_mega": [],
   "aus_teams": [
    "Basculegion-F",
-   "Indeedee",
    "Indeedee-F",
    "Sirfetch’d"
   ],
-  "aus_teams_count": 4,
+  "aus_teams_count": 3,
   "aus_teams_ohne_werte": [],
   "geschlechtsformen": [
    "Meowstic-F"
@@ -28,10 +27,11 @@
    "Gourgeist-Large",
    "Gourgeist-Small",
    "Gourgeist-Super",
+   "Indeedee",
    "Squawkabilly-Yellow",
    "Toxtricity"
   ],
-  "aus_nutzung_count": 6,
+  "aus_nutzung_count": 7,
   "aus_nutzung_ohne_werte": []
  },
  "smogonKeys": [
@@ -366,12 +366,12 @@
   "Indeedee-F",
   "Sirfetch’d",
   "Basculegion-F",
-  "Indeedee",
   "Meowstic-F",
   "Farfetch’d",
   "Gourgeist-Large",
   "Gourgeist-Small",
   "Gourgeist-Super",
+  "Indeedee",
   "Squawkabilly-Yellow",
   "Toxtricity",
   "Tauros-Paldea-Blaze",

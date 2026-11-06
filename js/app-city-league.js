@@ -1946,6 +1946,8 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             const p = fetch(`${url}?t=${Date.now()}`)
                 .then(r => r.ok ? r.text() : null)
                 .then(text => text ? parseCSV(text) : [])
+                // UI-161: Legendary-Stadien auf beide Haelften verteilen (app-utils.js).
+                .then(data => (typeof legendaryHaelftenAufteilen === 'function' ? legendaryHaelftenAufteilen(data) : data))
                 .then(data => {
                     // Only publish as the active dataset when the user is still
                     // on the format this fetch was started for.
@@ -2064,6 +2066,7 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
 
             if (!data) {
                 data = analysisText ? await fetchAndParseCSV(analysisUrl) : null;
+                if (data && typeof legendaryHaelftenAufteilen === 'function') data = legendaryHaelftenAufteilen(data);  // UI-161
             }
             const archetypesData = archetypesText ? await fetchAndParseCSV(archetypesUrl) : null;
             _captureKnownCityLeagueTournamentIds(archetypesData);
@@ -3246,8 +3249,14 @@ function cityLeagueOffSeasonHtml(istVergangenheit) {
             
             filteredCards.forEach(row => {
                 const cardNameRaw = String(row.card_name || row.full_card_name || '').trim();
-                const cardName = normalizeCardAggregationKey(cardNameRaw);
-                if (!cardName) return;
+                const cardNameKey = normalizeCardAggregationKey(cardNameRaw);
+                if (!cardNameKey) return;
+                /* UI-161: die beiden Haelften eines Legendary-Stadions tragen denselben Namen, sind aber zwei
+                   Karten (je hoechstens 2). Ueber den Namen zusammengefasst wurde M6 75 nie gezeigt und die
+                   Menge stand wieder bei 4 — hier zaehlt (Set, Nummer). */
+                const cardName = (typeof istLegendaryStadion === 'function' && istLegendaryStadion(row.set_code, row.set_number))
+                    ? cardNameKey + '|' + String(row.set_code || '').trim().toUpperCase() + ' ' + String(row.set_number || '').trim().replace(/^0+(?=\d)/, '')
+                    : cardNameKey;
                 
                 if (!cardMap.has(cardName)) {
                     const rowWithDisplayName = { ...row, card_name: cardNameRaw || row.card_name || '' };

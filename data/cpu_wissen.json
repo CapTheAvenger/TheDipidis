@@ -48,18 +48,6 @@
         "Dudunsparce"
       ],
       "quelle": "Massentest 06.11.2026 (scripts/cpu-lernen.ts, Auftrag Hausi): angreifer Mega Lopunny ex, Dudunsparce hebt die Siegquote CPU gegen CPU von 40 % auf 46.3 % (je 160 Partien gegen alle 20 Meta-Vorlagen, gleiche Startwerte, Schwelle 5 Punkte)."
-    },
-    "Basic Box": {
-      "angreifer": [
-        "Mega Kangaskhan ex"
-      ],
-      "quelle": "Massentest 06.11.2026 (scripts/cpu-lernen.ts, Modus matchups, dann Bestätigungslauf pruefe mit frischen Startwerten; Auftrag Hausi): angreifer Mega Kangaskhan ex hebt die Siegquote CPU gegen CPU von 33.6 % auf 49.7 % (je 336 Partien gegen alle 21 Meta-Vorlagen, Schwelle 5 Punkte)."
-    },
-    "Ogerpon Meganium Hydrapple": {
-      "angreifer": [
-        "Teal Mask Ogerpon ex"
-      ],
-      "quelle": "Massentest 06.11.2026 (scripts/cpu-lernen.ts, Modus matchups, dann Bestätigungslauf pruefe mit frischen Startwerten; Auftrag Hausi): angreifer Teal Mask Ogerpon ex hebt die Siegquote CPU gegen CPU von 41.4 % auf 49.1 % (je 336 Partien gegen alle 21 Meta-Vorlagen, Schwelle 5 Punkte)."
     }
   },
   "matchups": {}

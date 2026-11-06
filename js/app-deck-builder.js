@@ -658,8 +658,12 @@ if (typeof window.addEventListener === 'function') {
                 window[deckOrderKey] = [];
             }
 
+            // UI-161: die zwei Haelften eines Legendary-Stadions sind getrennte Karten (je hoechstens 2)
+            // mit demselben Namen — nie ueber den Namen zusammenlegen, keine Namens-Vorliebe setzen.
+            const legendaryHaelfte = typeof istLegendaryStadion === 'function' && istLegendaryStadion(setCode, setNumber);
+
             // When auto-generating, save version preference
-            if (setCode && setNumber) {
+            if (setCode && setNumber && !legendaryHaelfte) {
                 setRarityPreference(cardName, {
                     mode: 'specific',
                     set: setCode,
@@ -673,6 +677,8 @@ if (typeof window.addEventListener === 'function') {
             let existingKey = null;
             if (deck[deckKey]) {
                 existingKey = deckKey;
+            } else if (legendaryHaelfte) {
+                existingKey = null;
             } else if (deck[cardName]) {
                 existingKey = cardName;
             } else {
@@ -726,6 +732,9 @@ if (typeof window.addEventListener === 'function') {
             const isAceSpecCard = isAceSpec(cardName);
             
             // Check limits (silent fail for batch)
+            if (legendaryHaelfte && deck[deckKey] >= 2) {
+                return false;
+            }
             if (!isBaseEnergy && !isAceSpecCard && deck[deckKey] >= 4) {
                 return false;
             }
@@ -870,7 +879,9 @@ if (typeof window.addEventListener === 'function') {
 
             // CRITICAL FIX: When user manually adds a card with specific version, save it as preference
             // This ensures the exact version shows up in the deck (not auto-swapped to low rarity)
-            if (setCode && setNumber) {
+            // UI-161: Legendary-Haelften getrennt halten (siehe addCardToDeckBatch).
+            const legendaryHaelfte = typeof istLegendaryStadion === 'function' && istLegendaryStadion(setCode, setNumber);
+            if (setCode && setNumber && !legendaryHaelfte) {
                 setRarityPreference(cardName, {
                     mode: 'specific',
                     set: setCode,
@@ -887,6 +898,8 @@ if (typeof window.addEventListener === 'function') {
             let existingKey = null;
             if (deck[deckKey]) {
                 existingKey = deckKey; // Exact match
+            } else if (legendaryHaelfte) {
+                existingKey = null;
             } else if (deck[cardName]) {
                 existingKey = cardName; // Card exists without version
             } else {
@@ -946,6 +959,10 @@ if (typeof window.addEventListener === 'function') {
             const isAceSpecCard = isAceSpec(cardName);
             
             // Check if card already has 4 copies (only applies to non-energy, non-ace-spec cards)
+            if (legendaryHaelfte && deck[deckKey] >= 2) {
+                showToast(t('deck.maxCopies'), 'warning');
+                return;
+            }
             if (!isBaseEnergy && !isAceSpecCard && deck[deckKey] >= 4) {
                 showToast(t('deck.maxCopies'), 'warning');
                 return;
@@ -2701,10 +2718,17 @@ if (typeof window.addEventListener === 'function') {
 
             function getCardAggregationKey(card) {
                 const rawName = card?.card_name || card?.name || '';
-                if (typeof normalizeCardName === 'function') {
-                    return normalizeCardName(rawName);
+                const nameKey = (typeof normalizeCardName === 'function')
+                    ? normalizeCardName(rawName)
+                    : String(rawName || '').toLowerCase().trim();
+                /* UI-161: die zwei Haelften eines Legendary-Stadions tragen denselben Namen, sind aber zwei
+                   Karten — ueber den Namen dedupliziert verschwand M6 75 aus der Kartenuebersicht. */
+                const setCode = card?.set_code || card?.set || '';
+                const setNumber = card?.set_number || card?.number || '';
+                if (typeof istLegendaryStadion === 'function' && istLegendaryStadion(setCode, setNumber)) {
+                    return nameKey + '|' + String(setCode).trim().toUpperCase() + ' ' + String(setNumber).trim().replace(/^0+(?=\d)/, '');
                 }
-                return String(rawName || '').toLowerCase().trim();
+                return nameKey;
             }
 
             function getCanonicalDisplayName(card) {
@@ -9621,6 +9645,17 @@ if (typeof window.addEventListener === 'function') {
                         sum_avg_count: avgCountValue, count_entries: 1,
                         max_count: parseInt(card.max_count || 0)
                     };
+                } else if (typeof istLegendaryStadion === 'function'
+                    && istLegendaryStadion(card.set_code, card.set_number)
+                    && istLegendaryStadion(uniqueCards[cardName].set_code, uniqueCards[cardName].set_number)
+                    && String(card.set_number).trim() !== String(uniqueCards[cardName].set_number).trim()) {
+                    /* UI-161: zweite Haelfte desselben Legendary-Stadions. Dieselben Listen spielen BEIDE
+                       Haelften: die Listenzahl bleibt, Menge, Schnitt und Hoechstzahl addieren sich (2 + 2 = 4
+                       je Name). Verteilt wird nach dem Bau wieder auf beide Nummern (siehe unten). */
+                    uniqueCards[cardName].deck_count = Math.max(uniqueCards[cardName].deck_count, deckCountValue);
+                    uniqueCards[cardName].total_count += totalCountValue;
+                    uniqueCards[cardName].sum_avg_count += avgCountValue;
+                    uniqueCards[cardName].max_count = parseInt(uniqueCards[cardName].max_count || 0) + parseInt(card.max_count || 0);
                 } else {
                     uniqueCards[cardName].deck_count += deckCountValue;
                     uniqueCards[cardName].total_count += totalCountValue;
@@ -11702,6 +11737,10 @@ if (typeof window.addEventListener === 'function') {
                 return { ...entry.card, addCount: entry.count };
             });
 
+            // UI-161: ein Legendary-Stadion steht im Bau als EINE Karte (4 je Name). Gespielt wird es als
+            // zwei Haelften, je hoechstens 2 — hier auf beide Nummern verteilen (Summe bleibt gleich).
+            if (typeof legendaryHaelftenImDeck === 'function') cardsToAdd = legendaryHaelftenImDeck(cardsToAdd);
+
             // Keep output deterministic
             cardsToAdd.sort((a, b) => {
                 if (b.consistencyScore !== a.consistencyScore) return b.consistencyScore - a.consistencyScore;
@@ -11925,7 +11964,12 @@ if (typeof window.addEventListener === 'function') {
                     if (!cardName) return;
                     const originalSetCode = card.set_code || '';
                     const originalSetNumber = card.set_number || '';
-                    const preferredVersion = getPreferredVersionForCard(cardName, originalSetCode, originalSetNumber);
+                    // UI-161: die Druckwahl geht ueber den Namen und wuerde beide Legendary-Haelften auf
+                    // EINE Nummer legen — fuer sie gilt die Nummer aus der Verteilung.
+                    const istHaelfte = typeof istLegendaryStadion === 'function'
+                        && istLegendaryStadion(originalSetCode, originalSetNumber);
+                    const preferredVersion = istHaelfte ? null
+                        : getPreferredVersionForCard(cardName, originalSetCode, originalSetNumber);
                     let setCode, setNumber;
                     if (preferredVersion) {
                         setCode = preferredVersion.set;

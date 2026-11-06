@@ -642,6 +642,109 @@ function showTableSkeleton(containerOrId, opts) {
             return istLegendaryStadion(setCode, setNumber) && Number(rawMax) > 2 ? 0.5 : 1;
         }
 
+        /* UI-161 (Hausi, 06.11.2026): „im Deck taucht die zweite Haelfte nicht auf“. Die Japan-Zeilen
+           buchen die ganze Menge eines Legendary-Stadions (bis 4) auf EINE Nummer und die Partnerhaelfte
+           fehlt ganz (gemessen 02.11.: in 179 Gruppen nie beide). Hier wird jede solche Zeile beim Laden
+           auf das Paar verteilt: die Haelfte der Menge auf die eigene Nummer, die andere Haelfte auf die
+           Partnernummer (71/72, 73/74, 75/76 — beide Karten tragen denselben Namen, Bild nach demselben
+           Muster). Steht die Partnerhaelfte in derselben Gruppe schon in den Daten, bleibt alles, wie es ist.
+           Danach gilt fuer jede Nummer hoechstens 2, und Kartenuebersicht, „Dein Deck“, Max Consistency und
+           „nur in Japan“ sehen dasselbe. Erkannt wird ueber (Set, Nummer), nie ueber den Namen. */
+        function legendaryPartnerNummer(setNumber) {
+            const n = parseInt(String(setNumber == null ? '' : setNumber).trim(), 10);
+            if (!Number.isFinite(n)) return '';
+            return String(n % 2 ? n + 1 : n - 1);
+        }
+        function legendaryHaelftenAufteilen(zeilen) {
+            if (!Array.isArray(zeilen) || zeilen._legendaryGeteilt) return zeilen;
+            const zahl = (v) => { const x = parseFloat(String(v == null ? '' : v).replace(',', '.')); return Number.isFinite(x) ? x : NaN; };
+            const schreib = (x, vorlage) => {
+                if (!Number.isFinite(x)) return vorlage;
+                const s = String(Math.round(x * 100) / 100);
+                return String(vorlage == null ? '' : vorlage).indexOf('.') !== -1 ? s : s.replace('.', ',');
+            };
+            const nr = (r) => String(r.set_number == null ? '' : r.set_number).trim().replace(/^0+(?=\d)/, '');
+            const gruppe = (r) => [r.period, r.archetype, r.tournament_id, r.date, r.meta].join('|');
+            const vorhanden = new Set();
+            zeilen.forEach((r) => {
+                if (r && istLegendaryStadion(r.set_code, r.set_number)) vorhanden.add(gruppe(r) + '|' + nr(r));
+            });
+            if (!vorhanden.size) return zeilen;
+            const aus = [];
+            zeilen.forEach((r) => {
+                if (!r || !istLegendaryStadion(r.set_code, r.set_number)) { aus.push(r); return; }
+                const eigen = nr(r);
+                const partner = legendaryPartnerNummer(eigen);
+                if (!partner || vorhanden.has(gruppe(r) + '|' + partner)) { aus.push(r); return; }
+                const halb = Object.assign({}, r);
+                ['total_count', 'average_count', 'average_count_overall', 'avg_count'].forEach((f) => {
+                    if (f in r) halb[f] = schreib(zahl(r[f]) / 2, r[f]);
+                });
+                if ('max_count' in r) {
+                    const m = zahl(r.max_count);
+                    halb.max_count = Number.isFinite(m) ? String(Math.ceil(m / 2)) : r.max_count;
+                }
+                const set = String(r.set_code || '').trim();
+                const gegen = Object.assign({}, halb, {
+                    set_number: partner,
+                    card_identifier: set + ' ' + partner,
+                    image_url: String(r.image_url || '').replace(new RegExp('_' + eigen + '_'), '_' + partner + '_'),
+                });
+                aus.push(halb, gegen);
+            });
+            Object.defineProperty(aus, '_legendaryGeteilt', { value: true });
+            return aus;
+        }
+        /* UI-161: Verteilung im fertigen Deck. Eintraege { set_code, set_number, image_url, addCount, … }.
+           Steht ein Legendary-Stadion nur mit EINER Nummer im Deck, wird die Menge auf beide Haelften
+           verteilt, je hoechstens 2 und immer als volles Paar; die Summe bleibt. Die Eingabe wird nicht veraendert. */
+        function legendaryHaelftenImDeck(eintraege) {
+            if (!Array.isArray(eintraege)) return eintraege;
+            const nr = (e) => String(e && e.set_number != null ? e.set_number : '').trim().replace(/^0+(?=\d)/, '');
+            const imDeck = new Set(eintraege
+                .filter((e) => e && istLegendaryStadion(e.set_code, e.set_number))
+                .map((e) => String(e.set_code).trim().toUpperCase() + ' ' + nr(e)));
+            const aus = [];
+            let mehr = 0;
+            eintraege.forEach((e) => {
+                if (!e || !istLegendaryStadion(e.set_code, e.set_number)) { aus.push(e ? Object.assign({}, e) : e); return; }
+                const eigen = nr(e);
+                const partner = legendaryPartnerNummer(eigen);
+                const set = String(e.set_code).trim().toUpperCase();
+                const n = Number(e.addCount) || 0;
+                if (!partner || imDeck.has(set + ' ' + partner) || n < 1) { aus.push(e); return; }
+                /* Eine Haelfte allein ist im Spiel nutzlos: ungerade Mengen werden auf ein volles Paar
+                   aufgerundet (1 -> 1+1, 3 -> 2+2); die zusaetzliche Karte faellt unten bei der Karte mit
+                   dem niedrigsten Wert weg, damit die Summe gleich bleibt. */
+                const je = Math.min(2, Math.ceil(n / 2));
+                mehr += 2 * je - n;
+                aus.push(Object.assign({}, e, { addCount: je }));
+                aus.push(Object.assign({}, e, {
+                    set_number: partner,
+                    card_identifier: set + ' ' + partner,
+                    image_url: String(e.image_url || '').replace(new RegExp('_' + eigen + '_'), '_' + partner + '_'),
+                    addCount: je,
+                }));
+            });
+            const wert = (e) => (Number.isFinite(e.consistencyScore) ? e.consistencyScore
+                : parseFloat(String(e.sharePercent != null ? e.sharePercent : (e.percentage_in_archetype || 0)).replace(',', '.')) || 0);
+            while (mehr > 0) {
+                let schwach = null;
+                aus.forEach((e) => {
+                    if (!e || (Number(e.addCount) || 0) < 1 || istLegendaryStadion(e.set_code, e.set_number)) return;
+                    if (!schwach || wert(e) < wert(schwach)) schwach = e;
+                });
+                if (!schwach) break;
+                schwach.addCount -= 1;
+                mehr -= 1;
+            }
+            return aus.filter((e) => !e || !('addCount' in e) || e.addCount > 0);
+        }
+        if (typeof window !== 'undefined') {
+            window.legendaryHaelftenAufteilen = legendaryHaelftenAufteilen;
+            window.legendaryHaelftenImDeck = legendaryHaelftenImDeck;
+        }
+
         function getLegalMaxCopies(cardNameOrCard, fallbackCard = null) {
             const cardLike = (typeof cardNameOrCard === 'string')
                 ? (fallbackCard || { card_name: cardNameOrCard, name: cardNameOrCard })

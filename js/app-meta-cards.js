@@ -320,6 +320,7 @@ function _mcKartenQuotenHinweis(id) {
                     if (!analysisResponse.ok) throw new Error('Failed to load analysis data');
                     const analysisText = await analysisResponse.text();
                     allAnalysisData = parseCSV(analysisText);
+                    if (typeof legendaryHaelftenAufteilen === 'function') allAnalysisData = legendaryHaelftenAufteilen(allAnalysisData);  // UI-161
                 }
 
                 if (isPastCl) {

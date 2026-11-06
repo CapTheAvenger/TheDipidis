@@ -643,6 +643,59 @@ def unmoegliche_bloecke(pokemon):
 
 CSV_VERSUCHE_JE_FORMAT = 3
 
+# ── Duenne Bloecke: die Quelle liefert mitten im Umbau ───────────────
+#
+# VP-01 (gemessen 06.11.2026 am Tor-Artefakt von Lauf 41971828519):
+# die Saison-Gesamtdatei "Current" trug am 05.11. um 04:01 und 05:07 UTC
+# fuer 54 von 263 Pokemon im Doppel nur noch eine Handvoll Partien —
+# ein Item mit 100 %, vier Attacken, eine Wesensart (Baxcalibur: Focus
+# Sash 100 % statt Baxcalibrite 62,5 %, 13 statt 40 Zeilen). Um 00:40
+# UTC am 06.11. waren dieselben Dateien wieder voll (Baxcalibrite
+# 47,4 %, 8 Items). Der Scraper nahm den duennen Stand, der Pokedex-Bau
+# fand fuer neun Mega-Formen keinen Stein mehr in der Grundform, und
+# „fast jede Mega-Form hat jetzt Nutzungsdaten" wurde rot.
+#
+# Die Regel: ein Block, der weniger als DUENN_ANTEIL der Zeilen seines
+# Vorgaengers traegt, ist keine neue Verteilung, sondern eine Stichprobe
+# — er bleibt auf dem alten Stand und sagt das in `_warnungen`. Gemessen
+# an vier normalen Tagesuebergaengen (24.–26.10.2026): 0 Treffer; am
+# Stand vom 05.11.: 103 Bloecke. Die uebrigen Bloecke werden normal
+# frisch — die Datei steht nicht wegen 103 Bloecken still.
+DUENN_ANTEIL = 0.5
+BLOCK_KATEGORIEN = ("move", "held_item", "teammate", "nature", "stat_points", "ability")
+
+
+def block_zeilen(block):
+    """Zahl der Listenzeilen eines Formatblocks ueber alle Kategorien."""
+    return sum(len((block or {}).get(k) or []) for k in BLOCK_KATEGORIEN)
+
+
+def duenne_bloecke_behalten(pokemon, frueher, stand_alt=None):
+    """Ersetzt duenne Formatbloecke durch ihren Vorgaenger (siehe oben).
+
+    `frueher` ist der committete `pokemon`-Teil. Gibt die Liste der
+    behaltenen (slug, format, zeilen_alt, zeilen_neu) zurueck; die Bloecke
+    tragen danach `_warnungen` mit dem Grund und dem Datum des Standes.
+    """
+    behalten = []
+    for slug, rec in (pokemon or {}).items():
+        alt = (frueher or {}).get(slug) or {}
+        for fmt in ("doubles", "singles"):
+            neu_block, alt_block = rec.get(fmt), alt.get(fmt)
+            if not isinstance(neu_block, dict) or not isinstance(alt_block, dict):
+                continue
+            z_alt, z_neu = block_zeilen(alt_block), block_zeilen(neu_block)
+            if z_alt <= 0 or z_neu >= z_alt * DUENN_ANTEIL:
+                continue
+            ersatz = json.loads(json.dumps(alt_block))
+            ersatz.setdefault("_warnungen", []).append(
+                "Stichprobe zu duenn: die Quelle lieferte %d statt %d Zeilen; "
+                "Block vom Stand %s behalten (VP-01)"
+                % (z_neu, z_alt, stand_alt or "unbekannt"))
+            rec[fmt] = ersatz
+            behalten.append((slug, fmt, z_alt, z_neu))
+    return behalten
+
 
 def _ref_datum(ref):
     """'09_10_2026' -> (2026, 10, 9); ohne Datum -> (0, 0, 0)."""
@@ -839,9 +892,11 @@ def main():
     # snapshot. If we got noticeably fewer than last time, keep the committed
     # file (the workflow's fail-soft restores it on a non-zero exit).
     try:
-        frueher_da = set(json.load(open(OUT, encoding="utf-8")).get("pokemon") or {})
+        frueher_datei = json.load(open(OUT, encoding="utf-8"))
     except Exception:  # noqa: BLE001
-        frueher_da = set()
+        frueher_datei = {}
+    frueher = frueher_datei.get("pokemon") or {}
+    frueher_da = set(frueher)
     prev = len(frueher_da)
     # Der Vergleichswert ist nicht die alte Gesamtzahl, sondern die alte
     # Gesamtzahl OHNE die Eintraege, die es an der Quelle nicht mehr gibt.
@@ -882,6 +937,16 @@ def main():
               f"(previous {prev}, {len(entfallen)} von der Quelle entfernt) — "
               f"likely rate-limited; keeping committed JSON")
         return 1
+
+    # Duenne Bloecke (Quelle mitten im Umbau, VP-01) bleiben auf dem alten
+    # Stand — je Block, nicht die ganze Datei. Laut, nicht still.
+    duenn = duenne_bloecke_behalten(
+        pokemon, frueher, (frueher_datei.get("_meta") or {}).get("scraped_at"))
+    if duenn:
+        print(f"::warning::{len(duenn)} Formatbloecke zu duenn (unter "
+              f"{DUENN_ANTEIL:.0%} der bisherigen Zeilen) — auf dem alten Stand "
+              f"behalten, z. B. " + ", ".join(
+                  f"{s}/{f} {zn}/{za}" for s, f, za, zn in duenn[:5]))
 
     # Zweiter Schutz, andere Frage: nicht "ist es genug?", sondern "kann es
     # stimmen?". Ein Stand, der die eigenen Regeln verletzt, darf nicht in
@@ -934,6 +999,9 @@ def main():
                 "Ein `pct` taucht auf, sobald die Quelle eins liefert.",
             "note": "Authoritative ladder usage. Replaces the older VGCPastes "
                     "top-team sample for the Pokédex 'Meist genutzt' line.",
+            # Bloecke, die dieser Lauf auf dem alten Stand gelassen hat
+            # (VP-01) — benannt, damit die Luecke niemand suchen muss.
+            "duenn_behalten": [f"{s}/{f}" for s, f, _a, _n in duenn],
         },
         "pokemon": pokemon,
     }

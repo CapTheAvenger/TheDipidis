@@ -180,6 +180,40 @@ HYPHEN_BASE = {"Kommo-o", "Hakamo-o", "Jangmo-o", "Ho-Oh", "Porygon-Z",
                "Type-Null", "Mr-Mime", "Mime-Jr", "Mr-Rime",
                "Wo-Chien", "Chi-Yu", "Ting-Lu", "Chien-Pao"}
 
+# ── Deutsche Formnamen (DA-59, gelesen auf pokewiki.de am 06.11.2026) ──
+#
+# Der Alt-Form-Zweig von parse_smogon() traegt die ENGLISCHE Endung als
+# deutsche Beschriftung ("Durengard (Blade)", live gesehen 17.10.2026).
+# Hier steht, was pokewiki fuer die Form schreibt — entweder der ganze
+# Name (Rotom: "Hitze-Rotom") oder die Beschriftung in Klammern. Eine
+# Form, die hier fehlt, behaelt die englische Endung; die Zusicherung
+# dazu (test_formnamen_deutsch.py) nennt sie dann beim Namen.
+# (Grundform EN, Smogon-Endung) -> ("name", ganzer Name) | ("label", Klammer)
+FORM_DE = {
+    ("Rotom", "Heat"):          ("name", "Hitze-Rotom"),
+    ("Rotom", "Wash"):          ("name", "Wasch-Rotom"),
+    ("Rotom", "Frost"):         ("name", "Frost-Rotom"),
+    ("Rotom", "Fan"):           ("name", "Wirbel-Rotom"),
+    ("Rotom", "Mow"):           ("name", "Schneid-Rotom"),
+    ("Aegislash", "Blade"):     ("label", "Klingenform"),
+    ("Toxtricity", "Low-Key"):  ("label", "Tiefform"),
+    ("Lycanroc", "Dusk"):       ("label", "Zwielichtform"),
+    ("Lycanroc", "Midnight"):   ("label", "Nachtform"),
+    ("Gourgeist", "Small"):     ("label", "Größe S"),
+    ("Gourgeist", "Large"):     ("label", "Größe L"),
+    ("Gourgeist", "Super"):     ("label", "Größe XL"),
+    ("Squawkabilly", "Yellow"): ("label", "Gelbgefiedert"),
+}
+
+
+def name_de_mit_form(base_en, base_de, label):
+    """Deutscher Anzeigename einer Form: pokewiki-Schreibweise, wenn
+    bekannt (FORM_DE), sonst "<Grundform> (<Beschriftung>)"."""
+    if not label:
+        return base_de
+    art, wert = FORM_DE.get((base_en, label), ("label", label))
+    return wert if art == "name" else f"{base_de} ({wert})"
+
 
 def parse_smogon(nm):
     """Smogon name → (en_display, base_species, de_form_label, form_kind).
@@ -491,9 +525,23 @@ def _stein_anteil(rec, en_name):
     Rueckgabe: (prozent, steinname) oder (None, None), wenn die
     Grundform keinen passenden Stein traegt. Ohne Stein wird NICHT
     geerbt — dann ist die Mega-Form im Feld schlicht nicht vertreten.
+
+    VP-01 (06.11.2026): gesucht wird erst im Hauptformat, dann im
+    anderen. Am 05.11. trug Baxcalibur im Doppel nur noch „Focus Sash
+    100 %" (duenne Stichprobe der Quelle), im Einzel aber Baxcalibrite
+    63,2 % — die Mega-Form galt als „ohne Nutzungsdaten", obwohl die
+    Grundform den Stein nachweislich traegt. Die Zusicherung dazu prueft
+    den Stein ohnehin ueber alle Formate der Grundform.
     """
-    blk = rec.get(PRIMARY_FORMAT) or rec.get(
-        "singles" if PRIMARY_FORMAT == "doubles" else "doubles")
+    andere = "singles" if PRIMARY_FORMAT == "doubles" else "doubles"
+    for fmt in (PRIMARY_FORMAT, andere):
+        pct, name = _stein_im_block(rec.get(fmt), en_name)
+        if name:
+            return pct, name
+    return None, None
+
+
+def _stein_im_block(blk, en_name):
     if not blk:
         return None, None
     # "Mega Raichu Y" -> Kennung "y"; "Mega Tyranitar" -> keine Kennung.
@@ -727,7 +775,7 @@ def main():
         if not base_de:
             missing_de.append(base_en)
             base_de = base_en  # fall back to English rather than guess
-        name_de = f"{base_de} ({form_de})" if form_de else base_de
+        name_de = name_de_mit_form(base_en, base_de, form_de)
         if name in ROSTER_UMBENENNUNG:
             name, name_de = ROSTER_UMBENENNUNG[name]
 
@@ -806,7 +854,7 @@ def main():
         if not base_de:
             missing_de.append(base)
             base_de = base
-        name_de = f"{base_de} ({label})" if label else base_de
+        name_de = name_de_mit_form(base, base_de, label)
         types = sm.get("types") or []
         t1 = types[0] if types else ""
         t2 = types[1] if len(types) > 1 else ""

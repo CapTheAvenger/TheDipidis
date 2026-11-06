@@ -79,6 +79,17 @@
         "Forest's Curse ist durch alle automatischen Quellen gefallen, weil PokeAPI den typografischen Apostroph schreibt (Forest’s Curse) und die Nutzungsdaten den geraden.",
         "Jeder der 21 Namen wurde doppelt belegt: PokeAPI-Lokalisierungsdump UND pokewiki.de. Beide Quellen stimmten bei allen 21 ueberein."
       ]
+    },
+    "sechste_runde_2026_11_06": {
+      "anlass": "Champions Usage Refresh #146 (06.11.2026, erster Lauf nach PR #1020) fiel in test-zweisprachige-namen-und-schliessen.js rot: Poison Powder ohne deutschen Namen. Das Tor hielt daraufhin champions_usage.json und champions_pokedex.json zurueck — der elfte Lauf in Folge ohne Daten.",
+      "umfang": "Alle 513 Attacken aus data/champions_move_flags.json gegen data/champions_names_de.json gehalten, nicht nur die benutzten: zwei ohne Deutsch (Poison Powder, Frenzy Plant).",
+      "ergebnis": {
+        "ergaenzt": 2,
+        "attacken": 2
+      },
+      "bemerkenswert": [
+        "Die Pruefung ist jetzt eine Zusicherung (tests/nebenbereiche/python/test_attackennamen_vollstaendig.py): eine Attacke, die der Flags-Tabelle neu zuwaechst, macht den PR rot — nicht erst den naechtlichen Scrape-Lauf, der dann alles zurueckhaelt."
+      ]
     }
   },
   "namen": {
@@ -265,6 +276,16 @@
         "de": "Waldesfluch",
         "quelle": "https://pokewiki.de/Forest's_Curse",
         "beleg": "Artikeltitel \"Waldesfluch\", Name_en \"Forest’s Curse\", gelesen am 15.09.2026 (abgerufen als https://www.pokewiki.de/Forest%27s_Curse). Zweitbeleg: PokeAPI data/v2/csv/move_names.csv, move_id 571, local_language_id 6 -> Waldesfluch. ACHTUNG: PokeAPI schreibt den Namen mit typografischem Apostroph (Forest’s Curse), unsere Nutzungsdaten mit geradem (Forest's Curse) — daran ist der Name durch alle automatischen Quellen gefallen."
+      },
+      "Poison Powder": {
+        "de": "Giftpuder",
+        "quelle": "https://pokewiki.de/Poison_Powder",
+        "beleg": "Artikeltitel \"Giftpuder\", gelesen am 06.11.2026 (Weiterleitung von /Poison_Powder). Anlass: Vivillon (Fancy) fuehrt die Attacke seit der Saison nach M7 mit 0,2 % in den Singles; der Lauf #146 vom 06.11.2026 fiel daran rot (1 von 436 benutzten Attacken ohne Deutsch) und hielt alle Champions-Dateien zurueck."
+      },
+      "Frenzy Plant": {
+        "de": "Flora-Statue",
+        "quelle": "https://pokewiki.de/Frenzy_Plant",
+        "beleg": "Artikeltitel \"Flora-Statue\", gelesen am 06.11.2026. Noch in keinem Team gesehen; steht in data/champions_move_flags.json und war die einzige andere Attacke der 513 dort ohne deutschen Namen."
       }
     },
     "items": {

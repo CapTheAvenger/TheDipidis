@@ -3,12 +3,12 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-11-04T11:17:10",
+    "lastScrapedAt": "2026-11-06T06:23:02",
     "lastScrapedCount": 139,
     "lastBackfilledAt": "2026-05-05T13:19:27",
     "lastBackfillCount": 342,
     "lastHarvestedFrom": "city_league_archetype_scraper",
-    "lastHarvestedAt": "2026-10-30T06:17:29"
+    "lastHarvestedAt": "2026-11-06T06:16:46"
   },
   "archetypes": {
     "Dragapult": [
@@ -2424,6 +2424,22 @@
     "Palafin Mega Starmie": [
       "palafin",
       "starmie-mega"
+    ],
+    "Galvantula Meowth": [
+      "galvantula",
+      "meowth"
+    ],
+    "Hydreigon Dudunsparce": [
+      "hydreigon",
+      "dudunsparce"
+    ],
+    "Dragapult Vanilluxe": [
+      "dragapult",
+      "vanilluxe"
+    ],
+    "Mega Rayquaza Meowth": [
+      "rayquaza-mega",
+      "meowth"
     ]
   }
 }

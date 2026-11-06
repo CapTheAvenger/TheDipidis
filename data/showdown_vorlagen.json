@@ -24,7 +24,7 @@
     "grund": "weder auf dem Major noch online eine Liste"
    }
   ],
-  "anzahl": 21
+  "anzahl": 22
  },
  "vorlagen": [
   {
@@ -2061,139 +2061,6 @@
    ]
   },
   {
-   "archetyp": "Mega Excadrill",
-   "tier": 2,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 37,
-   "spieler": "David Walerian Rzepka",
-   "bilanz": "9-3-1",
-   "archetyp_turnier": "Mega Excadrill",
-   "titel": {
-    "name": "Mega Excadrill ex",
-    "set": "PBL",
-    "nummer": "65"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Beldum",
-     "set": "TEF",
-     "nummer": "113"
-    },
-    {
-     "anzahl": 4,
-     "name": "Metang",
-     "set": "TEF",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 1,
-     "name": "Metagross",
-     "set": "CRI",
-     "nummer": "61"
-    },
-    {
-     "anzahl": 3,
-     "name": "Drilbur",
-     "set": "PBL",
-     "nummer": "46"
-    },
-    {
-     "anzahl": 2,
-     "name": "Mega Excadrill ex",
-     "set": "PBL",
-     "nummer": "65"
-    },
-    {
-     "anzahl": 2,
-     "name": "Genesect ex",
-     "set": "BLK",
-     "nummer": "67"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mega Skarmory ex",
-     "set": "POR",
-     "nummer": "55"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 4,
-     "name": "Team Rocket's Petrel",
-     "set": "DRI",
-     "nummer": "176"
-    },
-    {
-     "anzahl": 4,
-     "name": "Judge",
-     "set": "POR",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 2,
-     "name": "Brock's Scouting",
-     "set": "JTG",
-     "nummer": "146"
-    },
-    {
-     "anzahl": 4,
-     "name": "Pokégear 3.0",
-     "set": "SVI",
-     "nummer": "186"
-    },
-    {
-     "anzahl": 4,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
-    },
-    {
-     "anzahl": 1,
-     "name": "Precious Trolley",
-     "set": "SSP",
-     "nummer": "185"
-    },
-    {
-     "anzahl": 1,
-     "name": "Energy Recycler",
-     "set": "DRI",
-     "nummer": "164"
-    },
-    {
-     "anzahl": 1,
-     "name": "Jumbo Ice Cream",
-     "set": "PFL",
-     "nummer": "91"
-    },
-    {
-     "anzahl": 1,
-     "name": "Switch",
-     "set": "MEG",
-     "nummer": "130"
-    },
-    {
-     "anzahl": 4,
-     "name": "Team Rocket's Watchtower",
-     "set": "DRI",
-     "nummer": "180"
-    },
-    {
-     "anzahl": 16,
-     "name": "Metal Energy",
-     "set": "MEE",
-     "nummer": "16"
-    }
-   ]
-  },
-  {
    "archetyp": "Lopunny Dudunsparce",
    "tier": 2,
    "quelle": "major",
@@ -2522,6 +2389,139 @@
      "name": "Darkness Energy",
      "set": "MEE",
      "nummer": "15"
+    }
+   ]
+  },
+  {
+   "archetyp": "Mega Excadrill",
+   "tier": 2,
+   "quelle": "major",
+   "turnier": "Regional Championship Gdańsk",
+   "datum": "2026-10-31",
+   "turnier_id": "0079",
+   "platz": 37,
+   "spieler": "David Walerian Rzepka",
+   "bilanz": "9-3-1",
+   "archetyp_turnier": "Mega Excadrill",
+   "titel": {
+    "name": "Mega Excadrill ex",
+    "set": "PBL",
+    "nummer": "65"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Beldum",
+     "set": "TEF",
+     "nummer": "113"
+    },
+    {
+     "anzahl": 4,
+     "name": "Metang",
+     "set": "TEF",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 1,
+     "name": "Metagross",
+     "set": "CRI",
+     "nummer": "61"
+    },
+    {
+     "anzahl": 3,
+     "name": "Drilbur",
+     "set": "PBL",
+     "nummer": "46"
+    },
+    {
+     "anzahl": 2,
+     "name": "Mega Excadrill ex",
+     "set": "PBL",
+     "nummer": "65"
+    },
+    {
+     "anzahl": 2,
+     "name": "Genesect ex",
+     "set": "BLK",
+     "nummer": "67"
+    },
+    {
+     "anzahl": 1,
+     "name": "Mega Skarmory ex",
+     "set": "POR",
+     "nummer": "55"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 4,
+     "name": "Team Rocket's Petrel",
+     "set": "DRI",
+     "nummer": "176"
+    },
+    {
+     "anzahl": 4,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 2,
+     "name": "Brock's Scouting",
+     "set": "JTG",
+     "nummer": "146"
+    },
+    {
+     "anzahl": 4,
+     "name": "Pokégear 3.0",
+     "set": "SVI",
+     "nummer": "186"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 1,
+     "name": "Precious Trolley",
+     "set": "SSP",
+     "nummer": "185"
+    },
+    {
+     "anzahl": 1,
+     "name": "Energy Recycler",
+     "set": "DRI",
+     "nummer": "164"
+    },
+    {
+     "anzahl": 1,
+     "name": "Jumbo Ice Cream",
+     "set": "PFL",
+     "nummer": "91"
+    },
+    {
+     "anzahl": 1,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 4,
+     "name": "Team Rocket's Watchtower",
+     "set": "DRI",
+     "nummer": "180"
+    },
+    {
+     "anzahl": 16,
+     "name": "Metal Energy",
+     "set": "MEE",
+     "nummer": "16"
     }
    ]
   },
@@ -3198,6 +3198,205 @@
      "name": "Psychic Energy",
      "set": "MEE",
      "nummer": "13"
+    }
+   ]
+  },
+  {
+   "archetyp": "Greninja",
+   "tier": 3,
+   "quelle": "major",
+   "turnier": "Regional Championship Gdańsk",
+   "datum": "2026-10-31",
+   "turnier_id": "0079",
+   "platz": 6,
+   "spieler": "Nathan Bonavia Zammit",
+   "bilanz": "11-2-2",
+   "archetyp_turnier": "Greninja",
+   "titel": {
+    "name": "Greninja ex",
+    "set": "TWM",
+    "nummer": "106"
+   },
+   "karten": [
+    {
+     "anzahl": 3,
+     "name": "Froakie",
+     "set": "CRI",
+     "nummer": "20"
+    },
+    {
+     "anzahl": 2,
+     "name": "Frogadier",
+     "set": "CRI",
+     "nummer": "21"
+    },
+    {
+     "anzahl": 2,
+     "name": "Greninja ex",
+     "set": "TWM",
+     "nummer": "106"
+    },
+    {
+     "anzahl": 2,
+     "name": "Snorunt",
+     "set": "ASC",
+     "nummer": "46"
+    },
+    {
+     "anzahl": 1,
+     "name": "Mega Froslass ex",
+     "set": "ASC",
+     "nummer": "47"
+    },
+    {
+     "anzahl": 2,
+     "name": "Duskull",
+     "set": "PRE",
+     "nummer": "35"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dusclops",
+     "set": "PRE",
+     "nummer": "36"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dusknoir",
+     "set": "PRE",
+     "nummer": "37"
+    },
+    {
+     "anzahl": 2,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 1,
+     "name": "Staryu",
+     "set": "POR",
+     "nummer": "20"
+    },
+    {
+     "anzahl": 1,
+     "name": "Mega Starmie ex",
+     "set": "POR",
+     "nummer": "21"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 1,
+     "name": "Latias ex",
+     "set": "SSP",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 1,
+     "name": "Budew",
+     "set": "ASC",
+     "nummer": "16"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 2,
+     "name": "Hilda",
+     "set": "WHT",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 2,
+     "name": "Colress's Tenacity",
+     "set": "SFA",
+     "nummer": "57"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 4,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 3,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 2,
+     "name": "Rare Candy",
+     "set": "MEG",
+     "nummer": "125"
+    },
+    {
+     "anzahl": 1,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 1,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 1,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
+    },
+    {
+     "anzahl": 1,
+     "name": "Grand Tree",
+     "set": "SCR",
+     "nummer": "136"
+    },
+    {
+     "anzahl": 1,
+     "name": "Gravity Mountain",
+     "set": "SSP",
+     "nummer": "177"
+    },
+    {
+     "anzahl": 5,
+     "name": "Water Energy",
+     "set": "MEE",
+     "nummer": "11"
+    },
+    {
+     "anzahl": 3,
+     "name": "Ignition Energy",
+     "set": "WHT",
+     "nummer": "86"
+    },
+    {
+     "anzahl": 1,
+     "name": "Bubbly Water Energy",
+     "set": "CRI",
+     "nummer": "84"
     }
    ]
   },

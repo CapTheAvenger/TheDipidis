@@ -458,11 +458,15 @@ def test_jeder_entschiedene_name_traegt_seine_quelle(entschieden):
     # data/champions_ability_overrides.json. Gezaehlt wird deshalb
     # "hier_eingetragen" und nicht "ergaenzt".
     fuenfte = entschieden["_meta"]["fuenfte_runde_2026_09_15"]["ergebnis"]["hier_eingetragen"]
+    # Runde 6 (06.11.2026, VP-01): Poison Powder und Frenzy Plant — die
+    # einzigen zwei der 513 Attacken aus champions_move_flags.json ohne
+    # deutschen Namen; Lauf #146 fiel an der ersten rot.
+    sechste = entschieden["_meta"]["sechste_runde_2026_11_06"]["ergebnis"]["ergaenzt"]
     assert erste == 63, f"erste Runde soll 63 Faelle nennen, nennt {erste}"
-    soll = erste + zweite + dritte + vierte + fuenfte
+    soll = erste + zweite + dritte + vierte + fuenfte + sechste
     assert gesamt == soll, (
         f"{gesamt} entschiedene Namen, aber die Bilanz in _meta sagt "
-        f"{erste} + {zweite} + {dritte} + {vierte} + {fuenfte} = {soll}")
+        f"{erste} + {zweite} + {dritte} + {vierte} + {fuenfte} + {sechste} = {soll}")
 
 
 def test_die_entschiedenen_namen_stehen_auch_in_den_daten(entschieden):

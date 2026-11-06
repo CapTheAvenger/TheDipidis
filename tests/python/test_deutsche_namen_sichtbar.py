@@ -323,11 +323,18 @@ def test_die_bilanz_der_runden_stimmt_mit_den_eintraegen_ueberein():
         "muss die Gesamtzahl ergeben")
     assert fuenfte["in_ability_overrides"] == fuenfte["faehigkeiten"]
 
+    # Runde 6 (06.11.2026, VP-01): zwei Attacken (Poison Powder, Frenzy
+    # Plant), beide HIER — es gibt keine zweite Datei fuer Attacken.
+    sechste = e["_meta"]["sechste_runde_2026_11_06"]["ergebnis"]
+    assert sechste["ergaenzt"] == sechste["attacken"] == 2, (
+        "die Bilanz der sechsten Runde geht nicht auf")
+
     soll = (63 + 20 + dritte["neu_eingetragen"] + vierte["ergaenzt"]
-            + fuenfte["hier_eingetragen"])
+            + fuenfte["hier_eingetragen"] + sechste["ergaenzt"])
     assert gesamt == soll, (
         f'63 (Runde 1) + 20 (Runde 2) + {dritte["neu_eingetragen"]} (Runde 3) '
         f'+ {vierte["ergaenzt"]} (Runde 4) + {fuenfte["hier_eingetragen"]} (Runde 5) '
+        f'+ {sechste["ergaenzt"]} (Runde 6) '
         f'ergibt {soll}, gezaehlt {gesamt}. '
         f'Wer Namen ergaenzt, zieht die Bilanz in _meta nach.')
 

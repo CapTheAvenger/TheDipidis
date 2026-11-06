@@ -3,7 +3,14 @@
   "beschreibung": "Karten ohne internationalen Druck fuer TCG Showdown, inoffizielle englische Uebersetzung von limitlesstcg.com (cards/jp, translate=en). Erzeugt von scripts/showdown_jp_karten.py.",
   "quelle": "https://limitlesstcg.com/cards/jp/<SET>/<NR>?translate=en",
   "anzahl": 6,
-  "fehlend": []
+  "fehlend": [
+   {
+    "set": "M6",
+    "nummer": "76",
+    "name": "Legendary Lava Cave",
+    "grund": "ohne Netz nicht geholt"
+   }
+  ]
  },
  "karten": [
   {

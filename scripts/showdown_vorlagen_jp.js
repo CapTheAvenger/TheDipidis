@@ -51,11 +51,43 @@ function schneideFunktion(quelle, name) {
 /** Die beiden Helfer der Seite, ausgefuehrt aus js/app-utils.js. */
 function schreibwegHelfer() {
     const UT = fs.readFileSync(path.join(ROOT, 'js', 'app-utils.js'), 'utf8');
+    const liste = /const LEGENDARY_STADIEN_NUMMERN = [^;]+;/.exec(UT);
+    if (!liste) throw new Error('LEGENDARY_STADIEN_NUMMERN ist in js/app-utils.js nicht mehr auffindbar');
     return new Function([
+        liste[0],
+        schneideFunktion(UT, 'istLegendaryStadion'),
+        schneideFunktion(UT, 'legendaryPartnerNummer'),
         schneideFunktion(UT, 'archetypSchreibwegSchluessel'),
         schneideFunktion(UT, 'legeSchreibwegeZusammen'),
-        'return { archetypSchreibwegSchluessel, legeSchreibwegeZusammen };',
+        'return { archetypSchreibwegSchluessel, legeSchreibwegeZusammen, istLegendaryStadion, legendaryPartnerNummer };',
     ].join('\n'))();
+}
+
+/**
+ * Legendary-Stadien (UI-161, Hausi 06.11.2026): Die Japan-Daten buchen die ganze Menge (bis 4) auf EINE
+ * Nummer, die Partnerhälfte fehlt. Gespielt wird nur das Paar (je Nummer höchstens 2), also wird wie auf der
+ * Seite geteilt: die Hälfte auf die eigene Nummer, die andere auf die Partnernummer (gleicher Name).
+ * Bei ungerader Menge wird auf ein volles Paar aufgerundet; die zusätzliche Karte geht von der größten
+ * Basis-Energie-Zeile ab, damit es bei 60 Karten bleibt. Steht die Partnerhälfte schon in der Liste, bleibt alles.
+ */
+function legendaryTeilen(karten, helfer) {
+    const hat = new Set(karten.map((k) => `${k.set} ${k.nummer}`));
+    const aus = [];
+    let mehr = 0;
+    for (const k of karten) {
+        if (!helfer.istLegendaryStadion(k.set, k.nummer)) { aus.push(k); continue; }
+        const partner = helfer.legendaryPartnerNummer(k.nummer);
+        if (!partner || hat.has(`${k.set} ${partner}`)) { aus.push(k); continue; }
+        const je = Math.min(2, Math.ceil(k.anzahl / 2));
+        mehr += 2 * je - k.anzahl;
+        aus.push({ ...k, anzahl: je }, { ...k, nummer: partner, anzahl: je });
+    }
+    while (mehr > 0) {
+        const e = aus.filter((k) => /^(Basic )?\w+ Energy$/.test(k.name) && k.anzahl > 1).sort((a, b) => b.anzahl - a.anzahl)[0];
+        if (!e) break;
+        e.anzahl--; mehr--;
+    }
+    return aus;
 }
 
 const MONAT = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
@@ -145,7 +177,7 @@ function erzeuge() {
             archetyp: t.archetyp, tier: t.tier, quelle: 'city-league', turnier: 'City League (JP)', turnier_id: m.turnier,
             datum: m.datum, platz: m.platz, spieler: m.spieler, archetyp_liste: m.archetypRoh,
             titel: V.titelkarte(t.archetyp, m.karten),
-            karten: m.karten.map(({ anzahl, name, set, nummer }) => ({ anzahl, name, set, nummer })),
+            karten: legendaryTeilen(m.karten.map(({ anzahl, name, set, nummer }) => ({ anzahl, name, set, nummer })), helfer),
         });
     }
     return {
@@ -174,4 +206,4 @@ if (require.main === module) {
     }
 }
 
-module.exports = { erzeuge, tierEinteilung, besteListen, isoDatum, schreibwegHelfer, ohneMega };
+module.exports = { erzeuge, tierEinteilung, besteListen, isoDatum, schreibwegHelfer, ohneMega, legendaryTeilen };

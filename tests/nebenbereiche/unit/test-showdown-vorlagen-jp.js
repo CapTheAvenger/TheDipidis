@@ -78,3 +78,32 @@ describe('Japan-Vorlagen: Datei im Bestand und Wochenlauf', () => {
         assert.ok(a > 0 && b > a && c > b, 'Reihenfolge: Meta-Vorlagen, Japan-Vorlagen, JP-Karten');
     });
 });
+
+describe('Japan-Vorlagen: Legendary-Stadien als Paar (UI-161, 06.11.2026)', () => {
+    it('4x M6 75 ohne Partner wird 2x M6 75 + 2x M6 76, Summe bleibt 60', () => {
+        const k = J.legendaryTeilen([
+            { anzahl: 4, name: 'Legendary Lava Cave', set: 'M6', nummer: '75' },
+            { anzahl: 56, name: 'Fire Energy', set: 'MEE', nummer: '2' },
+        ], H);
+        const lava = k.filter((c) => c.name === 'Legendary Lava Cave').map((c) => `${c.anzahl}x ${c.nummer}`);
+        assert.deepEqual(lava, ['2x 75', '2x 76']);
+        assert.ok(k.reduce((s, c) => s + c.anzahl, 0) === 60);
+    });
+    it('ungerade Menge: aufrunden auf ein Paar, eine Basis-Energie weniger', () => {
+        const k = J.legendaryTeilen([
+            { anzahl: 3, name: 'Legendary Lava Cave', set: 'M6', nummer: '76' },
+            { anzahl: 57, name: 'Fire Energy', set: 'MEE', nummer: '2' },
+        ], H);
+        assert.ok(k.reduce((s, c) => s + c.anzahl, 0) === 60);
+        assert.ok(k.find((c) => c.nummer === '75').anzahl === 2 && k.find((c) => c.nummer === '76').anzahl === 2);
+    });
+    it('steht die Partnerhaelfte schon da, bleibt alles; andere Karten werden nicht angefasst', () => {
+        const ein = [{ anzahl: 2, name: 'Legendary Lava Cave', set: 'M6', nummer: '75' }, { anzahl: 2, name: 'Legendary Lava Cave', set: 'M6', nummer: '76' }, { anzahl: 4, name: 'Rare Candy', set: 'MEG', nummer: '125' }];
+        assert.deepEqual(J.legendaryTeilen(ein, H), ein);
+    });
+    it('die ausgelieferte Datei fuehrt keine Haelfte mehr als 2x', () => {
+        const d = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'showdown_vorlagen_jp.json'), 'utf8'));
+        const zuViel = d.vorlagen.flatMap((v) => v.karten.filter((c) => H.istLegendaryStadion(c.set, c.nummer) && c.anzahl > 2).map((c) => `${v.archetyp}: ${c.anzahl}x ${c.set} ${c.nummer}`));
+        assert.deepEqual(zuViel, []);
+    });
+});

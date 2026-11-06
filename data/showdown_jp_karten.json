@@ -2,7 +2,7 @@
  "_meta": {
   "beschreibung": "Karten ohne internationalen Druck fuer TCG Showdown, inoffizielle englische Uebersetzung von limitlesstcg.com (cards/jp, translate=en). Erzeugt von scripts/showdown_jp_karten.py.",
   "quelle": "https://limitlesstcg.com/cards/jp/<SET>/<NR>?translate=en",
-  "anzahl": 6,
+  "anzahl": 7,
   "fehlend": []
  },
  "karten": [
@@ -90,6 +90,19 @@
    "setCode": "M6",
    "number": "75",
    "imageUrl": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M6/M6_75_R_JP_LG.png",
+   "jp": true,
+   "inoffiziell": true,
+   "cardType": "trainer",
+   "trainerType": "stadium",
+   "effect": "You must play 2 different Legendary Lava Cave cards at once. Both cards act as a single Stadium while in play. Evolution Pokémon in play have no Abilities.",
+   "manual": true
+  },
+  {
+   "id": "jp-m6-legendary-lava-cave-76",
+   "name": "Legendary Lava Cave",
+   "setCode": "M6",
+   "number": "76",
+   "imageUrl": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M6/M6_76_R_JP_LG.png",
    "jp": true,
    "inoffiziell": true,
    "cardType": "trainer",

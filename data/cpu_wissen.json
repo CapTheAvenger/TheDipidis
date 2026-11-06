@@ -1,7 +1,7 @@
 {
   "_meta": {
     "zweck": "Regeln fuer den CPU-Gegner in TCG Showdown (thedipidis.app/showdown/). Leer = allgemeine Regeln.",
-    "quellen": "Nur aus Masterclasses (Matchup-Plaene) oder Hausis Rueckmeldungen nach einer Partie — jede Regel nennt ihre Quelle.",
+    "quellen": "Aus Masterclasses (Matchup-Plaene), Hausis Rueckmeldungen nach einer Partie oder einem gemessenen A/B-Vergleich im Massentest (scripts/cpu-lernen.ts im Showdown-Repo; nur Regeln mit mindestens 5 Prozentpunkten mehr Siegen) — jede Regel nennt ihre Quelle.",
     "schema": {
       "decks": "Archetypname -> { angreifer, bankZuerst, nichtAufBank, unterstuetzer, nieSpielen, zieleZuerst, bossNurBeiKo, quelle }",
       "matchups": "'Eigenes Deck|Gegnerdeck' -> dieselben Felder, ergaenzen die Deckregeln"
@@ -13,6 +13,41 @@
         "Kyurem"
       ],
       "quelle": "Hausi 03.11.2026 (Partie gegen die CPU): Kyurem gehört in dieses Deck nur als Ziel von Slowkings Seek Inspiration und wird nie gelegt."
+    },
+    "Dragapult": {
+      "angreifer": [
+        "Dragapult ex",
+        "Munkidori"
+      ],
+      "quelle": "Massentest 06.11.2026 (scripts/cpu-lernen.ts, Auftrag Hausi): angreifer Dragapult ex, Munkidori hebt die Siegquote CPU gegen CPU von 53.8 % auf 62.5 % (je 160 Partien gegen alle 20 Meta-Vorlagen, gleiche Startwerte, Schwelle 5 Punkte)."
+    },
+    "Dhelmise": {
+      "angreifer": [
+        "Dhelmise",
+        "Banette"
+      ],
+      "quelle": "Massentest 06.11.2026 (scripts/cpu-lernen.ts, Auftrag Hausi): angreifer Dhelmise, Banette hebt die Siegquote CPU gegen CPU von 15 % auf 20.6 % (je 160 Partien gegen alle 20 Meta-Vorlagen, gleiche Startwerte, Schwelle 5 Punkte)."
+    },
+    "Alakazam Dudunsparce": {
+      "angreifer": [
+        "Alakazam",
+        "Flutter Mane"
+      ],
+      "quelle": "Massentest 06.11.2026 (scripts/cpu-lernen.ts, Auftrag Hausi): angreifer Alakazam, Flutter Mane hebt die Siegquote CPU gegen CPU von 34.4 % auf 43.8 % (je 160 Partien gegen alle 20 Meta-Vorlagen, gleiche Startwerte, Schwelle 5 Punkte)."
+    },
+    "Festival Lead": {
+      "angreifer": [
+        "Dipplin",
+        "Seaking"
+      ],
+      "quelle": "Massentest 06.11.2026 (scripts/cpu-lernen.ts, Auftrag Hausi): angreifer Dipplin, Seaking hebt die Siegquote CPU gegen CPU von 5 % auf 11.9 % (je 160 Partien gegen alle 20 Meta-Vorlagen, gleiche Startwerte, Schwelle 5 Punkte)."
+    },
+    "Lopunny Dudunsparce": {
+      "angreifer": [
+        "Mega Lopunny ex",
+        "Dudunsparce"
+      ],
+      "quelle": "Massentest 06.11.2026 (scripts/cpu-lernen.ts, Auftrag Hausi): angreifer Mega Lopunny ex, Dudunsparce hebt die Siegquote CPU gegen CPU von 40 % auf 46.3 % (je 160 Partien gegen alle 20 Meta-Vorlagen, gleiche Startwerte, Schwelle 5 Punkte)."
     }
   },
   "matchups": {}

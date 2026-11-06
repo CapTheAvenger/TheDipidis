@@ -179,6 +179,18 @@ describe('CPU-Wissen fuer TCG Showdown (data/cpu_wissen.json)', () => {
             }
         }
     });
+    it('Regeln aus dem Massentest nennen die gemessene Siegquote vorher/nachher und heben sie um mindestens 5 Punkte', () => {
+        let n = 0;
+        for (const [name, r] of Object.entries(w.decks)) {
+            if (!/Massentest/.test(r.quelle)) continue;
+            n++;
+            const m = /von ([\d.]+) % auf ([\d.]+) %/.exec(r.quelle);
+            assert.ok(m, `${name}: Massentest-Regel ohne Messwerte`);
+            assert.ok(Number(m[2]) - Number(m[1]) >= 5, `${name}: nur ${m[1]} → ${m[2]} %`);
+            assert.ok(Array.isArray(r.angreifer) && r.angreifer.length, `${name}: Massentest-Regel ohne angreifer`);
+        }
+        assert.ok(n >= 1, 'keine Massentest-Regel gefunden');
+    });
 });
 
 describe('Spielserver fuer „Mit Kumpel“ (data/showdown_server.json)', () => {

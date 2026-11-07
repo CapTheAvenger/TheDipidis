@@ -48,9 +48,17 @@ on:
         type: string
         default: '50'
       turniere:
-        description: 'Hoechstens N Turniere holen (0 = alle gefundenen; Vorsicht, das dauert)'
+        description: 'Hoechstens N neue Turniere holen, die juengsten zuerst (0 = alle neuen im Fenster; je Turnier ~2 min)'
         type: string
-        default: '2'
+        default: '0'
+      tage:
+        description: 'Fenster: Turniere der letzten N Tage (was schon in der Datei steht, wird uebersprungen)'
+        type: string
+        default: '14'
+      ab:
+        description: 'Statt tage: Fenster ab diesem Tag (JJJJ-MM-TT), zum Nachholen einer aelteren Luecke'
+        type: string
+        default: ''
       format:
         description: 'Limitless-Formatzahl aus data-format (4 = laufendes Standard, Stand 07.09.2026; "alle" schaltet den Filter ab)'
         type: string
@@ -75,7 +83,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 150
 
     steps:
       - name: Checkout repo
@@ -129,6 +137,8 @@ jobs:
           # Shell-Text mit.
           MINDEST_SPIELER: ${{ inputs.mindest_spieler }}
           TURNIERE: ${{ inputs.turniere }}
+          TAGE: ${{ inputs.tage }}
+          AB: ${{ inputs.ab }}
           FORMAT: ${{ inputs.format }}
           TROCKEN: ${{ inputs.trocken }}
           SCHRUMPFEN: ${{ inputs.schrumpfen_erlauben }}
@@ -137,6 +147,11 @@ jobs:
           args=""
           if [ -n "$MINDEST_SPIELER" ]; then args="$args --mindest-spieler $MINDEST_SPIELER"; fi
           if [ -n "$TURNIERE" ]; then args="$args --turniere $TURNIERE"; fi
+          if [ -n "$TAGE" ]; then args="$args --tage $TAGE"; fi
+          if [ -n "$AB" ]; then args="$args --ab $AB"; fi
+          # 110 min Budget unter der Zeitgrenze von 150 (Blaettern, Bestand, Schreiben kommen dazu): was fertig ist, wird
+          # geschrieben; der Rest kommt beim naechsten Lauf (SC-46).
+          args="$args --zeitbudget 110"
           if [ -n "$FORMAT" ]; then args="$args --format $FORMAT"; fi
           if [ "$TROCKEN" = "true" ]; then args="$args --trocken"; fi
           if [ "$SCHRUMPFEN" = "true" ]; then args="$args --schrumpfen-erlauben"; fi

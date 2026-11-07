@@ -182,6 +182,28 @@ MAX_SEITEN = 40
 # die anderen nicht mitreissen.
 AUFBAU_GRENZE = 2
 
+# Zweite Grenze fuer den Fall "Spieler da, keine Liste" (Pruefagent B2,
+# 07.11.2026). Aendert Limitless die Form des Listenverweises, sieht JEDES
+# Turnier so aus — und das darf nicht dauerhaft gruen bleiben. Gemessen
+# als normal: 5 der 8 juengsten Turniere ohne Listen (DLR-Startwoche),
+# daneben aber Turniere MIT Listen. Erst wenn mindestens so viele neue
+# Turniere ALLE ohne Liste sind, gilt das als geaenderter Aufbau.
+OHNE_LISTEN_GRENZE = 6
+
+# Zeitbudget je Lauf in Minuten (Pruefagent B1). Gesammelt wird bis zum
+# Schreiben im Speicher; reisst der Ablauf seine Zeitgrenze, ist alles
+# weg — im Wochenlauf samt Push der anderen Daten. Nach dem Budget wird
+# kein NEUES Turnier mehr angefangen, das laufende wird fertig, und
+# geschrieben wird, was fertig ist. Der Rest kommt beim naechsten Lauf,
+# weil er dann nicht im Bestand steht. 0 = kein Budget.
+ZEITBUDGET_MIN = 0
+# Harte Grenze INNERHALB eines Turniers (Pruefagent, Nachpruefung S2):
+# drosselt Limitless mit 429, wartet ein Abruf bis zu 60 s — ein Turnier
+# mit 500 Listen liefe dann weit ueber jedes Budget. Nach Budget + diese
+# Minuten wird das laufende Turnier verworfen (ganz oder gar nicht) und
+# das Fertige geschrieben; das Turnier kommt beim naechsten Lauf wieder.
+UEBERZIEHEN_MIN = 20
+
 # Voreinstellung fuer die Feldgroesse. Unter 50 Spielern ist ein
 # Online-Turnier fuer eine Kartenempfehlung zu duenn: die Plaetze 1-8
 # eines 20er-Feldes sagen ueber Konsistenz nichts, was die Plaetze 1-8
@@ -346,8 +368,9 @@ def hole_turnierliste(pause: float, ab: str, max_seiten: int = MAX_SEITEN,
             break
     else:
         print(f"::warning::Turnierliste: nach {max_seiten} Seiten noch nicht "
-              f"vor {ab} angekommen — der Rest des Fensters bleibt fuer den "
-              f"naechsten Lauf.")
+              f"vor {ab} angekommen — aeltere Turniere des Fensters werden "
+              f"NICHT gelesen. Ein naechster Lauf blaettert wieder von vorn; "
+              f"fuer eine so alte Luecke --ab naeher setzen.")
     return alle
 
 
@@ -836,7 +859,8 @@ def sammle(turniere: list, pause: float, aus_datei: str = "",
 
 
 def sammle_mit_bericht(turniere: list, pause: float, aus_datei: str = "",
-                       deckel: int = 0, card_db=None, holer=None) -> tuple:
+                       deckel: int = 0, card_db=None, holer=None,
+                       zeitbudget_min: float = 0, uhr=None) -> tuple:
     """Wie `sammle`, liefert dazu die uebersprungenen Turniere.
 
     Rueckgabe: (zeilen, [(turnier, grund), ...]).
@@ -857,23 +881,43 @@ def sammle_mit_bericht(turniere: list, pause: float, aus_datei: str = "",
     veroeffentlicht, sondern eine geaenderte Seite — dann `Teilausfall`.
     """
     holer = holer or hole
+    uhr = uhr or time.monotonic
+    beginn = uhr()
     gestempelt = datetime.now(timezone.utc).isoformat()
     alle = []
     uebersprungen = []
-    versucht = 0
+    verdacht = 0
+    ohne_listen = 0
     gezaehlte_listen = 0
     for i, t in enumerate(turniere, 1):
         if deckel and gezaehlte_listen >= deckel:
             break
-        versucht += 1
+        if zeitbudget_min and (uhr() - beginn) >= zeitbudget_min * 60:
+            rest = len(turniere) - i + 1
+            print(f"::warning::Zeitbudget von {zeitbudget_min:g} min erreicht — "
+                  f"{rest} Turnier(e) bleiben fuer den naechsten Lauf "
+                  f"(sie stehen dann nicht im Bestand und werden geholt).")
+            break
         try:
             if aus_datei:
                 std_html = _ausschnitt(aus_datei, "limitless_online_standings.html")
             else:
                 std_html = holer(t["url"], pause)
             standings = lies_standings(std_html)
+            if not standings and hat_spielerzeilen(std_html):
+                # Spieler stehen da, eine Deck-Spalte nicht: der
+                # Veranstalter hat nichts veroeffentlicht. GEMESSEN
+                # 07.11.2026: 5 der 8 juengsten passenden Turniere
+                # (fast alle "Delta Reign"), Spielerseite ohne Liste.
+                # Das ist die Quelle, kein Fehler — es zaehlt nicht
+                # zum Aufbauverdacht.
+                ohne_listen += 1
+                uebersprungen.append((t, "Veranstalter hat keine Listen veroeffentlicht"))
+                print(f"::warning::Turnier {t['id']} ({t['name']}, {t.get('datum', '')}): "
+                      f"keine veroeffentlichte Liste — uebersprungen.")
+                continue
             if not standings:
-                raise Teilausfall("keine Zeile mit veroeffentlichter Liste")
+                raise Teilausfall("keine Spielerzeile in den Standings")
             logger.info("[%d/%d] %s — %d Liste(n) von %d Spieler(n)",
                         i, len(turniere), t["name"], len(standings), t["spieler"])
             _pruefe_ausbeute(t, standings)
@@ -882,6 +926,10 @@ def sammle_mit_bericht(turniere: list, pause: float, aus_datei: str = "",
             for s in standings:
                 if deckel and gezaehlte_listen >= deckel:
                     break
+                if zeitbudget_min and (uhr() - beginn) >= (zeitbudget_min + UEBERZIEHEN_MIN) * 60:
+                    raise Teilausfall(
+                        f"harte Zeitgrenze (Budget + {UEBERZIEHEN_MIN} min) mitten im "
+                        f"Turnier erreicht — verworfen, kommt beim naechsten Lauf")
                 if aus_datei:
                     dl_html = _ausschnitt(aus_datei, "limitless_online_decklist.html")
                 else:
@@ -891,6 +939,11 @@ def sammle_mit_bericht(turniere: list, pause: float, aus_datei: str = "",
                 gezaehlte_listen += 1
         except Teilausfall as e:
             grund = str(e)
+            if grund.startswith("harte Zeitgrenze"):
+                uebersprungen.append((t, grund))
+                print(f"::warning::Turnier {t['id']} ({t['name']}): {grund}.")
+                break
+            verdacht += 1
             uebersprungen.append((t, grund))
             print(f"::warning::Turnier {t['id']} ({t['name']}, {t.get('datum', '')}): "
                   f"{grund} — uebersprungen, die anderen Turniere werden "
@@ -898,12 +951,37 @@ def sammle_mit_bericht(turniere: list, pause: float, aus_datei: str = "",
             continue
         alle.extend(dieses)
 
-    if versucht >= AUFBAU_GRENZE and not alle and len(uebersprungen) == versucht:
+    if verdacht >= AUFBAU_GRENZE and not alle:
+        erstes = next((t, g) for t, g in uebersprungen
+                      if g != "Veranstalter hat keine Listen veroeffentlicht")
         raise Teilausfall(
-            f"keines von {versucht} Turnieren lieferte eine Liste — "
+            f"{verdacht} Turniere unlesbar und keines lieferte eine Liste — "
             f"Aufbau der Standings oder Decklisten geaendert? Erstes: "
-            f"{uebersprungen[0][0]['name']}: {uebersprungen[0][1]}")
+            f"{erstes[0]['name']}: {erstes[1]}")
+    if (ohne_listen >= OHNE_LISTEN_GRENZE
+            or verdacht + ohne_listen >= OHNE_LISTEN_GRENZE) and not alle:
+        raise Teilausfall(
+            f"{ohne_listen} Turniere mit Spielern, aber keines mit einer Liste — "
+            f"so viele Veranstalter ohne Listen sind nicht die Quelle, sondern "
+            f"vermutlich ein geaenderter Listenverweis in den Standings.")
+    if verdacht:
+        # Sichtbar auch dann, wenn andere Turniere Zeilen geliefert haben
+        # (Pruefagent S4): eine Sperre mitten im Lauf soll als Zahl dastehen.
+        print(f"::warning::{verdacht} von {len(turniere)} Turnier(en) unlesbar "
+              f"(Netz oder Aufbau) — sie werden beim naechsten Lauf erneut "
+              f"versucht.")
     return alle, uebersprungen
+
+
+def hat_spielerzeilen(html: str) -> bool:
+    """Stehen in den Standings Spieler (Verweis auf /player/)?
+
+    Unterscheidet "Veranstalter hat keine Listen veroeffentlicht" (Spieler
+    ja, Deck-Spalte nein — Rare Candy Club Blitz #8, 06.11.2026: 106
+    Spielerzeilen, 0 Listen) von "die Seite sieht anders aus" (gar keine
+    Spielerzeile).
+    """
+    return bool(_suppe(html).select('table a[href*="/player/"]'))
 
 
 def _pruefe_ausbeute(turnier: dict, standings: list) -> None:
@@ -960,6 +1038,9 @@ def main(argv=None) -> int:
     p.add_argument("--ab", default="",
                    help="Fenster ab diesem Tag (JJJJ-MM-TT) statt --tage — zum "
                         "Nachholen einer aelteren Luecke")
+    p.add_argument("--zeitbudget", type=float, default=ZEITBUDGET_MIN,
+                   help="nach N Minuten kein neues Turnier mehr anfangen und "
+                        "schreiben, was fertig ist (0 = ohne Budget)")
     p.add_argument("--auch-bekannte", action="store_true", dest="auch_bekannte",
                    help="Turniere, die schon in der Datei stehen, trotzdem neu holen")
     p.add_argument("--nur", type=int,
@@ -1001,6 +1082,14 @@ def main(argv=None) -> int:
     # Das Fenster gilt nur fuer den Abruf aus dem Netz. Die Ausschnitte
     # sind eine Probe des Zusammenbaus mit festen Daten (September 2026);
     # ein Fenster ab heute wuerde sie alle wegfiltern.
+    if a.ab:
+        # Pruefagent S1: "03.11.2026" waere als Text kleiner als jedes
+        # ISO-Datum — kein Blaetterende, und das Fenster liesse alles durch.
+        try:
+            datetime.strptime(a.ab, "%Y-%m-%d")
+        except ValueError:
+            print(f"::error::--ab {a.ab!r} ist kein Datum der Form JJJJ-MM-TT.")
+            return 1
     if a.aus_datei:
         ab = a.ab or ""
     else:
@@ -1048,7 +1137,8 @@ def main(argv=None) -> int:
 
         card_db = _karten_datenbank()
         zeilen, uebersprungen = sammle_mit_bericht(
-            turniere, a.pause, a.aus_datei, a.nur or 0, card_db)
+            turniere, a.pause, a.aus_datei, a.nur or 0, card_db,
+            zeitbudget_min=a.zeitbudget)
     except Teilausfall as e:
         print(f"::error::{e}")
         return 1

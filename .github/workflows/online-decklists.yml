@@ -149,6 +149,9 @@ jobs:
           if [ -n "$TURNIERE" ]; then args="$args --turniere $TURNIERE"; fi
           if [ -n "$TAGE" ]; then args="$args --tage $TAGE"; fi
           if [ -n "$AB" ]; then args="$args --ab $AB"; fi
+          # 110 min Budget unter der Zeitgrenze von 150 (Blaettern, Bestand, Schreiben kommen dazu): was fertig ist, wird
+          # geschrieben; der Rest kommt beim naechsten Lauf (SC-46).
+          args="$args --zeitbudget 110"
           if [ -n "$FORMAT" ]; then args="$args --format $FORMAT"; fi
           if [ "$TROCKEN" = "true" ]; then args="$args --trocken"; fi
           if [ "$SCHRUMPFEN" = "true" ]; then args="$args --schrumpfen-erlauben"; fi

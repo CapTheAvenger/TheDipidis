@@ -673,7 +673,9 @@ jobs:
           ziel=backend/core/data/tournament_decklists_per_player.csv
           vorher=0
           if [ -f "$ziel" ]; then vorher=$(( $(wc -l < "$ziel") - 1 )); fi
-          python backend/scrapers/limitless_online_decklist_scraper.py
+          # Zeitbudget 60 min (SC-46, Pruefagent B1): reisst dieser Schritt den
+          # Job (300 min), geht der Push ALLER Wochendaten verloren.
+          python backend/scrapers/limitless_online_decklist_scraper.py --zeitbudget 60
           rc=$?
           nachher=0
           if [ -f "$ziel" ]; then nachher=$(( $(wc -l < "$ziel") - 1 )); fi

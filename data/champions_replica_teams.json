@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-11-06",
+    "last_updated": "2026-11-07",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-C=gid2001945654, M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-C",
@@ -4570,6 +4570,105 @@
     },
     {
       "rank": 47,
+      "replica_code": "CKFBRD3UUR",
+      "team_name": "NavarroVGC's Gdańsk Regional 2027 Top 128 Team",
+      "tournament": "Gdańsk Regional 2027",
+      "trainer": "NavarroVGC",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "108th",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/cc9b8f04c93e8de3",
+      "pokemon": [
+        {
+          "name": "Gardevoir",
+          "item": "Gardevoirite",
+          "ability": "Synchronize",
+          "tera_type": "",
+          "evs": "16 HP / 2 Def / 16 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Expanding Force",
+            "Hyper Voice",
+            "Mystical Fire",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Rocky Helmet",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "30 HP / 32 Def / 3 SpD / 1 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Psychic",
+            "Follow Me",
+            "Trick Room",
+            "Imprison"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Psychic Seed",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "18 HP / 32 Atk / 16 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Dire Claw",
+            "Rock Tomb",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Gholdengo",
+          "item": "Choice Scarf",
+          "ability": "Good as Gold",
+          "tera_type": "",
+          "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Make It Rain",
+            "Shadow Ball",
+            "Thunderbolt",
+            "Power Gem"
+          ]
+        },
+        {
+          "name": "Tyranitar",
+          "item": "Tyranitarite",
+          "ability": "Sand Stream",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Rock Slide",
+            "Knock Off",
+            "Low Kick",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Excadrill",
+          "item": "Focus Sash",
+          "ability": "Sand Rush",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "High Horsepower",
+            "Iron Head",
+            "Rock Slide",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 48,
       "replica_code": "EN43XY37V1",
       "team_name": "mynamesuckzvgc's Gdańsk Regional 2027 Top 128 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -4668,7 +4767,7 @@
       "strategy": []
     },
     {
-      "rank": 48,
+      "rank": 49,
       "replica_code": "8Q5AAFHHMM",
       "team_name": "Avalos_VGC's Nice Regional 2027 Top 32 Team",
       "tournament": "Nice Regional 2027",
@@ -4682,7 +4781,7 @@
       "strategy": []
     },
     {
-      "rank": 49,
+      "rank": 50,
       "replica_code": "5BM86P0C7E",
       "team_name": "punihina1334's Puebla Regional 2027 Top 32 Team",
       "tournament": "Puebla Regional 2027",
@@ -4781,7 +4880,7 @@
       "strategy": []
     },
     {
-      "rank": 50,
+      "rank": 51,
       "replica_code": "06QQRF03CE",
       "team_name": "fireb7799's Puebla Regional 2027 Top 32 Team",
       "tournament": "Puebla Regional 2027",
@@ -4880,7 +4979,7 @@
       "strategy": []
     },
     {
-      "rank": 51,
+      "rank": 52,
       "replica_code": "199JW2B5GE",
       "team_name": "Ewok's Puebla Regional 2027 Top 64 Team",
       "tournament": "Puebla Regional 2027",
@@ -4979,7 +5078,7 @@
       "strategy": []
     },
     {
-      "rank": 52,
+      "rank": 53,
       "replica_code": "PUMVJSDMM2",
       "team_name": "AndyBakes' Puebla Regional 2027 Team",
       "tournament": "Puebla Regional 2027",
@@ -5078,7 +5177,7 @@
       "strategy": []
     },
     {
-      "rank": 53,
+      "rank": 54,
       "replica_code": "L5RBYL90F2",
       "team_name": "gn_pete's Thailand PBL 2027 Top 4 Team",
       "tournament": "Thailand PBL 2027",
@@ -5177,7 +5276,7 @@
       "strategy": []
     },
     {
-      "rank": 54,
+      "rank": 55,
       "replica_code": "QGFP9HR7QT",
       "team_name": "boomngong's Thailand PBL 2027 Top 4 Team",
       "tournament": "Thailand PBL 2027",
@@ -5276,7 +5375,7 @@
       "strategy": []
     },
     {
-      "rank": 55,
+      "rank": 56,
       "replica_code": "8UPWUEA1AR",
       "team_name": "Sanvy's Nice Regional 2027 Top 4 Team",
       "tournament": "Nice Regional 2027",
@@ -5375,7 +5474,7 @@
       "strategy": []
     },
     {
-      "rank": 56,
+      "rank": 57,
       "replica_code": "B1V7P36K13",
       "team_name": "Triir's Nice Regional 2027 Top 8 Team",
       "tournament": "Nice Regional 2027",
@@ -5474,7 +5573,7 @@
       "strategy": []
     },
     {
-      "rank": 57,
+      "rank": 58,
       "replica_code": "5EQS0H68M0",
       "team_name": "IdkVgc19's Nice Regional 2027 Top 16 Team",
       "tournament": "Nice Regional 2027",
@@ -5573,7 +5672,7 @@
       "strategy": []
     },
     {
-      "rank": 58,
+      "rank": 59,
       "replica_code": "5C9LNUSWUY",
       "team_name": "schianchi_luca's Nice Regional 2027 Top 32 Team",
       "tournament": "Nice Regional 2027",
@@ -5672,7 +5771,7 @@
       "strategy": []
     },
     {
-      "rank": 59,
+      "rank": 60,
       "replica_code": "JRHT5NU7YT",
       "team_name": "mattia_vinti's Nice Regional 2027 Top 64 Team",
       "tournament": "Nice Regional 2027",
@@ -5764,105 +5863,6 @@
             "Draining Kiss",
             "Dazzling Gleam",
             "Calm Mind",
-            "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 60,
-      "replica_code": "WRYRHCSLS2",
-      "team_name": "LuixenS' Nice Regional 2027 Top 64 Team",
-      "tournament": "Nice Regional 2027",
-      "trainer": "LuixenS",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "57th",
-      "date_shared": "18 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/330cd499eeadd12f",
-      "pokemon": [
-        {
-          "name": "Raichu",
-          "item": "Raichunite Y",
-          "ability": "Lightning Rod",
-          "tera_type": "",
-          "evs": "24 HP / 16 Def / 26 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Zap Cannon",
-            "Focus Blast",
-            "Fake Out",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Rillaboom",
-          "item": "Miracle Seed",
-          "ability": "Grassy Surge",
-          "tera_type": "",
-          "evs": "18 HP / 25 Atk / 3 Def / 20 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Fake Out",
-            "Wood Hammer",
-            "Grassy Glide",
-            "High Horsepower"
-          ]
-        },
-        {
-          "name": "Primarina",
-          "item": "Leftovers",
-          "ability": "Liquid Voice",
-          "tera_type": "",
-          "evs": "22 HP / 24 Def / 4 SpA / 16 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Hyper Voice",
-            "Moonblast",
-            "Calm Mind",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Ceruledge",
-          "item": "Grassy Seed",
-          "ability": "Flash Fire",
-          "tera_type": "",
-          "evs": "27 HP / 15 Atk / 4 Def / 3 SpD / 17 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Shadow Sneak",
-            "Bitter Blade",
-            "Swords Dance",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Garchomp",
-          "item": "Choice Scarf",
-          "ability": "Rough Skin",
-          "tera_type": "",
-          "evs": "14 HP / 20 Atk / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Earthquake",
-            "Stomping Tantrum",
-            "Dragon Claw",
-            "Rock Slide"
-          ]
-        },
-        {
-          "name": "Staraptor",
-          "item": "Staraptite",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "25 HP / 7 Atk / 2 SpD / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Close Combat",
-            "Brave Bird",
-            "Tailwind",
             "Protect"
           ]
         }

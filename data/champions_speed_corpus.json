@@ -1,17 +1,17 @@
 {
   "_meta": {
-    "last_updated": "2026-11-06",
+    "last_updated": "2026-11-07",
     "window_days": 14,
-    "window_start": "2026-10-23",
-    "window_end": "2026-11-06",
+    "window_start": "2026-10-24",
+    "window_end": "2026-11-07",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
-    "content_to": "2026-11-03",
-    "samples_outside_window": 210,
+    "content_to": "2026-11-04",
+    "samples_outside_window": 204,
     "team_count": 66,
     "teams_with_samples": 64,
     "sample_count": 390,
-    "species_count": 63,
+    "species_count": 62,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
   "samples": [
@@ -1948,6 +1948,48 @@
       "replica": "UXBHR9D5RK"
     },
     {
+      "species": "Gardevoir",
+      "evs": "16 HP / 2 Def / 16 SpA / 32 Spe",
+      "nature": "Modest",
+      "date": "4 Nov 2026",
+      "replica": "CKFBRD3UUR"
+    },
+    {
+      "species": "Indeedee-F",
+      "evs": "30 HP / 32 Def / 3 SpD / 1 Spe",
+      "nature": "Bold",
+      "date": "4 Nov 2026",
+      "replica": "CKFBRD3UUR"
+    },
+    {
+      "species": "Sneasler",
+      "evs": "18 HP / 32 Atk / 16 Spe",
+      "nature": "Jolly",
+      "date": "4 Nov 2026",
+      "replica": "CKFBRD3UUR"
+    },
+    {
+      "species": "Gholdengo",
+      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
+      "nature": "Modest",
+      "date": "4 Nov 2026",
+      "replica": "CKFBRD3UUR"
+    },
+    {
+      "species": "Tyranitar",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Jolly",
+      "date": "4 Nov 2026",
+      "replica": "CKFBRD3UUR"
+    },
+    {
+      "species": "Excadrill",
+      "evs": "32 Atk / 2 Def / 32 Spe",
+      "nature": "Adamant",
+      "date": "4 Nov 2026",
+      "replica": "CKFBRD3UUR"
+    },
+    {
       "species": "Garchomp",
       "evs": "6 HP / 28 Atk / 32 Spe",
       "nature": "Jolly",
@@ -2450,48 +2492,6 @@
       "nature": "Modest",
       "date": "19 Oct 2026",
       "replica": "JRHT5NU7YT"
-    },
-    {
-      "species": "Raichu",
-      "evs": "24 HP / 16 Def / 26 Spe",
-      "nature": "Timid",
-      "date": "18 Oct 2026",
-      "replica": "WRYRHCSLS2"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "18 HP / 25 Atk / 3 Def / 20 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "WRYRHCSLS2"
-    },
-    {
-      "species": "Primarina",
-      "evs": "22 HP / 24 Def / 4 SpA / 16 Spe",
-      "nature": "Modest",
-      "date": "18 Oct 2026",
-      "replica": "WRYRHCSLS2"
-    },
-    {
-      "species": "Ceruledge",
-      "evs": "27 HP / 15 Atk / 4 Def / 3 SpD / 17 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "WRYRHCSLS2"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "14 HP / 20 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "18 Oct 2026",
-      "replica": "WRYRHCSLS2"
-    },
-    {
-      "species": "Staraptor",
-      "evs": "25 HP / 7 Atk / 2 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "18 Oct 2026",
-      "replica": "WRYRHCSLS2"
     },
     {
       "species": "Farigiraf",

@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-06T06:40:26Z",
+  "erzeugt_am": "2026-11-07T03:45:18Z",
   "id": "mega-stalobor",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -23,7 +23,7 @@
     ]
    },
    {
-    "anteil": "5,90",
+    "anteil": "5,92",
     "name": "Basic Box",
     "online": [
      89,
@@ -54,21 +54,6 @@
    },
    {
     "anteil": "4,99",
-    "name": "Slowking",
-    "online": [
-     89,
-     113,
-     2
-    ],
-    "slug": "slowking-scr",
-    "vor_ort": [
-     102,
-     172,
-     36
-    ]
-   },
-   {
-    "anteil": "4,98",
     "name": "Dhelmise",
     "online": [
      89,
@@ -83,7 +68,22 @@
     ]
    },
    {
-    "anteil": "4,03",
+    "anteil": "4,99",
+    "name": "Slowking",
+    "online": [
+     90,
+     113,
+     2
+    ],
+    "slug": "slowking-scr",
+    "vor_ort": [
+     102,
+     172,
+     36
+    ]
+   },
+   {
+    "anteil": "4,04",
     "name": "Alakazam Dudunsparce",
     "online": [
      53,
@@ -113,7 +113,7 @@
     ]
    },
    {
-    "anteil": "3,41",
+    "anteil": "3,40",
     "name": "Ogerpon Meganium Hydrapple",
     "online": [
      59,
@@ -128,7 +128,7 @@
     ]
    },
    {
-    "anteil": "3,12",
+    "anteil": "3,13",
     "name": "Sharpedo Toxtricity",
     "online": [
      66,
@@ -143,7 +143,7 @@
     ]
    },
    {
-    "anteil": "3,10",
+    "anteil": "3,11",
     "name": "Alakazam Dusknoir",
     "online": [
      35,
@@ -173,7 +173,7 @@
     ]
    },
    {
-    "anteil": "2,64",
+    "anteil": "2,63",
     "name": "Lucario Hariyama",
     "online": [
      38,
@@ -248,7 +248,7 @@
     ]
    },
    {
-    "anteil": "1,53",
+    "anteil": "1,52",
     "name": "Cynthia's Garchomp",
     "online": [
      20,
@@ -338,7 +338,7 @@
     ]
    },
    {
-    "anteil": "1,00",
+    "anteil": "0,99",
     "name": "Dragapult Dudunsparce",
     "online": [
      14,
@@ -518,7 +518,7 @@
     ]
    },
    {
-    "anteil": "0,55",
+    "anteil": "0,54",
     "name": "Mega Chandelure",
     "online": [
      8,
@@ -773,7 +773,7 @@
     ]
    },
    {
-    "anteil": "0,19",
+    "anteil": "0,20",
     "name": "Mega Abomasnow",
     "online": [
      4,
@@ -2100,26 +2100,26 @@
    "anteil": "3,53",
    "anteil14": "3,38",
    "bilanz": [
-    1749,
-    1932,
+    1751,
+    1933,
     22
    ],
    "bis": "06.11.2026",
    "fenster14": "23.10.–06.11.2026",
    "format": "TEF–30C",
-   "kurz_anteil": "2,42",
+   "kurz_anteil": "2,45",
    "kurz_bilanz": [
-    124,
-    128,
+    126,
+    129,
     4
    ],
-   "kurz_listen": 44,
-   "kurz_turniere": 11,
+   "kurz_listen": 45,
+   "kurz_turniere": 12,
    "kurz_von": "31.10.2026",
-   "listen": 738,
+   "listen": 739,
    "seit": "18.09.2026",
    "trend14": "-0,06",
-   "turniere": 134
+   "turniere": 135
   },
   "vor_ort": {
    "format": "TEF–30C",
@@ -2409,7 +2409,7 @@
    "majors-satz": "sind die letzten Majors (Brisbane, Frankfurt, Recife, Louisville, Nice, Puebla und Gdańsk), schon im laufenden Format.",
    "majors-turniere": "73, 74, 75, 76, 77, 78 und 79",
    "stand-online-davor": "2026-09-18",
-   "stand-online-jetzt": "2026-11-06"
+   "stand-online-jetzt": "2026-11-07"
   },
   "zellen": {
    "alakazam-dudunsparce": {
@@ -4293,9 +4293,9 @@
     ],
     "jetzt": [
      "mcl-wrz",
-     "44,0 % Win % nach Matchpunkten, aus 204 Matches, Bilanz 89–113–2 (W–L–T)",
-     "44,0 %",
-     "<i>(204)</i>"
+     "44,2 % Win % nach Matchpunkten, aus 205 Matches, Bilanz 90–113–2 (W–L–T)",
+     "44,2 %",
+     "<i>(205)</i>"
     ],
     "majors": [
      "mcl-wrz",

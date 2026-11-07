@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-06T06:40:26Z",
+  "erzeugt_am": "2026-11-07T03:45:18Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -23,10 +23,10 @@
     ]
    },
    {
-    "anteil": "5,90",
+    "anteil": "5,92",
     "name": "Basic Box",
     "online": [
-     76,
+     77,
      97,
      3
     ],
@@ -54,21 +54,6 @@
    },
    {
     "anteil": "4,99",
-    "name": "Slowking",
-    "online": [
-     66,
-     68,
-     1
-    ],
-    "slug": "slowking-scr",
-    "vor_ort": [
-     66,
-     66,
-     7
-    ]
-   },
-   {
-    "anteil": "4,98",
     "name": "Dhelmise",
     "online": [
      107,
@@ -83,7 +68,22 @@
     ]
    },
    {
-    "anteil": "4,03",
+    "anteil": "4,99",
+    "name": "Slowking",
+    "online": [
+     66,
+     68,
+     1
+    ],
+    "slug": "slowking-scr",
+    "vor_ort": [
+     66,
+     66,
+     7
+    ]
+   },
+   {
+    "anteil": "4,04",
     "name": "Alakazam Dudunsparce",
     "online": [
      66,
@@ -128,7 +128,7 @@
     ]
    },
    {
-    "anteil": "3,41",
+    "anteil": "3,40",
     "name": "Ogerpon Meganium Hydrapple",
     "online": [
      36,
@@ -143,7 +143,7 @@
     ]
    },
    {
-    "anteil": "3,10",
+    "anteil": "3,11",
     "name": "Alakazam Dusknoir",
     "online": [
      45,
@@ -173,7 +173,7 @@
     ]
    },
    {
-    "anteil": "2,64",
+    "anteil": "2,63",
     "name": "Lucario Hariyama",
     "online": [
      35,
@@ -248,7 +248,7 @@
     ]
    },
    {
-    "anteil": "1,53",
+    "anteil": "1,52",
     "name": "Cynthia's Garchomp",
     "online": [
      26,
@@ -338,7 +338,7 @@
     ]
    },
    {
-    "anteil": "1,00",
+    "anteil": "0,99",
     "name": "Dragapult Dudunsparce",
     "online": [
      17,
@@ -518,7 +518,7 @@
     ]
    },
    {
-    "anteil": "0,55",
+    "anteil": "0,54",
     "name": "Mega Chandelure",
     "online": [
      13,
@@ -773,7 +773,7 @@
     ]
    },
    {
-    "anteil": "0,19",
+    "anteil": "0,20",
     "name": "Mega Abomasnow",
     "online": [
      0,
@@ -1299,6 +1299,21 @@
    },
    {
     "anteil": "0,04",
+    "name": "Mega Manectric",
+    "online": [
+     1,
+     0,
+     0
+    ],
+    "slug": "mega-manectric-ex-meg",
+    "vor_ort": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,04",
     "name": "Dragapult Froslass",
     "online": [
      0,
@@ -1336,21 +1351,6 @@
      0
     ],
     "slug": "mega-froslass-dudunsparce",
-    "vor_ort": [
-     0,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,04",
-    "name": "Mega Manectric",
-    "online": [
-     1,
-     0,
-     0
-    ],
-    "slug": "mega-manectric-ex-meg",
     "vor_ort": [
      0,
      0,
@@ -1851,29 +1851,29 @@
   ],
   "name": "Sharpedo Toxtricity",
   "online": {
-   "anteil": "3,12",
+   "anteil": "3,13",
    "anteil14": "3,19",
    "bilanz": [
-    1483,
-    1667,
+    1484,
+    1671,
     25
    ],
    "bis": "06.11.2026",
    "fenster14": "23.10.–06.11.2026",
    "format": "TEF–30C",
-   "kurz_anteil": "2,31",
+   "kurz_anteil": "2,39",
    "kurz_bilanz": [
-    71,
-    101,
+    72,
+    105,
     0
    ],
-   "kurz_listen": 42,
-   "kurz_turniere": 11,
+   "kurz_listen": 44,
+   "kurz_turniere": 12,
    "kurz_von": "31.10.2026",
-   "listen": 653,
+   "listen": 655,
    "seit": "18.09.2026",
    "trend14": "-1,17",
-   "turniere": 134
+   "turniere": 135
   },
   "vor_ort": {
    "format": "TEF–30C",

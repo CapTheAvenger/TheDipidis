@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-06T06:40:26Z",
+  "erzeugt_am": "2026-11-07T03:45:18Z",
   "id": "hide-n-sneak",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -12,7 +12,7 @@
     "name": "Dragapult",
     "online": [
      315,
-     326,
+     328,
      9
     ],
     "slug": "dragapult-ex",
@@ -23,7 +23,7 @@
     ]
    },
    {
-    "anteil": "5,90",
+    "anteil": "5,92",
     "name": "Basic Box",
     "online": [
      111,
@@ -68,7 +68,7 @@
     ]
    },
    {
-    "anteil": "4,03",
+    "anteil": "4,04",
     "name": "Alakazam Dudunsparce",
     "online": [
      107,
@@ -113,7 +113,7 @@
     ]
    },
    {
-    "anteil": "3,41",
+    "anteil": "3,40",
     "name": "Ogerpon Meganium Hydrapple",
     "online": [
      84,
@@ -128,7 +128,7 @@
     ]
    },
    {
-    "anteil": "3,12",
+    "anteil": "3,13",
     "name": "Sharpedo Toxtricity",
     "online": [
      44,
@@ -143,7 +143,7 @@
     ]
    },
    {
-    "anteil": "3,10",
+    "anteil": "3,11",
     "name": "Alakazam Dusknoir",
     "online": [
      118,
@@ -173,7 +173,7 @@
     ]
    },
    {
-    "anteil": "2,64",
+    "anteil": "2,63",
     "name": "Lucario Hariyama",
     "online": [
      121,
@@ -248,7 +248,7 @@
     ]
    },
    {
-    "anteil": "1,53",
+    "anteil": "1,52",
     "name": "Cynthia's Garchomp",
     "online": [
      33,
@@ -338,7 +338,7 @@
     ]
    },
    {
-    "anteil": "1,00",
+    "anteil": "0,99",
     "name": "Dragapult Dudunsparce",
     "online": [
      26,
@@ -518,7 +518,7 @@
     ]
    },
    {
-    "anteil": "0,55",
+    "anteil": "0,54",
     "name": "Mega Chandelure",
     "online": [
      12,
@@ -773,7 +773,7 @@
     ]
    },
    {
-    "anteil": "0,19",
+    "anteil": "0,20",
     "name": "Mega Abomasnow",
     "online": [
      11,
@@ -1329,6 +1329,21 @@
    },
    {
     "anteil": "0,04",
+    "name": "Mega Manectric",
+    "online": [
+     0,
+     2,
+     0
+    ],
+    "slug": "mega-manectric-ex-meg",
+    "vor_ort": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,04",
     "name": "Raging Bolt Bellibolt",
     "online": [
      2,
@@ -1385,21 +1400,6 @@
      0,
      0,
      1
-    ]
-   },
-   {
-    "anteil": "0,04",
-    "name": "Mega Manectric",
-    "online": [
-     0,
-     2,
-     0
-    ],
-    "slug": "mega-manectric-ex-meg",
-    "vor_ort": [
-     0,
-     0,
-     0
     ]
    },
    {
@@ -2181,29 +2181,29 @@
   ],
   "name": "Dhelmise",
   "online": {
-   "anteil": "4,98",
+   "anteil": "4,99",
    "anteil14": "6,44",
    "bilanz": [
-    2421,
-    2674,
+    2427,
+    2678,
     33
    ],
    "bis": "06.11.2026",
    "fenster14": "23.10.–06.11.2026",
    "format": "TEF–30C",
-   "kurz_anteil": "6,00",
+   "kurz_anteil": "6,04",
    "kurz_bilanz": [
-    275,
-    264,
+    281,
+    268,
     4
    ],
-   "kurz_listen": 109,
-   "kurz_turniere": 11,
+   "kurz_listen": 111,
+   "kurz_turniere": 12,
    "kurz_von": "31.10.2026",
-   "listen": 1042,
+   "listen": 1044,
    "seit": "18.09.2026",
    "trend14": "0,82",
-   "turniere": 134
+   "turniere": 135
   },
   "vor_ort": {
    "format": "TEF–30C",

@@ -54540,3 +54540,17 @@ tournament_id;date;meta;archetype_id;opponent_id;wins;losses;ties;matches;win_ra
 6ad97ee5115c12b73a5a9707;2026-11-05;TEF-30C;ogerpon-meganium-hydrapple;dragapult-dusknoir;0;1;0;1;0.0;mitUnentschieden
 6ad97ee5115c12b73a5a9707;2026-11-05;TEF-30C;n-zoroark;alakazam-meg;0;1;0;1;0.0;mitUnentschieden
 6ad97ee5115c12b73a5a9707;2026-11-05;TEF-30C;alakazam-meg;n-zoroark;0;1;0;1;0.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;dragapult-ex;basic-box-m;1;0;0;1;1.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;basic-box-m;dragapult-ex;0;1;0;1;0.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;mega-excadrill-ex;slowking-scr;1;0;0;1;1.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;slowking-scr;mega-excadrill-ex;0;1;0;1;0.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;basic-box-m;sharpedo-toxtricity;0;1;0;1;0.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;sharpedo-toxtricity;basic-box-m;1;0;0;1;1.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;dragapult-ex;alakazam-dusknoir;2;0;0;2;1.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;alakazam-dusknoir;dragapult-ex;0;2;0;2;0.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;mega-venusaur-ex;alakazam-dusknoir;0;1;0;1;0.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;alakazam-dusknoir;mega-venusaur-ex;1;0;0;1;1.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;basic-box-m;alakazam-dudunsparce;0;1;0;1;0.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;alakazam-dudunsparce;basic-box-m;0;1;0;1;0.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;dhelmise-pbl;dragapult-ex;0;2;0;2;0.0;mitUnentschieden
+6aeb3790e94eae0f947470f2;2026-11-06;TEF-30C;dragapult-ex;dhelmise-pbl;2;0;0;2;1.0;mitUnentschieden

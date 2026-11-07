@@ -659,6 +659,14 @@ jobs:
         # deshalb mit rc=2 (argparse, "unrecognized argument") — mein
         # Fehler beim Einbau. Der Scraper setzt ohnehin fort: er
         # ueberspringt Turniere, die schon in der Datei stehen.
+        #
+        # SC-46 (07.11.2026): das stand hier, war aber erst ab PR SC-46
+        # wahr. Bis dahin las der Scraper nur die erste Uebersichtsseite
+        # (25 Turniere, knapp zwei Tage) und holte jedes davon neu —
+        # zwischen zwei Wochenlaeufen (3-4 Tage) fielen Tage heraus, und
+        # ein Turnier ohne Listen warf den ganzen Lauf weg. Jetzt: Fenster
+        # der letzten 14 Tage, geblaettert, Bestand uebersprungen, ein
+        # Turnier ohne Listen benannt uebersprungen.
         run: |
           set +e
           echo "::group::scrapers/limitless_online_decklist_scraper.py"

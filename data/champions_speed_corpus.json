@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "last_updated": "2026-11-07",
+    "last_updated": "2026-11-08",
     "window_days": 14,
-    "window_start": "2026-10-24",
-    "window_end": "2026-11-07",
+    "window_start": "2026-10-25",
+    "window_end": "2026-11-08",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
     "content_to": "2026-11-04",
-    "samples_outside_window": 204,
-    "team_count": 66,
-    "teams_with_samples": 64,
-    "sample_count": 390,
+    "samples_outside_window": 216,
+    "team_count": 65,
+    "teams_with_samples": 63,
+    "sample_count": 384,
     "species_count": 62,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
@@ -2702,48 +2702,6 @@
       "nature": "Timid",
       "date": "26 Oct 2026",
       "replica": "L2EXSMKPJX"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "16 HP / 12 Def / 29 SpA / 9 Spe",
-      "nature": "Modest",
-      "date": "24 Oct 2026",
-      "replica": "0790HHX12R"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "24 Oct 2026",
-      "replica": "0790HHX12R"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "22 HP / 15 Atk / 1 Def / 14 SpD / 14 Spe",
-      "nature": "Adamant",
-      "date": "24 Oct 2026",
-      "replica": "0790HHX12R"
-    },
-    {
-      "species": "Aerodactyl",
-      "evs": "16 HP / 12 Atk / 1 Def / 11 SpD / 26 Spe",
-      "nature": "Jolly",
-      "date": "24 Oct 2026",
-      "replica": "0790HHX12R"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "5 HP / 30 Atk / 1 Def / 1 SpD / 29 Spe",
-      "nature": "Adamant",
-      "date": "24 Oct 2026",
-      "replica": "0790HHX12R"
-    },
-    {
-      "species": "Volcarona",
-      "evs": "32 HP / 25 Def / 1 SpD / 8 Spe",
-      "nature": "Bold",
-      "date": "24 Oct 2026",
-      "replica": "0790HHX12R"
     }
   ]
 }

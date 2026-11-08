@@ -125,7 +125,7 @@
    "PLS 130"
   ]
  },
- "champions_teams": 66,
+ "champions_teams": 65,
  "champions_ueber_grenze": 0,
  "empty_files": {
   "labs_tournament_decks__unsorted.csv": true
@@ -139,7 +139,7 @@
   "champions_editionen.json": 26121,
   "champions_resources.json": 0,
   "champions_type_chart.json": 183,
-  "cm_expansions.csv": 788,
+  "cm_expansions.csv": 792,
   "japanese_cards_database.csv": 1076,
   "online_api_archetypes.csv": 24603,
   "online_api_cards_TEF-30C.csv": 179753,
@@ -151,7 +151,7 @@
   "price_data.csv": 20601,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-11-07 09:33 UTC",
+ "generated": "2026-11-08 09:33 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,

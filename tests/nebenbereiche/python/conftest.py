@@ -25,7 +25,8 @@ import pytest
 
 ABLAUF_DATEIEN = ("GITHUB_ENV", "GITHUB_OUTPUT", "GITHUB_STEP_SUMMARY",
                   "GITHUB_PATH", "GITHUB_STATE")
-TOR_ZUSTAND = ("TOR_ZURUECKGEROLLT", "TOR_OHNE_ROLLBACK", "TOR_OHNE_SCHRUMPF")
+TOR_ZUSTAND = ("TOR_ZURUECKGEROLLT", "TOR_OHNE_ROLLBACK", "TOR_OHNE_SCHRUMPF",
+               "TOR_OHNE_SPERRLISTE")  # SC-50: Setwechsel-Probe setzt es fuer ihren Lauf
 
 
 @pytest.fixture(autouse=True)

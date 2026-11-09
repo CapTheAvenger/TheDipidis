@@ -1072,6 +1072,11 @@ SYNC_PATTERNS = [
     "sets.json",
     "sets_metadata.json",
     "format_window.json",
+    # SC-49 (09.11.2026): update_sets.ensure_set_in_pokemon_sets_mapping
+    # haengt das neue Set an die Allowlist — im Saatordner. Ohne Rueckweg
+    # waeren die Karten eines neuen Sets auf der Seite unsichtbar (PBL Juli,
+    # DLR Wochenlauf #200).
+    "pokemon_sets_mapping.csv",
     # Formats catalog — produced by tournament_scraper_JH.update_formats_catalog
     # whenever a new format key shows up on Limitless (e.g. TEF-POR
     # added on the 2026-03-27 rotation). Seeded into the workflow's

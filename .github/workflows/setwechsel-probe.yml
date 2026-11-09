@@ -80,9 +80,14 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # SC-50 (09.11.2026): die Datenlaeufe sperren nur noch die Sperrliste.
+      # Die Probe soll aber jede Zusicherung sehen, die ein neues Set bricht
+      # — sie ist die Fruehwarnung (Pruefagent S6). Deshalb hier ohne
+      # Sperrliste, also genau wie vor SC-50 (das Zurueckrollen im
+      # Wegwerf-Baum bleibt, wie es war).
       - name: 1 — neues EN-Set, am Tag danach
         working-directory: ${{ runner.temp }}/en
-        run: TOR_OHNE_INSTALL=1 bash scripts/tor_vor_dem_push.sh kern
+        run: TOR_OHNE_INSTALL=1 TOR_OHNE_SPERRLISTE=1 bash scripts/tor_vor_dem_push.sh kern
 
       - name: 2 — dasselbe 30 Tage spaeter
         if: always() && steps.baeume.outcome == 'success'
@@ -94,10 +99,10 @@ jobs:
           # deshalb lokal festgehalten — gepusht wird nichts.
           git add -A data config
           git -c user.email=probe@local -c user.name=probe commit -qm "Setwechsel-Probe (lokal)"
-          TOR_OHNE_INSTALL=1 faketime "${{ steps.baeume.outputs.spaeter }}" \
+          TOR_OHNE_INSTALL=1 TOR_OHNE_SPERRLISTE=1 faketime "${{ steps.baeume.outputs.spaeter }}" \
             bash scripts/tor_vor_dem_push.sh kern
 
       - name: 3 — nur ein neues JP-Set
         if: always() && steps.baeume.outcome == 'success'
         working-directory: ${{ runner.temp }}/jp
-        run: TOR_OHNE_INSTALL=1 bash scripts/tor_vor_dem_push.sh kern
+        run: TOR_OHNE_INSTALL=1 TOR_OHNE_SPERRLISTE=1 bash scripts/tor_vor_dem_push.sh kern

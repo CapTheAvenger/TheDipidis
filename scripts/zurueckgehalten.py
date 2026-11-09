@@ -41,6 +41,12 @@ GEHALTEN = re.compile(r"^Tor: (\S+) bleibt auf dem alten Stand")
 # hoechstens 10 je Schritt an, Einzelzeilen koennen wegfallen (Replica #160).
 SAMMEL = re.compile(r"^Tor hielt zurueck: (.*?) \| Bilder: \d+$")
 ERSTLAUF = re.compile(r"^Tor, erster Durchlauf: (.+)$")
+# SC-50 (09.11.2026): seit der festen Sperrliste geht eine rote, nicht
+# sperrende Zusicherung als Befund durch, und die Daten werden geliefert.
+# Steht derselbe Befund im juengsten UND im vorherigen Lauf, ist er kein
+# Tagesrauschen mehr — dann soll es jemand erfahren (WZ-48: Guardian rot).
+TORBEFUND = re.compile(r"^Tor-Befund \(nicht sperrend\): (.+)$")
+TORBEFUNDE_SAMMEL = re.compile(r"^Tor-Befunde: (.+)$")
 
 
 def ablaeufe_mit_tor(ordner=".github/workflows"):
@@ -56,6 +62,36 @@ def ablaeufe_mit_tor(ordner=".github/workflows"):
                     r"git push|push_nach_rebase\.sh|daten_pushen\.sh", text):
                 raus.append(name)
     return raus
+
+
+def befunde_aus(annotationen):
+    """Tor-Befunde aus den Annotationen eines Laufs: die Sammelzeile
+    (::notice::, alle) und die Einzelzeilen (::warning::, hoechstens 10 je
+    Schritt kommen bei GitHub an)."""
+    raus = set()
+    for text in annotationen:
+        text = (text or "").strip()
+        m = TORBEFUNDE_SAMMEL.match(text)
+        if m:
+            raus |= {t.strip() for t in m.group(1).split(" | ") if t.strip()}
+        m = TORBEFUND.match(text)
+        if m:
+            raus.add(m.group(1).strip())
+    return sorted(raus)
+
+
+def heute_noch_rot(stehend, befunde_heute):
+    """Pruefagent S3 (09.11.2026): die meisten Ablaeufe laufen nicht taeglich.
+    Ein Befund aus ihren letzten zwei Laeufen hielte den Guardian rot, auch
+    wenn die Zusicherung auf main laengst wieder gruen ist. Deshalb zaehlt
+    ein stehender Befund einer KERN-Zusicherung nur, wenn er im eigenen Tor
+    des Guardians HEUTE noch rot ist (`befunde_heute`, None = unbekannt ->
+    nicht filtern). Nebenbereiche faehrt der Guardian nicht; die bleiben."""
+    if befunde_heute is None:
+        return list(stehend)
+    kern = ("tests/python/", "tests/unit/")
+    return [f for f in stehend
+            if not f["befund"].startswith(kern) or f["befund"] in befunde_heute]
 
 
 def gehalten_aus(annotationen):
@@ -113,6 +149,43 @@ def befunde(laeufe, zuletzt_geliefert=None):
     return raus
 
 
+def stehende_befunde(laeufe):
+    """Tor-Befunde, die der juengste UND der vorherige Lauf eines Ablaufs
+    gemeldet haben. Dieselbe Serienregel wie `befunde` fuer zurueckgehaltene
+    Dateien — nur dass hier die Daten geliefert wurden und eine Zusicherung
+    seit mehr als einem Lauf rot steht."""
+    raus = []
+    for ablauf, liste in sorted(laeufe.items()):
+        if len(liste) < 2:
+            continue
+        for befund in sorted(set(liste[0].get("befunde") or [])):
+            serie = 0
+            for lauf in liste:
+                if befund in (lauf.get("befunde") or []):
+                    serie += 1
+                else:
+                    break
+            if serie < 2:
+                continue
+            raus.append({
+                "ablauf": ablauf, "befund": befund, "serie": serie,
+                "seit": liste[serie - 1].get("zeit"), "voll": serie == len(liste),
+                "lauf": liste[0].get("url"), "nummer": liste[0].get("nummer"),
+            })
+    return raus
+
+
+def befunde_als_markdown(funde):
+    zeilen = []
+    for f in funde:
+        mehr = "+" if f["voll"] else ""
+        zeilen.append(
+            f"- **CRITICAL** `{f['ablauf']}`: Tor-Befund steht seit {f['seit']} "
+            f"({f['serie']}{mehr} Laeufe in Folge, Daten geliefert, nicht sperrend): "
+            f"`{f['befund']}` — [Lauf #{f['nummer']}]({f['lauf']})")
+    return "\n".join(zeilen)
+
+
 def als_markdown(funde):
     zeilen = []
     for f in funde:
@@ -149,10 +222,12 @@ def hole(ablaeufe, anzahl):
                 texte += [(a.get("message") or "") for a in
                           _gh(f"repos/{REPO}/check-runs/{job['id']}/annotations?per_page=100")]
             gehalten = gehalten_aus(texte)
+            tor_befunde = befunde_aus(texte)
             erst = [m.group(1)[:160] for m in (ERSTLAUF.match(t.strip()) for t in texte) if m]
             liste.append({"id": lauf["id"], "nummer": lauf.get("run_number"),
                           "zeit": (lauf.get("run_started_at") or lauf.get("created_at") or "")[:16],
-                          "url": lauf.get("html_url"), "gehalten": gehalten, "erstlauf": erst})
+                          "url": lauf.get("html_url"), "gehalten": gehalten, "erstlauf": erst,
+                          "befunde": tor_befunde})
         laeufe[ablauf] = liste
     return laeufe
 
@@ -174,22 +249,36 @@ def main(argv):
         laeufe = hole(ablaeufe_mit_tor(), anzahl)
         kandidat = [d for l in laeufe.values() if l for d in (l[0].get("gehalten") or [])]
         funde = befunde(laeufe, geliefert(kandidat))
+        heute = None
+        pfad_heute = os.environ.get("TOR_BEFUNDE_HEUTE", "")
+        if pfad_heute and os.path.exists(pfad_heute):
+            with open(pfad_heute, encoding="utf-8") as fh:
+                heute = {z.strip() for z in fh if z.strip()}
+        stehend = heute_noch_rot(stehende_befunde(laeufe), heute)
     except Exception as e:  # noqa: BLE001
         # Nicht schweigen: ein Ausfall der Pruefung ist selbst ein Befund.
         print(f"- **CRITICAL** Zurueckhalte-Pruefung ausgefallen: {e}")
         funde = [None]
+        stehend = []
     else:
         text = als_markdown(funde)
         if text:
             print(text)
+        text = befunde_als_markdown(stehend)
+        if text:
+            print(text)
+    for f in stehend:
+        print(f"::error title=Tor-Befund steht::{f['ablauf']}: {f['befund']} seit {f['seit']} "
+              f"({f['serie']} Laeufe in Folge)", file=sys.stderr)
     for f in funde:
         if f:
             print(f"::error title=Daten still::{f['ablauf']}: {f['datei']} seit {f['seit']} "
                   f"zurueckgehalten ({f['serie']} Laeufe in Folge)", file=sys.stderr)
+    gesamt = len(funde) + len(stehend)
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
-            fh.write(f"anzahl={len(funde)}\n")
-    print(f"anzahl={len(funde)}", file=sys.stderr)
+            fh.write(f"anzahl={gesamt}\n")
+    print(f"anzahl={gesamt}", file=sys.stderr)
     return 0
 
 

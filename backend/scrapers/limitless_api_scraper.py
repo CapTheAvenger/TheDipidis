@@ -832,6 +832,49 @@ def bekannte_turniere(pfad: str) -> Dict[str, str]:
     return heraus
 
 
+def neu_einordnen(pfad: str, datenverzeichnis: str = "data") -> List[str]:
+    """Turniere des LAUFENDEN Fensters, die unter einem anderen Schluessel im
+    Index stehen, aus dem Index nehmen. Gibt ihre ids zurueck.
+
+    SC-49 (09.11.2026, Wochenlauf #200). Am Tag eines Setwechsels holt der
+    taegliche Lauf die ersten Turniere des neuen Formats mit dem ALTEN
+    Fenster von main (Rare Candy Club Blitz #8, 06.11., stand als TEF-30C
+    im Index). Stellt der Wochenlauf dann auf das neue Format um, saehe die
+    inkrementelle Regel sie als bekannt und holte sie nie unter dem neuen
+    Schluessel — online_api_cards_<NEU>.csv entstuende gar nicht, und ihre
+    Kartenzeilen laegen im alten Auszug (zwei Kartenpools in einer Datei).
+
+    Nur das oberste Fenster wird angefasst: aeltere Turniere bleiben, wie
+    sie geholt wurden. Die verwaisten Zeilen in Archetypen-, Karten- und
+    Matchup-Dateien raeumt danach `_raeume_auf` weg; der Lauf holt die
+    Turniere neu.
+    """
+    if not os.path.exists(pfad):
+        return []
+    fenster = formatfenster(datenverzeichnis)
+    if not fenster:
+        return []
+    laufend, start = fenster[0]
+    with open(pfad, encoding="utf-8", newline="") as datei:
+        leser = csv.DictReader(datei, delimiter=";")
+        spalten = leser.fieldnames or SPALTEN_TURNIERE
+        alle = list(leser)
+    behalten, raus = [], []
+    for zeile in alle:
+        datum = (zeile.get("date") or "")[:10]
+        if datum >= start and (zeile.get("meta") or "") != laufend:
+            raus.append(zeile.get("tournament_id") or "")
+        else:
+            behalten.append(zeile)
+    if raus:
+        with open(pfad, "w", encoding="utf-8", newline="") as datei:
+            schreiber = csv.DictWriter(datei, fieldnames=list(spalten),
+                                       delimiter=";", extrasaction="ignore")
+            schreiber.writeheader()
+            schreiber.writerows(behalten)
+    return raus
+
+
 def bekannte_turnier_ids(pfad: str) -> List[str]:
     """Nur die ids — fuer das Aufraeumen verwaister Zeilen."""
     return list(bekannte_turniere(pfad))
@@ -1083,6 +1126,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                    help="0 = kein Deckel.")
     p.add_argument("--pause", type=float, default=0.35)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--neu-einordnen", action="store_true", dest="neu_einordnen",
+                   help="Turniere des laufenden Formatfensters, die unter einem anderen "
+                        "Schluessel im Index stehen, neu holen (Formatwechsel, SC-49)")
     p.add_argument("--verify", action="store_true",
                    help="Nur die Live-Gegenprobe fahren, nichts schreiben.")
     a = p.parse_args(argv)
@@ -1151,6 +1197,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if letztes and letztes < ab:
             break
 
+    if a.neu_einordnen:
+        umgehaengt = neu_einordnen(pfad("online_api_tournaments.csv"), a.data_dir)
+        if umgehaengt:
+            print(f"{len(umgehaengt)} Turnier(e) des laufenden Fensters standen unter "
+                  f"einem anderen Formatschluessel — werden neu geholt (SC-49).")
     bekannt = bekannte_turniere(pfad("online_api_tournaments.csv"))
 
     # Halbfertige Turniere eines abgebrochenen Vorlaufs wegraeumen, BEVOR

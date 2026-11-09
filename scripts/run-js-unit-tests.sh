@@ -99,6 +99,21 @@ for f in "$ORDNER"/test-*.js; do
         TOTAL_FAIL=$((TOTAL_FAIL + NOTOK))
         continue
     fi
+    # PROZESS GESTORBEN (SC-50, 09.11.2026): process.exit, OOM, fehlendes
+    # Modul, Wurf auf oberster Ebene. node meldet das als EINEN gezaehlten
+    # Fehlschlag ("not ok <datei>" mit "exitCode: N", # fail 1) — sah also
+    # aus wie eine benannte rote Zusicherung. Seit der Sperrliste waere das
+    # ein nicht sperrender Tor-Befund; ein Absturz prueft aber gar nichts.
+    # Deshalb "abgebrochen": tor_rollback.rote_zusicherungen fuehrt das als
+    # unlesbar, und unlesbar sperrt.
+    if echo "$OUTPUT" | grep -qE '^[[:space:]]+exitCode: [0-9]+'; then
+        echo "✗ $f — abgebrochen, Prozess gestorben ($(echo "$OUTPUT" | grep -oE 'exitCode: [0-9]+' | head -1))"
+        echo "$OUTPUT" | grep -B2 -A6 'Error' | head -20
+        FAILED_FILES+=("$f")
+        TOTAL_PASS=$((TOTAL_PASS + PASS))
+        TOTAL_FAIL=$((TOTAL_FAIL + (FAIL > 0 ? FAIL : 1)))
+        continue
+    fi
     if [ "$CODE" -ne 0 ] && [ "$FAIL" -eq 0 ]; then
         echo "✗ $f — abgebrochen, ohne dass ein Fehlschlag gezaehlt wurde (Exit $CODE)"
         echo "$OUTPUT" | grep -B2 -A6 'Error' | head -20

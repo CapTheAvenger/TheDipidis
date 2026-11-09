@@ -1,11 +1,11 @@
 {
- "timestamp": "2026-09-30T21:30:23Z",
- "source": "https://limitlesstcg.com/cards?q=regulation%3D<Marke>&display=list (nur englische Drucke); Erstbefuellung 30.09.2026 aus dem Browser gelesen (Geraete-Proxy 403), ab dem naechsten Lauf durch das Skript",
+ "timestamp": "2026-11-09T15:57:19Z",
+ "source": "https://limitlesstcg.com/cards?q=regulation%3D<Marke>&display=list (nur englische Drucke)",
  "counts": {
   "G": 1647,
   "H": 1303,
   "I": 1277,
-  "J": 640
+  "J": 781
  },
  "marks": {
   "G": {
@@ -61,6 +61,7 @@
    "30C": "1-126,129-158,B,G,R",
    "ASC": "1-10,20-22,29-31,41-43,48,55-56,58,73,83-84,93-94,102,108,114,117,121,138-139,141,144-145,149,163-170,172-176,198,214-215,218,232,236,240,242,246,249,252-253,272-274,294",
    "CRI": "1-54,56-73,75-107,110-113,116-122",
+   "DLR": "1-141",
    "MEP": "30,34-67,70-72,74-77,80-90,92,94-101",
    "PBL": "1-103,105-106,108-109,111-120",
    "POR": "1-21,23-73,75-107,110-114,116,118-124"

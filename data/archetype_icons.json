@@ -3,12 +3,12 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-11-06T06:23:02",
-    "lastScrapedCount": 139,
+    "lastScrapedAt": "2026-11-09T15:30:02",
+    "lastScrapedCount": 101,
     "lastBackfilledAt": "2026-05-05T13:19:27",
     "lastBackfillCount": 342,
     "lastHarvestedFrom": "city_league_archetype_scraper",
-    "lastHarvestedAt": "2026-11-06T06:16:46"
+    "lastHarvestedAt": "2026-11-09T15:23:09"
   },
   "archetypes": {
     "Dragapult": [
@@ -2440,6 +2440,39 @@
     "Mega Rayquaza Meowth": [
       "rayquaza-mega",
       "meowth"
+    ],
+    "Mega Gardevoir Mega Kangaskhan": [
+      "gardevoir-mega",
+      "kangaskhan-mega"
+    ],
+    "Mega Venusaur Mega Kangaskhan": [
+      "venusaur-mega",
+      "kangaskhan-mega"
+    ],
+    "Mamoswine Toucannon": [
+      "mamoswine",
+      "toucannon"
+    ],
+    "Mega Gengar Toxtricity": [
+      "gengar-mega",
+      "toxtricity"
+    ],
+    "Clefable Latias": [
+      "clefable",
+      "latias"
+    ],
+    "Talonflame Dusknoir": [
+      "talonflame",
+      "dusknoir"
+    ],
+    "Mega Golisopod": [
+      "golisopod-mega"
+    ],
+    "Mega Charizard Y": [
+      "charizard-mega-y"
+    ],
+    "Mega Malamar": [
+      "malamar-mega"
     ]
   }
 }

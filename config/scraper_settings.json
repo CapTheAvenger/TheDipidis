@@ -28,11 +28,11 @@
                 "max_lists_per_deck": 20,
                 "delay_between_lists": 4.0,
                 "delay_between_decks": 8.0,
-                "format_filter": "30C"
+                "format_filter": "DLR"
             },
             "tournaments": {
                 "enabled": true,
-                "start_date": "25.09.2026",
+                "start_date": "20.11.2026",
                 "max_tournaments": 15,
                 "max_decks_per_tournament": 256,
                 "format_filter": [
@@ -53,7 +53,7 @@
         "game": "POKEMON",
         "format": "STANDARD",
         "rotation": "2026",
-        "set": "30C",
+        "set": "DLR",
         "top_decks_for_matchup": 100,
         "delay_between_requests": 1.5,
         "output_file": "limitless_online_decks.csv",
@@ -130,7 +130,7 @@
         "_comment": "from_date: YYYY-MM-DD. tournament_types: regional/international/special/worlds. overwrite: true ersetzt labs_tournament_decks.csv statt anzuhaengen (NICHT die Turnierliste - die wird ohnehin in beiden Schreibwegen komplett neu geschrieben, save_results :1978 und overwrite_results :2033). GEAENDERT 06.09.2026: from_date stand auf 2026-04-24 und die Typenliste ohne special. Befund: data/labs_tournaments.json pendelte wochenlang zwischen 8 und 11 Eintraegen. Der Grund ist das Zusammenspiel zweier Stellen. Der Filter laesst nur 8 Turniere durch; der Gap-Fill (:2306-2318) sammelt aus dem Fenster [max_tid-10 .. max_tid+5] nachtraeglich wieder ein, OHNE Datums- und Typfilter. Solange max_tid 0070 war, fing das Fenster 0060 mit auf. Mit 0071 Worlds rutschte 0060 heraus und faellt seither nur noch unter den Filter - 0061 Queretaro haelt sich bis heute allein durch das Fenster und faellt beim naechsten Turnier ebenfalls heraus. 0067 Lima und 0069 Turin haengen am fehlenden Typ special. Der Schaden ist leise: player_continuity_scraper.py (:531-541) laesst Turniere, die nicht in der Zielliste stehen, als fremde Zeilen unveraendert stehen und meldet nichts. Die Daten bleiben, werden aber nie wieder aufgefrischt - 0060 Orlando steckt deshalb auf 512 Zeilen (Deckelung der HTML-Tabelle) ohne player_id. Warum genau 2026-04-01: .github/workflows/weekly-full-update.yml:449 faehrt den Continuity-Scraper laengst mit --from-date 2026-04-01; diese Einstellung war die einzige Stelle, die davon abwich. Kosten: im Labs-Lauf KEINE zusaetzlichen Abrufe - die vier Turniere stehen in seen_tids und laufen in den Zweig SKIP (frozen) (:2465-2485). Einmalig ein Standings-Abruf fuer 0060 im Continuity-Scraper. ERWARTETER NEBENEFFEKT: solange 0060 nur 512 Zeilen hat, meldet scripts/data_guardian.py (:1996-2012) dafuer CRITICAL statt bisher WARN - das ist die gewollte Lautstaerke, keine Regression."
     },
     "online_tournament_scraper": {
-        "format_filter": "30C",
+        "format_filter": "DLR",
         "min_players": 100,
         "max_tournaments": 200,
         "delay_between_requests": 1.5,

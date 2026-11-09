@@ -3,7 +3,20 @@
   "beschreibung": "Karten ohne internationalen Druck fuer TCG Showdown, inoffizielle englische Uebersetzung von limitlesstcg.com (cards/jp, translate=en). Erzeugt von scripts/showdown_jp_karten.py.",
   "quelle": "https://limitlesstcg.com/cards/jp/<SET>/<NR>?translate=en",
   "anzahl": 7,
-  "fehlend": []
+  "fehlend": [
+   {
+    "set": "DLR",
+    "nummer": "15",
+    "name": "Smoliv",
+    "grund": "404 Client Error: Not Found for url: https://limitlesstcg.com/cards/jp/DLR/15?translate=en"
+   },
+   {
+    "set": "DLR",
+    "nummer": "16",
+    "name": "Dolliv",
+    "grund": "404 Client Error: Not Found for url: https://limitlesstcg.com/cards/jp/DLR/16?translate=en"
+   }
+  ]
  },
  "karten": [
   {

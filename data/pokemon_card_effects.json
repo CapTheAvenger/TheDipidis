@@ -111613,6 +111613,3058 @@
       "Illustrated by Yusuke Shimada"
     ]
   },
+  "DLR|1": {
+    "name": "Heracross",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Spike Draw",
+        "cost": [
+          "G"
+        ],
+        "damage": "20",
+        "text": "Draw 2 cards."
+      },
+      {
+        "name": "High Horsepower",
+        "cost": [
+          "G",
+          "G",
+          "C"
+        ],
+        "damage": "130",
+        "text": "This Pokémon also does 30 damage to itself."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|10": {
+    "name": "Wimpod",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [
+      {
+        "name": "Punk Out",
+        "text": "If your opponent has any Pokémon ex in play, this Pokémon has no Retreat Cost."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Ram",
+        "cost": [
+          "G"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|100": {
+    "name": "Mega Rayquaza Cap",
+    "card_type": "Tool",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Delta Gift",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "For each of your Pokémon that has a Mega Rayquaza Cap attached, search your deck for a Basic Energy card and attach it to that Pokémon. Then, shuffle your deck."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|101": {
+    "name": "Tasty Rice Ball",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Heal 30 damage from your Active Pokémon. For each Tasty Rice Ball card (not including this card) in your discard pile, heal 30 more damage."
+    ]
+  },
+  "DLR|102": {
+    "name": "Tate & Liza's Training",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Draw 2 cards. If you drew any cards in this way, and if a Stadium that has \"Legendary\" in its name is in play, put this Tate & Liza's Training into your hand instead of the discard pile."
+    ]
+  },
+  "DLR|103": {
+    "name": "Zinnia's Trust",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Switch your Active Pokémon with 1 of your Benched Pokémon. If you do, move an Energy from the Pokémon you moved to your Bench to the new Active Pokémon."
+    ]
+  },
+  "DLR|104": {
+    "name": "Masquerain",
+    "card_type": "Evolves from Surskit",
+    "energy_type": "Grass",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Frightening Pattern",
+        "cost": [
+          "C"
+        ],
+        "damage": "30",
+        "text": "During your opponent's next turn, the Defending Pokémon can't use attacks."
+      },
+      {
+        "name": "Bug Out",
+        "cost": [
+          "G"
+        ],
+        "damage": "50×",
+        "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|105": {
+    "name": "Sprigatito",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Play Rough",
+        "cost": [
+          "G"
+        ],
+        "damage": "10+",
+        "text": "Flip a coin. If heads, this attack does 20 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|106": {
+    "name": "Growlithe",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Roar",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Switch out your opponent's Active Pokémon to the Bench. (Your opponent chooses the new Active Pokémon.)"
+      },
+      {
+        "name": "Rear Kick",
+        "cost": [
+          "R",
+          "C",
+          "C"
+        ],
+        "damage": "50",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|107": {
+    "name": "Magmortar",
+    "card_type": "Evolves from Magmar",
+    "energy_type": "Fire",
+    "hp": "140",
+    "abilities": [
+      {
+        "name": "Buddy Boost",
+        "text": "Once during your turn, you may use this Ability. Attach a Basic [ R ] Energy card, a Basic [ L ] Energy card, or 1 of each from your hand to your Electivire and Magmortar in any way you like."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Heat Crash",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|108": {
+    "name": "Electivire",
+    "card_type": "Evolves from Electabuzz",
+    "energy_type": "Lightning",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Body Slam",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      },
+      {
+        "name": "Voltaic Hammer",
+        "cost": [
+          "L",
+          "L",
+          "C",
+          "C"
+        ],
+        "damage": "60×",
+        "text": "Discard any amount of Basic Energy from this Pokémon, and this attack does 60 damage for each card you discarded in this way."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|109": {
+    "name": "Pincurchin",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Energy Crush",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "20×",
+        "text": "This attack does 20 damage for each Energy attached to all of your opponent's Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|11": {
+    "name": "Mega Golisopod ex",
+    "card_type": "Evolves from Wimpod",
+    "energy_type": "Grass",
+    "hp": "340",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Finishing Blow",
+        "cost": [
+          "G"
+        ],
+        "damage": "60+",
+        "text": "If your opponent's Active Pokémon already has any damage counters on it, this attack does 160 more damage."
+      },
+      {
+        "name": "Quadruple Hold",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "160",
+        "text": "During your opponent's next turn, the Defending Pokémon can't retreat."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|110": {
+    "name": "Enamorus",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Incarnate Solidarity",
+        "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all [ C ] Energy in the costs of attacks used by this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Rising Heart",
+        "cost": [
+          "P",
+          "P",
+          "C",
+          "C"
+        ],
+        "damage": "100+",
+        "text": "If your opponent's Active Pokémon is a Pokémon ex, this attack does 100 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|111": {
+    "name": "Groudon",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "150",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Strength",
+        "cost": [
+          "F",
+          "C"
+        ],
+        "damage": "40",
+        "text": ""
+      },
+      {
+        "name": "Brutal Lands",
+        "cost": [
+          "F",
+          "F",
+          "C"
+        ],
+        "damage": "100+",
+        "text": "If a Stadium that has \"Legendary\" in its name is in play, this attack does 170 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|112": {
+    "name": "Zorua",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Stampede",
+        "cost": [
+          "D"
+        ],
+        "damage": "10",
+        "text": ""
+      },
+      {
+        "name": "Scratch",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|113": {
+    "name": "Inkay",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Knock Off",
+        "cost": [
+          "D"
+        ],
+        "damage": "10",
+        "text": "Discard a random card from your opponent's hand."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|114": {
+    "name": "Eevee",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Nap",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Heal 20 damage from this Pokémon."
+      },
+      {
+        "name": "Headbutt",
+        "cost": [
+          "C"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|115": {
+    "name": "Azurill",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "30",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Bouncy-Bounce Charge",
+        "cost": [],
+        "damage": "",
+        "text": "Search your deck for an Energy card and attach it to 1 of your Benched Pokémon. Then, shuffle your deck."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|116": {
+    "name": "Altaria",
+    "card_type": "Evolves from Swablu",
+    "energy_type": "Colorless",
+    "hp": "110",
+    "abilities": [
+      {
+        "name": "Cottony Carrier",
+        "text": "Your Basic Pokémon in play have no Retreat Cost."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Flap",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|117": {
+    "name": "Kecleon",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Colorful Whip",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30×",
+        "text": "Reveal any number of Pokémon from your hand, and this attack does 30 damage for each different type of Pokémon you revealed in this way."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|118": {
+    "name": "Mega Golisopod ex",
+    "card_type": "Evolves from Wimpod",
+    "energy_type": "Grass",
+    "hp": "340",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Finishing Blow",
+        "cost": [
+          "G"
+        ],
+        "damage": "60+",
+        "text": "If your opponent's Active Pokémon already has any damage counters on it, this attack does 160 more damage."
+      },
+      {
+        "name": "Quadruple Hold",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "160",
+        "text": "During your opponent's next turn, the Defending Pokémon can't retreat."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|119": {
+    "name": "Heat Rotom ex",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "190",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Rewarm",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30×",
+        "text": "This attack does 30 damage for each Basic [ R ] Energy card in your discard pile. Then, shuffle those cards into your deck."
+      },
+      {
+        "name": "Strong Flare",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "170",
+        "text": "Discard 2 Energy from this Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|12": {
+    "name": "Sprigatito",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Play Rough",
+        "cost": [
+          "G"
+        ],
+        "damage": "10+",
+        "text": "Flip a coin. If heads, this attack does 20 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|120": {
+    "name": "Wishiwashi ex",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "260",
+    "abilities": [
+      {
+        "name": "Oceanic Gain",
+        "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Heal 50 damage from this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hydro Splash",
+        "cost": [
+          "W",
+          "W",
+          "W",
+          "C"
+        ],
+        "damage": "220",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|121": {
+    "name": "Raikou ex",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "200",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Thunder-Clad",
+        "cost": [
+          "L"
+        ],
+        "damage": "",
+        "text": "If you go first, you can use this attack during your first turn. Search your deck for an Energy card and attach it to this Pokémon. Then, shuffle your deck."
+      },
+      {
+        "name": "Power Rush",
+        "cost": [
+          "L",
+          "L",
+          "C"
+        ],
+        "damage": "200",
+        "text": "Flip a coin. If tails, during your next turn, this Pokémon can't use attacks."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|122": {
+    "name": "Mega Golurk ex",
+    "card_type": "Evolves from Golett",
+    "energy_type": "Psychic",
+    "hp": "350",
+    "abilities": [
+      {
+        "name": "Restricted Activation",
+        "text": "This Pokémon can't use attacks unless you have 10 or more cards in your hand."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Goliath's Punch",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "300",
+        "text": "This Pokémon also does 30 damage to itself."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|123": {
+    "name": "Mega Malamar ex",
+    "card_type": "Evolves from Inkay",
+    "energy_type": "Darkness",
+    "hp": "320",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Psychic Marionette",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "70×",
+        "text": "This attack does 70 damage for each of your opponent's Benched Pokémon."
+      },
+      {
+        "name": "Eerie Wave",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "200",
+        "text": "Your opponent's Active Pokémon is now Confused."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|124": {
+    "name": "Talonflame ex",
+    "card_type": "Evolves from Fletchling",
+    "energy_type": "Colorless",
+    "hp": "280",
+    "abilities": [
+      {
+        "name": "Excited Dive",
+        "text": "Once during your turn, if this Pokémon is in your hand, and if you have any [ C ] Mega Evolution Pokémon ex in play, you may use this Ability. Put this Pokémon onto your Bench."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Talon Hunt",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "150",
+        "text": "You may search your deck for up to 2 cards and put them into your hand. Then, shuffle your deck."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|125": {
+    "name": "Aarune",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Search your deck for up to 3 in any combination of Supporter and Stadium cards, reveal them, and put them into your hand. Then, shuffle your deck."
+    ]
+  },
+  "DLR|126": {
+    "name": "Adventure Lantern",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Search your deck for a Basic [ R ] Energy card and a Basic [ L ] Energy card, reveal them, and put them into your hand. Then, shuffle your deck."
+    ]
+  },
+  "DLR|127": {
+    "name": "Custom Vest",
+    "card_type": "Tool",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "If the Pokémon this card is attached to isn't a Mega Evolution Pokémon ex, it takes 60 less damage from attacks from your opponent's Mega Evolution Pokémon ex (after applying Weakness and Resistance) ."
+    ]
+  },
+  "DLR|128": {
+    "name": "Emcee's Hype",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Draw 2 cards. If your opponent has 3 or fewer Prize cards remaining, draw 2 more cards."
+    ]
+  },
+  "DLR|129": {
+    "name": "Pokémon Catcher",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Flip a coin. If heads, switch in 1 of your opponent's Benched Pokémon to the Active Spot."
+    ]
+  },
+  "DLR|13": {
+    "name": "Floragato",
+    "card_type": "Evolves from Sprigatito",
+    "energy_type": "Grass",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Slash",
+        "cost": [
+          "G",
+          "G"
+        ],
+        "damage": "60",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|130": {
+    "name": "Tate & Liza's Training",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Draw 2 cards. If you drew any cards in this way, and if a Stadium that has \"Legendary\" in its name is in play, put this Tate & Liza's Training into your hand instead of the discard pile."
+    ]
+  },
+  "DLR|131": {
+    "name": "Zinnia's Trust",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Switch your Active Pokémon with 1 of your Benched Pokémon. If you do, move an Energy from the Pokémon you moved to your Bench to the new Active Pokémon."
+    ]
+  },
+  "DLR|132": {
+    "name": "Bubbly Water Energy",
+    "card_type": "Special Energy",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "As long as this card is attached to a Pokémon, it provides [ W ] Energy. The [ W ] Pokémon this card is attached to recovers from all Special Conditions and can't be affected by any Special Conditions."
+    ]
+  },
+  "DLR|133": {
+    "name": "Growing Grass Energy",
+    "card_type": "Special Energy",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "As long as this card is attached to a Pokémon, it provides [ G ] Energy. The [ G ] Pokémon this card is attached to gets +20 HP."
+    ]
+  },
+  "DLR|134": {
+    "name": "Nitro Fire Energy",
+    "card_type": "Special Energy",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "As long as this card is attached to a Pokémon, it provides [ R ] Energy. If this card is discarded by an effect of an attack used by the [ R ] Pokémon this card is attached to, put this card into your hand after attack damage and effects."
+    ]
+  },
+  "DLR|135": {
+    "name": "Mega Golisopod ex",
+    "card_type": "Evolves from Wimpod",
+    "energy_type": "Grass",
+    "hp": "340",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Finishing Blow",
+        "cost": [
+          "G"
+        ],
+        "damage": "60+",
+        "text": "If your opponent's Active Pokémon already has any damage counters on it, this attack does 160 more damage."
+      },
+      {
+        "name": "Quadruple Hold",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "160",
+        "text": "During your opponent's next turn, the Defending Pokémon can't retreat."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|136": {
+    "name": "Raikou ex",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "200",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Thunder-Clad",
+        "cost": [
+          "L"
+        ],
+        "damage": "",
+        "text": "If you go first, you can use this attack during your first turn. Search your deck for an Energy card and attach it to this Pokémon. Then, shuffle your deck."
+      },
+      {
+        "name": "Power Rush",
+        "cost": [
+          "L",
+          "L",
+          "C"
+        ],
+        "damage": "200",
+        "text": "Flip a coin. If tails, during your next turn, this Pokémon can't use attacks."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|137": {
+    "name": "Mega Golurk ex",
+    "card_type": "Evolves from Golett",
+    "energy_type": "Psychic",
+    "hp": "350",
+    "abilities": [
+      {
+        "name": "Restricted Activation",
+        "text": "This Pokémon can't use attacks unless you have 10 or more cards in your hand."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Goliath's Punch",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "300",
+        "text": "This Pokémon also does 30 damage to itself."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|138": {
+    "name": "Mega Rayquaza ex",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "280",
+    "abilities": [
+      {
+        "name": "Ruler's Roar",
+        "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Look at the top 4 cards of your deck and attach a Basic Energy card you find there to this Pokémon. Shuffle the other cards and put them on the bottom of your deck."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Storm Emerald",
+        "cost": [
+          "R",
+          "L",
+          "C"
+        ],
+        "damage": "50×",
+        "text": "This attack does 50 damage for each [ R ] Energy and each [ L ] Energy attached to all of your Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|139": {
+    "name": "Aarune",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Search your deck for up to 3 in any combination of Supporter and Stadium cards, reveal them, and put them into your hand. Then, shuffle your deck."
+    ]
+  },
+  "DLR|14": {
+    "name": "Meowscarada ex",
+    "card_type": "Evolves from Sprigatito",
+    "energy_type": "Grass",
+    "hp": "320",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Magical Bullet",
+        "cost": [
+          "G",
+          "G"
+        ],
+        "damage": "120",
+        "text": "This attack also does 120 damage to 1 of your opponent's Benched Pokémon that has any damage counters on it. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": []
+  },
+  "DLR|140": {
+    "name": "Zinnia's Trust",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Switch your Active Pokémon with 1 of your Benched Pokémon. If you do, move an Energy from the Pokémon you moved to your Bench to the new Active Pokémon."
+    ]
+  },
+  "DLR|141": {
+    "name": "Mega Rayquaza ex",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "280",
+    "abilities": [
+      {
+        "name": "Ruler's Roar",
+        "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Look at the top 4 cards of your deck and attach a Basic Energy card you find there to this Pokémon. Shuffle the other cards and put them on the bottom of your deck."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Storm Emerald",
+        "cost": [
+          "R",
+          "L",
+          "C"
+        ],
+        "damage": "50×",
+        "text": "This attack does 50 damage for each [ R ] Energy and each [ L ] Energy attached to all of your Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|15": {
+    "name": "Smoliv",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Spray Fluid",
+        "cost": [
+          "G"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|16": {
+    "name": "Dolliv",
+    "card_type": "Evolves from Smoliv",
+    "energy_type": "Grass",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Leaf Step",
+        "cost": [
+          "G"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|17": {
+    "name": "Arboliva",
+    "card_type": "Evolves from Smoliv",
+    "energy_type": "Grass",
+    "hp": "150",
+    "abilities": [
+      {
+        "name": "Slippery Oil",
+        "text": "Once during your turn, you may use this Ability. Switch out your opponent's Active Pokémon to the Bench. (Your opponent chooses the new Active Pokémon.)"
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Mega Drain",
+        "cost": [
+          "G",
+          "C"
+        ],
+        "damage": "100",
+        "text": "Heal 30 damage from this Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|18": {
+    "name": "Growlithe",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Roar",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Switch out your opponent's Active Pokémon to the Bench. (Your opponent chooses the new Active Pokémon.)"
+      },
+      {
+        "name": "Rear Kick",
+        "cost": [
+          "R",
+          "C",
+          "C"
+        ],
+        "damage": "50",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|19": {
+    "name": "Arcanine",
+    "card_type": "Evolves from Growlithe",
+    "energy_type": "Fire",
+    "hp": "150",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Fervent Fang",
+        "cost": [
+          "R",
+          "C",
+          "C"
+        ],
+        "damage": "90+",
+        "text": "If your opponent has 4 or fewer Prize cards remaining, this attack does 90 more damage."
+      },
+      {
+        "name": "Heat Tackle",
+        "cost": [
+          "R",
+          "R",
+          "C",
+          "C"
+        ],
+        "damage": "200",
+        "text": "This Pokémon also does 50 damage to itself."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|2": {
+    "name": "Surskit",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "50",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Multiply",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 2 Surskit and put them onto your Bench. Then, shuffle your deck."
+      },
+      {
+        "name": "Bug Bite",
+        "cost": [
+          "G"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|20": {
+    "name": "Magmar",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Gather Strength",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 2 Basic Energy cards, reveal them, and put them into your hand. Then, shuffle your deck."
+      },
+      {
+        "name": "Combustion",
+        "cost": [
+          "R",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|21": {
+    "name": "Magmortar",
+    "card_type": "Evolves from Magmar",
+    "energy_type": "Fire",
+    "hp": "140",
+    "abilities": [
+      {
+        "name": "Buddy Boost",
+        "text": "Once during your turn, you may use this Ability. Attach a Basic [ R ] Energy card, a Basic [ L ] Energy card, or 1 of each from your hand to your Electivire and Magmortar in any way you like."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Heat Crash",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|22": {
+    "name": "Torkoal",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Searing Flame",
+        "cost": [
+          "R",
+          "C"
+        ],
+        "damage": "30",
+        "text": "Your opponent's Active Pokémon is now Burned."
+      },
+      {
+        "name": "Combustion Blast",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "120",
+        "text": "During your next turn, this Pokémon can't use Combustion Blast."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|23": {
+    "name": "Heat Rotom ex",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "190",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Rewarm",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30×",
+        "text": "This attack does 30 damage for each Basic [ R ] Energy card in your discard pile. Then, shuffle those cards into your deck."
+      },
+      {
+        "name": "Strong Flare",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "170",
+        "text": "Discard 2 Energy from this Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|24": {
+    "name": "Heatmor",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Destructive Flame",
+        "cost": [
+          "R"
+        ],
+        "damage": "30",
+        "text": "Flip a coin. If heads, discard an Energy from your opponent's Active Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|25": {
+    "name": "Mantine",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Make Waves",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Each player shuffles their hand into their deck and draws 4 cards."
+      },
+      {
+        "name": "Bubble Drain",
+        "cost": [
+          "W",
+          "C"
+        ],
+        "damage": "30",
+        "text": "Heal 30 damage from this Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|26": {
+    "name": "Kyogre",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "150",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Waterfall",
+        "cost": [
+          "W",
+          "C"
+        ],
+        "damage": "40",
+        "text": ""
+      },
+      {
+        "name": "Brutal Whirlpool",
+        "cost": [
+          "W",
+          "W",
+          "C"
+        ],
+        "damage": "100",
+        "text": "If a Stadium that has \"Legendary\" in its name is in play, this attack also does 50 damage to each of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": []
+  },
+  "DLR|27": {
+    "name": "Frillish",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Hook",
+        "cost": [
+          "C"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|28": {
+    "name": "Jellicent",
+    "card_type": "Evolves from Frillish",
+    "energy_type": "Water",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Deep Sea Draw",
+        "text": "Once during your turn, you may use this Ability. Draw a card. If you do, you may put a card from your hand on the bottom of your deck."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Gentle Slap",
+        "cost": [
+          "W",
+          "C",
+          "C"
+        ],
+        "damage": "100",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|29": {
+    "name": "Wishiwashi ex",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "260",
+    "abilities": [
+      {
+        "name": "Oceanic Gain",
+        "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Heal 50 damage from this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hydro Splash",
+        "cost": [
+          "W",
+          "W",
+          "W",
+          "C"
+        ],
+        "damage": "220",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|3": {
+    "name": "Masquerain",
+    "card_type": "Evolves from Surskit",
+    "energy_type": "Grass",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Frightening Pattern",
+        "cost": [
+          "C"
+        ],
+        "damage": "30",
+        "text": "During your opponent's next turn, the Defending Pokémon can't use attacks."
+      },
+      {
+        "name": "Bug Out",
+        "cost": [
+          "G"
+        ],
+        "damage": "50×",
+        "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|30": {
+    "name": "Electabuzz",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Call for Family",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 2 Basic Pokémon and put them onto your Bench. Then, shuffle your deck."
+      },
+      {
+        "name": "Headbutt",
+        "cost": [
+          "L",
+          "L",
+          "C"
+        ],
+        "damage": "60",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|31": {
+    "name": "Electivire",
+    "card_type": "Evolves from Electabuzz",
+    "energy_type": "Lightning",
+    "hp": "140",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Body Slam",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      },
+      {
+        "name": "Voltaic Hammer",
+        "cost": [
+          "L",
+          "L",
+          "C",
+          "C"
+        ],
+        "damage": "60×",
+        "text": "Discard any amount of Basic Energy from this Pokémon, and this attack does 60 damage for each card you discarded in this way."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|32": {
+    "name": "Jolteon",
+    "card_type": "Evolves from Eevee",
+    "energy_type": "Lightning",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Tackle",
+        "cost": [
+          "L"
+        ],
+        "damage": "30",
+        "text": ""
+      },
+      {
+        "name": "Thunderbolt",
+        "cost": [
+          "L",
+          "L",
+          "L"
+        ],
+        "damage": "220",
+        "text": "Discard all Energy from this Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|33": {
+    "name": "Raikou ex",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "200",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Thunder-Clad",
+        "cost": [
+          "L"
+        ],
+        "damage": "",
+        "text": "If you go first, you can use this attack during your first turn. Search your deck for an Energy card and attach it to this Pokémon. Then, shuffle your deck."
+      },
+      {
+        "name": "Power Rush",
+        "cost": [
+          "L",
+          "L",
+          "C"
+        ],
+        "damage": "200",
+        "text": "Flip a coin. If tails, during your next turn, this Pokémon can't use attacks."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|34": {
+    "name": "Rotom",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Thunder Shock",
+        "cost": [
+          "L",
+          "C"
+        ],
+        "damage": "50",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|35": {
+    "name": "Thundurus",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Incarnate Solidarity",
+        "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all [ C ] Energy in the costs of attacks used by this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Thunderous Edge",
+        "cost": [
+          "L",
+          "C",
+          "C"
+        ],
+        "damage": "90",
+        "text": "This attack's damage isn't affected by any effects on your opponent's Active Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|36": {
+    "name": "Pincurchin",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Energy Crush",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "20×",
+        "text": "This attack does 20 damage for each Energy attached to all of your opponent's Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|37": {
+    "name": "Pawmi",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Quick Attack",
+        "cost": [
+          "L"
+        ],
+        "damage": "10+",
+        "text": "Flip a coin. If heads, this attack does 20 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|38": {
+    "name": "Pawmo",
+    "card_type": "Evolves from Pawmi",
+    "energy_type": "Lightning",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Electro Ball",
+        "cost": [
+          "L"
+        ],
+        "damage": "40",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|39": {
+    "name": "Pawmot",
+    "card_type": "Evolves from Pawmi",
+    "energy_type": "Lightning",
+    "hp": "150",
+    "abilities": [
+      {
+        "name": "Generator's Touch",
+        "text": "Once during your turn, you may use this Ability. Attach a Basic [ L ] Energy card from your discard pile to 1 of your Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Electric Punch",
+        "cost": [
+          "L",
+          "C"
+        ],
+        "damage": "100",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|4": {
+    "name": "Cacnea",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Knock Away",
+        "cost": [
+          "C"
+        ],
+        "damage": "10+",
+        "text": "Flip a coin. If heads, this attack does 10 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|40": {
+    "name": "Wattrel",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Agility",
+        "cost": [
+          "L"
+        ],
+        "damage": "10",
+        "text": "Flip a coin. If heads, during your opponent's next turn, prevent all damage from and effects of attacks done to this Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|41": {
+    "name": "Kilowattrel",
+    "card_type": "Evolves from Wattrel",
+    "energy_type": "Lightning",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Raid",
+        "cost": [
+          "L"
+        ],
+        "damage": "30+",
+        "text": "If this Pokémon evolved from Wattrel during this turn, this attack does 90 more damage."
+      },
+      {
+        "name": "Speed Dive",
+        "cost": [
+          "L",
+          "C"
+        ],
+        "damage": "70",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|42": {
+    "name": "Miraidon",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Claw Slash",
+        "cost": [
+          "L",
+          "C"
+        ],
+        "damage": "50",
+        "text": ""
+      },
+      {
+        "name": "Flashing Bolt",
+        "cost": [
+          "L",
+          "L",
+          "C"
+        ],
+        "damage": "120",
+        "text": "During your next turn, this Pokémon can't use Flashing Bolt."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|43": {
+    "name": "Drowzee",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Pound",
+        "cost": [
+          "P"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|44": {
+    "name": "Hypno",
+    "card_type": "Evolves from Drowzee",
+    "energy_type": "Psychic",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Mind Ruler",
+        "cost": [
+          "P"
+        ],
+        "damage": "20×",
+        "text": "This attack does 20 damage for each card in your opponent's hand."
+      },
+      {
+        "name": "Hypnoblast",
+        "cost": [
+          "P",
+          "C"
+        ],
+        "damage": "50",
+        "text": "Your opponent's Active Pokémon is now Asleep."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|45": {
+    "name": "Giratina",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Chaos Crawler",
+        "cost": [
+          "P",
+          "P",
+          "C"
+        ],
+        "damage": "120",
+        "text": "During your opponent's next turn, prevent all damage from attacks done to this Pokémon. If 1 of your Pokémon used Chaos Crawler during your last turn, this attack can't be used."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|46": {
+    "name": "Golett",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Light Punch",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "50",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|47": {
+    "name": "Mega Golurk ex",
+    "card_type": "Evolves from Golett",
+    "energy_type": "Psychic",
+    "hp": "350",
+    "abilities": [
+      {
+        "name": "Restricted Activation",
+        "text": "This Pokémon can't use attacks unless you have 10 or more cards in your hand."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Goliath's Punch",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "300",
+        "text": "This Pokémon also does 30 damage to itself."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|48": {
+    "name": "Enamorus",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Incarnate Solidarity",
+        "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all [ C ] Energy in the costs of attacks used by this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Rising Heart",
+        "cost": [
+          "P",
+          "P",
+          "C",
+          "C"
+        ],
+        "damage": "100+",
+        "text": "If your opponent's Active Pokémon is a Pokémon ex, this attack does 100 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|49": {
+    "name": "Sandshrew",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Ascension",
+        "cost": [
+          "F"
+        ],
+        "damage": "",
+        "text": "Search your deck for a card that evolves from this Pokémon and put it onto this Pokémon to evolve it. Then, shuffle your deck."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|5": {
+    "name": "Cacturne",
+    "card_type": "Evolves from Cacnea",
+    "energy_type": "Grass",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Linear Attack",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "This attack does 30 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "name": "Punishing Needles",
+        "cost": [
+          "G"
+        ],
+        "damage": "10+",
+        "text": "This attack does 50 more damage for each of your opponent's Pokémon in play that has an Ability."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|50": {
+    "name": "Sandslash",
+    "card_type": "Evolves from Sandshrew",
+    "energy_type": "Fighting",
+    "hp": "110",
+    "abilities": [
+      {
+        "name": "Counterattack Quills",
+        "text": "If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon (even if this Pokémon is Knocked Out) , place 3 damage counters on the Attacking Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Digging Claw",
+        "cost": [
+          "F"
+        ],
+        "damage": "60",
+        "text": "Discard the top card of your opponent's deck."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|51": {
+    "name": "Onix",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Guard Press",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "80",
+        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance) ."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|52": {
+    "name": "Steelix",
+    "card_type": "Evolves from Onix",
+    "energy_type": "Fighting",
+    "hp": "190",
+    "abilities": [
+      {
+        "name": "High Density Armor",
+        "text": "If this Pokémon has full HP, it takes 60 less damage from attacks from your opponent's Pokémon (after applying Weakness and Resistance) ."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Tough Swing",
+        "cost": [
+          "F",
+          "F",
+          "C",
+          "C"
+        ],
+        "damage": "150",
+        "text": "This attack's damage isn't affected by Resistance."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|53": {
+    "name": "Groudon",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "150",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Strength",
+        "cost": [
+          "F",
+          "C"
+        ],
+        "damage": "40",
+        "text": ""
+      },
+      {
+        "name": "Brutal Lands",
+        "cost": [
+          "F",
+          "F",
+          "C"
+        ],
+        "damage": "100+",
+        "text": "If a Stadium that has \"Legendary\" in its name is in play, this attack does 170 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|54": {
+    "name": "Landorus",
+    "card_type": "Basic",
+    "energy_type": "Fighting",
+    "hp": "130",
+    "abilities": [
+      {
+        "name": "Incarnate Solidarity",
+        "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all [ C ] Energy in the costs of attacks used by this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Gaia Crush",
+        "cost": [
+          "F",
+          "C",
+          "C"
+        ],
+        "damage": "110",
+        "text": "Discard a Stadium in play."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|55": {
+    "name": "Nidoran♀",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Find a Friend",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Search your deck for a Pokémon, reveal it, and put it into your hand. Then, shuffle your deck."
+      },
+      {
+        "name": "Gnaw",
+        "cost": [
+          "D"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|56": {
+    "name": "Nidorina",
+    "card_type": "Evolves from Nidoran♀",
+    "energy_type": "Darkness",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Tackle",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "60",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|57": {
+    "name": "Nidoqueen",
+    "card_type": "Evolves from Nidoran♀",
+    "energy_type": "Darkness",
+    "hp": "170",
+    "abilities": [
+      {
+        "name": "Maternal Call",
+        "text": "Once during your turn, you may use this Ability. Flip a coin. If heads, switch in 1 of your opponent's Benched Pokémon to the Active Spot."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Giga Impact",
+        "cost": [
+          "D",
+          "C",
+          "C"
+        ],
+        "damage": "150",
+        "text": "During your next turn, this Pokémon can't use attacks."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|58": {
+    "name": "Spinarak",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Poison Sting",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Your opponent's Active Pokémon is now Poisoned."
+      },
+      {
+        "name": "Bug Out",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "50×",
+        "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|59": {
+    "name": "Ariados",
+    "card_type": "Evolves from Spinarak",
+    "energy_type": "Darkness",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Tormenting Poison",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Your opponent's Active Pokémon is now Poisoned. During Pokémon Checkup, place 4 damage counters on that Pokémon instead of 1."
+      },
+      {
+        "name": "Stealthy Sting",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "80",
+        "text": "During your opponent's next turn, prevent all damage done to this Pokémon by attacks from Basic Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|6": {
+    "name": "Combee",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "50",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Fade Out",
+        "cost": [
+          "G"
+        ],
+        "damage": "10",
+        "text": "Put this Pokémon and all attached cards into your hand."
+      },
+      {
+        "name": "Bug Out",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "50×",
+        "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|60": {
+    "name": "Sableye",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Lure Out",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Reveal the top 5 cards of your opponent's deck. You may choose any number of Basic Pokémon you find there and put those Pokémon onto their Bench. Your opponent shuffles the other cards back into their deck."
+      },
+      {
+        "name": "Ominous Eyes",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "",
+        "text": "Place 5 damage counters on 1 of your opponent's Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|61": {
+    "name": "Carvanha",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Ambush",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "20+",
+        "text": "Flip a coin. If heads, this attack does 20 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|62": {
+    "name": "Sharpedo",
+    "card_type": "Evolves from Carvanha",
+    "energy_type": "Darkness",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Crunch",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "60",
+        "text": "Flip a coin. If heads, discard an Energy from your opponent's Active Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|63": {
+    "name": "Darkrai",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Shadow-Clad",
+        "cost": [
+          "D"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 2 Basic [ D ] Energy cards and attach them to this Pokémon. Then, shuffle your deck."
+      },
+      {
+        "name": "Dark Cutter",
+        "cost": [
+          "D",
+          "D",
+          "C"
+        ],
+        "damage": "110",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|64": {
+    "name": "Purrloin",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Dig Claws",
+        "cost": [
+          "D"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|65": {
+    "name": "Liepard",
+    "card_type": "Evolves from Purrloin",
+    "energy_type": "Darkness",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Follow-Up Claw",
+        "cost": [
+          "D"
+        ],
+        "damage": "20×",
+        "text": "This attack does 20 damage for each damage counter on your opponent's Active Pokémon."
+      },
+      {
+        "name": "Slash",
+        "cost": [
+          "D",
+          "C",
+          "C"
+        ],
+        "damage": "90",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|66": {
+    "name": "Zorua",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Stampede",
+        "cost": [
+          "D"
+        ],
+        "damage": "10",
+        "text": ""
+      },
+      {
+        "name": "Scratch",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|67": {
+    "name": "Zoroark ex",
+    "card_type": "Evolves from Zorua",
+    "energy_type": "Darkness",
+    "hp": "270",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Riotous Beating",
+        "cost": [
+          "D"
+        ],
+        "damage": "20×",
+        "text": "This attack does 20 damage for each of your Pokémon in play."
+      },
+      {
+        "name": "Slashing Strike",
+        "cost": [
+          "D",
+          "C",
+          "C"
+        ],
+        "damage": "210",
+        "text": "During your next turn, this Pokémon can't use Slashing Strike."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|68": {
+    "name": "Inkay",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Knock Off",
+        "cost": [
+          "D"
+        ],
+        "damage": "10",
+        "text": "Discard a random card from your opponent's hand."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|69": {
+    "name": "Mega Malamar ex",
+    "card_type": "Evolves from Inkay",
+    "energy_type": "Darkness",
+    "hp": "320",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Psychic Marionette",
+        "cost": [
+          "D",
+          "D"
+        ],
+        "damage": "70×",
+        "text": "This attack does 70 damage for each of your opponent's Benched Pokémon."
+      },
+      {
+        "name": "Eerie Wave",
+        "cost": [
+          "D",
+          "D",
+          "D"
+        ],
+        "damage": "200",
+        "text": "Your opponent's Active Pokémon is now Confused."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|7": {
+    "name": "Vespiquen",
+    "card_type": "Evolves from Combee",
+    "energy_type": "Grass",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Pierce",
+        "cost": [
+          "G"
+        ],
+        "damage": "40",
+        "text": ""
+      },
+      {
+        "name": "Clean Hit",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "80+",
+        "text": "If your opponent's Active Pokémon is an Evolution Pokémon, this attack does 80 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|70": {
+    "name": "Morpeko",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Call for Family",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 2 Basic Pokémon and put them onto your Bench. Then, shuffle your deck."
+      },
+      {
+        "name": "Slap",
+        "cost": [
+          "D"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|71": {
+    "name": "Zarude",
+    "card_type": "Basic",
+    "energy_type": "Darkness",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Corkscrew Punch",
+        "cost": [
+          "D"
+        ],
+        "damage": "20",
+        "text": ""
+      },
+      {
+        "name": "Deadly Whip",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "50+",
+        "text": "Flip 2 coins. If both of them are heads, this attack does 150 more damage."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|72": {
+    "name": "Druddigon",
+    "card_type": "Basic",
+    "energy_type": "Dragon",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Drag Off",
+        "cost": [
+          "R",
+          "W"
+        ],
+        "damage": "",
+        "text": "Switch in 1 of your opponent's Benched Pokémon to the Active Spot. This attack does 40 damage to the new Active Pokémon."
+      },
+      {
+        "name": "Claw Slash",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|73": {
+    "name": "Jangmo-o",
+    "card_type": "Basic",
+    "energy_type": "Dragon",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Hard Head",
+        "cost": [
+          "L",
+          "F"
+        ],
+        "damage": "30",
+        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance) ."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|74": {
+    "name": "Hakamo-o",
+    "card_type": "Evolves from Jangmo-o",
+    "energy_type": "Dragon",
+    "hp": "100",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Double Smash",
+        "cost": [
+          "L",
+          "F"
+        ],
+        "damage": "70×",
+        "text": "Flip 2 coins. This attack does 70 damage for each heads."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|75": {
+    "name": "Kommo-o",
+    "card_type": "Evolves from Jangmo-o",
+    "energy_type": "Dragon",
+    "hp": "160",
+    "abilities": [
+      {
+        "name": "Beat Scales",
+        "text": "Once during your turn, you may use this Ability. Look at the top 6 cards of your deck and attach any number of Basic Energy cards you find there to your [ N ] Pokémon in any way you like. Shuffle the other cards back into your deck."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hammer In",
+        "cost": [
+          "L",
+          "F",
+          "C"
+        ],
+        "damage": "170",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|76": {
+    "name": "Cyclizar",
+    "card_type": "Basic",
+    "energy_type": "Dragon",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Bite",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30",
+        "text": ""
+      },
+      {
+        "name": "Break Through",
+        "cost": [
+          "G",
+          "D",
+          "C"
+        ],
+        "damage": "110",
+        "text": "This attack also does 30 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": []
+  },
+  "DLR|77": {
+    "name": "Tauros",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Raging Horns",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "50+",
+        "text": "This attack does 10 more damage for each damage counter on this Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|78": {
+    "name": "Eevee",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Nap",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Heal 20 damage from this Pokémon."
+      },
+      {
+        "name": "Headbutt",
+        "cost": [
+          "C"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|79": {
+    "name": "Delibird",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "90",
+    "abilities": [
+      {
+        "name": "Energizing Present",
+        "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Look at the top 6 cards of your deck, reveal an Energy card you find there, and put it into your hand. Shuffle the other cards and put them on the bottom of your deck."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Beat",
+        "cost": [
+          "C"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|8": {
+    "name": "Shaymin",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Overrun",
+        "cost": [
+          "G"
+        ],
+        "damage": "20",
+        "text": "This attack also does 20 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": []
+  },
+  "DLR|80": {
+    "name": "Azurill",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "30",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Bouncy-Bounce Charge",
+        "cost": [],
+        "damage": "",
+        "text": "Search your deck for an Energy card and attach it to 1 of your Benched Pokémon. Then, shuffle your deck."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|81": {
+    "name": "Swablu",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "50",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Run Around",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Switch this Pokémon with 1 of your Benched Pokémon."
+      },
+      {
+        "name": "Peck",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "20",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|82": {
+    "name": "Altaria",
+    "card_type": "Evolves from Swablu",
+    "energy_type": "Colorless",
+    "hp": "110",
+    "abilities": [
+      {
+        "name": "Cottony Carrier",
+        "text": "Your Basic Pokémon in play have no Retreat Cost."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Flap",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|83": {
+    "name": "Kecleon",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "90",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Colorful Whip",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "30×",
+        "text": "Reveal any number of Pokémon from your hand, and this attack does 30 damage for each different type of Pokémon you revealed in this way."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|84": {
+    "name": "Mega Rayquaza ex",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "280",
+    "abilities": [
+      {
+        "name": "Ruler's Roar",
+        "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Look at the top 4 cards of your deck and attach a Basic Energy card you find there to this Pokémon. Shuffle the other cards and put them on the bottom of your deck."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Storm Emerald",
+        "cost": [
+          "R",
+          "L",
+          "C"
+        ],
+        "damage": "50×",
+        "text": "This attack does 50 damage for each [ R ] Energy and each [ L ] Energy attached to all of your Pokémon."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|85": {
+    "name": "Tornadus",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "110",
+    "abilities": [
+      {
+        "name": "Incarnate Solidarity",
+        "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all [ C ] Energy in the costs of attacks used by this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Corkscrew Dive",
+        "cost": [
+          "C",
+          "C",
+          "C"
+        ],
+        "damage": "70",
+        "text": "You may draw cards until you have 6 cards in your hand."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|86": {
+    "name": "Fletchling",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Surprise Attack",
+        "cost": [
+          "C"
+        ],
+        "damage": "30",
+        "text": "Flip a coin. If tails, this attack does nothing."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|87": {
+    "name": "Fletchinder",
+    "card_type": "Evolves from Fletchling",
+    "energy_type": "Colorless",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Clutch",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "40",
+        "text": "During your opponent's next turn, the Defending Pokémon can't retreat."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|88": {
+    "name": "Talonflame ex",
+    "card_type": "Evolves from Fletchling",
+    "energy_type": "Colorless",
+    "hp": "280",
+    "abilities": [
+      {
+        "name": "Excited Dive",
+        "text": "Once during your turn, if this Pokémon is in your hand, and if you have any [ C ] Mega Evolution Pokémon ex in play, you may use this Ability. Put this Pokémon onto your Bench."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Talon Hunt",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "150",
+        "text": "You may search your deck for up to 2 cards and put them into your hand. Then, shuffle your deck."
+      }
+    ],
+    "rules": []
+  },
+  "DLR|89": {
+    "name": "Aarune",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Search your deck for up to 3 in any combination of Supporter and Stadium cards, reveal them, and put them into your hand. Then, shuffle your deck."
+    ]
+  },
+  "DLR|9": {
+    "name": "Virizion",
+    "card_type": "Basic",
+    "energy_type": "Grass",
+    "hp": "120",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Double Draw",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Draw 2 cards."
+      },
+      {
+        "name": "Solar Beam",
+        "cost": [
+          "G",
+          "G",
+          "C"
+        ],
+        "damage": "110",
+        "text": ""
+      }
+    ],
+    "rules": []
+  },
+  "DLR|90": {
+    "name": "Adventure Lantern",
+    "card_type": "Item",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Search your deck for a Basic [ R ] Energy card and a Basic [ L ] Energy card, reveal them, and put them into your hand. Then, shuffle your deck."
+    ]
+  },
+  "DLR|91": {
+    "name": "Custom Vest",
+    "card_type": "Tool",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "If the Pokémon this card is attached to isn't a Mega Evolution Pokémon ex, it takes 60 less damage from attacks from your opponent's Mega Evolution Pokémon ex (after applying Weakness and Resistance) ."
+    ]
+  },
+  "DLR|92": {
+    "name": "Emcee's Hype",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Draw 2 cards. If your opponent has 3 or fewer Prize cards remaining, draw 2 more cards."
+    ]
+  },
+  "DLR|93": {
+    "name": "Grisham",
+    "card_type": "Supporter",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Heal 50 damage from each Pokémon (both yours and your opponent's) ."
+    ]
+  },
+  "DLR|94": {
+    "name": "Legendary Pyroduct",
+    "card_type": "Stadium",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Evolution Pokémon in play (both yours and your opponent's) have no Abilities."
+    ]
+  },
+  "DLR|95": {
+    "name": "Legendary Pyroduct",
+    "card_type": "Stadium",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Evolution Pokémon in play (both yours and your opponent's) have no Abilities."
+    ]
+  },
+  "DLR|96": {
+    "name": "Legendary Summit",
+    "card_type": "Stadium",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Whenever a [ C ] Pokémon (yours or your opponent's) is Knocked Out by damage from an attack from the opponent's Pokémon, that player takes 1 fewer Prize card."
+    ]
+  },
+  "DLR|97": {
+    "name": "Legendary Summit",
+    "card_type": "Stadium",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Whenever a [ C ] Pokémon (yours or your opponent's) is Knocked Out by damage from an attack from the opponent's Pokémon, that player takes 1 fewer Prize card."
+    ]
+  },
+  "DLR|98": {
+    "name": "Legendary Trench",
+    "card_type": "Stadium",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Whenever a Pokémon (yours or your opponent's) is healed, double the amount of damage healed."
+    ]
+  },
+  "DLR|99": {
+    "name": "Legendary Trench",
+    "card_type": "Stadium",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Whenever a Pokémon (yours or your opponent's) is healed, double the amount of damage healed."
+    ]
+  },
   "DPP|1": {
     "name": "Turtwig",
     "card_type": "Basic",

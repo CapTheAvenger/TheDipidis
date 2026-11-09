@@ -1,8 +1,8 @@
 {
  "_meta": {
   "beschreibung": "Deckvorlagen fuer TCG Showdown: Tier 1–3 des aktuellen Metas, je Archetyp die bestplatzierte Liste des juengsten Majors mit Listen, sonst die beste Online-Liste. Erzeugt von scripts/showdown_vorlagen.js.",
-  "format": "TEF-30C",
-  "tier_quelle": "js/app-tier-meta.js (computeTierScore, gleiche Grenzen) mit Labs-Auszug",
+  "format": "TEF-DLR",
+  "tier_quelle": "js/app-tier-meta.js (computeTierScore, gleiche Grenzen) ohne Labs-Auszug",
   "grenzen": {
    "T1_MAX": 6,
    "T2_MAX": 9,
@@ -11,33 +11,597 @@
    "T1_MIN_WR": 49,
    "MINDEST_ANTEIL_GROESSTER": 0.1
   },
-  "major": {
-   "id": "0079",
-   "name": "Regional Championship Gdańsk",
-   "datum": "2026-10-31"
-  },
-  "majors_ohne_listen": [],
+  "major": null,
+  "majors_ohne_listen": [
+   {
+    "id": "0079",
+    "name": "Regional Championship Gdańsk",
+    "datum": "2026-10-31"
+   },
+   {
+    "id": "0078",
+    "name": "Regional Championship Puebla",
+    "datum": "2026-10-24"
+   },
+   {
+    "id": "0077",
+    "name": "Regional Championship Nice",
+    "datum": "2026-10-17"
+   },
+   {
+    "id": "0076",
+    "name": "Regional Championship Louisville",
+    "datum": "2026-10-09"
+   },
+   {
+    "id": "0075",
+    "name": "Regional Championship Recife",
+    "datum": "2026-10-03"
+   },
+   {
+    "id": "0074",
+    "name": "Regional Championship Frankfurt",
+    "datum": "2026-09-26"
+   },
+   {
+    "id": "0073",
+    "name": "Regional Championship Brisbane",
+    "datum": "2026-09-26"
+   }
+  ],
   "ohne_liste": [
    {
-    "archetyp": "Cynthia's Garchomp",
+    "archetyp": "Basic Box",
+    "tier": 1,
+    "grund": "weder auf dem Major noch online eine Liste"
+   },
+   {
+    "archetyp": "Dhelmise",
     "tier": 3,
     "grund": "weder auf dem Major noch online eine Liste"
    }
   ],
-  "anzahl": 22
+  "anzahl": 23
  },
  "vorlagen": [
   {
+   "archetyp": "Mega Rayquaza",
+   "tier": 1,
+   "quelle": "online",
+   "turnier": "CHAMPIONSHIP OF DOOM! TEN!",
+   "datum": "2026-11-07",
+   "platz": 1,
+   "platz_text": "1st of 494",
+   "spieler": "AzulGG",
+   "bilanz": "14 - 3 - 0",
+   "titel": {
+    "name": "Mega Rayquaza ex",
+    "set": "DLR",
+    "nummer": "84"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Mega Kangaskhan ex",
+     "set": "MEG",
+     "nummer": "104"
+    },
+    {
+     "anzahl": 2,
+     "name": "Latias ex",
+     "set": "SSP",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 2,
+     "name": "Talonflame ex",
+     "set": "DLR",
+     "nummer": "88"
+    },
+    {
+     "anzahl": 2,
+     "name": "Ethan's Ho-Oh ex",
+     "set": "DRI",
+     "nummer": "39"
+    },
+    {
+     "anzahl": 2,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 2,
+     "name": "Mega Rayquaza ex",
+     "set": "DLR",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 1,
+     "name": "Iron Thorns ex",
+     "set": "TWM",
+     "nummer": "77"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 4,
+     "name": "Cyrano",
+     "set": "SSP",
+     "nummer": "170"
+    },
+    {
+     "anzahl": 2,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 2,
+     "name": "Crispin",
+     "set": "SCR",
+     "nummer": "133"
+    },
+    {
+     "anzahl": 2,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 4,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 4,
+     "name": "Energy Switch",
+     "set": "MEG",
+     "nummer": "115"
+    },
+    {
+     "anzahl": 2,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 1,
+     "name": "Unfair Stamp",
+     "set": "TWM",
+     "nummer": "165"
+    },
+    {
+     "anzahl": 1,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
+    },
+    {
+     "anzahl": 1,
+     "name": "Blowtorch",
+     "set": "PFL",
+     "nummer": "86"
+    },
+    {
+     "anzahl": 2,
+     "name": "Legendary Pyroduct",
+     "set": "DLR",
+     "nummer": "94"
+    },
+    {
+     "anzahl": 2,
+     "name": "Legendary Pyroduct",
+     "set": "DLR",
+     "nummer": "95"
+    },
+    {
+     "anzahl": 10,
+     "name": "Fire Energy",
+     "set": "MEE",
+     "nummer": "10"
+    },
+    {
+     "anzahl": 5,
+     "name": "Lightning Energy",
+     "set": "MEE",
+     "nummer": "12"
+    }
+   ]
+  },
+  {
    "archetyp": "Dragapult",
    "tier": 1,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 3,
-   "spieler": "Vincenzo Cipolla",
-   "bilanz": "12-3-1",
-   "archetyp_turnier": "Dragapult",
+   "quelle": "online",
+   "turnier": "Mini, mini, tournoi n18° Entrainement FR",
+   "datum": "2026-11-08",
+   "platz": 1,
+   "platz_text": "1st of 8",
+   "spieler": "Sotro",
+   "bilanz": "3 - 0 - 0",
+   "titel": {
+    "name": "Dragapult ex",
+    "set": "TWM",
+    "nummer": "130"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Dreepy",
+     "set": "TWM",
+     "nummer": "128"
+    },
+    {
+     "anzahl": 4,
+     "name": "Drakloak",
+     "set": "TWM",
+     "nummer": "129"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dragapult ex",
+     "set": "TWM",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 2,
+     "name": "Munkidori",
+     "set": "TWM",
+     "nummer": "95"
+    },
+    {
+     "anzahl": 2,
+     "name": "Budew",
+     "set": "ASC",
+     "nummer": "16"
+    },
+    {
+     "anzahl": 1,
+     "name": "Snorunt",
+     "set": "ASC",
+     "nummer": "46"
+    },
+    {
+     "anzahl": 1,
+     "name": "Froslass",
+     "set": "TWM",
+     "nummer": "53"
+    },
+    {
+     "anzahl": 1,
+     "name": "Moltres",
+     "set": "PFL",
+     "nummer": "14"
+    },
+    {
+     "anzahl": 1,
+     "name": "Yveltal",
+     "set": "MEG",
+     "nummer": "88"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 1,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 3,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 2,
+     "name": "Crispin",
+     "set": "SCR",
+     "nummer": "133"
+    },
+    {
+     "anzahl": 1,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 1,
+     "name": "Rosa's Encouragement",
+     "set": "POR",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 4,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 3,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 3,
+     "name": "Crushing Hammer",
+     "set": "POR",
+     "nummer": "71"
+    },
+    {
+     "anzahl": 2,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 1,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
+    },
+    {
+     "anzahl": 1,
+     "name": "Unfair Stamp",
+     "set": "TWM",
+     "nummer": "165"
+    },
+    {
+     "anzahl": 1,
+     "name": "Risky Ruins",
+     "set": "MEG",
+     "nummer": "127"
+    },
+    {
+     "anzahl": 1,
+     "name": "Team Rocket's Watchtower",
+     "set": "DRI",
+     "nummer": "180"
+    },
+    {
+     "anzahl": 3,
+     "name": "Darkness Energy",
+     "set": "MEE",
+     "nummer": "15"
+    },
+    {
+     "anzahl": 3,
+     "name": "Psychic Energy",
+     "set": "MEE",
+     "nummer": "13"
+    },
+    {
+     "anzahl": 3,
+     "name": "Fire Energy",
+     "set": "MEE",
+     "nummer": "10"
+    }
+   ]
+  },
+  {
+   "archetyp": "Alakazam Dudunsparce",
+   "tier": 1,
+   "quelle": "online",
+   "turnier": "🎁LIGA 5K PLAY TCG🏆BO1🏆 DELTA 🐉✅",
+   "datum": "2026-11-08",
+   "platz": 1,
+   "platz_text": "1st of 10",
+   "spieler": "KanitoALoLoco",
+   "bilanz": "4 - 0 - 0",
+   "titel": {
+    "name": "Alakazam",
+    "set": "MEG",
+    "nummer": "56"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Abra",
+     "set": "MEG",
+     "nummer": "54"
+    },
+    {
+     "anzahl": 4,
+     "name": "Kadabra",
+     "set": "MEG",
+     "nummer": "55"
+    },
+    {
+     "anzahl": 4,
+     "name": "Alakazam",
+     "set": "MEG",
+     "nummer": "56"
+    },
+    {
+     "anzahl": 3,
+     "name": "Dunsparce",
+     "set": "JTG",
+     "nummer": "120"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dudunsparce",
+     "set": "TEF",
+     "nummer": "129"
+    },
+    {
+     "anzahl": 1,
+     "name": "Shaymin",
+     "set": "DRI",
+     "nummer": "10"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lillie's Clefairy ex",
+     "set": "JTG",
+     "nummer": "56"
+    },
+    {
+     "anzahl": 1,
+     "name": "Psyduck",
+     "set": "ASC",
+     "nummer": "39"
+    },
+    {
+     "anzahl": 1,
+     "name": "Genesect",
+     "set": "SFA",
+     "nummer": "40"
+    },
+    {
+     "anzahl": 4,
+     "name": "Dawn",
+     "set": "PFL",
+     "nummer": "87"
+    },
+    {
+     "anzahl": 3,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 3,
+     "name": "Hilda",
+     "set": "WHT",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 1,
+     "name": "Eri",
+     "set": "TEF",
+     "nummer": "146"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lana's Aid",
+     "set": "TWM",
+     "nummer": "155"
+    },
+    {
+     "anzahl": 4,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 3,
+     "name": "Rare Candy",
+     "set": "MEG",
+     "nummer": "125"
+    },
+    {
+     "anzahl": 3,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 2,
+     "name": "Enhanced Hammer",
+     "set": "TWM",
+     "nummer": "148"
+    },
+    {
+     "anzahl": 1,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
+    },
+    {
+     "anzahl": 1,
+     "name": "Sacred Ash",
+     "set": "DRI",
+     "nummer": "168"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lucky Helmet",
+     "set": "TWM",
+     "nummer": "158"
+    },
+    {
+     "anzahl": 1,
+     "name": "Air Balloon",
+     "set": "ASC",
+     "nummer": "181"
+    },
+    {
+     "anzahl": 2,
+     "name": "Battle Cage",
+     "set": "PFL",
+     "nummer": "85"
+    },
+    {
+     "anzahl": 1,
+     "name": "Nighttime Mine",
+     "set": "ASC",
+     "nummer": "197"
+    },
+    {
+     "anzahl": 4,
+     "name": "Telepathic Psychic Energy",
+     "set": "POR",
+     "nummer": "88"
+    },
+    {
+     "anzahl": 2,
+     "name": "Psychic Energy",
+     "set": "MEE",
+     "nummer": "13"
+    },
+    {
+     "anzahl": 1,
+     "name": "Enriching Energy",
+     "set": "SSP",
+     "nummer": "191"
+    }
+   ]
+  },
+  {
+   "archetyp": "Dragapult Dudunsparce",
+   "tier": 2,
+   "quelle": "online",
+   "turnier": "Rare Candy Club Showdown #51 DELTA REIGN LEGAL",
+   "datum": "2026-11-09",
+   "platz": 1,
+   "platz_text": "1st of 149",
+   "spieler": "Dickson68",
+   "bilanz": "10 - 0 - 0",
    "titel": {
     "name": "Dragapult ex",
     "set": "TWM",
@@ -64,18 +628,6 @@
     },
     {
      "anzahl": 2,
-     "name": "Munkidori",
-     "set": "TWM",
-     "nummer": "95"
-    },
-    {
-     "anzahl": 2,
-     "name": "Budew",
-     "set": "ASC",
-     "nummer": "16"
-    },
-    {
-     "anzahl": 1,
      "name": "Dunsparce",
      "set": "TEF",
      "nummer": "128"
@@ -88,15 +640,39 @@
     },
     {
      "anzahl": 1,
-     "name": "Meowth ex",
-     "set": "POR",
-     "nummer": "62"
+     "name": "Dudunsparce ex",
+     "set": "JTG",
+     "nummer": "121"
+    },
+    {
+     "anzahl": 2,
+     "name": "Munkidori",
+     "set": "TWM",
+     "nummer": "95"
+    },
+    {
+     "anzahl": 2,
+     "name": "Budew",
+     "set": "ASC",
+     "nummer": "16"
     },
     {
      "anzahl": 1,
      "name": "Fezandipiti ex",
      "set": "ASC",
      "nummer": "142"
+    },
+    {
+     "anzahl": 1,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 1,
+     "name": "Shaymin",
+     "set": "DRI",
+     "nummer": "10"
     },
     {
      "anzahl": 4,
@@ -118,21 +694,21 @@
     },
     {
      "anzahl": 1,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 1,
      "name": "Rosa's Encouragement",
      "set": "POR",
      "nummer": "84"
     },
     {
      "anzahl": 1,
-     "name": "Judge",
-     "set": "POR",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 4,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
+     "name": "Dawn",
+     "set": "PFL",
+     "nummer": "87"
     },
     {
      "anzahl": 4,
@@ -142,21 +718,21 @@
     },
     {
      "anzahl": 4,
-     "name": "Crushing Hammer",
-     "set": "POR",
-     "nummer": "71"
-    },
-    {
-     "anzahl": 3,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
     },
     {
      "anzahl": 3,
      "name": "Night Stretcher",
      "set": "ASC",
      "nummer": "196"
+    },
+    {
+     "anzahl": 3,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
     },
     {
      "anzahl": 1,
@@ -191,191 +767,15 @@
    ]
   },
   {
-   "archetyp": "Basic Box",
-   "tier": 1,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 19,
-   "spieler": "James Cox",
-   "bilanz": "10-3-0",
-   "archetyp_turnier": "Basic Box",
-   "titel": {
-    "name": "Mega Kangaskhan ex",
-    "set": "MEG",
-    "nummer": "104"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Mega Kangaskhan ex",
-     "set": "MEG",
-     "nummer": "104"
-    },
-    {
-     "anzahl": 4,
-     "name": "Meowth ex",
-     "set": "POR",
-     "nummer": "62"
-    },
-    {
-     "anzahl": 2,
-     "name": "Teal Mask Ogerpon ex",
-     "set": "TWM",
-     "nummer": "25"
-    },
-    {
-     "anzahl": 2,
-     "name": "Latias ex",
-     "set": "SSP",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 2,
-     "name": "Lillie's Clefairy ex",
-     "set": "JTG",
-     "nummer": "56"
-    },
-    {
-     "anzahl": 1,
-     "name": "Chien-Pao",
-     "set": "SSP",
-     "nummer": "56"
-    },
-    {
-     "anzahl": 1,
-     "name": "Iron Leaves ex",
-     "set": "TEF",
-     "nummer": "25"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 1,
-     "name": "Koraidon ex",
-     "set": "ASC",
-     "nummer": "121"
-    },
-    {
-     "anzahl": 1,
-     "name": "Bloodmoon Ursaluna ex",
-     "set": "TWM",
-     "nummer": "141"
-    },
-    {
-     "anzahl": 1,
-     "name": "Wellspring Mask Ogerpon ex",
-     "set": "TWM",
-     "nummer": "64"
-    },
-    {
-     "anzahl": 4,
-     "name": "Crispin",
-     "set": "SCR",
-     "nummer": "133"
-    },
-    {
-     "anzahl": 3,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 2,
-     "name": "Cyrano",
-     "set": "SSP",
-     "nummer": "170"
-    },
-    {
-     "anzahl": 1,
-     "name": "Ciphermaniac's Codebreaking",
-     "set": "TEF",
-     "nummer": "145"
-    },
-    {
-     "anzahl": 1,
-     "name": "Judge",
-     "set": "POR",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 4,
-     "name": "Energy Switch",
-     "set": "MEG",
-     "nummer": "115"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 2,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 1,
-     "name": "Special Red Card",
-     "set": "CRI",
-     "nummer": "82"
-    },
-    {
-     "anzahl": 1,
-     "name": "Hero's Cape",
-     "set": "TEF",
-     "nummer": "152"
-    },
-    {
-     "anzahl": 4,
-     "name": "Area Zero Underdepths",
-     "set": "SCR",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 7,
-     "name": "Grass Energy",
-     "set": "MEE",
-     "nummer": "9"
-    },
-    {
-     "anzahl": 3,
-     "name": "Psychic Energy",
-     "set": "MEE",
-     "nummer": "13"
-    },
-    {
-     "anzahl": 2,
-     "name": "Fighting Energy",
-     "set": "MEE",
-     "nummer": "14"
-    },
-    {
-     "anzahl": 1,
-     "name": "Water Energy",
-     "set": "MEE",
-     "nummer": "11"
-    }
-   ]
-  },
-  {
    "archetyp": "N's Zoroark",
-   "tier": 1,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 38,
-   "spieler": "Bartosz Skrobacki",
-   "bilanz": "9-3-1",
-   "archetyp_turnier": "N's Zoroark",
+   "tier": 2,
+   "quelle": "online",
+   "turnier": "Dark Pulse Fridays Casuals 11/06",
+   "datum": "2026-11-06",
+   "platz": 1,
+   "platz_text": "1st of 21",
+   "spieler": "Gabriel Saulo",
+   "bilanz": "4 - 0 - 0",
    "titel": {
     "name": "N's Zoroark ex",
     "set": "JTG",
@@ -396,6 +796,18 @@
     },
     {
      "anzahl": 2,
+     "name": "N's Zekrom",
+     "set": "ASC",
+     "nummer": "155"
+    },
+    {
+     "anzahl": 1,
+     "name": "N's Reshiram",
+     "set": "JTG",
+     "nummer": "116"
+    },
+    {
+     "anzahl": 1,
      "name": "Munkidori",
      "set": "TWM",
      "nummer": "95"
@@ -408,39 +820,21 @@
     },
     {
      "anzahl": 1,
-     "name": "N's Reshiram",
-     "set": "JTG",
-     "nummer": "116"
-    },
-    {
-     "anzahl": 1,
      "name": "Pecharunt ex",
      "set": "SFA",
      "nummer": "39"
     },
     {
      "anzahl": 1,
-     "name": "Yveltal",
-     "set": "MEG",
-     "nummer": "88"
+     "name": "Tatsugiri",
+     "set": "TWM",
+     "nummer": "131"
     },
     {
      "anzahl": 1,
      "name": "Fezandipiti ex",
      "set": "ASC",
      "nummer": "142"
-    },
-    {
-     "anzahl": 1,
-     "name": "N's Zekrom",
-     "set": "ASC",
-     "nummer": "155"
-    },
-    {
-     "anzahl": 1,
-     "name": "Tatsugiri",
-     "set": "TWM",
-     "nummer": "131"
     },
     {
      "anzahl": 4,
@@ -498,6 +892,12 @@
     },
     {
      "anzahl": 2,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 2,
      "name": "Night Stretcher",
      "set": "ASC",
      "nummer": "196"
@@ -510,15 +910,9 @@
     },
     {
      "anzahl": 1,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 1,
-     "name": "Unfair Stamp",
+     "name": "Secret Box",
      "set": "TWM",
-     "nummer": "165"
+     "nummer": "163"
     },
     {
      "anzahl": 2,
@@ -534,15 +928,15 @@
     },
     {
      "anzahl": 1,
-     "name": "Gravity Mountain",
-     "set": "SSP",
-     "nummer": "177"
-    },
-    {
-     "anzahl": 1,
      "name": "N's Castle",
      "set": "JTG",
      "nummer": "152"
+    },
+    {
+     "anzahl": 1,
+     "name": "Gravity Mountain",
+     "set": "SSP",
+     "nummer": "177"
     },
     {
      "anzahl": 8,
@@ -553,523 +947,15 @@
    ]
   },
   {
-   "archetyp": "Slowking",
-   "tier": 1,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 1,
-   "spieler": "Aarni Karjala",
-   "bilanz": "14-1-2",
-   "archetyp_turnier": "Slowking",
-   "titel": {
-    "name": "Slowking",
-    "set": "SCR",
-    "nummer": "58"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Slowpoke",
-     "set": "SCR",
-     "nummer": "57"
-    },
-    {
-     "anzahl": 3,
-     "name": "Slowking",
-     "set": "SCR",
-     "nummer": "58"
-    },
-    {
-     "anzahl": 4,
-     "name": "Mega Kangaskhan ex",
-     "set": "MEG",
-     "nummer": "104"
-    },
-    {
-     "anzahl": 2,
-     "name": "Latias ex",
-     "set": "SSP",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 2,
-     "name": "Metagross",
-     "set": "CRI",
-     "nummer": "61"
-    },
-    {
-     "anzahl": 2,
-     "name": "Kyurem",
-     "set": "SFA",
-     "nummer": "47"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 1,
-     "name": "Zeraora",
-     "set": "DRI",
-     "nummer": "78"
-    },
-    {
-     "anzahl": 1,
-     "name": "Lillie's Clefairy ex",
-     "set": "JTG",
-     "nummer": "56"
-    },
-    {
-     "anzahl": 1,
-     "name": "Meowth ex",
-     "set": "POR",
-     "nummer": "62"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mew ex",
-     "set": "30C",
-     "nummer": "66"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ciphermaniac's Codebreaking",
-     "set": "TEF",
-     "nummer": "145"
-    },
-    {
-     "anzahl": 4,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 3,
-     "name": "Wondrous Patch",
-     "set": "PFL",
-     "nummer": "94"
-    },
-    {
-     "anzahl": 2,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 1,
-     "name": "Switch",
-     "set": "MEG",
-     "nummer": "130"
-    },
-    {
-     "anzahl": 1,
-     "name": "Secret Box",
-     "set": "TWM",
-     "nummer": "163"
-    },
-    {
-     "anzahl": 1,
-     "name": "Lucky Helmet",
-     "set": "TWM",
-     "nummer": "158"
-    },
-    {
-     "anzahl": 4,
-     "name": "Academy at Night",
-     "set": "SFA",
-     "nummer": "54"
-    },
-    {
-     "anzahl": 4,
-     "name": "Psychic Energy",
-     "set": "MEE",
-     "nummer": "13"
-    },
-    {
-     "anzahl": 4,
-     "name": "Telepathic Psychic Energy",
-     "set": "POR",
-     "nummer": "88"
-    },
-    {
-     "anzahl": 2,
-     "name": "Boomerang Energy",
-     "set": "TWM",
-     "nummer": "166"
-    }
-   ]
-  },
-  {
-   "archetyp": "Dhelmise",
-   "tier": 1,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 12,
-   "spieler": "Nino Brodar",
-   "bilanz": "10-2-2",
-   "archetyp_turnier": "Dhelmise",
-   "titel": {
-    "name": "Dhelmise",
-    "set": "PBL",
-    "nummer": "39"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Poltchageist",
-     "set": "PBL",
-     "nummer": "5"
-    },
-    {
-     "anzahl": 2,
-     "name": "Sinistcha",
-     "set": "PBL",
-     "nummer": "6"
-    },
-    {
-     "anzahl": 4,
-     "name": "Dhelmise",
-     "set": "PBL",
-     "nummer": "39"
-    },
-    {
-     "anzahl": 3,
-     "name": "Dunsparce",
-     "set": "JTG",
-     "nummer": "120"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dudunsparce",
-     "set": "TEF",
-     "nummer": "129"
-    },
-    {
-     "anzahl": 2,
-     "name": "Shuppet",
-     "set": "PBL",
-     "nummer": "33"
-    },
-    {
-     "anzahl": 4,
-     "name": "Banette",
-     "set": "PBL",
-     "nummer": "34"
-    },
-    {
-     "anzahl": 2,
-     "name": "Lillie's Clefairy ex",
-     "set": "JTG",
-     "nummer": "56"
-    },
-    {
-     "anzahl": 1,
-     "name": "Bloodmoon Ursaluna ex",
-     "set": "TWM",
-     "nummer": "141"
-    },
-    {
-     "anzahl": 1,
-     "name": "Latias ex",
-     "set": "SSP",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 4,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 4,
-     "name": "Gwynn",
-     "set": "PBL",
-     "nummer": "78"
-    },
-    {
-     "anzahl": 3,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 2,
-     "name": "Explorer's Guidance",
-     "set": "TEF",
-     "nummer": "147"
-    },
-    {
-     "anzahl": 1,
-     "name": "Black Belt's Training",
-     "set": "JTG",
-     "nummer": "143"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 3,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 3,
-     "name": "Prism Tower",
-     "set": "CRI",
-     "nummer": "80"
-    },
-    {
-     "anzahl": 4,
-     "name": "Telepathic Psychic Energy",
-     "set": "POR",
-     "nummer": "88"
-    },
-    {
-     "anzahl": 2,
-     "name": "Psychic Energy",
-     "set": "MEE",
-     "nummer": "13"
-    },
-    {
-     "anzahl": 1,
-     "name": "Legacy Energy",
-     "set": "TWM",
-     "nummer": "167"
-    }
-   ]
-  },
-  {
-   "archetyp": "Alakazam Dudunsparce",
-   "tier": 1,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 9,
-   "spieler": "Cho Tsun Leung",
-   "bilanz": "10-1-3",
-   "archetyp_turnier": "Alakazam Dudunsparce",
-   "titel": {
-    "name": "Alakazam",
-    "set": "MEG",
-    "nummer": "56"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Abra",
-     "set": "MEG",
-     "nummer": "54"
-    },
-    {
-     "anzahl": 4,
-     "name": "Kadabra",
-     "set": "MEG",
-     "nummer": "55"
-    },
-    {
-     "anzahl": 3,
-     "name": "Alakazam",
-     "set": "MEG",
-     "nummer": "56"
-    },
-    {
-     "anzahl": 3,
-     "name": "Dunsparce",
-     "set": "JTG",
-     "nummer": "120"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dudunsparce",
-     "set": "TEF",
-     "nummer": "129"
-    },
-    {
-     "anzahl": 1,
-     "name": "Flutter Mane",
-     "set": "TEF",
-     "nummer": "78"
-    },
-    {
-     "anzahl": 1,
-     "name": "Elgyem",
-     "set": "BLK",
-     "nummer": "40"
-    },
-    {
-     "anzahl": 1,
-     "name": "Genesect",
-     "set": "SFA",
-     "nummer": "40"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 1,
-     "name": "Lillie's Clefairy ex",
-     "set": "JTG",
-     "nummer": "56"
-    },
-    {
-     "anzahl": 4,
-     "name": "Dawn",
-     "set": "PFL",
-     "nummer": "87"
-    },
-    {
-     "anzahl": 3,
-     "name": "Hilda",
-     "set": "WHT",
-     "nummer": "84"
-    },
-    {
-     "anzahl": 2,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 1,
-     "name": "Eri",
-     "set": "TEF",
-     "nummer": "146"
-    },
-    {
-     "anzahl": 4,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
-    },
-    {
-     "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 2,
-     "name": "Rare Candy",
-     "set": "MEG",
-     "nummer": "125"
-    },
-    {
-     "anzahl": 2,
-     "name": "Wondrous Patch",
-     "set": "PFL",
-     "nummer": "94"
-    },
-    {
-     "anzahl": 1,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 1,
-     "name": "Sacred Ash",
-     "set": "DRI",
-     "nummer": "168"
-    },
-    {
-     "anzahl": 1,
-     "name": "Special Red Card",
-     "set": "CRI",
-     "nummer": "82"
-    },
-    {
-     "anzahl": 2,
-     "name": "Lillie's Pearl",
-     "set": "JTG",
-     "nummer": "151"
-    },
-    {
-     "anzahl": 1,
-     "name": "Handheld Fan",
-     "set": "TWM",
-     "nummer": "150"
-    },
-    {
-     "anzahl": 2,
-     "name": "Nighttime Mine",
-     "set": "ASC",
-     "nummer": "197"
-    },
-    {
-     "anzahl": 1,
-     "name": "Battle Cage",
-     "set": "PFL",
-     "nummer": "85"
-    },
-    {
-     "anzahl": 4,
-     "name": "Telepathic Psychic Energy",
-     "set": "POR",
-     "nummer": "88"
-    },
-    {
-     "anzahl": 2,
-     "name": "Psychic Energy",
-     "set": "MEE",
-     "nummer": "13"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mist Energy",
-     "set": "TEF",
-     "nummer": "161"
-    },
-    {
-     "anzahl": 1,
-     "name": "Enriching Energy",
-     "set": "SSP",
-     "nummer": "191"
-    }
-   ]
-  },
-  {
    "archetyp": "Crustle",
    "tier": 2,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 4,
-   "spieler": "Miloslav Posledni",
-   "bilanz": "12-3-1",
-   "archetyp_turnier": "Crustle",
+   "quelle": "online",
+   "turnier": "OTS Pokemon TCG Live Arena #3",
+   "datum": "2026-11-08",
+   "platz": 1,
+   "platz_text": "1st of 60",
+   "spieler": "Shackalacka55",
+   "bilanz": "9 - 2 - 0",
    "titel": {
     "name": "Crustle",
     "set": "DRI",
@@ -1095,6 +981,18 @@
      "nummer": "12"
     },
     {
+     "anzahl": 1,
+     "name": "Azurill",
+     "set": "DLR",
+     "nummer": "80"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
      "anzahl": 4,
      "name": "Boss's Orders",
      "set": "MEG",
@@ -1107,18 +1005,6 @@
      "nummer": "176"
     },
     {
-     "anzahl": 3,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 3,
-     "name": "Crispin",
-     "set": "SCR",
-     "nummer": "133"
-    },
-    {
      "anzahl": 2,
      "name": "Eri",
      "set": "TEF",
@@ -1129,6 +1015,12 @@
      "name": "Hilda",
      "set": "WHT",
      "nummer": "84"
+    },
+    {
+     "anzahl": 1,
+     "name": "Aarune",
+     "set": "DLR",
+     "nummer": "89"
     },
     {
      "anzahl": 1,
@@ -1161,7 +1053,7 @@
      "nummer": "144"
     },
     {
-     "anzahl": 1,
+     "anzahl": 2,
      "name": "Switch",
      "set": "MEG",
      "nummer": "130"
@@ -1174,27 +1066,33 @@
     },
     {
      "anzahl": 1,
+     "name": "Handheld Fan",
+     "set": "TWM",
+     "nummer": "150"
+    },
+    {
+     "anzahl": 1,
      "name": "Hero's Cape",
      "set": "TEF",
      "nummer": "152"
     },
     {
-     "anzahl": 1,
-     "name": "Lumiose City",
-     "set": "POR",
-     "nummer": "77"
+     "anzahl": 2,
+     "name": "Team Rocket's Factory",
+     "set": "DRI",
+     "nummer": "173"
     },
     {
      "anzahl": 1,
-     "name": "Festival Grounds",
-     "set": "TWM",
-     "nummer": "149"
+     "name": "Legendary Trench",
+     "set": "DLR",
+     "nummer": "98"
     },
     {
      "anzahl": 1,
-     "name": "Prism Tower",
-     "set": "CRI",
-     "nummer": "80"
+     "name": "Legendary Trench",
+     "set": "DLR",
+     "nummer": "99"
     },
     {
      "anzahl": 4,
@@ -1209,566 +1107,23 @@
      "nummer": "86"
     },
     {
-     "anzahl": 2,
+     "anzahl": 4,
      "name": "Spiky Energy",
      "set": "JTG",
      "nummer": "159"
-    },
-    {
-     "anzahl": 1,
-     "name": "Psychic Energy",
-     "set": "MEE",
-     "nummer": "13"
-    },
-    {
-     "anzahl": 1,
-     "name": "Darkness Energy",
-     "set": "MEE",
-     "nummer": "15"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fighting Energy",
-     "set": "MEE",
-     "nummer": "14"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fire Energy",
-     "set": "MEE",
-     "nummer": "10"
-    },
-    {
-     "anzahl": 1,
-     "name": "Grass Energy",
-     "set": "MEE",
-     "nummer": "9"
-    }
-   ]
-  },
-  {
-   "archetyp": "Dragapult Blaziken",
-   "tier": 2,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 14,
-   "spieler": "Alp Ehliz",
-   "bilanz": "10-3-1",
-   "archetyp_turnier": "Dragapult Blaziken",
-   "titel": {
-    "name": "Dragapult ex",
-    "set": "TWM",
-    "nummer": "130"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Dreepy",
-     "set": "TWM",
-     "nummer": "128"
-    },
-    {
-     "anzahl": 4,
-     "name": "Drakloak",
-     "set": "TWM",
-     "nummer": "129"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dragapult ex",
-     "set": "TWM",
-     "nummer": "130"
-    },
-    {
-     "anzahl": 2,
-     "name": "Torchic",
-     "set": "DRI",
-     "nummer": "40"
-    },
-    {
-     "anzahl": 1,
-     "name": "Combusken",
-     "set": "DRI",
-     "nummer": "41"
-    },
-    {
-     "anzahl": 2,
-     "name": "Blaziken ex",
-     "set": "JTG",
-     "nummer": "24"
-    },
-    {
-     "anzahl": 2,
-     "name": "Munkidori",
-     "set": "TWM",
-     "nummer": "95"
-    },
-    {
-     "anzahl": 1,
-     "name": "Budew",
-     "set": "ASC",
-     "nummer": "16"
-    },
-    {
-     "anzahl": 1,
-     "name": "Chi-Yu",
-     "set": "TWM",
-     "nummer": "39"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 1,
-     "name": "Meowth ex",
-     "set": "POR",
-     "nummer": "62"
-    },
-    {
-     "anzahl": 4,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 3,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 2,
-     "name": "Crispin",
-     "set": "SCR",
-     "nummer": "133"
-    },
-    {
-     "anzahl": 2,
-     "name": "Judge",
-     "set": "POR",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 4,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
-    },
-    {
-     "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 3,
-     "name": "Rare Candy",
-     "set": "MEG",
-     "nummer": "125"
-    },
-    {
-     "anzahl": 2,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 1,
-     "name": "Unfair Stamp",
-     "set": "TWM",
-     "nummer": "165"
-    },
-    {
-     "anzahl": 2,
-     "name": "Team Rocket's Watchtower",
-     "set": "DRI",
-     "nummer": "180"
-    },
-    {
-     "anzahl": 3,
-     "name": "Fire Energy",
-     "set": "MEE",
-     "nummer": "10"
-    },
-    {
-     "anzahl": 3,
-     "name": "Psychic Energy",
-     "set": "MEE",
-     "nummer": "13"
-    },
-    {
-     "anzahl": 2,
-     "name": "Darkness Energy",
-     "set": "MEE",
-     "nummer": "15"
-    }
-   ]
-  },
-  {
-   "archetyp": "Festival Lead",
-   "tier": 2,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 30,
-   "spieler": "Rain Burr",
-   "bilanz": "9-2-2",
-   "archetyp_turnier": "Festival Lead",
-   "titel": {
-    "name": "Thwackey",
-    "set": "TWM",
-    "nummer": "15"
-   },
-   "karten": [
-    {
-     "anzahl": 2,
-     "name": "Applin",
-     "set": "TWM",
-     "nummer": "126"
-    },
-    {
-     "anzahl": 2,
-     "name": "Applin",
-     "set": "TWM",
-     "nummer": "17"
-    },
-    {
-     "anzahl": 3,
-     "name": "Dipplin",
-     "set": "TWM",
-     "nummer": "18"
-    },
-    {
-     "anzahl": 3,
-     "name": "Grookey",
-     "set": "TWM",
-     "nummer": "14"
-    },
-    {
-     "anzahl": 4,
-     "name": "Thwackey",
-     "set": "TWM",
-     "nummer": "15"
-    },
-    {
-     "anzahl": 2,
-     "name": "Goldeen",
-     "set": "TWM",
-     "nummer": "44"
-    },
-    {
-     "anzahl": 1,
-     "name": "Seaking",
-     "set": "PRE",
-     "nummer": "21"
-    },
-    {
-     "anzahl": 1,
-     "name": "Rellor",
-     "set": "TEF",
-     "nummer": "23"
-    },
-    {
-     "anzahl": 1,
-     "name": "Rabsca",
-     "set": "TEF",
-     "nummer": "24"
-    },
-    {
-     "anzahl": 1,
-     "name": "Psyduck",
-     "set": "ASC",
-     "nummer": "39"
-    },
-    {
-     "anzahl": 4,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 2,
-     "name": "Gladion's Final Battle",
-     "set": "PBL",
-     "nummer": "77"
-    },
-    {
-     "anzahl": 2,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 1,
-     "name": "Kieran",
-     "set": "TWM",
-     "nummer": "154"
-    },
-    {
-     "anzahl": 1,
-     "name": "Dawn",
-     "set": "PFL",
-     "nummer": "87"
-    },
-    {
-     "anzahl": 1,
-     "name": "Lana's Aid",
-     "set": "TWM",
-     "nummer": "155"
-    },
-    {
-     "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 4,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
-    },
-    {
-     "anzahl": 3,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 2,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 1,
-     "name": "Secret Box",
-     "set": "TWM",
-     "nummer": "163"
-    },
-    {
-     "anzahl": 3,
-     "name": "Air Balloon",
-     "set": "ASC",
-     "nummer": "181"
-    },
-    {
-     "anzahl": 2,
-     "name": "Brave Bangle",
-     "set": "WHT",
-     "nummer": "80"
-    },
-    {
-     "anzahl": 4,
-     "name": "Festival Grounds",
-     "set": "TWM",
-     "nummer": "149"
-    },
-    {
-     "anzahl": 1,
-     "name": "Forest of Vitality",
-     "set": "MEG",
-     "nummer": "117"
-    },
-    {
-     "anzahl": 3,
-     "name": "Grass Energy",
-     "set": "MEE",
-     "nummer": "9"
-    },
-    {
-     "anzahl": 2,
-     "name": "Growing Grass Energy",
-     "set": "POR",
-     "nummer": "86"
-    }
-   ]
-  },
-  {
-   "archetyp": "Ogerpon Meganium Hydrapple",
-   "tier": 2,
-   "quelle": "online",
-   "turnier": "SEASAC League Challenge #19 (SEASON 6) [50 CODES]",
-   "datum": "2026-11-03",
-   "platz": 1,
-   "platz_text": "1st of 81",
-   "spieler": "Digitallogik",
-   "bilanz": "8 - 2 - 0",
-   "titel": {
-    "name": "Teal Mask Ogerpon ex",
-    "set": "TWM",
-    "nummer": "25"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Teal Mask Ogerpon ex",
-     "set": "TWM",
-     "nummer": "25"
-    },
-    {
-     "anzahl": 2,
-     "name": "Chikorita",
-     "set": "ASC",
-     "nummer": "8"
-    },
-    {
-     "anzahl": 2,
-     "name": "Bayleef",
-     "set": "MEG",
-     "nummer": "9"
-    },
-    {
-     "anzahl": 2,
-     "name": "Meganium",
-     "set": "MEG",
-     "nummer": "10"
-    },
-    {
-     "anzahl": 2,
-     "name": "Applin",
-     "set": "TWM",
-     "nummer": "17"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dipplin",
-     "set": "TWM",
-     "nummer": "18"
-    },
-    {
-     "anzahl": 2,
-     "name": "Hydrapple ex",
-     "set": "SCR",
-     "nummer": "14"
-    },
-    {
-     "anzahl": 2,
-     "name": "Meowth ex",
-     "set": "POR",
-     "nummer": "62"
-    },
-    {
-     "anzahl": 1,
-     "name": "Tapu Bulu",
-     "set": "SFA",
-     "nummer": "6"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 1,
-     "name": "Celebi",
-     "set": "MEG",
-     "nummer": "12"
-    },
-    {
-     "anzahl": 4,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 2,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 1,
-     "name": "Briar",
-     "set": "SCR",
-     "nummer": "132"
-    },
-    {
-     "anzahl": 1,
-     "name": "Ciphermaniac's Codebreaking",
-     "set": "TEF",
-     "nummer": "145"
-    },
-    {
-     "anzahl": 1,
-     "name": "Lana's Aid",
-     "set": "TWM",
-     "nummer": "155"
-    },
-    {
-     "anzahl": 1,
-     "name": "Judge",
-     "set": "POR",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 4,
-     "name": "Bug Catching Set",
-     "set": "TWM",
-     "nummer": "143"
-    },
-    {
-     "anzahl": 2,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 1,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 1,
-     "name": "Unfair Stamp",
-     "set": "TWM",
-     "nummer": "165"
-    },
-    {
-     "anzahl": 4,
-     "name": "Forest of Vitality",
-     "set": "MEG",
-     "nummer": "117"
-    },
-    {
-     "anzahl": 13,
-     "name": "Grass Energy",
-     "set": "MEE",
-     "nummer": "9"
     }
    ]
   },
   {
    "archetyp": "Rocket's Honchkrow",
    "tier": 2,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 2,
-   "spieler": "Finn Lasse Fries",
-   "bilanz": "13-3-1",
-   "archetyp_turnier": "Rocket's Honchkrow",
+   "quelle": "online",
+   "turnier": "🇧🇷 Hit Challenge #59 | TCG Live",
+   "datum": "2026-11-07",
+   "platz": 1,
+   "platz_text": "1st of 23",
+   "spieler": "Marcelo Seiti",
+   "bilanz": "6 - 2 - 0",
    "titel": {
     "name": "Team Rocket's Honchkrow",
     "set": "ASC",
@@ -1898,63 +1253,542 @@
    ]
   },
   {
-   "archetyp": "Grimmsnarl Froslass",
+   "archetyp": "Slowking",
    "tier": 2,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 178,
-   "spieler": "Mau Lundell",
-   "bilanz": "7-3-3",
-   "archetyp_turnier": "Grimmsnarl Froslass",
+   "quelle": "online",
+   "turnier": "JustInBasil Online League - 06 November 2026",
+   "datum": "2026-11-07",
+   "platz": 1,
+   "platz_text": "1st of 9",
+   "spieler": "intimidate68",
+   "bilanz": "3 - 0 - 0",
    "titel": {
-    "name": "Marnie's Grimmsnarl ex",
-    "set": "DRI",
-    "nummer": "136"
+    "name": "Slowking",
+    "set": "SCR",
+    "nummer": "58"
    },
    "karten": [
     {
      "anzahl": 4,
-     "name": "Marnie's Impidimp",
-     "set": "DRI",
-     "nummer": "134"
-    },
-    {
-     "anzahl": 2,
-     "name": "Marnie's Morgrem",
-     "set": "DRI",
-     "nummer": "135"
-    },
-    {
-     "anzahl": 2,
-     "name": "Marnie's Grimmsnarl ex",
-     "set": "DRI",
-     "nummer": "136"
-    },
-    {
-     "anzahl": 4,
-     "name": "Munkidori",
-     "set": "TWM",
-     "nummer": "95"
+     "name": "Slowpoke",
+     "set": "SCR",
+     "nummer": "57"
     },
     {
      "anzahl": 3,
-     "name": "Snorunt",
-     "set": "ASC",
-     "nummer": "46"
+     "name": "Slowking",
+     "set": "SCR",
+     "nummer": "58"
     },
     {
      "anzahl": 3,
-     "name": "Froslass",
-     "set": "TWM",
-     "nummer": "53"
+     "name": "Mega Kangaskhan ex",
+     "set": "MEG",
+     "nummer": "104"
+    },
+    {
+     "anzahl": 2,
+     "name": "Latias ex",
+     "set": "SSP",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 2,
+     "name": "Kyurem",
+     "set": "SFA",
+     "nummer": "47"
+    },
+    {
+     "anzahl": 2,
+     "name": "Metagross",
+     "set": "CRI",
+     "nummer": "61"
     },
     {
      "anzahl": 1,
-     "name": "Tatsugiri",
-     "set": "TWM",
+     "name": "Spectrier",
+     "set": "ASC",
+     "nummer": "98"
+    },
+    {
+     "anzahl": 1,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lillie's Clefairy ex",
+     "set": "JTG",
+     "nummer": "56"
+    },
+    {
+     "anzahl": 1,
+     "name": "Annihilape",
+     "set": "SSP",
+     "nummer": "100"
+    },
+    {
+     "anzahl": 1,
+     "name": "Giratina",
+     "set": "DLR",
+     "nummer": "45"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 3,
+     "name": "Ciphermaniac's Codebreaking",
+     "set": "TEF",
+     "nummer": "145"
+    },
+    {
+     "anzahl": 4,
+     "name": "Ultra Ball",
+     "set": "MEG",
      "nummer": "131"
+    },
+    {
+     "anzahl": 4,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 3,
+     "name": "Wondrous Patch",
+     "set": "PFL",
+     "nummer": "94"
+    },
+    {
+     "anzahl": 3,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 1,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 1,
+     "name": "Secret Box",
+     "set": "TWM",
+     "nummer": "163"
+    },
+    {
+     "anzahl": 1,
+     "name": "Brave Bangle",
+     "set": "WHT",
+     "nummer": "80"
+    },
+    {
+     "anzahl": 4,
+     "name": "Academy at Night",
+     "set": "SFA",
+     "nummer": "54"
+    },
+    {
+     "anzahl": 4,
+     "name": "Telepathic Psychic Energy",
+     "set": "POR",
+     "nummer": "88"
+    },
+    {
+     "anzahl": 4,
+     "name": "Psychic Energy",
+     "set": "MEE",
+     "nummer": "13"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boomerang Energy",
+     "set": "TWM",
+     "nummer": "166"
+    }
+   ]
+  },
+  {
+   "archetyp": "Ogerpon Meganium Hydrapple",
+   "tier": 2,
+   "quelle": "online",
+   "turnier": "Московская лига Pokémon TCG | X сезон #10",
+   "datum": "2026-11-08",
+   "platz": 2,
+   "platz_text": "2nd of 24",
+   "spieler": "andrea Maccalli",
+   "bilanz": "4 - 0 - 1",
+   "titel": {
+    "name": "Teal Mask Ogerpon ex",
+    "set": "TWM",
+    "nummer": "25"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Teal Mask Ogerpon ex",
+     "set": "TWM",
+     "nummer": "25"
+    },
+    {
+     "anzahl": 2,
+     "name": "Applin",
+     "set": "SCR",
+     "nummer": "12"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dipplin",
+     "set": "TWM",
+     "nummer": "18"
+    },
+    {
+     "anzahl": 2,
+     "name": "Hydrapple ex",
+     "set": "SCR",
+     "nummer": "14"
+    },
+    {
+     "anzahl": 2,
+     "name": "Chikorita",
+     "set": "MEG",
+     "nummer": "8"
+    },
+    {
+     "anzahl": 2,
+     "name": "Bayleef",
+     "set": "MEG",
+     "nummer": "9"
+    },
+    {
+     "anzahl": 2,
+     "name": "Meganium",
+     "set": "MEG",
+     "nummer": "10"
+    },
+    {
+     "anzahl": 2,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 1,
+     "name": "Celebi",
+     "set": "MEG",
+     "nummer": "12"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 1,
+     "name": "Ciphermaniac's Codebreaking",
+     "set": "TEF",
+     "nummer": "145"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lana's Aid",
+     "set": "TWM",
+     "nummer": "155"
+    },
+    {
+     "anzahl": 1,
+     "name": "Briar",
+     "set": "SCR",
+     "nummer": "132"
+    },
+    {
+     "anzahl": 1,
+     "name": "Dawn",
+     "set": "PFL",
+     "nummer": "87"
+    },
+    {
+     "anzahl": 4,
+     "name": "Bug Catching Set",
+     "set": "TWM",
+     "nummer": "143"
+    },
+    {
+     "anzahl": 4,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 2,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 1,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
+    },
+    {
+     "anzahl": 1,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 1,
+     "name": "Unfair Stamp",
+     "set": "TWM",
+     "nummer": "165"
+    },
+    {
+     "anzahl": 4,
+     "name": "Forest of Vitality",
+     "set": "MEG",
+     "nummer": "117"
+    },
+    {
+     "anzahl": 13,
+     "name": "Grass Energy",
+     "set": "MEE",
+     "nummer": "9"
+    }
+   ]
+  },
+  {
+   "archetyp": "Talonflame Dusknoir",
+   "tier": 2,
+   "quelle": "online",
+   "turnier": "Elite Four Fridays (Delta Reign)",
+   "datum": "2026-11-07",
+   "platz": 1,
+   "platz_text": "1st of 69",
+   "spieler": "Apothanasia",
+   "bilanz": "7 - 0 - 0",
+   "titel": {
+    "name": "Talonflame ex",
+    "set": "DLR",
+    "nummer": "88"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Mega Kangaskhan ex",
+     "set": "MEG",
+     "nummer": "104"
+    },
+    {
+     "anzahl": 3,
+     "name": "Duskull",
+     "set": "PRE",
+     "nummer": "35"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dusclops",
+     "set": "PRE",
+     "nummer": "36"
+    },
+    {
+     "anzahl": 3,
+     "name": "Dusknoir",
+     "set": "PRE",
+     "nummer": "37"
+    },
+    {
+     "anzahl": 3,
+     "name": "Talonflame ex",
+     "set": "DLR",
+     "nummer": "88"
+    },
+    {
+     "anzahl": 2,
+     "name": "Latias ex",
+     "set": "SSP",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 2,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 1,
+     "name": "Bloodmoon Ursaluna ex",
+     "set": "TWM",
+     "nummer": "141"
+    },
+    {
+     "anzahl": 4,
+     "name": "Hilda",
+     "set": "WHT",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 3,
+     "name": "Cyrano",
+     "set": "SSP",
+     "nummer": "170"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dawn",
+     "set": "PFL",
+     "nummer": "87"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 4,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 4,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 4,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 3,
+     "name": "Rare Candy",
+     "set": "MEG",
+     "nummer": "125"
+    },
+    {
+     "anzahl": 2,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
+    },
+    {
+     "anzahl": 2,
+     "name": "Jamming Tower",
+     "set": "TWM",
+     "nummer": "153"
+    },
+    {
+     "anzahl": 4,
+     "name": "Ignition Energy",
+     "set": "WHT",
+     "nummer": "86"
+    },
+    {
+     "anzahl": 1,
+     "name": "Neo Upper Energy",
+     "set": "TEF",
+     "nummer": "162"
+    }
+   ]
+  },
+  {
+   "archetyp": "Dragapult Blaziken",
+   "tier": 2,
+   "quelle": "online",
+   "turnier": "SEASAC League Challenge #24 (SEASON 6) [50 CODES]",
+   "datum": "2026-11-08",
+   "platz": 1,
+   "platz_text": "1st of 105",
+   "spieler": "CornDog_XX",
+   "bilanz": "8 - 1 - 1",
+   "titel": {
+    "name": "Dragapult ex",
+    "set": "TWM",
+    "nummer": "130"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Dreepy",
+     "set": "TWM",
+     "nummer": "128"
+    },
+    {
+     "anzahl": 4,
+     "name": "Drakloak",
+     "set": "TWM",
+     "nummer": "129"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dragapult ex",
+     "set": "TWM",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 2,
+     "name": "Torchic",
+     "set": "DRI",
+     "nummer": "40"
+    },
+    {
+     "anzahl": 1,
+     "name": "Combusken",
+     "set": "DRI",
+     "nummer": "41"
+    },
+    {
+     "anzahl": 2,
+     "name": "Blaziken ex",
+     "set": "JTG",
+     "nummer": "24"
+    },
+    {
+     "anzahl": 2,
+     "name": "Munkidori",
+     "set": "TWM",
+     "nummer": "95"
     },
     {
      "anzahl": 1,
@@ -1964,15 +1798,21 @@
     },
     {
      "anzahl": 1,
-     "name": "Yveltal",
-     "set": "MEG",
-     "nummer": "88"
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
     },
     {
      "anzahl": 1,
-     "name": "Shaymin",
-     "set": "DRI",
-     "nummer": "10"
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 1,
+     "name": "Chi-Yu",
+     "set": "TWM",
+     "nummer": "39"
     },
     {
      "anzahl": 4,
@@ -1987,16 +1827,16 @@
      "nummer": "114"
     },
     {
-     "anzahl": 3,
-     "name": "Gwynn",
-     "set": "PBL",
-     "nummer": "78"
+     "anzahl": 2,
+     "name": "Crispin",
+     "set": "SCR",
+     "nummer": "133"
     },
     {
      "anzahl": 2,
-     "name": "Team Rocket's Petrel",
-     "set": "DRI",
-     "nummer": "176"
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
     },
     {
      "anzahl": 4,
@@ -2005,34 +1845,520 @@
      "nummer": "81"
     },
     {
-     "anzahl": 3,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 2,
+     "anzahl": 4,
      "name": "Buddy-Buddy Poffin",
      "set": "TEF",
      "nummer": "144"
     },
     {
-     "anzahl": 1,
-     "name": "Energy Switch",
+     "anzahl": 4,
+     "name": "Ultra Ball",
      "set": "MEG",
-     "nummer": "115"
+     "nummer": "131"
     },
     {
-     "anzahl": 1,
+     "anzahl": 2,
      "name": "Rare Candy",
      "set": "MEG",
      "nummer": "125"
+    },
+    {
+     "anzahl": 2,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
     },
     {
      "anzahl": 1,
      "name": "Unfair Stamp",
      "set": "TWM",
      "nummer": "165"
+    },
+    {
+     "anzahl": 3,
+     "name": "Team Rocket's Watchtower",
+     "set": "DRI",
+     "nummer": "180"
+    },
+    {
+     "anzahl": 3,
+     "name": "Psychic Energy",
+     "set": "MEE",
+     "nummer": "13"
+    },
+    {
+     "anzahl": 3,
+     "name": "Fire Energy",
+     "set": "MEE",
+     "nummer": "10"
+    },
+    {
+     "anzahl": 2,
+     "name": "Darkness Energy",
+     "set": "MEE",
+     "nummer": "15"
+    }
+   ]
+  },
+  {
+   "archetyp": "Festival Lead",
+   "tier": 2,
+   "quelle": "online",
+   "turnier": "Hydra TCG Serbia standard tournament 7.11.2026.",
+   "datum": "2026-11-07",
+   "platz": 1,
+   "platz_text": "1st of 10",
+   "spieler": "Tieger",
+   "bilanz": "4 - 1 - 1",
+   "titel": {
+    "name": "Festival Grounds",
+    "set": "TWM",
+    "nummer": "149"
+   },
+   "karten": [
+    {
+     "anzahl": 3,
+     "name": "Applin",
+     "set": "SCR",
+     "nummer": "12"
+    },
+    {
+     "anzahl": 1,
+     "name": "Applin",
+     "set": "TWM",
+     "nummer": "17"
+    },
+    {
+     "anzahl": 3,
+     "name": "Dipplin",
+     "set": "TWM",
+     "nummer": "18"
+    },
+    {
+     "anzahl": 3,
+     "name": "Grookey",
+     "set": "TWM",
+     "nummer": "14"
+    },
+    {
+     "anzahl": 4,
+     "name": "Thwackey",
+     "set": "TWM",
+     "nummer": "15"
+    },
+    {
+     "anzahl": 2,
+     "name": "Goldeen",
+     "set": "TWM",
+     "nummer": "44"
+    },
+    {
+     "anzahl": 1,
+     "name": "Seaking",
+     "set": "PRE",
+     "nummer": "21"
+    },
+    {
+     "anzahl": 1,
+     "name": "Rellor",
+     "set": "TEF",
+     "nummer": "23"
+    },
+    {
+     "anzahl": 1,
+     "name": "Rabsca",
+     "set": "TEF",
+     "nummer": "24"
+    },
+    {
+     "anzahl": 1,
+     "name": "Shaymin",
+     "set": "DRI",
+     "nummer": "10"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 2,
+     "name": "Gladion's Final Battle",
+     "set": "PBL",
+     "nummer": "77"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 1,
+     "name": "Kieran",
+     "set": "TWM",
+     "nummer": "154"
+    },
+    {
+     "anzahl": 4,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 2,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 2,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 2,
+     "name": "Bug Catching Set",
+     "set": "TWM",
+     "nummer": "143"
+    },
+    {
+     "anzahl": 1,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 1,
+     "name": "Tool Scrapper",
+     "set": "ASC",
+     "nummer": "212"
+    },
+    {
+     "anzahl": 1,
+     "name": "Secret Box",
+     "set": "TWM",
+     "nummer": "163"
+    },
+    {
+     "anzahl": 1,
+     "name": "Sacred Ash",
+     "set": "DRI",
+     "nummer": "168"
+    },
+    {
+     "anzahl": 2,
+     "name": "Air Balloon",
+     "set": "ASC",
+     "nummer": "181"
+    },
+    {
+     "anzahl": 2,
+     "name": "Brave Bangle",
+     "set": "WHT",
+     "nummer": "80"
+    },
+    {
+     "anzahl": 4,
+     "name": "Festival Grounds",
+     "set": "TWM",
+     "nummer": "149"
+    },
+    {
+     "anzahl": 4,
+     "name": "Grass Energy",
+     "set": "MEE",
+     "nummer": "9"
+    },
+    {
+     "anzahl": 1,
+     "name": "Growing Grass Energy",
+     "set": "POR",
+     "nummer": "86"
+    }
+   ]
+  },
+  {
+   "archetyp": "Alakazam Dusknoir",
+   "tier": 3,
+   "quelle": "online",
+   "turnier": "🪎Vault Of Games #10🪙|REGIONAL FORMAT🏆|WEEKLY📅",
+   "datum": "2026-11-08",
+   "platz": 4,
+   "platz_text": "4th of 161",
+   "spieler": "Ruen47",
+   "bilanz": "8 - 3 - 1",
+   "titel": {
+    "name": "Alakazam",
+    "set": "MEG",
+    "nummer": "56"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Duskull",
+     "set": "PRE",
+     "nummer": "35"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dusclops",
+     "set": "PRE",
+     "nummer": "36"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dusknoir",
+     "set": "PRE",
+     "nummer": "37"
+    },
+    {
+     "anzahl": 2,
+     "name": "Abra",
+     "set": "TWM",
+     "nummer": "80"
+    },
+    {
+     "anzahl": 2,
+     "name": "Abra",
+     "set": "MEG",
+     "nummer": "54"
+    },
+    {
+     "anzahl": 4,
+     "name": "Kadabra",
+     "set": "MEG",
+     "nummer": "55"
+    },
+    {
+     "anzahl": 3,
+     "name": "Alakazam",
+     "set": "MEG",
+     "nummer": "56"
+    },
+    {
+     "anzahl": 2,
+     "name": "Budew",
+     "set": "ASC",
+     "nummer": "16"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 4,
+     "name": "Gwynn",
+     "set": "PBL",
+     "nummer": "78"
+    },
+    {
+     "anzahl": 4,
+     "name": "Hilda",
+     "set": "WHT",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 3,
+     "name": "Dawn",
+     "set": "PFL",
+     "nummer": "87"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 4,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 4,
+     "name": "Rare Candy",
+     "set": "MEG",
+     "nummer": "125"
+    },
+    {
+     "anzahl": 2,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 2,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
+    },
+    {
+     "anzahl": 2,
+     "name": "Strange Timepiece",
+     "set": "MEG",
+     "nummer": "128"
+    },
+    {
+     "anzahl": 1,
+     "name": "Sacred Ash",
+     "set": "DRI",
+     "nummer": "168"
+    },
+    {
+     "anzahl": 4,
+     "name": "Telepathic Psychic Energy",
+     "set": "POR",
+     "nummer": "88"
+    },
+    {
+     "anzahl": 1,
+     "name": "Psychic Energy",
+     "set": "MEE",
+     "nummer": "13"
+    },
+    {
+     "anzahl": 1,
+     "name": "Legacy Energy",
+     "set": "TWM",
+     "nummer": "167"
+    }
+   ]
+  },
+  {
+   "archetyp": "Mega Excadrill",
+   "tier": 3,
+   "quelle": "online",
+   "turnier": "🇧🇷 Hit Battle • Corujão #12 | TCG Live",
+   "datum": "2026-11-08",
+   "platz": 1,
+   "platz_text": "1st of 10",
+   "spieler": "Ivison Silva",
+   "bilanz": "4 - 0 - 0",
+   "titel": {
+    "name": "Mega Excadrill ex",
+    "set": "PBL",
+    "nummer": "65"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Beldum",
+     "set": "CRI",
+     "nummer": "59"
+    },
+    {
+     "anzahl": 4,
+     "name": "Metang",
+     "set": "TEF",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 1,
+     "name": "Metagross",
+     "set": "CRI",
+     "nummer": "61"
+    },
+    {
+     "anzahl": 4,
+     "name": "Drilbur",
+     "set": "PBL",
+     "nummer": "46"
+    },
+    {
+     "anzahl": 2,
+     "name": "Mega Excadrill ex",
+     "set": "PBL",
+     "nummer": "65"
+    },
+    {
+     "anzahl": 2,
+     "name": "Genesect ex",
+     "set": "BLK",
+     "nummer": "67"
+    },
+    {
+     "anzahl": 4,
+     "name": "Brock's Scouting",
+     "set": "JTG",
+     "nummer": "146"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 2,
+     "name": "Team Rocket's Petrel",
+     "set": "DRI",
+     "nummer": "176"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 1,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 2,
+     "name": "Pokégear 3.0",
+     "set": "SVI",
+     "nummer": "186"
+    },
+    {
+     "anzahl": 2,
+     "name": "Jumbo Ice Cream",
+     "set": "PFL",
+     "nummer": "91"
+    },
+    {
+     "anzahl": 1,
+     "name": "Energy Recycler",
+     "set": "DRI",
+     "nummer": "164"
+    },
+    {
+     "anzahl": 1,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 1,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
     },
     {
      "anzahl": 1,
@@ -2042,35 +2368,208 @@
     },
     {
      "anzahl": 1,
+     "name": "Hero's Cape",
+     "set": "TEF",
+     "nummer": "152"
+    },
+    {
+     "anzahl": 1,
+     "name": "Gravity Mountain",
+     "set": "SSP",
+     "nummer": "177"
+    },
+    {
+     "anzahl": 16,
+     "name": "Metal Energy",
+     "set": "MEE",
+     "nummer": "16"
+    }
+   ]
+  },
+  {
+   "archetyp": "Mega Lucario",
+   "tier": 3,
+   "quelle": "online",
+   "turnier": "JustInBasil Online League - 06 November 2026",
+   "datum": "2026-11-07",
+   "platz": 2,
+   "platz_text": "2nd of 9",
+   "spieler": "V70shwagon",
+   "bilanz": "2 - 1 - 0",
+   "titel": {
+    "name": "Mega Lucario ex",
+    "set": "MEG",
+    "nummer": "77"
+   },
+   "karten": [
+    {
+     "anzahl": 2,
+     "name": "Riolu",
+     "set": "PRE",
+     "nummer": "50"
+    },
+    {
+     "anzahl": 1,
+     "name": "Riolu",
+     "set": "SCR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 3,
+     "name": "Mega Lucario ex",
+     "set": "MEG",
+     "nummer": "77"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dunsparce",
+     "set": "JTG",
+     "nummer": "120"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dudunsparce",
+     "set": "TEF",
+     "nummer": "129"
+    },
+    {
+     "anzahl": 2,
+     "name": "Lunatone",
+     "set": "MEG",
+     "nummer": "74"
+    },
+    {
+     "anzahl": 2,
+     "name": "Solrock",
+     "set": "MEG",
+     "nummer": "75"
+    },
+    {
+     "anzahl": 1,
+     "name": "Makuhita",
+     "set": "MEG",
+     "nummer": "72"
+    },
+    {
+     "anzahl": 1,
+     "name": "Hariyama",
+     "set": "MEG",
+     "nummer": "73"
+    },
+    {
+     "anzahl": 3,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 2,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 1,
+     "name": "Hilda",
+     "set": "WHT",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 1,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 1,
+     "name": "Salvatore",
+     "set": "TEF",
+     "nummer": "160"
+    },
+    {
+     "anzahl": 1,
+     "name": "Xerosic's Machinations",
+     "set": "SFA",
+     "nummer": "64"
+    },
+    {
+     "anzahl": 4,
+     "name": "Fighting Gong",
+     "set": "MEG",
+     "nummer": "116"
+    },
+    {
+     "anzahl": 4,
+     "name": "Premium Power Pro",
+     "set": "MEG",
+     "nummer": "124"
+    },
+    {
+     "anzahl": 3,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 3,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 3,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 2,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 1,
+     "name": "Prime Catcher",
+     "set": "TEF",
+     "nummer": "157"
+    },
+    {
+     "anzahl": 1,
      "name": "Air Balloon",
      "set": "ASC",
      "nummer": "181"
     },
     {
-     "anzahl": 3,
-     "name": "Spikemuth Gym",
-     "set": "DRI",
-     "nummer": "169"
+     "anzahl": 2,
+     "name": "Gravity Mountain",
+     "set": "SSP",
+     "nummer": "177"
     },
     {
      "anzahl": 9,
-     "name": "Darkness Energy",
+     "name": "Fighting Energy",
      "set": "MEE",
-     "nummer": "15"
+     "nummer": "14"
+    },
+    {
+     "anzahl": 3,
+     "name": "Rocky Fighting Energy",
+     "set": "POR",
+     "nummer": "87"
     }
    ]
   },
   {
    "archetyp": "Lopunny Dudunsparce",
-   "tier": 2,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 100,
-   "spieler": "Piotr Orleański",
-   "bilanz": "8-3-2",
-   "archetyp_turnier": "Lopunny Dudunsparce",
+   "tier": 3,
+   "quelle": "online",
+   "turnier": "🪎Vault Of Games #10🪙|REGIONAL FORMAT🏆|WEEKLY📅",
+   "datum": "2026-11-08",
+   "platz": 5,
+   "platz_text": "5th of 161",
+   "spieler": "SnazzyPlatypus",
+   "bilanz": "8 - 3 - 0",
    "titel": {
     "name": "Mega Lopunny ex",
     "set": "PFL",
@@ -2102,16 +2601,28 @@
      "nummer": "128"
     },
     {
-     "anzahl": 3,
+     "anzahl": 2,
      "name": "Dudunsparce",
      "set": "TEF",
      "nummer": "129"
     },
     {
+     "anzahl": 2,
+     "name": "Snorunt",
+     "set": "ASC",
+     "nummer": "46"
+    },
+    {
+     "anzahl": 2,
+     "name": "Mega Froslass ex",
+     "set": "ASC",
+     "nummer": "47"
+    },
+    {
      "anzahl": 1,
-     "name": "Lillie's Clefairy ex",
-     "set": "JTG",
-     "nummer": "56"
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
     },
     {
      "anzahl": 1,
@@ -2127,21 +2638,15 @@
     },
     {
      "anzahl": 1,
-     "name": "Shaymin",
-     "set": "DRI",
-     "nummer": "10"
+     "name": "Lillie's Clefairy ex",
+     "set": "JTG",
+     "nummer": "56"
     },
     {
-     "anzahl": 1,
-     "name": "Genesect",
-     "set": "SFA",
-     "nummer": "40"
-    },
-    {
-     "anzahl": 1,
-     "name": "Moltres",
-     "set": "PFL",
-     "nummer": "14"
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
     },
     {
      "anzahl": 4,
@@ -2150,22 +2655,22 @@
      "nummer": "84"
     },
     {
-     "anzahl": 4,
+     "anzahl": 3,
      "name": "Boss's Orders",
      "set": "MEG",
      "nummer": "114"
     },
     {
      "anzahl": 3,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 2,
      "name": "Wally's Compassion",
      "set": "MEG",
      "nummer": "132"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
     },
     {
      "anzahl": 4,
@@ -2175,21 +2680,9 @@
     },
     {
      "anzahl": 4,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
-    },
-    {
-     "anzahl": 3,
      "name": "Ultra Ball",
      "set": "MEG",
      "nummer": "131"
-    },
-    {
-     "anzahl": 2,
-     "name": "Pokégear 3.0",
-     "set": "SVI",
-     "nummer": "186"
     },
     {
      "anzahl": 2,
@@ -2204,7 +2697,7 @@
      "nummer": "82"
     },
     {
-     "anzahl": 4,
+     "anzahl": 2,
      "name": "Air Balloon",
      "set": "ASC",
      "nummer": "181"
@@ -2216,22 +2709,16 @@
      "nummer": "85"
     },
     {
-     "anzahl": 3,
+     "anzahl": 4,
      "name": "Mist Energy",
      "set": "TEF",
      "nummer": "161"
     },
     {
-     "anzahl": 2,
-     "name": "Fire Energy",
+     "anzahl": 3,
+     "name": "Water Energy",
      "set": "MEE",
-     "nummer": "10"
-    },
-    {
-     "anzahl": 1,
-     "name": "Telepathic Psychic Energy",
-     "set": "POR",
-     "nummer": "88"
+     "nummer": "11"
     },
     {
      "anzahl": 1,
@@ -2242,63 +2729,92 @@
    ]
   },
   {
-   "archetyp": "Sharpedo Toxtricity",
-   "tier": 2,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 91,
-   "spieler": "Luca Remi",
-   "bilanz": "8-3-2",
-   "archetyp_turnier": "Sharpedo Toxtricity",
+   "archetyp": "Greninja",
+   "tier": 3,
+   "quelle": "online",
+   "turnier": "Rare Candy Club Showdown #51 DELTA REIGN LEGAL",
+   "datum": "2026-11-09",
+   "platz": 2,
+   "platz_text": "2nd of 149",
+   "spieler": "PizzaParrker",
+   "bilanz": "8 - 2 - 0",
    "titel": {
-    "name": "Mega Sharpedo ex",
-    "set": "PFL",
-    "nummer": "61"
+    "name": "Greninja ex",
+    "set": "TWM",
+    "nummer": "106"
    },
    "karten": [
     {
      "anzahl": 3,
-     "name": "Carvanha",
-     "set": "PFL",
-     "nummer": "60"
-    },
-    {
-     "anzahl": 4,
-     "name": "Mega Sharpedo ex",
-     "set": "PFL",
-     "nummer": "61"
+     "name": "Froakie",
+     "set": "CRI",
+     "nummer": "20"
     },
     {
      "anzahl": 2,
-     "name": "Toxel",
-     "set": "PFL",
-     "nummer": "67"
+     "name": "Frogadier",
+     "set": "CRI",
+     "nummer": "21"
     },
     {
      "anzahl": 2,
-     "name": "Toxtricity",
-     "set": "PFL",
-     "nummer": "68"
-    },
-    {
-     "anzahl": 2,
-     "name": "Pecharunt ex",
-     "set": "SFA",
-     "nummer": "39"
-    },
-    {
-     "anzahl": 2,
-     "name": "Tatsugiri",
+     "name": "Greninja ex",
      "set": "TWM",
-     "nummer": "131"
+     "nummer": "106"
+    },
+    {
+     "anzahl": 1,
+     "name": "Greninja ex",
+     "set": "30C",
+     "nummer": "21"
     },
     {
      "anzahl": 2,
-     "name": "Munkidori",
-     "set": "TWM",
-     "nummer": "95"
+     "name": "Duskull",
+     "set": "PRE",
+     "nummer": "35"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dusclops",
+     "set": "PRE",
+     "nummer": "36"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dusknoir",
+     "set": "PRE",
+     "nummer": "37"
+    },
+    {
+     "anzahl": 2,
+     "name": "Snorunt",
+     "set": "ASC",
+     "nummer": "46"
+    },
+    {
+     "anzahl": 2,
+     "name": "Mega Froslass ex",
+     "set": "ASC",
+     "nummer": "47"
+    },
+    {
+     "anzahl": 2,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 1,
+     "name": "Staryu",
+     "set": "POR",
+     "nummer": "20"
+    },
+    {
+     "anzahl": 1,
+     "name": "Mega Starmie ex",
+     "set": "POR",
+     "nummer": "21"
     },
     {
      "anzahl": 1,
@@ -2308,9 +2824,177 @@
     },
     {
      "anzahl": 1,
-     "name": "Yveltal",
+     "name": "Budew",
+     "set": "ASC",
+     "nummer": "16"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
      "set": "MEG",
-     "nummer": "88"
+     "nummer": "119"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 2,
+     "name": "Hilda",
+     "set": "WHT",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 1,
+     "name": "Wally's Compassion",
+     "set": "MEG",
+     "nummer": "132"
+    },
+    {
+     "anzahl": 1,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 1,
+     "name": "Colress's Tenacity",
+     "set": "SFA",
+     "nummer": "57"
+    },
+    {
+     "anzahl": 1,
+     "name": "Team Rocket's Petrel",
+     "set": "DRI",
+     "nummer": "176"
+    },
+    {
+     "anzahl": 3,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 3,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 3,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 2,
+     "name": "Rare Candy",
+     "set": "MEG",
+     "nummer": "125"
+    },
+    {
+     "anzahl": 1,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 1,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
+    },
+    {
+     "anzahl": 1,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 1,
+     "name": "Gravity Mountain",
+     "set": "SSP",
+     "nummer": "177"
+    },
+    {
+     "anzahl": 1,
+     "name": "Grand Tree",
+     "set": "SCR",
+     "nummer": "136"
+    },
+    {
+     "anzahl": 4,
+     "name": "Water Energy",
+     "set": "MEE",
+     "nummer": "11"
+    },
+    {
+     "anzahl": 3,
+     "name": "Ignition Energy",
+     "set": "WHT",
+     "nummer": "86"
+    },
+    {
+     "anzahl": 1,
+     "name": "Bubbly Water Energy",
+     "set": "CRI",
+     "nummer": "84"
+    }
+   ]
+  },
+  {
+   "archetyp": "Cynthia's Garchomp",
+   "tier": 3,
+   "quelle": "online",
+   "turnier": "Redraftowa Liga Pokemon TCG - 08.11.2026",
+   "datum": "2026-11-08",
+   "platz": 1,
+   "platz_text": "1st of 6",
+   "spieler": "Denis Dziopak",
+   "bilanz": "4 - 0 - 0",
+   "titel": {
+    "name": "Cynthia's Garchomp ex",
+    "set": "DRI",
+    "nummer": "104"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Cynthia's Gible",
+     "set": "DRI",
+     "nummer": "102"
+    },
+    {
+     "anzahl": 4,
+     "name": "Cynthia's Gabite",
+     "set": "DRI",
+     "nummer": "103"
+    },
+    {
+     "anzahl": 3,
+     "name": "Cynthia's Garchomp ex",
+     "set": "DRI",
+     "nummer": "104"
+    },
+    {
+     "anzahl": 3,
+     "name": "Cynthia's Roselia",
+     "set": "DRI",
+     "nummer": "7"
+    },
+    {
+     "anzahl": 3,
+     "name": "Cynthia's Roserade",
+     "set": "DRI",
+     "nummer": "8"
+    },
+    {
+     "anzahl": 1,
+     "name": "Cynthia's Spiritomb",
+     "set": "DRI",
+     "nummer": "129"
     },
     {
      "anzahl": 4,
@@ -2325,16 +3009,16 @@
      "nummer": "114"
     },
     {
-     "anzahl": 3,
-     "name": "Judge",
-     "set": "POR",
-     "nummer": "76"
-    },
-    {
      "anzahl": 2,
      "name": "Team Rocket's Petrel",
      "set": "DRI",
      "nummer": "176"
+    },
+    {
+     "anzahl": 1,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
     },
     {
      "anzahl": 4,
@@ -2349,16 +3033,22 @@
      "nummer": "81"
     },
     {
-     "anzahl": 4,
-     "name": "Ultra Ball",
+     "anzahl": 3,
+     "name": "Fighting Gong",
      "set": "MEG",
-     "nummer": "131"
+     "nummer": "116"
     },
     {
-     "anzahl": 1,
-     "name": "Unfair Stamp",
-     "set": "TWM",
-     "nummer": "165"
+     "anzahl": 2,
+     "name": "Premium Power Pro",
+     "set": "MEG",
+     "nummer": "124"
+    },
+    {
+     "anzahl": 2,
+     "name": "Pokégear 3.0",
+     "set": "SVI",
+     "nummer": "186"
     },
     {
      "anzahl": 1,
@@ -2367,143 +3057,16 @@
      "nummer": "196"
     },
     {
-     "anzahl": 3,
-     "name": "Binding Mochi",
-     "set": "PRE",
-     "nummer": "95"
-    },
-    {
-     "anzahl": 2,
-     "name": "Team Rocket's Watchtower",
-     "set": "DRI",
-     "nummer": "180"
+     "anzahl": 1,
+     "name": "Rare Candy",
+     "set": "MEG",
+     "nummer": "125"
     },
     {
      "anzahl": 1,
-     "name": "Gravity Mountain",
-     "set": "SSP",
-     "nummer": "177"
-    },
-    {
-     "anzahl": 9,
-     "name": "Darkness Energy",
-     "set": "MEE",
-     "nummer": "15"
-    }
-   ]
-  },
-  {
-   "archetyp": "Mega Excadrill",
-   "tier": 2,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 37,
-   "spieler": "David Walerian Rzepka",
-   "bilanz": "9-3-1",
-   "archetyp_turnier": "Mega Excadrill",
-   "titel": {
-    "name": "Mega Excadrill ex",
-    "set": "PBL",
-    "nummer": "65"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Beldum",
-     "set": "TEF",
-     "nummer": "113"
-    },
-    {
-     "anzahl": 4,
-     "name": "Metang",
-     "set": "TEF",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 1,
-     "name": "Metagross",
-     "set": "CRI",
-     "nummer": "61"
-    },
-    {
-     "anzahl": 3,
-     "name": "Drilbur",
-     "set": "PBL",
-     "nummer": "46"
-    },
-    {
-     "anzahl": 2,
-     "name": "Mega Excadrill ex",
-     "set": "PBL",
-     "nummer": "65"
-    },
-    {
-     "anzahl": 2,
-     "name": "Genesect ex",
-     "set": "BLK",
-     "nummer": "67"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mega Skarmory ex",
-     "set": "POR",
-     "nummer": "55"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 4,
-     "name": "Team Rocket's Petrel",
-     "set": "DRI",
-     "nummer": "176"
-    },
-    {
-     "anzahl": 4,
-     "name": "Judge",
-     "set": "POR",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 2,
-     "name": "Brock's Scouting",
-     "set": "JTG",
-     "nummer": "146"
-    },
-    {
-     "anzahl": 4,
-     "name": "Pokégear 3.0",
-     "set": "SVI",
-     "nummer": "186"
-    },
-    {
-     "anzahl": 4,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
-    },
-    {
-     "anzahl": 1,
-     "name": "Precious Trolley",
-     "set": "SSP",
-     "nummer": "185"
-    },
-    {
-     "anzahl": 1,
-     "name": "Energy Recycler",
-     "set": "DRI",
-     "nummer": "164"
-    },
-    {
-     "anzahl": 1,
-     "name": "Jumbo Ice Cream",
-     "set": "PFL",
-     "nummer": "91"
+     "name": "Unfair Stamp",
+     "set": "TWM",
+     "nummer": "165"
     },
     {
      "anzahl": 1,
@@ -2513,373 +3076,40 @@
     },
     {
      "anzahl": 4,
+     "name": "Cynthia's Power Weight",
+     "set": "DRI",
+     "nummer": "162"
+    },
+    {
+     "anzahl": 1,
      "name": "Team Rocket's Watchtower",
      "set": "DRI",
      "nummer": "180"
     },
     {
-     "anzahl": 16,
-     "name": "Metal Energy",
-     "set": "MEE",
-     "nummer": "16"
-    }
-   ]
-  },
-  {
-   "archetyp": "Dragapult Dusknoir",
-   "tier": 3,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 10,
-   "spieler": "Aleksander Rutowicz",
-   "bilanz": "10-2-2",
-   "archetyp_turnier": "Dragapult Dusknoir",
-   "titel": {
-    "name": "Dragapult ex",
-    "set": "TWM",
-    "nummer": "130"
-   },
-   "karten": [
-    {
      "anzahl": 4,
-     "name": "Dreepy",
-     "set": "TWM",
-     "nummer": "128"
-    },
-    {
-     "anzahl": 4,
-     "name": "Drakloak",
-     "set": "TWM",
-     "nummer": "129"
-    },
-    {
-     "anzahl": 3,
-     "name": "Dragapult ex",
-     "set": "TWM",
-     "nummer": "130"
-    },
-    {
-     "anzahl": 2,
-     "name": "Duskull",
-     "set": "PRE",
-     "nummer": "35"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dusclops",
-     "set": "PRE",
-     "nummer": "36"
-    },
-    {
-     "anzahl": 1,
-     "name": "Dusknoir",
-     "set": "PRE",
-     "nummer": "37"
-    },
-    {
-     "anzahl": 1,
-     "name": "Budew",
-     "set": "ASC",
-     "nummer": "16"
-    },
-    {
-     "anzahl": 1,
-     "name": "Munkidori",
-     "set": "TWM",
-     "nummer": "95"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 1,
-     "name": "Meowth ex",
+     "name": "Rocky Fighting Energy",
      "set": "POR",
-     "nummer": "62"
-    },
-    {
-     "anzahl": 4,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 3,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dawn",
-     "set": "PFL",
-     "nummer": "87"
-    },
-    {
-     "anzahl": 2,
-     "name": "Crispin",
-     "set": "SCR",
-     "nummer": "133"
-    },
-    {
-     "anzahl": 1,
-     "name": "Rosa's Encouragement",
-     "set": "POR",
-     "nummer": "84"
-    },
-    {
-     "anzahl": 4,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
-    },
-    {
-     "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 2,
-     "name": "Rare Candy",
-     "set": "MEG",
-     "nummer": "125"
-    },
-    {
-     "anzahl": 2,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 1,
-     "name": "Special Red Card",
-     "set": "CRI",
-     "nummer": "82"
-    },
-    {
-     "anzahl": 1,
-     "name": "Unfair Stamp",
-     "set": "TWM",
-     "nummer": "165"
-    },
-    {
-     "anzahl": 2,
-     "name": "Team Rocket's Watchtower",
-     "set": "DRI",
-     "nummer": "180"
-    },
-    {
-     "anzahl": 3,
-     "name": "Fire Energy",
-     "set": "MEE",
-     "nummer": "10"
-    },
-    {
-     "anzahl": 3,
-     "name": "Psychic Energy",
-     "set": "MEE",
-     "nummer": "13"
-    },
-    {
-     "anzahl": 2,
-     "name": "Darkness Energy",
-     "set": "MEE",
-     "nummer": "15"
-    }
-   ]
-  },
-  {
-   "archetyp": "Alakazam Dusknoir",
-   "tier": 3,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 17,
-   "spieler": "Tomasz Chałupka",
-   "bilanz": "10-2-1",
-   "archetyp_turnier": "Alakazam Dusknoir",
-   "titel": {
-    "name": "Alakazam",
-    "set": "MEG",
-    "nummer": "56"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Duskull",
-     "set": "PRE",
-     "nummer": "35"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dusclops",
-     "set": "PRE",
-     "nummer": "36"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dusknoir",
-     "set": "PRE",
-     "nummer": "37"
-    },
-    {
-     "anzahl": 3,
-     "name": "Abra",
-     "set": "MEG",
-     "nummer": "54"
-    },
-    {
-     "anzahl": 1,
-     "name": "Abra",
-     "set": "TWM",
-     "nummer": "80"
-    },
-    {
-     "anzahl": 4,
-     "name": "Kadabra",
-     "set": "MEG",
-     "nummer": "55"
-    },
-    {
-     "anzahl": 3,
-     "name": "Alakazam",
-     "set": "MEG",
-     "nummer": "56"
-    },
-    {
-     "anzahl": 2,
-     "name": "Budew",
-     "set": "ASC",
-     "nummer": "16"
-    },
-    {
-     "anzahl": 1,
-     "name": "Shaymin",
-     "set": "DRI",
-     "nummer": "10"
-    },
-    {
-     "anzahl": 1,
-     "name": "Lillie's Clefairy ex",
-     "set": "JTG",
-     "nummer": "56"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 4,
-     "name": "Hilda",
-     "set": "WHT",
-     "nummer": "84"
-    },
-    {
-     "anzahl": 3,
-     "name": "Gwynn",
-     "set": "PBL",
-     "nummer": "78"
-    },
-    {
-     "anzahl": 3,
-     "name": "Dawn",
-     "set": "PFL",
      "nummer": "87"
     },
     {
      "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 4,
-     "name": "Rare Candy",
-     "set": "MEG",
-     "nummer": "125"
-    },
-    {
-     "anzahl": 3,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
-    },
-    {
-     "anzahl": 3,
-     "name": "Strange Timepiece",
-     "set": "MEG",
-     "nummer": "128"
-    },
-    {
-     "anzahl": 2,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 2,
-     "name": "Special Red Card",
-     "set": "CRI",
-     "nummer": "82"
-    },
-    {
-     "anzahl": 1,
-     "name": "Prime Catcher",
-     "set": "TEF",
-     "nummer": "157"
-    },
-    {
-     "anzahl": 1,
-     "name": "Sacred Ash",
-     "set": "DRI",
-     "nummer": "168"
-    },
-    {
-     "anzahl": 1,
-     "name": "Wondrous Patch",
-     "set": "PFL",
-     "nummer": "94"
-    },
-    {
-     "anzahl": 4,
-     "name": "Telepathic Psychic Energy",
-     "set": "POR",
-     "nummer": "88"
-    },
-    {
-     "anzahl": 1,
-     "name": "Psychic Energy",
+     "name": "Fighting Energy",
      "set": "MEE",
-     "nummer": "13"
+     "nummer": "14"
     }
    ]
   },
   {
    "archetyp": "Lucario Hariyama",
    "tier": 3,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 231,
-   "spieler": "James McSweeney",
-   "bilanz": "7-5-1",
-   "archetyp_turnier": "Lucario Hariyama",
+   "quelle": "online",
+   "turnier": "Heart of the Games Online Series - S108",
+   "datum": "2026-11-06",
+   "platz": 3,
+   "platz_text": "3rd of 7",
+   "spieler": "lacaipa",
+   "bilanz": "2 - 1 - 0",
    "titel": {
     "name": "Mega Lucario ex",
     "set": "MEG",
@@ -2923,25 +3153,13 @@
      "nummer": "74"
     },
     {
-     "anzahl": 1,
-     "name": "Meowth ex",
-     "set": "POR",
-     "nummer": "62"
-    },
-    {
-     "anzahl": 1,
-     "name": "Shaymin",
-     "set": "DRI",
-     "nummer": "10"
-    },
-    {
      "anzahl": 4,
      "name": "Lillie's Determination",
      "set": "MEG",
      "nummer": "119"
     },
     {
-     "anzahl": 2,
+     "anzahl": 4,
      "name": "Judge",
      "set": "POR",
      "nummer": "76"
@@ -2960,15 +3178,21 @@
     },
     {
      "anzahl": 1,
-     "name": "Ciphermaniac's Codebreaking",
-     "set": "TEF",
-     "nummer": "145"
+     "name": "Team Rocket's Petrel",
+     "set": "DRI",
+     "nummer": "176"
     },
     {
      "anzahl": 4,
-     "name": "Premium Power Pro",
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 4,
+     "name": "Fighting Gong",
      "set": "MEG",
-     "nummer": "124"
+     "nummer": "116"
     },
     {
      "anzahl": 4,
@@ -2978,21 +3202,9 @@
     },
     {
      "anzahl": 4,
-     "name": "Fighting Gong",
+     "name": "Premium Power Pro",
      "set": "MEG",
-     "nummer": "116"
-    },
-    {
-     "anzahl": 2,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 1,
-     "name": "Special Red Card",
-     "set": "CRI",
-     "nummer": "82"
+     "nummer": "124"
     },
     {
      "anzahl": 1,
@@ -3007,31 +3219,25 @@
      "nummer": "130"
     },
     {
-     "anzahl": 1,
-     "name": "Unfair Stamp",
-     "set": "TWM",
-     "nummer": "165"
-    },
-    {
      "anzahl": 2,
      "name": "Air Balloon",
      "set": "ASC",
      "nummer": "181"
     },
     {
-     "anzahl": 2,
+     "anzahl": 1,
+     "name": "Maximum Belt",
+     "set": "TEF",
+     "nummer": "154"
+    },
+    {
+     "anzahl": 1,
      "name": "Gravity Mountain",
      "set": "SSP",
      "nummer": "177"
     },
     {
-     "anzahl": 1,
-     "name": "Team Rocket's Watchtower",
-     "set": "DRI",
-     "nummer": "180"
-    },
-    {
-     "anzahl": 10,
+     "anzahl": 11,
      "name": "Fighting Energy",
      "set": "MEE",
      "nummer": "14"
@@ -3039,250 +3245,62 @@
    ]
   },
   {
-   "archetyp": "Lopunny Dusknoir",
+   "archetyp": "Sharpedo Toxtricity",
    "tier": 3,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 118,
-   "spieler": "Viktor Andersson",
-   "bilanz": "7-2-4",
-   "archetyp_turnier": "Lopunny Dusknoir",
+   "quelle": "online",
+   "turnier": "Heart of the Games Online Series - S108",
+   "datum": "2026-11-06",
+   "platz": 1,
+   "platz_text": "1st of 7",
+   "spieler": "Darak24",
+   "bilanz": "3 - 0 - 0",
    "titel": {
-    "name": "Mega Lopunny ex",
+    "name": "Mega Sharpedo ex",
     "set": "PFL",
-    "nummer": "84"
+    "nummer": "61"
    },
    "karten": [
     {
      "anzahl": 4,
-     "name": "Duskull",
-     "set": "PRE",
-     "nummer": "35"
+     "name": "Carvanha",
+     "set": "PFL",
+     "nummer": "60"
+    },
+    {
+     "anzahl": 3,
+     "name": "Mega Sharpedo ex",
+     "set": "PFL",
+     "nummer": "61"
     },
     {
      "anzahl": 2,
-     "name": "Dusclops",
-     "set": "PRE",
-     "nummer": "36"
-    },
-    {
-     "anzahl": 4,
-     "name": "Dusknoir",
-     "set": "PRE",
-     "nummer": "37"
-    },
-    {
-     "anzahl": 4,
-     "name": "Mega Kangaskhan ex",
-     "set": "MEG",
-     "nummer": "104"
+     "name": "Toxel",
+     "set": "PFL",
+     "nummer": "67"
     },
     {
      "anzahl": 2,
-     "name": "Bronzor",
-     "set": "TEF",
+     "name": "Toxtricity",
+     "set": "PFL",
      "nummer": "68"
     },
     {
      "anzahl": 2,
-     "name": "Bronzong",
-     "set": "TEF",
-     "nummer": "69"
-    },
-    {
-     "anzahl": 2,
-     "name": "Buneary",
-     "set": "PFL",
-     "nummer": "83"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mega Lopunny ex",
-     "set": "PFL",
-     "nummer": "84"
-    },
-    {
-     "anzahl": 2,
-     "name": "Latias ex",
-     "set": "SSP",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 1,
-     "name": "Bloodmoon Ursaluna ex",
+     "name": "Munkidori",
      "set": "TWM",
-     "nummer": "141"
-    },
-    {
-     "anzahl": 1,
-     "name": "Meowth ex",
-     "set": "POR",
-     "nummer": "62"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mew ex",
-     "set": "30C",
-     "nummer": "66"
-    },
-    {
-     "anzahl": 1,
-     "name": "Budew",
-     "set": "ASC",
-     "nummer": "16"
-    },
-    {
-     "anzahl": 4,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 4,
-     "name": "Hilda",
-     "set": "WHT",
-     "nummer": "84"
+     "nummer": "95"
     },
     {
      "anzahl": 2,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ultra Ball",
-     "set": "MEG",
+     "name": "Tatsugiri",
+     "set": "TWM",
      "nummer": "131"
     },
     {
-     "anzahl": 4,
-     "name": "Rare Candy",
-     "set": "MEG",
-     "nummer": "125"
-    },
-    {
-     "anzahl": 3,
-     "name": "Switch",
-     "set": "MEG",
-     "nummer": "130"
-    },
-    {
      "anzahl": 2,
-     "name": "Jamming Tower",
-     "set": "TWM",
-     "nummer": "153"
-    },
-    {
-     "anzahl": 4,
-     "name": "Telepathic Psychic Energy",
-     "set": "POR",
-     "nummer": "88"
-    },
-    {
-     "anzahl": 1,
-     "name": "Enriching Energy",
-     "set": "SSP",
-     "nummer": "191"
-    },
-    {
-     "anzahl": 1,
-     "name": "Psychic Energy",
-     "set": "MEE",
-     "nummer": "13"
-    }
-   ]
-  },
-  {
-   "archetyp": "Greninja",
-   "tier": 3,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 6,
-   "spieler": "Nathan Bonavia Zammit",
-   "bilanz": "11-2-2",
-   "archetyp_turnier": "Greninja",
-   "titel": {
-    "name": "Greninja ex",
-    "set": "TWM",
-    "nummer": "106"
-   },
-   "karten": [
-    {
-     "anzahl": 3,
-     "name": "Froakie",
-     "set": "CRI",
-     "nummer": "20"
-    },
-    {
-     "anzahl": 2,
-     "name": "Frogadier",
-     "set": "CRI",
-     "nummer": "21"
-    },
-    {
-     "anzahl": 2,
-     "name": "Greninja ex",
-     "set": "TWM",
-     "nummer": "106"
-    },
-    {
-     "anzahl": 2,
-     "name": "Snorunt",
-     "set": "ASC",
-     "nummer": "46"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mega Froslass ex",
-     "set": "ASC",
-     "nummer": "47"
-    },
-    {
-     "anzahl": 2,
-     "name": "Duskull",
-     "set": "PRE",
-     "nummer": "35"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dusclops",
-     "set": "PRE",
-     "nummer": "36"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dusknoir",
-     "set": "PRE",
-     "nummer": "37"
-    },
-    {
-     "anzahl": 2,
-     "name": "Meowth ex",
-     "set": "POR",
-     "nummer": "62"
-    },
-    {
-     "anzahl": 1,
-     "name": "Staryu",
-     "set": "POR",
-     "nummer": "20"
-    },
-    {
-     "anzahl": 1,
-     "name": "Mega Starmie ex",
-     "set": "POR",
-     "nummer": "21"
+     "name": "Pecharunt ex",
+     "set": "SFA",
+     "nummer": "39"
     },
     {
      "anzahl": 1,
@@ -3292,178 +3310,9 @@
     },
     {
      "anzahl": 1,
-     "name": "Latias ex",
-     "set": "SSP",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 1,
-     "name": "Budew",
-     "set": "ASC",
-     "nummer": "16"
-    },
-    {
-     "anzahl": 4,
-     "name": "Lillie's Determination",
+     "name": "Yveltal",
      "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 2,
-     "name": "Hilda",
-     "set": "WHT",
-     "nummer": "84"
-    },
-    {
-     "anzahl": 2,
-     "name": "Colress's Tenacity",
-     "set": "SFA",
-     "nummer": "57"
-    },
-    {
-     "anzahl": 2,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 4,
-     "name": "Buddy-Buddy Poffin",
-     "set": "TEF",
-     "nummer": "144"
-    },
-    {
-     "anzahl": 3,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 2,
-     "name": "Rare Candy",
-     "set": "MEG",
-     "nummer": "125"
-    },
-    {
-     "anzahl": 1,
-     "name": "Switch",
-     "set": "MEG",
-     "nummer": "130"
-    },
-    {
-     "anzahl": 1,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 1,
-     "name": "Special Red Card",
-     "set": "CRI",
-     "nummer": "82"
-    },
-    {
-     "anzahl": 1,
-     "name": "Grand Tree",
-     "set": "SCR",
-     "nummer": "136"
-    },
-    {
-     "anzahl": 1,
-     "name": "Gravity Mountain",
-     "set": "SSP",
-     "nummer": "177"
-    },
-    {
-     "anzahl": 5,
-     "name": "Water Energy",
-     "set": "MEE",
-     "nummer": "11"
-    },
-    {
-     "anzahl": 3,
-     "name": "Ignition Energy",
-     "set": "WHT",
-     "nummer": "86"
-    },
-    {
-     "anzahl": 1,
-     "name": "Bubbly Water Energy",
-     "set": "CRI",
-     "nummer": "84"
-    }
-   ]
-  },
-  {
-   "archetyp": "Mega Lucario",
-   "tier": 3,
-   "quelle": "major",
-   "turnier": "Regional Championship Gdańsk",
-   "datum": "2026-10-31",
-   "turnier_id": "0079",
-   "platz": 303,
-   "spieler": "Aleksandar Skoric",
-   "bilanz": "6-6-1",
-   "archetyp_turnier": "Mega Lucario",
-   "titel": {
-    "name": "Mega Lucario ex",
-    "set": "MEG",
-    "nummer": "77"
-   },
-   "karten": [
-    {
-     "anzahl": 3,
-     "name": "Riolu",
-     "set": "PRE",
-     "nummer": "50"
-    },
-    {
-     "anzahl": 1,
-     "name": "Riolu",
-     "set": "MEG",
-     "nummer": "76"
-    },
-    {
-     "anzahl": 3,
-     "name": "Mega Lucario ex",
-     "set": "MEG",
-     "nummer": "77"
-    },
-    {
-     "anzahl": 3,
-     "name": "Dunsparce",
-     "set": "JTG",
-     "nummer": "120"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dudunsparce",
-     "set": "TEF",
-     "nummer": "129"
-    },
-    {
-     "anzahl": 1,
-     "name": "Dudunsparce ex",
-     "set": "JTG",
-     "nummer": "121"
-    },
-    {
-     "anzahl": 2,
-     "name": "Solrock",
-     "set": "MEG",
-     "nummer": "75"
-    },
-    {
-     "anzahl": 2,
-     "name": "Lunatone",
-     "set": "MEG",
-     "nummer": "74"
+     "nummer": "88"
     },
     {
      "anzahl": 4,
@@ -3478,13 +3327,7 @@
      "nummer": "114"
     },
     {
-     "anzahl": 2,
-     "name": "Hilda",
-     "set": "WHT",
-     "nummer": "84"
-    },
-    {
-     "anzahl": 2,
+     "anzahl": 3,
      "name": "Judge",
      "set": "POR",
      "nummer": "76"
@@ -3496,22 +3339,16 @@
      "nummer": "132"
     },
     {
-     "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
+     "anzahl": 1,
+     "name": "Team Rocket's Petrel",
+     "set": "DRI",
+     "nummer": "176"
     },
     {
      "anzahl": 4,
-     "name": "Fighting Gong",
+     "name": "Ultra Ball",
      "set": "MEG",
-     "nummer": "116"
-    },
-    {
-     "anzahl": 4,
-     "name": "Premium Power Pro",
-     "set": "MEG",
-     "nummer": "124"
+     "nummer": "131"
     },
     {
      "anzahl": 3,
@@ -3520,10 +3357,16 @@
      "nummer": "144"
     },
     {
-     "anzahl": 1,
-     "name": "Mega Signal",
-     "set": "MEG",
-     "nummer": "121"
+     "anzahl": 3,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 2,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
     },
     {
      "anzahl": 1,
@@ -3538,10 +3381,16 @@
      "nummer": "163"
     },
     {
+     "anzahl": 1,
+     "name": "Mega Signal",
+     "set": "MEG",
+     "nummer": "121"
+    },
+    {
      "anzahl": 2,
-     "name": "Air Balloon",
-     "set": "ASC",
-     "nummer": "181"
+     "name": "Binding Mochi",
+     "set": "PRE",
+     "nummer": "95"
     },
     {
      "anzahl": 2,
@@ -3550,16 +3399,16 @@
      "nummer": "177"
     },
     {
-     "anzahl": 7,
-     "name": "Fighting Energy",
-     "set": "MEE",
-     "nummer": "14"
+     "anzahl": 2,
+     "name": "Team Rocket's Watchtower",
+     "set": "DRI",
+     "nummer": "180"
     },
     {
-     "anzahl": 2,
-     "name": "Rocky Fighting Energy",
-     "set": "POR",
-     "nummer": "87"
+     "anzahl": 8,
+     "name": "Darkness Energy",
+     "set": "MEE",
+     "nummer": "15"
     }
    ]
   },
@@ -3567,12 +3416,12 @@
    "archetyp": "Mega Greninja",
    "tier": 3,
    "quelle": "online",
-   "turnier": "Amyverse Bulk Box Battles #6 🧡 Cash Prize!",
-   "datum": "2026-11-03",
-   "platz": 2,
-   "platz_text": "2nd of 47",
-   "spieler": "rhinoguy123",
-   "bilanz": "4 - 1 - 1",
+   "turnier": "Delta Reign!",
+   "datum": "2026-11-07",
+   "platz": 1,
+   "platz_text": "1st of 15",
+   "spieler": "[Meigas] - Daroav",
+   "bilanz": "5 - 1 - 0",
    "titel": {
     "name": "Mega Greninja ex",
     "set": "CRI",
@@ -3586,34 +3435,58 @@
      "nummer": "20"
     },
     {
-     "anzahl": 3,
+     "anzahl": 2,
      "name": "Frogadier",
      "set": "CRI",
      "nummer": "21"
     },
     {
-     "anzahl": 3,
+     "anzahl": 2,
      "name": "Mega Greninja ex",
      "set": "CRI",
      "nummer": "22"
     },
     {
-     "anzahl": 3,
-     "name": "N's Zorua",
-     "set": "JTG",
-     "nummer": "97"
+     "anzahl": 2,
+     "name": "Greninja ex",
+     "set": "TWM",
+     "nummer": "106"
+    },
+    {
+     "anzahl": 1,
+     "name": "Greninja ex",
+     "set": "30C",
+     "nummer": "21"
     },
     {
      "anzahl": 3,
-     "name": "N's Zoroark ex",
-     "set": "JTG",
-     "nummer": "98"
+     "name": "Mega Kangaskhan ex",
+     "set": "MEG",
+     "nummer": "104"
     },
     {
-     "anzahl": 4,
-     "name": "Hilda",
-     "set": "WHT",
-     "nummer": "84"
+     "anzahl": 2,
+     "name": "Talonflame ex",
+     "set": "DLR",
+     "nummer": "88"
+    },
+    {
+     "anzahl": 2,
+     "name": "Latias ex",
+     "set": "SSP",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 1,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
     },
     {
      "anzahl": 4,
@@ -3629,9 +3502,27 @@
     },
     {
      "anzahl": 2,
-     "name": "Wally's Compassion",
-     "set": "MEG",
-     "nummer": "132"
+     "name": "Hilda",
+     "set": "WHT",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 1,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 1,
+     "name": "Cyrano",
+     "set": "SSP",
+     "nummer": "170"
+    },
+    {
+     "anzahl": 1,
+     "name": "Zinnia's Trust",
+     "set": "DLR",
+     "nummer": "103"
     },
     {
      "anzahl": 4,
@@ -3640,22 +3531,22 @@
      "nummer": "131"
     },
     {
-     "anzahl": 4,
+     "anzahl": 3,
      "name": "Buddy-Buddy Poffin",
      "set": "TEF",
      "nummer": "144"
-    },
-    {
-     "anzahl": 4,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
     },
     {
      "anzahl": 3,
      "name": "Rare Candy",
      "set": "MEG",
      "nummer": "125"
+    },
+    {
+     "anzahl": 2,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
     },
     {
      "anzahl": 1,
@@ -3671,18 +3562,6 @@
     },
     {
      "anzahl": 1,
-     "name": "Great Haul Net",
-     "set": "CRI",
-     "nummer": "78"
-    },
-    {
-     "anzahl": 1,
-     "name": "Energy Retrieval",
-     "set": "SVI",
-     "nummer": "171"
-    },
-    {
-     "anzahl": 2,
      "name": "Air Balloon",
      "set": "ASC",
      "nummer": "181"
@@ -3700,10 +3579,352 @@
      "nummer": "11"
     },
     {
+     "anzahl": 3,
+     "name": "Ignition Energy",
+     "set": "WHT",
+     "nummer": "86"
+    },
+    {
      "anzahl": 1,
      "name": "Neo Upper Energy",
      "set": "TEF",
      "nummer": "162"
+    }
+   ]
+  },
+  {
+   "archetyp": "Dragapult Dusknoir",
+   "tier": 3,
+   "quelle": "online",
+   "turnier": "TORNEIO DE 30 ANOS - ARTEUS TCG",
+   "datum": "2026-11-06",
+   "platz": 1,
+   "platz_text": "1st of 8",
+   "spieler": "Emanuel Souza",
+   "bilanz": "5 - 1 - 0",
+   "titel": {
+    "name": "Dragapult ex",
+    "set": "TWM",
+    "nummer": "130"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Dreepy",
+     "set": "TWM",
+     "nummer": "128"
+    },
+    {
+     "anzahl": 4,
+     "name": "Drakloak",
+     "set": "TWM",
+     "nummer": "129"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dragapult ex",
+     "set": "TWM",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 2,
+     "name": "Duskull",
+     "set": "PRE",
+     "nummer": "35"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dusclops",
+     "set": "PRE",
+     "nummer": "36"
+    },
+    {
+     "anzahl": 1,
+     "name": "Dusknoir",
+     "set": "PRE",
+     "nummer": "37"
+    },
+    {
+     "anzahl": 2,
+     "name": "Munkidori",
+     "set": "TWM",
+     "nummer": "95"
+    },
+    {
+     "anzahl": 1,
+     "name": "Budew",
+     "set": "ASC",
+     "nummer": "16"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 1,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 2,
+     "name": "Crispin",
+     "set": "SCR",
+     "nummer": "133"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 1,
+     "name": "Rosa's Encouragement",
+     "set": "POR",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 4,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 4,
+     "name": "Crushing Hammer",
+     "set": "POR",
+     "nummer": "71"
+    },
+    {
+     "anzahl": 3,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 3,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 1,
+     "name": "Unfair Stamp",
+     "set": "TWM",
+     "nummer": "165"
+    },
+    {
+     "anzahl": 1,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
+    },
+    {
+     "anzahl": 1,
+     "name": "Handheld Fan",
+     "set": "TWM",
+     "nummer": "150"
+    },
+    {
+     "anzahl": 2,
+     "name": "Risky Ruins",
+     "set": "MEG",
+     "nummer": "127"
+    },
+    {
+     "anzahl": 3,
+     "name": "Psychic Energy",
+     "set": "MEE",
+     "nummer": "13"
+    },
+    {
+     "anzahl": 3,
+     "name": "Fire Energy",
+     "set": "MEE",
+     "nummer": "10"
+    },
+    {
+     "anzahl": 2,
+     "name": "Darkness Energy",
+     "set": "MEE",
+     "nummer": "15"
+    }
+   ]
+  },
+  {
+   "archetyp": "Mega Starmie",
+   "tier": 3,
+   "quelle": "online",
+   "turnier": "Heart of the Games Online Series - S108",
+   "datum": "2026-11-06",
+   "platz": 5,
+   "platz_text": "5th of 7",
+   "spieler": "Lyaneklma10",
+   "bilanz": "1 - 2 - 0",
+   "titel": {
+    "name": "Mega Starmie ex",
+    "set": "POR",
+    "nummer": "21"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Snorunt",
+     "set": "ASC",
+     "nummer": "46"
+    },
+    {
+     "anzahl": 2,
+     "name": "Mega Froslass ex",
+     "set": "ASC",
+     "nummer": "47"
+    },
+    {
+     "anzahl": 4,
+     "name": "Staryu",
+     "set": "POR",
+     "nummer": "20"
+    },
+    {
+     "anzahl": 2,
+     "name": "Mega Starmie ex",
+     "set": "POR",
+     "nummer": "21"
+    },
+    {
+     "anzahl": 2,
+     "name": "Budew",
+     "set": "ASC",
+     "nummer": "16"
+    },
+    {
+     "anzahl": 2,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 1,
+     "name": "Munkidori",
+     "set": "TWM",
+     "nummer": "95"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 3,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 2,
+     "name": "Hilda",
+     "set": "WHT",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 1,
+     "name": "Judge",
+     "set": "POR",
+     "nummer": "76"
+    },
+    {
+     "anzahl": 4,
+     "name": "Buddy-Buddy Poffin",
+     "set": "TEF",
+     "nummer": "144"
+    },
+    {
+     "anzahl": 4,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 4,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 2,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 1,
+     "name": "Switch",
+     "set": "MEG",
+     "nummer": "130"
+    },
+    {
+     "anzahl": 1,
+     "name": "Air Balloon",
+     "set": "ASC",
+     "nummer": "181"
+    },
+    {
+     "anzahl": 1,
+     "name": "Grand Tree",
+     "set": "SCR",
+     "nummer": "136"
+    },
+    {
+     "anzahl": 1,
+     "name": "Battle Cage",
+     "set": "PFL",
+     "nummer": "85"
+    },
+    {
+     "anzahl": 10,
+     "name": "Water Energy",
+     "set": "MEE",
+     "nummer": "11"
+    },
+    {
+     "anzahl": 2,
+     "name": "Darkness Energy",
+     "set": "MEE",
+     "nummer": "15"
+    },
+    {
+     "anzahl": 1,
+     "name": "Bubbly Water Energy",
+     "set": "CRI",
+     "nummer": "84"
+    },
+    {
+     "anzahl": 1,
+     "name": "Ignition Energy",
+     "set": "WHT",
+     "nummer": "86"
     }
    ]
   }

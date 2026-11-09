@@ -50,6 +50,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Zwei Commits: ein Code-Push auf main wird gegen seinen Vorgaenger
+          # eingeordnet (SC-50, Pruefagent S-B).
+          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
@@ -64,8 +68,15 @@ jobs:
           # fester Heap wie in scripts/run-js-unit-tests.sh (SC-45)
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
+          # SC-50 (09.11.2026): Protokoll im Format des Tors, Entscheidung im
+          # Schritt „Rote Zusicherungen einordnen" unten (scripts/ci_einordnen.py).
+          mkdir -p "$RUNNER_TEMP/ci"
+          # Direkt in die Datei, danach ausgeben: ein tee-Prozess koennte das
+          # Schrittende ueberleben, dann fehlte die Schlusszeile (Pruefagent, KANN).
+          {
           TOTAL_PASS=0
           TOTAL_FAIL=0
+          ABGEBROCHEN=0
           for f in tests/unit/test-*.js; do
             OUTPUT=$(node --test "$f" 2>&1) || true
             PASS=$(echo "$OUTPUT" | grep -oP '# pass \K\d+' || echo 0)
@@ -73,15 +84,28 @@ jobs:
             TOTAL_PASS=$((TOTAL_PASS + PASS))
             TOTAL_FAIL=$((TOTAL_FAIL + FAIL))
             if [ "$FAIL" -gt 0 ]; then
-              echo "::error::$f — $FAIL test(s) failed"
               echo "$OUTPUT"
+              echo "✗ $f — $FAIL failure(s)"
+            fi
+            # Gestorben: kein "# pass" ODER node meldet den Prozess mit
+            # "exitCode: N" (process.exit, OOM, Wurf beim Laden) — sonst
+            # zaehlte ein Absturz als benannte Zusicherung und damit als Befund.
+            if ! echo "$OUTPUT" | grep -q '^# pass ' || echo "$OUTPUT" | grep -qE '^\s+exitCode: [0-9]+'; then
+              # Datei als Prozess gestorben (kein Ergebnis) — sperrt immer.
+              echo "$OUTPUT" | tail -20
+              echo "$f abgebrochen (kein Testergebnis)"
+              ABGEBROCHEN=1
             fi
           done
           echo "✓ JS tests: $TOTAL_PASS passed, $TOTAL_FAIL failed"
-          if [ "$TOTAL_FAIL" -gt 0 ]; then
-            echo "::error::$TOTAL_FAIL JS test(s) failed — blocking deployment"
-            exit 1
+          echo "JS unit tests: $TOTAL_PASS passed, $TOTAL_FAIL failed"
+          if [ "$TOTAL_FAIL" -gt 0 ] || [ "$ABGEBROCHEN" -ne 0 ] || [ "$TOTAL_PASS" -eq 0 ]; then
+            echo 1 > "$RUNNER_TEMP/ci/js-kern.rc"
+          else
+            echo 0 > "$RUNNER_TEMP/ci/js-kern.rc"
           fi
+          } > "$RUNNER_TEMP/ci/js-kern.log" 2>&1
+          cat "$RUNNER_TEMP/ci/js-kern.log"
 
       - name: Setup Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -156,18 +180,62 @@ jobs:
       - name: Run Python unit tests
         run: |
           set +e
-          python -m pytest tests/python/ -q --tb=short 2>&1
-          PYTEST_EXIT=$?
-          set -e
-
+          mkdir -p "$RUNNER_TEMP/ci"
+          python -m pytest tests/python/ -q --tb=short 2>&1 | tee "$RUNNER_TEMP/ci/py-kern.log"
+          PYTEST_EXIT=${PIPESTATUS[0]}
+          echo "$PYTEST_EXIT" > "$RUNNER_TEMP/ci/py-kern.rc"
           if [ "$PYTEST_EXIT" -eq 0 ]; then
             echo "✓ Python tests passed"
-          elif [ "$PYTEST_EXIT" -eq 5 ]; then
-            echo "::warning::No Python tests were collected in tests/python - continuing"
           else
-            echo "::error::Python tests failed with exit code $PYTEST_EXIT"
-            exit "$PYTEST_EXIT"
+            echo "Python tests: Rueckgabewert $PYTEST_EXIT — Entscheidung im naechsten Schritt"
           fi
+
+      # SC-50 (09.11.2026). Seit der festen Sperrliste schieben die Datenlaeufe
+      # auch mit einem nicht sperrenden Tor-Befund. Haette dieser Job weiter
+      # bei jedem Rot gesperrt, hielte ein Befund auf main jeden Deploy und
+      # jeden PR an (Pruefagent B2). Regeln in scripts/ci_einordnen.py:
+      # push/Handstart -> dieselbe Sperrliste wie das Tor; pull_request ->
+      # sperrt alles, was nicht auf main GENAUSO rot ist (der PR hat es
+      # verursacht). Ein Abbruch einer Suite sperrt immer.
+      - name: Rote Zusicherungen einordnen
+        env:
+          EREIGNIS: ${{ github.event_name }}
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          set -uo pipefail
+          # Regel waehlen (SC-50):
+          #   pull_request                → Altbefund gegen main
+          #   push, nur data/ und images/ → Sperrliste (Datenlauf, wie das Tor)
+          #   push mit Code               → Altbefund gegen den Vorgaenger (HEAD^)
+          #   workflow_dispatch           → Sperrliste
+          regel="$EREIGNIS"
+          ref=""
+          if [ "$EREIGNIS" = "pull_request" ]; then
+            ref="main"
+          elif [ "$EREIGNIS" = "push" ]; then
+            if ! geaendert=$(git diff --name-only HEAD^ HEAD 2>/dev/null); then
+              echo "::warning::Vorgaenger-Commit nicht lesbar — jede rote Zusicherung sperrt"
+              regel="code"
+            elif echo "$geaendert" | grep -qvE '^(data|images)/'; then
+              regel="code"
+              ref="HEAD^"
+            fi
+          fi
+          basis=""
+          if [ -n "$ref" ] && grep -qE '^(FAILED |✗ )' "$RUNNER_TEMP"/ci/*.log; then
+            if [ "$ref" = "main" ]; then
+              git fetch -q --depth 1 origin main && ziel=FETCH_HEAD || ziel=""
+            else
+              ziel=$(git rev-parse -q --verify "HEAD^" || true)
+            fi
+            if [ -n "$ziel" ] && git worktree add -q "$RUNNER_TEMP/basis" "$ziel"; then
+              mkdir -p "$RUNNER_TEMP/basis/backend/core/data"
+              cp "$RUNNER_TEMP"/basis/data/*.csv "$RUNNER_TEMP"/basis/data/*.json "$RUNNER_TEMP/basis/backend/core/data/" 2>/dev/null || true
+              ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/basis/node_modules" 2>/dev/null || true
+              basis="$RUNNER_TEMP/basis"
+            fi
+          fi
+          python3 scripts/ci_einordnen.py "$RUNNER_TEMP/ci" "$regel" "$basis"
 
   build:
     runs-on: ubuntu-24.04

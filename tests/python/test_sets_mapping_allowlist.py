@@ -165,3 +165,20 @@ def test_das_nachtragen_haengt_nicht_am_schreibpfad():
     assert all(len(t) == 4 for t in aufrufe), (
         'der Aufruf steht eingerueckt in einem Block — vermutlich wieder in '
         f'`if fw_path:`. Gefundene Einrueckungen: {[len(t) for t in aufrufe]}')
+
+
+def test_der_wochenlauf_saet_die_zuordnung_damit_der_nachtrag_greift():
+    """SC-49 (09.11.2026, Wochenlauf #200): update_sets lief mit dem
+    Saatordner backend/core/data, dort fehlte pokemon_sets_mapping.csv —
+    der Nachtrag meldete "missing — not creating it blind", und DLR fehlte
+    in der Allowlist (die Karten waeren auf der Seite unsichtbar gewesen,
+    wie PBL im Juli). Saat UND Rueckweg muessen die Datei tragen."""
+    import re
+    yml = open(os.path.join(ROOT, '.github', 'workflows', 'weekly-full-update.yml'),
+               encoding='utf-8').read()
+    saat = yml.split('- name: Seed backend/core/data/ from data/', 1)[1].split('- name:', 1)[0]
+    saat = "\n".join(z for z in saat.splitlines() if not z.strip().startswith('#'))
+    for datei in ('pokemon_sets_mapping.csv', 'cm_expansions.csv', 'format_window.json'):
+        assert re.search(rf'^\s*{re.escape(datei)} \\\s*$', saat, re.M), f'{datei} fehlt in der Saat'
+    zurueck = yml.split('- name: Erzeugte Dateien zurueck nach data/', 1)[1].split('- name:', 1)[0]
+    assert 'backend/core/data/*.csv' in zurueck, 'der Rueckweg holt die Zuordnung nicht zurueck'

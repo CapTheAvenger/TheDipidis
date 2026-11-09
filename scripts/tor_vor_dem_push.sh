@@ -5,7 +5,9 @@
 #   bash scripts/tor_vor_dem_push.sh kern    # TCG-Kern: tests/unit + tests/python
 #   bash scripts/tor_vor_dem_push.sh alle    # Kern + tests/nebenbereiche/{unit,python}
 #
-# Rueckgabewert 0 = alle Zusicherungen gruen, der Ablauf darf pushen.
+# Rueckgabewert 0 = nichts Sperrendes rot, der Ablauf darf pushen — seit
+#   SC-50 (09.11.2026) auch mit nicht sperrenden Tor-Befunden (Annotation
+#   „Tor-Befund", Sperrliste in scripts/tor_sperrliste.py).
 # Rueckgabewert 1 = etwas ist rot (oder das Tor konnte nicht pruefen) —
 #                   NICHTS pushen.
 #
@@ -126,6 +128,7 @@ for lauf in "${laeufe[@]}"; do
     log="$protokolle/$name.log"
     bash -c "$befehl" > "$log" 2>&1
     rc=$?
+    echo "$rc" > "$protokolle/$name.rc"   # SC-50: die Einordnung braucht ihn (B1)
     ergebnis=$(grep -E 'JS unit tests:|[0-9]+ (passed|failed|error)' "$log" | tail -n 1)
     echo "| $name | $rc | $ergebnis |" >> "$zusammenfassung"
     echo "$name: Rueckgabewert $rc — $ergebnis"
@@ -133,6 +136,33 @@ for lauf in "${laeufe[@]}"; do
         rot=1
     fi
 done
+
+# ── SC-50 (09.11.2026): FESTE SPERRLISTE ─────────────────────────────
+# Entscheidung Hausi nach Wochenlauf #200: nur die benannten
+# Schadenspruefungen in scripts/tor_sperrliste.py sperren (dazu jedes Rot,
+# das sich keiner Zusicherung zuordnen laesst). Jede andere rote
+# Zusicherung ist ein TOR-BEFUND: die Daten gehen raus, der Befund steht
+# als Warnung im Lauf, und steht er zwei Laeufe in Folge, wird der Data
+# Guardian rot (WZ-48). Begruendung und Liste: scripts/tor_sperrliste.py.
+befunde_datei="$protokolle/befunde.txt"
+: > "$befunde_datei"
+einordnung() {  # $1 Protokolle, $2 Ausgabe — Rueckgabe 0: nichts sperrt
+    [ "${TOR_OHNE_SPERRLISTE:-0}" = "1" ] && return 1
+    python3 scripts/tor_sperrliste.py einordnen "$1" "$2"
+}
+suchordner=""
+rm -rf "$protokolle/einordnung" "$protokolle/einordnung2"   # kein Rest eines frueheren Tors
+if [ "$rot" -ne 0 ]; then
+    mkdir -p "$protokolle/erstlauf" && cp "$protokolle"/*.log "$protokolle/erstlauf/" 2>/dev/null
+    if einordnung "$protokolle" "$protokolle/einordnung"; then
+        rot=0
+        cp "$protokolle/einordnung/befunde.txt" "$befunde_datei" 2>/dev/null || true
+    elif [ -d "$protokolle/einordnung" ]; then
+        # Die Rueckroll-Suche sieht nur die SPERRENDEN Zeilen — sonst rollte
+        # sie Dateien zurueck, nur um einen Befund gruen zu bekommen.
+        suchordner="$protokolle/einordnung"
+    fi
+fi
 
 # ROTE DATEI ZURUECKROLLEN (07.10.2026) — scripts/tor_rollback.py.
 # Ist etwas rot, sucht das Tor die Datendatei(en), die es brechen, laesst sie
@@ -146,7 +176,7 @@ if [ "$rot" -ne 0 ] && [ "${TOR_OHNE_ROLLBACK:-0}" != "1" ] && [ -f scripts/tor_
     rm -rf "$sicherung"; mkdir -p "$sicherung"
     mkdir -p "$protokolle/erstlauf" && cp "$protokolle"/*.log "$protokolle/erstlauf/" 2>/dev/null
     rollback_versucht=1
-    if python3 scripts/tor_rollback.py suchen "$protokolle/erstlauf" "$sicherung"; then
+    if python3 scripts/tor_rollback.py suchen "${suchordner:-$protokolle/erstlauf}" "$sicherung"; then
         # SC-37 (17.10.2026): eine zurueckgerollte Datei traegt den Stempel von
         # gestern, obwohl ihr Erzeuger heute lief. Die Frischepruefung meldete
         # das am dritten Tag als „kommt nicht an (git-add-Liste?)" und machte
@@ -162,8 +192,16 @@ if [ "$rot" -ne 0 ] && [ "${TOR_OHNE_ROLLBACK:-0}" != "1" ] && [ -f scripts/tor_
         rot2=0
         for lauf in "${laeufe[@]}"; do
             name="${lauf%%|*}"; befehl="${lauf#*|}"
-            bash -c "$befehl" > "$protokolle/$name.log" 2>&1 || rot2=1
+            bash -c "$befehl" > "$protokolle/$name.log" 2>&1
+            rc2=$?
+            echo "$rc2" > "$protokolle/$name.rc"
+            [ "$rc2" -ne 0 ] && rot2=1
         done
+        # SC-50: auch nach dem Zurueckrollen sperrt nur, was auf der Liste steht.
+        if [ "$rot2" -ne 0 ] && einordnung "$protokolle" "$protokolle/einordnung2"; then
+            rot2=0
+            cp "$protokolle/einordnung2/befunde.txt" "$befunde_datei" 2>/dev/null || true
+        fi
         if [ "$rot2" -eq 0 ]; then
             rot=0
             rollback="$(python3 -c "import json,sys;print(' '.join(json.load(open(sys.argv[1]))['zurueck']))" "$sicherung/manifest.json")"
@@ -278,6 +316,30 @@ if [ "$rot" -ne 0 ]; then
     grep -hE '^✗|^FAILED' "$protokolle"/*.log 2>/dev/null | head -20 || true
     echo "::error::Das Tor ist zu: Zusicherungen rot ($bereich) — nicht gepusht. Siehe Zusammenfassung."
     exit 1
+fi
+if [ -s "$befunde_datei" ]; then
+    anzahl_befunde="$(grep -c . "$befunde_datei")"
+    {
+        echo ""
+        echo "### Tor-Befunde (nicht sperrend) — die Daten wurden trotzdem geliefert"
+        echo ""
+        echo "Diese Zusicherungen sind rot, stehen aber nicht auf der Sperrliste"
+        echo "(\`scripts/tor_sperrliste.py\`). Steht ein Befund zwei Laeufe in Folge,"
+        echo "wird der Data Guardian rot."
+        echo '```'
+        cat "$befunde_datei"
+        echo '```'
+    } >> "$zusammenfassung"
+    # Die Annotation ist der Kanal, den scripts/zurueckgehalten.py liest
+    # (Zusammenfassungen sind ohne Anmeldung unsichtbar, WZ-41).
+    # GitHub nimmt je Schritt nur 10 Warnungen an (SC-37, Replica #160) —
+    # deshalb ALLE Befunde zusaetzlich als eine Sammelzeile mit eigenem
+    # Kontingent (::notice::). scripts/zurueckgehalten.py liest beide Formen.
+    echo "::notice::Tor-Befunde: $(paste -sd'|' "$befunde_datei" | sed 's/|/ | /g')"
+    head -n 5 "$befunde_datei" | sed 's/^/::warning::Tor-Befund (nicht sperrend): /'
+    [ -n "${GITHUB_OUTPUT:-}" ] && echo "befunde=$anzahl_befunde" >> "$GITHUB_OUTPUT"
+    echo "Tor offen mit $anzahl_befunde Befund(en), nichts davon sperrend ($bereich)${rollback:+ — nach Zurueckrollen von: $rollback}."
+    exit 0
 fi
 echo "Tor offen: alle Suiten gruen ($bereich)${rollback:+ — nach Zurueckrollen von: $rollback}."
 exit 0

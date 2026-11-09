@@ -164,6 +164,8 @@ jobs:
               sets.json \
               sets_metadata.json \
               format_window.json \
+              pokemon_sets_mapping.csv \
+              cm_expansions.csv \
               archetype_icons.json \
               formats_catalog.json \
               pokemon_card_text.json \
@@ -1220,6 +1222,52 @@ jobs:
       # geschrieben wird). Der Last-Modified-Kopf traegt nicht: GitHub Pages
       # setzt dort die Deploy-Zeit, fuer alle Dateien dieselbe. Also wird der
       # Stand dort festgehalten, wo er entsteht: hier.
+
+      # SC-49 (09.11.2026, Wochenlauf #200). Der Wochenlauf stellt beim
+      # Setwechsel das Format um (core/update_sets.py, hier am 09.11. 30C ->
+      # DLR). Die Online-API-Dateien je Format (online_api_cards_<FORMAT>.csv,
+      # online_api_matchups_<FORMAT>.csv) erzeugt aber NUR der taegliche
+      # Limitless-API-Lauf — und der liest das Format von main, wo bis zum
+      # Push noch das alte steht. Ergebnis: format_window nennt TEF-DLR, die
+      # Dateien dazu gibt es nicht, die Seite wuerde sie laden. Das Tor hielt
+      # zu Recht an — und jeder weitere Wochenlauf haette genauso geendet,
+      # weil keiner der beiden Ablaeufe die Kette allein schliessen kann.
+      # Hier: hat DIESER Lauf das Format gewechselt, holt er die Online-
+      # Turniere des neuen Formats selbst (seit dem Erscheinungstag) und
+      # rechnet die Prognose neu — mit denselben Aufrufen wie
+      # limitless-api-scrape.yml. Bricht das ab, sperrt das Tor ueber
+      # test_consumers_vertrag_deckt_sich (Sperrliste) und rollt die
+      # Umstellung zurueck; der Schritt selbst bleibt nicht blockierend.
+      - name: Formatwechsel — Online-API-Dateien des neuen Formats holen (SC-49)
+        timeout-minutes: 30
+        env:
+          LIMITLESS_API_KEY: ${{ secrets.LIMITLESS_API_KEY }}
+        run: |
+          set +e -uo pipefail
+          neu="$(python3 -c "import json;print(json.load(open('data/format_window.json')).get('current_set',''))")"
+          alt="$(git show HEAD:data/format_window.json 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('current_set',''))" 2>/dev/null)"
+          if [ -z "$neu" ] || [ -z "$alt" ] || [ "$neu" = "$alt" ]; then
+            echo "kein Formatwechsel in diesem Lauf (${alt:-?} -> ${neu:-?})"
+            exit 0
+          fi
+          tage="$(python3 scripts/tage_seit_release.py)"
+          echo "Formatwechsel $alt -> $neu: Online-API-Dateien der letzten $tage Tage holen"
+          python backend/scrapers/limitless_api_scraper.py --min-players 100 --days "$tage" --max-tournaments 0 --neu-einordnen 2>&1 | tee /tmp/api_formatwechsel.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::Formatwechsel $alt -> $neu: Limitless-API-Lauf abgebrochen (Code $rc) — das Tor sperrt die Umstellung"
+            exit 0
+          fi
+          python3 scripts/build_meta_prognose.py > /tmp/prognose_formatwechsel.log 2>&1
+          prc=$?
+          tail -5 /tmp/prognose_formatwechsel.log
+          if [ "$prc" -ne 0 ]; then
+            echo "::warning::Formatwechsel $alt -> $neu: Meta-Prognose nicht neu gerechnet (Code $prc) — der naechste Limitless-API-Lauf rechnet sie"
+          fi
+          ls -la data/online_api_cards_*.csv data/online_api_matchups_*.csv
+          echo "::notice::Formatwechsel $alt -> $neu: Online-API-Dateien des neuen Formats geholt ($tage Tage)"
+          exit 0
+
       # Die Deckempfehlung neu rechnen, nachdem die Turnier- und
       # Online-Daten frisch sind. Ohne diesen Schritt friert
       # data/deckempfehlung.json auf dem Stand ein, an dem es zuletzt von

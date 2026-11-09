@@ -428,6 +428,17 @@ def suchen(ordner, sicherung):
     py_extra, js_extra = konsistenztests(kand, bereich_aus_protokollen(ordner))
     py_extra = [p for p in py_extra if p not in {x.split("::", 1)[0] for x in py}]
     js_extra = [j for j in js_extra if j not in js]
+    # SC-50 (Pruefagent S1, 09.11.2026): ein Konsistenztest, der im ersten
+    # Durchlauf als nicht sperrender BEFUND rot war, gehoert nicht ins
+    # Orakel — sonst rollte die Suche seine Datei zurueck, nur um einen
+    # Befund gruen zu bekommen. tor_sperrliste.py legt die Befunde neben die
+    # gefilterten Protokolle (befunde.txt).
+    befunde_pfad = os.path.join(ordner, "befunde.txt")
+    if os.path.exists(befunde_pfad):
+        befund_dateien = {z.strip().split("::", 1)[0]
+                          for z in open(befunde_pfad, encoding="utf-8") if z.strip()}
+        py_extra = [p for p in py_extra if p not in befund_dateien]
+        js_extra = [j for j in js_extra if j not in befund_dateien]
     alt = altbefunde(py_extra, js_extra)
     if alt:
         print("Altbefund (schon mit allen Dateien alt rot, zaehlt nicht als Orakel): " + " ".join(alt))

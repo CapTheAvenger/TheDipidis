@@ -47,6 +47,7 @@ ALLOWED_SEED_ONLY = {
     "pokemon_card_text.json": "card-effects scraper writes directly to data/",
     "archetype_icons.json": "icon mapper writes directly to data/",
     "tournament_cards_manifest.json": "split_tournament_cards regenerates this on every run",
+    "cm_expansions.csv": "nur Eingabe fuer update_sets (Setnamen beim Nachtrag der Allowlist, SC-49); kein Erzeuger im Lauf",
 }
 ALLOWED_SYNC_ONLY = {
     # HTML reports — produced by scrapers, not seeded back because they

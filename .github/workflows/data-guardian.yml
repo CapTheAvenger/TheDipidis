@@ -220,6 +220,9 @@ jobs:
         id: still
         env:
           GH_TOKEN: ${{ github.token }}
+          # SC-50/S3: die Befunde des eigenen Tors von heute — ein stehender
+          # Befund zaehlt nur, wenn er heute auf main noch rot ist.
+          TOR_BEFUNDE_HEUTE: ${{ runner.temp }}/tor/befunde.txt
         run: |
           set +e -uo pipefail
           python3 scripts/zurueckgehalten.py --laeufe 4 > /tmp/still.md
@@ -303,3 +306,22 @@ jobs:
               "https://api.github.com/repos/$REPO/issues" \
               -d "$(T="$TITLE" python3 -c 'import json,os;print(json.dumps({"title":os.environ["T"],"body":open("/tmp/body.md",encoding="utf-8").read()}))')" >/dev/null
           fi
+
+      # WZ-48 (entschieden Hausi 06.11.2026, gebaut 09.11.2026). Vom 28.10.
+      # bis 05.11. stand „Daten still" taeglich als CRITICAL im Issue #978 —
+      # zehn Tage, ohne dass es jemand bemerkte: eine Issue-Zeile verschickt
+      # keine Mail, ein roter Lauf schon (darauf reagiert Hausi nachweislich).
+      # Deshalb wird der Guardian ROT, sobald eine Datei zwei Laeufe in Folge
+      # zurueckgehalten wurde ODER ein Tor-Befund zwei Laeufe in Folge steht
+      # (SC-50, scripts/zurueckgehalten.py). Erst nach dem Issue, damit die
+      # Meldung mit Ursache dasteht, bevor die Mail kommt.
+      - name: Rot bei stehendem Befund (WZ-48)
+        if: ${{ always() }}
+        env:
+          STILL: ${{ steps.still.outputs.anzahl }}
+        run: |
+          if [ "${STILL:-0}" -gt 0 ]; then
+            echo "::error::${STILL} Befund(e) stehen seit mindestens zwei Laeufen (Daten zurueckgehalten oder Tor-Befund) — Ursache steht im Guardian-Issue."
+            exit 1
+          fi
+          echo "keine stehenden Befunde"

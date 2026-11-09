@@ -123,10 +123,25 @@ def _index():
     return d, idx
 
 
+# Seitenkopf der Quelle am 30.09.2026. SC-49 (09.11.2026): bis dahin stand
+# hier `counts == {...}` woertlich — ein Wochenwert (WZ-22). Mit Delta Reign
+# (DLR, 141 Karten, Marke J) wurde J 640 -> 781 und der Wochenlauf #200 rot,
+# obwohl die Datei richtig war. Die Regel: die Zaehlung im Kopf passt zum
+# Inhalt, und keine Marke faellt unter den belegten Stand (Marken wachsen
+# nur — ein neues Set kommt dazu, keins geht weg).
+BELEGT_30_09 = {"G": 1647, "H": 1303, "I": 1277, "J": 640}
+
+
 def test_datei_zaehlung_stimmt_mit_inhalt_und_quelle():
     d, idx = _index()
-    assert d["counts"] == {"G": 1647, "H": 1303, "I": 1277, "J": 640}  # Seitenkopf 30.09.2026
+    je_marke = {}
+    for mk in idx.values():
+        je_marke[mk] = je_marke.get(mk, 0) + 1
+    assert d["counts"] == je_marke, "der Kopf zaehlt anders als der Inhalt"
     assert len(idx) == sum(d["counts"].values())  # kein Druck in zwei Marken
+    for mk, n in BELEGT_30_09.items():
+        assert d["counts"].get(mk, 0) >= n, f"Marke {mk} schrumpft: {d['counts'].get(mk)} < {n}"
+
 
 
 def test_svp_und_mep_sind_vollstaendig_mit_marke_belegt():

@@ -56,8 +56,7 @@ jobs:
     # in-game usage scrape adds ~1000 throttled sequential requests
     # (championsbattledata, ~234 Pokémon × api+2 CSVs) which takes ~8–10 min
     # on its own. Generous headroom against a slow host.
-    # +15 min fuer das Tor vor dem Push (Kern-Suiten ~6,5 min im Deploy-Test, 29.09.2026)
-    timeout-minutes: 60
+    timeout-minutes: 90  # SC-55: Lauf bis 31 min, Tor "alle" bis 27 min, bis zu zwei Tore nach Rebase
 
     steps:
       - name: Checkout repo

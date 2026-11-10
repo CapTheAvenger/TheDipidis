@@ -1,5 +1,5 @@
-/* SC-51 (10.11.2026): die Duenne-Pruefungen setzen nur in den ersten
-   28 Tagen nach Erscheinen des Sets aus — davor und danach greifen sie.
+/* SC-51 (10.11.2026): die Duenne-Pruefungen setzen nur aus, solange der
+   Datenstand weniger als 28 Tage nach Erscheinen des Sets liegt.
    Geprueft am Verhalten von jungesFormat() in einem Wegwerf-Ordner. */
 const { test } = require('node:test');
 const assert = require('node:assert');
@@ -8,10 +8,12 @@ const os = require('node:os');
 const path = require('node:path');
 const { jungesFormat, FRIST_TAGE } = require('./lib-junges-format.js');
 
-function baum(fw) {
+function baum(fw, stand) {
     const d = fs.mkdtempSync(path.join(os.tmpdir(), 'sc51-'));
     fs.mkdirSync(path.join(d, 'data'));
     fs.writeFileSync(path.join(d, 'data', 'format_window.json'), JSON.stringify(fw));
+    if (stand) fs.writeFileSync(path.join(d, 'data', 'data_stand.json'),
+        JSON.stringify({ erzeugt_am: stand + 'T08:00:00+00:00' }));
     return d;
 }
 const FW = { current_set: 'DLR', oldest_legal_set: 'TEF', set_release_date: '2026-11-06' };
@@ -34,10 +36,25 @@ test('ab Tag 28 greifen die Pruefungen wieder', () => {
     assert.strictEqual(jungesFormat(d, tag('2027-02-01')).jung, false);
 });
 
-test('vor dem Erscheinen oder ohne Datum setzt nichts aus', () => {
-    assert.strictEqual(jungesFormat(baum(FW), tag('2026-11-05')).jung, false);
+test('ohne Erscheinungsdatum setzt nichts aus', () => {
     assert.strictEqual(jungesFormat(baum({ current_set: 'DLR' }), tag('2026-11-07')).jung, false);
     assert.strictEqual(jungesFormat(baum({ ...FW, set_release_date: 'bald' }), tag('2026-11-07')).jung, false);
+});
+
+test('ein Datenstand vor dem Erscheinen kann das Set nicht enthalten — jung', () => {
+    const j = jungesFormat(baum(FW), tag('2026-11-05'));
+    assert.strictEqual(j.jung, true);
+    assert.match(j.grund, /VOR dem Erscheinen/);
+});
+
+test('gemessen wird am Datenstand, nicht an der Uhr (Setwechsel-Probe mit faketime)', () => {
+    // Datenstand 10.11., Set erschienen 06.11. → 4 Tage, jung — egal wie spaet es ist.
+    assert.strictEqual(jungesFormat(baum(FW, '2026-11-10')).jung, true);
+    // Datenstand 04.12. → 28 Tage, Pruefungen greifen wieder.
+    assert.strictEqual(jungesFormat(baum(FW, '2026-12-04')).jung, false);
+    // Erfundenes Set einen Tag NACH dem Datenstand → die Daten kennen es nicht.
+    const zzn = { ...FW, current_set: 'ZZN', set_release_date: '2026-11-11' };
+    assert.strictEqual(jungesFormat(baum(zzn, '2026-11-10')).jung, true);
 });
 
 test('der Grund nennt Alter und Enddatum — das steht im Protokoll', () => {
@@ -59,6 +76,11 @@ test('die vier Duenne-Pruefungen nutzen die Regel und nur sie', () => {
         for (const m of q.matchAll(/if \(([^)]*?\)?[^)]*?)\) (?:\{\s*)?return t\.skip/g)) {
             assert.match(m[1], /jf\.jung/, `${f}: Aussetzen ohne Frist-Pruefung`);
             assert.match(m[1], /&&/, `${f}: Aussetzen ohne Duenne-Bedingung`);
+        }
+        if (f === 'test-online-major-merge.js') {
+            // Die Turnierdatei setzt nur aus, wenn sie FEHLT und das Format jung ist.
+            assert.match(q, /if \(!formatKey && jfDatei\.jung\)/,
+                'test-online-major-merge.js: die Turnierdatei setzt ohne Fehlen-Bedingung aus');
         }
     }
 });

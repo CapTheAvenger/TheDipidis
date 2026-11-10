@@ -220,6 +220,17 @@ describe('mergeOnlineMajorAdditive am echten Datenbestand', () => {
     ].filter(Boolean);
     const formatKey = kandidaten.find(k => fs.existsSync(
         path.join(wurzel, 'data', `tournament_cards_data_cards_${k}.csv`)));
+    /* SC-51 (10.11.2026): ist das Format jung (Datenstand < 28 Tage nach
+       Erscheinen), fehlt die Turnierdatei womoeglich fuer BEIDE Kandidaten —
+       das vorige Format kann selbst erst Tage alt sein (Setwechsel-Probe am
+       10.11.: ZZN auf DLR, DLR ohne Majors). Dann die Faelle benannt
+       aussetzen statt den describe-Rumpf reissen zu lassen. */
+    const jfDatei = jungesFormat(path.join(__dirname, '..', '..'));
+    if (!formatKey && jfDatei.jung) {
+        it('Turnierdatei des Formats', (t) => t.skip(
+            `weder ${kandidaten.join(' noch ')} hat tournament_cards_data_cards — ${jfDatei.grund}`));
+        return;
+    }
     assert.ok(formatKey,
         `weder fuer ${kandidaten.join(' noch ')} gibt es `
         + 'tournament_cards_data_cards_<Format>.csv — dann hat auch das '

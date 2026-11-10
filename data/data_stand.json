@@ -1,5 +1,5 @@
 {
-  "erzeugt_am": "2026-11-10T17:53:30+00:00",
+  "erzeugt_am": "2026-11-10T18:38:03+00:00",
   "quelle": "Zeitpunkt des Laufs fuer geaenderte Dateien, sonst fortgeschrieben",
   "dateien": {
     "limitless_online_decks.csv": "2026-11-10T06:43:21+00:00",
@@ -54,7 +54,7 @@
     "tournament_decklists_per_player_TEF-30C_2026-10.csv": "2026-11-07T02:32:20+00:00",
     "tournament_decklists_per_player_TEF-30C_2026-09.csv": "2026-11-04T08:51:42+00:00",
     "tournament_decklists_per_player_TEF-CRI_2026-06.csv": "2026-11-04T08:51:42+00:00",
-    "tournament_decklists_per_player_TEF-30C_2026-11.csv": "2026-11-10T06:43:21+00:00",
+    "tournament_decklists_per_player_TEF-30C_2026-11.csv": "2026-11-10T18:38:03+00:00",
     "online_api_cards_TEF-DLR.csv": "2026-11-10T03:44:08+00:00",
     "online_api_matchups_TEF-DLR.csv": "2026-11-10T03:44:08+00:00"
   },

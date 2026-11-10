@@ -120,6 +120,11 @@ jobs:
       # 60-card decks ended up as ~10 Pokémon each, no trainers, no
       # energies. CardDatabaseLookup loads both the CSV (preferred) and
       # the JSON; we seed both so either path works.
+      # SC-54 (10.11.2026): sets_metadata.json fehlte in dieser Saat. Der
+      # Rueckfall aufs Vorformat (_vorformat_fenster) liest daraus das
+      # Erscheinungsdatum und fand es nie — "kein Vorformat bestimmbar,
+      # dieser Lauf holt nichts", seit DLR in format_window steht.
+      # tests/python/test_per_decklist_rueckfall.py faehrt die Saat nach.
       - name: Seed backend/core/data/ from data/
         run: |
           mkdir -p backend/core/data
@@ -132,6 +137,7 @@ jobs:
                    all_cards_database.json \
                    japanese_cards_database.csv \
                    sets.json \
+                   sets_metadata.json \
                    format_window.json; do
             if [ -f "data/$f" ]; then
               cp "data/$f" "backend/core/data/$f"

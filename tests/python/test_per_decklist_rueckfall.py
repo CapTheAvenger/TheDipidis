@@ -117,3 +117,41 @@ def test_beide_ausgaenge_melden_sich():
     stelle = quelle.index("if not work and args.from_date ==")
     block = quelle[stelle:stelle + 2600]
     assert block.count("::warning::per_decklist_scraper") >= 2, block[:400]
+
+
+def _saatliste(ablauf):
+    """Die Dateinamen aus der for-Schleife des Saat-Schritts."""
+    import re
+    import yaml
+    with open(os.path.join(WURZEL, ".github", "workflows", ablauf),
+              encoding="utf-8") as f:
+        doc = yaml.safe_load(f)
+    for job in doc["jobs"].values():
+        for schritt in job.get("steps", []):
+            if str(schritt.get("name", "")).startswith("Seed backend/core/data"):
+                text = schritt["run"].replace("\\\n", " ")
+                m = re.search(r"for f in (.*?); do", text, re.S)
+                assert m, "Saat-Schleife nicht gefunden"
+                return m.group(1).split()
+    raise AssertionError(f"kein Saat-Schritt in {ablauf}")
+
+
+def test_die_saat_reicht_fuer_den_rueckfall(modul, tmp_path):
+    """SC-54 (10.11.2026): gesaet wurde format_window.json, aber nicht
+    sets_metadata.json — der Rueckfall fand in CI nie ein Vorformat.
+    Gefahren wird die echte Saatliste gegen die echten Daten."""
+    if not os.path.exists(os.path.join(WURZEL, "data", "format_window.json")):
+        pytest.skip("keine Projektdaten")
+    for f in _saatliste("per-decklist-scrape.yml"):
+        q = os.path.join(WURZEL, "data", f)
+        if os.path.isfile(q):
+            with open(q, "rb") as a, open(tmp_path / f, "wb") as b:
+                b.write(a.read())
+    datum, name = modul._vorformat_fenster(str(tmp_path))
+    with open(os.path.join(WURZEL, "data", "format_window.json"),
+              encoding="utf-8") as f:
+        fw = json.load(f)
+    if not fw.get("previous_format_key"):
+        pytest.skip("kein Vorformat gepflegt")
+    assert datum, (f"mit der Saat aus per-decklist-scrape.yml findet der "
+                   f"Rueckfall kein Vorformat ({name!r}) — fehlt eine Datei?")

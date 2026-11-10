@@ -1127,6 +1127,12 @@ html.is-signed-out [onclick*="radelist"]:hover {
     cursor: pointer;
     transition: background .15s ease, border-color .15s ease;
 }
+/* UI-161: volles Herz = Karte steht auf der Wunschliste. Die Flaeche traegt die Markierung, nicht nur die Form. */
+.top-card-act.ist-gewuenscht {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--surface-0);
+}
 .top-card-act:hover {
     background: var(--surface-2);
     border-color: var(--brand);

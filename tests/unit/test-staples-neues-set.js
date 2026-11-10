@@ -67,7 +67,8 @@ function lade(formatFenster) {
         this._setCode = neuesSetCode;
         this._min = STAPLES_NEUES_SET_MIN_ARCHETYPEN;
         this._schwelle = STAPLES_ART_SCHWELLE;
-        this._max = STAPLES_ART_MAX;`, kasten);
+        this._max = STAPLES_ART_MAX;
+        this._maxNeu = STAPLES_NEUES_SET_MAX;`, kasten);
     return kasten;
 }
 
@@ -160,12 +161,13 @@ describe('Die Schwelle fuer „Neues Set" ist eine andere', () => {
         assert.equal(R._min, 2, 'Die Regel meint "mehr als ein Deck" — nicht eine runde Zahl');
     });
 
-    it('hoechstens zehn, und die meistgespielten zuerst', () => {
+    it('hoechstens dreissig (UI-161), und die meistgespielten zuerst', () => {
         const R = lade(FENSTER_AKTIV);
         const daten = [];
-        for (let i = 0; i < 25; i++) daten.push(karte('K' + i, ['30C'], 25 - i, 40 - i));
+        for (let i = 0; i < 45; i++) daten.push(karte('K' + i, ['30C'], 50 - i, 60 - i));
         const treffer = R._waehle(daten, 'neuesSet');
-        assert.equal(treffer.length, R._max);
+        assert.equal(R._maxNeu, 30);
+        assert.equal(treffer.length, R._maxNeu);
         assert.equal(treffer[0].name, 'K0');
     });
 });

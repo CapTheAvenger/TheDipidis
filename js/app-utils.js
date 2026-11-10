@@ -633,7 +633,10 @@ function showTableSkeleton(containerOrId, opts) {
            zusammen, also von JEDER Nummer hoechstens 2. Erkannt wird die Haelfte an (Set, Nummer), nie am
            Namen. Die Japan-Daten fuehren die Gesamtmenge nach Namen (bis 4) bei EINER Nummer; je Nummer
            gilt dann die Haelfte. Fuehren die Daten schon je Nummer (max <= 2), bleibt der Wert. */
-        const LEGENDARY_STADIEN_NUMMERN = { M6: ['71', '72', '73', '74', '75', '76'] };
+        const LEGENDARY_STADIEN_NUMMERN = {
+            M6: ['71', '72', '73', '74', '75', '76'],
+            DLR: ['94', '95', '96', '97', '98', '99']
+        };
         function istLegendaryStadion(setCode, setNumber) {
             const liste = LEGENDARY_STADIEN_NUMMERN[String(setCode || '').trim().toUpperCase()];
             return !!liste && liste.indexOf(String(setNumber == null ? '' : setNumber).trim().replace(/^0+(?=\d)/, '')) !== -1;
@@ -650,7 +653,17 @@ function showTableSkeleton(containerOrId, opts) {
            Muster). Steht die Partnerhaelfte in derselben Gruppe schon in den Daten, bleibt alles, wie es ist.
            Danach gilt fuer jede Nummer hoechstens 2, und Kartenuebersicht, „Dein Deck“, Max Consistency und
            „nur in Japan“ sehen dasselbe. Erkannt wird ueber (Set, Nummer), nie ueber den Namen. */
-        function legendaryPartnerNummer(setNumber) {
+        /* Mit Set-Code (UI-161, 10.11.2026) zaehlt die Paarung der Liste LEGENDARY_STADIEN_NUMMERN
+           (1.+2., 3.+4., 5.+6. Eintrag) — DLR 94/95 beginnt auf einer geraden Nummer, M6 71/72 auf einer
+           ungeraden. Ohne Set-Code gilt die alte Regel (ungerade → +1, gerade → −1). */
+        function legendaryPartnerNummer(setNumber, setCode) {
+            if (setCode !== undefined) {
+                const liste = LEGENDARY_STADIEN_NUMMERN[String(setCode || '').trim().toUpperCase()];
+                if (!liste) return '';
+                const nr0 = String(setNumber == null ? '' : setNumber).trim().replace(/^0+(?=\d)/, '');
+                const i = liste.indexOf(nr0);
+                return i === -1 ? '' : (liste[i % 2 === 0 ? i + 1 : i - 1] || '');
+            }
             const n = parseInt(String(setNumber == null ? '' : setNumber).trim(), 10);
             if (!Number.isFinite(n)) return '';
             return String(n % 2 ? n + 1 : n - 1);
@@ -674,7 +687,7 @@ function showTableSkeleton(containerOrId, opts) {
             zeilen.forEach((r) => {
                 if (!r || !istLegendaryStadion(r.set_code, r.set_number)) { aus.push(r); return; }
                 const eigen = nr(r);
-                const partner = legendaryPartnerNummer(eigen);
+                const partner = legendaryPartnerNummer(eigen, r.set_code);
                 if (!partner || vorhanden.has(gruppe(r) + '|' + partner)) { aus.push(r); return; }
                 const halb = Object.assign({}, r);
                 ['total_count', 'average_count', 'average_count_overall', 'avg_count'].forEach((f) => {
@@ -709,7 +722,7 @@ function showTableSkeleton(containerOrId, opts) {
             eintraege.forEach((e) => {
                 if (!e || !istLegendaryStadion(e.set_code, e.set_number)) { aus.push(e ? Object.assign({}, e) : e); return; }
                 const eigen = nr(e);
-                const partner = legendaryPartnerNummer(eigen);
+                const partner = legendaryPartnerNummer(eigen, e.set_code);
                 const set = String(e.set_code).trim().toUpperCase();
                 const n = Number(e.addCount) || 0;
                 if (!partner || imDeck.has(set + ' ' + partner) || n < 1) { aus.push(e); return; }

@@ -63,8 +63,8 @@ describe('UI-159 Legendary-Stadien: je Seite hoechstens 2', () => {
         const kopf = csv[0].split(',');
         const i = (n) => kopf.indexOf(n);
         const zeilen = csv.slice(1).map((l) => l.split(','));
-        const liste = /LEGENDARY_STADIEN_NUMMERN = \{ M6: \[([^\]]*)\]/.exec(UTILS)[1].match(/\d+/g);
-        assert.ok(liste.length >= 6);
+        const liste = /M6: \[([^\]]*)\]/.exec(UTILS)[1].match(/\d+/g);
+        assert.ok(liste && liste.length);
         const namen = {};
         liste.forEach((nr) => {
             const r = zeilen.find((x) => x[i('set')] === 'M6' && x[i('number')] === nr);

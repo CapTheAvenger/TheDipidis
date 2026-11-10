@@ -50,6 +50,7 @@ const SET_HILFEN = schneide('function neuesSetCode(heute)',
                             '\n        /* Art setzen UND merken');
 const MIN_ARCH = Number(/const STAPLES_NEUES_SET_MIN_ARCHETYPEN\s*=\s*(\d+)/.exec(SRC)[1]);
 
+const MIT_HAELFTEN = schneide('function staplesMitHaelften(', '\n        /**');
 const NACH_ART = schneide('function staplesNachArt(daten, artId)', '\n        /**');
 const ZAEHLUNG = schneide('function staplesArtZaehlung(daten)',
                           '\n        function staplesAnzahl()');
@@ -65,11 +66,11 @@ const ART_MAX = Number(/const STAPLES_ART_MAX\s*=\s*(\d+)/.exec(SRC)[1]);
 
 function bau() {
     const attrappen = { STAPLES_ARTEN: ARTEN, STAPLES_ART_SCHWELLE: SCHWELLE,
-                        STAPLES_ART_MAX: ART_MAX,
+                        STAPLES_ART_MAX: ART_MAX, STAPLES_NEUES_SET_MAX: 30,
                         STAPLES_NEUES_SET_MIN_ARCHETYPEN: MIN_ARCH,
                         window: { _formatWindow: { current_set: 'PBL' } } };
     return new Function(...Object.keys(attrappen),
-        SET_HILFEN + NACH_ART + ZAEHLUNG +
+        SET_HILFEN + MIT_HAELFTEN + NACH_ART + ZAEHLUNG +
         '\nreturn { waehle: staplesNachArt, zaehl: staplesArtZaehlung };'
     )(...Object.values(attrappen));
 }

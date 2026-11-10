@@ -3309,6 +3309,8 @@
          * Voreinstellung; die Artenlisten kommen daneben. */
         const STAPLES_ART_SCHWELLE = 25;   // Prozent der Archetypen
         const STAPLES_ART_MAX = 10;
+        /* UI-161 (Hausi, 10.11.2026): „Neues Set" zeigt bis zu 30 Karten, die sechs Arten bleiben bei 10. */
+        const STAPLES_NEUES_SET_MAX = 30;
         const STAPLES_ART_KEY = 'staples_art_v1';
         /* DAS NEUE SET KOMMT NICHT UEBER 25 % — UND KANN ES NICHT.
            ------------------------------------------------------
@@ -3478,6 +3480,66 @@
             return _staplesArt;
         }
 
+        /* UI-161: leeres Herz = nicht auf der Wunschliste, volles Herz = drauf. Die Wunschliste ist
+           window.userWishlist (Menge von "Name|Set|Nummer"). */
+        function staplesAufWunschliste(kartenId) {
+            return typeof window !== 'undefined' && !!window.userWishlist
+                && typeof window.userWishlist.has === 'function' && window.userWishlist.has(kartenId);
+        }
+        /* Zeichnet nur die Herzen neu (nach Anmeldung, Hinzufuegen, Entfernen) — kein Neuaufbau des Widgets. */
+        function staplesHerzenAbgleichen() {
+            if (typeof document === 'undefined') return;
+            document.querySelectorAll('.top-card-herz[data-wunsch-id]').forEach(b => {
+                const drauf = staplesAufWunschliste(b.getAttribute('data-wunsch-id'));
+                b.classList.toggle('ist-gewuenscht', drauf);
+                b.setAttribute('aria-pressed', drauf ? 'true' : 'false');
+                b.textContent = drauf ? '♥' : '♡';
+            });
+        }
+        window.staplesHerzenAbgleichen = staplesHerzenAbgleichen;
+
+        /* UI-161 (Hausi, 10.11.2026): ein Legendary-Stadion besteht aus zwei Haelften und wird nur als
+           Paar gespielt. Zeigt die Liste eine Haelfte, steht die andere direkt daneben — erkannt an
+           (Set, Nummer), nicht am Namen. Die Daten fuehren die Karte nach NAMEN bei einer Nummer; die
+           zweite Kachel traegt dieselben Zahlen. `limit` zaehlt Kacheln, nicht Karten. */
+        function staplesMitHaelften(karten, limit) {
+            const out = [];
+            const gesetzt = {};
+            const schluessel = c => String(c.set_code || '').toUpperCase() + '|'
+                + String(c.set_number || '').replace(/^0+(?=\d)/, '');
+            (karten || []).forEach(c => {
+                if (out.length >= limit) return;
+                const partner = (typeof legendaryPartnerNummer === 'function')
+                    ? legendaryPartnerNummer(c.set_number, c.set_code) : '';
+                if (!partner) { out.push(c); return; }
+                if (gesetzt[schluessel(c)]) return;
+                if (out.length + 2 > limit) return;
+                const bild = (nr) => {
+                    let u = (typeof getUnifiedCardImage === 'function')
+                        ? getUnifiedCardImage(String(c.set_code).toUpperCase(), nr) : '';
+                    if (!u && c.image_url) {
+                        const a = String(c.set_number).replace(/^0+(?=\d)/, '');
+                        u = String(c.image_url).replace(
+                            new RegExp('_0*' + a + '_'), '_' + String(nr).padStart(3, '0') + '_');
+                    }
+                    return u || c.image_url || '';
+                };
+                const eigene = String(c.set_number).replace(/^0+(?=\d)/, '');
+                const haelften = [eigene, partner].sort((x, y) => Number(x) - Number(y));
+                haelften.forEach((nr, k) => {
+                    const kachel = Object.assign({}, c, {
+                        set_number: nr,
+                        image_url: nr === eigene ? c.image_url : bild(nr),
+                        legendaerHaelfte: true,
+                        haelfteZwei: k === 1
+                    });
+                    gesetzt[schluessel(kachel)] = true;
+                    out.push(kachel);
+                });
+            });
+            return out;
+        }
+
         /**
          * Die Karten einer Art, ueber der Schwelle, hoechstens zehn.
          *
@@ -3529,10 +3591,9 @@
             const ueberSchwelle = art.kennzeichen === 'neues_set'
                 ? (c => Number(c.deck_inclusion_count) >= STAPLES_NEUES_SET_MIN_ARCHETYPEN)
                 : (c => Number(c.global_share) >= STAPLES_ART_SCHWELLE);
-            return (daten || [])
-                .filter(passt)
-                .filter(ueberSchwelle)
-                .slice(0, STAPLES_ART_MAX);
+            return staplesMitHaelften(
+                (daten || []).filter(passt).filter(ueberSchwelle),
+                art.kennzeichen === 'neues_set' ? STAPLES_NEUES_SET_MAX : STAPLES_ART_MAX);
         }
 
         /**
@@ -3559,7 +3620,7 @@
             const art = staplesArt();
             return art
                 ? staplesNachArt(daten || [], art)
-                : (daten || []).slice(0, staplesAnzahl());
+                : staplesMitHaelften(daten || [], staplesAnzahl());
         }
 
         /** Wie viele Karten jede Art gerade hergibt — fuer die Knopfzeile. */
@@ -3599,6 +3660,7 @@
                 }
             } catch (_e) { /* faellt auf den Modus zurueck */ }
 
+            if (card.legendaerHaelfte) return roh;   // die Vorliebe sucht nach NAMEN und wuerde die andere Haelfte liefern
             if (modus !== 'min' && modus !== 'max') return roh;
             if (typeof getPreferredVersionForCard !== 'function') return roh;
 
@@ -3626,10 +3688,12 @@
 
         function staplesListe() {
             const daten = _staplesDaten || [];
+            let rangZaehler = 0;
             return staplesAuswahl(daten).map((card, i) => {
                 const d = staplesDruckFuer(card, STAPLES_DRUCK);
+                if (!card.haelfteZwei) rangZaehler++;
                 return {
-                    rang: i + 1, name: card.name, share: card.global_share,
+                    rang: rangZaehler, name: card.name, share: card.global_share,
                     anzahl: card.deck_inclusion_count,
                     set: d.set, number: d.number, url: d.url
                 };
@@ -3888,7 +3952,7 @@
                            + 'kann das gar nicht erreichen. Hier zählt deshalb, ob eine Karte '
                            + 'überhaupt in mehr als einem Deck liegt: ab '
                            + STAPLES_NEUES_SET_MIN_ARCHETYPEN + ' Archetypen, die '
-                           + STAPLES_ART_MAX + ' meistgespielten. Gezeigt wird das zuletzt '
+                           + STAPLES_NEUES_SET_MAX + ' meistgespielten (ein Legendary-Stadion zählt mit beiden Hälften). Gezeigt wird das zuletzt '
                            + '<em>erschienene</em> Set, und zwar ab dem Tag nach dem Erscheinen '
                            + '— nicht das Format: ein Sammelset wechselt das Format nicht, '
                            + 'steht aber trotzdem im Laden.</p>'
@@ -3914,7 +3978,7 @@
                            + 'archetypes <em>share</em> — a freshly released set cannot reach '
                            + 'that at all. What counts here is whether a card sits in more than '
                            + 'one deck: from ' + STAPLES_NEUES_SET_MIN_ARCHETYPEN
-                           + ' archetypes, the ' + STAPLES_ART_MAX + ' most played. It shows the '
+                           + ' archetypes, the ' + STAPLES_NEUES_SET_MAX + ' most played (a Legendary stadium counts with both halves). It shows the '
                            + 'most recently <em>released</em> set, from the day after release — '
                            + 'not the format: a collector set does not move the format but is '
                            + 'on the shelves all the same.</p>'
@@ -3960,8 +4024,10 @@
                     ${steuerung}
                     <div class="top-cards-grid">`;
             
+            let rangZaehler = 0;
             gezeigt.forEach((card, index) => {
-                const rank = index + 1;
+                if (!card.haelfteZwei) rangZaehler++;
+                const rank = rangZaehler;
                 const imageUrl = card.image_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="280"%3E%3Crect fill="%23ddd" width="200" height="280"/%3E%3C/svg%3E';
                 
                 /* Rangfarbe. Gemessen 28.08.2026: weisse Ziffern standen
@@ -3999,12 +4065,15 @@
                 // Karte eben ohne Knoepfe, statt zwei tote anzubieten.
                 const hatDruck = !!(card.set_code && card.set_number);
                 const kartenId = hatDruck ? `${card.name}|${card.set_code}|${card.set_number}` : '';
+                const aufWunschliste = hatDruck && staplesAufWunschliste(kartenId);
                 const aktionen = hatDruck ? `
                         <div class="top-card-actions">
-                            <button type="button" class="top-card-act"
+                            <button type="button" class="top-card-act top-card-herz${aufWunschliste ? ' ist-gewuenscht' : ''}"
+                                    data-wunsch-id="${escapeHtml(kartenId)}"
+                                    aria-pressed="${aufWunschliste ? 'true' : 'false'}"
                                     onclick="addToWishlist('${escapeHtmlAttr(escapeJsStr(kartenId))}')"
                                     title="${escapeHtml(t('akt.addWishlist'))}"
-                                    aria-label="${escapeHtml((deLbl ? 'Auf die Wunschliste: ' : 'Add to wishlist: ') + card.name)}">♡</button>
+                                    aria-label="${escapeHtml((deLbl ? 'Auf die Wunschliste: ' : 'Add to wishlist: ') + card.name)}">${aufWunschliste ? '♥' : '♡'}</button>
                             <button type="button" class="top-card-act"
                                     onclick="openRaritySwitcherFromDB('${escapeHtmlAttr(escapeJsStr(card.name))}', '${escapeHtmlAttr(escapeJsStr(card.set_code))}', '${escapeHtmlAttr(escapeJsStr(String(card.set_number)))}', 'staples')"
                                     title="${escapeHtml(deLbl ? 'Andere Artworks dieser Karte' : 'Other artworks of this card')}"

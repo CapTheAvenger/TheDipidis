@@ -73,6 +73,7 @@ function bauWidget(lang) {
         /* Seit dem 11.09.2026 trifft EINE Funktion die Auswahl fuer das
            Markup UND fuer die Bilder (siehe staplesAuswahl in der
            Quelle). Die Attrappe bildet den Zustand "Alle" nach. */
+        staplesAufWunschliste: () => false,
         staplesAuswahl: (d) => (d || []).slice(0, 15),
     };
     const fabrik = new Function(...Object.keys(attrappen),
@@ -148,6 +149,7 @@ describe('Format-Staples: Top 15 und Top 30', () => {
             staplesNachArt: () => [], staplesArtZaehlung: () => ({}),
             STAPLES_ARTEN: [],
             // Ansicht "Alle", auf eine Karte begrenzt wie ladeStaplesAnzahl.
+            staplesAufWunschliste: () => false,
             staplesAuswahl: (d) => (d || []).slice(0, 1),
         };
         const render = new Function(...Object.keys(attrappen),

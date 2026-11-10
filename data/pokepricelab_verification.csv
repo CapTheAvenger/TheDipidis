@@ -1,5 +1,5 @@
 ﻿set,number,our_product_id,ppl_product_id,verdict,extracted_via,url,checked_at
-ASR,91,658714,658718,disagree,idProduct-param,https://pokepricelab.com/de/catalog/astral-radiance-hisuian-overqwil-091,2026-10-29
+BCR,96,280682,280683,disagree,idProduct-param,https://pokepricelab.com/de/catalog/boundaries-crossed-skarmory-96,2026-11-10
 BKT,8,286254,286254,agree,idProduct-param,https://pokepricelab.com/de/catalog/breakthrough-chespin-8,2026-08-12
 BKT,9,286255,286255,agree,idProduct-param,https://pokepricelab.com/de/catalog/breakthrough-chespin-9,2026-08-12
 CES,64,361308,361308,agree,idProduct-param,https://pokepricelab.com/de/catalog/celestial-storm-shuppet-64,2026-08-12
@@ -31,6 +31,7 @@ OBF,155,725234,725235,disagree,idProduct-param,https://pokepricelab.com/de/catal
 OBF,61,725141,725141,agree,idProduct-param,https://pokepricelab.com/de/catalog/obsidian-flames-finizen-061,2026-08-12
 OBF,74,725156,725154,disagree,idProduct-param,https://pokepricelab.com/de/catalog/obsidian-flames-tadbulb-074,2026-08-12
 OBF,75,725155,725155,agree,idProduct-param,https://pokepricelab.com/de/catalog/obsidian-flames-tadbulb-075,2026-08-12
+OBF,78,725158,725158,agree,idProduct-param,https://pokepricelab.com/de/catalog/obsidian-flames-bellibolt-078,2026-11-10
 PAF,111,751659,751650,disagree,idProduct-param,https://pokepricelab.com/de/catalog/paldean-fates-paldean-tauros-111,2026-08-12
 PAF,120,751711,751659,disagree,idProduct-param,https://pokepricelab.com/de/catalog/paldean-fates-paldean-tauros-120,2026-08-12
 PAF,172,751650,751711,disagree,idProduct-param,https://pokepricelab.com/de/catalog/paldean-fates-paldean-tauros-172,2026-08-12
@@ -41,11 +42,9 @@ PAL,13,715485,715485,agree,idProduct-param,https://pokepricelab.com/de/catalog/p
 PAL,216,715691,715691,agree,idProduct-param,https://pokepricelab.com/de/catalog/paldea-evolved-tinkatink-216,2026-08-12
 PAL,38,715513,715512,disagree,idProduct-param,https://pokepricelab.com/de/catalog/paldea-evolved-charcadet-038,2026-08-12
 PAL,78,715552,715553,disagree,idProduct-param,https://pokepricelab.com/de/catalog/paldea-evolved-tadbulb-078,2026-11-05
-PAR,133,740670,740671,disagree,idProduct-param,https://pokepricelab.com/de/catalog/paradox-rift-doublade-133,2026-10-29
 PL,23,278543,278444,disagree,idProduct-param,https://pokepricelab.com/de/catalog/platinum-dialga-lv-73-23,2026-08-12
 PL,6,371546,278427,disagree,idProduct-param,https://pokepricelab.com/de/catalog/platinum-dialga-lv-70-6,2026-08-12
 PLF,55,280932,280933,disagree,idProduct-param,https://pokepricelab.com/de/catalog/plasma-freeze-yamask-55,2026-08-12
-PLF,72,280949,280950,disagree,idProduct-param,https://pokepricelab.com/de/catalog/plasma-freeze-pawniard-72,2026-11-05
 PLS,112,280853,280852,disagree,idProduct-param,https://pokepricelab.com/de/catalog/plasma-storm-watchog-112,2026-08-12
 PLS,113,280852,280853,disagree,idProduct-param,https://pokepricelab.com/de/catalog/plasma-storm-watchog-113,2026-08-12
 PLS,63,280803,280803,agree,idProduct-param,https://pokepricelab.com/de/catalog/plasma-storm-trubbish-63,2026-08-12
@@ -53,7 +52,6 @@ PLS,64,280804,280804,agree,idProduct-param,https://pokepricelab.com/de/catalog/p
 RCL,191,456583,456583,agree,idProduct-param,https://pokepricelab.com/de/catalog/rebel-clash-oleana-191,2026-08-12
 RCL,202,457323,457323,agree,idProduct-param,https://pokepricelab.com/de/catalog/rebel-clash-oleana-202,2026-08-12
 ROS,92,297897,282760,disagree,idProduct-param,https://pokepricelab.com/de/catalog/roaring-skies-trainers-mail-92,2026-08-12
-RS,60,275708,275708,agree,idProduct-param,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-mudkip-60,2026-10-22
 RS,65,275712,275713,disagree,idProduct-param,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-poochyena-65,2026-08-12
 RS,68,275714,275716,disagree,idProduct-param,https://pokepricelab.com/de/catalog/ex-ruby-sapphire-ralts-68,2026-11-05
 SIT,139,682186,682186,agree,idProduct-param,https://pokepricelab.com/de/catalog/silver-tempest-lugia-vstar-139,2026-08-12
@@ -63,6 +61,7 @@ SIT,196,682259,682244,disagree,idProduct-param,https://pokepricelab.com/de/catal
 SIT,204,682237,682252,disagree,idProduct-param,https://pokepricelab.com/de/catalog/silver-tempest-candice-204,2026-10-13
 SIT,205,682253,682253,agree,idProduct-param,https://pokepricelab.com/de/catalog/silver-tempest-furisode-girl-205,2026-10-13
 SIT,206,682255,682255,agree,idProduct-param,https://pokepricelab.com/de/catalog/silver-tempest-lance-206,2026-10-13
+SIT,207,682256,682256,agree,idProduct-param,https://pokepricelab.com/de/catalog/silver-tempest-serena-207,2026-11-10
 SIT,210,682244,682259,disagree,idProduct-param,https://pokepricelab.com/de/catalog/silver-tempest-serperior-vstar-210,2026-10-13
 SP,1,547426,547426,agree,idProduct-param,https://pokepricelab.com/de/catalog/swsh-black-star-promos-grookey-001,2026-10-13
 SP,11,439963,439963,agree,idProduct-param,https://pokepricelab.com/de/catalog/swsh-black-star-promos-wooloo-011,2026-08-12
@@ -116,7 +115,6 @@ SSH,206,437119,437119,agree,idProduct-param,https://pokepricelab.com/de/catalog/
 SSH,207,437124,437124,agree,idProduct-param,https://pokepricelab.com/de/catalog/sword-shield-bede-207,2026-08-12
 SSH,209,448168,437134,disagree,idProduct-param,https://pokepricelab.com/de/catalog/sword-shield-professor-s-research-209,2026-08-12
 SSH,3,436194,436194,agree,idProduct-param,https://pokepricelab.com/de/catalog/sword-shield-roselia-3,2026-11-05
-SSH,31,427161,427161,agree,idProduct-param,https://pokepricelab.com/de/catalog/sword-shield-scorbunny-31,2026-11-05
 SSH,32,436319,436319,agree,idProduct-param,https://pokepricelab.com/de/catalog/sword-shield-raboot-32,2026-10-13
 SSH,33,436324,436324,agree,idProduct-param,https://pokepricelab.com/de/catalog/sword-shield-raboot-33,2026-10-13
 SSH,34,427226,450573,disagree,idProduct-param,https://pokepricelab.com/de/catalog/sword-shield-cinderace-34,2026-08-12
@@ -160,7 +158,6 @@ SVI,164,702460,702460,agree,idProduct-param,https://pokepricelab.com/de/catalog/
 SVI,17,702314,702313,disagree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-tarountula-017,2026-08-12
 SVI,175,702471,702471,agree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-jacq-175,2026-08-12
 SVI,18,702312,702314,disagree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-tarountula-018,2026-08-12
-SVI,190,702485,689769,disagree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-professor-s-research-190,2026-10-22
 SVI,199,702495,702495,agree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-tarountula-199,2026-10-13
 SVI,21,702317,702317,agree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-smoliv-021,2026-08-12
 SVI,215,702511,702511,agree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-riolu-215,2026-08-12
@@ -180,6 +177,7 @@ SVI,55,702351,702350,disagree,idProduct-param,https://pokepricelab.com/de/catalo
 SVI,56,702350,702351,disagree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-wiglett-056,2026-08-12
 SVI,58,702354,702353,disagree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-cetoddle-058,2026-08-12
 SVI,59,702353,702354,disagree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-cetoddle-059,2026-08-12
+SVI,70,702366,702366,agree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-rotom-070,2026-11-10
 SVI,73,702370,702369,disagree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-pawmi-073,2026-10-29
 SVI,74,702369,702370,disagree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-pawmi-074,2026-08-12
 SVI,77,702375,702374,disagree,idProduct-param,https://pokepricelab.com/de/catalog/scarlet-violet-wattrel-077,2026-08-12
@@ -247,9 +245,9 @@ UD,58,279311,279311,agree,idProduct-param,https://pokepricelab.com/de/catalog/un
 UD,65,279318,279318,agree,idProduct-param,https://pokepricelab.com/de/catalog/undaunted-scyther-65,2026-10-13
 UD,81,279334,279334,agree,idProduct-param,https://pokepricelab.com/de/catalog/undaunted-espeon-81,2026-10-13
 UD,83,279336,279336,agree,idProduct-param,https://pokepricelab.com/de/catalog/undaunted-raichu-83,2026-10-13
-UD,84,279337,279337,agree,idProduct-param,https://pokepricelab.com/de/catalog/undaunted-scizor-84,2026-10-22
 UD,89,279342,279342,agree,idProduct-param,https://pokepricelab.com/de/catalog/undaunted-rayquaza-deoxys-legend-89,2026-10-13
 UL,21,279177,279177,agree,idProduct-param,https://pokepricelab.com/de/catalog/unleashed-poliwrath-21,2026-08-12
+UL,39,279195,279195,agree,idProduct-param,https://pokepricelab.com/de/catalog/unleashed-pupitar-39,2026-11-10
 UL,43,279199,279199,agree,idProduct-param,https://pokepricelab.com/de/catalog/unleashed-aipom-43,2026-09-30
 UL,48,279204,279204,agree,idProduct-param,https://pokepricelab.com/de/catalog/unleashed-chinchou-48,2026-09-30
 UL,49,279205,279205,agree,idProduct-param,https://pokepricelab.com/de/catalog/unleashed-horsea-49,2026-09-30
@@ -271,6 +269,7 @@ UNB,9,372302,372302,agree,idProduct-param,https://pokepricelab.com/de/catalog/un
 UNM,115,388372,388372,agree,idProduct-param,https://pokepricelab.com/de/catalog/unified-minds-riolu-115,2026-08-12
 UNM,116,388382,388382,agree,idProduct-param,https://pokepricelab.com/de/catalog/unified-minds-riolu-116,2026-08-12
 UNM,129,388432,388442,disagree,idProduct-param,https://pokepricelab.com/de/catalog/unified-minds-murkrow-129,2026-10-22
+UNM,148,388532,388532,agree,idProduct-param,https://pokepricelab.com/de/catalog/unified-minds-dratini-148,2026-11-10
 UNM,149,388542,388537,disagree,idProduct-param,https://pokepricelab.com/de/catalog/unified-minds-dragonair-149,2026-10-13
 UNM,150,388537,388542,disagree,idProduct-param,https://pokepricelab.com/de/catalog/unified-minds-dragonair-150,2026-10-13
 UNM,167,388622,388622,agree,idProduct-param,https://pokepricelab.com/de/catalog/unified-minds-slakoth-167,2026-10-13

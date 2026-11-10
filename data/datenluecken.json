@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt": "2026-11-10T05:07:29Z",
+  "erzeugt": "2026-11-10T06:43:13Z",
   "erzeuger": "scripts/datenluecken.py",
   "anzahl": 9,
   "jeKlasse": {
@@ -38,9 +38,7 @@
    }
   },
   "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten.",
-  "nichtGemessen": [
-   "kartentyp"
-  ]
+  "nichtGemessen": []
  },
  "luecken": [
   {
@@ -55,8 +53,8 @@
   {
    "id": "kartentyp/mee-10",
    "klasse": "kartentyp",
-   "titel": "Fire Energy (MEE 10) — kein Kartentyp in der Datenbank (4802x)",
-   "titelEn": "Fire Energy (MEE 10) — no card type in the database (4802x)",
+   "titel": "Fire Energy (MEE 10) — kein Kartentyp in der Datenbank (4908x)",
+   "titelEn": "Fire Energy (MEE 10) — no card type in the database (4908x)",
    "wo": "data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -64,8 +62,8 @@
   {
    "id": "kartentyp/mee-11",
    "klasse": "kartentyp",
-   "titel": "Water Energy (MEE 11) — kein Kartentyp in der Datenbank (2468x)",
-   "titelEn": "Water Energy (MEE 11) — no card type in the database (2468x)",
+   "titel": "Water Energy (MEE 11) — kein Kartentyp in der Datenbank (2506x)",
+   "titelEn": "Water Energy (MEE 11) — no card type in the database (2506x)",
    "wo": "data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -73,8 +71,8 @@
   {
    "id": "kartentyp/mee-12",
    "klasse": "kartentyp",
-   "titel": "Lightning Energy (MEE 12) — kein Kartentyp in der Datenbank (1389x)",
-   "titelEn": "Lightning Energy (MEE 12) — no card type in the database (1389x)",
+   "titel": "Lightning Energy (MEE 12) — kein Kartentyp in der Datenbank (1454x)",
+   "titelEn": "Lightning Energy (MEE 12) — no card type in the database (1454x)",
    "wo": "data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -82,8 +80,8 @@
   {
    "id": "kartentyp/mee-13",
    "klasse": "kartentyp",
-   "titel": "Psychic Energy (MEE 13) — kein Kartentyp in der Datenbank (9308x)",
-   "titelEn": "Psychic Energy (MEE 13) — no card type in the database (9308x)",
+   "titel": "Psychic Energy (MEE 13) — kein Kartentyp in der Datenbank (9411x)",
+   "titelEn": "Psychic Energy (MEE 13) — no card type in the database (9411x)",
    "wo": "data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -91,8 +89,8 @@
   {
    "id": "kartentyp/mee-14",
    "klasse": "kartentyp",
-   "titel": "Fighting Energy (MEE 14) — kein Kartentyp in der Datenbank (2693x)",
-   "titelEn": "Fighting Energy (MEE 14) — no card type in the database (2693x)",
+   "titel": "Fighting Energy (MEE 14) — kein Kartentyp in der Datenbank (2736x)",
+   "titelEn": "Fighting Energy (MEE 14) — no card type in the database (2736x)",
    "wo": "data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -100,8 +98,8 @@
   {
    "id": "kartentyp/mee-15",
    "klasse": "kartentyp",
-   "titel": "Darkness Energy (MEE 15) — kein Kartentyp in der Datenbank (6295x)",
-   "titelEn": "Darkness Energy (MEE 15) — no card type in the database (6295x)",
+   "titel": "Darkness Energy (MEE 15) — kein Kartentyp in der Datenbank (6375x)",
+   "titelEn": "Darkness Energy (MEE 15) — no card type in the database (6375x)",
    "wo": "data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -109,8 +107,8 @@
   {
    "id": "kartentyp/mee-16",
    "klasse": "kartentyp",
-   "titel": "Metal Energy (MEE 16) — kein Kartentyp in der Datenbank (950x)",
-   "titelEn": "Metal Energy (MEE 16) — no card type in the database (950x)",
+   "titel": "Metal Energy (MEE 16) — kein Kartentyp in der Datenbank (962x)",
+   "titelEn": "Metal Energy (MEE 16) — no card type in the database (962x)",
    "wo": "data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null
@@ -118,8 +116,8 @@
   {
    "id": "kartentyp/mee-9",
    "klasse": "kartentyp",
-   "titel": "Grass Energy (MEE 9) — kein Kartentyp in der Datenbank (3514x)",
-   "titelEn": "Grass Energy (MEE 9) — no card type in the database (3514x)",
+   "titel": "Grass Energy (MEE 9) — kein Kartentyp in der Datenbank (3563x)",
+   "titelEn": "Grass Energy (MEE 9) — no card type in the database (3563x)",
    "wo": "data/tournament_decklists_per_player_<META>_<JJJJ-MM>.csv → Spalte type",
    "ansicht": "deck-builder",
    "vorschlag": null

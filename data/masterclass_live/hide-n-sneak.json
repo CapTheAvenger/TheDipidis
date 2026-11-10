@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-10T03:44:49Z",
+  "erzeugt_am": "2026-11-10T06:43:43Z",
   "id": "hide-n-sneak",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1433,7 +1433,136 @@
     ]
    }
   ],
-  "liste_online": null,
+  "liste_online": {
+   "bilanz": "3-1-0",
+   "datum": "06.11.2026",
+   "karten": [
+    [
+     4,
+     "Shuppet",
+     "PBL",
+     "33"
+    ],
+    [
+     4,
+     "Banette",
+     "PBL",
+     "34"
+    ],
+    [
+     4,
+     "Poltchageist",
+     "PBL",
+     "5"
+    ],
+    [
+     4,
+     "Sinistcha",
+     "PBL",
+     "6"
+    ],
+    [
+     4,
+     "Dhelmise",
+     "PBL",
+     "39"
+    ],
+    [
+     1,
+     "Spiritomb",
+     "PBL",
+     "35"
+    ],
+    [
+     1,
+     "Lillie's Clefairy ex",
+     "JTG",
+     "56"
+    ],
+    [
+     4,
+     "Gwynn",
+     "PBL",
+     "78"
+    ],
+    [
+     4,
+     "Lillie's Determination",
+     "MEG",
+     "119"
+    ],
+    [
+     3,
+     "Boss's Orders",
+     "MEG",
+     "114"
+    ],
+    [
+     2,
+     "Hassel",
+     "TWM",
+     "151"
+    ],
+    [
+     4,
+     "Ultra Ball",
+     "MEG",
+     "131"
+    ],
+    [
+     3,
+     "Poké Pad",
+     "POR",
+     "81"
+    ],
+    [
+     3,
+     "Night Stretcher",
+     "ASC",
+     "196"
+    ],
+    [
+     2,
+     "Switch",
+     "MEG",
+     "130"
+    ],
+    [
+     2,
+     "Pokégear 3.0",
+     "SVI",
+     "186"
+    ],
+    [
+     1,
+     "Brilliant Blender",
+     "SSP",
+     "164"
+    ],
+    [
+     3,
+     "Prism Tower",
+     "CRI",
+     "80"
+    ],
+    [
+     4,
+     "Psychic Energy",
+     "MEE",
+     "13"
+    ],
+    [
+     3,
+     "Telepathic Psychic Energy",
+     "POR",
+     "88"
+    ]
+   ],
+   "platz": 1,
+   "spieler": "CrissSkywalker",
+   "turnier": "💰 Domino Arena Rush | Temporada 3 | Semana 8 💰",
+   "von": 7
+  },
   "listen_vor_ort": [
    {
     "bilanz": "14-2-2",
@@ -1717,14 +1846,14 @@
   "name": "Dhelmise",
   "online": {
    "anteil": "3,25",
-   "anteil14": "6,44",
+   "anteil14": "3,14",
    "bilanz": [
     116,
     129,
     3
    ],
    "bis": "09.11.2026",
-   "fenster14": "23.10.–06.11.2026",
+   "fenster14": "09.11.–10.11.2026",
    "format": "TEF–DLR",
    "kurz_anteil": "3,25",
    "kurz_bilanz": [
@@ -1737,7 +1866,7 @@
    "kurz_von": "03.11.2026",
    "listen": 50,
    "seit": "06.11.2026",
-   "trend14": "0,82",
+   "trend14": "",
    "turniere": 9
   },
   "vor_ort": {

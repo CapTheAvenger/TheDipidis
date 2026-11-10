@@ -179,8 +179,13 @@ def test_jeder_schreiber_hat_ein_tor_vor_dem_push():
 
 def test_das_tor_hat_node_und_zeit():
     """Ohne Node schliesst das Tor (Absicht) — dann pusht der Ablauf nie
-    wieder. Und das Tor braucht im Deploy-Test gemessene 6,5 Minuten; ein
-    Job mit 10 Minuten Limit stirbt daran."""
+    wieder. Und das Tor braucht gemessene 9 Minuten (Prize-Pack-Lauf
+    42884785991, 10.11.2026) und laeuft nach einem abgelehnten Push
+    (`push_nach_rebase.sh`) noch einmal; der Lauf mit 30 Minuten Limit wurde
+    dabei mitten im zweiten Tor abgebrochen und lieferte nichts (SC-55).
+    Untergrenze daher 45 Minuten; mit dem Tor `alle` (Nebenbereiche dazu,
+    gemessen bis 27 Minuten je Durchlauf) 60 Minuten. Die Grenzen sind
+    Boden, keine Rechnung: die Werte je Ablauf stehen begruendet in der YAML."""
     probleme = []
     for name, roh, y in _alle_ablaeufe():
         if "scripts/tor_vor_dem_push.sh" not in _ohne_kommentare(roh):
@@ -193,8 +198,10 @@ def test_das_tor_hat_node_und_zeit():
                 continue
             if not any("setup-node" in str(s.get("uses", "")) for s in schritte[:i_tor]):
                 probleme.append(f"{name}: kein setup-node vor dem Tor")
-            if int(job.get("timeout-minutes", 360)) < 25:
-                probleme.append(f"{name}: timeout-minutes {job.get('timeout-minutes')} < 25")
+            tor_text = str(schritte[i_tor].get("run", ""))
+            boden = 60 if "tor_vor_dem_push.sh alle" in tor_text else 45
+            if int(job.get("timeout-minutes", 360)) < boden:
+                probleme.append(f"{name}: timeout-minutes {job.get('timeout-minutes')} < {boden}")
     assert not probleme, "\n".join(probleme)
 
 

@@ -157,6 +157,12 @@ def test_laufendes_fenster_kommt_aus_format_window(daten):
     fw = json.load(open(fw_pfad, encoding='utf-8'))
     fw['current_set'] = '30C'
     fw['oldest_legal_set'] = 'TEF'
+    # SC-53 (10.11.2026, Pruefagent): die Vorlage spielt "30C ist das
+    # laufende Format" — dann ist das Vorformat TEF-PBL. Stand hier das
+    # Vorformat aus den echten Daten (seit DLR: TEF-DLR, 06.11.), saehe
+    # formatfenster() ein JUENGERES Vorformat oben, und der Test fiele bei
+    # jedem Setwechsel nach DLR.
+    fw['previous_format_key'] = 'TEF-PBL'
     json.dump(fw, open(fw_pfad, 'w', encoding='utf-8'))
 
     modul._fenster_zwischenspeicher = None

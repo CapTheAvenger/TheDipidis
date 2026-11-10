@@ -63,15 +63,28 @@ jobs:
       - name: Wegwerf-Baeume mit neuem Set
         id: baeume
         run: |
-          set -e
+          # pipefail: sonst verschluckt `| tee` den Rueckgabewert 1 der
+          # Simulation (Riegel lehnt den Wechsel ab) und die Probe prueft
+          # den unveraenderten Baum (Pruefagent SC-53).
+          set -eo pipefail
           for name in en jp; do
             git worktree add --detach "$RUNNER_TEMP/$name" HEAD
             cp -r node_modules "$RUNNER_TEMP/$name/"
           done
           python scripts/simuliere_setwechsel.py "$RUNNER_TEMP/en" | tee "$RUNNER_TEMP/en.json"
           python scripts/simuliere_setwechsel.py "$RUNNER_TEMP/jp" --en "" | tee "$RUNNER_TEMP/jp.json"
-          datum=$(python -c "import json;print(json.load(open('$RUNNER_TEMP/en.json'))['datum'])")
-          echo "spaeter=$(date -u -d "$datum + 30 days" '+%F 12:00:00')" >> "$GITHUB_OUTPUT"
+          # SC-53: ist das laufende Format selbst noch jung, ueberspringt die
+          # Simulation die EN-Probe benannt (scripts/simuliere_setwechsel.py,
+          # laufendes_format_zu_jung) — Schritte 1 und 2 laufen dann nicht.
+          grund=$(python -c "import json;print(json.load(open('$RUNNER_TEMP/en.json')).get('uebersprungen',''))")
+          if [ -n "$grund" ]; then
+            echo "::notice title=EN-Probe uebersprungen::$grund"
+            echo "en=jung" >> "$GITHUB_OUTPUT"
+          else
+            datum=$(python -c "import json;print(json.load(open('$RUNNER_TEMP/en.json'))['datum'])")
+            echo "spaeter=$(date -u -d "$datum + 30 days" '+%F 12:00:00')" >> "$GITHUB_OUTPUT"
+            echo "en=probe" >> "$GITHUB_OUTPUT"
+          fi
           {
             echo "## Setwechsel-Probe"
             echo ""
@@ -86,11 +99,12 @@ jobs:
       # Sperrliste, also genau wie vor SC-50 (das Zurueckrollen im
       # Wegwerf-Baum bleibt, wie es war).
       - name: 1 — neues EN-Set, am Tag danach
+        if: steps.baeume.outputs.en == 'probe'
         working-directory: ${{ runner.temp }}/en
         run: TOR_OHNE_INSTALL=1 TOR_OHNE_SPERRLISTE=1 bash scripts/tor_vor_dem_push.sh kern
 
       - name: 2 — dasselbe 30 Tage spaeter
-        if: always() && steps.baeume.outcome == 'success'
+        if: always() && steps.baeume.outcome == 'success' && steps.baeume.outputs.en == 'probe'
         working-directory: ${{ runner.temp }}/en
         run: |
           # HEAD ist der ausgelieferte Stand, gegen den die Bestandsbelege
@@ -99,7 +113,10 @@ jobs:
           # deshalb lokal festgehalten — gepusht wird nichts.
           git add -A data config
           git -c user.email=probe@local -c user.name=probe commit -qm "Setwechsel-Probe (lokal)"
-          TOR_OHNE_INSTALL=1 TOR_OHNE_SPERRLISTE=1 faketime "${{ steps.baeume.outputs.spaeter }}" \
+          # NO_FAKE_STAT=1: faketime verstellt sonst auch die Dateizeiten, und
+          # der Masterclass-Stand faellt fuer Dateien ohne data_stand-Eintrag
+          # auf getmtime zurueck (SC-53, Pruefagent).
+          NO_FAKE_STAT=1 TOR_OHNE_INSTALL=1 TOR_OHNE_SPERRLISTE=1 faketime "${{ steps.baeume.outputs.spaeter }}" \
             bash scripts/tor_vor_dem_push.sh kern
 
       - name: 3 — nur ein neues JP-Set

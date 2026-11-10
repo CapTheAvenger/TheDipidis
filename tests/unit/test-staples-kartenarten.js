@@ -59,7 +59,7 @@ function schneide(start, ende) {
 const REGELN = schneide('const STAPLES_ART_SCHWELLE', 'function staplesAnzahl()');
 
 function lade() {
-    const kasten = { Number, String, Object, Array, Math, localStorage: null };
+    const kasten = { Number, String, Object, Array, Math, localStorage: null, window: {} };
     vm.createContext(kasten);
     vm.runInContext(REGELN + `
         this._schwelle = STAPLES_ART_SCHWELLE;

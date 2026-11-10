@@ -157,6 +157,7 @@ function gleichheiten(datei) { return zeilenMit(datei, GLEICHHEIT); }
  * Eintrag laesst diesen Test fallen — genau das ist der Zweck.
  */
 const REGISTER = {
+    'test-ui161-neues-set-haelften.js': 'UI-161 (10.11.2026): liest aus data/all_cards_database.csv NUR die sechs Zeilen DLR 94 bis 99 und prueft eine feste Tatsache des Kartendrucks (Stadien namens Legendary, paarweise gleicher Name), keinen Wochenwert. Alle anderen Zusicherungen laufen auf gesetzten Karten.',
     'test-sc51-junges-format.js':        'SC-51 (10.11.2026): liest KEINE echte Datei aus data/ — der Pfad data/format_window.json entsteht nur in einem Wegwerf-Ordner (mkdtemp), in den der Test eine gesetzte format_window.json schreibt. Geprueft wird jungesFormat() mit festen Daten (Erscheinen 06.11., Frist 28 Tage); welche Woche gerade ist, ist dem Test egal, weil er das Datum hineinreicht.',
     'test-ui159-legendary-stadien.js': 'UI-160 (05.11.2026): liest aus data/japanese_cards_database.csv NUR die sechs Zeilen M6 71 bis 76 und prueft eine feste Tatsache des Kartendrucks, keinen Wochenwert: jede Nummer der Liste LEGENDARY_STADIEN_NUMMERN ist ein Stadion namens Legendary und die Haelften tragen paarweise denselben Namen. Ein Datenlauf aendert daran nichts; faellt ein Eintrag weg oder kommt eine Karte dazu, SOLL der Test rot werden. Alle anderen Zusicherungen laufen auf gesetzten Zeilen.',
     'test-v2-13.js': 'V2-13 (07.10.2026): liest die drei Verzeichnisse (tournament_cards_manifest.json, labs_tournament_decks_verzeichnis.json, labs_matchups_je_turnier_verzeichnis.json) und vergleicht die Tabelle „Was fehlt“ Zeile fuer Zeile gegen DIESELBEN Dateien — keine feste Zahl, kein Wochenwert. Eine Ungleichung: mindestens ein Format ohne Major-Daten (Vorpruefung gegen ein leeres Bestehen).',
@@ -674,7 +675,10 @@ const REGISTER = {
    wenigen Bandgrenzen an Live-Daten stehen im Register. */
 /* +1 am 06.11.2026: test-showdown-vorlagen.js verlangt, dass eine CPU-Regel aus dem Massentest
    ihre Siegquote um mindestens 5 Punkte hebt (Regel gegen die eigene Quelle, kein Wochenwert). */
-const OBERGRENZE = 393 + 1 + 2 + 13 + 2 + 92 + 1;
+/* +1 am 10.11.2026: test-ui161-neues-set-haelften.js — eine Ungleichung gegen die Liste der Legendary-Nummern
+ * (assert.ok auf die LISTE aus app-utils.js, keine Zahl aus data/); die Datei liest aus data/ nur die sechs
+ * Zeilen DLR 94 bis 99, eine feste Tatsache des Kartendrucks. */
+const OBERGRENZE = 393 + 1 + 2 + 13 + 2 + 92 + 1 + 1;
 
 /* Die zweite Sperrklinke, eingezogen am 22.09.2026: so viele
    Gleichheiten gegen eine zweistellige Zahl stehen heute in Dateien,
@@ -707,7 +711,10 @@ const OBERGRENZE = 393 + 1 + 2 + 13 + 2 + 92 + 1;
  * deshalb muss sie festgenagelt sein: alle anderen Zusicherungen lesen
  * den Deckel aus dem Modul und merken nicht, wenn er zurueckfaellt
  * (beim Verfaelschen gemessen). */
-const OBERGRENZE_GLEICHHEIT = 162 + 2 + 1 + 1;
+/* +3 am 10.11.2026: test-ui161-neues-set-haelften.js — die Zahlen kommen aus dem Test selbst (gesetzte Karten:
+ * 30 Kacheln, Nummern 94/95/96/97, Name der Haelften), nicht aus data/. Aus data/ liest die Datei nur die
+ * Namensgleichheit der Haelften DLR 94 bis 99. */
+const OBERGRENZE_GLEICHHEIT = 162 + 2 + 1 + 1 + 3;
 
 describe('kein Unit-Test behauptet etwas ueber die Daten dieser Woche', () => {
 

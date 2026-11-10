@@ -55,6 +55,7 @@ const SET_HILFEN = schneide('function neuesSetCode(heute)',
                             '\n        /* Art setzen UND merken');
 const MIN_ARCH = Number(/const STAPLES_NEUES_SET_MIN_ARCHETYPEN\s*=\s*(\d+)/.exec(SRC)[1]);
 
+const MIT_HAELFTEN = schneide('function staplesMitHaelften(', '\n        /**');
 const NACH_ART = schneide('function staplesNachArt(daten, artId)', '\n        /** Wie viele Karten');
 const WIDGET = schneide('function renderTopCardsWidget(topCards)',
                         '/**\n         * Render and inject Top Cards Widget');
@@ -115,7 +116,7 @@ function bau(art, anzahl) {
         STAPLES_STUFEN: [15, 30],
         STAPLES_ARTEN: ARTEN,
         STAPLES_ART_SCHWELLE: SCHWELLE,
-        STAPLES_ART_MAX: ART_MAX,
+        STAPLES_ART_MAX: ART_MAX, STAPLES_NEUES_SET_MAX: 30,
         STAPLES_NEUES_SET_MIN_ARCHETYPEN: MIN_ARCH,
         window: { _formatWindow: { current_set: 'PBL' } },
         ladeStaplesAnzahl: () => anzahl,
@@ -150,9 +151,10 @@ function bau(art, anzahl) {
         }),
         STAPLES_DRUCK: 'min',
         _staplesDaten: null,
+        staplesAufWunschliste: () => false,
     };
     const fabrik = new Function(...Object.keys(attrappen),
-        SET_HILFEN + NACH_ART + AUSWAHL + WIDGET + LISTE +
+        SET_HILFEN + MIT_HAELFTEN + NACH_ART + AUSWAHL + WIDGET + LISTE +
         '\nreturn { render: renderTopCardsWidget, liste: staplesListe,' +
         '  setzeDaten: (d) => { _staplesDaten = d; } };');
     const g = fabrik(...Object.values(attrappen));

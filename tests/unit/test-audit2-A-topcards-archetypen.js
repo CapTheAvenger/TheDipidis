@@ -53,6 +53,7 @@ function build(lang) {
         // Seit dem 11.09.2026: EINE Auswahlfunktion fuer Markup und
         // Bilder. Hier der Zustand "Alle".
         staplesAuswahl: (d) => (d || []).slice(0, 15),
+        staplesAufWunschliste: () => false,
         ladeStaplesModus: () => 'gespielt',
         // Seit dem 01.09.2026 meldet das Widget seinen Nenner an den
         // Datenumfang, statt ihn selbst als Untertitel zu drucken.

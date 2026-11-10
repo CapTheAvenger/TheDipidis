@@ -1803,6 +1803,7 @@ function priceTrustBadge(card, cmUrl) {
 if (typeof window !== 'undefined') window.priceTrustBadge = priceTrustBadge;
 
 function updateWishlistUI(searchFilter = '', setFilter = '') {
+  if (typeof window.staplesHerzenAbgleichen === 'function') window.staplesHerzenAbgleichen();
   const wishlistGrid = document.getElementById('wishlist-grid');
   if (!wishlistGrid) return;
 

@@ -21,6 +21,7 @@ WAS HIER SCHIEFGEHEN KANN
    ohne darin zu stehen.
 """
 import json
+import re
 import os
 
 import pytest
@@ -90,7 +91,20 @@ def test_wer_kein_bild_hat_steht_auf_der_liste(manifest, benutzte):
     geprueft wird.
     """
     ohne = set(manifest["_meta"]["ohne_sprite"])
-    still = sorted(n for n in benutzte if n not in manifest["sprites"] and n not in ohne)
+    # SC-52 (10.11.2026): "Unknown Item N" ist kein Gegenstand, sondern eine
+    # Nummer, die die Quelle statt eines Namens liefert (Befund 13.09.2026,
+    # scripts/datenluecken.py "gegenstandsname/quelle-liefert-nummern").
+    # Ein Bild gibt es dafuer nie; gemeldet wird es als Datenluecke — dort
+    # MUSS es stehen, sonst waere es ein stilles Loch.
+    nummern = sorted(n for n in benutzte if re.match(r"^Unknown Item \d+$", n))
+    if nummern:
+        luecken = _json(os.path.join(DATA, "datenluecken.json"))
+        text = json.dumps(luecken, ensure_ascii=False)
+        assert "gegenstandsname/quelle-liefert-nummern" in text, (
+            "die Quelle liefert Nummern statt Namen (" + ", ".join(nummern)
+            + "), aber datenluecken.json meldet es nicht")
+    still = sorted(n for n in benutzte if n not in manifest["sprites"] and n not in ohne
+                   and n not in nummern)
     assert not still, ("Diese benutzten Gegenstaende haben weder Bild noch einen Eintrag "
                        "in _meta.ohne_sprite: " + ", ".join(still))
 

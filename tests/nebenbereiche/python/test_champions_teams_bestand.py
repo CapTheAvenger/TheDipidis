@@ -177,5 +177,10 @@ def test_mem_und_mez_haben_keine_internationalen_karten():
     assert "MEM" in ohne and "MEZ" in ohne
     # M4/M5/M6 tragen sehr wohl internationale Karten — sie werden ueber das
     # Namensmuster ausgeschlossen, nicht ueber diese Regel.
-    for jp in ("M4", "M5", "M6"):
-        assert jp in codes, f"{jp} hat keine Karten mehr — dann greift die Regel zu weit"
+    # Seit DLR (EN, 06.11.2026) traegt M6 keine jp_only-Karten mehr — sie
+    # sind durch die englischen Drucke ersetzt (gemessen 10.11.2026: 67 von
+    # 75 Namen aus M6 stehen jetzt unter DLR). Dasselbe trifft jedes JP-Set,
+    # sobald sein EN-Gegenstueck erscheint. Die Probe braucht also nur
+    # EIN M-Set mit Karten, nicht ein bestimmtes (SC-52).
+    mit = [jp for jp in ("M4", "M5", "M6", "M6A") if jp in codes]
+    assert mit, "kein M-Set hat mehr Karten — dann greift die Regel zu weit"

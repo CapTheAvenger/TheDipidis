@@ -43,6 +43,7 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
+const { jungesFormat } = require('./lib-junges-format.js');
 
 const wurzel = path.join(__dirname, '..', '..');
 const lies = p => fs.readFileSync(path.join(wurzel, p), 'utf8');
@@ -219,6 +220,17 @@ describe('mergeOnlineMajorAdditive am echten Datenbestand', () => {
     ].filter(Boolean);
     const formatKey = kandidaten.find(k => fs.existsSync(
         path.join(wurzel, 'data', `tournament_cards_data_cards_${k}.csv`)));
+    /* SC-51 (10.11.2026): ist das Format jung (Datenstand < 28 Tage nach
+       Erscheinen), fehlt die Turnierdatei womoeglich fuer BEIDE Kandidaten —
+       das vorige Format kann selbst erst Tage alt sein (Setwechsel-Probe am
+       10.11.: ZZN auf DLR, DLR ohne Majors). Dann die Faelle benannt
+       aussetzen statt den describe-Rumpf reissen zu lassen. */
+    const jfDatei = jungesFormat(path.join(__dirname, '..', '..'));
+    if (!formatKey && jfDatei.jung) {
+        it('Turnierdatei des Formats', (t) => t.skip(
+            `weder ${kandidaten.join(' noch ')} hat tournament_cards_data_cards — ${jfDatei.grund}`));
+        return;
+    }
     assert.ok(formatKey,
         `weder fuer ${kandidaten.join(' noch ')} gibt es `
         + 'tournament_cards_data_cards_<Format>.csv — dann hat auch das '
@@ -228,10 +240,12 @@ describe('mergeOnlineMajorAdditive am echten Datenbestand', () => {
     assert.notEqual(turnier.length, 0,
         `${turnierDatei} ist leer — dann prueft der Rest dieser Datei nichts`);
 
-    it('der Bestand traegt beide Quellen — sonst prueft der Rest nichts', () => {
+    it('der Bestand traegt beide Quellen — sonst prueft der Rest nichts', (t) => {
         const live = alle.filter(r => String(r.meta || '').startsWith('Meta Live')).length;
         const play = alle.filter(r => r.meta === 'Meta Play!').length;
         assert.ok(live > 100, `nur ${live} Meta-Live-Zeilen`);
+        const jf = jungesFormat(path.join(__dirname, '..', '..'));
+        if (play === 0 && jf.jung) return t.skip(`keine Meta-Play!-Zeilen — ${jf.grund}`);
         assert.ok(play > 0,
             'keine Meta-Play!-Zeilen im Bestand — genau diese Zeilen loesten '
             + 'den Befund aus, ohne sie greift der Test unten ins Leere');

@@ -78,3 +78,63 @@ def test_stdout_traegt_nur_die_ergebniszeile(tmp_path, capsys, monkeypatch):
     aus = capsys.readouterr()
     assert json.loads(aus.out)["datum"] == "2026-09-28"
     assert "[Update Sets]" in aus.err
+
+
+# --- SC-53 (10.11.2026): junges laufendes Format ---------------------------
+
+def _stand(d, tag):
+    (d / "data_stand.json").write_text(json.dumps({"erzeugt_am": tag + "T08:00:00+00:00"}))
+
+
+def test_junges_laufendes_format_ueberspringt_die_en_probe_benannt(tmp_path, capsys, monkeypatch):
+    """Probe zu PR #1041: DLR war 4 Tage alt, das erfundene Set lag 2 Tage
+    dahinter — fuenf Zusicherungen fielen an einem Setwechsel, den es so nie
+    gibt. Jetzt: benannt uebersprungen, setwechsel() laeuft gar nicht."""
+    d = _baum(tmp_path)
+    _stand(d, "2026-09-05")
+    gelaufen = []
+    monkeypatch.setattr(sim, "setwechsel", lambda *a: gelaufen.append(a) or {})
+    assert sim.main([str(tmp_path)]) == 0
+    erg = json.loads(capsys.readouterr().out)
+    assert "uebersprungen" in erg and "4 Tag(e) alt" in erg["uebersprungen"]
+    assert "wieder ab 2026-09-29" in erg["uebersprungen"]
+    assert gelaufen == []
+
+
+def test_ab_tag_28_laeuft_die_probe_wieder(tmp_path):
+    d = _baum(tmp_path)
+    _stand(d, "2026-09-28")
+    assert sim.laufendes_format_zu_jung(str(tmp_path)) is not None
+    _stand(d, "2026-09-29")
+    assert sim.laufendes_format_zu_jung(str(tmp_path)) is None
+
+
+def test_jp_probe_und_festes_datum_werden_nie_uebersprungen(tmp_path, capsys, monkeypatch):
+    d = _baum(tmp_path)
+    _stand(d, "2026-09-05")
+    monkeypatch.setattr(sim, "setwechsel", lambda b, en, jp, datum: {"current_set": en,
+                                                                     "current_set_jp": jp})
+    assert sim.main([str(tmp_path), "--en", ""]) == 0
+    assert "uebersprungen" not in json.loads(capsys.readouterr().out)
+    assert sim.main([str(tmp_path), "--datum", "2026-09-04"]) == 0
+    assert "uebersprungen" not in json.loads(capsys.readouterr().out)
+
+
+def test_der_ablauf_laesst_schritt_1_und_2_nur_bei_einer_probe_laufen():
+    import yaml
+    wf = yaml.safe_load(open(os.path.join(WURZEL, ".github", "workflows", "setwechsel-probe.yml"),
+                             encoding="utf-8"))
+    schritte = {s.get("name", ""): s for s in wf["jobs"]["probe"]["steps"]}
+    assert "uebersprungen" in schritte["Wegwerf-Baeume mit neuem Set"]["run"]
+    for n in ("1 — neues EN-Set, am Tag danach", "2 — dasselbe 30 Tage spaeter"):
+        assert "steps.baeume.outputs.en == 'probe'" in schritte[n]["if"], n
+    assert "outputs.en" not in str(schritte["3 — nur ein neues JP-Set"].get("if", ""))
+
+
+def test_schritt_2_haelt_die_dateizeiten_echt_und_der_aufbau_verliert_keinen_fehler():
+    import yaml
+    wf = yaml.safe_load(open(os.path.join(WURZEL, ".github", "workflows", "setwechsel-probe.yml"),
+                             encoding="utf-8"))
+    schritte = {s.get("name", ""): s for s in wf["jobs"]["probe"]["steps"]}
+    assert "NO_FAKE_STAT=1" in schritte["2 — dasselbe 30 Tage spaeter"]["run"]
+    assert "set -eo pipefail" in schritte["Wegwerf-Baeume mit neuem Set"]["run"]

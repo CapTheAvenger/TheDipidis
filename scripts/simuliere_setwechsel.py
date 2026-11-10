@@ -195,6 +195,46 @@ def auto_datum(baum, mindestens=3):
                      "wenige Online-Turniere fuer eine Probe")
 
 
+FRIST_TAGE = 28  # wie tests/unit/lib-junges-format.js (SC-51)
+
+
+def laufendes_format_zu_jung(baum):
+    """SC-53 (10.11.2026): Grund-Text, wenn das LAUFENDE Format zu jung fuer
+    eine EN-Probe ist, sonst None.
+
+    Die Probe setzt das erfundene Set an einen Tag im laufenden Fenster
+    (auto_datum). Ist das laufende Format erst Tage alt (DLR am 10.11.: 4
+    Tage), liegt das erfundene Set 2 Tage nach dem echten — ein Format, das
+    nie praesenzlegal war, Lag-Fenster, die sich ueberlappen. Fuenf
+    Zusicherungen fielen in der Probe zu PR #1041; zwei davon genau am
+    2-Tage-Abstand (Klebrigkeit, Vorformat-Rueckfall). Die drei anderen
+    waren eigene Fehler und sind repariert (Vorlage in
+    test_formatrotation_ableitung, Dateizeiten unter faketime in Schritt 2).
+    Gemessen wird wie in
+    lib-junges-format.js: Datenstand (data_stand.json) gegen
+    set_release_date, Frist 28 Tage."""
+    import datetime as _dt
+    daten = os.path.join(baum, "data")
+    fw = _lies(os.path.join(daten, "format_window.json"))
+    rel = str(fw.get("set_release_date") or "")
+    try:
+        rel_d = _dt.date.fromisoformat(rel)
+    except ValueError:
+        return None
+    try:
+        stand = _lies(os.path.join(daten, "data_stand.json")).get("erzeugt_am") or ""
+        stand_d = _dt.date.fromisoformat(str(stand)[:10])
+    except (OSError, ValueError):
+        stand_d = _dt.date.today()
+    tage = (stand_d - rel_d).days
+    if tage >= FRIST_TAGE:
+        return None
+    ende = (rel_d + _dt.timedelta(days=FRIST_TAGE)).isoformat()
+    return (f"laufendes Format {fw.get('oldest_legal_set')}-{fw.get('current_set')} ist "
+            f"{tage} Tag(e) alt (Datenstand {stand_d}, erschienen {rel}) — ein erfundenes "
+            f"Set darauf waere kein echter Setwechsel; EN-Probe wieder ab {ende}")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("baum")
@@ -208,6 +248,11 @@ def main(argv=None):
     if os.path.samefile(baum, WURZEL):
         print("::error::simuliere_setwechsel.py laeuft nur in einer Kopie, nicht im Repo-Baum")
         return 2
+    if a.en and a.datum == "auto":
+        grund = laufendes_format_zu_jung(baum)
+        if grund:
+            print(json.dumps({"uebersprungen": grund}, ensure_ascii=False))
+            return 0
     datum = auto_datum(baum) if a.datum == "auto" else a.datum
     # stdout traegt NUR die Ergebniszeile: setwechsel-probe.yml liest sie
     # als JSON. Das Protokoll von update_sets.py („[Update Sets] …") ging

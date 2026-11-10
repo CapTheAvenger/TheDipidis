@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt": "2026-11-10T17:31:33Z",
+  "erzeugt": "2026-11-10T18:23:45Z",
   "erzeuger": "scripts/datenluecken.py",
   "anzahl": 9,
   "jeKlasse": {
@@ -38,9 +38,7 @@
    }
   },
   "zweck": "Eingelesen vom Admin-Bereich (#admin). Nur Bestandsaufnahme — dieses Skript aendert keine Daten.",
-  "nichtGemessen": [
-   "kartentyp"
-  ]
+  "nichtGemessen": []
  },
  "luecken": [
   {

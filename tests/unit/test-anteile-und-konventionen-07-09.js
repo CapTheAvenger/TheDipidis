@@ -38,6 +38,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const { ZAHL_KOMMA_SRC, zahlKommaEinsetzen } = require('./lib-zahlkomma-sandkasten.js');
+const { jungesFormat } = require('./lib-junges-format.js');
 /* zahlKomma() aus js/app-utils.js — im Browser laedt index.html sie vor
    jedem Aufrufer, der Sandkasten muss sie deshalb ebenfalls kennen. */
 const zahlKomma = new Function(ZAHL_KOMMA_SRC + '\nreturn zahlKomma;')();
@@ -658,7 +659,7 @@ describe('B5 — eine Kennzahl, ein Name', () => {
 
 describe('B6 — roher Schnitt neben geglaetteten Zellen, und es steht da', () => {
 
-    it('die Kachel rechnet roh — nachgerechnet an denselben Zeilen', () => {
+    it('die Kachel rechnet roh — nachgerechnet an denselben Zeilen', (t) => {
         const s = cmSandkasten({ sprache: 'de' });
         vm.runInContext(cmStueck('function _cmTop20Schnitt(deckStats, matchupData, cleanArch, matchKey)'),
             s.kontext);
@@ -666,6 +667,8 @@ describe('B6 — roher Schnitt neben geglaetteten Zellen, und es steht da', () =
         const deck = DECKS[0].deck_name;
         const erg = vm.runInContext('_cmTop20Schnitt(stats, mus, name, (x) => String(x).toLowerCase())',
             Object.assign(s.kontext, { stats, mus: MU, name: deck.toLowerCase() }));
+        const jf = jungesFormat(path.join(__dirname, '..', '..'));
+        if (!(erg.partien > 0) && jf.jung) return t.skip(jf.grund);
         assert.ok(erg.partien > 0, 'kein Top-20-Schnitt fuer die erste Zeile der Datei — '
             + 'dann prueft diese Zusicherung nichts');
         /* Der Sollwert kommt aus derselben Datei, ohne Glaettung. */

@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-10T06:43:43Z",
+  "erzeugt_am": "2026-11-10T20:22:58Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1681,7 +1681,7 @@
   "name": "Sharpedo Toxtricity",
   "online": {
    "anteil": "1,56",
-   "anteil14": "1,98",
+   "anteil14": "2,01",
    "bilanz": [
     46,
     52,

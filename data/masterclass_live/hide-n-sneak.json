@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-10T06:43:43Z",
+  "erzeugt_am": "2026-11-10T20:22:58Z",
   "id": "hide-n-sneak",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1846,7 +1846,7 @@
   "name": "Dhelmise",
   "online": {
    "anteil": "3,25",
-   "anteil14": "3,14",
+   "anteil14": "3,17",
    "bilanz": [
     116,
     129,

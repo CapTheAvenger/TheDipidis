@@ -2,10 +2,10 @@
   "fenster_von": "2026-11-09",
   "fenster_bis": "2026-11-10",
   "fenster_tage": 1,
-  "decks_im_fenster": 860,
-  "decks_differenz_roh": 858,
+  "decks_im_fenster": 945,
+  "decks_differenz_roh": 943,
   "vorfenster_von": null,
   "nicht_im_fenster_entstanden": 0,
-  "decks_kumulativ": 2340,
+  "decks_kumulativ": 2425,
   "staende_vorhanden": 96
 }

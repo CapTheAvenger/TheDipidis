@@ -65,6 +65,13 @@ describe('Showdown-Vorlagen: welches Major', () => {
         assert.equal(r.major.tournament_name, 'Nice');
         assert.deepEqual(r.ohneListen.map((x) => x.name), ['Puebla']);
     });
+    it('ein Major aus dem alten Format fehlt nicht, es zaehlt nicht mehr (Setwechsel DLR, 11.11.2026)', () => {
+        const r = V.waehleMajor(majors, new Map(), '2026-11-06');
+        assert.equal(r.major, null);
+        assert.deepEqual(r.ohneListen, [], 'Majors vor dem Formatbeginn wurden als „ohne Listen“ gemeldet');
+        const ohne = V.waehleMajor(majors, new Map());
+        assert.equal(ohne.ohneListen.length, 3, 'Gegenprobe: ohne Formatbeginn zaehlen alle drei');
+    });
 });
 
 describe('Showdown-Vorlagen: Titelkarte', () => {

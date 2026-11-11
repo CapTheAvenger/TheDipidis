@@ -2,6 +2,7 @@
  "_meta": {
   "beschreibung": "Deckvorlagen fuer TCG Showdown: Tier 1–3 des aktuellen Metas, je Archetyp die bestplatzierte Liste des juengsten Majors mit Listen, sonst die beste Online-Liste. Erzeugt von scripts/showdown_vorlagen.js.",
   "format": "TEF-DLR",
+  "format_seit": "2026-11-06",
   "tier_quelle": "js/app-tier-meta.js (computeTierScore, gleiche Grenzen) ohne Labs-Auszug",
   "grenzen": {
    "T1_MAX": 6,
@@ -12,43 +13,7 @@
    "MINDEST_ANTEIL_GROESSTER": 0.1
   },
   "major": null,
-  "majors_ohne_listen": [
-   {
-    "id": "0079",
-    "name": "Regional Championship Gdańsk",
-    "datum": "2026-10-31"
-   },
-   {
-    "id": "0078",
-    "name": "Regional Championship Puebla",
-    "datum": "2026-10-24"
-   },
-   {
-    "id": "0077",
-    "name": "Regional Championship Nice",
-    "datum": "2026-10-17"
-   },
-   {
-    "id": "0076",
-    "name": "Regional Championship Louisville",
-    "datum": "2026-10-09"
-   },
-   {
-    "id": "0075",
-    "name": "Regional Championship Recife",
-    "datum": "2026-10-03"
-   },
-   {
-    "id": "0074",
-    "name": "Regional Championship Frankfurt",
-    "datum": "2026-09-26"
-   },
-   {
-    "id": "0073",
-    "name": "Regional Championship Brisbane",
-    "datum": "2026-09-26"
-   }
-  ],
+  "majors_ohne_listen": [],
   "ohne_liste": [],
   "anzahl": 23
  },

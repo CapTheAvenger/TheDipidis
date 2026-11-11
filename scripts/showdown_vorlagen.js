@@ -159,9 +159,14 @@ function namensbruecke() {
 }
 
 // ── 3. Listen der Majors ────────────────────────────────────────────────
-/** Juengstes Major mit Listen; juengere ohne Listen werden mitgenannt. */
-function waehleMajor(majors, jeTurnier) {
-    const sortiert = majors.filter((t) => t.tournament_id && t.tournament_date)
+/**
+ * Juengstes Major mit Listen; juengere ohne Listen werden mitgenannt.
+ * abDatum: erster Tag des laufenden Formats (format_window.set_release_date). Ein Major davor lief im alten
+ * Format — es fehlen ihm keine Listen, es gehoert nur nicht mehr dazu (11.11.2026: nach dem Wechsel auf DLR
+ * nannte die Seite Gdańsk … Brisbane als „noch keine Listen“, obwohl alle Listen da sind, nur in TEF-30C).
+ */
+function waehleMajor(majors, jeTurnier, abDatum) {
+    const sortiert = majors.filter((t) => t.tournament_id && t.tournament_date && (!abDatum || String(t.tournament_date) >= abDatum))
         .slice().sort((a, b) => String(b.tournament_date).localeCompare(String(a.tournament_date)));
     const ohneListen = [];
     for (const t of sortiert) {
@@ -172,7 +177,7 @@ function waehleMajor(majors, jeTurnier) {
     return { major: null, zeilen: [], ohneListen };
 }
 
-function majorListen(formatKey) {
+function majorListen(formatKey, abDatum) {
     const majors = JSON.parse(lies('labs_tournaments.json'));
     const jeTurnier = new Map();
     // SC-45: Auszuege je Format und Monat, nur die des gewuenschten Formats
@@ -181,7 +186,7 @@ function majorListen(formatKey) {
         if (!jeTurnier.has(r.tournament_id)) jeTurnier.set(r.tournament_id, []);
         jeTurnier.get(r.tournament_id).push(r);
     }
-    return waehleMajor(majors, jeTurnier);
+    return waehleMajor(majors, jeTurnier, abDatum);
 }
 
 function bestenJeArchetyp(zeilen, kanon) {
@@ -283,7 +288,7 @@ function erzeuge() {
     const formatKey = `${String(fw.oldest_legal_set).toUpperCase()}-${String(fw.current_set).toUpperCase()}`;
     const { tiers, labs, grenzen } = tierEinteilung(formatKey);
     const kanon = namensbruecke();
-    const { major, zeilen, ohneListen } = majorListen(formatKey);
+    const { major, zeilen, ohneListen } = majorListen(formatKey, fw.set_release_date || null);
     const beste = bestenJeArchetyp(zeilen, kanon);
     const online = JSON.parse(lies('online_best_decklists.json'));
 
@@ -322,6 +327,7 @@ function erzeuge() {
         _meta: {
             beschreibung: 'Deckvorlagen fuer TCG Showdown: Tier 1–3 des aktuellen Metas, je Archetyp die bestplatzierte Liste des juengsten Majors mit Listen, sonst die beste Online-Liste. Erzeugt von scripts/showdown_vorlagen.js.',
             format: formatKey,
+            format_seit: fw.set_release_date || null,
             tier_quelle: 'js/app-tier-meta.js (computeTierScore, gleiche Grenzen)' + (labs ? ' mit Labs-Auszug' : ' ohne Labs-Auszug'),
             grenzen,
             major: major ? { id: major.tournament_id, name: major.tournament_name, datum: major.tournament_date } : null,

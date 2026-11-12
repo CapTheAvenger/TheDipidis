@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-11-11",
+    "last_updated": "2026-11-12",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-C=gid2001945654, M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-C",
@@ -11,7 +11,7 @@
       "M-B",
       "M-A"
     ],
-    "team_count": 62
+    "team_count": 103
   },
   "teams": [
     {
@@ -3481,6 +3481,3754 @@
     },
     {
       "rank": 36,
+      "replica_code": "X11HA44MJ7",
+      "team_name": "Santino's 2027 Global Challenge II Top 16 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Santino Tarquinio",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "10th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/8b72bdb6f1469837",
+      "pokemon": [
+        {
+          "name": "Incineroar",
+          "item": "Chople Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 20 Def / 14 SpD",
+          "nature": "Sassy",
+          "moves": [
+            "Protect",
+            "Fake Out",
+            "Flare Blitz",
+            "Parting Shot"
+          ]
+        },
+        {
+          "name": "Kommo-o",
+          "item": "Leftovers",
+          "ability": "Bulletproof",
+          "tera_type": "",
+          "evs": "10 HP / 24 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Protect",
+            "Clangorous Soul",
+            "Clanging Scales",
+            "Aura Sphere"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "20 HP / 32 Atk / 1 Def / 13 SpD",
+          "nature": "Brave",
+          "moves": [
+            "Protect",
+            "Fake Out",
+            "Grassy Glide",
+            "U-turn"
+          ]
+        },
+        {
+          "name": "Primarina",
+          "item": "Sitrus Berry",
+          "ability": "Liquid Voice",
+          "tera_type": "",
+          "evs": "32 HP / 20 Def / 14 SpD",
+          "nature": "Sassy",
+          "moves": [
+            "Protect",
+            "Perish Song",
+            "Hyper Voice",
+            "Moonblast"
+          ]
+        },
+        {
+          "name": "Gengar",
+          "item": "Gengarite",
+          "ability": "Cursed Body",
+          "tera_type": "",
+          "evs": "32 HP / 26 SpD / 8 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Protect",
+            "Perish Song",
+            "Substitute",
+            "Shadow Ball"
+          ]
+        },
+        {
+          "name": "Annihilape",
+          "item": "Choice Scarf",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Phantom Force",
+            "Rock Slide",
+            "U-turn"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 37,
+      "replica_code": "2AJ95SDGY5",
+      "team_name": "lix12_poke's 2027 Global Challenge II Top 16 Team (Seniors)",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "lix12_poke",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "10th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/a8cbb09f8e62d226",
+      "pokemon": [
+        {
+          "name": "Basculegion-F",
+          "item": "Life Orb",
+          "ability": "Swift Swim",
+          "tera_type": "",
+          "evs": "2 Def / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Muddy Water",
+            "Shadow Ball",
+            "Ice Beam",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Aerodactyl",
+          "item": "Aerodactylite",
+          "ability": "Unnerve",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Rock Slide",
+            "Dual Wingbeat",
+            "Tailwind",
+            "Wide Guard"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Focus Sash",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "32 Atk / 32 Spe",
+          "nature": "Naive",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Coaching",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Golisopod",
+          "item": "Golisopite",
+          "ability": "Emergency Exit",
+          "tera_type": "",
+          "evs": "31 HP / 32 Atk / 2 SpD / 1 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Leech Life",
+            "Iron Head",
+            "Sucker Punch",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Archaludon",
+          "item": "Leftovers",
+          "ability": "Stamina",
+          "tera_type": "",
+          "evs": "30 HP / 1 Def / 19 SpD / 16 Spe",
+          "nature": "Calm",
+          "moves": [
+            "Dragon Pulse",
+            "Electro Shot",
+            "Snarl",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Pelipper",
+          "item": "Choice Scarf",
+          "ability": "Drizzle",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Muddy Water",
+            "Hurricane",
+            "Ice Beam",
+            "Rain Dance"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 38,
+      "replica_code": "KHDQPSFP8C",
+      "team_name": "habakamiyudai's 2027 Global Challenge II Top 16 Team (Seniors)",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "habakamiyudai",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "14th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/d9915c459ab8b824",
+      "pokemon": [
+        {
+          "name": "Staraptor",
+          "item": "Staraptite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "15 HP / 20 Atk / 31 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Brave Bird",
+            "Close Combat",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Psychic Seed",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "32 HP / 2 Def / 32 SpA",
+          "nature": "Modest",
+          "moves": [
+            "Expanding Force",
+            "Hyper Voice",
+            "Nasty Plot",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Sitrus Berry",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Psychic",
+            "Follow Me",
+            "Helping Hand",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Life Orb",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 14 Def / 20 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 25 Atk / 9 Def",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Sucker Punch",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Raichu",
+          "item": "Focus Sash",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Thunderbolt",
+            "Charm",
+            "Encore",
+            "Fake Out"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 39,
+      "replica_code": "7PR2WE5XGH",
+      "team_name": "pikapatVGC's 2027 Global Challenge II Top 32 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "pikapatVGC",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "19th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/2d8e59376dc45011",
+      "pokemon": [
+        {
+          "name": "Sneasler",
+          "item": "White Herb",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Protect",
+            "Fake Out",
+            "Close Combat",
+            "Dire Claw"
+          ]
+        },
+        {
+          "name": "Gholdengo",
+          "item": "Life Orb",
+          "ability": "Good as Gold",
+          "tera_type": "",
+          "evs": "7 HP / 1 Def / 32 SpA / 5 SpD / 21 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Protect",
+            "Make It Rain",
+            "Shadow Ball",
+            "Nasty Plot"
+          ]
+        },
+        {
+          "name": "Altaria",
+          "item": "Altarianite",
+          "ability": "Cloud Nine",
+          "tera_type": "",
+          "evs": "28 HP / 30 SpA / 8 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Protect",
+            "Hyper Voice",
+            "Draco Meteor",
+            "Tailwind"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "17 HP / 25 Atk / 1 Def / 21 SpD / 2 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Fake Out",
+            "Grassy Glide",
+            "Wood Hammer",
+            "U-turn"
+          ]
+        },
+        {
+          "name": "Rotom-Heat",
+          "item": "Choice Scarf",
+          "ability": "Levitate",
+          "tera_type": "",
+          "evs": "20 HP / 15 SpA / 31 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Overheat",
+            "Thunderbolt",
+            "Volt Switch",
+            "Electroweb"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Protect",
+            "Liquidation",
+            "Last Respects",
+            "Aqua Jet"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 40,
+      "replica_code": "8U33UA8GLY",
+      "team_name": "yuukari's 2027 Global Challenge II Top 32 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "yuukari",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "30th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/834da98b01e1b35d",
+      "pokemon": [
+        {
+          "name": "Gholdengo",
+          "item": "Choice Scarf",
+          "ability": "Good as Gold",
+          "tera_type": "",
+          "evs": "32 SpA / 2 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Make It Rain",
+            "Shadow Ball",
+            "Power Gem",
+            "Trick"
+          ]
+        },
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "28 HP / 4 Def / 16 SpA / 18 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Moonblast",
+            "Dazzling Gleam",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "White Herb",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "20 Atk / 14 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Close Combat",
+            "Dire Claw",
+            "Throat Chop",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Sitrus Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "31 HP / 27 Def / 8 SpD",
+          "nature": "Impish",
+          "moves": [
+            "Flare Blitz",
+            "Darkest Lariat",
+            "Fake Out",
+            "Parting Shot"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Dragoninite",
+          "ability": "Inner Focus",
+          "tera_type": "",
+          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Heat Wave",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "31 HP / 25 Atk / 10 SpD",
+          "nature": "Adamant",
+          "moves": [
+            "Wood Hammer",
+            "Grassy Glide",
+            "U-turn",
+            "Fake Out"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 41,
+      "replica_code": "CMB286EHE7",
+      "team_name": "nunopoken's 2027 Global Challenge II Top 64 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "nunopoken",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "35th",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/7ae8b0880ddfb33a",
+      "pokemon": [
+        {
+          "name": "Salamence",
+          "item": "Salamencite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "13 HP / 1 Atk / 28 SpD / 24 Spe",
+          "nature": "Hasty",
+          "moves": [
+            "Hyper Voice",
+            "Double-Edge",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Rindo Berry",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "13 HP / 18 Atk / 7 Def / 12 SpD / 16 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Fairy Feather",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "23 HP / 6 Def / 20 SpA / 17 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Moonblast",
+            "Quick Attack",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Kommo-o",
+          "item": "Focus Sash",
+          "ability": "Soundproof",
+          "tera_type": "",
+          "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Clanging Scales",
+            "Aura Sphere",
+            "Flamethrower",
+            "Vacuum Wave"
+          ]
+        },
+        {
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "32 HP / 2 Def / 3 SpD / 29 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Zap Cannon",
+            "Encore",
+            "Fake Out",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 15 Atk / 16 Def / 3 SpD",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Low Kick",
+            "Sucker Punch"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 42,
+      "replica_code": "XAQKWTUVKY",
+      "team_name": "U_DonPM's 2027 Global Challenge II Top 64 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "U_DonPM",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "43rd",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/4d84f6ddf8d6f582",
+      "pokemon": [
+        {
+          "name": "Metagross-Mega",
+          "item": "Metagrossite",
+          "ability": "Tough Claws",
+          "tera_type": "",
+          "evs": "9 HP / 32 Atk / 25 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Thunder Punch",
+            "Hammer Arm",
+            "Psychic Fangs",
+            "Stomping Tantrum"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Sitrus Berry",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "31 HP / 22 Def / 13 SpD",
+          "nature": "Bold",
+          "moves": [
+            "Psychic",
+            "Helping Hand",
+            "Trick Room",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Charcoal",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "31 HP / 32 Atk / 3 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Flare Blitz",
+            "Darkest Lariat",
+            "Parting Shot",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Fairy Feather",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "11 HP / 32 Def / 21 SpA / 2 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Moonblast",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp-Mega-Z",
+          "item": "Garchompite Z",
+          "ability": "Sand Veil",
+          "tera_type": "",
+          "evs": "8 HP / 4 Def / 32 SpA / 1 SpD / 21 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Earth Power",
+            "Draco Meteor",
+            "Power Gem",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Drampa",
+          "item": "Life Orb",
+          "ability": "Cloud Nine",
+          "tera_type": "",
+          "evs": "32 HP / 32 SpA / 2 SpD",
+          "nature": "Quiet",
+          "moves": [
+            "Earth Power",
+            "Flamethrower",
+            "Dragon Pulse",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 43,
+      "replica_code": "WTSS85SG4F",
+      "team_name": "satorungo's 2027 Global Challenge II Top 64 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Satoru Nishigai",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "44th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/579a832b7c25abfd",
+      "pokemon": [
+        {
+          "name": "Whimsicott",
+          "item": "Focus Sash",
+          "ability": "Prankster",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Moonblast",
+            "Tailwind",
+            "Sunny Day",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "16 HP / 18 Def / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Weather Ball",
+            "Solar Beam",
+            "Heat Wave",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Earthquake",
+            "Dragon Claw",
+            "Stomping Tantrum",
+            "Rock Slide"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Life Orb",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "4 HP / 15 Atk / 23 Def / 24 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "22 HP / 9 Def / 20 SpA / 15 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Moonblast",
+            "Dazzling Gleam",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Sitrus Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 10 Def / 17 SpD / 7 Spe",
+          "nature": "Careful",
+          "moves": [
+            "Flare Blitz",
+            "Snarl",
+            "Fake Out",
+            "Parting Shot"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 44,
+      "replica_code": "G43HEB8MTL",
+      "team_name": "tooshi_ptcg's 2027 Global Challenge II Top 64 Team (Seniors)",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "tooshi_ptcg",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "44th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/9ceb7843759e65e6",
+      "pokemon": [
+        {
+          "name": "Gengar",
+          "item": "Gengarite",
+          "ability": "Cursed Body",
+          "tera_type": "",
+          "evs": "32 HP / 5 Def / 10 SpA / 12 SpD / 7 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Shadow Ball",
+            "Sludge Bomb",
+            "Perish Song",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Sitrus Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "31 HP / 15 Def / 20 SpD",
+          "nature": "Sassy",
+          "moves": [
+            "Fake Out",
+            "Flare Blitz",
+            "Parting Shot",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Kebia Berry",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "32 HP / 2 Def / 32 SpD",
+          "nature": "Sassy",
+          "moves": [
+            "Fake Out",
+            "Grassy Glide",
+            "U-turn",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Politoed",
+          "item": "Grassy Seed",
+          "ability": "Drizzle",
+          "tera_type": "",
+          "evs": "31 HP / 23 Def / 12 SpD",
+          "nature": "Calm",
+          "moves": [
+            "Weather Ball",
+            "Perish Song",
+            "Encore",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sinistcha",
+          "item": "Eject Button",
+          "ability": "Hospitality",
+          "tera_type": "",
+          "evs": "30 HP / 15 Def / 21 SpD",
+          "nature": "Calm",
+          "moves": [
+            "Matcha Gotcha",
+            "Rage Powder",
+            "Life Dew",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kommo-o",
+          "item": "Leftovers",
+          "ability": "Soundproof",
+          "tera_type": "",
+          "evs": "11 HP / 1 Def / 20 SpA / 2 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Aura Sphere",
+            "Clanging Scales",
+            "Clangorous Soul",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 45,
+      "replica_code": "VDHSBG9VAQ",
+      "team_name": "K's 2027 Global Challenge II Top 64 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "K",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "48th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/67226052054745c9",
+      "pokemon": [
+        {
+          "name": "Drampa",
+          "item": "Haban Berry",
+          "ability": "Cloud Nine",
+          "tera_type": "",
+          "evs": "32 HP / 9 Def / 25 SpA",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Grass Knot",
+            "Heat Wave",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Rocky Helmet",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 31 Def / 2 SpD / 1 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Psychic",
+            "Follow Me",
+            "Skill Swap",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Choice Scarf",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "26 Atk / 8 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Flip Turn",
+            "Aqua Jet"
+          ]
+        },
+        {
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "32 HP / 7 Def / 1 SpD / 26 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Zap Cannon",
+            "Focus Blast",
+            "Encore",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Psychic Seed",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Close Combat",
+            "Dire Claw",
+            "Throat Chop",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Armarouge",
+          "item": "Focus Sash",
+          "ability": "Weak Armor",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Expanding Force",
+            "Armor Cannon",
+            "Wide Guard",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 46,
+      "replica_code": "K8JFC99UYB",
+      "team_name": "siratama090177's 2027 Global Challenge II Top 64 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "siratama090177",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "53rd",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/8b60c2e5af04c85a",
+      "pokemon": [
+        {
+          "name": "Raichu",
+          "item": "Focus Sash",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "2 Def / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Thunderbolt",
+            "Charm",
+            "Fake Out",
+            "Encore"
+          ]
+        },
+        {
+          "name": "Staraptor",
+          "item": "Staraptite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "23 HP / 15 Atk / 28 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Brave Bird",
+            "Close Combat",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 25 Atk / 8 Def / 1 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Sucker Punch",
+            "Iron Head",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Armarouge",
+          "item": "Life Orb",
+          "ability": "Flash Fire",
+          "tera_type": "",
+          "evs": "3 HP / 31 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Heat Wave",
+            "Expanding Force",
+            "Wide Guard",
+            "Ally Switch"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Sitrus Berry",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Bold",
+          "moves": [
+            "Follow Me",
+            "Psychic",
+            "Helping Hand",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Rindo Berry",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "12 HP / 13 Atk / 16 Def / 6 SpD / 19 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 47,
+      "replica_code": "K51K78VAAN",
+      "team_name": "snm_774's 2027 Global Challenge II Top 64 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "snm_774",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "58th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/cade390da4f4b45b",
+      "pokemon": [
+        {
+          "name": "Sneasler",
+          "item": "Life Orb",
+          "ability": "Poison Touch",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Fake Out",
+            "Rock Slide"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 20 Atk / 5 Def / 9 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Low Kick",
+            "Sucker Punch"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Liquidation",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Claw",
+            "Stomping Tantrum",
+            "Rock Slide",
+            "Earthquake"
+          ]
+        },
+        {
+          "name": "Delphox",
+          "item": "Delphoxite",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "17 HP / 5 Def / 12 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Psychic",
+            "Encore",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Dragoninite",
+          "ability": "Inner Focus",
+          "tera_type": "",
+          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Heat Wave",
+            "Extreme Speed",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 48,
+      "replica_code": "J826EGJ4UX",
+      "team_name": "natsumewato's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "natsumewato",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "65th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/99fdc9d0f7c73553",
+      "pokemon": [
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "28 HP / 4 Def / 2 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Weather Ball",
+            "Heat Wave",
+            "Ancient Power",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Venusaur",
+          "item": "Focus Sash",
+          "ability": "Chlorophyll",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Sleep Powder",
+            "Sludge Bomb",
+            "Leaf Storm",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "9 HP / 10 Atk / 19 SpD / 28 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Earthquake",
+            "Stomping Tantrum",
+            "Dragon Claw",
+            "Rock Slide"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Sitrus Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 5 Atk / 7 Def / 21 SpD / 1 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Flare Blitz",
+            "Darkest Lariat",
+            "Parting Shot",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Fairy Feather",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "19 HP / 27 Def / 20 SpA",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Moonblast",
+            "Yawn",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Twisted Spoon",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "23 HP / 20 Def / 23 SpD",
+          "nature": "Relaxed",
+          "moves": [
+            "Psychic",
+            "Trick Room",
+            "Helping Hand",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 49,
+      "replica_code": "HWJP9LX695",
+      "team_name": "oldamber_poke's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "oldamber_poke",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "70th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/558a3e68cd09362e",
+      "pokemon": [
+        {
+          "name": "Dragonite",
+          "item": "Dragoninite",
+          "ability": "Inner Focus",
+          "tera_type": "",
+          "evs": "18 HP / 25 SpA / 2 SpD / 21 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Heat Wave",
+            "Thunderbolt",
+            "Tailwind"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "32 Atk / 2 SpD / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Earthquake",
+            "Rock Slide",
+            "Stomping Tantrum",
+            "Dragon Claw"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Life Orb",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "26 Atk / 14 Def / 26 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Focus Sash",
+          "ability": "Poison Touch",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Fake Out",
+            "Feint"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 15 Atk / 14 Def / 5 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Sucker Punch",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Delphox",
+          "item": "Delphoxite",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "1 HP / 2 Def / 31 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Psychic",
+            "Encore",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 50,
+      "replica_code": "F209748LA2",
+      "team_name": "mintia0810's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Kento Sato",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "72nd",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/581f5cb83d4d492f",
+      "pokemon": [
+        {
+          "name": "Sneasler",
+          "item": "Focus Sash",
+          "ability": "Poison Touch",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Dire Claw",
+            "Fake Out",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Life Orb",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "25 Atk / 14 Def / 27 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Dragoninite",
+          "ability": "Inner Focus",
+          "tera_type": "",
+          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Flamethrower",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 17 Atk / 2 Def / 14 SpD / 1 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Sucker Punch",
+            "Iron Head",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Volcarona",
+          "item": "Sitrus Berry",
+          "ability": "Flame Body",
+          "tera_type": "",
+          "evs": "32 HP / 25 Def / 1 SpA / 8 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Overheat",
+            "Struggle Bug",
+            "Rage Powder",
+            "Whirlwind"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Claw",
+            "Stomping Tantrum",
+            "Rock Slide",
+            "Earthquake"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 51,
+      "replica_code": "7LMD0PPFBN",
+      "team_name": "MikaMika_tti's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "MikaMika_tti",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "74th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/4f169bb50bfb456d",
+      "pokemon": [
+        {
+          "name": "Archaludon",
+          "item": "Air Balloon",
+          "ability": "Sturdy",
+          "tera_type": "",
+          "evs": "32 SpA / 2 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Electro Shot",
+            "Protect",
+            "Draco Meteor",
+            "Aura Sphere"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Sitrus Berry",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Bold",
+          "moves": [
+            "Follow Me",
+            "Helping Hand",
+            "Psychic",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Psychic Seed",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Rock Slide",
+            "Close Combat",
+            "Dire Claw",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Choice Scarf",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Aqua Jet",
+            "Last Respects",
+            "Flip Turn"
+          ]
+        },
+        {
+          "name": "Gardevoir",
+          "item": "Gardevoirite",
+          "ability": "Trace",
+          "tera_type": "",
+          "evs": "2 Def / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Protect",
+            "Expanding Force",
+            "Mystical Fire",
+            "Hyper Voice"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Focus Sash",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Low Kick",
+            "Kowtow Cleave",
+            "Protect",
+            "Sucker Punch"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 52,
+      "replica_code": "EURSHS4T1Y",
+      "team_name": "Shuuka's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Aki Shibuya",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "92nd",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/2522d52b3591c103",
+      "pokemon": [
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Symbiosis",
+          "tera_type": "",
+          "evs": "28 HP / 19 Def / 15 SpA / 4 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Moonblast",
+            "Dazzling Gleam",
+            "Light of Ruin",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "8 Atk / 26 SpD / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Earthquake",
+            "Dragon Claw",
+            "Stomping Tantrum",
+            "Rock Tomb"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Liquidation",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Dragoninite",
+          "ability": "Multiscale",
+          "tera_type": "",
+          "evs": "9 HP / 25 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Flamethrower",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Rocky Helmet",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Relaxed",
+          "moves": [
+            "Psychic",
+            "Helping Hand",
+            "Follow Me",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Charcoal",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 16 Atk / 18 SpD",
+          "nature": "Adamant",
+          "moves": [
+            "Flare Blitz",
+            "Snarl",
+            "Fake Out",
+            "Parting Shot"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 53,
+      "replica_code": "XRWKCU45WC",
+      "team_name": "mizusa_poke's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "mizusa_poke",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "95th",
+      "date_shared": "5 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/bd5ac21e41a8b581",
+      "pokemon": [
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "10 HP / 8 Def / 27 SpA / 21 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Moonblast",
+            "Dazzling Gleam",
+            "Light of Ruin",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Dragoninite",
+          "ability": "Inner Focus",
+          "tera_type": "",
+          "evs": "15 HP / 30 SpA / 21 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Heat Wave",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 23 Atk / 2 Def / 8 SpD / 1 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Sucker Punch",
+            "Kowtow Cleave",
+            "Low Kick",
+            "Iron Head"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Focus Sash",
+          "ability": "Poison Touch",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Dire Claw",
+            "Fake Out",
+            "Feint"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Colbur Berry",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "4 HP / 18 Atk / 12 Def / 12 SpD / 20 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Life Orb",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 2 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Grassy Glide",
+            "Wood Hammer",
+            "High Horsepower",
+            "Fake Out"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 54,
+      "replica_code": "BP8NN87JBU",
+      "team_name": "narato_poke's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "narato_poke",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "99th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/e485b50053a1e967",
+      "pokemon": [
+        {
+          "name": "Indeedee-F",
+          "item": "Rocky Helmet",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Relaxed",
+          "moves": [
+            "Psychic",
+            "Trick Room",
+            "Follow Me",
+            "Helping Hand"
+          ]
+        },
+        {
+          "name": "Armarouge",
+          "item": "Focus Sash",
+          "ability": "Flash Fire",
+          "tera_type": "",
+          "evs": "2 Def / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Armor Cannon",
+            "Expanding Force",
+            "Ally Switch",
+            "Wide Guard"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Psychic Seed",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Rock Slide",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Golisopod",
+          "item": "Golisopite",
+          "ability": "Emergency Exit",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 2 SpD",
+          "nature": "Brave",
+          "moves": [
+            "Leech Life",
+            "Close Combat",
+            "Swords Dance",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Occa Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 15 Atk / 19 SpD",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Sucker Punch",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "32 HP / 13 Def / 21 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Dazzling Gleam",
+            "Draining Kiss",
+            "Calm Mind",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 55,
+      "replica_code": "G5EMS9S8CA",
+      "team_name": "kaki's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "kaki",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "102nd",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/48e28c74bcbcc71b",
+      "pokemon": [
+        {
+          "name": "Pelipper",
+          "item": "Choice Scarf",
+          "ability": "Drizzle",
+          "tera_type": "",
+          "evs": "32 SpA / 2 SpD / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Muddy Water",
+            "Hurricane",
+            "Icy Wind",
+            "Rain Dance"
+          ]
+        },
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "16 HP / 18 Def / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Weather Ball",
+            "Protect",
+            "Ancient Power"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Liquidation",
+            "Protect",
+            "Last Respects",
+            "Aqua Jet"
+          ]
+        },
+        {
+          "name": "Archaludon",
+          "item": "White Herb",
+          "ability": "Sturdy",
+          "tera_type": "",
+          "evs": "32 SpA / 2 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Flash Cannon",
+            "Electro Shot",
+            "Draco Meteor",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Haban Berry",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Dragon Claw",
+            "Earthquake",
+            "Rock Slide",
+            "Dragon Tail"
+          ]
+        },
+        {
+          "name": "Metagross",
+          "item": "Metagrossite",
+          "ability": "Clear Body",
+          "tera_type": "",
+          "evs": "10 HP / 31 Atk / 25 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Psychic Fangs",
+            "Steel Roller",
+            "Stomping Tantrum",
+            "Bullet Punch"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 56,
+      "replica_code": "1FB5N56JE9",
+      "team_name": "kakunaka's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Shinichi Matsuda",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "103rd",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/dbc9a5038094c64f",
+      "pokemon": [
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "16 HP / 18 Def / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Weather Ball",
+            "Protect",
+            "Ancient Power"
+          ]
+        },
+        {
+          "name": "Metagross",
+          "item": "Metagrossite",
+          "ability": "Clear Body",
+          "tera_type": "",
+          "evs": "10 HP / 31 Atk / 25 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Psychic Fangs",
+            "Steel Roller",
+            "Stomping Tantrum",
+            "Bullet Punch"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Liquidation",
+            "Protect",
+            "Last Respects",
+            "Aqua Jet"
+          ]
+        },
+        {
+          "name": "Politoed",
+          "item": "Choice Scarf",
+          "ability": "Drizzle",
+          "tera_type": "",
+          "evs": "2 Def / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Muddy Water",
+            "Ice Beam",
+            "Rain Dance",
+            "Icy Wind"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Haban Berry",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Dragon Claw",
+            "Earthquake",
+            "Rock Slide",
+            "Dragon Tail"
+          ]
+        },
+        {
+          "name": "Archaludon",
+          "item": "White Herb",
+          "ability": "Sturdy",
+          "tera_type": "",
+          "evs": "32 SpA / 2 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Flash Cannon",
+            "Electro Shot",
+            "Draco Meteor",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 57,
+      "replica_code": "FQR86Y4K23",
+      "team_name": "chappi_1129's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "chappi_1129",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "111th",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/59629caeb7bafed4",
+      "pokemon": [
+        {
+          "name": "Sylveon",
+          "item": "Fairy Feather",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "13 HP / 30 SpA / 23 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Quick Attack",
+            "Yawn",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Life Orb",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "14 HP / 31 Atk / 21 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Sucker Punch",
+            "Low Kick",
+            "Swords Dance"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Rocky Helmet",
+          "ability": "Synchronize",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Bold",
+          "moves": [
+            "Fake Out",
+            "Psychic",
+            "Follow Me",
+            "Helping Hand"
+          ]
+        },
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "20 HP / 14 Def / 12 SpA / 20 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Heat Wave",
+            "Ancient Power",
+            "Sunny Day",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Salamence",
+          "item": "Salamencite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "13 HP / 1 Atk / 28 SpD / 24 Spe",
+          "nature": "Hasty",
+          "moves": [
+            "Hyper Voice",
+            "Double-Edge",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Liquidation",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 58,
+      "replica_code": "K6TA4CNWFQ",
+      "team_name": "Leunam's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Manuel Barea",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "118th",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/0b99fb1c9f8a9658",
+      "pokemon": [
+        {
+          "name": "Aegislash",
+          "item": "Kasib Berry",
+          "ability": "Stance Change",
+          "tera_type": "",
+          "evs": "27 HP / 32 Atk / 7 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Poltergeist",
+            "Iron Head",
+            "Wide Guard",
+            "King's Shield"
+          ]
+        },
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "20 HP / 16 Def / 11 SpA / 19 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Heat Wave",
+            "Weather Ball",
+            "Solar Beam",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Life Orb",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Dragon Claw",
+            "Earthquake",
+            "Rock Slide",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Glimmora",
+          "item": "Focus Sash",
+          "ability": "Toxic Debris",
+          "tera_type": "",
+          "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Power Gem",
+            "Sludge Bomb",
+            "Earth Power",
+            "Spiky Shield"
+          ]
+        },
+        {
+          "name": "Scrafty",
+          "item": "Scraftinite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "19 HP / 32 Atk / 15 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Knock Off",
+            "Close Combat",
+            "Fake Out",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Whimsicott",
+          "item": "Occa Berry",
+          "ability": "Prankster",
+          "tera_type": "",
+          "evs": "32 HP / 2 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Moonblast",
+            "Encore",
+            "Tailwind",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 59,
+      "replica_code": "51MXQ9LDE4",
+      "team_name": "charge_poke's 2027 Global Challenge II Top 128 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "charge_poke",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "121st",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/892396eb5199bb6f",
+      "pokemon": [
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Earthquake",
+            "Stomping Tantrum",
+            "Dragon Claw",
+            "Rock Slide"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Dragoninite",
+          "ability": "Inner Focus",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Heat Wave",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Focus Sash",
+          "ability": "Poison Touch",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Protect",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 19 Atk / 14 Def / 1 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Sucker Punch",
+            "Iron Head",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "32 HP / 9 Def / 7 SpD / 18 Spe",
+          "nature": "Calm",
+          "moves": [
+            "Heat Wave",
+            "Weather Ball",
+            "Solar Beam",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Kasib Berry",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "4 HP / 18 Atk / 20 Def / 8 SpD / 16 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Last Respects",
+            "Wave Crash",
+            "Aqua Jet",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 60,
+      "replica_code": "7D869YP7BE",
+      "team_name": "k_moou's 2027 Global Challenge II Top 256 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "k_moou",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "147th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/f4e8770591d65836",
+      "pokemon": [
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "32 HP / 12 Def / 1 SpA / 21 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Heat Wave",
+            "Weather Ball",
+            "Solar Beam",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Aerodactyl",
+          "item": "Aerodactylite",
+          "ability": "Unnerve",
+          "tera_type": "",
+          "evs": "10 HP / 23 Atk / 1 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Rock Slide",
+            "Dual Wingbeat",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Life Orb",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "31 Atk / 3 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Rock Slide",
+            "Earthquake",
+            "Dragon Claw",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Fairy Feather",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "7 HP / 22 Def / 20 SpA / 17 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Hyper Beam",
+            "Quick Attack",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Focus Sash",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Sucker Punch",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Sitrus Berry",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "27 HP / 20 Def / 19 SpD",
+          "nature": "Relaxed",
+          "moves": [
+            "Psychic",
+            "Thunderbolt",
+            "Trick Room",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 61,
+      "replica_code": "BLJLXF74HS",
+      "team_name": "newcon8's 2027 Global Challenge II Top 256 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "newcon8",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "159th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/040c125150378c78",
+      "pokemon": [
+        {
+          "name": "Dragonite",
+          "item": "Dragoninite",
+          "ability": "Multiscale",
+          "tera_type": "",
+          "evs": "19 HP / 32 SpA / 15 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Flamethrower",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "25 HP / 16 Def / 25 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Zap Cannon",
+            "Focus Blast",
+            "Fake Out",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "30 Atk / 4 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Claw",
+            "Earthquake",
+            "Rock Slide",
+            "Stomping Tantrum"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Liquidation",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 25 Atk / 3 Def / 5 SpD / 1 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Sucker Punch",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Fairy Feather",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "23 HP / 17 Def / 20 SpA / 6 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Hyper Beam",
+            "Quick Attack",
+            "Detect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 62,
+      "replica_code": "VGDP4630X8",
+      "team_name": "st_chame's 2027 Global Challenge II Top 256 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "st_chame",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "162nd",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/45947b24aee9e8f7",
+      "pokemon": [
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Solar Power",
+          "tera_type": "",
+          "evs": "14 HP / 20 Def / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Heat Wave",
+            "Weather Ball",
+            "Helping Hand",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Focus Sash",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 Atk / 2 SpD / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Protect",
+            "Sucker Punch",
+            "Kowtow Cleave",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Indeedee",
+          "item": "Choice Scarf",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Expanding Force",
+            "Psychic",
+            "Trick Room",
+            "Imprison"
+          ]
+        },
+        {
+          "name": "Salamence",
+          "item": "Salamencite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Hyper Voice",
+            "Flamethrower",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Whimsicott",
+          "item": "Life Orb",
+          "ability": "Chlorophyll",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Moonblast",
+            "Psychic",
+            "Tailwind",
+            "Sunny Day"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Psychic Seed",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Rock Slide",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 63,
+      "replica_code": "AVTF73NS47",
+      "team_name": "tako_dai_'s 2027 Global Challenge II Top 256 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "tako_dai_",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "169th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/fff688dc1fe3e8f7",
+      "pokemon": [
+        {
+          "name": "Gengar",
+          "item": "Focus Sash",
+          "ability": "Cursed Body",
+          "tera_type": "",
+          "evs": "32 HP / 32 SpA / 2 SpD",
+          "nature": "Quiet",
+          "moves": [
+            "Shadow Ball",
+            "Sludge Bomb",
+            "Destiny Bond",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Charcoal",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "31 HP / 32 Atk / 3 Def",
+          "nature": "Adamant",
+          "moves": [
+            "Flare Blitz",
+            "Throat Chop",
+            "Close Combat",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Life Orb",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 1 Def / 1 SpD",
+          "nature": "Brave",
+          "moves": [
+            "Wood Hammer",
+            "Grassy Glide",
+            "High Horsepower",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Archaludon",
+          "item": "Expert Belt",
+          "ability": "Stamina",
+          "tera_type": "",
+          "evs": "32 HP / 32 SpA / 2 SpD",
+          "nature": "Quiet",
+          "moves": [
+            "Electro Shot",
+            "Dragon Pulse",
+            "Aura Sphere",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Politoed",
+          "item": "Iron Ball",
+          "ability": "Drizzle",
+          "tera_type": "",
+          "evs": "32 HP / 1 Def / 32 SpA / 1 SpD",
+          "nature": "Quiet",
+          "moves": [
+            "Weather Ball",
+            "Muddy Water",
+            "Ice Beam",
+            "Rain Dance"
+          ]
+        },
+        {
+          "name": "Golisopod",
+          "item": "Golisopite",
+          "ability": "Emergency Exit",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 2 SpD",
+          "nature": "Brave",
+          "moves": [
+            "Leech Life",
+            "Iron Head",
+            "Sucker Punch",
+            "Close Combat"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 64,
+      "replica_code": "6E2GS1EWG7",
+      "team_name": "aqril15's 2027 Global Challenge II Top 256 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "aqril15",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "177th",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/44d3125b2faa0540",
+      "pokemon": [
+        {
+          "name": "Blastoise",
+          "item": "Blastoisinite",
+          "ability": "Rain Dish",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Water Spout",
+            "Terrain Pulse",
+            "Shell Smash",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Sitrus Berry",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Bold",
+          "moves": [
+            "Follow Me",
+            "Helping Hand",
+            "Psychic",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Gardevoir",
+          "item": "Gardevoirite",
+          "ability": "Trace",
+          "tera_type": "",
+          "evs": "8 HP / 1 Def / 25 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Hyper Voice",
+            "Expanding Force",
+            "Aura Sphere",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Hydreigon",
+          "item": "Focus Sash",
+          "ability": "Levitate",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Draco Meteor",
+            "Dark Pulse",
+            "Snarl",
+            "Tailwind"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Charcoal",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 5 Atk / 8 Def / 10 SpD / 11 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Flare Blitz",
+            "Roar",
+            "Fake Out",
+            "Parting Shot"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Psychic Seed",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Rock Tomb",
+            "Fake Out"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 65,
+      "replica_code": "NKLDK2E0AS",
+      "team_name": "bourgeois__poke's 2027 Global Challenge II Top 256 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "bourgeois__poke",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "178th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/1eaafe3540dae12d",
+      "pokemon": [
+        {
+          "name": "Dragonite",
+          "item": "Dragoninite",
+          "ability": "Inner Focus",
+          "tera_type": "",
+          "evs": "18 HP / 25 SpA / 2 SpD / 21 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Thunderbolt",
+            "Heat Wave",
+            "Tailwind"
+          ]
+        },
+        {
+          "name": "Delphox",
+          "item": "Leftovers",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "10 HP / 5 Def / 20 SpA / 2 SpD / 29 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Expanding Force",
+            "Imprison",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Glimmora",
+          "item": "Glimmoranite",
+          "ability": "Toxic Debris",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Power Gem",
+            "Sludge Bomb",
+            "Earth Power",
+            "Spiky Shield"
+          ]
+        },
+        {
+          "name": "Whimsicott",
+          "item": "Rocky Helmet",
+          "ability": "Prankster",
+          "tera_type": "",
+          "evs": "32 HP / 15 Def / 19 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Moonblast",
+            "Tailwind",
+            "Sunny Day",
+            "Encore"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Focus Sash",
+          "ability": "Poison Touch",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Fake Out",
+            "Dire Claw",
+            "Close Combat",
+            "Feint"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 17 Atk / 16 Def / 1 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Sucker Punch",
+            "Low Kick"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 66,
+      "replica_code": "0B0998RJPR",
+      "team_name": "the_sygard's 2027 Global Challenge II Top 300 Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "the_sygard",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "284th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/a3355008600db0d2",
+      "pokemon": [
+        {
+          "name": "Grimmsnarl",
+          "item": "Light Clay",
+          "ability": "Prankster",
+          "tera_type": "",
+          "evs": "31 HP / 20 Def / 15 SpD",
+          "nature": "Sassy",
+          "moves": [
+            "Spirit Break",
+            "Reflect",
+            "Light Screen",
+            "Parting Shot"
+          ]
+        },
+        {
+          "name": "Metagross",
+          "item": "Metagrossite",
+          "ability": "Clear Body",
+          "tera_type": "",
+          "evs": "31 HP / 25 Atk / 1 Def / 1 SpD / 8 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Steel Roller",
+            "Psychic Fangs",
+            "Stomping Tantrum",
+            "Bullet Punch"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Rock Slide",
+            "Dragon Claw",
+            "Earthquake",
+            "Stomping Tantrum"
+          ]
+        },
+        {
+          "name": "Pelipper",
+          "item": "Sitrus Berry",
+          "ability": "Drizzle",
+          "tera_type": "",
+          "evs": "32 HP / 5 SpA / 19 SpD / 10 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Weather Ball",
+            "Hurricane",
+            "Tailwind",
+            "Helping Hand"
+          ]
+        },
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "12 HP / 14 Def / 15 SpA / 1 SpD / 24 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Weather Ball",
+            "Hurricane",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Archaludon",
+          "item": "Leftovers",
+          "ability": "Stamina",
+          "tera_type": "",
+          "evs": "32 HP / 1 Def / 1 SpA / 32 SpD",
+          "nature": "Timid",
+          "moves": [
+            "Electro Shot",
+            "Snarl",
+            "Dragon Pulse",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 67,
+      "replica_code": "PJJLN7YQTE",
+      "team_name": "bdogplatinum's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Brandon Davis",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "357th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/9cdab14081096e42",
+      "pokemon": [
+        {
+          "name": "Scrafty",
+          "item": "Scraftinite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 30 Atk / 4 SpD",
+          "nature": "Adamant",
+          "moves": [
+            "Fake Out",
+            "Rock Slide",
+            "Close Combat",
+            "Knock Off"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Sitrus Berry",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "28 HP / 20 Def / 3 SpA / 15 SpD",
+          "nature": "Bold",
+          "moves": [
+            "Trick Room",
+            "Helping Hand",
+            "Twin Beam",
+            "Thunderbolt"
+          ]
+        },
+        {
+          "name": "Torkoal",
+          "item": "Life Orb",
+          "ability": "Drought",
+          "tera_type": "",
+          "evs": "32 HP / 2 Def / 32 SpA",
+          "nature": "Quiet",
+          "moves": [
+            "Helping Hand",
+            "Eruption",
+            "Weather Ball",
+            "Earth Power"
+          ]
+        },
+        {
+          "name": "Venusaur",
+          "item": "Focus Sash",
+          "ability": "Overgrow",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Protect",
+            "Leaf Storm",
+            "Sludge Bomb",
+            "Earth Power"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Garchompite",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "9 HP / 10 Atk / 21 SpD / 26 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Protect",
+            "Scale Shot",
+            "Stomping Tantrum",
+            "Rock Slide"
+          ]
+        },
+        {
+          "name": "Gholdengo",
+          "item": "Occa Berry",
+          "ability": "Good as Gold",
+          "tera_type": "",
+          "evs": "17 HP / 7 SpA / 22 SpD / 20 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Protect",
+            "Nasty Plot",
+            "Make It Rain",
+            "Shadow Ball"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 68,
+      "replica_code": "NH5KAB2FEC",
+      "team_name": "dummy0530's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "dummy0530",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "360th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/1ac1a4fe82187a23",
+      "pokemon": [
+        {
+          "name": "Gengar",
+          "item": "Gengarite",
+          "ability": "Cursed Body",
+          "tera_type": "",
+          "evs": "32 HP / 7 Def / 1 SpA / 19 SpD / 7 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Shadow Ball",
+            "Sludge Bomb",
+            "Perish Song",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Sitrus Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 20 Def / 13 SpD / 1 Spe",
+          "nature": "Impish",
+          "moves": [
+            "Throat Chop",
+            "Fake Out",
+            "Parting Shot",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Eject Button",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "32 HP / 3 Atk / 7 Def / 24 SpD",
+          "nature": "Sassy",
+          "moves": [
+            "Grassy Glide",
+            "Fake Out",
+            "U-turn",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kommo-o",
+          "item": "Leftovers",
+          "ability": "Soundproof",
+          "tera_type": "",
+          "evs": "5 HP / 29 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Clanging Scales",
+            "Clangorous Soul",
+            "Aura Sphere",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Scovillain",
+          "item": "Scovillainite",
+          "ability": "Moody",
+          "tera_type": "",
+          "evs": "32 HP / 15 Def / 19 SpD",
+          "nature": "Bold",
+          "moves": [
+            "Rage Powder",
+            "Overheat",
+            "Giga Drain",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Tyranitar",
+          "item": "Chople Berry",
+          "ability": "Sand Stream",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 2 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Rock Slide",
+            "Knock Off",
+            "Ice Punch",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 69,
+      "replica_code": "HD44APBCS7",
+      "team_name": "MobileEx's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "MobileEx",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "989th",
+      "date_shared": "4 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/de686e7cf74f89e9",
+      "pokemon": [
+        {
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "32 HP / 8 Def / 1 SpD / 25 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Zap Cannon",
+            "Focus Blast",
+            "Fake Out",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "12 HP / 27 Def / 5 SpA / 22 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Protect",
+            "Moonblast",
+            "Dazzling Gleam",
+            "Calm Mind"
+          ]
+        },
+        {
+          "name": "Volcarona",
+          "item": "Grassy Seed",
+          "ability": "Flame Body",
+          "tera_type": "",
+          "evs": "32 HP / 11 Def / 5 SpA / 1 SpD / 17 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Protect",
+            "Heat Wave",
+            "Giga Drain",
+            "Quiver Dance"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "32 HP / 15 Atk / 19 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wood Hammer",
+            "U-turn",
+            "Grassy Glide",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Sitrus Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "27 HP / 2 Def / 11 SpD / 26 Spe",
+          "nature": "Careful",
+          "moves": [
+            "Flare Blitz",
+            "Darkest Lariat",
+            "Fake Out",
+            "Parting Shot"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Choice Scarf",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "27 Atk / 11 Def / 28 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Flip Turn",
+            "Soak"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 70,
+      "replica_code": "KNBA0SNV8V",
+      "team_name": "sometimessidd's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "sometimessidd",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "1381st",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/f2a66a192f52ee7d",
+      "pokemon": [
+        {
+          "name": "Gardevoir",
+          "item": "Gardevoirite",
+          "ability": "Trace",
+          "tera_type": "",
+          "evs": "32 HP / 32 SpA / 2 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Psyshock",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "32 HP / 9 Def / 25 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Zap Cannon",
+            "Focus Blast",
+            "Fake Out",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Chople Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 16 Def / 18 SpD",
+          "nature": "Impish",
+          "moves": [
+            "Flare Blitz",
+            "Darkest Lariat",
+            "Fake Out",
+            "Parting Shot"
+          ]
+        },
+        {
+          "name": "Maushold",
+          "item": "Focus Sash",
+          "ability": "Friend Guard",
+          "tera_type": "",
+          "evs": "32 HP / 2 Def / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Super Fang",
+            "Beat Up",
+            "Follow Me",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "32 HP / 17 Atk / 3 SpD / 14 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wood Hammer",
+            "Grassy Glide",
+            "High Horsepower",
+            "Fake Out"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 71,
+      "replica_code": "WQBRGKATC2",
+      "team_name": "hiimjaguarr's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "hiimjaguarr",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "1813th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/4d2f660198ba3449",
+      "pokemon": [
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "20 HP / 31 Def / 1 SpA / 14 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Heat Wave",
+            "Protect",
+            "Weather Ball",
+            "Solar Beam"
+          ]
+        },
+        {
+          "name": "Gardevoir",
+          "item": "Gardevoirite",
+          "ability": "Trace",
+          "tera_type": "",
+          "evs": "30 HP / 3 Def / 25 SpA / 1 SpD / 7 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Expanding Force",
+            "Protect",
+            "Thunderbolt",
+            "Hyper Voice"
+          ]
+        },
+        {
+          "name": "Whimsicott",
+          "item": "Focus Sash",
+          "ability": "Prankster",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Moonblast",
+            "Protect",
+            "Tailwind",
+            "Sunny Day"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Rocky Helmet",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Relaxed",
+          "moves": [
+            "Follow Me",
+            "Trick Room",
+            "Helping Hand",
+            "Psychic"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "21 HP / 10 Atk / 6 Def / 1 SpD / 28 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Claw",
+            "Stomping Tantrum",
+            "Rock Slide",
+            "Earthquake"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Life Orb",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "3 HP / 32 Atk / 26 Def / 5 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Protect",
+            "Aqua Jet",
+            "Last Respects"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 72,
+      "replica_code": "9Q4U923PFQ",
+      "team_name": "surface_tremble's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "surface_tremble",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "2369th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/af090c158eb4fa4b",
+      "pokemon": [
+        {
+          "name": "Farigiraf",
+          "item": "Sitrus Berry",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "27 HP / 19 Def / 20 SpD",
+          "nature": "Relaxed",
+          "moves": [
+            "Psychic",
+            "Protect",
+            "Helping Hand",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "14 HP / 32 Atk / 20 SpD",
+          "nature": "Brave",
+          "moves": [
+            "Wood Hammer",
+            "Grassy Glide",
+            "U-turn",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Camerupt",
+          "item": "Cameruptite",
+          "ability": "Solid Rock",
+          "tera_type": "",
+          "evs": "32 HP / 2 Def / 32 SpA",
+          "nature": "Quiet",
+          "moves": [
+            "Earth Power",
+            "Heat Wave",
+            "Ancient Power",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Life Orb",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "13 HP / 21 Def / 32 SpA",
+          "nature": "Quiet",
+          "moves": [
+            "Hyper Voice",
+            "Detect",
+            "Calm Mind",
+            "Hyper Beam"
+          ]
+        },
+        {
+          "name": "Blastoise",
+          "item": "Blastoisinite",
+          "ability": "Rain Dish",
+          "tera_type": "",
+          "evs": "32 HP / 1 Def / 32 SpA / 1 SpD",
+          "nature": "Quiet",
+          "moves": [
+            "Ice Beam",
+            "Dark Pulse",
+            "Aura Sphere",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Focus Sash",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 73,
+      "replica_code": "JYYNJ6D976",
+      "team_name": "NatusPKMN's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Nate Innocenti",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "5230th",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/5e8950a2aec5a9f3",
+      "pokemon": [
+        {
+          "name": "Meganium",
+          "item": "Meganiumite",
+          "ability": "Overgrow",
+          "tera_type": "",
+          "evs": "32 HP / 7 Def / 17 SpA / 10 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Solar Beam",
+            "Weather Ball",
+            "Dazzling Gleam",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Absol",
+          "item": "Absolite Z",
+          "ability": "Super Luck",
+          "tera_type": "",
+          "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Night Slash",
+            "Psycho Cut",
+            "Focus Energy",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Aerodactyl",
+          "item": "Lum Berry",
+          "ability": "Unnerve",
+          "tera_type": "",
+          "evs": "32 HP / 2 Def / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Rock Slide",
+            "Wide Guard",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Gholdengo",
+          "item": "Life Orb",
+          "ability": "Good as Gold",
+          "tera_type": "",
+          "evs": "6 HP / 1 Def / 27 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Make It Rain",
+            "Shadow Ball",
+            "Power Gem",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Psychic Seed",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "16 HP / 20 Atk / 9 SpD / 21 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Swords Dance",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Sitrus Berry",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "31 HP / 25 Def / 3 SpD / 7 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Psychic",
+            "Follow Me",
+            "Fake Out",
+            "Trick Room"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 74,
       "replica_code": "JQDVTFK10X",
       "team_name": "MichaelderBeste's Gdańsk Regional 2027 Top 4 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -3579,7 +7327,7 @@
       "strategy": []
     },
     {
-      "rank": 37,
+      "rank": 75,
       "replica_code": "RK5BCHW4S0",
       "team_name": "Huyubare's Gdańsk Regional 2027 Top 4 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -3678,7 +7426,7 @@
       "strategy": []
     },
     {
-      "rank": 38,
+      "rank": 76,
       "replica_code": "6CNDDNSNSW",
       "team_name": "Leo's Gdańsk Regional 2027 Top 32 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -3777,7 +7525,7 @@
       "strategy": []
     },
     {
-      "rank": 39,
+      "rank": 77,
       "replica_code": "MC027MKNDF",
       "team_name": "jonen00's Gdańsk Regional 2027 Top 32 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -3876,7 +7624,7 @@
       "strategy": []
     },
     {
-      "rank": 40,
+      "rank": 78,
       "replica_code": "5GCS285NPL",
       "team_name": "NikolajHoej's Gdańsk Regional 2027 Top 32 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -3975,7 +7723,7 @@
       "strategy": []
     },
     {
-      "rank": 41,
+      "rank": 79,
       "replica_code": "BKS8L17LK5",
       "team_name": "gabryyl_'s Gdańsk Regional 2027 Top 32 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -4074,7 +7822,7 @@
       "strategy": []
     },
     {
-      "rank": 42,
+      "rank": 80,
       "replica_code": "RJWTJGEJH1",
       "team_name": "DaniVGC's Gdańsk Regional 2027 Top 64 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -4173,7 +7921,7 @@
       "strategy": []
     },
     {
-      "rank": 43,
+      "rank": 81,
       "replica_code": "MGKLWBSEVE",
       "team_name": "Trimoxis' Gdańsk Regional 2027 Top 64 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -4272,7 +8020,7 @@
       "strategy": []
     },
     {
-      "rank": 44,
+      "rank": 82,
       "replica_code": "SN0Q5JTUCH",
       "team_name": "ildrarvgc's Gdańsk Regional 2027 Top 64 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -4371,7 +8119,7 @@
       "strategy": []
     },
     {
-      "rank": 45,
+      "rank": 83,
       "replica_code": "BGR86EBGRT",
       "team_name": "krlos_cb's Gdańsk Regional 2027 Top 64 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -4470,7 +8218,7 @@
       "strategy": []
     },
     {
-      "rank": 46,
+      "rank": 84,
       "replica_code": "UXBHR9D5RK",
       "team_name": "draxolotl12's Gdańsk Regional 2027 Top 128 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -4569,7 +8317,7 @@
       "strategy": []
     },
     {
-      "rank": 47,
+      "rank": 85,
       "replica_code": "CKFBRD3UUR",
       "team_name": "NavarroVGC's Gdańsk Regional 2027 Top 128 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -4668,7 +8416,7 @@
       "strategy": []
     },
     {
-      "rank": 48,
+      "rank": 86,
       "replica_code": "EN43XY37V1",
       "team_name": "mynamesuckzvgc's Gdańsk Regional 2027 Top 128 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -4767,7 +8515,7 @@
       "strategy": []
     },
     {
-      "rank": 49,
+      "rank": 87,
       "replica_code": "8Q5AAFHHMM",
       "team_name": "Avalos_VGC's Nice Regional 2027 Top 32 Team",
       "tournament": "Nice Regional 2027",
@@ -4781,205 +8529,7 @@
       "strategy": []
     },
     {
-      "rank": 50,
-      "replica_code": "5BM86P0C7E",
-      "team_name": "punihina1334's Puebla Regional 2027 Top 32 Team",
-      "tournament": "Puebla Regional 2027",
-      "trainer": "punihina1334",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "21st",
-      "date_shared": "27 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/9c031a787b16b322",
-      "pokemon": [
-        {
-          "name": "Charizard",
-          "item": "Charizardite Y",
-          "ability": "Blaze",
-          "tera_type": "",
-          "evs": "17 HP / 12 Def / 13 SpA / 1 SpD / 23 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Protect",
-            "Weather Ball",
-            "Ancient Power",
-            "Heat Wave"
-          ]
-        },
-        {
-          "name": "Toxapex",
-          "item": "Leftovers",
-          "ability": "Regenerator",
-          "tera_type": "",
-          "evs": "32 HP / 8 Def / 26 SpD",
-          "nature": "Bold",
-          "moves": [
-            "Infestation",
-            "Wide Guard",
-            "Baneful Bunker",
-            "Toxic"
-          ]
-        },
-        {
-          "name": "Sylveon",
-          "item": "Fairy Feather",
-          "ability": "Pixilate",
-          "tera_type": "",
-          "evs": "31 HP / 25 Def / 10 SpA",
-          "nature": "Modest",
-          "moves": [
-            "Detect",
-            "Hyper Voice",
-            "Yawn",
-            "Quick Attack"
-          ]
-        },
-        {
-          "name": "Venusaur",
-          "item": "Life Orb",
-          "ability": "Chlorophyll",
-          "tera_type": "",
-          "evs": "4 HP / 30 SpA / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Leaf Storm",
-            "Sludge Bomb",
-            "Protect",
-            "Earth Power"
-          ]
-        },
-        {
-          "name": "Incineroar",
-          "item": "Sitrus Berry",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "31 HP / 21 Def / 12 SpD / 2 Spe",
-          "nature": "Impish",
-          "moves": [
-            "Flare Blitz",
-            "Throat Chop",
-            "Fake Out",
-            "Parting Shot"
-          ]
-        },
-        {
-          "name": "Garchomp",
-          "item": "Choice Scarf",
-          "ability": "Rough Skin",
-          "tera_type": "",
-          "evs": "14 HP / 20 Atk / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Rock Slide",
-            "Dragon Claw",
-            "Stomping Tantrum",
-            "Earthquake"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 51,
-      "replica_code": "06QQRF03CE",
-      "team_name": "fireb7799's Puebla Regional 2027 Top 32 Team",
-      "tournament": "Puebla Regional 2027",
-      "trainer": "fireb7799",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "20th",
-      "date_shared": "26 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/c6b6fd3ce9a82cea",
-      "pokemon": [
-        {
-          "name": "Golisopod",
-          "item": "Golisopite",
-          "ability": "Emergency Exit",
-          "tera_type": "",
-          "evs": "29 HP / 30 Atk / 7 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Sucker Punch",
-            "Leech Life",
-            "Protect",
-            "Iron Head"
-          ]
-        },
-        {
-          "name": "Archaludon",
-          "item": "Leftovers",
-          "ability": "Stamina",
-          "tera_type": "",
-          "evs": "27 HP / 15 SpA / 11 SpD / 13 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Electro Shot",
-            "Draco Meteor",
-            "Flash Cannon",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Basculegion",
-          "item": "Life Orb",
-          "ability": "Swift Swim",
-          "tera_type": "",
-          "evs": "13 HP / 28 Atk / 25 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Last Respects",
-            "Aqua Jet",
-            "Wave Crash",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Meowstic",
-          "item": "Sitrus Berry",
-          "ability": "Prankster",
-          "tera_type": "",
-          "evs": "32 HP / 15 Def / 19 SpD",
-          "nature": "Calm",
-          "moves": [
-            "Light Screen",
-            "Trick Room",
-            "Fake Out",
-            "Rain Dance"
-          ]
-        },
-        {
-          "name": "Pelipper",
-          "item": "Focus Sash",
-          "ability": "Drizzle",
-          "tera_type": "",
-          "evs": "2 Def / 32 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Hurricane",
-            "Weather Ball",
-            "Protect",
-            "Tailwind"
-          ]
-        },
-        {
-          "name": "Garchomp",
-          "item": "Garchompite Z",
-          "ability": "Rough Skin",
-          "tera_type": "",
-          "evs": "2 Def / 32 SpA / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Draco Meteor",
-            "Earth Power",
-            "Power Gem",
-            "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 52,
+      "rank": 88,
       "replica_code": "199JW2B5GE",
       "team_name": "Ewok's Puebla Regional 2027 Top 64 Team",
       "tournament": "Puebla Regional 2027",
@@ -5078,57 +8628,241 @@
       "strategy": []
     },
     {
-      "rank": 53,
-      "replica_code": "PUMVJSDMM2",
-      "team_name": "AndyBakes' Puebla Regional 2027 Team",
-      "tournament": "Puebla Regional 2027",
-      "trainer": "AndyBakes",
+      "rank": 89,
+      "replica_code": "3JXYNEUGQE",
+      "team_name": "Xena's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Xena",
       "format": "VGC Champions",
       "regulation": "M-C",
-      "sheet_rank": "114th",
-      "date_shared": "25 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/00442477c87038db",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/c286e593d2be065e",
       "pokemon": [
         {
-          "name": "Indeedee-F",
-          "item": "Psychic Seed",
-          "ability": "Psychic Surge",
+          "name": "Salamence",
+          "item": "Salamencite",
+          "ability": "Intimidate",
           "tera_type": "",
-          "evs": "32 HP / 32 Def / 2 SpD",
-          "nature": "Relaxed",
-          "moves": [
-            "Follow Me",
-            "Psychic",
-            "Trick Room",
-            "Baton Pass"
-          ]
-        },
-        {
-          "name": "Starmie",
-          "item": "Starminite",
-          "ability": "Natural Cure",
-          "tera_type": "",
-          "evs": "12 HP / 29 Atk / 1 Def / 24 Spe",
+          "evs": "15 HP / 31 SpD / 20 Spe",
           "nature": "Hasty",
           "moves": [
-            "Liquidation",
-            "Expanding Force",
-            "Flip Turn",
+            "Hyper Voice",
+            "Double-Edge",
+            "Tailwind",
             "Protect"
           ]
         },
         {
-          "name": "Politoed",
-          "item": "Choice Scarf",
-          "ability": "Drizzle",
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "Lightning Rod",
           "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
+          "evs": "26 HP / 3 Def / 8 SpD / 29 Spe",
           "nature": "Timid",
           "moves": [
-            "Weather Ball",
+            "Zap Cannon",
+            "Encore",
+            "Fake Out",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Fairy Feather",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "19 HP / 19 Def / 20 SpA / 8 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Hyper Beam",
+            "Quick Attack",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Sitrus Berry",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "13 HP / 18 Atk / 7 Def / 18 SpD / 10 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 15 Atk / 2 Def / 17 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Sucker Punch",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Kommo-o",
+          "item": "Focus Sash",
+          "ability": "Overcoat",
+          "tera_type": "",
+          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Aura Sphere",
+            "Clanging Scales",
+            "Flamethrower",
+            "Vacuum Wave"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 90,
+      "replica_code": "83TMDHG9EH",
+      "team_name": "dekanukanu75210's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "dekanukanu75210",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/17b4289e6ee3bdb3",
+      "pokemon": [
+        {
+          "name": "Pyroar",
+          "item": "Pyroarite",
+          "ability": "Unnerve",
+          "tera_type": "",
+          "evs": "2 Def / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Overheat",
+            "Snarl",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Whimsicott",
+          "item": "Kebia Berry",
+          "ability": "Prankster",
+          "tera_type": "",
+          "evs": "28 HP / 31 Def / 4 SpD / 3 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Moonblast",
+            "Tailwind",
+            "Charm",
+            "Sunny Day"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Sitrus Berry",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "18 HP / 23 Def / 24 SpD / 1 Spe",
+          "nature": "Calm",
+          "moves": [
+            "Expanding Force",
+            "Hyper Voice",
+            "Trick Room",
+            "Imprison"
+          ]
+        },
+        {
+          "name": "Staraptor",
+          "item": "Staraptite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "22 HP / 2 Atk / 10 SpD / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Roost",
+            "Protect",
+            "Close Combat",
+            "Brave Bird"
+          ]
+        },
+        {
+          "name": "Basculegion-F",
+          "item": "Life Orb",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "14 Def / 30 SpA / 22 Spe",
+          "nature": "Timid",
+          "moves": [
             "Muddy Water",
+            "Shadow Ball",
             "Ice Beam",
-            "Icy Wind"
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Focus Sash",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Low Kick",
+            "Sucker Punch",
+            "Iron Head"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 91,
+      "replica_code": "7T6PB29L6C",
+      "team_name": "Bell's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Bell",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/e4099b13c77cd455",
+      "pokemon": [
+        {
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "26 HP / 16 Def / 24 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Zap Cannon",
+            "Focus Blast",
+            "Fake Out",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Espathra",
+          "item": "Grassy Seed",
+          "ability": "Speed Boost",
+          "tera_type": "",
+          "evs": "23 HP / 19 Def / 9 SpD / 15 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Lumina Crash",
+            "Calm Mind",
+            "Baton Pass",
+            "Protect"
           ]
         },
         {
@@ -5136,40 +8870,252 @@
           "item": "Leftovers",
           "ability": "Stamina",
           "tera_type": "",
-          "evs": "32 HP / 8 Def / 2 SpA / 11 SpD / 13 Spe",
+          "evs": "28 HP / 1 Def / 5 SpA / 25 SpD / 7 Spe",
           "nature": "Modest",
           "moves": [
             "Electro Shot",
             "Dragon Pulse",
-            "Aura Sphere",
+            "Flash Cannon",
             "Protect"
           ]
         },
         {
-          "name": "Sneasler",
-          "item": "White Herb",
-          "ability": "Unburden",
+          "name": "Pelipper",
+          "item": "Sitrus Berry",
+          "ability": "Drizzle",
           "tera_type": "",
-          "evs": "21 HP / 10 Atk / 5 Def / 30 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Close Combat",
-            "Gunk Shot",
-            "Throat Chop",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Gengar",
-          "item": "Gengarite",
-          "ability": "Cursed Body",
-          "tera_type": "",
-          "evs": "25 HP / 7 Def / 2 SpA / 32 Spe",
+          "evs": "13 HP / 25 SpA / 28 Spe",
           "nature": "Modest",
           "moves": [
-            "Sludge Bomb",
+            "Weather Ball",
+            "Hurricane",
+            "Wide Guard",
+            "Helping Hand"
+          ]
+        },
+        {
+          "name": "Basculegion-F",
+          "item": "Life Orb",
+          "ability": "Swift Swim",
+          "tera_type": "",
+          "evs": "4 Def / 30 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Muddy Water",
             "Shadow Ball",
-            "Substitute",
+            "Ice Beam",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "20 HP / 17 Atk / 1 Def / 15 SpD / 13 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wood Hammer",
+            "Grassy Glide",
+            "U-turn",
+            "Fake Out"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 92,
+      "replica_code": "68UQ9CYWUX",
+      "team_name": "micr0_macra's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "micr0_macra",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/02b6da8d54aa24f0",
+      "pokemon": [
+        {
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "32 HP / 10 Def / 24 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Zap Cannon",
+            "Focus Blast",
+            "Protect",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Sylveon",
+          "item": "Leftovers",
+          "ability": "Pixilate",
+          "tera_type": "",
+          "evs": "32 HP / 29 Def / 5 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Hyper Voice",
+            "Roar",
+            "Detect",
+            "Yawn"
+          ]
+        },
+        {
+          "name": "Volcarona",
+          "item": "Sitrus Berry",
+          "ability": "Flame Body",
+          "tera_type": "",
+          "evs": "17 HP / 5 Def / 14 SpA / 30 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Heat Wave",
+            "Giga Drain",
+            "Protect",
+            "Quiver Dance"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "32 HP / 8 Atk / 8 Def / 16 SpD / 2 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Grassy Glide",
+            "Wood Hammer",
+            "Fake Out",
+            "U-turn"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Life Orb",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "22 HP / 32 Atk / 12 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Sucker Punch",
+            "Protect",
+            "Swords Dance"
+          ]
+        },
+        {
+          "name": "Staraptor",
+          "item": "Staraptite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "25 HP / 9 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Brave Bird",
+            "Protect",
+            "Roost"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 93,
+      "replica_code": "F8FKT9YKXC",
+      "team_name": "Sidi I. Haidala's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Sidi I. Haidala",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/887658a0ae81fcd0",
+      "pokemon": [
+        {
+          "name": "Raichu",
+          "item": "Raichunite X",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "30 HP / 8 Def / 28 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Volt Tackle",
+            "Volt Switch",
+            "Fake Out",
+            "Charm"
+          ]
+        },
+        {
+          "name": "Staraptor",
+          "item": "Staraptite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "29 HP / 1 Atk / 4 SpD / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Brave Bird",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Electric Seed",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "30 HP / 8 Def / 12 SpA / 9 SpD / 7 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Shadow Ball",
+            "Nasty Plot",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 25 Atk / 3 Def / 6 SpD",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Sucker Punch",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Mystic Water",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "6 HP / 18 Atk / 15 Def / 6 SpD / 21 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Volcarona",
+          "item": "Rocky Helmet",
+          "ability": "Flame Body",
+          "tera_type": "",
+          "evs": "29 HP / 14 Def / 23 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Overheat",
+            "Struggle Bug",
+            "Rage Powder",
             "Protect"
           ]
         }
@@ -5177,29 +9123,71 @@
       "strategy": []
     },
     {
-      "rank": 54,
-      "replica_code": "L5RBYL90F2",
-      "team_name": "gn_pete's Thailand PBL 2027 Top 4 Team",
-      "tournament": "Thailand PBL 2027",
-      "trainer": "gn_pete",
+      "rank": 94,
+      "replica_code": "KXNVBUBLPA",
+      "team_name": "Lexicon's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Alex Underhill",
       "format": "VGC Champions",
       "regulation": "M-C",
-      "sheet_rank": "3rd",
-      "date_shared": "25 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/d2e099953622a32a",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/1fcc4dcf7e9ef4d5",
       "pokemon": [
         {
-          "name": "Pelipper",
-          "item": "Sitrus Berry",
+          "name": "Gengar",
+          "item": "Focus Sash",
+          "ability": "Cursed Body",
+          "tera_type": "",
+          "evs": "32 HP / 2 Def / 32 SpA",
+          "nature": "Quiet",
+          "moves": [
+            "Shadow Ball",
+            "Sludge Bomb",
+            "Trick Room",
+            "Destiny Bond"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Charcoal",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 2 Def",
+          "nature": "Brave",
+          "moves": [
+            "Flare Blitz",
+            "Darkest Lariat",
+            "Close Combat",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 2 SpD",
+          "nature": "Brave",
+          "moves": [
+            "Wood Hammer",
+            "Grassy Glide",
+            "High Horsepower",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Politoed",
+          "item": "Mystic Water",
           "ability": "Drizzle",
           "tera_type": "",
-          "evs": "30 HP / 4 Def / 1 SpA / 30 SpD / 1 Spe",
-          "nature": "Calm",
+          "evs": "12 HP / 30 Def / 24 SpA",
+          "nature": "Quiet",
           "moves": [
-            "Weather Ball",
-            "Hurricane",
-            "Tailwind",
-            "Wide Guard"
+            "Protect",
+            "Muddy Water",
+            "Ice Beam",
+            "Rain Dance"
           ]
         },
         {
@@ -5207,15 +9195,44 @@
           "item": "Leftovers",
           "ability": "Stamina",
           "tera_type": "",
-          "evs": "32 HP / 1 Def / 32 SpD / 1 Spe",
-          "nature": "Bold",
+          "evs": "32 HP / 2 Def / 5 SpA / 27 SpD",
+          "nature": "Modest",
           "moves": [
-            "Dragon Pulse",
-            "Flash Cannon",
+            "Protect",
             "Electro Shot",
-            "Protect"
+            "Flash Cannon",
+            "Dragon Pulse"
           ]
         },
+        {
+          "name": "Blastoise",
+          "item": "Blastoisinite",
+          "ability": "Rain Dish",
+          "tera_type": "",
+          "evs": "32 HP / 2 Def / 32 SpA",
+          "nature": "Quiet",
+          "moves": [
+            "Water Spout",
+            "Dark Pulse",
+            "Aura Sphere",
+            "Fake Out"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 95,
+      "replica_code": "5L1S5FL4FK",
+      "team_name": "SeaWolfMikes' 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "SeaWolfMikes",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/6fea31c3ada68495",
+      "pokemon": [
         {
           "name": "Venusaur",
           "item": "Focus Sash",
@@ -5235,8 +9252,8 @@
           "item": "Charizardite Y",
           "ability": "Blaze",
           "tera_type": "",
-          "evs": "8 HP / 30 Def / 10 SpA / 18 Spe",
-          "nature": "Timid",
+          "evs": "32 HP / 9 Def / 24 SpD / 1 Spe",
+          "nature": "Modest",
           "moves": [
             "Heat Wave",
             "Weather Ball",
@@ -5245,59 +9262,16 @@
           ]
         },
         {
-          "name": "Grimmsnarl",
-          "item": "Light Clay",
-          "ability": "Prankster",
-          "tera_type": "",
-          "evs": "32 HP / 25 Def / 9 SpD",
-          "nature": "Careful",
-          "moves": [
-            "Spirit Break",
-            "Reflect",
-            "Light Screen",
-            "Parting Shot"
-          ]
-        },
-        {
-          "name": "Garchomp",
-          "item": "Garchompite Z",
-          "ability": "Rough Skin",
-          "tera_type": "",
-          "evs": "13 Def / 21 SpA / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Dragon Pulse",
-            "Earth Power",
-            "Power Gem",
-            "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 55,
-      "replica_code": "QGFP9HR7QT",
-      "team_name": "boomngong's Thailand PBL 2027 Top 4 Team",
-      "tournament": "Thailand PBL 2027",
-      "trainer": "Nattanon Wongwiwatchai",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "4th",
-      "date_shared": "24 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/f9ea2a09126fccbc",
-      "pokemon": [
-        {
-          "name": "Pelipper",
-          "item": "Focus Sash",
+          "name": "Politoed",
+          "item": "Mystic Water",
           "ability": "Drizzle",
           "tera_type": "",
-          "evs": "2 Def / 32 SpA / 32 Spe",
+          "evs": "32 HP / 1 Def / 32 SpA / 1 Spe",
           "nature": "Modest",
           "moves": [
             "Weather Ball",
-            "Hurricane",
-            "Helping Hand",
+            "Muddy Water",
+            "Ice Beam",
             "Protect"
           ]
         },
@@ -5306,422 +9280,295 @@
           "item": "Leftovers",
           "ability": "Stamina",
           "tera_type": "",
-          "evs": "32 HP / 1 Def / 1 SpA / 32 Spe",
+          "evs": "31 HP / 1 Def / 1 SpA / 25 SpD / 8 Spe",
           "nature": "Bold",
           "moves": [
-            "Electro Shot",
             "Dragon Pulse",
-            "Aura Sphere",
+            "Electro Shot",
+            "Snarl",
             "Protect"
           ]
         },
         {
-          "name": "Basculegion-F",
-          "item": "Choice Scarf",
-          "ability": "Adaptability",
+          "name": "Metagross",
+          "item": "Metagrossite",
+          "ability": "Clear Body",
           "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Shadow Ball",
-            "Muddy Water",
-            "Icy Wind",
-            "Ice Beam"
-          ]
-        },
-        {
-          "name": "Golisopod-Mega",
-          "item": "Golisopite",
-          "ability": "Emergency Exit",
-          "tera_type": "",
-          "evs": "32 HP / 30 Atk / 1 Def / 2 SpD / 1 Spe",
+          "evs": "10 HP / 29 Atk / 27 Spe",
           "nature": "Adamant",
           "moves": [
-            "Leech Life",
-            "Sucker Punch",
-            "Swords Dance",
+            "Bullet Punch",
+            "Psychic Fangs",
+            "Stomping Tantrum",
             "Protect"
           ]
         },
         {
-          "name": "Sneasler",
-          "item": "Electric Seed",
-          "ability": "Unburden",
+          "name": "Grimmsnarl",
+          "item": "Light Clay",
+          "ability": "Prankster",
           "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Spe",
-          "nature": "Adamant",
+          "evs": "31 HP / 19 Def / 15 SpD / 1 Spe",
+          "nature": "Careful",
           "moves": [
-            "Dire Claw",
-            "Close Combat",
-            "Rock Slide",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Raichu-Mega-X",
-          "item": "Raichunite X",
-          "ability": "Lightning Rod",
-          "tera_type": "",
-          "evs": "32 HP / 2 Def / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Volt Tackle",
-            "Feint",
-            "Fake Out",
-            "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 56,
-      "replica_code": "8UPWUEA1AR",
-      "team_name": "Sanvy's Nice Regional 2027 Top 4 Team",
-      "tournament": "Nice Regional 2027",
-      "trainer": "Simone Sanvito",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "3rd",
-      "date_shared": "20 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/c9bab45f6fec8403",
-      "pokemon": [
-        {
-          "name": "Tyranitar",
-          "item": "Tyranitarite",
-          "ability": "Sand Stream",
-          "tera_type": "",
-          "evs": "18 HP / 16 Atk / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Rock Slide",
-            "Knock Off",
-            "Dragon Dance",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Excadrill",
-          "item": "Focus Sash",
-          "ability": "Sand Rush",
-          "tera_type": "",
-          "evs": "32 Atk / 1 Def / 1 SpD / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "High Horsepower",
-            "Iron Head",
-            "Rock Slide",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Gholdengo",
-          "item": "Life Orb",
-          "ability": "Good as Gold",
-          "tera_type": "",
-          "evs": "27 HP / 12 Def / 17 SpD / 10 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Shadow Ball",
-            "Make It Rain",
-            "Nasty Plot",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Milotic",
-          "item": "Sitrus Berry",
-          "ability": "Competitive",
-          "tera_type": "",
-          "evs": "32 HP / 17 Def / 8 SpA / 5 SpD / 4 Spe",
-          "nature": "Calm",
-          "moves": [
-            "Scald",
-            "Ice Beam",
-            "Icy Wind",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Sinistcha",
-          "item": "Rocky Helmet",
-          "ability": "Hospitality",
-          "tera_type": "",
-          "evs": "29 HP / 14 Def / 23 SpD",
-          "nature": "Bold",
-          "moves": [
-            "Matcha Gotcha",
-            "Strength Sap",
-            "Rage Powder",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Staraptor",
-          "item": "Staraptite",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "29 HP / 1 Atk / 4 SpD / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Close Combat",
-            "Brave Bird",
-            "Tailwind",
-            "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 57,
-      "replica_code": "B1V7P36K13",
-      "team_name": "Triir's Nice Regional 2027 Top 8 Team",
-      "tournament": "Nice Regional 2027",
-      "trainer": "Riccardo Stellini",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "6th",
-      "date_shared": "18 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/b9422630d1c3f8bc",
-      "pokemon": [
-        {
-          "name": "Camerupt",
-          "item": "Cameruptite",
-          "ability": "Solid Rock",
-          "tera_type": "",
-          "evs": "32 HP / 32 SpA / 2 Spe",
-          "nature": "Quiet",
-          "moves": [
-            "Heat Wave",
-            "Earth Power",
-            "Ancient Power",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Raichu",
-          "item": "Raichunite Y",
-          "ability": "Lightning Rod",
-          "tera_type": "",
-          "evs": "32 HP / 11 Def / 23 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Zap Cannon",
-            "Focus Blast",
-            "Fake Out",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Farigiraf",
-          "item": "Sitrus Berry",
-          "ability": "Armor Tail",
-          "tera_type": "",
-          "evs": "31 HP / 20 Def / 1 SpA / 14 SpD",
-          "nature": "Bold",
-          "moves": [
-            "Psychic",
-            "Helping Hand",
-            "Trick Room",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Incineroar",
-          "item": "White Herb",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "32 HP / 32 Atk / 2 SpD",
-          "nature": "Brave",
-          "moves": [
-            "Flare Blitz",
-            "Darkest Lariat",
-            "Fake Out",
+            "Spirit Break",
+            "Reflect",
+            "Light Screen",
             "Parting Shot"
           ]
-        },
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 96,
+      "replica_code": "XDC11HGXH2",
+      "team_name": "Sarapoke0914's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Sarapoke0914",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "1 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/7d41f09103da600f",
+      "pokemon": [
         {
-          "name": "Sylveon",
-          "item": "Fairy Feather",
-          "ability": "Pixilate",
+          "name": "Incineroar",
+          "item": "Grassy Seed",
+          "ability": "Intimidate",
           "tera_type": "",
-          "evs": "13 HP / 21 Def / 32 SpA",
-          "nature": "Modest",
+          "evs": "32 HP / 13 Def / 21 SpD",
+          "nature": "Calm",
           "moves": [
-            "Hyper Voice",
-            "Moonblast",
-            "Calm Mind",
-            "Detect"
+            "Flamethrower",
+            "Nasty Plot",
+            "Baton Pass",
+            "Protect"
           ]
         },
         {
           "name": "Rillaboom",
-          "item": "Life Orb",
+          "item": "Focus Sash",
           "ability": "Grassy Surge",
           "tera_type": "",
-          "evs": "32 HP / 28 Atk / 6 SpD",
-          "nature": "Adamant",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
           "moves": [
             "Wood Hammer",
             "Grassy Glide",
             "Fake Out",
-            "U-turn"
+            "Snarl"
+          ]
+        },
+        {
+          "name": "Gardevoir",
+          "item": "Gardevoirite",
+          "ability": "Telepathy",
+          "tera_type": "",
+          "evs": "3 HP / 1 Def / 30 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Hyper Voice",
+            "Expanding Force",
+            "Psychic",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Psychic Seed",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Bold",
+          "moves": [
+            "Follow Me",
+            "Heal Pulse",
+            "Helping Hand",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Yache Berry",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "25 HP / 1 Atk / 1 Def / 20 SpD / 19 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Tail",
+            "Stomping Tantrum",
+            "Sunny Day",
+            "Breaking Swipe"
+          ]
+        },
+        {
+          "name": "Volcarona",
+          "item": "Life Orb",
+          "ability": "Flame Body",
+          "tera_type": "",
+          "evs": "6 HP / 13 Def / 15 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Flamethrower",
+            "Rage Powder",
+            "Whirlwind",
+            "Psychic"
           ]
         }
       ],
       "strategy": []
     },
     {
-      "rank": 58,
-      "replica_code": "5EQS0H68M0",
-      "team_name": "IdkVgc19's Nice Regional 2027 Top 16 Team",
-      "tournament": "Nice Regional 2027",
-      "trainer": "IdkVgc19",
+      "rank": 97,
+      "replica_code": "TKNNNA5JJK",
+      "team_name": "dodoriosiriru's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "Hijito Kihara",
       "format": "VGC Champions",
       "regulation": "M-C",
-      "sheet_rank": "15th",
-      "date_shared": "19 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/9b8519ea8b7fc5a9",
+      "sheet_rank": "",
+      "date_shared": "1 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/2b27184f40d1be39",
       "pokemon": [
+        {
+          "name": "Drampa",
+          "item": "Drampanite",
+          "ability": "Cloud Nine",
+          "tera_type": "",
+          "evs": "32 HP / 1 Def / 32 SpA / 1 SpD",
+          "nature": "Quiet",
+          "moves": [
+            "Dragon Pulse",
+            "Earth Power",
+            "Thunderbolt",
+            "Flamethrower"
+          ]
+        },
+        {
+          "name": "Grapploct",
+          "item": "Black Belt",
+          "ability": "Technician",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 2 SpD",
+          "nature": "Brave",
+          "moves": [
+            "Storm Throw",
+            "Mach Punch",
+            "Sucker Punch",
+            "Detect"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Rocky Helmet",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Relaxed",
+          "moves": [
+            "Psychic",
+            "Follow Me",
+            "Helping Hand",
+            "Trick Room"
+          ]
+        },
+        {
+          "name": "Slowking",
+          "item": "Life Orb",
+          "ability": "Regenerator",
+          "tera_type": "",
+          "evs": "29 HP / 5 Def / 32 SpA",
+          "nature": "Quiet",
+          "moves": [
+            "Expanding Force",
+            "Scald",
+            "Flamethrower",
+            "Trick Room"
+          ]
+        },
         {
           "name": "Incineroar",
           "item": "Sitrus Berry",
           "ability": "Intimidate",
           "tera_type": "",
-          "evs": "32 HP / 10 Def / 10 SpD / 14 Spe",
+          "evs": "32 HP / 5 Atk / 2 Def / 20 SpD / 7 Spe",
           "nature": "Careful",
           "moves": [
             "Flare Blitz",
             "Snarl",
             "Parting Shot",
-            "Fake Out"
+            "Roar"
           ]
         },
         {
-          "name": "Rillaboom",
-          "item": "Life Orb",
-          "ability": "Grassy Surge",
+          "name": "Metagross",
+          "item": "Metagrossite",
+          "ability": "Clear Body",
           "tera_type": "",
-          "evs": "32 HP / 15 Atk / 16 SpD / 3 Spe",
-          "nature": "Adamant",
+          "evs": "9 HP / 25 Atk / 32 Spe",
+          "nature": "Jolly",
           "moves": [
-            "Fake Out",
-            "Wood Hammer",
-            "Grassy Glide",
-            "High Horsepower"
-          ]
-        },
-        {
-          "name": "Kommo-o",
-          "item": "Dragon Fang",
-          "ability": "Soundproof",
-          "tera_type": "",
-          "evs": "10 HP / 24 SpA / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Clanging Scales",
-            "Aura Sphere",
-            "Clangorous Soul",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Gengar",
-          "item": "Gengarite",
-          "ability": "Cursed Body",
-          "tera_type": "",
-          "evs": "20 HP / 4 Def / 10 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Substitute",
-            "Shadow Ball",
-            "Sludge Bomb",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Hippowdon",
-          "item": "Leftovers",
-          "ability": "Sand Stream",
-          "tera_type": "",
-          "evs": "32 HP / 4 Atk / 12 Def / 18 SpD",
-          "nature": "Careful",
-          "moves": [
-            "High Horsepower",
-            "Stone Edge",
-            "Yawn",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Excadrill",
-          "item": "Focus Sash",
-          "ability": "Sand Rush",
-          "tera_type": "",
-          "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "High Horsepower",
-            "Iron Head",
-            "Rock Tomb",
-            "Protect"
+            "Bullet Punch",
+            "Steel Roller",
+            "Psychic Fangs",
+            "Stomping Tantrum"
           ]
         }
       ],
       "strategy": []
     },
     {
-      "rank": 59,
-      "replica_code": "5C9LNUSWUY",
-      "team_name": "schianchi_luca's Nice Regional 2027 Top 32 Team",
-      "tournament": "Nice Regional 2027",
-      "trainer": "schianchi_luca",
+      "rank": 98,
+      "replica_code": "PJGRYLQQ4V",
+      "team_name": "darth_aaronvgc's 2027 Global Challenge II Team",
+      "tournament": "2027 Global Challenge II",
+      "trainer": "darth_aaronvgc",
       "format": "VGC Champions",
       "regulation": "M-C",
-      "sheet_rank": "23rd",
-      "date_shared": "19 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/069b340fb0a1cdc9",
+      "sheet_rank": "",
+      "date_shared": "1 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/0cc93478799b4bff",
       "pokemon": [
         {
-          "name": "Raichu",
-          "item": "Raichunite Y",
-          "ability": "Lightning Rod",
+          "name": "Talonflame",
+          "item": "Sharp Beak",
+          "ability": "Gale Wings",
           "tera_type": "",
-          "evs": "16 HP / 22 Def / 28 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Zap Cannon",
-            "Focus Blast",
-            "Fake Out",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Primarina",
-          "item": "Leftovers",
-          "ability": "Liquid Voice",
-          "tera_type": "",
-          "evs": "22 HP / 16 Def / 5 SpA / 23 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Hyper Voice",
-            "Moonblast",
-            "Calm Mind",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Staraptor",
-          "item": "Staraptite",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "31 HP / 3 SpD / 32 Spe",
+          "evs": "1 HP / 31 Atk / 1 Def / 1 SpD / 32 Spe",
           "nature": "Jolly",
           "moves": [
-            "Close Combat",
             "Brave Bird",
+            "Flare Blitz",
             "Tailwind",
+            "Quick Guard"
+          ]
+        },
+        {
+          "name": "Barbaracle-Mega",
+          "item": "Barbaracite",
+          "ability": "Tough Claws",
+          "tera_type": "",
+          "evs": "24 HP / 30 Atk / 1 Def / 11 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Rock Slide",
+            "Close Combat",
+            "Poison Jab",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Maushold-Four",
+          "item": "Chople Berry",
+          "ability": "Friend Guard",
+          "tera_type": "",
+          "evs": "32 HP / 20 Def / 3 SpD / 11 Spe",
+          "nature": "Impish",
+          "moves": [
+            "Super Fang",
+            "Follow Me",
+            "Taunt",
             "Protect"
           ]
         },
@@ -5730,7 +9577,7 @@
           "item": "Life Orb",
           "ability": "Good as Gold",
           "tera_type": "",
-          "evs": "27 HP / 25 SpD / 14 Spe",
+          "evs": "17 HP / 12 Def / 10 SpA / 27 Spe",
           "nature": "Modest",
           "moves": [
             "Make It Rain",
@@ -5738,131 +9585,103 @@
             "Nasty Plot",
             "Protect"
           ]
-        },
-        {
-          "name": "Arcanine-Hisui",
-          "item": "Focus Sash",
-          "ability": "Rock Head",
-          "tera_type": "",
-          "evs": "1 HP / 32 Atk / 1 Def / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Flare Blitz",
-            "Head Smash",
-            "Extreme Speed",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Rillaboom",
-          "item": "Miracle Seed",
-          "ability": "Grassy Surge",
-          "tera_type": "",
-          "evs": "27 HP / 25 Atk / 14 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Wood Hammer",
-            "Grassy Glide",
-            "High Horsepower",
-            "Fake Out"
-          ]
         }
       ],
       "strategy": []
     },
     {
-      "rank": 60,
-      "replica_code": "JRHT5NU7YT",
-      "team_name": "mattia_vinti's Nice Regional 2027 Top 64 Team",
-      "tournament": "Nice Regional 2027",
-      "trainer": "mattia_vinti",
+      "rank": 99,
+      "replica_code": "T6R01MXBHW",
+      "team_name": "yazawakopoke's Raichu-Y Vanilluxe Team",
+      "tournament": "-",
+      "trainer": "yazawakopoke",
       "format": "VGC Champions",
       "regulation": "M-C",
-      "sheet_rank": "50th",
-      "date_shared": "19 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/c63db108857342db",
+      "sheet_rank": "",
+      "date_shared": "3 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/4aea087baf6d9313",
       "pokemon": [
         {
-          "name": "Delphox",
-          "item": "Delphoxite",
-          "ability": "Blaze",
+          "name": "Vivillon",
+          "item": "Focus Sash",
+          "ability": "Compound Eyes",
           "tera_type": "",
-          "evs": "8 HP / 4 Def / 22 SpA / 32 Spe",
+          "evs": "2 HP / 32 SpA / 32 Spe",
           "nature": "Timid",
           "moves": [
-            "Heat Wave",
-            "Psychic",
-            "Nasty Plot",
+            "Hurricane",
+            "Tailwind",
+            "Sleep Powder",
             "Protect"
           ]
         },
         {
-          "name": "Incineroar",
-          "item": "Sitrus Berry",
-          "ability": "Intimidate",
+          "name": "Sneasler",
+          "item": "Iron Ball",
+          "ability": "Poison Touch",
           "tera_type": "",
-          "evs": "27 HP / 4 Def / 10 SpD / 25 Spe",
-          "nature": "Careful",
+          "evs": "21 HP / 32 Atk / 9 Def / 4 SpD",
+          "nature": "Brave",
           "moves": [
+            "Poison Jab",
+            "Close Combat",
             "Fake Out",
-            "Flare Blitz",
-            "Throat Chop",
-            "Parting Shot"
+            "Protect"
           ]
         },
         {
-          "name": "Sneasler",
-          "item": "Focus Sash",
-          "ability": "Poison Touch",
+          "name": "Raichu",
+          "item": "Raichunite Y",
+          "ability": "Lightning Rod",
           "tera_type": "",
-          "evs": "32 Atk / 32 Spe",
-          "nature": "Jolly",
+          "evs": "32 HP / 7 Def / 1 SpA / 26 Spe",
+          "nature": "Timid",
           "moves": [
-            "Close Combat",
-            "Dire Claw",
-            "Quick Guard",
+            "Zap Cannon",
+            "Focus Blast",
+            "Encore",
             "Fake Out"
           ]
         },
         {
-          "name": "Sinistcha",
-          "item": "Coba Berry",
-          "ability": "Hospitality",
+          "name": "Vanilluxe",
+          "item": "Never-Melt Ice",
+          "ability": "Snow Warning",
           "tera_type": "",
-          "evs": "32 HP / 19 Def / 15 SpD",
-          "nature": "Bold",
+          "evs": "25 HP / 9 Def / 32 SpA",
+          "nature": "Quiet",
           "moves": [
-            "Matcha Gotcha",
-            "Rage Powder",
+            "Blizzard",
+            "Freeze-Dry",
+            "Ice Shard",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Colbur Berry",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "4 HP / 30 SpA / 32 SpD",
+          "nature": "Quiet",
+          "moves": [
+            "Psychic",
+            "Hyper Voice",
             "Trick Room",
             "Protect"
           ]
         },
         {
-          "name": "Kingambit",
+          "name": "Garchomp",
           "item": "Life Orb",
-          "ability": "Defiant",
+          "ability": "Rough Skin",
           "tera_type": "",
-          "evs": "30 HP / 32 Atk / 2 Def / 1 SpD / 1 Spe",
-          "nature": "Adamant",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
           "moves": [
-            "Kowtow Cleave",
-            "Sucker Punch",
-            "Protect",
-            "Swords Dance"
-          ]
-        },
-        {
-          "name": "Floette-Eternal",
-          "item": "Floettite",
-          "ability": "Flower Veil",
-          "tera_type": "",
-          "evs": "14 HP / 27 Def / 5 SpA / 1 SpD / 19 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Draining Kiss",
-            "Dazzling Gleam",
-            "Calm Mind",
+            "Earthquake",
+            "Dragon Claw",
+            "Rock Slide",
             "Protect"
           ]
         }
@@ -5870,7 +9689,304 @@
       "strategy": []
     },
     {
-      "rank": 61,
+      "rank": 100,
+      "replica_code": "D170EQ156B",
+      "team_name": "Gworf's Meganium Garchomp-Z Team",
+      "tournament": "Video",
+      "trainer": "Zach Knight",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/09cb3847bc1cbba5",
+      "pokemon": [
+        {
+          "name": "Meganium",
+          "item": "Meganiumite",
+          "ability": "Leaf Guard",
+          "tera_type": "",
+          "evs": "12 HP / 27 SpA / 27 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Solar Beam",
+            "Dazzling Gleam",
+            "Weather Ball",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Indeedee",
+          "item": "Choice Scarf",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Expanding Force",
+            "Shadow Ball",
+            "Tri Attack",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Psychic Seed",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "32 Atk / 2 Def / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dire Claw",
+            "Close Combat",
+            "Throat Chop",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Volcarona",
+          "item": "Sitrus Berry",
+          "ability": "Flame Body",
+          "tera_type": "",
+          "evs": "29 HP / 15 Def / 9 SpA / 13 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Tailwind",
+            "Heat Wave",
+            "Bug Buzz",
+            "Rage Powder"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Garchompite Z",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "15 HP / 19 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Power Gem",
+            "Earth Power",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Gholdengo",
+          "item": "Life Orb",
+          "ability": "Good as Gold",
+          "tera_type": "",
+          "evs": "17 HP / 17 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Shadow Ball",
+            "Make It Rain",
+            "Nasty Plot",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 101,
+      "replica_code": "K8R1AK718E",
+      "team_name": "SwapDogVGC's Staraptor Dragonite Team",
+      "tournament": "Video",
+      "trainer": "SwapDogVGC",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/2d1b7be899abd8a9",
+      "pokemon": [
+        {
+          "name": "Staraptor",
+          "item": "Staraptite",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "23 HP / 17 Atk / 26 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Brave Bird",
+            "Close Combat",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Roseli Berry",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "14 HP / 20 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Earthquake",
+            "Dragon Rush",
+            "Poison Jab",
+            "Rock Slide"
+          ]
+        },
+        {
+          "name": "Dragonite",
+          "item": "Expert Belt",
+          "ability": "Multiscale",
+          "tera_type": "",
+          "evs": "3 HP / 31 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Dragon Pulse",
+            "Tailwind",
+            "Flamethrower",
+            "Extreme Speed"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Life Orb",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "4 HP / 25 Atk / 12 Def / 25 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Aqua Jet",
+            "Last Respects",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Chople Berry",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "24 HP / 19 Atk / 6 Def / 17 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Iron Head",
+            "Sucker Punch",
+            "Low Kick"
+          ]
+        },
+        {
+          "name": "Raichu",
+          "item": "Focus Sash",
+          "ability": "Lightning Rod",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Thunderbolt",
+            "Charm",
+            "Encore",
+            "Fake Out"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 102,
+      "replica_code": "C3AD4NG2GS",
+      "team_name": "Gabriel709794's Charizard-Y Gardevoir Rain Team",
+      "tournament": "-",
+      "trainer": "Gabriel709794",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "2 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/51922646b5c2af4b",
+      "pokemon": [
+        {
+          "name": "Charizard",
+          "item": "Charizardite Y",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Weather Ball",
+            "Solar Beam",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Whimsicott",
+          "item": "Focus Sash",
+          "ability": "Chlorophyll",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Moonblast",
+            "Taunt",
+            "Sunny Day",
+            "Tailwind"
+          ]
+        },
+        {
+          "name": "Gardevoir",
+          "item": "Gardevoirite",
+          "ability": "Synchronize",
+          "tera_type": "",
+          "evs": "29 HP / 5 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Hyper Voice",
+            "Expanding Force",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Indeedee-F",
+          "item": "Psychic Seed",
+          "ability": "Psychic Surge",
+          "tera_type": "",
+          "evs": "32 HP / 32 Def / 2 SpD",
+          "nature": "Relaxed",
+          "moves": [
+            "Psychic",
+            "Follow Me",
+            "Helping Hand",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Politoed",
+          "item": "Choice Scarf",
+          "ability": "Drizzle",
+          "tera_type": "",
+          "evs": "3 Def / 31 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Weather Ball",
+            "Muddy Water",
+            "Ice Beam",
+            "Rain Dance"
+          ]
+        },
+        {
+          "name": "Basculegion-F",
+          "item": "Life Orb",
+          "ability": "Swift Swim",
+          "tera_type": "",
+          "evs": "4 HP / 30 SpA / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Muddy Water",
+            "Shadow Ball",
+            "Ice Beam",
+            "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 103,
       "replica_code": "9KDKCQ8YAY",
       "team_name": "Chompy's Recreation of Erizabeth's VR October Challenge #4 Top 4 Team",
       "tournament": "-",
@@ -5963,105 +10079,6 @@
             "Fake Out",
             "Wood Hammer",
             "U-turn"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 62,
-      "replica_code": "EGJR0PYH5A",
-      "team_name": "BTrickroomZ's Floette Kingambit Team",
-      "tournament": "-",
-      "trainer": "Yuta Ishigaki",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "",
-      "date_shared": "28 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/8aa5d225332186aa",
-      "pokemon": [
-        {
-          "name": "Floette-Eternal",
-          "item": "Floettite",
-          "ability": "Flower Veil",
-          "tera_type": "",
-          "evs": "16 HP / 12 Def / 29 SpA / 9 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Moonblast",
-            "Dazzling Gleam",
-            "Light of Ruin",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Kingambit",
-          "item": "Life Orb",
-          "ability": "Defiant",
-          "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Kowtow Cleave",
-            "Sucker Punch",
-            "Swords Dance",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Rillaboom",
-          "item": "Miracle Seed",
-          "ability": "Grassy Surge",
-          "tera_type": "",
-          "evs": "22 HP / 15 Atk / 1 Def / 14 SpD / 14 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Wood Hammer",
-            "Grassy Glide",
-            "High Horsepower",
-            "Fake Out"
-          ]
-        },
-        {
-          "name": "Salamence",
-          "item": "Salamencite",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "29 HP / 31 SpD / 6 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Hyper Voice",
-            "Draco Meteor",
-            "Tailwind",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Garchomp",
-          "item": "Expert Belt",
-          "ability": "Rough Skin",
-          "tera_type": "",
-          "evs": "30 HP / 2 Atk / 4 Def / 8 SpD / 22 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Dragon Claw",
-            "Stomping Tantrum",
-            "Poison Jab",
-            "Rock Slide"
-          ]
-        },
-        {
-          "name": "Volcarona",
-          "item": "Rocky Helmet",
-          "ability": "Flame Body",
-          "tera_type": "",
-          "evs": "32 HP / 25 Def / 1 SpD / 8 Spe",
-          "nature": "Bold",
-          "moves": [
-            "Overheat",
-            "Struggle Bug",
-            "Rage Powder",
-            "Protect"
           ]
         }
       ],

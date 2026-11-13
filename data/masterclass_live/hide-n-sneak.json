@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-13T03:45:21Z",
+  "erzeugt_am": "2026-11-13T07:07:02Z",
   "id": "hide-n-sneak",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1464,21 +1464,9 @@
    }
   ],
   "liste_online": {
-   "bilanz": "3-1-0",
-   "datum": "06.11.2026",
+   "bilanz": "7-2-0",
+   "datum": "10.11.2026",
    "karten": [
-    [
-     4,
-     "Shuppet",
-     "PBL",
-     "33"
-    ],
-    [
-     4,
-     "Banette",
-     "PBL",
-     "34"
-    ],
     [
      4,
      "Poltchageist",
@@ -1486,7 +1474,7 @@
      "5"
     ],
     [
-     4,
+     2,
      "Sinistcha",
      "PBL",
      "6"
@@ -1498,16 +1486,46 @@
      "39"
     ],
     [
-     1,
-     "Spiritomb",
-     "PBL",
-     "35"
+     3,
+     "Dunsparce",
+     "JTG",
+     "120"
     ],
     [
-     1,
+     2,
+     "Dudunsparce",
+     "TEF",
+     "129"
+    ],
+    [
+     2,
+     "Shuppet",
+     "PBL",
+     "33"
+    ],
+    [
+     4,
+     "Banette",
+     "PBL",
+     "34"
+    ],
+    [
+     2,
      "Lillie's Clefairy ex",
      "JTG",
      "56"
+    ],
+    [
+     1,
+     "Latias ex",
+     "SSP",
+     "76"
+    ],
+    [
+     1,
+     "Bloodmoon Ursaluna ex",
+     "TWM",
+     "141"
     ],
     [
      4,
@@ -1529,9 +1547,21 @@
     ],
     [
      2,
-     "Hassel",
-     "TWM",
-     "151"
+     "Explorer's Guidance",
+     "TEF",
+     "147"
+    ],
+    [
+     1,
+     "Black Belt's Training",
+     "JTG",
+     "143"
+    ],
+    [
+     4,
+     "Poké Pad",
+     "POR",
+     "81"
     ],
     [
      4,
@@ -1541,33 +1571,9 @@
     ],
     [
      3,
-     "Poké Pad",
-     "POR",
-     "81"
-    ],
-    [
-     3,
      "Night Stretcher",
      "ASC",
      "196"
-    ],
-    [
-     2,
-     "Switch",
-     "MEG",
-     "130"
-    ],
-    [
-     2,
-     "Pokégear 3.0",
-     "SVI",
-     "186"
-    ],
-    [
-     1,
-     "Brilliant Blender",
-     "SSP",
-     "164"
     ],
     [
      3,
@@ -1577,21 +1583,27 @@
     ],
     [
      4,
+     "Telepathic Psychic Energy",
+     "POR",
+     "88"
+    ],
+    [
+     2,
      "Psychic Energy",
      "MEE",
      "13"
     ],
     [
-     3,
-     "Telepathic Psychic Energy",
-     "POR",
-     "88"
+     1,
+     "Legacy Energy",
+     "TWM",
+     "167"
     ]
    ],
-   "platz": 1,
-   "spieler": "CrissSkywalker",
-   "turnier": "💰 Domino Arena Rush | Temporada 3 | Semana 8 💰",
-   "von": 7
+   "platz": 2,
+   "spieler": "BravBrav",
+   "turnier": "⚡ Surge's TCG Vault Winner Takes All - 50 Codes",
+   "von": 45
   },
   "listen_vor_ort": [
    {
@@ -1876,14 +1888,14 @@
   "name": "Dhelmise",
   "online": {
    "anteil": "2,69",
-   "anteil14": "3,17",
+   "anteil14": "2,65",
    "bilanz": [
     183,
     198,
     3
    ],
    "bis": "13.11.2026",
-   "fenster14": "09.11.–10.11.2026",
+   "fenster14": "09.11.–13.11.2026",
    "format": "TEF–DLR",
    "kurz_anteil": "2,61",
    "kurz_bilanz": [

@@ -260660,6 +260660,217 @@
       "Illustrated by Taiga Kasai"
     ]
   },
+  "MEP|102": {
+    "name": "Victini",
+    "card_type": "Basic",
+    "energy_type": "Fire",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Call for Family",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Search your deck for up to 2 Basic Pokémon and put them onto your Bench. Then, shuffle your deck."
+      },
+      {
+        "name": "V-Flame",
+        "cost": [
+          "R",
+          "C"
+        ],
+        "damage": "50",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by satoma"
+    ]
+  },
+  "MEP|103": {
+    "name": "Zeraora",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Rapid Draw",
+        "cost": [
+          "C"
+        ],
+        "damage": "20",
+        "text": "Draw a card."
+      },
+      {
+        "name": "Electrobullet",
+        "cost": [
+          "L",
+          "C"
+        ],
+        "damage": "50",
+        "text": "This attack also does 20 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": [
+      "Illustrated by HACCAN"
+    ]
+  },
+  "MEP|104": {
+    "name": "Mewtwo",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "130",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Empower",
+        "cost": [
+          "P"
+        ],
+        "damage": "",
+        "text": "Attach up to 2 Basic Energy cards from your discard pile to 1 of your Pokémon."
+      },
+      {
+        "name": "Psydrive",
+        "cost": [
+          "P",
+          "P",
+          "C"
+        ],
+        "damage": "120",
+        "text": "Discard an Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Nisota Niso"
+    ]
+  },
+  "MEP|105": {
+    "name": "Mew",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "60",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Psychic",
+        "cost": [
+          "P",
+          "P"
+        ],
+        "damage": "10+",
+        "text": "This attack does 40 more damage for each Energy attached to your opponent's Active Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by Cona Nitanda"
+    ]
+  },
+  "MEP|106": {
+    "name": "Ditto",
+    "card_type": "Basic",
+    "energy_type": "Colorless",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Surprisingly Transform",
+        "cost": [
+          "C",
+          "C"
+        ],
+        "damage": "",
+        "text": "Flip a coin. If heads, search your deck for a Pokémon and switch it with this Pokémon. Any attached cards, damage counters, Special Conditions, turns in play, and any other effects remain on the new Pokémon. If you switched a Pokémon in this way, put this card into your deck. Then, shuffle your deck."
+      }
+    ],
+    "rules": [
+      "Illustrated by Ounishi"
+    ]
+  },
+  "MEP|107": {
+    "name": "Pikachu ex",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "190",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Pika-Pika Parade",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Search your deck for any number of Basic Pokémon and put them onto your Bench. Then, shuffle your deck."
+      },
+      {
+        "name": "Thunderbolt",
+        "cost": [
+          "L",
+          "L",
+          "C"
+        ],
+        "damage": "200",
+        "text": "Discard all Energy from this Pokémon."
+      }
+    ],
+    "rules": [
+      "Illustrated by YOSHIROTTEN"
+    ]
+  },
+  "MEP|108": {
+    "name": "Espeon ex",
+    "card_type": "Evolves from Eevee",
+    "energy_type": "Psychic",
+    "hp": "260",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Solar Beatdown",
+        "cost": [
+          "P",
+          "C"
+        ],
+        "damage": "30×",
+        "text": "This attack does 30 damage for each of your Pokémon in play."
+      }
+    ],
+    "rules": [
+      "Illustrated by REND"
+    ]
+  },
+  "MEP|109": {
+    "name": "Pikachu ex",
+    "card_type": "Basic",
+    "energy_type": "Lightning",
+    "hp": "190",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Zip-Zap Frenzy",
+        "cost": [
+          "L"
+        ],
+        "damage": "",
+        "text": "You may attach any number of Basic Energy cards from your hand to your Pokémon in any way you like."
+      },
+      {
+        "name": "Thunder",
+        "cost": [
+          "L",
+          "L",
+          "C"
+        ],
+        "damage": "200",
+        "text": "This Pokémon also does 30 damage to itself."
+      }
+    ],
+    "rules": [
+      "Illustrated by YOSHIROTTEN"
+    ]
+  },
   "MEP|11": {
     "name": "Mega Latias ex",
     "card_type": "Basic",
@@ -260690,6 +260901,225 @@
       "Illustrated by 5ban Graphics"
     ]
   },
+  "MEP|110": {
+    "name": "Umbreon ex",
+    "card_type": "Evolves from Eevee",
+    "energy_type": "Darkness",
+    "hp": "270",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Lunatic Claw",
+        "cost": [
+          "D",
+          "C"
+        ],
+        "damage": "100+",
+        "text": "If your opponent's Active Pokémon already has any damage counters on it, this attack does 140 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by REND"
+    ]
+  },
+  "MEP|111": {
+    "name": "Masquerain",
+    "card_type": "Evolves from Surskit",
+    "energy_type": "Grass",
+    "hp": "110",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Frightening Pattern",
+        "cost": [
+          "C"
+        ],
+        "damage": "30",
+        "text": "During your opponent's next turn, the Defending Pokémon can't use attacks."
+      },
+      {
+        "name": "Bug Out",
+        "cost": [
+          "G"
+        ],
+        "damage": "50×",
+        "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards."
+      }
+    ],
+    "rules": [
+      "Illustrated by Anderson"
+    ]
+  },
+  "MEP|112": {
+    "name": "Magmortar",
+    "card_type": "Evolves from Magmar",
+    "energy_type": "Fire",
+    "hp": "140",
+    "abilities": [
+      {
+        "name": "Buddy Boost",
+        "text": "Once during your turn, you may use this Ability. Attach a Basic [ R ] Energy card, a Basic [ L ] Energy card, or 1 of each from your hand to your Electivire and Magmortar in any way you like."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Heat Crash",
+        "cost": [
+          "R",
+          "R",
+          "C"
+        ],
+        "damage": "80",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Kazumasa Yasukuni"
+    ]
+  },
+  "MEP|113": {
+    "name": "Enamorus",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "120",
+    "abilities": [
+      {
+        "name": "Incarnate Solidarity",
+        "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all [ C ] Energy in the costs of attacks used by this Pokémon."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Rising Heart",
+        "cost": [
+          "P",
+          "P",
+          "C",
+          "C"
+        ],
+        "damage": "100+",
+        "text": "If your opponent's Active Pokémon is a Pokémon ex, this attack does 100 more damage."
+      }
+    ],
+    "rules": [
+      "Illustrated by CHORISO"
+    ]
+  },
+  "MEP|114": {
+    "name": "Kommo-o",
+    "card_type": "Evolves from Jangmo-o",
+    "energy_type": "Dragon",
+    "hp": "160",
+    "abilities": [
+      {
+        "name": "Beat Scales",
+        "text": "Once during your turn, you may use this Ability. Look at the top 6 cards of your deck and attach any number of Basic Energy cards you find there to your [ N ] Pokémon in any way you like. Shuffle the other cards back into your deck."
+      }
+    ],
+    "attacks": [
+      {
+        "name": "Hammer In",
+        "cost": [
+          "L",
+          "F",
+          "C"
+        ],
+        "damage": "170",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Kazuki Minami"
+    ]
+  },
+  "MEP|115": {
+    "name": "Spritzee",
+    "card_type": "Basic",
+    "energy_type": "Psychic",
+    "hp": "70",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Sweet Scent",
+        "cost": [
+          "C"
+        ],
+        "damage": "",
+        "text": "Heal 30 damage from 1 of your Pokémon."
+      },
+      {
+        "name": "Ram",
+        "cost": [
+          "P"
+        ],
+        "damage": "10",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by Terada Tera"
+    ]
+  },
+  "MEP|116": {
+    "name": "Seel",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "80",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Rain Splash",
+        "cost": [
+          "W"
+        ],
+        "damage": "10",
+        "text": ""
+      },
+      {
+        "name": "Wave Splash",
+        "cost": [
+          "W",
+          "W"
+        ],
+        "damage": "30",
+        "text": ""
+      }
+    ],
+    "rules": [
+      "Illustrated by cochi8i"
+    ]
+  },
+  "MEP|117": {
+    "name": "Kyogre",
+    "card_type": "Basic",
+    "energy_type": "Water",
+    "hp": "150",
+    "abilities": [],
+    "attacks": [
+      {
+        "name": "Waterfall",
+        "cost": [
+          "W",
+          "C"
+        ],
+        "damage": "40",
+        "text": ""
+      },
+      {
+        "name": "Brutal Whirlpool",
+        "cost": [
+          "W",
+          "W",
+          "C"
+        ],
+        "damage": "100",
+        "text": "If a Stadium that has \"Legendary\" in its name is in play, this attack also does 50 damage to each of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "rules": [
+      "Illustrated by Nurikabe"
+    ]
+  },
   "MEP|12": {
     "name": "Mega Lucario ex",
     "card_type": "Evolves from Riolu",
@@ -260717,6 +261147,18 @@
     ],
     "rules": [
       "Illustrated by 5ban Graphics"
+    ]
+  },
+  "MEP|120": {
+    "name": "Celebratory Fanfare",
+    "card_type": "Stadium",
+    "energy_type": "",
+    "hp": "",
+    "abilities": [],
+    "attacks": [],
+    "rules": [
+      "Once during each player's turn, that player may heal 10 damage from each of their Pokémon. If a player healed any damage in this way, their turn ends.",
+      "Illustrated by Yuu Nishida"
     ]
   },
   "MEP|13": {

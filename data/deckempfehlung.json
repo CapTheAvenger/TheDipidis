@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-11-10 20:22:02+00:00",
+ "erzeugt": "2026-11-13 07:06:14+00:00",
  "format": "TEF-DLR",
  "betriebsart": "B",
  "betriebsart_klartext": "Kaltstart — TEF-DLR hat noch kein Praesenzturnier, Anker ist die Vorepoche TEF-PBL",
@@ -63,28 +63,28 @@
  ],
  "ankerspieler_gesamt": 17805,
  "online_abdeckung": {
-  "schnappschuss": "2026-11-10",
-  "anteil_unbekannt": 17.6,
+  "schnappschuss": "2026-11-13",
+  "anteil_unbekannt": 17.46,
   "groesste_unbekannte": [
    {
     "deck": "Mega Rayquaza",
-    "anteil": 11.68
+    "anteil": 10.35
    },
    {
     "deck": "Talonflame Dusknoir",
-    "anteil": 2.35
+    "anteil": 3.03
    },
    {
     "deck": "Mega Golisopod",
-    "anteil": 1.08
+    "anteil": 1.17
    },
    {
     "deck": "Mega Charizard Y",
-    "anteil": 0.8
+    "anteil": 0.62
    },
    {
     "deck": "Mega Malamar",
-    "anteil": 0.36
+    "anteil": 0.51
    }
   ]
  },

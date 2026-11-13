@@ -1,10 +1,9 @@
 {
  "_meta": {
-  "erzeugt": "2026-11-12T05:07:36Z",
+  "erzeugt": "2026-11-13T04:05:33Z",
   "erzeuger": "scripts/datenluecken.py",
-  "anzahl": 9,
+  "anzahl": 8,
   "jeKlasse": {
-   "gegenstandsname": 1,
    "kartentyp": 8
   },
   "klassen": {
@@ -43,15 +42,6 @@
   ]
  },
  "luecken": [
-  {
-   "id": "gegenstandsname/quelle-liefert-nummern",
-   "klasse": "gegenstandsname",
-   "titel": "1 Gegenstände kommen nur als Nummer (1 Einträge): Unknown Item 200",
-   "titelEn": "1 held items arrive as a bare number (1 entries): Unknown Item 200",
-   "wo": "data/champions_usage.json → pokemon[*][*].held_item[].name",
-   "ansicht": "side-quest",
-   "vorschlag": null
-  },
   {
    "id": "kartentyp/mee-10",
    "klasse": "kartentyp",

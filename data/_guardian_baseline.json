@@ -134,7 +134,7 @@
   "all_cards_database.csv": 20759,
   "archetype_aliases.json": 65,
   "cardmarket_card_images.csv": 1295,
-  "cardmarket_id_mapping.csv": 17712,
+  "cardmarket_id_mapping.csv": 17714,
   "cardmarket_mapping_verified.csv": 6536,
   "champions_editionen.json": 26121,
   "champions_resources.json": 0,
@@ -151,7 +151,7 @@
   "price_data.csv": 20759,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-11-14 09:34 UTC",
+ "generated": "2026-11-14 12:39 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -164,13 +164,13 @@
  },
  "kartentext_de_gefuellt": 14796,
  "price_integrity": {
-  "duplicate_idproducts": 72,
+  "duplicate_idproducts": 71,
   "match_methods": {
    "live-verified": 5909,
    "manual-pin": 78,
    "priced-by-all": 91,
-   "priced-by-date": 495,
-   "unique": 11139
+   "priced-by-date": 499,
+   "unique": 11137
   },
   "nonempty_eur_price": 20734,
   "verified_collision_owners": {},
@@ -568,9 +568,9 @@
    100.0
   ],
   "MEP": [
-   115,
    117,
-   98.3
+   117,
+   100.0
   ],
   "MEW": [
    204,

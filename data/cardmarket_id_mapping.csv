@@ -9172,7 +9172,7 @@ MEP,101,895604,live-verified,Nidorina
 MEP,102,895613,unique,Victini
 MEP,103,895614,unique,Zeraora
 MEP,104,895620,unique,Mewtwo
-MEP,105,895621,unique,Mew
+MEP,105,895621,priced-by-date(1↔2),Mew
 MEP,106,895619,unique,Ditto
 MEP,107,895615,priced-by-date(2↔2),Pikachu ex
 MEP,108,895616,unique,Espeon ex
@@ -9182,6 +9182,8 @@ MEP,111,921287,priced-by-date(1↔2),Masquerain
 MEP,112,921289,priced-by-date(1↔2),Magmortar
 MEP,113,921291,priced-by-date(1↔2),Enamorus
 MEP,114,921293,priced-by-date(1↔2),Kommo-o
+MEP,115,923521,unique,Spritzee
+MEP,116,923539,unique,Seel
 MEP,117,922655,priced-by-date(1↔2),Kyogre
 MEP,120,914431,priced-by-all(2↔3),Celebratory Fanfare
 MEW,1,733596,live-verified,Bulbasaur
@@ -13827,10 +13829,10 @@ SP,62,576730,live-verified,Pikachu VMAX
 SP,63,605848,priced-by-all(6↔8),Pikachu V
 SP,64,496550,live-verified,Eternatus V
 SP,65,496555,unique,Eevee V
-SP,66,516329,unique,Charizard
-SP,67,516334,unique,Donphan
+SP,66,516329,priced-by-date(1↔2),Charizard
+SP,67,516334,priced-by-date(1↔2),Donphan
 SP,68,516339,live-verified,Snorlax
-SP,69,516344,unique,Lugia
+SP,69,516344,priced-by-date(1↔2),Lugia
 SP,70,516349,priced-by-all(2↔3),Grookey
 SP,71,516354,priced-by-all(3↔4),Scorbunny
 SP,72,516359,unique,Vaporeon
@@ -13878,7 +13880,7 @@ SP,115,566763,unique,Passimian
 SP,116,557973,priced-by-all(3↔4),Morpeko
 SP,117,557974,unique,Phanpy
 SP,118,557975,live-verified,Eevee
-SP,119,516339,priced-by-all(3↔3),Snorlax
+SP,119,923480,priced-by-all(3↔4),Snorlax
 SP,120,566764,live-verified,Marnie
 SP,121,566765,live-verified,Marnie
 SP,122,573857,unique,Flaaffy

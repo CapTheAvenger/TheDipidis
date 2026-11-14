@@ -5,9 +5,7 @@
   "zuordnung": "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/items.csv + item_names.csv (local_language_id 9)",
   "rechte": "The Pokemon Company / Nintendo / GAME FREAK. PokeAPI stellt die Icons als Fansammlung bereit und kann daran nichts einraeumen.",
   "anzahl": 166,
-  "ohne_sprite": [
-   "Unknown Item 200"
-  ],
+  "ohne_sprite": [],
   "ohne_sprite_grund": "Champions-eigene Gegenstaende (fast durchweg Mega-Steine), die es in keinem Hauptreihenspiel gibt. Es wird KEIN Ersatzbild gesetzt."
  },
  "sprites": {

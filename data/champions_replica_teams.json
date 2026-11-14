@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-11-13",
+    "last_updated": "2026-11-14",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-C=gid2001945654, M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-C",
@@ -11698,97 +11698,97 @@
     },
     {
       "rank": 120,
-      "replica_code": "199JW2B5GE",
-      "team_name": "Ewok's Puebla Regional 2027 Top 64 Team",
-      "tournament": "Puebla Regional 2027",
-      "trainer": "Christian Ramírez",
+      "replica_code": "T7L0UJPU47",
+      "team_name": "Ze Banded's Taiwan PBL 2027 Team",
+      "tournament": "Taiwan PBL 2027",
+      "trainer": "Ze Banded",
       "format": "VGC Champions",
       "regulation": "M-C",
-      "sheet_rank": "41st",
-      "date_shared": "30 Oct 2026",
-      "pokepaste_url": "https://pokepast.es/4ee5d23f26213d8e",
+      "sheet_rank": "",
+      "date_shared": "7 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/5894b72f2a93d73f",
       "pokemon": [
         {
-          "name": "Golisopod",
-          "item": "Golisopite",
-          "ability": "Emergency Exit",
+          "name": "Raichu",
+          "item": "Raichunite X",
+          "ability": "Lightning Rod",
           "tera_type": "",
-          "evs": "32 HP / 32 Atk / 2 SpD",
-          "nature": "Brave",
-          "moves": [
-            "Leech Life",
-            "Iron Head",
-            "Sucker Punch",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Pelipper",
-          "item": "Focus Sash",
-          "ability": "Drizzle",
-          "tera_type": "",
-          "evs": "31 HP / 2 Def / 15 SpA / 17 SpD / 1 Spe",
-          "nature": "Calm",
-          "moves": [
-            "Muddy Water",
-            "Hurricane",
-            "Tailwind",
-            "Wide Guard"
-          ]
-        },
-        {
-          "name": "Indeedee-F",
-          "item": "Lum Berry",
-          "ability": "Psychic Surge",
-          "tera_type": "",
-          "evs": "32 HP / 25 Def / 4 SpA / 5 SpD",
-          "nature": "Relaxed",
-          "moves": [
-            "Follow Me",
-            "Helping Hand",
-            "Trick Room",
-            "Psychic"
-          ]
-        },
-        {
-          "name": "Archaludon",
-          "item": "Leftovers",
-          "ability": "Stamina",
-          "tera_type": "",
-          "evs": "32 HP / 1 Def / 1 SpA / 20 SpD / 12 Spe",
-          "nature": "Bold",
-          "moves": [
-            "Electro Shot",
-            "Dragon Pulse",
-            "Aura Sphere",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Basculegion",
-          "item": "Choice Scarf",
-          "ability": "Adaptability",
-          "tera_type": "",
-          "evs": "4 HP / 21 Atk / 13 Def / 28 Spe",
+          "evs": "30 HP / 4 Def / 32 Spe",
           "nature": "Jolly",
           "moves": [
-            "Wave Crash",
-            "Last Respects",
-            "Aqua Jet",
-            "Flip Turn"
+            "Volt Tackle",
+            "Volt Switch",
+            "Feint",
+            "Fake Out"
           ]
         },
         {
-          "name": "Gardevoir",
-          "item": "Gardevoirite",
-          "ability": "Synchronize",
+          "name": "Staraptor",
+          "item": "Staraptite",
+          "ability": "Intimidate",
           "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
-          "nature": "Timid",
+          "evs": "32 HP / 1 Atk / 2 SpD / 31 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Brave Bird",
+            "Tailwind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Primarina",
+          "item": "Leftovers",
+          "ability": "Liquid Voice",
+          "tera_type": "",
+          "evs": "21 HP / 16 Def / 6 SpA / 23 Spe",
+          "nature": "Bold",
           "moves": [
             "Hyper Voice",
-            "Expanding Force",
-            "Psychic",
+            "Moonblast",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "18 HP / 32 Atk / 2 Def / 6 SpD / 8 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wood Hammer",
+            "Grassy Glide",
+            "U-turn",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Sneasler",
+          "item": "Electric Seed",
+          "ability": "Unburden",
+          "tera_type": "",
+          "evs": "32 HP / 10 Atk / 6 Def / 1 SpD / 17 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Close Combat",
+            "Dire Claw",
+            "Swords Dance",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Kingambit",
+          "item": "Life Orb",
+          "ability": "Defiant",
+          "tera_type": "",
+          "evs": "32 HP / 32 Atk / 1 Def / 1 SpD",
+          "nature": "Adamant",
+          "moves": [
+            "Kowtow Cleave",
+            "Sucker Punch",
+            "Swords Dance",
             "Protect"
           ]
         }

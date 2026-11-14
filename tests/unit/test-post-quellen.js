@@ -803,21 +803,30 @@ test('der Nenner der Zahl-Vorlage ueberlebt den Umbruch', async () => {
 });
 
 test('Champions zaehlt keinen Platzhalter als Turnier', async () => {
-    /* 13 der 114 Teams tragen tournament: "-". Die erste Fassung zaehlte
-     * den Platzhalter als 25. Turnier. */
+    /* 13 der 114 Teams trugen tournament: "-". Die erste Fassung zaehlte
+     * den Platzhalter als 25. Turnier.
+     *
+     * WZ-49 (14.11.2026): seit dem 13.11. traegt die Quelle kein Team mit
+     * "-" mehr — die Vorpruefung "es gibt einen Platzhalter" fiel und hielt
+     * vier Datenlaeufe als Tor-Befund an (Guardian rot). Der Fall wird jetzt
+     * GESETZT: ein Team mit "-" kommt zu den echten Daten dazu, ueber den
+     * Ersatz im Fenster. Damit prueft der Test die Regel, nicht die Welt. */
     const d = JSON.parse(fs.readFileSync(D('data/champions_replica_teams.json'), 'utf8'));
+    const gesetzt = JSON.parse(JSON.stringify(d.teams[0]));
+    gesetzt.tournament = '-';
+    d.teams.push(gesetzt);
     const echt = new Set();
     let ohne = 0;
     d.teams.forEach((t) => {
         const n = String(t.tournament || '').trim();
         if (n && n !== '-') echt.add(n); else ohne++;
     });
-    assert.ok(ohne >= 1,
-        'kein Team ohne Turnierangabe mehr — dann prueft dieser Test nichts');
-    const erg = await Q.lade('champions');
+    assert.ok(ohne >= 1, 'der gesetzte Platzhalter fehlt');
+    const Qg = fenster({ 'data/champions_replica_teams.json': JSON.stringify(d) }).window.DsPostQuellen;
+    const erg = await Qg.lade('champions');
     assert.ok(erg.fuss.includes(String(echt.size)),
         `die Fusszeile nennt nicht ${echt.size} echte Turniere: ${erg.fuss}`);
-    assert.ok(!erg.fuss.includes(String(echt.size + ohne)) || echt.size + ohne === echt.size,
+    assert.ok(!erg.fuss.includes(String(echt.size + ohne)),
         `die Fusszeile zaehlt den Platzhalter mit: ${erg.fuss}`);
 });
 

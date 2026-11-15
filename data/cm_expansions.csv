@@ -5,7 +5,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 4388,,Start Deck 100 Deck,2021-12-22,,430
 3324,,5 Pack GET! Campaign,2020-06-10,,422
 4159,,McDonald's 2014 Promo,2021-03-19,,412
-2916,SP,Sword & Shield Ultra-Premium Collection - Charizard Promos,2019-12-02,tcg,386
+2916,SP,Sword & Shield Ultra-Premium Collection - Charizard Promos,2019-12-02,tcg,390
 6673,,,2026-07-28,,380
 5519,,Shiny Treasure ex,2023-10-20,,360
 6582,,CSM2DC: Shining Synergy GX Starter Deck,2024-11-14,,357
@@ -130,11 +130,11 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 6134,BLK,Black Bolt,2025-05-07,tcg,172
 6250,,CS6bC: Azure Shadow - Pursuit,2024-09-10,,172
 6230,,Pokémon Card Gym Promo MEGA Vol. 1,2025-07-25,,171
+6232,MEP,First Partner Illustration,2025-09-25,tcg,170
 1536,E1,Expedition Base Set,0000-00-00,tcg,169
 6249,,CS6aC: Azure Shadow - Roar,2024-09-10,,169
 1582,XY,XY,0000-00-00,tcg,168
 6193,,CSV1C: Eternal Birth,2025-01-03,,167
-6232,MEP,First Partner Illustration,2025-09-25,tcg,167
 6393,,,2025-11-19,,167
 1564,SV,Supreme Victors,0000-00-00,tcg,166
 6110,,CSV3C: Fearless Terastal,2025-04-16,,165
@@ -541,6 +541,7 @@ id_expansion,expansion_code,name,release_date,code_source,n_singles
 5422,,Ruler of the Black Flame Deck Build Box,2023-06-22,,38
 5724,,Gift Box Emerald,2024-04-08,,38
 6290,,,2025-09-24,,38
+6963,,"Mega Gengar ex, Mega Dragonite ex & Mega Feraligatr ex Special Deck Set",2026-11-12,,38
 5796,,Trick or Trade 2024,2024-06-24,,36
 4249,,Tag Team GX Premium Trainer Box,2021-03-17,,35
 5530,,Pokémon Trading Card Game Classic: Venusaur & Lugia ex Deck,2023-11-17,,35

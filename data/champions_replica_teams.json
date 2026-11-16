@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-11-15",
+    "last_updated": "2026-11-16",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-C=gid2001945654, M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-C",
@@ -10694,105 +10694,6 @@
     },
     {
       "rank": 109,
-      "replica_code": "MC027MKNDF",
-      "team_name": "jonen00's Gdańsk Regional 2027 Top 32 Team",
-      "tournament": "Gdańsk Regional 2027",
-      "trainer": "jonen00",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "19th",
-      "date_shared": "1 Nov 2026",
-      "pokepaste_url": "https://pokepast.es/d7003f722cc59699",
-      "pokemon": [
-        {
-          "name": "Glimmora",
-          "item": "Focus Sash",
-          "ability": "Toxic Debris",
-          "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Sludge Bomb",
-            "Power Gem",
-            "Earth Power",
-            "Spiky Shield"
-          ]
-        },
-        {
-          "name": "Froslass",
-          "item": "Froslassite",
-          "ability": "Cursed Body",
-          "tera_type": "",
-          "evs": "32 HP / 10 SpA / 1 SpD / 23 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Blizzard",
-            "Shadow Ball",
-            "Aurora Veil",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Kingambit",
-          "item": "Life Orb",
-          "ability": "Defiant",
-          "tera_type": "",
-          "evs": "8 HP / 32 Atk / 26 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Kowtow Cleave",
-            "Sucker Punch",
-            "Iron Head",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Whimsicott",
-          "item": "Fairy Feather",
-          "ability": "Prankster",
-          "tera_type": "",
-          "evs": "32 HP / 16 Def / 1 SpA / 5 SpD / 12 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Moonblast",
-            "Tailwind",
-            "Charm",
-            "Encore"
-          ]
-        },
-        {
-          "name": "Staraptor",
-          "item": "Staraptite",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "27 HP / 4 Atk / 1 Def / 2 SpD / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Brave Bird",
-            "Close Combat",
-            "Roost",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Armarouge",
-          "item": "Sitrus Berry",
-          "ability": "Flash Fire",
-          "tera_type": "",
-          "evs": "31 HP / 5 SpA / 22 SpD / 8 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Armor Cannon",
-            "Psyshock",
-            "Wide Guard",
-            "Trick Room"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 110,
       "replica_code": "5GCS285NPL",
       "team_name": "NikolajHoej's Gdańsk Regional 2027 Top 32 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -10891,7 +10792,7 @@
       "strategy": []
     },
     {
-      "rank": 111,
+      "rank": 110,
       "replica_code": "BKS8L17LK5",
       "team_name": "gabryyl_'s Gdańsk Regional 2027 Top 32 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -10990,7 +10891,7 @@
       "strategy": []
     },
     {
-      "rank": 112,
+      "rank": 111,
       "replica_code": "RJWTJGEJH1",
       "team_name": "DaniVGC's Gdańsk Regional 2027 Top 64 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -11089,7 +10990,7 @@
       "strategy": []
     },
     {
-      "rank": 113,
+      "rank": 112,
       "replica_code": "MGKLWBSEVE",
       "team_name": "Trimoxis' Gdańsk Regional 2027 Top 64 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -11188,7 +11089,7 @@
       "strategy": []
     },
     {
-      "rank": 114,
+      "rank": 113,
       "replica_code": "SN0Q5JTUCH",
       "team_name": "ildrarvgc's Gdańsk Regional 2027 Top 64 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -11287,7 +11188,7 @@
       "strategy": []
     },
     {
-      "rank": 115,
+      "rank": 114,
       "replica_code": "BGR86EBGRT",
       "team_name": "krlos_cb's Gdańsk Regional 2027 Top 64 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -11386,7 +11287,7 @@
       "strategy": []
     },
     {
-      "rank": 116,
+      "rank": 115,
       "replica_code": "UXBHR9D5RK",
       "team_name": "draxolotl12's Gdańsk Regional 2027 Top 128 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -11485,7 +11386,7 @@
       "strategy": []
     },
     {
-      "rank": 117,
+      "rank": 116,
       "replica_code": "CKFBRD3UUR",
       "team_name": "NavarroVGC's Gdańsk Regional 2027 Top 128 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -11584,7 +11485,7 @@
       "strategy": []
     },
     {
-      "rank": 118,
+      "rank": 117,
       "replica_code": "EN43XY37V1",
       "team_name": "mynamesuckzvgc's Gdańsk Regional 2027 Top 128 Team",
       "tournament": "Gdańsk Regional 2027",
@@ -11683,21 +11584,7 @@
       "strategy": []
     },
     {
-      "rank": 119,
-      "replica_code": "8Q5AAFHHMM",
-      "team_name": "Avalos_VGC's Nice Regional 2027 Top 32 Team",
-      "tournament": "Nice Regional 2027",
-      "trainer": "Avalos_VGC",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "27th",
-      "date_shared": "1 Nov 2026",
-      "pokepaste_url": "https://pokepast.es/afffb5cb120e14bf",
-      "pokemon": [],
-      "strategy": []
-    },
-    {
-      "rank": 120,
+      "rank": 118,
       "replica_code": "T7L0UJPU47",
       "team_name": "Ze Banded's Taiwan PBL 2027 Team",
       "tournament": "Taiwan PBL 2027",
@@ -11790,6 +11677,204 @@
             "Sucker Punch",
             "Swords Dance",
             "Protect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 119,
+      "replica_code": "JBQ9R170NL",
+      "team_name": "barudoru's Heracross Delphox Team",
+      "tournament": "-",
+      "trainer": "Ryota Otsubo",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "11 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/561acb65db7d21b1",
+      "pokemon": [
+        {
+          "name": "Glimmora",
+          "item": "Life Orb",
+          "ability": "Toxic Debris",
+          "tera_type": "",
+          "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Sludge Bomb",
+            "Power Gem",
+            "Earth Power",
+            "Spiky Shield"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Earthquake",
+            "Rock Slide",
+            "Stomping Tantrum",
+            "Dragon Claw"
+          ]
+        },
+        {
+          "name": "Delphox",
+          "item": "Delphoxite",
+          "ability": "Blaze",
+          "tera_type": "",
+          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Heat Wave",
+            "Psychic",
+            "Encore",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Whimsicott",
+          "item": "Focus Sash",
+          "ability": "Prankster",
+          "tera_type": "",
+          "evs": "2 HP / 32 SpA / 32 Spe",
+          "nature": "Timid",
+          "moves": [
+            "Moonblast",
+            "Tailwind",
+            "Encore",
+            "Endeavor"
+          ]
+        },
+        {
+          "name": "Farigiraf",
+          "item": "Sitrus Berry",
+          "ability": "Armor Tail",
+          "tera_type": "",
+          "evs": "27 HP / 20 Def / 15 SpD / 4 Spe",
+          "nature": "Bold",
+          "moves": [
+            "Expanding Force",
+            "Hyper Voice",
+            "Trick Room",
+            "Imprison"
+          ]
+        },
+        {
+          "name": "Heracross",
+          "item": "Heracronite",
+          "ability": "Moxie",
+          "tera_type": "",
+          "evs": "2 HP / 32 Atk / 32 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Close Combat",
+            "Bullet Seed",
+            "Pin Missile",
+            "Detect"
+          ]
+        }
+      ],
+      "strategy": []
+    },
+    {
+      "rank": 120,
+      "replica_code": "YYG0UU9QF8",
+      "team_name": "BTrickroomZ's Metagross Floette Team",
+      "tournament": "-",
+      "trainer": "Yuta Ishigaki",
+      "format": "VGC Champions",
+      "regulation": "M-C",
+      "sheet_rank": "",
+      "date_shared": "8 Nov 2026",
+      "pokepaste_url": "https://pokepast.es/fd2afbddd0a66106",
+      "pokemon": [
+        {
+          "name": "Floette-Eternal",
+          "item": "Floettite",
+          "ability": "Flower Veil",
+          "tera_type": "",
+          "evs": "16 HP / 12 Def / 15 SpA / 23 Spe",
+          "nature": "Modest",
+          "moves": [
+            "Moonblast",
+            "Dazzling Gleam",
+            "Calm Mind",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Metagross",
+          "item": "Metagrossite",
+          "ability": "Clear Body",
+          "tera_type": "",
+          "evs": "28 HP / 8 Atk / 1 Def / 1 SpD / 28 Spe",
+          "nature": "Jolly",
+          "moves": [
+            "Psychic Fangs",
+            "Body Press",
+            "Iron Defense",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Rillaboom",
+          "item": "Miracle Seed",
+          "ability": "Grassy Surge",
+          "tera_type": "",
+          "evs": "26 HP / 5 Atk / 1 Def / 31 SpD / 3 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wood Hammer",
+            "Grassy Glide",
+            "U-turn",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Incineroar",
+          "item": "Sitrus Berry",
+          "ability": "Intimidate",
+          "tera_type": "",
+          "evs": "31 HP / 20 Def / 15 SpD",
+          "nature": "Impish",
+          "moves": [
+            "Flare Blitz",
+            "Helping Hand",
+            "Parting Shot",
+            "Fake Out"
+          ]
+        },
+        {
+          "name": "Basculegion",
+          "item": "Life Orb",
+          "ability": "Adaptability",
+          "tera_type": "",
+          "evs": "28 Atk / 14 Def / 24 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Wave Crash",
+            "Last Respects",
+            "Aqua Jet",
+            "Protect"
+          ]
+        },
+        {
+          "name": "Garchomp",
+          "item": "Choice Scarf",
+          "ability": "Rough Skin",
+          "tera_type": "",
+          "evs": "5 HP / 30 Atk / 1 Def / 1 SpD / 29 Spe",
+          "nature": "Adamant",
+          "moves": [
+            "Dragon Claw",
+            "Earthquake",
+            "Rock Slide",
+            "Stomping Tantrum"
           ]
         }
       ],

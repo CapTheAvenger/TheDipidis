@@ -6,18 +6,17 @@
    "official M-B Mega coverage",
    "Smogon (pokemon-showdown)"
   ],
-  "base_count": 328,
+  "base_count": 329,
   "aus_mega_count": 0,
   "mega_count": 16,
   "form_count": 2,
   "aus_mega": [],
   "aus_teams": [
    "Basculegion-F",
-   "Indeedee",
    "Indeedee-F",
    "Sirfetch’d"
   ],
-  "aus_teams_count": 4,
+  "aus_teams_count": 3,
   "aus_teams_ohne_werte": [],
   "geschlechtsformen": [
    "Meowstic-F"
@@ -28,10 +27,9 @@
    "Gourgeist-Large",
    "Gourgeist-Small",
    "Gourgeist-Super",
-   "Squawkabilly-Yellow",
-   "Toxtricity"
+   "Squawkabilly-Yellow"
   ],
-  "aus_nutzung_count": 6,
+  "aus_nutzung_count": 5,
   "aus_nutzung_ohne_werte": []
  },
  "smogonKeys": [
@@ -41,7 +39,6 @@
   "Absol-Mega",
   "Absol-Mega-Z",
   "Aegislash",
-  "Aegislash-Blade",
   "Aerodactyl",
   "Aerodactyl-Mega",
   "Aggron",
@@ -191,6 +188,7 @@
   "Hydrapple",
   "Hydreigon",
   "Incineroar",
+  "Indeedee",
   "Infernape",
   "Inteleon",
   "Jolteon",
@@ -338,6 +336,7 @@
   "Toucannon",
   "Toxapex",
   "Toxicroak",
+  "Toxtricity",
   "Toxtricity-Low-Key",
   "Trevenant",
   "Tsareena",
@@ -366,14 +365,12 @@
   "Indeedee-F",
   "Sirfetch’d",
   "Basculegion-F",
-  "Indeedee",
   "Meowstic-F",
   "Farfetch’d",
   "Gourgeist-Large",
   "Gourgeist-Small",
   "Gourgeist-Super",
   "Squawkabilly-Yellow",
-  "Toxtricity",
   "Tauros-Paldea-Blaze",
   "Tauros-Paldea-Aqua"
  ]

@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "last_updated": "2026-11-15",
+    "last_updated": "2026-11-16",
     "window_days": 14,
-    "window_start": "2026-11-01",
-    "window_end": "2026-11-15",
+    "window_start": "2026-11-02",
+    "window_end": "2026-11-16",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
-    "content_to": "2026-11-08",
+    "content_to": "2026-11-11",
     "samples_outside_window": 198,
     "team_count": 120,
-    "teams_with_samples": 117,
-    "sample_count": 713,
+    "teams_with_samples": 118,
+    "sample_count": 719,
     "species_count": 85,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
@@ -4545,48 +4545,6 @@
       "replica": "6CNDDNSNSW"
     },
     {
-      "species": "Glimmora",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "1 Nov 2026",
-      "replica": "MC027MKNDF"
-    },
-    {
-      "species": "Froslass",
-      "evs": "32 HP / 10 SpA / 1 SpD / 23 Spe",
-      "nature": "Modest",
-      "date": "1 Nov 2026",
-      "replica": "MC027MKNDF"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "8 HP / 32 Atk / 26 Spe",
-      "nature": "Adamant",
-      "date": "1 Nov 2026",
-      "replica": "MC027MKNDF"
-    },
-    {
-      "species": "Whimsicott",
-      "evs": "32 HP / 16 Def / 1 SpA / 5 SpD / 12 Spe",
-      "nature": "Timid",
-      "date": "1 Nov 2026",
-      "replica": "MC027MKNDF"
-    },
-    {
-      "species": "Staraptor",
-      "evs": "27 HP / 4 Atk / 1 Def / 2 SpD / 32 Spe",
-      "nature": "Jolly",
-      "date": "1 Nov 2026",
-      "replica": "MC027MKNDF"
-    },
-    {
-      "species": "Armarouge",
-      "evs": "31 HP / 5 SpA / 22 SpD / 8 Spe",
-      "nature": "Modest",
-      "date": "1 Nov 2026",
-      "replica": "MC027MKNDF"
-    },
-    {
       "species": "Incineroar",
       "evs": "32 HP / 14 Def / 20 SpD",
       "nature": "Sassy",
@@ -5005,6 +4963,90 @@
       "nature": "Adamant",
       "date": "7 Nov 2026",
       "replica": "T7L0UJPU47"
+    },
+    {
+      "species": "Glimmora",
+      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
+      "nature": "Modest",
+      "date": "11 Nov 2026",
+      "replica": "JBQ9R170NL"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Adamant",
+      "date": "11 Nov 2026",
+      "replica": "JBQ9R170NL"
+    },
+    {
+      "species": "Delphox",
+      "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "11 Nov 2026",
+      "replica": "JBQ9R170NL"
+    },
+    {
+      "species": "Whimsicott",
+      "evs": "2 HP / 32 SpA / 32 Spe",
+      "nature": "Timid",
+      "date": "11 Nov 2026",
+      "replica": "JBQ9R170NL"
+    },
+    {
+      "species": "Farigiraf",
+      "evs": "27 HP / 20 Def / 15 SpD / 4 Spe",
+      "nature": "Bold",
+      "date": "11 Nov 2026",
+      "replica": "JBQ9R170NL"
+    },
+    {
+      "species": "Heracross",
+      "evs": "2 HP / 32 Atk / 32 Spe",
+      "nature": "Jolly",
+      "date": "11 Nov 2026",
+      "replica": "JBQ9R170NL"
+    },
+    {
+      "species": "Floette-Eternal",
+      "evs": "16 HP / 12 Def / 15 SpA / 23 Spe",
+      "nature": "Modest",
+      "date": "8 Nov 2026",
+      "replica": "YYG0UU9QF8"
+    },
+    {
+      "species": "Metagross",
+      "evs": "28 HP / 8 Atk / 1 Def / 1 SpD / 28 Spe",
+      "nature": "Jolly",
+      "date": "8 Nov 2026",
+      "replica": "YYG0UU9QF8"
+    },
+    {
+      "species": "Rillaboom",
+      "evs": "26 HP / 5 Atk / 1 Def / 31 SpD / 3 Spe",
+      "nature": "Adamant",
+      "date": "8 Nov 2026",
+      "replica": "YYG0UU9QF8"
+    },
+    {
+      "species": "Incineroar",
+      "evs": "31 HP / 20 Def / 15 SpD",
+      "nature": "Impish",
+      "date": "8 Nov 2026",
+      "replica": "YYG0UU9QF8"
+    },
+    {
+      "species": "Basculegion",
+      "evs": "28 Atk / 14 Def / 24 Spe",
+      "nature": "Adamant",
+      "date": "8 Nov 2026",
+      "replica": "YYG0UU9QF8"
+    },
+    {
+      "species": "Garchomp",
+      "evs": "5 HP / 30 Atk / 1 Def / 1 SpD / 29 Spe",
+      "nature": "Adamant",
+      "date": "8 Nov 2026",
+      "replica": "YYG0UU9QF8"
     }
   ]
 }

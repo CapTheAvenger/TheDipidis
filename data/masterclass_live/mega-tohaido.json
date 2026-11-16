@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-15T03:45:00Z",
+  "erzeugt_am": "2026-11-16T03:45:55Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -8,7 +8,7 @@
   "deck": "sharpedo-toxtricity",
   "gegner": [
    {
-    "anteil": "11,09",
+    "anteil": "11,15",
     "name": "Mega Rayquaza",
     "online": [
      14,
@@ -23,7 +23,7 @@
     ]
    },
    {
-    "anteil": "9,48",
+    "anteil": "9,29",
     "name": "Dragapult",
     "online": [
      8,
@@ -38,7 +38,7 @@
     ]
    },
    {
-    "anteil": "6,05",
+    "anteil": "6,09",
     "name": "Basic Box",
     "online": [
      4,
@@ -53,7 +53,7 @@
     ]
    },
    {
-    "anteil": "4,62",
+    "anteil": "4,79",
     "name": "Slowking",
     "online": [
      6,
@@ -68,7 +68,7 @@
     ]
    },
    {
-    "anteil": "3,74",
+    "anteil": "3,68",
     "name": "Ogerpon Meganium Hydrapple",
     "online": [
      1,
@@ -83,11 +83,11 @@
     ]
    },
    {
-    "anteil": "3,54",
+    "anteil": "3,44",
     "name": "Alakazam Dudunsparce",
     "online": [
      2,
-     3,
+     4,
      0
     ],
     "slug": "alakazam-dudunsparce",
@@ -98,7 +98,7 @@
     ]
    },
    {
-    "anteil": "3,16",
+    "anteil": "3,11",
     "name": "Talonflame Dusknoir",
     "online": [
      4,
@@ -113,7 +113,7 @@
     ]
    },
    {
-    "anteil": "2,87",
+    "anteil": "2,98",
     "name": "N's Zoroark",
     "online": [
      4,
@@ -143,21 +143,6 @@
     ]
    },
    {
-    "anteil": "2,69",
-    "name": "Dhelmise",
-    "online": [
-     4,
-     1,
-     0
-    ],
-    "slug": "dhelmise-pbl",
-    "vor_ort": [
-     70,
-     16,
-     23
-    ]
-   },
-   {
     "anteil": "2,60",
     "name": "Crustle",
     "online": [
@@ -173,7 +158,22 @@
     ]
    },
    {
-    "anteil": "2,43",
+    "anteil": "2,57",
+    "name": "Dhelmise",
+    "online": [
+     4,
+     1,
+     0
+    ],
+    "slug": "dhelmise-pbl",
+    "vor_ort": [
+     70,
+     16,
+     23
+    ]
+   },
+   {
+    "anteil": "2,52",
     "name": "Lopunny Dudunsparce",
     "online": [
      2,
@@ -188,7 +188,7 @@
     ]
    },
    {
-    "anteil": "2,28",
+    "anteil": "2,33",
     "name": "Mega Excadrill",
     "online": [
      3,
@@ -203,7 +203,7 @@
     ]
    },
    {
-    "anteil": "1,93",
+    "anteil": "2,03",
     "name": "Mega Lucario",
     "online": [
      3,
@@ -218,37 +218,7 @@
     ]
    },
    {
-    "anteil": "1,90",
-    "name": "Greninja",
-    "online": [
-     1,
-     0,
-     0
-    ],
-    "slug": "greninja-ex",
-    "vor_ort": [
-     7,
-     3,
-     0
-    ]
-   },
-   {
-    "anteil": "1,87",
-    "name": "Rocket's Honchkrow",
-    "online": [
-     0,
-     1,
-     0
-    ],
-    "slug": "rockets-honchkrow",
-    "vor_ort": [
-     9,
-     14,
-     6
-    ]
-   },
-   {
-    "anteil": "1,84",
+    "anteil": "1,92",
     "name": "Festival Lead",
     "online": [
      1,
@@ -263,7 +233,37 @@
     ]
    },
    {
-    "anteil": "1,70",
+    "anteil": "1,84",
+    "name": "Greninja",
+    "online": [
+     1,
+     0,
+     0
+    ],
+    "slug": "greninja-ex",
+    "vor_ort": [
+     7,
+     3,
+     0
+    ]
+   },
+   {
+    "anteil": "1,84",
+    "name": "Rocket's Honchkrow",
+    "online": [
+     0,
+     1,
+     0
+    ],
+    "slug": "rockets-honchkrow",
+    "vor_ort": [
+     9,
+     14,
+     6
+    ]
+   },
+   {
+    "anteil": "1,62",
     "name": "Dragapult Blaziken",
     "online": [
      3,
@@ -278,10 +278,10 @@
     ]
    },
    {
-    "anteil": "1,35",
+    "anteil": "1,41",
     "name": "Iron Thorns",
     "online": [
-     1,
+     2,
      1,
      0
     ],
@@ -293,37 +293,7 @@
     ]
    },
    {
-    "anteil": "1,32",
-    "name": "Cynthia's Garchomp",
-    "online": [
-     2,
-     0,
-     0
-    ],
-    "slug": "cynthia-garchomp-ex",
-    "vor_ort": [
-     4,
-     14,
-     5
-    ]
-   },
-   {
-    "anteil": "1,26",
-    "name": "Lucario Hariyama",
-    "online": [
-     0,
-     2,
-     0
-    ],
-    "slug": "lucario-hariyama",
-    "vor_ort": [
-     17,
-     26,
-     5
-    ]
-   },
-   {
-    "anteil": "1,23",
+    "anteil": "1,27",
     "name": "Alakazam Dusknoir",
     "online": [
      1,
@@ -338,7 +308,22 @@
     ]
    },
    {
-    "anteil": "1,23",
+    "anteil": "1,27",
+    "name": "Cynthia's Garchomp",
+    "online": [
+     2,
+     1,
+     0
+    ],
+    "slug": "cynthia-garchomp-ex",
+    "vor_ort": [
+     4,
+     14,
+     5
+    ]
+   },
+   {
+    "anteil": "1,22",
     "name": "Dragapult Dusknoir",
     "online": [
      1,
@@ -353,7 +338,22 @@
     ]
    },
    {
-    "anteil": "1,20",
+    "anteil": "1,22",
+    "name": "Lucario Hariyama",
+    "online": [
+     0,
+     2,
+     0
+    ],
+    "slug": "lucario-hariyama",
+    "vor_ort": [
+     17,
+     26,
+     5
+    ]
+   },
+   {
+    "anteil": "1,19",
     "name": "Mega Golisopod",
     "online": [
      2,
@@ -383,7 +383,22 @@
     ]
    },
    {
-    "anteil": "0,79",
+    "anteil": "0,76",
+    "name": "Mega Greninja",
+    "online": [
+     2,
+     1,
+     0
+    ],
+    "slug": "mega-greninja-ex",
+    "vor_ort": [
+     5,
+     3,
+     2
+    ]
+   },
+   {
+    "anteil": "0,76",
     "name": "Mega Starmie",
     "online": [
      0,
@@ -398,22 +413,7 @@
     ]
    },
    {
-    "anteil": "0,76",
-    "name": "Mega Greninja",
-    "online": [
-     1,
-     1,
-     0
-    ],
-    "slug": "mega-greninja-ex",
-    "vor_ort": [
-     5,
-     3,
-     2
-    ]
-   },
-   {
-    "anteil": "0,76",
+    "anteil": "0,73",
     "name": "Ogerpon Meganium Arboliva",
     "online": [
      0,
@@ -428,7 +428,7 @@
     ]
    },
    {
-    "anteil": "0,67",
+    "anteil": "0,68",
     "name": "Mew Box",
     "online": [
      0,
@@ -443,37 +443,7 @@
     ]
    },
    {
-    "anteil": "0,64",
-    "name": "Ethan's Typhlosion",
-    "online": [
-     1,
-     1,
-     0
-    ],
-    "slug": "ethan-typhlosion",
-    "vor_ort": [
-     6,
-     2,
-     1
-    ]
-   },
-   {
-    "anteil": "0,61",
-    "name": "Mega Malamar",
-    "online": [
-     1,
-     1,
-     0
-    ],
-    "slug": "mega-malamar-ex",
-    "vor_ort": [
-     0,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,61",
+    "anteil": "0,68",
     "name": "Toucannon",
     "online": [
      1,
@@ -488,22 +458,22 @@
     ]
    },
    {
-    "anteil": "0,58",
-    "name": "Lopunny Dusknoir",
+    "anteil": "0,60",
+    "name": "Ethan's Typhlosion",
     "online": [
      1,
-     0,
+     1,
      0
     ],
-    "slug": "lopunny-dusknoir",
+    "slug": "ethan-typhlosion",
     "vor_ort": [
-     20,
-     13,
-     2
+     6,
+     2,
+     1
     ]
    },
    {
-    "anteil": "0,58",
+    "anteil": "0,60",
     "name": "Manectric Eelektrik",
     "online": [
      1,
@@ -518,7 +488,37 @@
     ]
    },
    {
-    "anteil": "0,56",
+    "anteil": "0,60",
+    "name": "Mega Malamar",
+    "online": [
+     1,
+     1,
+     0
+    ],
+    "slug": "mega-malamar-ex",
+    "vor_ort": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,57",
+    "name": "Lopunny Dusknoir",
+    "online": [
+     1,
+     0,
+     0
+    ],
+    "slug": "lopunny-dusknoir",
+    "vor_ort": [
+     20,
+     13,
+     2
+    ]
+   },
+   {
+    "anteil": "0,54",
     "name": "Okidogi Barbaracle",
     "online": [
      1,
@@ -533,7 +533,7 @@
     ]
    },
    {
-    "anteil": "0,56",
+    "anteil": "0,51",
     "name": "Rocket's Mewtwo",
     "online": [
      1,
@@ -548,22 +548,7 @@
     ]
    },
    {
-    "anteil": "0,53",
-    "name": "Raging Bolt Ogerpon",
-    "online": [
-     1,
-     0,
-     0
-    ],
-    "slug": "raging-bolt-ogerpon",
-    "vor_ort": [
-     5,
-     9,
-     0
-    ]
-   },
-   {
-    "anteil": "0,50",
+    "anteil": "0,49",
     "name": "Beedrill",
     "online": [
      0,
@@ -578,82 +563,7 @@
     ]
    },
    {
-    "anteil": "0,47",
-    "name": "Froslass Munkidori",
-    "online": [
-     1,
-     0,
-     0
-    ],
-    "slug": "froslass-munkidori",
-    "vor_ort": [
-     0,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,47",
-    "name": "Hop's Trevenant",
-    "online": [
-     1,
-     0,
-     0
-    ],
-    "slug": "hops-trevenant",
-    "vor_ort": [
-     4,
-     2,
-     3
-    ]
-   },
-   {
-    "anteil": "0,47",
-    "name": "Absol Audino",
-    "online": [
-     1,
-     1,
-     0
-    ],
-    "slug": "mega-absol-mega-audino",
-    "vor_ort": [
-     2,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,47",
-    "name": "Mega Venusaur",
-    "online": [
-     1,
-     1,
-     0
-    ],
-    "slug": "mega-venusaur-ex",
-    "vor_ort": [
-     1,
-     2,
-     0
-    ]
-   },
-   {
-    "anteil": "0,47",
-    "name": "Seaking Festival Lead",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "seaking-pre",
-    "vor_ort": [
-     3,
-     11,
-     5
-    ]
-   },
-   {
-    "anteil": "0,44",
+    "anteil": "0,49",
     "name": "Igglybuff",
     "online": [
      0,
@@ -668,14 +578,89 @@
     ]
    },
    {
-    "anteil": "0,41",
-    "name": "Iono's Bellibolt",
+    "anteil": "0,49",
+    "name": "Raging Bolt Ogerpon",
     "online": [
      1,
      0,
      0
     ],
-    "slug": "iono-bellibolt",
+    "slug": "raging-bolt-ogerpon",
+    "vor_ort": [
+     5,
+     9,
+     0
+    ]
+   },
+   {
+    "anteil": "0,46",
+    "name": "Hop's Trevenant",
+    "online": [
+     1,
+     0,
+     0
+    ],
+    "slug": "hops-trevenant",
+    "vor_ort": [
+     4,
+     2,
+     3
+    ]
+   },
+   {
+    "anteil": "0,46",
+    "name": "Absol Audino",
+    "online": [
+     1,
+     1,
+     0
+    ],
+    "slug": "mega-absol-mega-audino",
+    "vor_ort": [
+     2,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,46",
+    "name": "Mega Venusaur",
+    "online": [
+     1,
+     1,
+     0
+    ],
+    "slug": "mega-venusaur-ex",
+    "vor_ort": [
+     1,
+     2,
+     0
+    ]
+   },
+   {
+    "anteil": "0,46",
+    "name": "Seaking Festival Lead",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "seaking-pre",
+    "vor_ort": [
+     3,
+     11,
+     5
+    ]
+   },
+   {
+    "anteil": "0,43",
+    "name": "Froslass Munkidori",
+    "online": [
+     1,
+     0,
+     0
+    ],
+    "slug": "froslass-munkidori",
     "vor_ort": [
      0,
      0,
@@ -683,7 +668,7 @@
     ]
    },
    {
-    "anteil": "0,38",
+    "anteil": "0,41",
     "name": "Kangaskhan Bouffalant",
     "online": [
      1,
@@ -698,22 +683,7 @@
     ]
    },
    {
-    "anteil": "0,35",
-    "name": "Mega Absol Box",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "mega-absol-box",
-    "vor_ort": [
-     3,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,32",
+    "anteil": "0,41",
     "name": "Starmie Froslass",
     "online": [
      1,
@@ -728,7 +698,37 @@
     ]
    },
    {
-    "anteil": "0,29",
+    "anteil": "0,38",
+    "name": "Iono's Bellibolt",
+    "online": [
+     1,
+     0,
+     0
+    ],
+    "slug": "iono-bellibolt",
+    "vor_ort": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,32",
+    "name": "Mega Absol Box",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "mega-absol-box",
+    "vor_ort": [
+     3,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,30",
     "name": "Mega Abomasnow",
     "online": [
      0,
@@ -743,22 +743,7 @@
     ]
    },
    {
-    "anteil": "0,26",
-    "name": "Mega Dragonite",
-    "online": [
-     1,
-     0,
-     0
-    ],
-    "slug": "mega-dragonite-ex",
-    "vor_ort": [
-     2,
-     1,
-     0
-    ]
-   },
-   {
-    "anteil": "0,26",
+    "anteil": "0,30",
     "name": "Steven's Metagross",
     "online": [
      2,
@@ -773,22 +758,22 @@
     ]
    },
    {
-    "anteil": "0,26",
-    "name": "Toxtricity Box",
+    "anteil": "0,27",
+    "name": "Mega Dragonite",
     "online": [
-     0,
+     1,
      0,
      0
     ],
-    "slug": "toxtricity-box",
+    "slug": "mega-dragonite-ex",
     "vor_ort": [
+     2,
      1,
-     3,
      0
     ]
    },
    {
-    "anteil": "0,23",
+    "anteil": "0,24",
     "name": "Mega Chandelure",
     "online": [
      0,
@@ -803,52 +788,22 @@
     ]
    },
    {
-    "anteil": "0,20",
-    "name": "Cinccino",
+    "anteil": "0,24",
+    "name": "Toxtricity Box",
     "online": [
-     1,
-     2,
+     0,
+     0,
      0
     ],
-    "slug": "cinccino-ex",
+    "slug": "toxtricity-box",
     "vor_ort": [
-     2,
-     0,
+     1,
+     3,
      0
     ]
    },
    {
-    "anteil": "0,20",
-    "name": "Mega Froslass",
-    "online": [
-     1,
-     0,
-     0
-    ],
-    "slug": "mega-froslass-ex",
-    "vor_ort": [
-     0,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,20",
-    "name": "Palafin",
-    "online": [
-     0,
-     1,
-     0
-    ],
-    "slug": "palafin-ex",
-    "vor_ort": [
-     1,
-     1,
-     0
-    ]
-   },
-   {
-    "anteil": "0,15",
+    "anteil": "0,19",
     "name": "Ceruledge",
     "online": [
      0,
@@ -863,14 +818,29 @@
     ]
    },
    {
-    "anteil": "0,15",
-    "name": "Eelektrik",
+    "anteil": "0,19",
+    "name": "Cinccino",
+    "online": [
+     1,
+     2,
+     0
+    ],
+    "slug": "cinccino-ex",
+    "vor_ort": [
+     2,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,19",
+    "name": "Mega Froslass",
     "online": [
      1,
      0,
      0
     ],
-    "slug": "eelektrik-blk",
+    "slug": "mega-froslass-ex",
     "vor_ort": [
      0,
      0,
@@ -878,7 +848,22 @@
     ]
    },
    {
-    "anteil": "0,15",
+    "anteil": "0,19",
+    "name": "Palafin",
+    "online": [
+     0,
+     1,
+     0
+    ],
+    "slug": "palafin-ex",
+    "vor_ort": [
+     1,
+     1,
+     0
+    ]
+   },
+   {
+    "anteil": "0,16",
     "name": "Flareon Noctowl",
     "online": [
      0,
@@ -893,7 +878,7 @@
     ]
    },
    {
-    "anteil": "0,15",
+    "anteil": "0,16",
     "name": "Mega Darkrai",
     "online": [
      0,
@@ -908,14 +893,14 @@
     ]
    },
    {
-    "anteil": "0,12",
-    "name": "Decidueye",
+    "anteil": "0,14",
+    "name": "Eelektrik",
     "online": [
      1,
      0,
      0
     ],
-    "slug": "decidueye-ex",
+    "slug": "eelektrik-blk",
     "vor_ort": [
      0,
      0,
@@ -923,7 +908,7 @@
     ]
    },
    {
-    "anteil": "0,12",
+    "anteil": "0,14",
     "name": "Gengar",
     "online": [
      0,
@@ -938,22 +923,7 @@
     ]
    },
    {
-    "anteil": "0,12",
-    "name": "Hydreigon",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "hydreigon-ex",
-    "vor_ort": [
-     1,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,12",
+    "anteil": "0,14",
     "name": "Mega Zygarde",
     "online": [
      0,
@@ -968,7 +938,7 @@
     ]
    },
    {
-    "anteil": "0,12",
+    "anteil": "0,14",
     "name": "Starmie Dusknoir",
     "online": [
      0,
@@ -983,7 +953,7 @@
     ]
    },
    {
-    "anteil": "0,12",
+    "anteil": "0,14",
     "name": "Toxtricity",
     "online": [
      1,
@@ -998,7 +968,37 @@
     ]
    },
    {
-    "anteil": "0,09",
+    "anteil": "0,11",
+    "name": "Decidueye",
+    "online": [
+     1,
+     0,
+     0
+    ],
+    "slug": "decidueye-ex",
+    "vor_ort": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,11",
+    "name": "Hydreigon",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "hydreigon-ex",
+    "vor_ort": [
+     1,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,08",
     "name": "Archaludon",
     "online": [
      0,
@@ -1013,7 +1013,7 @@
     ]
    },
    {
-    "anteil": "0,09",
+    "anteil": "0,08",
     "name": "Flygon",
     "online": [
      1,
@@ -1028,7 +1028,7 @@
     ]
    },
    {
-    "anteil": "0,09",
+    "anteil": "0,08",
     "name": "Rocket's Spidops",
     "online": [
      0,
@@ -1043,7 +1043,7 @@
     ]
    },
    {
-    "anteil": "0,06",
+    "anteil": "0,05",
     "name": "Alakazam",
     "online": [
      0,
@@ -1058,7 +1058,22 @@
     ]
    },
    {
-    "anteil": "0,06",
+    "anteil": "0,05",
+    "name": "Joltik Box",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "joltik-box",
+    "vor_ort": [
+     0,
+     0,
+     1
+    ]
+   },
+   {
+    "anteil": "0,05",
     "name": "Lillie's Clefairy",
     "online": [
      0,
@@ -1073,7 +1088,7 @@
     ]
    },
    {
-    "anteil": "0,06",
+    "anteil": "0,05",
     "name": "Marnie's Grimmsnarl",
     "online": [
      0,
@@ -1084,6 +1099,21 @@
     "vor_ort": [
      0,
      0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,05",
+    "name": "Yanmega",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "yanmega-ex",
+    "vor_ort": [
+     0,
+     1,
      0
     ]
    },
@@ -1164,17 +1194,17 @@
    },
    {
     "anteil": "0,03",
-    "name": "Joltik Box",
+    "name": "Mega Camerupt",
     "online": [
      0,
      0,
      0
     ],
-    "slug": "joltik-box",
+    "slug": "mega-camerupt-ex",
     "vor_ort": [
+     1,
      0,
-     0,
-     1
+     0
     ]
    },
    {
@@ -1299,21 +1329,6 @@
    },
    {
     "anteil": "0,00",
-    "name": "mega-camerupt-ex",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "mega-camerupt-ex",
-    "vor_ort": [
-     1,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,00",
     "name": "relicanth-pbl",
     "online": [
      0,
@@ -1339,21 +1354,6 @@
     "vor_ort": [
      1,
      0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,00",
-    "name": "yanmega-ex",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "yanmega-ex",
-    "vor_ort": [
-     0,
-     1,
      0
     ]
    }
@@ -1788,29 +1788,29 @@
   ],
   "name": "Sharpedo Toxtricity",
   "online": {
-   "anteil": "1,40",
+   "anteil": "1,33",
    "anteil14": "1,69",
    "bilanz": [
-    109,
-    115,
+    111,
+    117,
     1
    ],
-   "bis": "14.11.2026",
+   "bis": "15.11.2026",
    "fenster14": "09.11.–13.11.2026",
    "format": "TEF–DLR",
-   "kurz_anteil": "1,38",
+   "kurz_anteil": "1,24",
    "kurz_bilanz": [
-    102,
-    98,
+    100,
+    93,
     1
    ],
-   "kurz_listen": 40,
+   "kurz_listen": 36,
    "kurz_turniere": 17,
-   "kurz_von": "08.11.2026",
-   "listen": 48,
+   "kurz_von": "09.11.2026",
+   "listen": 49,
    "seit": "06.11.2026",
    "trend14": "",
-   "turniere": 20
+   "turniere": 22
   },
   "vor_ort": {
    "format": "TEF–30C",

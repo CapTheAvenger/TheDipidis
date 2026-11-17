@@ -1,5 +1,13 @@
 [
   {
+    "tournament_id": "0080",
+    "tournament_name": "Special Event Buenos Aires",
+    "tournament_date": "2026-11-14",
+    "tournament_type": "special",
+    "country": "AR",
+    "total_players": 543
+  },
+  {
     "tournament_id": "0079",
     "tournament_name": "Regional Championship Gdańsk",
     "tournament_date": "2026-10-31",

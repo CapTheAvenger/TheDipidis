@@ -12895,3 +12895,834 @@ TEF-30C,75,1,dragapult-toucannon,Dragapult Toucannon,1,2,3,1,38.89,n-zoroark,N's
 TEF-30C,75,1,dragapult-toucannon,Dragapult Toucannon,1,2,3,1,38.89,dragapult-dusknoir,Dragapult Dusknoir,1,100.0,1,0,0,overall,2026-11-03T22:55:59.210897+00:00,nein,abfrage
 TEF-30C,75,1,dragapult-toucannon,Dragapult Toucannon,1,2,3,1,38.89,dragapult-ex,Dragapult,1,100.0,1,0,0,overall,2026-11-03T22:55:59.210897+00:00,nein,abfrage
 TEF-30C,75,1,dragapult-toucannon,Dragapult Toucannon,1,2,3,1,38.89,basic-box-m,Basic Box,1,0.0,0,1,0,overall,2026-11-03T22:55:59.210897+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,dragapult-ex,Dragapult,86,44.57,33,37,16,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,n-zoroark,N's Zoroark,32,51.04,14,11,7,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,basic-box-m,Basic Box,21,68.25,13,4,4,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,20,65.0,12,5,3,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,alakazam-dudunsparce,Alakazam Dudunsparce,17,44.12,11,11,12,overall,2026-11-17T06:37:34.750912+00:00,ja,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,slowking-scr,Slowking,16,52.08,7,5,4,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,mega-excadrill-ex,Mega Excadrill,13,38.46,3,4,6,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,dragapult-blaziken,Dragapult Blaziken,12,33.33,3,6,3,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,dragapult-dusknoir,Dragapult Dusknoir,10,46.67,4,4,2,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,crustle-dri,Crustle,10,3.33,0,9,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,festival-lead,Festival Lead,8,37.5,3,5,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,dhelmise-pbl,Dhelmise,7,33.33,2,4,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,dragapult-dudunsparce,Dragapult Dudunsparce,6,33.33,1,2,3,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,mega-lucario-ex,Mega Lucario,5,26.67,1,3,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,grimmsnarl-froslass,Grimmsnarl Froslass,5,46.67,2,2,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,mew-ex-30c,Mew Box,5,46.67,2,2,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,cynthia-garchomp-ex,Cynthia's Garchomp,4,41.67,1,1,2,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,greninja-ex,Greninja,4,33.33,1,2,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,rocket-mewtwo-ex,Rocket's Mewtwo,4,0.0,0,4,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,sharpedo-toxtricity,Sharpedo Toxtricity,4,16.67,0,2,2,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,rockets-honchkrow,Rocket's Honchkrow,4,8.33,0,3,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,lucario-hariyama,Lucario Hariyama,3,0.0,0,3,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,hops-trevenant,Hop's Trevenant,2,100.0,2,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,starmie-dusknoir,Starmie Dusknoir,2,100.0,2,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,flareon-noctowl,Flareon Noctowl,2,50.0,1,1,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,lopunny-dusknoir,Lopunny Dusknoir,2,16.67,0,1,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,ethan-typhlosion,Ethan's Typhlosion,2,50.0,1,1,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,2,50.0,1,1,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,alakazam-dusknoir,Alakazam Dusknoir,2,16.67,0,1,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,ceruledge-ex,Ceruledge,2,66.67,1,0,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,2,0.0,0,2,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,stevens-metagross,Steven's Metagross,1,100.0,1,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,joltik-box,Joltik Box,1,100.0,1,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,manectric-eelektrik,Manectric Eelektrik,1,33.33,0,0,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,yanmega-ex,Yanmega,1,100.0,1,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,toucannon-pbl,Toucannon,1,100.0,1,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,beedrill-ex-cri,Beedrill,1,33.33,0,0,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,mega-greninja-ex,Mega Greninja,1,100.0,1,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,decidueye-ex,Decidueye,1,100.0,1,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,0.0,0,1,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,ursaluna-lunatone,Ursaluna Lunatone,1,33.33,0,0,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,100.0,1,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,mega-charizard-x-ex,Mega Charizard X,1,100.0,1,0,0,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dudunsparce,Alakazam Dudunsparce,43,135,138,81,45.76,seaking-pre,Seaking Festival Lead,1,33.33,0,0,1,overall,2026-11-17T06:37:34.750912+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,dragapult-ex,Dragapult,8,37.5,3,5,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,slowking-scr,Slowking,8,50.0,3,2,3,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,66.67,3,1,1,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,basic-box-m,Basic Box,4,75.0,3,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,n-zoroark,N's Zoroark,4,8.33,0,3,1,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,dragapult-dudunsparce,Dragapult Dudunsparce,4,33.33,1,2,1,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,crustle-dri,Crustle,2,50.0,1,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,2,100.0,2,0,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,lucario-hariyama,Lucario Hariyama,2,0.0,0,2,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,sharpedo-toxtricity,Sharpedo Toxtricity,2,50.0,1,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,alakazam-dudunsparce,Alakazam Dudunsparce,2,66.67,1,0,1,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,cynthia-garchomp-ex,Cynthia's Garchomp,2,50.0,1,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,grimmsnarl-froslass,Grimmsnarl Froslass,1,0.0,0,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,dragapult-blaziken,Dragapult Blaziken,1,0.0,0,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,alakazam-dusknoir,Alakazam Dusknoir,1,50.0,1,1,0,overall,2026-11-17T06:37:36.384849+00:00,ja,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,rocket-mewtwo-ex,Rocket's Mewtwo,1,0.0,0,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,misty-gyarados,Misty's Gyarados,1,100.0,1,0,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,greninja-ex,Greninja,1,0.0,0,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,seaking-pre,Seaking Festival Lead,1,0.0,0,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,dhelmise-pbl,Dhelmise,1,33.33,0,0,1,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,mega-excadrill-ex,Mega Excadrill,1,100.0,1,0,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,yanmega-ex,Yanmega,1,0.0,0,1,0,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,alakazam-dusknoir,Alakazam Dusknoir,8,22,27,9,43.1,festival-lead,Festival Lead,1,33.33,0,0,1,overall,2026-11-17T06:37:36.384849+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,dragapult-ex,Dragapult,85,50.59,39,34,12,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,n-zoroark,N's Zoroark,40,51.67,19,16,5,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,25,41.33,9,12,4,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,alakazam-dudunsparce,Alakazam Dudunsparce,21,25.4,4,13,4,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,slowking-scr,Slowking,19,31.58,4,9,6,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,dhelmise-pbl,Dhelmise,17,70.59,12,5,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,mega-excadrill-ex,Mega Excadrill,12,25.0,3,9,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,dragapult-dudunsparce,Dragapult Dudunsparce,9,14.81,0,5,4,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,basic-box-m,Basic Box,8,47.92,7,7,2,overall,2026-11-17T06:37:38.038477+00:00,ja,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,dragapult-blaziken,Dragapult Blaziken,6,50.0,2,1,3,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,festival-lead,Festival Lead,6,38.89,2,3,1,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,rockets-honchkrow,Rocket's Honchkrow,5,26.67,1,3,1,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,lucario-hariyama,Lucario Hariyama,5,60.0,3,2,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,alakazam-dusknoir,Alakazam Dusknoir,4,25.0,1,3,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,crustle-dri,Crustle,4,66.67,2,0,2,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,rocket-mewtwo-ex,Rocket's Mewtwo,3,66.67,2,1,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,mew-ex-30c,Mew Box,3,100.0,3,0,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,grimmsnarl-froslass,Grimmsnarl Froslass,3,66.67,2,1,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,dragapult-dusknoir,Dragapult Dusknoir,3,0.0,0,3,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,hops-trevenant,Hop's Trevenant,3,44.44,1,1,1,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,lopunny-dusknoir,Lopunny Dusknoir,3,66.67,2,1,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,sharpedo-toxtricity,Sharpedo Toxtricity,2,16.67,0,1,1,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,cynthia-garchomp-ex,Cynthia's Garchomp,2,100.0,2,0,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,mega-greninja-ex,Mega Greninja,2,50.0,1,1,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,seaking-pre,Seaking Festival Lead,2,50.0,1,1,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,mega-lucario-ex,Mega Lucario,1,100.0,1,0,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,ogerpon-meganium,Ogerpon Meganium,1,33.33,0,0,1,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,toucannon-pbl,Toucannon,1,0.0,0,1,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,ceruledge-ex,Ceruledge,1,100.0,1,0,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,ursaluna-lunatone,Ursaluna Lunatone,1,100.0,1,0,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,lopunny-dudunsparce,Lopunny Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,mega-charizard-x-ex,Mega Charizard X,1,100.0,1,0,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,1,100.0,1,0,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,greninja-ex,Greninja,1,100.0,1,0,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,basic-box-m,Basic Box,40,134,138,47,46.92,joltik-box,Joltik Box,1,0.0,0,1,0,overall,2026-11-17T06:37:38.038477+00:00,nein,abfrage
+TEF-30C,80,1,beedrill-ex-cri,Beedrill,1,2,2,4,41.67,dragapult-ex,Dragapult,4,16.67,0,2,2,overall,2026-11-17T06:37:39.673482+00:00,nein,abfrage
+TEF-30C,80,1,beedrill-ex-cri,Beedrill,1,2,2,4,41.67,dhelmise-pbl,Dhelmise,1,100.0,1,0,0,overall,2026-11-17T06:37:39.673482+00:00,nein,abfrage
+TEF-30C,80,1,beedrill-ex-cri,Beedrill,1,2,2,4,41.67,alakazam-dudunsparce,Alakazam Dudunsparce,1,33.33,0,0,1,overall,2026-11-17T06:37:39.673482+00:00,nein,abfrage
+TEF-30C,80,1,beedrill-ex-cri,Beedrill,1,2,2,4,41.67,festival-lead,Festival Lead,1,100.0,1,0,0,overall,2026-11-17T06:37:39.673482+00:00,nein,abfrage
+TEF-30C,80,1,beedrill-ex-cri,Beedrill,1,2,2,4,41.67,n-zoroark,N's Zoroark,1,33.33,0,0,1,overall,2026-11-17T06:37:39.673482+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,slowking-scr,Slowking,3,77.78,2,0,1,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,crustle-dri,Crustle,2,0.0,0,2,0,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,alakazam-dudunsparce,Alakazam Dudunsparce,2,16.67,0,1,1,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,cynthia-garchomp-ex,Cynthia's Garchomp,1,0.0,0,1,0,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,dragapult-dusknoir,Dragapult Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,basic-box-m,Basic Box,1,0.0,0,1,0,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,dragapult-ex,Dragapult,1,33.33,0,0,1,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,lopunny-dudunsparce,Lopunny Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,dhelmise-pbl,Dhelmise,1,33.33,0,0,1,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,mega-charizard-x-ex,Mega Charizard X,1,100.0,1,0,0,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,ceruledge-ex,Ceruledge,2,4,8,4,33.33,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:37:41.325744+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,dragapult-ex,Dragapult,40,65.83,25,11,4,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,n-zoroark,N's Zoroark,12,69.44,8,3,1,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,alakazam-dudunsparce,Alakazam Dudunsparce,10,93.33,9,0,1,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,28.57,2,5,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,dragapult-dudunsparce,Dragapult Dudunsparce,5,33.33,1,2,2,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,basic-box-m,Basic Box,4,16.67,0,2,2,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,mega-excadrill-ex,Mega Excadrill,3,0.0,0,3,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,dragapult-blaziken,Dragapult Blaziken,3,11.11,0,2,1,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,festival-lead,Festival Lead,3,11.11,0,2,1,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,grimmsnarl-froslass,Grimmsnarl Froslass,3,33.33,1,2,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,dhelmise-pbl,Dhelmise,3,44.44,1,1,1,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,alakazam-dusknoir,Alakazam Dusknoir,2,50.0,1,1,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,mega-greninja-ex,Mega Greninja,2,50.0,1,1,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,ceruledge-ex,Ceruledge,2,100.0,2,0,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,slowking-scr,Slowking,2,50.0,1,1,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,mega-venusaur-ex,Mega Venusaur,2,0.0,0,2,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,cynthia-garchomp-ex,Cynthia's Garchomp,1,100.0,1,0,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,ethan-typhlosion,Ethan's Typhlosion,1,33.33,0,0,1,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,starmie-froslass,Starmie Froslass,1,0.0,0,1,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,dragapult-dusknoir,Dragapult Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,seaking-pre,Seaking Festival Lead,1,33.33,0,0,1,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,hops-trevenant,Hop's Trevenant,1,100.0,1,0,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,crustle-dri,Crustle,1,50.0,1,1,0,overall,2026-11-17T06:37:42.963925+00:00,ja,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,100.0,1,0,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,rocket-mewtwo-ex,Rocket's Mewtwo,1,0.0,0,1,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,mega-lucario-ex,Mega Lucario,1,100.0,1,0,0,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,crustle-dri,Crustle,13,58,42,17,54.42,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,1,33.33,0,0,1,overall,2026-11-17T06:37:42.963925+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,dragapult-ex,Dragapult,12,36.11,4,7,1,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,n-zoroark,N's Zoroark,6,33.33,2,4,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,slowking-scr,Slowking,5,40.0,2,3,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,alakazam-dudunsparce,Alakazam Dudunsparce,4,41.67,1,1,2,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,0.0,0,4,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,dragapult-blaziken,Dragapult Blaziken,3,66.67,2,1,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,basic-box-m,Basic Box,2,0.0,0,2,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,lucario-hariyama,Lucario Hariyama,2,0.0,0,2,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,dhelmise-pbl,Dhelmise,2,100.0,2,0,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,mew-ex-30c,Mew Box,2,50.0,1,1,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,alakazam-dusknoir,Alakazam Dusknoir,2,50.0,1,1,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,ceruledge-ex,Ceruledge,1,100.0,1,0,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,rockets-honchkrow,Rocket's Honchkrow,1,33.33,0,0,1,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,lopunny-dusknoir,Lopunny Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,crustle-dri,Crustle,1,0.0,0,1,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,mega-venusaur-ex,Mega Venusaur,1,0.0,0,1,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,toxtricity-box,Toxtricity Box,1,33.33,0,0,1,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,cynthia-garchomp-ex,Cynthia's Garchomp,1,50.0,1,1,0,overall,2026-11-17T06:37:44.603966+00:00,ja,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,lopunny-dudunsparce,Lopunny Dudunsparce,1,100.0,1,0,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,cynthia-garchomp-ex,Cynthia's Garchomp,7,20,29,5,40.12,grimmsnarl-froslass,Grimmsnarl Froslass,1,100.0,1,0,0,overall,2026-11-17T06:37:44.603966+00:00,nein,abfrage
+TEF-30C,80,1,decidueye-ex,Decidueye,1,1,6,1,16.67,dragapult-ex,Dragapult,5,20.0,1,4,0,overall,2026-11-17T06:37:46.238514+00:00,nein,abfrage
+TEF-30C,80,1,decidueye-ex,Decidueye,1,1,6,1,16.67,rocket-mewtwo-ex,Rocket's Mewtwo,1,33.33,0,0,1,overall,2026-11-17T06:37:46.238514+00:00,nein,abfrage
+TEF-30C,80,1,decidueye-ex,Decidueye,1,1,6,1,16.67,alakazam-dudunsparce,Alakazam Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:37:46.238514+00:00,nein,abfrage
+TEF-30C,80,1,decidueye-ex,Decidueye,1,1,6,1,16.67,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,1,0.0,0,1,0,overall,2026-11-17T06:37:46.238514+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,dragapult-ex,Dragapult,60,47.78,22,18,20,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,n-zoroark,N's Zoroark,20,21.67,3,13,4,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,basic-box-m,Basic Box,17,29.41,5,12,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,slowking-scr,Slowking,12,50.0,5,4,3,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,10,36.67,3,5,2,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,mega-excadrill-ex,Mega Excadrill,10,46.67,4,4,2,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,alakazam-dudunsparce,Alakazam Dudunsparce,7,61.9,4,2,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,dragapult-blaziken,Dragapult Blaziken,7,33.33,2,4,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,lucario-hariyama,Lucario Hariyama,5,80.0,4,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,rocket-mewtwo-ex,Rocket's Mewtwo,4,50.0,2,2,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,hops-trevenant,Hop's Trevenant,4,41.67,1,1,2,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,dragapult-dusknoir,Dragapult Dusknoir,4,83.33,3,0,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,festival-lead,Festival Lead,3,66.67,2,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,mega-lucario-ex,Mega Lucario,3,66.67,2,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,dragapult-dudunsparce,Dragapult Dudunsparce,3,55.56,1,0,2,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,crustle-dri,Crustle,3,44.44,1,1,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,yanmega-ex,Yanmega,2,16.67,0,1,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,greninja-ex,Greninja,2,50.0,1,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,dhelmise-pbl,Dhelmise,2,50.0,2,2,0,overall,2026-11-17T06:37:47.873902+00:00,ja,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,cynthia-garchomp-ex,Cynthia's Garchomp,2,0.0,0,2,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,sharpedo-toxtricity,Sharpedo Toxtricity,2,50.0,1,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,beedrill-ex-cri,Beedrill,1,0.0,0,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,starmie-froslass,Starmie Froslass,1,0.0,0,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,mega-greninja-ex,Mega Greninja,1,100.0,1,0,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,mega-charizard-x-ex,Mega Charizard X,1,100.0,1,0,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,other,Other,1,0.0,0,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,alakazam-dusknoir,Alakazam Dusknoir,1,33.33,0,0,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,seaking-pre,Seaking Festival Lead,1,100.0,1,0,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,ceruledge-ex,Ceruledge,1,33.33,0,0,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,lopunny-dudunsparce,Lopunny Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,starmie-dusknoir,Starmie Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,1,33.33,0,0,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,0.0,0,1,0,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,rockets-honchkrow,Rocket's Honchkrow,1,33.33,0,0,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dhelmise-pbl,Dhelmise,25,77,84,45,44.66,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,1,33.33,0,0,1,overall,2026-11-17T06:37:47.873902+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,dragapult-ex,Dragapult,30,37.78,10,16,4,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,alakazam-dudunsparce,Alakazam Dudunsparce,12,58.33,6,3,3,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,slowking-scr,Slowking,12,22.22,2,8,2,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,n-zoroark,N's Zoroark,10,16.67,1,7,2,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,9,22.22,1,5,3,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,dhelmise-pbl,Dhelmise,7,61.9,4,2,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,dragapult-dusknoir,Dragapult Dusknoir,6,72.22,4,1,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,basic-box-m,Basic Box,6,33.33,1,2,3,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,hops-trevenant,Hop's Trevenant,5,73.33,3,0,2,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,mega-excadrill-ex,Mega Excadrill,5,53.33,2,1,2,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,dragapult-blaziken,Dragapult Blaziken,4,50.0,4,4,0,overall,2026-11-17T06:37:49.525898+00:00,ja,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,rockets-honchkrow,Rocket's Honchkrow,3,11.11,0,2,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,cynthia-garchomp-ex,Cynthia's Garchomp,3,33.33,1,2,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,crustle-dri,Crustle,3,77.78,2,0,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,dragapult-dudunsparce,Dragapult Dudunsparce,3,33.33,1,2,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,lucario-hariyama,Lucario Hariyama,2,0.0,0,2,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,rocket-mewtwo-ex,Rocket's Mewtwo,2,50.0,1,1,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,sharpedo-toxtricity,Sharpedo Toxtricity,2,100.0,2,0,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,grimmsnarl-froslass,Grimmsnarl Froslass,1,33.33,0,0,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,alakazam-dusknoir,Alakazam Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,mega-charizard-x-ex,Mega Charizard X,1,100.0,1,0,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,33.33,0,0,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,mega-lucario-ex,Mega Lucario,1,33.33,0,0,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,lopunny-dudunsparce,Lopunny Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,joltik-box,Joltik Box,1,0.0,0,1,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,lopunny-dusknoir,Lopunny Dusknoir,1,33.33,0,0,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,manectric-eelektrik,Manectric Eelektrik,1,100.0,1,0,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,festival-lead,Festival Lead,1,100.0,1,0,0,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,greninja-ex,Greninja,1,33.33,0,0,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-blaziken,Dragapult Blaziken,19,50,60,32,42.72,toucannon-pbl,Toucannon,1,33.33,0,0,1,overall,2026-11-17T06:37:49.525898+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,dragapult-ex,Dragapult,28,54.76,13,8,7,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,slowking-scr,Slowking,11,36.36,3,5,3,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,basic-box-m,Basic Box,9,70.37,5,0,4,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,7,33.33,2,4,1,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,alakazam-dudunsparce,Alakazam Dudunsparce,6,50.0,2,1,3,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,crustle-dri,Crustle,5,53.33,2,1,2,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,mega-excadrill-ex,Mega Excadrill,5,33.33,1,2,2,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,alakazam-dusknoir,Alakazam Dusknoir,4,58.33,2,1,1,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,n-zoroark,N's Zoroark,4,33.33,1,2,1,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,grimmsnarl-froslass,Grimmsnarl Froslass,3,55.56,1,0,2,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,dhelmise-pbl,Dhelmise,3,22.22,0,1,2,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,dragapult-blaziken,Dragapult Blaziken,3,66.67,2,1,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,ethan-typhlosion,Ethan's Typhlosion,2,100.0,2,0,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,festival-lead,Festival Lead,2,50.0,1,1,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,dragapult-dudunsparce,Dragapult Dudunsparce,2,50.0,2,2,0,overall,2026-11-17T06:37:51.189309+00:00,ja,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,rockets-honchkrow,Rocket's Honchkrow,2,100.0,2,0,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,yanmega-ex,Yanmega,1,100.0,1,0,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,joltik-box,Joltik Box,1,0.0,0,1,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,starmie-dusknoir,Starmie Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,starmie-froslass,Starmie Froslass,1,100.0,1,0,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,mew-ex-30c,Mew Box,1,0.0,0,1,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,mega-greninja-ex,Mega Greninja,1,100.0,1,0,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,mega-venusaur-ex,Mega Venusaur,1,100.0,1,0,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,lopunny-dudunsparce,Lopunny Dudunsparce,1,100.0,1,0,0,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dudunsparce,Dragapult Dudunsparce,12,49,31,29,53.82,lucario-hariyama,Lucario Hariyama,1,33.33,0,0,1,overall,2026-11-17T06:37:51.189309+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,dragapult-ex,Dragapult,20,45.0,8,9,3,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,n-zoroark,N's Zoroark,11,39.39,4,6,1,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,alakazam-dudunsparce,Alakazam Dudunsparce,10,46.67,4,4,2,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,slowking-scr,Slowking,9,29.63,2,5,2,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,dragapult-blaziken,Dragapult Blaziken,6,22.22,1,4,1,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,83.33,3,0,1,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,dhelmise-pbl,Dhelmise,4,8.33,0,3,1,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,sharpedo-toxtricity,Sharpedo Toxtricity,3,66.67,2,1,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,basic-box-m,Basic Box,3,100.0,3,0,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,raging-bolt-ogerpon,Raging Bolt Ogerpon,2,16.67,0,1,1,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,mega-venusaur-ex,Mega Venusaur,2,100.0,2,0,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,mega-excadrill-ex,Mega Excadrill,2,66.67,1,0,1,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,toxtricity-box,Toxtricity Box,1,100.0,1,0,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,ceruledge-ex,Ceruledge,1,100.0,1,0,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,1,33.33,0,0,1,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,crustle-dri,Crustle,1,100.0,1,0,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,dragapult-dusknoir,Dragapult Dusknoir,1,50.0,1,1,0,overall,2026-11-17T06:37:52.812650+00:00,ja,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,lucario-hariyama,Lucario Hariyama,1,100.0,1,0,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,ogerpon-meganium,Ogerpon Meganium,1,100.0,1,0,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,rocket-mewtwo-ex,Rocket's Mewtwo,1,0.0,0,1,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,rockets-honchkrow,Rocket's Honchkrow,1,33.33,0,0,1,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-dusknoir,Dragapult Dusknoir,10,37,36,15,47.73,seaking-pre,Seaking Festival Lead,1,0.0,0,1,0,overall,2026-11-17T06:37:52.812650+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,dragapult-ex,Dragapult,144,46.06,110,110,68,overall,2026-11-17T06:37:54.475215+00:00,ja,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,alakazam-dudunsparce,Alakazam Dudunsparce,86,49.22,37,33,16,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,basic-box-m,Basic Box,85,44.71,34,39,12,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,n-zoroark,N's Zoroark,83,38.55,25,37,21,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,73,59.82,39,20,14,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,slowking-scr,Slowking,68,34.8,19,35,14,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,dhelmise-pbl,Dhelmise,60,41.11,18,22,20,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,crustle-dri,Crustle,40,30.83,11,25,4,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,festival-lead,Festival Lead,32,57.29,17,11,4,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,mega-excadrill-ex,Mega Excadrill,30,37.78,8,12,10,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,dragapult-blaziken,Dragapult Blaziken,30,57.78,16,10,4,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,dragapult-dudunsparce,Dragapult Dudunsparce,28,36.9,8,13,7,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,dragapult-dusknoir,Dragapult Dusknoir,20,50.0,9,8,3,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,sharpedo-toxtricity,Sharpedo Toxtricity,15,8.89,1,13,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,rockets-honchkrow,Rocket's Honchkrow,15,46.67,6,6,3,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,rocket-mewtwo-ex,Rocket's Mewtwo,13,66.67,8,3,2,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,lucario-hariyama,Lucario Hariyama,12,66.67,7,2,3,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,cynthia-garchomp-ex,Cynthia's Garchomp,12,61.11,7,4,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,greninja-ex,Greninja,11,75.76,8,2,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,mew-ex-30c,Mew Box,9,37.04,3,5,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,alakazam-dusknoir,Alakazam Dusknoir,8,62.5,5,3,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,grimmsnarl-froslass,Grimmsnarl Froslass,8,41.67,3,4,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,hops-trevenant,Hop's Trevenant,7,71.43,5,2,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,7,57.14,3,1,3,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,lopunny-dusknoir,Lopunny Dusknoir,7,57.14,3,1,3,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,seaking-pre,Seaking Festival Lead,7,71.43,5,2,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,decidueye-ex,Decidueye,5,80.0,4,1,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,starmie-froslass,Starmie Froslass,5,60.0,3,2,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,kangaskhan-bouffalant,Kangaskhan Bouffalant,4,33.33,1,2,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,beedrill-ex-cri,Beedrill,4,66.67,2,0,2,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,mega-lucario-ex,Mega Lucario,4,50.0,2,2,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,mega-greninja-ex,Mega Greninja,3,100.0,3,0,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,mega-venusaur-ex,Mega Venusaur,3,77.78,2,0,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,3,100.0,3,0,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,other,Other,3,33.33,1,2,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,joltik-box,Joltik Box,3,33.33,1,2,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,manectric-eelektrik,Manectric Eelektrik,2,100.0,2,0,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,lopunny-dudunsparce,Lopunny Dudunsparce,2,50.0,1,1,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,toxtricity-box,Toxtricity Box,2,66.67,1,0,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,flareon-noctowl,Flareon Noctowl,2,100.0,2,0,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,toucannon-pbl,Toucannon,2,66.67,1,0,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,ethan-typhlosion,Ethan's Typhlosion,2,50.0,1,1,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,mega-charizard-x-ex,Mega Charizard X,1,100.0,1,0,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,misty-gyarados,Misty's Gyarados,1,100.0,1,0,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,ceruledge-ex,Ceruledge,1,33.33,0,0,1,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,stevens-metagross,Steven's Metagross,1,100.0,1,0,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,100.0,1,0,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,dragapult-ex,Dragapult,137,467,443,225,47.75,ursaluna-lunatone,Ursaluna Lunatone,1,0.0,0,1,0,overall,2026-11-17T06:37:54.475215+00:00,nein,abfrage
+TEF-30C,80,1,ethan-typhlosion,Ethan's Typhlosion,2,7,6,3,50.0,n-zoroark,N's Zoroark,3,77.78,2,0,1,overall,2026-11-17T06:37:56.140118+00:00,nein,abfrage
+TEF-30C,80,1,ethan-typhlosion,Ethan's Typhlosion,2,7,6,3,50.0,slowking-scr,Slowking,3,33.33,1,2,0,overall,2026-11-17T06:37:56.140118+00:00,nein,abfrage
+TEF-30C,80,1,ethan-typhlosion,Ethan's Typhlosion,2,7,6,3,50.0,dragapult-dudunsparce,Dragapult Dudunsparce,2,0.0,0,2,0,overall,2026-11-17T06:37:56.140118+00:00,nein,abfrage
+TEF-30C,80,1,ethan-typhlosion,Ethan's Typhlosion,2,7,6,3,50.0,alakazam-dudunsparce,Alakazam Dudunsparce,2,50.0,1,1,0,overall,2026-11-17T06:37:56.140118+00:00,nein,abfrage
+TEF-30C,80,1,ethan-typhlosion,Ethan's Typhlosion,2,7,6,3,50.0,dragapult-ex,Dragapult,2,50.0,1,1,0,overall,2026-11-17T06:37:56.140118+00:00,nein,abfrage
+TEF-30C,80,1,ethan-typhlosion,Ethan's Typhlosion,2,7,6,3,50.0,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:37:56.140118+00:00,nein,abfrage
+TEF-30C,80,1,ethan-typhlosion,Ethan's Typhlosion,2,7,6,3,50.0,crustle-dri,Crustle,1,33.33,0,0,1,overall,2026-11-17T06:37:56.140118+00:00,nein,abfrage
+TEF-30C,80,1,ethan-typhlosion,Ethan's Typhlosion,2,7,6,3,50.0,lucario-hariyama,Lucario Hariyama,1,33.33,0,0,1,overall,2026-11-17T06:37:56.140118+00:00,nein,abfrage
+TEF-30C,80,1,ethan-typhlosion,Ethan's Typhlosion,2,7,6,3,50.0,mega-excadrill-ex,Mega Excadrill,1,100.0,1,0,0,overall,2026-11-17T06:37:56.140118+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,dragapult-ex,Dragapult,32,38.54,11,17,4,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,10,53.33,4,2,4,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,alakazam-dudunsparce,Alakazam Dudunsparce,8,62.5,5,3,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,n-zoroark,N's Zoroark,6,83.33,5,1,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,basic-box-m,Basic Box,6,55.56,3,2,1,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,slowking-scr,Slowking,6,55.56,3,2,1,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,dhelmise-pbl,Dhelmise,3,33.33,1,2,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,crustle-dri,Crustle,3,77.78,2,0,1,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,mew-ex-30c,Mew Box,2,0.0,0,2,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,sharpedo-toxtricity,Sharpedo Toxtricity,2,100.0,2,0,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,dragapult-dudunsparce,Dragapult Dudunsparce,2,50.0,1,1,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,rocket-mewtwo-ex,Rocket's Mewtwo,2,66.67,1,0,1,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,mega-excadrill-ex,Mega Excadrill,2,50.0,1,1,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,grimmsnarl-froslass,Grimmsnarl Froslass,1,0.0,0,1,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,rockets-honchkrow,Rocket's Honchkrow,1,100.0,1,0,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,manectric-eelektrik,Manectric Eelektrik,1,33.33,0,0,1,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,lucario-hariyama,Lucario Hariyama,1,33.33,0,0,1,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,beedrill-ex-cri,Beedrill,1,0.0,0,1,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,festival-lead,Festival Lead,1,50.0,1,1,0,overall,2026-11-17T06:37:57.779212+00:00,ja,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,lopunny-dusknoir,Lopunny Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,mega-charizard-x-ex,Mega Charizard X,1,100.0,1,0,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,dragapult-blaziken,Dragapult Blaziken,1,0.0,0,1,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,other,Other,1,100.0,1,0,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,alakazam-dusknoir,Alakazam Dusknoir,1,33.33,0,0,1,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,festival-lead,Festival Lead,13,46,37,16,51.85,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,1,100.0,1,0,0,overall,2026-11-17T06:37:57.779212+00:00,nein,abfrage
+TEF-30C,80,1,flareon-noctowl,Flareon Noctowl,1,1,5,0,16.67,alakazam-dudunsparce,Alakazam Dudunsparce,2,50.0,1,1,0,overall,2026-11-17T06:37:59.422300+00:00,nein,abfrage
+TEF-30C,80,1,flareon-noctowl,Flareon Noctowl,1,1,5,0,16.67,dragapult-ex,Dragapult,2,0.0,0,2,0,overall,2026-11-17T06:37:59.422300+00:00,nein,abfrage
+TEF-30C,80,1,flareon-noctowl,Flareon Noctowl,1,1,5,0,16.67,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-11-17T06:37:59.422300+00:00,nein,abfrage
+TEF-30C,80,1,flareon-noctowl,Flareon Noctowl,1,1,5,0,16.67,hops-trevenant,Hop's Trevenant,1,0.0,0,1,0,overall,2026-11-17T06:37:59.422300+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,dragapult-ex,Dragapult,11,21.21,2,8,1,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,alakazam-dudunsparce,Alakazam Dudunsparce,4,58.33,2,1,1,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,16.67,0,2,2,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,dhelmise-pbl,Dhelmise,2,50.0,1,1,0,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,lucario-hariyama,Lucario Hariyama,2,50.0,1,1,0,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,n-zoroark,N's Zoroark,2,0.0,0,2,0,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,lopunny-dusknoir,Lopunny Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,alakazam-dusknoir,Alakazam Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,basic-box-m,Basic Box,1,0.0,0,1,0,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,ogerpon-meganium,Ogerpon Meganium,1,0.0,0,1,0,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,greninja-ex,Greninja,5,7,18,5,28.89,dragapult-blaziken,Dragapult Blaziken,1,33.33,0,0,1,overall,2026-11-17T06:38:01.053018+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,dragapult-ex,Dragapult,8,54.17,4,3,1,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,alakazam-dudunsparce,Alakazam Dudunsparce,5,46.67,2,2,1,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,mega-excadrill-ex,Mega Excadrill,4,50.0,1,0,3,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,dragapult-dudunsparce,Dragapult Dudunsparce,3,22.22,0,1,2,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,66.67,2,1,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,crustle-dri,Crustle,3,66.67,2,1,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,basic-box-m,Basic Box,3,33.33,1,2,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,n-zoroark,N's Zoroark,3,33.33,1,2,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,slowking-scr,Slowking,2,0.0,0,2,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,mew-ex-30c,Mew Box,2,50.0,1,1,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,dragapult-blaziken,Dragapult Blaziken,1,33.33,0,0,1,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,festival-lead,Festival Lead,1,100.0,1,0,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,alakazam-dusknoir,Alakazam Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,lucario-hariyama,Lucario Hariyama,1,0.0,0,1,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,lopunny-dusknoir,Lopunny Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,starmie-dusknoir,Starmie Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,rockets-honchkrow,Rocket's Honchkrow,1,33.33,0,0,1,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,mega-lucario-ex,Mega Lucario,1,0.0,0,1,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,mega-venusaur-ex,Mega Venusaur,1,33.33,0,0,1,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,starmie-froslass,Starmie Froslass,1,0.0,0,1,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,grimmsnarl-froslass,Grimmsnarl Froslass,6,19,19,10,46.53,cynthia-garchomp-ex,Cynthia's Garchomp,1,0.0,0,1,0,overall,2026-11-17T06:38:02.690420+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,dragapult-ex,Dragapult,7,28.57,2,5,0,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,dragapult-blaziken,Dragapult Blaziken,5,13.33,0,3,2,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,dhelmise-pbl,Dhelmise,4,41.67,1,1,2,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,basic-box-m,Basic Box,3,44.44,1,1,1,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,alakazam-dudunsparce,Alakazam Dudunsparce,2,0.0,0,2,0,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,rockets-honchkrow,Rocket's Honchkrow,2,50.0,1,1,0,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,50.0,1,1,0,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,slowking-scr,Slowking,1,100.0,1,0,0,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,rocket-mewtwo-ex,Rocket's Mewtwo,1,33.33,0,0,1,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,flareon-noctowl,Flareon Noctowl,1,100.0,1,0,0,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,hops-trevenant,Hop's Trevenant,4,10,15,6,38.71,crustle-dri,Crustle,1,0.0,0,1,0,overall,2026-11-17T06:38:04.326737+00:00,nein,abfrage
+TEF-30C,80,1,joltik-box,Joltik Box,1,8,3,1,69.44,dragapult-ex,Dragapult,3,66.67,2,1,0,overall,2026-11-17T06:38:05.952259+00:00,nein,abfrage
+TEF-30C,80,1,joltik-box,Joltik Box,1,8,3,1,69.44,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,66.67,1,0,1,overall,2026-11-17T06:38:05.952259+00:00,nein,abfrage
+TEF-30C,80,1,joltik-box,Joltik Box,1,8,3,1,69.44,toucannon-pbl,Toucannon,1,100.0,1,0,0,overall,2026-11-17T06:38:05.952259+00:00,nein,abfrage
+TEF-30C,80,1,joltik-box,Joltik Box,1,8,3,1,69.44,alakazam-dudunsparce,Alakazam Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:05.952259+00:00,nein,abfrage
+TEF-30C,80,1,joltik-box,Joltik Box,1,8,3,1,69.44,dragapult-dudunsparce,Dragapult Dudunsparce,1,100.0,1,0,0,overall,2026-11-17T06:38:05.952259+00:00,nein,abfrage
+TEF-30C,80,1,joltik-box,Joltik Box,1,8,3,1,69.44,dragapult-blaziken,Dragapult Blaziken,1,100.0,1,0,0,overall,2026-11-17T06:38:05.952259+00:00,nein,abfrage
+TEF-30C,80,1,joltik-box,Joltik Box,1,8,3,1,69.44,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-11-17T06:38:05.952259+00:00,nein,abfrage
+TEF-30C,80,1,joltik-box,Joltik Box,1,8,3,1,69.44,basic-box-m,Basic Box,1,100.0,1,0,0,overall,2026-11-17T06:38:05.952259+00:00,nein,abfrage
+TEF-30C,80,1,joltik-box,Joltik Box,1,8,3,1,69.44,mega-lucario-ex,Mega Lucario,1,100.0,1,0,0,overall,2026-11-17T06:38:05.952259+00:00,nein,abfrage
+TEF-30C,80,1,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,5,3,1,59.26,dragapult-ex,Dragapult,4,58.33,2,1,1,overall,2026-11-17T06:38:07.574270+00:00,nein,abfrage
+TEF-30C,80,1,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,5,3,1,59.26,rockets-honchkrow,Rocket's Honchkrow,1,100.0,1,0,0,overall,2026-11-17T06:38:07.574270+00:00,nein,abfrage
+TEF-30C,80,1,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,5,3,1,59.26,alakazam-dudunsparce,Alakazam Dudunsparce,1,100.0,1,0,0,overall,2026-11-17T06:38:07.574270+00:00,nein,abfrage
+TEF-30C,80,1,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,5,3,1,59.26,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,1,0.0,0,1,0,overall,2026-11-17T06:38:07.574270+00:00,nein,abfrage
+TEF-30C,80,1,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,5,3,1,59.26,dhelmise-pbl,Dhelmise,1,100.0,1,0,0,overall,2026-11-17T06:38:07.574270+00:00,nein,abfrage
+TEF-30C,80,1,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,5,3,1,59.26,crustle-dri,Crustle,1,0.0,0,1,0,overall,2026-11-17T06:38:07.574270+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,dragapult-ex,Dragapult,2,50.0,1,1,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,50.0,1,1,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,lucario-hariyama,Lucario Hariyama,1,33.33,0,0,1,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,n-zoroark,N's Zoroark,1,33.33,0,0,1,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,starmie-froslass,Starmie Froslass,1,0.0,0,1,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,0.0,0,1,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,dragapult-blaziken,Dragapult Blaziken,1,100.0,1,0,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,ceruledge-ex,Ceruledge,1,100.0,1,0,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,basic-box-m,Basic Box,1,100.0,1,0,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,1,33.33,0,0,1,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,slowking-scr,Slowking,1,100.0,1,0,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,dhelmise-pbl,Dhelmise,1,100.0,1,0,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,cynthia-garchomp-ex,Cynthia's Garchomp,1,0.0,0,1,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dudunsparce,Lopunny Dudunsparce,2,7,6,3,50.0,dragapult-dudunsparce,Dragapult Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:09.205030+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,dragapult-ex,Dragapult,7,28.57,1,3,3,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,n-zoroark,N's Zoroark,4,25.0,1,3,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,basic-box-m,Basic Box,3,33.33,1,2,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,slowking-scr,Slowking,2,0.0,0,2,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,alakazam-dudunsparce,Alakazam Dudunsparce,2,66.67,1,0,1,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,cynthia-garchomp-ex,Cynthia's Garchomp,1,0.0,0,1,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,mega-lucario-ex,Mega Lucario,1,100.0,1,0,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,grimmsnarl-froslass,Grimmsnarl Froslass,1,0.0,0,1,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,greninja-ex,Greninja,1,100.0,1,0,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,rockets-honchkrow,Rocket's Honchkrow,1,0.0,0,1,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,dragapult-blaziken,Dragapult Blaziken,1,33.33,0,0,1,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,festival-lead,Festival Lead,1,0.0,0,1,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,mega-greninja-ex,Mega Greninja,1,0.0,0,1,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lopunny-dusknoir,Lopunny Dusknoir,4,8,16,5,33.33,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,1,0.0,0,1,0,overall,2026-11-17T06:38:10.838236+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,dragapult-ex,Dragapult,12,25.0,2,7,3,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,n-zoroark,N's Zoroark,9,59.26,5,3,1,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,dhelmise-pbl,Dhelmise,5,20.0,1,4,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,basic-box-m,Basic Box,5,40.0,2,3,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,80.0,4,1,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,alakazam-dudunsparce,Alakazam Dudunsparce,3,100.0,3,0,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,dragapult-blaziken,Dragapult Blaziken,2,100.0,2,0,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,alakazam-dusknoir,Alakazam Dusknoir,2,100.0,2,0,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,slowking-scr,Slowking,2,0.0,0,2,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,ursaluna-lunatone,Ursaluna Lunatone,2,100.0,2,0,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,mew-ex-30c,Mew Box,2,0.0,0,2,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,cynthia-garchomp-ex,Cynthia's Garchomp,2,100.0,2,0,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,greninja-ex,Greninja,2,50.0,1,1,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,lopunny-dudunsparce,Lopunny Dudunsparce,1,33.33,0,0,1,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,grimmsnarl-froslass,Grimmsnarl Froslass,1,100.0,1,0,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,festival-lead,Festival Lead,1,33.33,0,0,1,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,1,0.0,0,1,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,ethan-typhlosion,Ethan's Typhlosion,1,33.33,0,0,1,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,dragapult-dusknoir,Dragapult Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,mega-venusaur-ex,Mega Venusaur,1,0.0,0,1,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,rocket-mewtwo-ex,Rocket's Mewtwo,1,0.0,0,1,0,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,lucario-hariyama,Lucario Hariyama,8,29,29,8,47.98,dragapult-dudunsparce,Dragapult Dudunsparce,1,33.33,0,0,1,overall,2026-11-17T06:38:12.477825+00:00,nein,abfrage
+TEF-30C,80,1,manectric-eelektrik,Manectric Eelektrik,1,0,5,2,9.52,dragapult-ex,Dragapult,2,0.0,0,2,0,overall,2026-11-17T06:38:14.113376+00:00,nein,abfrage
+TEF-30C,80,1,manectric-eelektrik,Manectric Eelektrik,1,0,5,2,9.52,n-zoroark,N's Zoroark,2,0.0,0,2,0,overall,2026-11-17T06:38:14.113376+00:00,nein,abfrage
+TEF-30C,80,1,manectric-eelektrik,Manectric Eelektrik,1,0,5,2,9.52,alakazam-dudunsparce,Alakazam Dudunsparce,1,33.33,0,0,1,overall,2026-11-17T06:38:14.113376+00:00,nein,abfrage
+TEF-30C,80,1,manectric-eelektrik,Manectric Eelektrik,1,0,5,2,9.52,festival-lead,Festival Lead,1,33.33,0,0,1,overall,2026-11-17T06:38:14.113376+00:00,nein,abfrage
+TEF-30C,80,1,manectric-eelektrik,Manectric Eelektrik,1,0,5,2,9.52,dragapult-blaziken,Dragapult Blaziken,1,0.0,0,1,0,overall,2026-11-17T06:38:14.113376+00:00,nein,abfrage
+TEF-30C,80,1,mega-charizard-x-ex,Mega Charizard X,1,1,7,0,12.5,dragapult-blaziken,Dragapult Blaziken,1,0.0,0,1,0,overall,2026-11-17T06:38:15.737479+00:00,nein,abfrage
+TEF-30C,80,1,mega-charizard-x-ex,Mega Charizard X,1,1,7,0,12.5,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-11-17T06:38:15.737479+00:00,nein,abfrage
+TEF-30C,80,1,mega-charizard-x-ex,Mega Charizard X,1,1,7,0,12.5,dhelmise-pbl,Dhelmise,1,0.0,0,1,0,overall,2026-11-17T06:38:15.737479+00:00,nein,abfrage
+TEF-30C,80,1,mega-charizard-x-ex,Mega Charizard X,1,1,7,0,12.5,basic-box-m,Basic Box,1,0.0,0,1,0,overall,2026-11-17T06:38:15.737479+00:00,nein,abfrage
+TEF-30C,80,1,mega-charizard-x-ex,Mega Charizard X,1,1,7,0,12.5,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:38:15.737479+00:00,nein,abfrage
+TEF-30C,80,1,mega-charizard-x-ex,Mega Charizard X,1,1,7,0,12.5,festival-lead,Festival Lead,1,0.0,0,1,0,overall,2026-11-17T06:38:15.737479+00:00,nein,abfrage
+TEF-30C,80,1,mega-charizard-x-ex,Mega Charizard X,1,1,7,0,12.5,ceruledge-ex,Ceruledge,1,0.0,0,1,0,overall,2026-11-17T06:38:15.737479+00:00,nein,abfrage
+TEF-30C,80,1,mega-charizard-x-ex,Mega Charizard X,1,1,7,0,12.5,alakazam-dudunsparce,Alakazam Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:15.737479+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,dragapult-ex,Dragapult,30,51.11,12,8,10,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,alakazam-dudunsparce,Alakazam Dudunsparce,13,46.15,4,3,6,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,basic-box-m,Basic Box,12,75.0,9,3,0,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,dhelmise-pbl,Dhelmise,10,46.67,4,4,2,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,9,33.33,2,4,3,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,n-zoroark,N's Zoroark,8,70.83,5,1,2,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,slowking-scr,Slowking,8,29.17,2,5,1,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,dragapult-dudunsparce,Dragapult Dudunsparce,5,53.33,2,1,2,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,dragapult-blaziken,Dragapult Blaziken,5,33.33,1,2,2,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,grimmsnarl-froslass,Grimmsnarl Froslass,4,25.0,0,1,3,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,crustle-dri,Crustle,3,100.0,3,0,0,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,rockets-honchkrow,Rocket's Honchkrow,3,33.33,1,2,0,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,mew-ex-30c,Mew Box,2,50.0,1,1,0,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,festival-lead,Festival Lead,2,50.0,1,1,0,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,dragapult-dusknoir,Dragapult Dusknoir,2,16.67,0,1,1,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,mega-venusaur-ex,Mega Venusaur,1,0.0,0,1,0,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,alakazam-dusknoir,Alakazam Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,yanmega-ex,Yanmega,1,33.33,0,0,1,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-excadrill-ex,Mega Excadrill,15,47,40,33,48.33,ethan-typhlosion,Ethan's Typhlosion,1,0.0,0,1,0,overall,2026-11-17T06:38:17.376997+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,dragapult-ex,Dragapult,3,0.0,0,3,0,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,crustle-dri,Crustle,2,50.0,1,1,0,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,basic-box-m,Basic Box,2,50.0,1,1,0,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,1,33.33,0,0,1,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,dhelmise-pbl,Dhelmise,1,0.0,0,1,0,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,yanmega-ex,Yanmega,1,100.0,1,0,0,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,alakazam-dudunsparce,Alakazam Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,dragapult-dudunsparce,Dragapult Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,lopunny-dusknoir,Lopunny Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-greninja-ex,Mega Greninja,2,4,11,1,27.08,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-11-17T06:38:19.017230+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,alakazam-dudunsparce,Alakazam Dudunsparce,5,66.67,3,1,1,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,dragapult-ex,Dragapult,4,50.0,2,2,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,dhelmise-pbl,Dhelmise,3,33.33,1,2,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,mew-ex-30c,Mew Box,2,0.0,0,2,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,0.0,0,2,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,n-zoroark,N's Zoroark,2,50.0,1,1,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,basic-box-m,Basic Box,1,0.0,0,1,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,dragapult-blaziken,Dragapult Blaziken,1,33.33,0,0,1,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,lopunny-dusknoir,Lopunny Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,slowking-scr,Slowking,1,100.0,1,0,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,grimmsnarl-froslass,Grimmsnarl Froslass,1,100.0,1,0,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,crustle-dri,Crustle,1,0.0,0,1,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-lucario-ex,Mega Lucario,3,9,14,3,38.46,joltik-box,Joltik Box,1,0.0,0,1,0,overall,2026-11-17T06:38:20.662624+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,dragapult-ex,Dragapult,3,11.11,0,2,1,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,50.0,1,1,0,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,dragapult-dusknoir,Dragapult Dusknoir,2,0.0,0,2,0,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,crustle-dri,Crustle,2,100.0,2,0,0,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,cynthia-garchomp-ex,Cynthia's Garchomp,1,100.0,1,0,0,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,misty-gyarados,Misty's Gyarados,1,100.0,1,0,0,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,mega-excadrill-ex,Mega Excadrill,1,100.0,1,0,0,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,lucario-hariyama,Lucario Hariyama,1,100.0,1,0,0,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,dragapult-dudunsparce,Dragapult Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mega-venusaur-ex,Mega Venusaur,2,7,7,2,47.92,grimmsnarl-froslass,Grimmsnarl Froslass,1,33.33,0,0,1,overall,2026-11-17T06:38:22.308430+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,dragapult-ex,Dragapult,9,59.26,5,3,1,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,alakazam-dudunsparce,Alakazam Dudunsparce,5,46.67,2,2,1,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,4,33.33,1,2,1,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,basic-box-m,Basic Box,3,0.0,0,3,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,festival-lead,Festival Lead,2,100.0,2,0,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,mega-excadrill-ex,Mega Excadrill,2,50.0,1,1,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,mega-lucario-ex,Mega Lucario,2,100.0,2,0,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,lucario-hariyama,Lucario Hariyama,2,100.0,2,0,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,cynthia-garchomp-ex,Cynthia's Garchomp,2,50.0,1,1,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,grimmsnarl-froslass,Grimmsnarl Froslass,2,50.0,1,1,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,mew-ex-30c,Mew Box,1,50.0,1,1,0,overall,2026-11-17T06:38:23.949912+00:00,ja,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,slowking-scr,Slowking,1,0.0,0,1,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,dragapult-dudunsparce,Dragapult Dudunsparce,1,100.0,1,0,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,rocket-mewtwo-ex,Rocket's Mewtwo,1,0.0,0,1,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,mew-ex-30c,Mew Box,5,20,17,3,52.5,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-11-17T06:38:23.949912+00:00,nein,abfrage
+TEF-30C,80,1,misty-gyarados,Misty's Gyarados,1,1,5,0,16.67,slowking-scr,Slowking,1,0.0,0,1,0,overall,2026-11-17T06:38:25.585642+00:00,nein,abfrage
+TEF-30C,80,1,misty-gyarados,Misty's Gyarados,1,1,5,0,16.67,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-11-17T06:38:25.585642+00:00,nein,abfrage
+TEF-30C,80,1,misty-gyarados,Misty's Gyarados,1,1,5,0,16.67,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-11-17T06:38:25.585642+00:00,nein,abfrage
+TEF-30C,80,1,misty-gyarados,Misty's Gyarados,1,1,5,0,16.67,alakazam-dusknoir,Alakazam Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:38:25.585642+00:00,nein,abfrage
+TEF-30C,80,1,misty-gyarados,Misty's Gyarados,1,1,5,0,16.67,mega-venusaur-ex,Mega Venusaur,1,0.0,0,1,0,overall,2026-11-17T06:38:25.585642+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,dragapult-ex,Dragapult,83,53.01,37,25,21,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,basic-box-m,Basic Box,40,44.17,16,19,5,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,33,29.29,8,20,5,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,alakazam-dudunsparce,Alakazam Dudunsparce,32,41.67,11,14,7,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,dhelmise-pbl,Dhelmise,20,71.67,13,3,4,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,slowking-scr,Slowking,18,44.44,7,8,3,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,n-zoroark,N's Zoroark,15,46.67,12,12,6,overall,2026-11-17T06:38:27.231428+00:00,ja,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,crustle-dri,Crustle,12,27.78,3,8,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,dragapult-dusknoir,Dragapult Dusknoir,11,57.58,6,4,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,dragapult-blaziken,Dragapult Blaziken,10,76.67,7,1,2,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,lucario-hariyama,Lucario Hariyama,9,37.04,3,5,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,mega-excadrill-ex,Mega Excadrill,8,20.83,1,5,2,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,festival-lead,Festival Lead,6,16.67,1,5,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,cynthia-garchomp-ex,Cynthia's Garchomp,6,66.67,4,2,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,sharpedo-toxtricity,Sharpedo Toxtricity,5,46.67,2,2,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,5,0.0,0,5,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,rockets-honchkrow,Rocket's Honchkrow,5,26.67,1,3,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,lopunny-dusknoir,Lopunny Dusknoir,4,75.0,3,1,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,rocket-mewtwo-ex,Rocket's Mewtwo,4,0.0,0,4,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,alakazam-dusknoir,Alakazam Dusknoir,4,83.33,3,0,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,dragapult-dudunsparce,Dragapult Dudunsparce,4,58.33,2,1,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,ethan-typhlosion,Ethan's Typhlosion,3,11.11,0,2,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,starmie-froslass,Starmie Froslass,3,100.0,3,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,seaking-pre,Seaking Festival Lead,3,33.33,1,2,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,grimmsnarl-froslass,Grimmsnarl Froslass,3,66.67,2,1,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,toxtricity-box,Toxtricity Box,2,50.0,1,1,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,manectric-eelektrik,Manectric Eelektrik,2,100.0,2,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,mega-lucario-ex,Mega Lucario,2,50.0,1,1,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,greninja-ex,Greninja,2,100.0,2,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,flareon-noctowl,Flareon Noctowl,1,100.0,1,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,lopunny-dudunsparce,Lopunny Dudunsparce,1,33.33,0,0,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,misty-gyarados,Misty's Gyarados,1,100.0,1,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,mega-venusaur-ex,Mega Venusaur,1,100.0,1,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,stevens-metagross,Steven's Metagross,1,100.0,1,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,yanmega-ex,Yanmega,1,0.0,0,1,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,joltik-box,Joltik Box,1,100.0,1,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,beedrill-ex-cri,Beedrill,1,33.33,0,0,1,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,mew-ex-30c,Mew Box,1,100.0,1,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,n-zoroark,N's Zoroark,45,159,157,67,47.35,mega-greninja-ex,Mega Greninja,1,100.0,1,0,0,overall,2026-11-17T06:38:27.231428+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium,Ogerpon Meganium,1,2,4,2,33.33,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,16.67,0,1,1,overall,2026-11-17T06:38:28.878645+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium,Ogerpon Meganium,1,2,4,2,33.33,basic-box-m,Basic Box,1,33.33,0,0,1,overall,2026-11-17T06:38:28.878645+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium,Ogerpon Meganium,1,2,4,2,33.33,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:38:28.878645+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium,Ogerpon Meganium,1,2,4,2,33.33,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,1,0.0,0,1,0,overall,2026-11-17T06:38:28.878645+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium,Ogerpon Meganium,1,2,4,2,33.33,dragapult-dusknoir,Dragapult Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:38:28.878645+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium,Ogerpon Meganium,1,2,4,2,33.33,greninja-ex,Greninja,1,100.0,1,0,0,overall,2026-11-17T06:38:28.878645+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium,Ogerpon Meganium,1,2,4,2,33.33,slowking-scr,Slowking,1,0.0,0,1,0,overall,2026-11-17T06:38:28.878645+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,dragapult-ex,Dragapult,7,28.57,1,3,3,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,n-zoroark,N's Zoroark,5,100.0,5,0,0,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,3,33.33,1,2,0,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,alakazam-dusknoir,Alakazam Dusknoir,2,0.0,0,2,0,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,slowking-scr,Slowking,2,100.0,2,0,0,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,alakazam-dudunsparce,Alakazam Dudunsparce,2,100.0,2,0,0,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,rockets-honchkrow,Rocket's Honchkrow,1,33.33,0,0,1,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,dragapult-dusknoir,Dragapult Dusknoir,1,33.33,0,0,1,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,ogerpon-meganium,Ogerpon Meganium,1,100.0,1,0,0,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,basic-box-m,Basic Box,1,0.0,0,1,0,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,100.0,1,0,0,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,dhelmise-pbl,Dhelmise,1,33.33,0,0,1,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,festival-lead,Festival Lead,1,0.0,0,1,0,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,13,9,7,52.87,crustle-dri,Crustle,1,33.33,0,0,1,overall,2026-11-17T06:38:30.524946+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,dragapult-ex,Dragapult,73,33.79,20,39,14,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,n-zoroark,N's Zoroark,33,65.66,20,8,5,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,slowking-scr,Slowking,25,50.67,10,7,8,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,basic-box-m,Basic Box,25,53.33,12,9,4,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,alakazam-dudunsparce,Alakazam Dudunsparce,20,30.0,5,12,3,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,13,46.15,10,10,6,overall,2026-11-17T06:38:32.159385+00:00,ja,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,festival-lead,Festival Lead,10,33.33,2,4,4,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,dhelmise-pbl,Dhelmise,10,56.67,5,3,2,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,dragapult-blaziken,Dragapult Blaziken,9,66.67,5,1,3,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,mega-excadrill-ex,Mega Excadrill,9,55.56,4,2,3,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,crustle-dri,Crustle,7,71.43,5,2,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,dragapult-dudunsparce,Dragapult Dudunsparce,7,61.9,4,2,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,sharpedo-toxtricity,Sharpedo Toxtricity,5,66.67,3,1,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,lucario-hariyama,Lucario Hariyama,5,20.0,1,4,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,rocket-mewtwo-ex,Rocket's Mewtwo,5,73.33,3,0,2,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,alakazam-dusknoir,Alakazam Dusknoir,5,26.67,1,3,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,dragapult-dusknoir,Dragapult Dusknoir,4,8.33,0,3,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,cynthia-garchomp-ex,Cynthia's Garchomp,4,100.0,4,0,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,greninja-ex,Greninja,4,66.67,2,0,2,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,mew-ex-30c,Mew Box,4,58.33,2,1,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,grimmsnarl-froslass,Grimmsnarl Froslass,3,33.33,1,2,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,3,66.67,2,1,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,ogerpon-meganium,Ogerpon Meganium,2,66.67,1,0,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,mega-venusaur-ex,Mega Venusaur,2,50.0,1,1,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,joltik-box,Joltik Box,2,16.67,0,1,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,mega-lucario-ex,Mega Lucario,2,100.0,2,0,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,seaking-pre,Seaking Festival Lead,2,50.0,1,1,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,lopunny-dudunsparce,Lopunny Dudunsparce,2,50.0,1,1,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,hops-trevenant,Hop's Trevenant,2,50.0,1,1,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,ursaluna-lunatone,Ursaluna Lunatone,1,0.0,0,1,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,mega-greninja-ex,Mega Greninja,1,33.33,0,0,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,starmie-dusknoir,Starmie Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,stevens-metagross,Steven's Metagross,1,100.0,1,0,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,toucannon-pbl,Toucannon,1,33.33,0,0,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,100.0,1,0,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,decidueye-ex,Decidueye,1,100.0,1,0,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,lopunny-dusknoir,Lopunny Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,38,133,122,67,48.24,rockets-honchkrow,Rocket's Honchkrow,1,33.33,0,0,1,overall,2026-11-17T06:38:32.159385+00:00,nein,abfrage
+TEF-30C,80,1,other,Other,1,3,4,0,42.86,dragapult-ex,Dragapult,3,66.67,2,1,0,overall,2026-11-17T06:38:33.797942+00:00,nein,abfrage
+TEF-30C,80,1,other,Other,1,3,4,0,42.86,sharpedo-toxtricity,Sharpedo Toxtricity,1,0.0,0,1,0,overall,2026-11-17T06:38:33.797942+00:00,nein,abfrage
+TEF-30C,80,1,other,Other,1,3,4,0,42.86,slowking-scr,Slowking,1,0.0,0,1,0,overall,2026-11-17T06:38:33.797942+00:00,nein,abfrage
+TEF-30C,80,1,other,Other,1,3,4,0,42.86,dhelmise-pbl,Dhelmise,1,100.0,1,0,0,overall,2026-11-17T06:38:33.797942+00:00,nein,abfrage
+TEF-30C,80,1,other,Other,1,3,4,0,42.86,festival-lead,Festival Lead,1,0.0,0,1,0,overall,2026-11-17T06:38:33.797942+00:00,nein,abfrage
+TEF-30C,80,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,2,4,2,33.33,dragapult-dusknoir,Dragapult Dusknoir,2,66.67,1,0,1,overall,2026-11-17T06:38:35.429475+00:00,nein,abfrage
+TEF-30C,80,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,2,4,2,33.33,dragapult-blaziken,Dragapult Blaziken,1,33.33,0,0,1,overall,2026-11-17T06:38:35.429475+00:00,nein,abfrage
+TEF-30C,80,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,2,4,2,33.33,lopunny-dudunsparce,Lopunny Dudunsparce,1,100.0,1,0,0,overall,2026-11-17T06:38:35.429475+00:00,nein,abfrage
+TEF-30C,80,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,2,4,2,33.33,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-11-17T06:38:35.429475+00:00,nein,abfrage
+TEF-30C,80,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,2,4,2,33.33,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,1,0.0,0,1,0,overall,2026-11-17T06:38:35.429475+00:00,nein,abfrage
+TEF-30C,80,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,2,4,2,33.33,rockets-honchkrow,Rocket's Honchkrow,1,0.0,0,1,0,overall,2026-11-17T06:38:35.429475+00:00,nein,abfrage
+TEF-30C,80,1,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,2,4,2,33.33,alakazam-dudunsparce,Alakazam Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:35.429475+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,dragapult-ex,Dragapult,13,28.21,3,8,2,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,13.33,0,3,2,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,dhelmise-pbl,Dhelmise,4,50.0,2,2,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,alakazam-dudunsparce,Alakazam Dudunsparce,4,100.0,4,0,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,n-zoroark,N's Zoroark,4,100.0,4,0,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,basic-box-m,Basic Box,3,33.33,1,2,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,festival-lead,Festival Lead,2,16.67,0,1,1,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,dragapult-blaziken,Dragapult Blaziken,2,50.0,1,1,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,seaking-pre,Seaking Festival Lead,1,0.0,0,1,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,decidueye-ex,Decidueye,1,33.33,0,0,1,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,alakazam-dusknoir,Alakazam Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,slowking-scr,Slowking,1,0.0,0,1,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,hops-trevenant,Hop's Trevenant,1,33.33,0,0,1,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,mew-ex-30c,Mew Box,1,100.0,1,0,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,dragapult-dusknoir,Dragapult Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,lucario-hariyama,Lucario Hariyama,1,100.0,1,0,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rocket-mewtwo-ex,Rocket's Mewtwo,5,20,19,7,48.55,crustle-dri,Crustle,1,100.0,1,0,0,overall,2026-11-17T06:38:37.065798+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,dragapult-ex,Dragapult,15,46.67,6,6,3,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,basic-box-m,Basic Box,5,66.67,3,1,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,n-zoroark,N's Zoroark,5,66.67,3,1,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,slowking-scr,Slowking,5,40.0,2,3,0,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,alakazam-dudunsparce,Alakazam Dudunsparce,4,83.33,3,0,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,dragapult-blaziken,Dragapult Blaziken,3,77.78,2,0,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,mega-excadrill-ex,Mega Excadrill,3,66.67,2,1,0,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,hops-trevenant,Hop's Trevenant,2,50.0,1,1,0,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,dragapult-dudunsparce,Dragapult Dudunsparce,2,0.0,0,2,0,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,cynthia-garchomp-ex,Cynthia's Garchomp,1,33.33,0,0,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,festival-lead,Festival Lead,1,0.0,0,1,0,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,1,33.33,0,0,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,kangaskhan-bouffalant,Kangaskhan Bouffalant,1,0.0,0,1,0,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,lopunny-dusknoir,Lopunny Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,grimmsnarl-froslass,Grimmsnarl Froslass,1,33.33,0,0,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,raging-bolt-ogerpon,Raging Bolt Ogerpon,1,100.0,1,0,0,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,dhelmise-pbl,Dhelmise,1,33.33,0,0,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,1,33.33,0,0,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,rockets-honchkrow,Rocket's Honchkrow,6,24,17,13,52.47,dragapult-dusknoir,Dragapult Dusknoir,1,33.33,0,0,1,overall,2026-11-17T06:38:38.715534+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,dragapult-ex,Dragapult,7,28.57,2,5,0,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,n-zoroark,N's Zoroark,3,66.67,2,1,0,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,2,50.0,1,1,0,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,slowking-scr,Slowking,2,66.67,1,0,1,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,basic-box-m,Basic Box,2,50.0,1,1,0,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,rocket-mewtwo-ex,Rocket's Mewtwo,1,100.0,1,0,0,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,crustle-dri,Crustle,1,33.33,0,0,1,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,alakazam-dusknoir,Alakazam Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,dhelmise-pbl,Dhelmise,1,0.0,0,1,0,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,alakazam-dudunsparce,Alakazam Dudunsparce,1,33.33,0,0,1,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,seaking-pre,Seaking Festival Lead,2,12,9,3,54.17,dragapult-dusknoir,Dragapult Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:40.355571+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,dragapult-ex,Dragapult,15,88.89,13,1,1,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,n-zoroark,N's Zoroark,5,46.67,2,2,1,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,5,26.67,1,3,1,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,alakazam-dudunsparce,Alakazam Dudunsparce,4,66.67,2,0,2,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,dragapult-dusknoir,Dragapult Dusknoir,3,33.33,1,2,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,slowking-scr,Slowking,2,0.0,0,2,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,festival-lead,Festival Lead,2,0.0,0,2,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,basic-box-m,Basic Box,2,66.67,1,0,1,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,alakazam-dusknoir,Alakazam Dusknoir,2,50.0,1,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,dragapult-blaziken,Dragapult Blaziken,2,0.0,0,2,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,dhelmise-pbl,Dhelmise,2,50.0,1,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,ethan-typhlosion,Ethan's Typhlosion,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,other,Other,1,100.0,1,0,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,lopunny-dusknoir,Lopunny Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,ogerpon-meganium,Ogerpon Meganium,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,hops-trevenant,Hop's Trevenant,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,mega-charizard-x-ex,Mega Charizard X,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,dragapult-dudunsparce,Dragapult Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,grimmsnarl-froslass,Grimmsnarl Froslass,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,ursaluna-lunatone,Ursaluna Lunatone,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,stevens-metagross,Steven's Metagross,1,100.0,1,0,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,ceruledge-ex,Ceruledge,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,sharpedo-toxtricity,Sharpedo Toxtricity,7,24,28,6,44.83,seaking-pre,Seaking Festival Lead,1,0.0,0,1,0,overall,2026-11-17T06:38:41.988248+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,dragapult-ex,Dragapult,68,58.33,35,19,14,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,25,38.67,7,10,8,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,basic-box-m,Basic Box,19,57.89,9,4,6,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,n-zoroark,N's Zoroark,18,50.0,8,7,3,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,alakazam-dudunsparce,Alakazam Dudunsparce,16,39.58,5,7,4,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,dhelmise-pbl,Dhelmise,12,41.67,4,5,3,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,dragapult-blaziken,Dragapult Blaziken,12,72.22,8,2,2,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,dragapult-dudunsparce,Dragapult Dudunsparce,11,54.55,5,3,3,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,dragapult-dusknoir,Dragapult Dusknoir,9,62.96,5,2,2,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,alakazam-dusknoir,Alakazam Dusknoir,8,37.5,2,3,3,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,mega-excadrill-ex,Mega Excadrill,8,66.67,5,2,1,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,slowking-scr,Slowking,7,50.0,7,7,0,overall,2026-11-17T06:38:43.671447+00:00,ja,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,festival-lead,Festival Lead,6,38.89,2,3,1,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,cynthia-garchomp-ex,Cynthia's Garchomp,5,60.0,3,2,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,rockets-honchkrow,Rocket's Honchkrow,5,60.0,3,2,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,ceruledge-ex,Ceruledge,3,11.11,0,2,1,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,ethan-typhlosion,Ethan's Typhlosion,3,66.67,2,1,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,sharpedo-toxtricity,Sharpedo Toxtricity,2,100.0,2,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,lopunny-dusknoir,Lopunny Dusknoir,2,100.0,2,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,grimmsnarl-froslass,Grimmsnarl Froslass,2,100.0,2,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,stevens-metagross,Steven's Metagross,2,100.0,2,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,lucario-hariyama,Lucario Hariyama,2,100.0,2,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,crustle-dri,Crustle,2,50.0,1,1,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,seaking-pre,Seaking Festival Lead,2,16.67,0,1,1,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,ogerpon-meganium-arboliva,Ogerpon Meganium Arboliva,2,0.0,0,2,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,misty-gyarados,Misty's Gyarados,1,100.0,1,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,ursaluna-lunatone,Ursaluna Lunatone,1,100.0,1,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,hops-trevenant,Hop's Trevenant,1,0.0,0,1,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,other,Other,1,100.0,1,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,mew-ex-30c,Mew Box,1,100.0,1,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,rocket-mewtwo-ex,Rocket's Mewtwo,1,100.0,1,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,toucannon-pbl,Toucannon,1,33.33,0,0,1,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,starmie-froslass,Starmie Froslass,1,33.33,0,0,1,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,mega-lucario-ex,Mega Lucario,1,0.0,0,1,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,lopunny-dudunsparce,Lopunny Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,slowking-scr,Slowking,30,129,88,55,54.17,ogerpon-meganium,Ogerpon Meganium,1,100.0,1,0,0,overall,2026-11-17T06:38:43.671447+00:00,nein,abfrage
+TEF-30C,80,1,starmie-dusknoir,Starmie Dusknoir,1,1,6,0,14.29,alakazam-dudunsparce,Alakazam Dudunsparce,2,0.0,0,2,0,overall,2026-11-17T06:38:45.328126+00:00,nein,abfrage
+TEF-30C,80,1,starmie-dusknoir,Starmie Dusknoir,1,1,6,0,14.29,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,1,100.0,1,0,0,overall,2026-11-17T06:38:45.328126+00:00,nein,abfrage
+TEF-30C,80,1,starmie-dusknoir,Starmie Dusknoir,1,1,6,0,14.29,dragapult-dudunsparce,Dragapult Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:45.328126+00:00,nein,abfrage
+TEF-30C,80,1,starmie-dusknoir,Starmie Dusknoir,1,1,6,0,14.29,grimmsnarl-froslass,Grimmsnarl Froslass,1,0.0,0,1,0,overall,2026-11-17T06:38:45.328126+00:00,nein,abfrage
+TEF-30C,80,1,starmie-dusknoir,Starmie Dusknoir,1,1,6,0,14.29,dhelmise-pbl,Dhelmise,1,0.0,0,1,0,overall,2026-11-17T06:38:45.328126+00:00,nein,abfrage
+TEF-30C,80,1,starmie-froslass,Starmie Froslass,2,6,7,1,45.24,dragapult-ex,Dragapult,5,40.0,2,3,0,overall,2026-11-17T06:38:46.972329+00:00,nein,abfrage
+TEF-30C,80,1,starmie-froslass,Starmie Froslass,2,6,7,1,45.24,n-zoroark,N's Zoroark,3,0.0,0,3,0,overall,2026-11-17T06:38:46.972329+00:00,nein,abfrage
+TEF-30C,80,1,starmie-froslass,Starmie Froslass,2,6,7,1,45.24,dhelmise-pbl,Dhelmise,1,100.0,1,0,0,overall,2026-11-17T06:38:46.972329+00:00,nein,abfrage
+TEF-30C,80,1,starmie-froslass,Starmie Froslass,2,6,7,1,45.24,lopunny-dudunsparce,Lopunny Dudunsparce,1,100.0,1,0,0,overall,2026-11-17T06:38:46.972329+00:00,nein,abfrage
+TEF-30C,80,1,starmie-froslass,Starmie Froslass,2,6,7,1,45.24,crustle-dri,Crustle,1,100.0,1,0,0,overall,2026-11-17T06:38:46.972329+00:00,nein,abfrage
+TEF-30C,80,1,starmie-froslass,Starmie Froslass,2,6,7,1,45.24,dragapult-dudunsparce,Dragapult Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:46.972329+00:00,nein,abfrage
+TEF-30C,80,1,starmie-froslass,Starmie Froslass,2,6,7,1,45.24,slowking-scr,Slowking,1,33.33,0,0,1,overall,2026-11-17T06:38:46.972329+00:00,nein,abfrage
+TEF-30C,80,1,starmie-froslass,Starmie Froslass,2,6,7,1,45.24,grimmsnarl-froslass,Grimmsnarl Froslass,1,100.0,1,0,0,overall,2026-11-17T06:38:46.972329+00:00,nein,abfrage
+TEF-30C,80,1,stevens-metagross,Steven's Metagross,1,1,7,0,12.5,slowking-scr,Slowking,2,0.0,0,2,0,overall,2026-11-17T06:38:48.603620+00:00,nein,abfrage
+TEF-30C,80,1,stevens-metagross,Steven's Metagross,1,1,7,0,12.5,alakazam-dudunsparce,Alakazam Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:48.603620+00:00,nein,abfrage
+TEF-30C,80,1,stevens-metagross,Steven's Metagross,1,1,7,0,12.5,dragapult-ex,Dragapult,1,0.0,0,1,0,overall,2026-11-17T06:38:48.603620+00:00,nein,abfrage
+TEF-30C,80,1,stevens-metagross,Steven's Metagross,1,1,7,0,12.5,n-zoroark,N's Zoroark,1,0.0,0,1,0,overall,2026-11-17T06:38:48.603620+00:00,nein,abfrage
+TEF-30C,80,1,stevens-metagross,Steven's Metagross,1,1,7,0,12.5,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,1,0.0,0,1,0,overall,2026-11-17T06:38:48.603620+00:00,nein,abfrage
+TEF-30C,80,1,stevens-metagross,Steven's Metagross,1,1,7,0,12.5,sharpedo-toxtricity,Sharpedo Toxtricity,1,0.0,0,1,0,overall,2026-11-17T06:38:48.603620+00:00,nein,abfrage
+TEF-30C,80,1,toucannon-pbl,Toucannon,1,1,3,4,29.17,dragapult-ex,Dragapult,2,16.67,0,1,1,overall,2026-11-17T06:38:50.239936+00:00,nein,abfrage
+TEF-30C,80,1,toucannon-pbl,Toucannon,1,1,3,4,29.17,joltik-box,Joltik Box,1,0.0,0,1,0,overall,2026-11-17T06:38:50.239936+00:00,nein,abfrage
+TEF-30C,80,1,toucannon-pbl,Toucannon,1,1,3,4,29.17,basic-box-m,Basic Box,1,100.0,1,0,0,overall,2026-11-17T06:38:50.239936+00:00,nein,abfrage
+TEF-30C,80,1,toucannon-pbl,Toucannon,1,1,3,4,29.17,alakazam-dudunsparce,Alakazam Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:50.239936+00:00,nein,abfrage
+TEF-30C,80,1,toucannon-pbl,Toucannon,1,1,3,4,29.17,slowking-scr,Slowking,1,33.33,0,0,1,overall,2026-11-17T06:38:50.239936+00:00,nein,abfrage
+TEF-30C,80,1,toucannon-pbl,Toucannon,1,1,3,4,29.17,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,1,33.33,0,0,1,overall,2026-11-17T06:38:50.239936+00:00,nein,abfrage
+TEF-30C,80,1,toucannon-pbl,Toucannon,1,1,3,4,29.17,dragapult-blaziken,Dragapult Blaziken,1,33.33,0,0,1,overall,2026-11-17T06:38:50.239936+00:00,nein,abfrage
+TEF-30C,80,1,toxtricity-box,Toxtricity Box,1,1,3,2,27.78,n-zoroark,N's Zoroark,2,50.0,1,1,0,overall,2026-11-17T06:38:51.874356+00:00,nein,abfrage
+TEF-30C,80,1,toxtricity-box,Toxtricity Box,1,1,3,2,27.78,dragapult-ex,Dragapult,2,16.67,0,1,1,overall,2026-11-17T06:38:51.874356+00:00,nein,abfrage
+TEF-30C,80,1,toxtricity-box,Toxtricity Box,1,1,3,2,27.78,dragapult-dusknoir,Dragapult Dusknoir,1,0.0,0,1,0,overall,2026-11-17T06:38:51.874356+00:00,nein,abfrage
+TEF-30C,80,1,toxtricity-box,Toxtricity Box,1,1,3,2,27.78,cynthia-garchomp-ex,Cynthia's Garchomp,1,33.33,0,0,1,overall,2026-11-17T06:38:51.874356+00:00,nein,abfrage
+TEF-30C,80,1,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,1,2,4,2,33.33,dragapult-ex,Dragapult,3,0.0,0,3,0,overall,2026-11-17T06:38:53.506880+00:00,nein,abfrage
+TEF-30C,80,1,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,1,2,4,2,33.33,alakazam-dudunsparce,Alakazam Dudunsparce,2,50.0,1,1,0,overall,2026-11-17T06:38:53.506880+00:00,nein,abfrage
+TEF-30C,80,1,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,1,2,4,2,33.33,lucario-hariyama,Lucario Hariyama,1,100.0,1,0,0,overall,2026-11-17T06:38:53.506880+00:00,nein,abfrage
+TEF-30C,80,1,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,1,2,4,2,33.33,lopunny-dudunsparce,Lopunny Dudunsparce,1,33.33,0,0,1,overall,2026-11-17T06:38:53.506880+00:00,nein,abfrage
+TEF-30C,80,1,toxtricity-brute-bonnet,Toxtricity Brute Bonnet,1,2,4,2,33.33,dhelmise-pbl,Dhelmise,1,33.33,0,0,1,overall,2026-11-17T06:38:53.506880+00:00,nein,abfrage
+TEF-30C,80,1,ursaluna-lunatone,Ursaluna Lunatone,1,3,4,1,41.67,lucario-hariyama,Lucario Hariyama,2,0.0,0,2,0,overall,2026-11-17T06:38:55.133376+00:00,nein,abfrage
+TEF-30C,80,1,ursaluna-lunatone,Ursaluna Lunatone,1,3,4,1,41.67,ogerpon-meganium-hydrapple,Ogerpon Meganium Hydrapple,1,100.0,1,0,0,overall,2026-11-17T06:38:55.133376+00:00,nein,abfrage
+TEF-30C,80,1,ursaluna-lunatone,Ursaluna Lunatone,1,3,4,1,41.67,slowking-scr,Slowking,1,0.0,0,1,0,overall,2026-11-17T06:38:55.133376+00:00,nein,abfrage
+TEF-30C,80,1,ursaluna-lunatone,Ursaluna Lunatone,1,3,4,1,41.67,basic-box-m,Basic Box,1,0.0,0,1,0,overall,2026-11-17T06:38:55.133376+00:00,nein,abfrage
+TEF-30C,80,1,ursaluna-lunatone,Ursaluna Lunatone,1,3,4,1,41.67,alakazam-dudunsparce,Alakazam Dudunsparce,1,33.33,0,0,1,overall,2026-11-17T06:38:55.133376+00:00,nein,abfrage
+TEF-30C,80,1,ursaluna-lunatone,Ursaluna Lunatone,1,3,4,1,41.67,sharpedo-toxtricity,Sharpedo Toxtricity,1,100.0,1,0,0,overall,2026-11-17T06:38:55.133376+00:00,nein,abfrage
+TEF-30C,80,1,ursaluna-lunatone,Ursaluna Lunatone,1,3,4,1,41.67,dragapult-ex,Dragapult,1,100.0,1,0,0,overall,2026-11-17T06:38:55.133376+00:00,nein,abfrage
+TEF-30C,80,1,yanmega-ex,Yanmega,1,3,3,2,45.83,dhelmise-pbl,Dhelmise,2,66.67,1,0,1,overall,2026-11-17T06:38:56.777861+00:00,nein,abfrage
+TEF-30C,80,1,yanmega-ex,Yanmega,1,3,3,2,45.83,dragapult-dudunsparce,Dragapult Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:56.777861+00:00,nein,abfrage
+TEF-30C,80,1,yanmega-ex,Yanmega,1,3,3,2,45.83,alakazam-dudunsparce,Alakazam Dudunsparce,1,0.0,0,1,0,overall,2026-11-17T06:38:56.777861+00:00,nein,abfrage
+TEF-30C,80,1,yanmega-ex,Yanmega,1,3,3,2,45.83,mega-greninja-ex,Mega Greninja,1,0.0,0,1,0,overall,2026-11-17T06:38:56.777861+00:00,nein,abfrage
+TEF-30C,80,1,yanmega-ex,Yanmega,1,3,3,2,45.83,n-zoroark,N's Zoroark,1,100.0,1,0,0,overall,2026-11-17T06:38:56.777861+00:00,nein,abfrage
+TEF-30C,80,1,yanmega-ex,Yanmega,1,3,3,2,45.83,alakazam-dusknoir,Alakazam Dusknoir,1,100.0,1,0,0,overall,2026-11-17T06:38:56.777861+00:00,nein,abfrage
+TEF-30C,80,1,yanmega-ex,Yanmega,1,3,3,2,45.83,mega-excadrill-ex,Mega Excadrill,1,33.33,0,0,1,overall,2026-11-17T06:38:56.777861+00:00,nein,abfrage

@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-17T03:44:56Z",
+  "erzeugt_am": "2026-11-17T07:01:04Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -32,9 +32,9 @@
     ],
     "slug": "dragapult-ex",
     "vor_ort": [
-     154,
-     172,
-     73
+     167,
+     173,
+     74
     ]
    },
    {
@@ -47,9 +47,9 @@
     ],
     "slug": "basic-box-m",
     "vor_ort": [
-     72,
+     73,
      112,
-     10
+     11
     ]
    },
    {
@@ -63,7 +63,7 @@
     "slug": "slowking-scr",
     "vor_ort": [
      66,
-     66,
+     68,
      7
     ]
    },
@@ -77,9 +77,9 @@
     ],
     "slug": "ogerpon-meganium-hydrapple",
     "vor_ort": [
-     10,
-     66,
-     11
+     11,
+     69,
+     12
     ]
    },
    {
@@ -92,9 +92,9 @@
     ],
     "slug": "alakazam-dudunsparce",
     "vor_ort": [
-     53,
+     55,
      26,
-     13
+     15
     ]
    },
    {
@@ -107,9 +107,9 @@
     ],
     "slug": "n-zoroark",
     "vor_ort": [
-     65,
-     38,
-     21
+     67,
+     40,
+     22
     ]
    },
    {
@@ -153,7 +153,7 @@
     "slug": "dragapult-dudunsparce",
     "vor_ort": [
      6,
-     3,
+     4,
      0
     ]
    },
@@ -167,8 +167,8 @@
     ],
     "slug": "dhelmise-pbl",
     "vor_ort": [
-     70,
-     16,
+     71,
+     17,
      23
     ]
    },
@@ -213,7 +213,7 @@
     "slug": "festival-lead",
     "vor_ort": [
      14,
-     55,
+     57,
      13
     ]
    },
@@ -273,7 +273,7 @@
     "slug": "dragapult-blaziken",
     "vor_ort": [
      60,
-     33,
+     35,
      20
     ]
    },
@@ -317,8 +317,8 @@
     ],
     "slug": "dragapult-dusknoir",
     "vor_ort": [
-     48,
-     40,
+     49,
+     42,
      12
     ]
    },
@@ -362,8 +362,8 @@
     ],
     "slug": "alakazam-dusknoir",
     "vor_ort": [
-     23,
-     23,
+     24,
+     24,
      4
     ]
    },
@@ -378,7 +378,7 @@
     "slug": "grimmsnarl-froslass",
     "vor_ort": [
      9,
-     6,
+     7,
      1
     ]
    },
@@ -453,7 +453,7 @@
     "slug": "lopunny-dusknoir",
     "vor_ort": [
      20,
-     13,
+     14,
      2
     ]
    },
@@ -498,7 +498,7 @@
     "slug": "seaking-pre",
     "vor_ort": [
      3,
-     11,
+     12,
      5
     ]
    },
@@ -528,7 +528,7 @@
     "slug": "ethan-typhlosion",
     "vor_ort": [
      6,
-     2,
+     3,
      1
     ]
    },
@@ -693,8 +693,23 @@
     "slug": "hops-trevenant",
     "vor_ort": [
      4,
-     2,
+     3,
      3
+    ]
+   },
+   {
+    "anteil": "0,37",
+    "name": "Mega Charizard X",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "mega-charizard-x-ex",
+    "vor_ort": [
+     0,
+     1,
+     0
     ]
    },
    {
@@ -797,7 +812,7 @@
     ],
     "slug": "stevens-metagross",
     "vor_ort": [
-     0,
+     1,
      1,
      0
     ]
@@ -888,7 +903,7 @@
     "slug": "ceruledge-ex",
     "vor_ort": [
      2,
-     3,
+     4,
      1
     ]
    },
@@ -1158,7 +1173,7 @@
     "slug": "ursaluna-lunatone",
     "vor_ort": [
      0,
-     0,
+     1,
      1
     ]
    },
@@ -1263,7 +1278,7 @@
     "slug": "ogerpon-meganium",
     "vor_ort": [
      0,
-     1,
+     2,
      0
     ]
    },
@@ -1804,14 +1819,14 @@
   "name": "Sharpedo Toxtricity",
   "online": {
    "anteil": "1,51",
-   "anteil14": "1,69",
+   "anteil14": "1,65",
    "bilanz": [
     166,
     169,
     1
    ],
    "bis": "16.11.2026",
-   "fenster14": "09.11.–13.11.2026",
+   "fenster14": "09.11.–17.11.2026",
    "format": "TEF–DLR",
    "kurz_anteil": "1,48",
    "kurz_bilanz": [
@@ -1830,19 +1845,34 @@
   "vor_ort": {
    "format": "TEF–30C",
    "summe": {
-    "anteil": "1,94",
+    "anteil": "1,91",
     "bilanz": [
-     908,
-     926,
-     311
+     932,
+     954,
+     317
     ],
-    "day2": 40,
-    "decks": 269,
+    "day2": 41,
+    "decks": 276,
     "sieg": 0,
-    "spieler": 13889,
+    "spieler": 14432,
     "top8": 1
    },
    "turniere": [
+    {
+     "anteil": "1,29",
+     "bilanz": [
+      24,
+      28,
+      6
+     ],
+     "datum": "14.11.2026",
+     "day2": 1,
+     "decks": 7,
+     "name": "Buenos Aires",
+     "sieg": 0,
+     "spieler": 543,
+     "top8": 0
+    },
     {
      "anteil": "2,30",
      "bilanz": [

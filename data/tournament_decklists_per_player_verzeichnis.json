@@ -1,6 +1,6 @@
 {
   "quelle": "tournament_decklists_per_player",
-  "stand": "2026-11-17T06:59:08+00:00",
+  "stand": "2026-11-17T12:13:47+00:00",
   "schluessel": "<meta>_<jjjj-mm des tournament_date>; ohne Format: _unsorted",
   "meta_keys": [
     "TEF-30C",
@@ -31,7 +31,7 @@
       "monat": "2026-11",
       "datei": "tournament_decklists_per_player_TEF-30C_2026-11.csv",
       "zeilen": 122304,
-      "bytes": 27876617
+      "bytes": 27876619
     },
     {
       "schluessel": "TEF-CRI_2026-06",

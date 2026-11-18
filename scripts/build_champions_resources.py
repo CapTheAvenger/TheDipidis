@@ -156,8 +156,32 @@ def clean(t):
     return re.sub(r"\s+", " ", (t or "").replace("\x0c", " ")).strip()
 
 
-def pokeapi_de_map(names_csv, flavor_csv, idkey):
-    """norm(EN name) -> {'de_name':…, 'de_eff':…} from PokéAPI."""
+def legends_version_groups():
+    """PokéAPI version_group ids of the Legends games (legends-arceus,
+    legends-za) and their add-ons (LEGENDS_ZUSATZ).
+
+    WZ-50 (18.11.2026): PokéAPI added German Legends Z-A flavor texts, and
+    "newest version group wins" put them on 181 moves overnight (e.g.
+    String Shot: "bewegen sich für kurze Zeit langsamer" instead of a
+    stage drop). Legends games run their own real-time battle rules, so
+    their texts describe a different mechanic than Champions. Mainline
+    texts stay — a newer mainline game (scarlet-violet) still wins.
+    Read by identifier from version_groups.csv, not hard-coded ids."""
+    return {int(r["id"]) for r in fetch_csv("version_groups")
+            if str(r.get("identifier", "")).startswith("legends-")
+            or str(r.get("identifier", "")) in LEGENDS_ZUSATZ}
+
+
+# Zusatzinhalte der Legends-Spiele, deren Name nicht mit "legends-" beginnt.
+# mega-dimension (Gruppe 31) ist der Z-A-Zusatz; am 18.11.2026 ohne deutsche
+# Texte — kommen welche, gewaenne er sonst als neueste Gruppe.
+LEGENDS_ZUSATZ = {"mega-dimension"}
+
+
+def pokeapi_de_map(names_csv, flavor_csv, idkey, ohne_vg=frozenset()):
+    """norm(EN name) -> {'de_name':…, 'de_eff':…} from PokéAPI.
+
+    ohne_vg: version_group ids whose flavor text is never chosen."""
     names = {}
     for r in fetch_csv(names_csv):
         i = int(r[list(r.keys())[0]])
@@ -169,6 +193,8 @@ def pokeapi_de_map(names_csv, flavor_csv, idkey):
         if int(r["language_id"]) != LANG_DE:
             continue
         i, vg = int(r[idkey]), int(r["version_group_id"])
+        if vg in ohne_vg:
+            continue
         if i not in flav or vg > flav[i][0]:
             flav[i] = (vg, clean(r["flavor_text"]))
     out = {}
@@ -292,9 +318,13 @@ def main():
     champ_moves = fetch_json(f"{CHAMP_BASE}/moves/moves.json")
 
     print("Fetching PokéAPI German localisation …")
-    de_item = pokeapi_de_map("item_names", "item_flavor_text", "item_id")
-    de_abil = pokeapi_de_map("ability_names", "ability_flavor_text", "ability_id")
-    de_move = pokeapi_de_map("move_names", "move_flavor_text", "move_id")
+    ohne = legends_version_groups()
+    if not ohne:
+        raise SystemExit("version_groups.csv nennt kein Legends-Spiel — "
+                         "der Ausschluss (WZ-50) griffe ins Leere")
+    de_item = pokeapi_de_map("item_names", "item_flavor_text", "item_id", ohne)
+    de_abil = pokeapi_de_map("ability_names", "ability_flavor_text", "ability_id", ohne)
+    de_move = pokeapi_de_map("move_names", "move_flavor_text", "move_id", ohne)
     prio_move = pokeapi_move_priority()
     ziel_move = pokeapi_move_target()
 

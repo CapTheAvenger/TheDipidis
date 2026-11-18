@@ -360,13 +360,39 @@ describe('Was sich am Feld aendert — beide Rechenwege auf denselben Daten', ()
         });
     }
 
-    it('die alte Rechnung hatte fast durchweg dasselbe Vorzeichen, die neue nicht', () => {
+    it('die alte Rechnung zog jedes Deck nach unten, die neue nicht', () => {
+        /* WZ-50 (18.11.2026): Hier stand "alt mehr negative Decks als neu".
+           Das ZAEHLT VORZEICHEN einer Woche: beim Special Event Buenos Aires
+           (0080) stand Slowking schon in der alten Rechnung im Plus (+0,16),
+           in der neuen +11,20 — alt 6/7 negativ, neu 6/7, und der Test fiel,
+           obwohl die Korrektur jedes Deck um 5,6 bis 11,1 pp verschob (Mittel
+           alt −9,21 pp, neu −0,36 pp). Die Eigenschaft der Rechnung ist die
+           RICHTUNG je Deck. Ungeklemmt gilt neu − alt = Pp·up − Po·uo
+           (P = S/(S+N), u = Unentschieden-Anteil, p Papier, o online):
+           ist Pp·up > Po·uo, liegt die neue Differenz UEBER der alten.
+           Geklemmte Decks (|roh| >= 12) sagen darueber nichts. */
         const werte = beide();
-        const negAlt = werte.filter((w) => w.alt < 0).length;
-        const negNeu = werte.filter((w) => w.neu < 0).length;
-        assert.ok(negAlt > negNeu,
-            `alt ${negAlt}/${werte.length} negativ, neu ${negNeu}/${werte.length} — `
-            + 'der einseitige Zug ist nicht mehr zu sehen');
+        let geprueft = 0;
+        for (const x of KANDIDATEN) {
+            const s = F._labsGanz(x.lm.roh.wins), n = F._labsGanz(x.lm.roh.losses),
+                  u = F._labsGanz(x.lm.roh.ties) || 0;
+            const b = ONLINE_BILANZ[x.k];
+            const up = u / (s + n + u), uo = b.u / (b.s + b.n + b.u);
+            const pp = F.W.KONVENTIONEN.ohneUnentschieden.rechne(s, n);
+            const po = F.W.nachOhneUnentschieden(x.d.onlineWinPct, uo);
+            const KLEMME = 12;
+            if (Math.abs(pp - po) >= KLEMME) continue;
+            if (!(pp * up > po * uo)) continue;
+            const w = werte.find((v) => v.name === x.d.name);
+            assert.ok(w.neu > w.alt,
+                `${w.name}: neu ${w.neu.toFixed(2)} pp liegt nicht ueber alt `
+                + `${w.alt.toFixed(2)} pp, obwohl Pp·up > Po·uo`);
+            geprueft++;
+        }
+        // Vorpruefung gegen ein leeres Bestehen, wie MINDEST_KANDIDATEN.
+        const MINDEST_RICHTUNG = 3;
+        assert.ok(geprueft >= MINDEST_RICHTUNG,
+            `nur ${geprueft} Decks mit mehr Papier-Unentschieden`);
         const mittel = (f) => werte.reduce((s, w) => s + f(w), 0) / werte.length;
         assert.ok(Math.abs(mittel((w) => w.alt)) > Math.abs(mittel((w) => w.neu)),
             `Mittel alt ${mittel((w) => w.alt).toFixed(2)} pp, `

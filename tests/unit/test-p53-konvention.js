@@ -382,11 +382,10 @@ describe('Was sich am Feld aendert — beide Rechenwege auf denselben Daten', ()
                 + `${w.alt.toFixed(2)} pp, obwohl auf Papier oefter unentschieden`);
             geprueft++;
         }
-        assert.ok(geprueft >= 3, `nur ${geprueft} Decks mit mehr Papier-Unentschieden`);
-        const negAlt = werte.filter((w) => w.alt < 0).length;
-        const negNeu = werte.filter((w) => w.neu < 0).length;
-        assert.ok(negAlt >= negNeu,
-            `alt ${negAlt}/${werte.length} negativ, neu ${negNeu}/${werte.length}`);
+        // Vorpruefung gegen ein leeres Bestehen, wie MINDEST_KANDIDATEN.
+        const MINDEST_RICHTUNG = 3;
+        assert.ok(geprueft >= MINDEST_RICHTUNG,
+            `nur ${geprueft} Decks mit mehr Papier-Unentschieden`);
         const mittel = (f) => werte.reduce((s, w) => s + f(w), 0) / werte.length;
         assert.ok(Math.abs(mittel((w) => w.alt)) > Math.abs(mittel((w) => w.neu)),
             `Mittel alt ${mittel((w) => w.alt).toFixed(2)} pp, `

@@ -91,16 +91,30 @@ function erhebe(tid) {
     const labs = LABS.filter(r => String(r.tournament_id || '').trim() === tid);
     const day2Plaetze = [...new Set(day2.map(r => zahl(r.place)))]
         .filter(p => p > 0).sort((a, b) => a - b);
+    /* WZ-50 (18.11.2026, Special Event Buenos Aires 0080 = Limitless 585):
+       Platz 17 (Matias Fung) steht im Day-2-Feld, aber die Quelle zeigt fuer
+       ihn KEINEN Listen-Link (in Chrome gemessen 18.11.: 96 Zeilen, 95 mit
+       Liste, die eine ohne ist Rang 17) — und labs fuehrt fuer ihn kein
+       deck_slug. Eine day2-Zeile ohne deck_slug ist darum ein Loch der
+       Quelle, kein Datenverlust: haette die Quelle eine Liste, haette labs
+       sie einem Deck zugeordnet. Verloren bleibt rot. */
+    const quelleOhne = [...new Set(day2
+        .filter(r => zahl(r.place) > 0 && !String(r.deck_slug || '').trim())
+        .map(r => zahl(r.place)))].sort((a, b) => a - b);
     return {
         tid,
         plaetze,
         day2Plaetze,
+        quelleOhne,
         listen: plaetze.length,
         contZeilen: cont.length,
         day2: day2.length,
         // Nur day2-Zeilen MIT gueltigem Platz sind vergleichbar: eine
         // disqualifizierte Zeile ohne Platz kann keine Liste haben.
         day2MitPlatz: day2.filter(r => zahl(r.place) > 0).length,
+        // Listen auf Plaetzen, fuer die die Quelle keine Liste fuehrt,
+        // zaehlen nicht mit (die Gleichung gilt fuer den Rest).
+        listenMitQuelle: plaetze.filter(p => !quelleOhne.includes(p)).length,
         feld: labs.reduce((m, r) => Math.max(m, zahl(r.total_players)), 0),
         summeDay2Spalte: labs.reduce((s, r) => s + zahl(r.day2_players), 0),
         summePlayerCount: labs.reduce((s, r) => s + zahl(r.player_count), 0),
@@ -229,8 +243,9 @@ describe('Die Listen-CSV fuehrt genau das Day-2-Feld', () => {
     it('jedes Turnier: Zahl der Listen = Zahl der day2-Zeilen mit Platz', () => {
         assert.ok(ERHEBUNG.length > 0, 'Vorpruefung: die Listen-CSV fuehrt Turniere');
         for (const e of ERHEBUNG) {
-            assert.equal(e.listen, e.day2MitPlatz,
-                `Turnier ${e.tid}: ${e.listen} Listen, aber ${e.day2MitPlatz} `
+            const soll = e.day2MitPlatz - e.quelleOhne.length;
+            assert.equal(e.listenMitQuelle, soll,
+                `Turnier ${e.tid}: ${e.listenMitQuelle} Listen, aber ${soll} `
                 + `day2-Spieler mit Platz. Weichen die ab, ist die Datei NICHT `
                 + `mehr genau der Day-2-Cut — dann ist jede "Tag-2"-Beschriftung `
                 + `im Deckbauer falsch und muss mit.`);
@@ -262,7 +277,15 @@ describe('Die Listen-CSV fuehrt genau das Day-2-Feld', () => {
         const day2 = new Set(e.day2Plaetze);
         const liste = new Set(e.plaetze);
         const nurListe = e.plaetze.filter(p => !day2.has(p));
-        const nurDay2 = e.day2Plaetze.filter(p => !liste.has(p));
+        const quelle = new Set(e.quelleOhne || []);
+        const nurDay2 = e.day2Plaetze.filter(p => !liste.has(p) && !quelle.has(p));
+        // Wenige Quell-Loecher sind die Quelle; viele heissen, dass labs die
+        // Decks nicht mehr zuordnet — das waere kein Loch, sondern ein Bruch.
+        const HOECHSTENS_QUELLE = Math.max(2, Math.ceil(e.day2Plaetze.length * 0.02));
+        if (quelle.size > HOECHSTENS_QUELLE) {
+            fehler.push(`Turnier ${e.tid}: ${quelle.size} Day-2-Plaetze ohne deck_slug `
+                + `(hoechstens ${HOECHSTENS_QUELLE}) — das ist kein Loch der Quelle mehr`);
+        }
         if (nurListe.length) {
             fehler.push(`Turnier ${e.tid}: Liste(n) auf Platz `
                 + `${nurListe.slice(0, 5).join(', ')} ohne day2-Zeile mit Platz in `
@@ -275,8 +298,12 @@ describe('Die Listen-CSV fuehrt genau das Day-2-Feld', () => {
         return fehler;
     }
 
-    it('jedes Turnier: die Plaetze mit Liste sind genau die Day-2-Plaetze', () => {
+    it('jedes Turnier: die Plaetze mit Liste sind genau die Day-2-Plaetze', (t) => {
         for (const e of ERHEBUNG) {
+            if (e.quelleOhne.length) {
+                t.diagnostic(`Turnier ${e.tid}: Day-2-Platz ${e.quelleOhne.join(', ')} `
+                    + 'ohne Liste an der Quelle (kein deck_slug) — Loch der Quelle');
+            }
             assert.deepEqual(plaetzeGegenDay2(e), []);
         }
     });
@@ -293,6 +320,16 @@ describe('Die Listen-CSV fuehrt genau das Day-2-Feld', () => {
         assert.match(plaetzeGegenDay2({
             tid: 'geist', plaetze: [1, 2, 3, 6], day2Plaetze: [1, 2, 3] }).join('\n'),
             /Platz 6 ohne day2-Zeile/);
+        // WZ-50: Day-2-Platz ohne deck_slug ist ein Loch der Quelle ...
+        assert.deepEqual(plaetzeGegenDay2({
+            tid: 'quelle2', plaetze: [1, 2, 3, 5], day2Plaetze: [1, 2, 3, 4, 5],
+            quelleOhne: [4] }), []);
+        // ... aber nur wenige: verliert labs alle Zuordnungen, ist das rot.
+        const viele = Array.from({ length: 50 }, (_, i) => i + 1);
+        assert.match(plaetzeGegenDay2({
+            tid: 'bruch', plaetze: viele.slice(0, 40), day2Plaetze: viele,
+            quelleOhne: viele.slice(40) }).join('\n'),
+            /kein Loch der Quelle mehr/);
         // Und der erste Platz ist 1.
         assert.match(plaetzeGegenDay2({
             tid: 'start', plaetze: [2, 3], day2Plaetze: [2, 3] }).join('\n'),

@@ -158,7 +158,7 @@ def clean(t):
 
 def legends_version_groups():
     """PokéAPI version_group ids of the Legends games (legends-arceus,
-    legends-za).
+    legends-za) and their add-ons (LEGENDS_ZUSATZ).
 
     WZ-50 (18.11.2026): PokéAPI added German Legends Z-A flavor texts, and
     "newest version group wins" put them on 181 moves overnight (e.g.
@@ -168,7 +168,14 @@ def legends_version_groups():
     texts stay — a newer mainline game (scarlet-violet) still wins.
     Read by identifier from version_groups.csv, not hard-coded ids."""
     return {int(r["id"]) for r in fetch_csv("version_groups")
-            if str(r.get("identifier", "")).startswith("legends-")}
+            if str(r.get("identifier", "")).startswith("legends-")
+            or str(r.get("identifier", "")) in LEGENDS_ZUSATZ}
+
+
+# Zusatzinhalte der Legends-Spiele, deren Name nicht mit "legends-" beginnt.
+# mega-dimension (Gruppe 31) ist der Z-A-Zusatz; am 18.11.2026 ohne deutsche
+# Texte — kommen welche, gewaenne er sonst als neueste Gruppe.
+LEGENDS_ZUSATZ = {"mega-dimension"}
 
 
 def pokeapi_de_map(names_csv, flavor_csv, idkey, ohne_vg=frozenset()):

@@ -35,6 +35,7 @@ GRUPPEN = [
     {"id": "25", "identifier": "scarlet-violet"},
     {"id": "24", "identifier": "legends-arceus"},
     {"id": "30", "identifier": "legends-za"},
+    {"id": "31", "identifier": "mega-dimension"},
     {"id": "32", "identifier": "champions"},
 ]
 NAMEN = [
@@ -56,7 +57,7 @@ def _mit_attrappe(mod, tabellen):
 def test_legends_gruppen_kommen_aus_der_tabelle():
     mod = _bauer()
     _mit_attrappe(mod, {"version_groups": GRUPPEN})
-    assert mod.legends_version_groups() == {24, 30}
+    assert mod.legends_version_groups() == {24, 30, 31}
 
 
 def test_neuere_legends_zeile_verliert_gegen_die_hauptreihe():

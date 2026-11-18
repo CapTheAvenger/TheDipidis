@@ -281,7 +281,9 @@ describe('Die Listen-CSV fuehrt genau das Day-2-Feld', () => {
         const nurDay2 = e.day2Plaetze.filter(p => !liste.has(p) && !quelle.has(p));
         // Wenige Quell-Loecher sind die Quelle; viele heissen, dass labs die
         // Decks nicht mehr zuordnet — das waere kein Loch, sondern ein Bruch.
-        const HOECHSTENS_QUELLE = Math.max(2, Math.ceil(e.day2Plaetze.length * 0.02));
+        // Gemessen bisher hoechstens 1 je Turnier (0080); fest, nicht als
+        // Anteil — 2 % waeren bei 548 Day-2-Spielern elf verdeckte Plaetze.
+        const HOECHSTENS_QUELLE = 2;
         if (quelle.size > HOECHSTENS_QUELLE) {
             fehler.push(`Turnier ${e.tid}: ${quelle.size} Day-2-Plaetze ohne deck_slug `
                 + `(hoechstens ${HOECHSTENS_QUELLE}) — das ist kein Loch der Quelle mehr`);

@@ -365,21 +365,28 @@ describe('Was sich am Feld aendert — beide Rechenwege auf denselben Daten', ()
            Das ZAEHLT VORZEICHEN einer Woche: beim Special Event Buenos Aires
            (0080) stand Slowking schon in der alten Rechnung im Plus (+0,16),
            in der neuen +11,20 — alt 6/7 negativ, neu 6/7, und der Test fiel,
-           obwohl die Korrektur jedes Deck um 6,5 bis 11 pp verschob (Mittel
+           obwohl die Korrektur jedes Deck um 5,6 bis 11,1 pp verschob (Mittel
            alt −9,21 pp, neu −0,36 pp). Die Eigenschaft der Rechnung ist die
-           RICHTUNG je Deck: wird auf Papier oefter unentschieden gespielt
-           als online, liegt die neue Differenz UEBER der alten. */
+           RICHTUNG je Deck. Ungeklemmt gilt neu − alt = Pp·up − Po·uo
+           (P = S/(S+N), u = Unentschieden-Anteil, p Papier, o online):
+           ist Pp·up > Po·uo, liegt die neue Differenz UEBER der alten.
+           Geklemmte Decks (|roh| >= 12) sagen darueber nichts. */
         const werte = beide();
         let geprueft = 0;
         for (const x of KANDIDATEN) {
             const s = F._labsGanz(x.lm.roh.wins), n = F._labsGanz(x.lm.roh.losses),
                   u = F._labsGanz(x.lm.roh.ties) || 0;
             const b = ONLINE_BILANZ[x.k];
-            if (!(u / (s + n + u) > b.u / (b.s + b.n + b.u))) continue;
+            const up = u / (s + n + u), uo = b.u / (b.s + b.n + b.u);
+            const pp = F.W.KONVENTIONEN.ohneUnentschieden.rechne(s, n);
+            const po = F.W.nachOhneUnentschieden(x.d.onlineWinPct, uo);
+            const KLEMME = 12;
+            if (Math.abs(pp - po) >= KLEMME) continue;
+            if (!(pp * up > po * uo)) continue;
             const w = werte.find((v) => v.name === x.d.name);
             assert.ok(w.neu > w.alt,
                 `${w.name}: neu ${w.neu.toFixed(2)} pp liegt nicht ueber alt `
-                + `${w.alt.toFixed(2)} pp, obwohl auf Papier oefter unentschieden`);
+                + `${w.alt.toFixed(2)} pp, obwohl Pp·up > Po·uo`);
             geprueft++;
         }
         // Vorpruefung gegen ein leeres Bestehen, wie MINDEST_KANDIDATEN.

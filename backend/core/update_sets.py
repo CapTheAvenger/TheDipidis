@@ -519,6 +519,62 @@ def scrape_jp_release_dates() -> dict:
     return out
 
 
+# DATEIEN, DIE EINE ROTATION AUF DIE KOPFZEILE LEERT (WZ-51, 20.11.2026).
+# Auf Modulebene, damit der Schrumpf-Waechter (scripts/schrumpf_waechter.py)
+# dieselbe Liste liest, statt eine Abschrift zu fuehren: er laesst genau
+# diese Dateien schrumpfen, wenn im selben Lauf die Rotation stattfand.
+CITY_LEAGUE_ROTATION_DATEIEN = (
+    'city_league_analysis.csv',
+    'city_league_archetypes.csv',
+    'city_league_archetypes_comparison.csv',
+    'city_league_archetypes_deck_stats.csv',
+    'city_league_analysis_past.csv',
+    'city_league_archetypes_past.csv',
+    'city_league_archetypes_past_comparison.csv',
+    'city_league_archetypes_past_deck_stats.csv',
+)
+CURRENT_META_ROTATION_DATEIEN = (
+    'current_meta_card_data.csv',
+    'online_tournament_dated_cards.csv',
+    # labs_tournament_decks.csv = live Major Day-2 data feeding
+    # app-meta-call.js. Holds the 4-or-so most recent regionals
+    # (currently Prague/LA/Utrecht/Campinas, all POR-format).
+    # Once a new English set rotates in, those regionals are
+    # still legal in person (until in_person_legal_date) but
+    # they're playing the PREVIOUS format's cards. Clearing this
+    # file means the live Major view shows "no current data"
+    # until new-format regionals happen — preferable to silently
+    # mixing previous-format Major lists into the deck-builder's
+    # current-format suggestions. Per-meta historical archives
+    # (tournament_cards_data_cards_*.csv chunks) are NOT touched
+    # here — those are the Past Meta browser's permanent record.
+    'labs_tournament_decks.csv',
+)
+
+# DAS JAPANISCHE FORMAT DREHT NUR EINE ERWEITERUNG (WZ-51, 20.11.2026).
+#
+# Am 13.11.2026 erschien bei Limitless "Special Deck Set MEGA" (Code MG,
+# 38 Karten). _pick_current_set() nimmt einfach das juengste Datum — MG
+# wurde current_set_jp, der Wochenlauf vom 20.11. rotierte die City League
+# (Daten ab 16.09. ins Archiv, "aktuell" nur noch 7 Tage) und das Tor brach
+# an drei Pruefungen ab, die "M<n>" erwarten (tests/python/test_proxy_praefixe.py).
+# Fuer EN verhindert der Ankerriegel (anker_belegt) dasselbe; fuer JP gab es
+# nichts. Die JP-Erweiterungen heissen M<n> mit optionalem Buchstaben (M1L,
+# M1S, M2a, M6, M6a); Decksets, Starter und Sammelpakete nicht (MC, MP1,
+# MEE, MEM, MEZ, MF, MG — gelesen von limitlesstcg.com/cards/jp am 20.11.).
+JP_ERWEITERUNG = re.compile(r"M\d{1,2}[A-Za-z]?")
+
+
+def _pick_current_jp_set(release_dates: dict) -> str:
+    """Wie _pick_current_set, aber nur unter den JP-Erweiterungen.
+
+    Steht keine einzige Erweiterung im Verzeichnis (Rueckfalltabelle ohne
+    M-Sets), bleibt es beim alten Verhalten — lieber ein Format als keins."""
+    nur = {c: d for c, d in (release_dates or {}).items()
+           if JP_ERWEITERUNG.fullmatch(str(c or ''))}
+    return _pick_current_set(nur) or _pick_current_set(release_dates)
+
+
 def _pick_current_set(release_dates: dict) -> str:
     """Return the set code with the latest release_date that's <= today.
     Empty string when no qualifying entry exists.
@@ -1132,7 +1188,7 @@ def write_format_window(sets_metadata_path: str,
     jp_dates = rueckfall_jp_release_dates()
     if jp_release_dates:
         jp_dates.update(jp_release_dates)
-    jp_current = _pick_current_set(jp_dates)
+    jp_current = _pick_current_jp_set(jp_dates)
     jp_release = jp_dates.get(jp_current, '') if jp_current else ''
 
     if not (en_current and en_release):
@@ -1608,16 +1664,7 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
         # contain the PREVIOUS rotation's past data when the new past-
         # scraper kicks in with append_mode=true.)
         truncated: List[str] = []
-        for fname in (
-            'city_league_analysis.csv',
-            'city_league_archetypes.csv',
-            'city_league_archetypes_comparison.csv',
-            'city_league_archetypes_deck_stats.csv',
-            'city_league_analysis_past.csv',
-            'city_league_archetypes_past.csv',
-            'city_league_archetypes_past_comparison.csv',
-            'city_league_archetypes_past_deck_stats.csv',
-        ):
+        for fname in CITY_LEAGUE_ROTATION_DATEIEN:
             fpath = os.path.join(data_dir, fname)
             if not os.path.isfile(fpath):
                 continue
@@ -1736,23 +1783,7 @@ def apply_format_window_to_scraper_settings(format_window_path: str,
     # which DOES snapshot past data because its window spans months).
     if cma_rotation_detected:
         truncated_cma: List[str] = []
-        for fname in (
-            'current_meta_card_data.csv',
-            'online_tournament_dated_cards.csv',
-            # labs_tournament_decks.csv = live Major Day-2 data feeding
-            # app-meta-call.js. Holds the 4-or-so most recent regionals
-            # (currently Prague/LA/Utrecht/Campinas, all POR-format).
-            # Once a new English set rotates in, those regionals are
-            # still legal in person (until in_person_legal_date) but
-            # they're playing the PREVIOUS format's cards. Clearing this
-            # file means the live Major view shows "no current data"
-            # until new-format regionals happen — preferable to silently
-            # mixing previous-format Major lists into the deck-builder's
-            # current-format suggestions. Per-meta historical archives
-            # (tournament_cards_data_cards_*.csv chunks) are NOT touched
-            # here — those are the Past Meta browser's permanent record.
-            'labs_tournament_decks.csv',
-        ):
+        for fname in CURRENT_META_ROTATION_DATEIEN:
             fpath = os.path.join(data_dir, fname)
             if not os.path.isfile(fpath):
                 continue

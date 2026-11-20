@@ -44,8 +44,93 @@ DARF_SCHRUMPFEN = {
 }
 
 
+# WZ-51 (20.11.2026, Wochenlauf 44686101979): Schrumpfen nach einer Regel,
+# die NUR IN DIESEM LAUF gilt. Anders als DARF_SCHRUMPFEN gilt die Erlaubnis
+# nicht fuer immer, sondern nur, wenn der Lauf selbst belegt, dass die Regel
+# gegriffen hat:
+#
+#  1. ROTATION. backend/core/update_sets.py leert bei einem Formatwechsel
+#     bestimmte Dateien auf die Kopfzeile (CITY_LEAGUE_ROTATION_DATEIEN,
+#     CURRENT_META_ROTATION_DATEIEN). Belegt ist der Wechsel, wenn sich der
+#     Schluessel in config/scraper_settings.json gegenueber dem Ausgangsstand
+#     geaendert hat. Ohne diese Ausnahme hielte der Waechter nach jeder
+#     Rotation die alten Daten fest, bis das neue Format die Haelfte des
+#     alten Umfangs erreicht — Wochen.
+#  2. VICTORY-ROAD-FRIST. Der Replika-Scraper wirft Teams, die laenger als
+#     28 Tage nicht mehr auf der Seite stehen, hinaus und zaehlt sie in
+#     _meta.entfallen_nach_frist. Am 20.11. fielen so 80 von 86 Teams
+#     (zuletzt gesehen 02.10.). Erlaubt nur, wenn die gezaehlten Abgaenge
+#     den Schwund vollstaendig erklaeren.
+ROTATION_SCHLUESSEL = (
+    (("city_league_analysis", "sources", "city_league", "start_date"),
+     "CITY_LEAGUE_ROTATION_DATEIEN"),
+    (("current_meta_analysis", "sources", "limitless_online", "format_filter"),
+     "CURRENT_META_ROTATION_DATEIEN"),
+)
+EINSTELLUNGEN = "config/scraper_settings.json"
+UPDATE_SETS = "backend/core/update_sets.py"
+VR_REPLIKA = "data/victory_road_replika_teams.json"
+
+
 def sh(*a):
     return subprocess.run(list(a), capture_output=True, text=True)
+
+
+def _rotationsdateien(name):
+    """Die Liste aus update_sets.py, ohne das Modul zu laden (es zieht
+    Netzwerk-Bibliotheken nach). Fehlt sie, gibt es keine Erlaubnis."""
+    import ast  # noqa: PLC0415
+    baum = ast.parse(open(UPDATE_SETS, encoding="utf-8").read())
+    for knoten in baum.body:
+        if (isinstance(knoten, ast.Assign) and len(knoten.targets) == 1
+                and getattr(knoten.targets[0], "id", None) == name):
+            return tuple(ast.literal_eval(knoten.value))
+    return ()
+
+
+def _wert(einstellungen, pfad):
+    for k in pfad:
+        if not isinstance(einstellungen, dict):
+            return None
+        einstellungen = einstellungen.get(k)
+    return einstellungen
+
+
+def _json_aus(basis, f):
+    import json  # noqa: PLC0415
+    if basis is None:
+        with open(f, encoding="utf-8") as h:
+            return json.load(h)
+    r = sh("git", "show", f"{basis}:{f}")
+    return json.loads(r.stdout) if r.returncode == 0 else None
+
+
+def laufregel(basis, f):
+    """Grund, warum f in DIESEM Lauf schrumpfen darf — oder ''."""
+    try:
+        alt, neu = _json_aus(basis, EINSTELLUNGEN), _json_aus(None, EINSTELLUNGEN)
+        for pfad, liste in ROTATION_SCHLUESSEL:
+            va, vn = _wert(alt, pfad), _wert(neu, pfad)
+            if va and vn and va != vn and \
+                    os.path.basename(f) in _rotationsdateien(liste) and \
+                    f.startswith("data/"):
+                return (f"Rotation in diesem Lauf: {'.'.join(pfad)} "
+                        f"{va} -> {vn} leert die Datei ({liste})")
+    except Exception:  # noqa: BLE001 — keine Erlaubnis ist die sichere Seite
+        pass
+    if f == VR_REPLIKA:
+        try:
+            a, n = _json_aus(basis, f), _json_aus(None, f)
+            ma, mn = a.get("_meta") or {}, n.get("_meta") or {}
+            weg = int(mn.get("entfallen_nach_frist") or 0)
+            vorher, nachher = len(a.get("teams") or []), len(n.get("teams") or [])
+            if weg > 0 and nachher == int(mn.get("team_count") or -1) \
+                    and vorher - nachher <= weg:
+                return (f"28-Tage-Frist des Replika-Scrapers: {weg} Teams "
+                        f"entfallen, {vorher} -> {nachher}")
+        except Exception:  # noqa: BLE001
+            pass
+    return ""
 
 
 def ausgangsstand():
@@ -71,10 +156,18 @@ def bewerten(basis):
         neu = os.path.getsize(f)
         q = neu / alt
         if q < STOPP and f not in DARF_SCHRUMPFEN:
-            befunde.append(("STOPP", f, alt, neu, q))
+            grund = laufregel(basis, f)
+            if grund:
+                LAUFGRUND[f] = grund
+                befunde.append(("WARNUNG", f, alt, neu, q))
+            else:
+                befunde.append(("STOPP", f, alt, neu, q))
         elif q < WARNUNG:
             befunde.append(("WARNUNG", f, alt, neu, q))
     return befunde
+
+
+LAUFGRUND = {}
 
 
 def mit_familie(basis, stopp):
@@ -129,7 +222,8 @@ def main():
             familie = []
         zuruecksetzen(basis, stopp + familie)
         for stufe, f, alt, neu, q in befunde:
-            grund = f" — erlaubt: {DARF_SCHRUMPFEN[f]}" if f in DARF_SCHRUMPFEN else ""
+            grund = (f" — erlaubt: {DARF_SCHRUMPFEN[f]}" if f in DARF_SCHRUMPFEN
+                     else f" — erlaubt: {LAUFGRUND[f]}" if f in LAUFGRUND else "")
             print(f"{stufe}: {f} {alt} -> {neu} ({q:.2f}){grund}")
         if familie:
             # EINE Zeile: GitHub nimmt hoechstens 10 Warnungen je Schritt (SC-37).

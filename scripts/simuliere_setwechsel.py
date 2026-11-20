@@ -86,6 +86,16 @@ def quelle_umbeschriften(daten, alt, neu, datum):
     return len(ids)
 
 
+def en_erscheinungsdaten(us, daten, en, datum):
+    """EN-Erscheinungsdaten fuer die Formatwahl der Probe — ohne JP-Codes
+    (WZ-51, Begruendung beim Aufruf). Was update_sets ohne Netz nimmt:
+    EN-Grundstock plus die gespeicherten EN-Anker, dazu das erfundene Set."""
+    nur_en = us.rueckfall_release_dates(daten)
+    if en:
+        nur_en[en] = datum
+    return nur_en
+
+
 def wochenlauf_update_sets(baum, en, jp, datum):
     sys.path.insert(0, os.path.join(baum, "backend", "core"))
     for m in ("update_sets", "turnier_legalitaet", "card_scraper_shared"):
@@ -104,9 +114,17 @@ def wochenlauf_update_sets(baum, en, jp, datum):
     with open(os.path.join(daten, "sets.json"), "w", encoding="utf-8") as f:
         json.dump(sets_order, f, indent=2, sort_keys=True)
     meta_pfad = us.write_sets_metadata(sets_order, en_dates, jp_dates)
-    fw = us.write_format_window(meta_pfad, en_release_dates=en_dates, jp_release_dates=jp_dates)
+    # WZ-51 (20.11.2026): sets_metadata.json fuehrt EN- UND JP-Codes in einer
+    # Liste. Als EN-Erscheinungsdaten fuer die Formatwahl war das harmlos,
+    # solange ein EN-Set das juengste war — seit dem JP-Deckset MG (13.11.)
+    # hielt die Probe MG fuer das neue EN-Set, der Ankerriegel lehnte ab und
+    # nichts wurde geschrieben (Probe rot auf PR #1050). Der Wochenlauf liest
+    # EN von limitlesstcg.com/cards; die Probe nimmt, was update_sets ohne
+    # Netz nimmt: den EN-Grundstock plus die gespeicherten EN-Anker.
+    nur_en = en_erscheinungsdaten(us, daten, en, datum)
+    fw = us.write_format_window(meta_pfad, en_release_dates=nur_en, jp_release_dates=jp_dates)
     fw_pfad = fw or os.path.join(daten, "format_window.json")
-    us.aktualisiere_neuestes_set(fw_pfad, en_dates)
+    us.aktualisiere_neuestes_set(fw_pfad, nur_en)
     if fw:
         us.apply_format_window_to_scraper_settings(
             fw, os.path.join(baum, "config", "scraper_settings.json"))

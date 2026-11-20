@@ -1008,23 +1008,36 @@ describe('Die Gewichtung gewichtet INNERHALB des Cuts', () => {
     it('die Schwelle von 3 haengt an der Stichprobe, nicht am Feld', async () => {
         /* Die Zusage: ein Archetyp mit weniger als drei Listen wird
            abgelehnt, und die Ablehnung sagt dazu, dass es Day-2-Listen
-           sind. Welcher Archetyp das diese Woche ist, ist egal. */
-        const zaehler = new Map();
-        for (const r of PER) {
-            const a = String(r.deck_archetype || '').trim();
-            if (!a) continue;
-            const k = a + '|' + String(r.tournament_id || '') + '|' + String(r.place || '');
-            if (!zaehler.has(a)) zaehler.set(a, new Set());
-            zaehler.get(a).add(k);
-        }
-        const duenn = [...zaehler.entries()].filter(([, v]) => v.size < 3).map(([a]) => a);
-        if (duenn.length === 0) return;   // waere eine Verbesserung der Daten
-        const res = await MCB.build(duenn[0]);
-        assert.equal(res.dataQuality.sufficient, false,
-            `${duenn[0]} hat unter drei Listen, wird aber gebaut`);
-        assert.ok(/Day 2/.test(res.dataQuality.warning),
-            'die Ablehnung sagt nicht, dass es Day-2-Listen sind: '
-            + res.dataQuality.warning);
+           sind.
+
+           WZ-51 (20.11.2026, Wochenlauf 44686101979): hier wurde der Fall
+           aus den echten Daten gesucht — irgendein Archetyp mit unter drei
+           Listen ueber ALLE Formate. Diese Woche war das "Incineroar", den
+           der Motor im laufenden Fenster gar nicht sieht; er lehnte mit
+           "No per-decklist data" ab (0 Listen, eigener Weg), und der Test
+           wurde rot, obwohl der Motor richtig rechnete. Der Fall wird jetzt
+           gesetzt: genau zwei Listen, Gegenprobe mit drei. */
+        const KOPF = 'tournament_id,limitless_tournament_id,tournament_name,tournament_date,'
+                   + 'meta,place,player_name,deck_archetype,deck_slug,wins,losses,ties,'
+                   + 'card_name,card_identifier,set_code,set_number,count,type,is_ace_spec,'
+                   + 'quelle,druck_quelle,scraped_at';
+        const zeile = (platz, spieler) =>
+            `9998,,Schwellenprobe,2026-09-01,TEF-PBL,${platz},${spieler},Schwellendeck,1,3,1,0,`
+            + 'Testkarte,Testkarte-x,TST,1,4,Pokemon,No,papier,,';
+        const baue = async (n) => {
+            const csv = [KOPF, ...Array.from({ length: n }, (_, i) => zeile(i + 1, 'S' + i))].join('\n');
+            const m = ladeMotor({ 'tournament_decklists_per_player.csv': csv }).MostConsistencyBuilder;
+            await m.loadData();
+            return (await m.build('Schwellendeck')).dataQuality;
+        };
+        const zwei = await baue(2);
+        assert.equal(zwei.n_lists, 2, 'Vorpruefung: der gesetzte Fall liefert zwei Listen');
+        assert.equal(zwei.sufficient, false, 'zwei Listen, wird aber gebaut');
+        assert.ok(/Day 2/.test(zwei.warning),
+            'die Ablehnung sagt nicht, dass es Day-2-Listen sind: ' + zwei.warning);
+        const drei = await baue(3);
+        assert.notEqual(drei.sufficient, false,
+            'Gegenprobe: drei Listen erreichen die Schwelle — ' + drei.warning);
     });
 });
 

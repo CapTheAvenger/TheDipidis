@@ -138,3 +138,76 @@ def test_schritt_2_haelt_die_dateizeiten_echt_und_der_aufbau_verliert_keinen_feh
     schritte = {s.get("name", ""): s for s in wf["jobs"]["probe"]["steps"]}
     assert "NO_FAKE_STAT=1" in schritte["2 — dasselbe 30 Tage spaeter"]["run"]
     assert "set -eo pipefail" in schritte["Wegwerf-Baeume mit neuem Set"]["run"]
+
+
+def test_ein_jp_deckset_ist_fuer_die_probe_kein_en_set(tmp_path):
+    """WZ-51 (20.11.2026): sets_metadata.json fuehrt EN- und JP-Codes. Seit
+    dem JP-Deckset MG (13.11.) war MG dort das juengste — die Probe hielt es
+    fuer das neue EN-Set, der Ankerriegel lehnte ab, Probe rot (PR #1050).
+    Ausgefuehrt mit dem echten update_sets an einem gesetzten Formatfenster."""
+    import importlib
+    sys.path.insert(0, os.path.join(WURZEL, "backend", "core"))
+    us = importlib.import_module("update_sets")
+    d = tmp_path / "data"
+    d.mkdir()
+    (d / "format_window.json").write_text(json.dumps({
+        "current_set": "DLR", "set_release_date": "2026-11-06",
+        "neuestes_set": "DLR", "neuestes_set_release_date": "2026-11-06",
+        "current_set_jp": "M6A", "jp_release_date": "2026-09-16"}))
+    (d / "sets_metadata.json").write_text(json.dumps({
+        "DLR": {"order": 160, "release_date": "2026-11-06"},
+        "MG": {"order": 161, "release_date": "2026-11-13"}}))
+    daten = sim.en_erscheinungsdaten(us, str(d), "", "2026-11-17")
+    assert "MG" not in daten
+    # Gegen den EN-Rueckfall selbst, nicht gegen ein festes Kuerzel — sonst
+    # faellt der Test, sobald der Grundstock ein neueres EN-Set kennt.
+    assert us._pick_current_set(daten) == us._pick_current_set(
+        us.rueckfall_release_dates(str(d))) != "MG"
+    assert sim.en_erscheinungsdaten(us, str(d), "ZZN", "2026-11-17")["ZZN"] == "2026-11-17"
+
+
+def test_die_probe_waehlt_das_format_mit_den_en_daten(tmp_path, monkeypatch):
+    """Die Aufrufstelle: wochenlauf_update_sets gibt write_format_window genau
+    das, was en_erscheinungsdaten liefert (Prueffund 20.11.: der Test oben
+    prueft nur den Helfer). Gemessen mit einer Attrappe, die den Lauf an
+    write_format_window anhaelt — kein Netz, kein Schreiben ins Formatfenster."""
+    import shutil
+    b = tmp_path / "baum"
+    (b / "backend" / "core").mkdir(parents=True)
+    (b / "data").mkdir()
+    for f in ("update_sets.py", "turnier_legalitaet.py", "card_scraper_shared.py"):
+        q = os.path.join(WURZEL, "backend", "core", f)
+        if os.path.exists(q):
+            shutil.copy(q, b / "backend" / "core" / f)
+    (b / "data" / "format_window.json").write_text(json.dumps({
+        "current_set": "DLR", "set_release_date": "2026-11-06",
+        "current_set_jp": "M6A", "jp_release_date": "2026-09-16"}))
+    (b / "data" / "sets_metadata.json").write_text(json.dumps({
+        "DLR": {"order": 160, "release_date": "2026-11-06"},
+        "MG": {"order": 161, "release_date": "2026-11-13"}}))
+    (b / "data" / "sets.json").write_text(json.dumps({"DLR": 160, "MG": 161}))
+    MARKE = {"PROBE": "2026-11-17"}
+    monkeypatch.setattr(sim, "en_erscheinungsdaten", lambda *a, **k: dict(MARKE))
+    gesehen = {}
+
+    class Halt(Exception):
+        pass
+
+    import importlib
+    echt = importlib.import_module
+
+    def import_mit_attrappe(name, *a, **k):
+        mod = echt(name, *a, **k)
+        if name == "update_sets":
+            def wfw(meta, en_release_dates=None, jp_release_dates=None):
+                gesehen["en"] = en_release_dates
+                raise Halt()
+            monkeypatch.setattr(mod, "write_format_window", wfw)
+        return mod
+
+    monkeypatch.setattr(sim.importlib, "import_module", import_mit_attrappe)
+    try:
+        sim.wochenlauf_update_sets(str(b), "", "M7Z", "2026-11-17")
+    except Halt:
+        pass
+    assert gesehen.get("en") == MARKE, gesehen

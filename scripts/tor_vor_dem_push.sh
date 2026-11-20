@@ -107,6 +107,27 @@ if [ -s "${RUNNER_TEMP:-/tmp}/tor_zurueckgerollt.txt" ]; then
     export TOR_ZURUECKGEROLLT
 fi
 
+# WZ-51 (20.11.2026): DIE MELDUNG, NICHT NUR DER NAME. Wochenlauf
+# 44686101979 war rot an "3 errors" der Python-Suite und an einer
+# JS-Datei — welche Zusicherung mit welcher Meldung, stand nur in den
+# Protokollen, und die Artefakte sind ohne Anmeldung nicht lesbar (auch
+# nicht aus der Cloud-Sitzung: Blob-Speicher gesperrt). Hier die ersten
+# Fehlerzeilen als Hinweis-Annotation (notice: eigenes Kontingent von 10,
+# die Warnungen bleiben fuer Schrumpf-Waechter und Tor-Sammelzeile frei).
+# EINE Zeile je Suite (hoechstens 4 im Modus alle): die Sammelzeile
+# "Tor-Befunde", die zurueckgehalten.py liest (WZ-48), kommt danach und
+# darf nicht aus dem Kontingent fallen (Prueffund 20.11.).
+tor_detail() {  # $1 Suitenname, $2 Protokoll
+    { grep -E '^(ERROR|FAILED) ' "$2"
+      grep -E '^E +[A-Za-z]|^[[:space:]]+error: |^[[:space:]]+not ok [0-9]+ - ' "$2"
+    } 2>/dev/null \
+        | grep -vE "^[[:space:]]+error: 'test failed'$|^E +assert " \
+        | awk '!gesehen[$0]++' \
+        | head -n "${TOR_DETAIL_ZEILEN:-3}" | cut -c1-200 \
+        | sed -e 's/^[[:space:]]*//' | paste -sd'|' - | sed -e 's/|/ | /g' \
+        | cut -c1-700 | sed -e 's/%/%25/g' -e '/^$/d' -e "s/^/::notice::Tor-Detail $1: /" || true
+}
+
 rot=0
 laeufe=("js-kern|bash scripts/run-js-unit-tests.sh tests/unit"
         "py-kern|python3 -m pytest tests/python -q")
@@ -134,6 +155,7 @@ for lauf in "${laeufe[@]}"; do
     echo "$name: Rueckgabewert $rc — $ergebnis"
     if [ "$rc" -ne 0 ]; then
         rot=1
+        tor_detail "$name" "$log"
     fi
 done
 

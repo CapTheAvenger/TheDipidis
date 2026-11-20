@@ -1,17 +1,17 @@
 {
   "_meta": {
-    "last_updated": "2026-11-19",
+    "last_updated": "2026-11-20",
     "window_days": 14,
-    "window_start": "2026-11-05",
-    "window_end": "2026-11-19",
+    "window_start": "2026-11-06",
+    "window_end": "2026-11-20",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
     "content_to": "2026-11-15",
-    "samples_outside_window": 288,
-    "team_count": 67,
-    "teams_with_samples": 66,
-    "sample_count": 402,
-    "species_count": 74,
+    "samples_outside_window": 300,
+    "team_count": 64,
+    "teams_with_samples": 63,
+    "sample_count": 384,
+    "species_count": 73,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
   "samples": [
@@ -2534,132 +2534,6 @@
       "nature": "Jolly",
       "date": "4 Nov 2026",
       "replica": "PTWXRD14MU"
-    },
-    {
-      "species": "Armarouge",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Modest",
-      "date": "5 Nov 2026",
-      "replica": "91QNX94B9B"
-    },
-    {
-      "species": "Indeedee-F",
-      "evs": "32 HP / 32 Def / 2 SpD",
-      "nature": "Bold",
-      "date": "5 Nov 2026",
-      "replica": "91QNX94B9B"
-    },
-    {
-      "species": "Gardevoir",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "5 Nov 2026",
-      "replica": "91QNX94B9B"
-    },
-    {
-      "species": "Kommo-o",
-      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-      "nature": "Modest",
-      "date": "5 Nov 2026",
-      "replica": "91QNX94B9B"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "5 Nov 2026",
-      "replica": "91QNX94B9B"
-    },
-    {
-      "species": "Absol",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "5 Nov 2026",
-      "replica": "91QNX94B9B"
-    },
-    {
-      "species": "Gardevoir",
-      "evs": "29 HP / 32 SpA / 5 Spe",
-      "nature": "Modest",
-      "date": "5 Nov 2026",
-      "replica": "F5FFTA32NF"
-    },
-    {
-      "species": "Sinistcha",
-      "evs": "23 HP / 12 Def / 9 SpA / 22 SpD",
-      "nature": "Modest",
-      "date": "5 Nov 2026",
-      "replica": "F5FFTA32NF"
-    },
-    {
-      "species": "Grapploct",
-      "evs": "29 HP / 32 Atk / 5 SpD",
-      "nature": "Adamant",
-      "date": "5 Nov 2026",
-      "replica": "F5FFTA32NF"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 32 Atk / 2 SpD",
-      "nature": "Brave",
-      "date": "5 Nov 2026",
-      "replica": "F5FFTA32NF"
-    },
-    {
-      "species": "Indeedee-F",
-      "evs": "32 HP / 25 Def / 9 SpD",
-      "nature": "Bold",
-      "date": "5 Nov 2026",
-      "replica": "F5FFTA32NF"
-    },
-    {
-      "species": "Ceruledge",
-      "evs": "6 HP / 25 Atk / 2 Def / 1 SpD / 32 Spe",
-      "nature": "Adamant",
-      "date": "5 Nov 2026",
-      "replica": "F5FFTA32NF"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "10 HP / 8 Def / 27 SpA / 21 Spe",
-      "nature": "Timid",
-      "date": "5 Nov 2026",
-      "replica": "XRWKCU45WC"
-    },
-    {
-      "species": "Dragonite",
-      "evs": "15 HP / 30 SpA / 21 Spe",
-      "nature": "Modest",
-      "date": "5 Nov 2026",
-      "replica": "XRWKCU45WC"
-    },
-    {
-      "species": "Kingambit",
-      "evs": "32 HP / 23 Atk / 2 Def / 8 SpD / 1 Spe",
-      "nature": "Adamant",
-      "date": "5 Nov 2026",
-      "replica": "XRWKCU45WC"
-    },
-    {
-      "species": "Sneasler",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "5 Nov 2026",
-      "replica": "XRWKCU45WC"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "4 HP / 18 Atk / 12 Def / 12 SpD / 20 Spe",
-      "nature": "Adamant",
-      "date": "5 Nov 2026",
-      "replica": "XRWKCU45WC"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "32 HP / 32 Atk / 2 Spe",
-      "nature": "Adamant",
-      "date": "5 Nov 2026",
-      "replica": "XRWKCU45WC"
     },
     {
       "species": "Gengar",

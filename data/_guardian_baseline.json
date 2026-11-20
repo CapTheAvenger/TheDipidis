@@ -140,7 +140,7 @@
   "champions_resources.json": 0,
   "champions_type_chart.json": 183,
   "cm_expansions.csv": 793,
-  "japanese_cards_database.csv": 1076,
+  "japanese_cards_database.csv": 1114,
   "online_api_archetypes.csv": 26140,
   "online_api_cards_TEF-DLR.csv": 47821,
   "online_api_matchups_TEF-DLR.csv": 14395,
@@ -151,13 +151,14 @@
   "price_data.csv": 20759,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-11-20 09:34 UTC",
+ "generated": "2026-11-20 11:29 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
   "M5": 81,
   "M6": 113,
   "M6A": 103,
+  "MG": 38,
   "SMP": 194,
   "SP": 265,
   "SVP": 228

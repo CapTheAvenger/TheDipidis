@@ -166,5 +166,13 @@
     "tournament_type": "regional",
     "country": "US",
     "total_players": 2734
+  },
+  {
+    "tournament_id": "0081",
+    "tournament_name": "International Championship São Paulo",
+    "tournament_date": "",
+    "tournament_type": "special",
+    "country": "",
+    "total_players": 0
   }
 ]

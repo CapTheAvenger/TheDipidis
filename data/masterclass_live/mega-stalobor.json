@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-20T03:44:50Z",
+  "erzeugt_am": "2026-11-20T10:33:44Z",
   "id": "mega-stalobor",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1569,8 +1569,8 @@
    }
   ],
   "liste_online": {
-   "bilanz": "7-1-0",
-   "datum": "15.11.2026",
+   "bilanz": "9-0-0",
+   "datum": "19.11.2026",
    "karten": [
     [
      4,
@@ -1585,13 +1585,13 @@
      "114"
     ],
     [
-     2,
+     1,
      "Metagross",
      "CRI",
      "61"
     ],
     [
-     4,
+     3,
      "Drilbur",
      "PBL",
      "46"
@@ -1610,15 +1610,21 @@
     ],
     [
      1,
+     "Fezandipiti ex",
+     "ASC",
+     "142"
+    ],
+    [
+     1,
      "Mega Skarmory ex",
      "POR",
      "55"
     ],
     [
      4,
-     "Lillie's Determination",
-     "MEG",
-     "119"
+     "Judge",
+     "POR",
+     "76"
     ],
     [
      4,
@@ -1627,28 +1633,22 @@
      "176"
     ],
     [
-     3,
+     2,
      "Brock's Scouting",
      "JTG",
      "146"
     ],
     [
      4,
-     "Buddy-Buddy Poffin",
-     "TEF",
-     "144"
-    ],
-    [
-     4,
-     "Jumbo Ice Cream",
-     "PFL",
-     "91"
-    ],
-    [
-     2,
      "Pokégear 3.0",
      "SVI",
      "186"
+    ],
+    [
+     4,
+     "Buddy-Buddy Poffin",
+     "TEF",
+     "144"
     ],
     [
      1,
@@ -1658,33 +1658,39 @@
     ],
     [
      1,
+     "Precious Trolley",
+     "SSP",
+     "185"
+    ],
+    [
+     1,
      "Switch",
      "MEG",
      "130"
     ],
     [
-     2,
-     "Air Balloon",
-     "ASC",
-     "181"
-    ],
-    [
      1,
-     "Hero's Cape",
-     "TEF",
-     "152"
+     "Jumbo Ice Cream",
+     "PFL",
+     "91"
     ],
     [
-     15,
+     4,
+     "Team Rocket's Watchtower",
+     "DRI",
+     "180"
+    ],
+    [
+     16,
      "Metal Energy",
      "MEE",
      "16"
     ]
    ],
    "platz": 1,
-   "spieler": "Yunrong Cai",
-   "turnier": "AOB's Team Challenge",
-   "von": 64
+   "spieler": "Alessandro Tarquini",
+   "turnier": "ASRcristiano # 207 - 60 codes - Road to Stuttgart!",
+   "von": 51
   },
   "listen_vor_ort": [
    {
@@ -1975,14 +1981,14 @@
   "name": "Mega Excadrill",
   "online": {
    "anteil": "2,67",
-   "anteil14": "3,26",
+   "anteil14": "3,21",
    "bilanz": [
     359,
     380,
     5
    ],
    "bis": "20.11.2026",
-   "fenster14": "09.11.–17.11.2026",
+   "fenster14": "09.11.–20.11.2026",
    "format": "TEF–DLR",
    "kurz_anteil": "3,31",
    "kurz_bilanz": [
@@ -2139,138 +2145,142 @@
  },
  "matchups": {
   "anteile": {
-   "absol audino": "0,52",
-   "alakazam": "0,08",
-   "alakazam dudunsparce": "3,48",
-   "alakazam dusknoir": "1,22",
-   "archaludon": "0,10",
+   "absol audino": "0,49",
+   "alakazam": "0,10",
+   "alakazam dudunsparce": "3,46",
+   "alakazam dusknoir": "1,20",
+   "ancient box": "0,01",
+   "archaludon": "0,11",
    "archaludon dudunsparce": "0,01",
-   "archaludon zoroark": "0,05",
-   "azumarill": "0,03",
+   "archaludon zoroark": "0,07",
+   "azumarill": "0,02",
    "basic box": "5,80",
-   "beedrill": "0,52",
-   "blaziken": "0,13",
-   "blaziken zoroark": "0,03",
+   "beedrill": "0,49",
+   "blaziken": "0,14",
+   "blaziken zoroark": "0,02",
    "bloodmoon ursaluna": "0,01",
    "bronzong": "0,01",
-   "ceruledge": "0,29",
-   "cinccino": "0,19",
+   "ceruledge": "0,33",
+   "cinccino": "0,16",
    "cinderace": "0,01",
    "clefairy ogerpon": "0,01",
-   "cornerstone mask ogerpon": "0,04",
-   "crustle": "2,40",
-   "cynthia's garchomp": "1,34",
+   "cornerstone mask ogerpon": "0,03",
+   "crustle": "2,33",
+   "cynthia's garchomp": "1,39",
    "decidueye": "0,09",
-   "dhelmise": "2,87",
+   "dhelmise": "2,79",
    "diancie dusknoir": "0,01",
    "doublade": "0,13",
-   "dragapult": "9,15",
-   "dragapult alakazam": "0,10",
-   "dragapult blaziken": "1,62",
-   "dragapult dudunsparce": "2,55",
-   "dragapult dusknoir": "1,48",
+   "dragapult": "9,31",
+   "dragapult alakazam": "0,13",
+   "dragapult blaziken": "1,53",
+   "dragapult dudunsparce": "2,45",
+   "dragapult dusknoir": "1,53",
    "dragapult iron thorns": "0,09",
    "dragapult toucannon": "0,01",
-   "dudunsparce control": "0,04",
-   "eelektrik": "0,12",
-   "erika's victreebel": "0,04",
-   "ethan's typhlosion": "0,66",
-   "festival lead": "1,98",
-   "flareon": "0,04",
-   "flareon noctowl": "0,13",
-   "flygon": "0,05",
-   "froslass dudunsparce": "0,16",
-   "froslass munkidori": "0,26",
+   "dudunsparce control": "0,03",
+   "eelektrik": "0,11",
+   "erika's victreebel": "0,03",
+   "ethan's typhlosion": "0,67",
+   "festival lead": "2,01",
+   "flareon": "0,03",
+   "flareon noctowl": "0,16",
+   "flygon": "0,04",
+   "froslass dudunsparce": "0,14",
+   "froslass munkidori": "0,23",
    "future box": "0,01",
-   "galvantula": "0,01",
-   "gengar": "0,19",
-   "greninja": "1,77",
+   "galvantula": "0,02",
+   "gengar": "0,22",
+   "greninja": "1,85",
    "greninja froslass": "0,03",
    "grimmsnarl froslass": "1,10",
-   "hop's trevenant": "0,35",
-   "hop's zacian": "0,04",
-   "hydreigon": "0,16",
-   "igglybuff": "0,55",
+   "hop's trevenant": "0,36",
+   "hop's zacian": "0,09",
+   "hydreigon": "0,20",
+   "igglybuff": "0,61",
    "incineroar": "0,01",
-   "iono's bellibolt": "0,30",
-   "iron thorns": "1,26",
+   "iono's bellibolt": "0,29",
+   "iron thorns": "1,11",
    "jellicent dusknoir": "0,01",
-   "joltik box": "0,03",
-   "kangaskhan bouffalant": "0,36",
+   "joltik box": "0,05",
+   "kangaskhan bouffalant": "0,39",
    "koraidon": "0,01",
-   "lillie's clefairy": "0,10",
-   "lopunny dudunsparce": "2,33",
-   "lopunny dusknoir": "0,58",
-   "lucario hariyama": "1,29",
+   "lillie's clefairy": "0,09",
+   "lopunny dudunsparce": "2,22",
+   "lopunny dusknoir": "0,54",
+   "lucario hariyama": "1,26",
+   "luxray": "0,01",
    "mamoswine": "0,08",
-   "manectric eelektrik": "0,51",
-   "marnie's grimmsnarl": "0,09",
-   "mega abomasnow": "0,23",
+   "manectric eelektrik": "0,50",
+   "marnie's grimmsnarl": "0,08",
+   "mega abomasnow": "0,22",
    "mega absol box": "0,29",
-   "mega camerupt": "0,05",
-   "mega chandelure": "0,30",
-   "mega charizard x": "0,36",
-   "mega charizard y": "0,49",
-   "mega darkrai": "0,26",
-   "mega dragonite": "0,22",
-   "mega excadrill": "2,99",
-   "mega feraligatr": "0,03",
-   "mega froslass": "0,19",
-   "mega gengar": "0,10",
-   "mega golisopod": "1,23",
+   "mega camerupt": "0,07",
+   "mega chandelure": "0,32",
+   "mega charizard x": "0,33",
+   "mega charizard y": "0,46",
+   "mega darkrai": "0,32",
+   "mega dragonite": "0,20",
+   "mega excadrill": "2,97",
+   "mega feraligatr": "0,04",
+   "mega froslass": "0,22",
+   "mega gengar": "0,09",
+   "mega golisopod": "1,28",
    "mega greninja": "0,88",
    "mega latias": "0,01",
    "mega lopunny": "0,17",
-   "mega lucario": "2,31",
-   "mega malamar": "0,52",
-   "mega manectric": "0,27",
-   "mega rayquaza": "9,54",
+   "mega lucario": "2,33",
+   "mega malamar": "0,51",
+   "mega manectric": "0,30",
+   "mega rayquaza": "9,16",
    "mega sharpedo": "0,01",
-   "mega starmie": "0,78",
-   "mega venusaur": "0,40",
-   "mega zygarde": "0,14",
+   "mega starmie": "0,72",
+   "mega venusaur": "0,39",
+   "mega zygarde": "0,16",
+   "meowscarada": "0,01",
    "metagross": "0,12",
-   "mew box": "0,56",
+   "mew box": "0,52",
    "milotic": "0,01",
    "miraidon": "0,05",
-   "misty's gyarados": "0,05",
-   "n's zoroark": "3,38",
+   "misty's gyarados": "0,04",
+   "n's zoroark": "3,40",
    "ogerpon meganium": "0,09",
-   "ogerpon meganium arboliva": "0,81",
-   "ogerpon meganium hydrapple": "3,68",
-   "okidogi barbaracle": "0,44",
-   "palafin": "0,13",
-   "paldean tauros": "0,05",
-   "raging bolt": "0,17",
+   "ogerpon meganium arboliva": "0,77",
+   "ogerpon meganium hydrapple": "3,86",
+   "okidogi barbaracle": "0,47",
+   "palafin": "0,14",
+   "paldean tauros": "0,04",
+   "raging bolt": "0,16",
    "raging bolt bellibolt": "0,01",
-   "raging bolt ogerpon": "0,51",
-   "rocket's honchkrow": "1,94",
-   "rocket's mewtwo": "0,57",
+   "raging bolt ogerpon": "0,46",
+   "rocket's honchkrow": "2,02",
+   "rocket's mewtwo": "0,61",
    "rocket's spidops": "0,10",
+   "salamence": "0,01",
    "scovillain": "0,05",
-   "seaking festival lead": "0,56",
-   "sharpedo toxtricity": "1,59",
-   "sinistcha ogerpon": "0,10",
-   "slaking": "0,04",
-   "slowking": "4,81",
+   "seaking festival lead": "0,53",
+   "sharpedo toxtricity": "1,53",
+   "sinistcha ogerpon": "0,11",
+   "slaking": "0,07",
+   "slowking": "4,74",
    "starmie dusknoir": "0,27",
    "starmie froslass": "0,49",
-   "steven's metagross": "0,31",
+   "steven's metagross": "0,30",
    "sylveon": "0,03",
-   "talonflame dusknoir": "2,86",
-   "tapu koko spread": "0,12",
-   "tera box": "0,04",
-   "terapagos noctowl": "0,04",
-   "toucannon": "0,78",
-   "toxtricity": "0,18",
-   "toxtricity box": "0,18",
-   "toxtricity brute bonnet": "0,03",
+   "talonflame dusknoir": "3,16",
+   "tapu koko spread": "0,10",
+   "tera box": "0,05",
+   "terapagos noctowl": "0,03",
+   "toucannon": "0,73",
+   "toxtricity": "0,22",
+   "toxtricity box": "0,22",
+   "toxtricity brute bonnet": "0,04",
    "tyranitar": "0,01",
-   "ursaluna lunatone": "0,10",
-   "wailord": "0,03",
-   "yanmega": "0,17",
+   "ursaluna lunatone": "0,11",
+   "wailord": "0,02",
+   "yanmega": "0,18",
    "zoroark crustle": "0,01",
-   "zygarde barbaracle": "0,03"
+   "zygarde barbaracle": "0,02"
   },
   "koepfe": {
    "davor": "TEF–30C",
@@ -4826,411 +4836,8 @@
     "name": "Igor_Zuv3la · 2. von 454"
    },
    {
-    "fakten": "5. Platz von 128 (6–1–0), „REFINE Autumn Series Session 11: Glowing Gobbler“, 12.11.2026.",
+    "fakten": "4. Platz von 171 (9–3–1), „🏆Moujii's Dojo🏆 (Late Registration Available!)“, 19.11.2026.",
     "karten": [
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Beldum",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_113_R_EN_LG.png",
-       "de": "Tanhel",
-       "druck": "TEF-113",
-       "en": "Beldum",
-       "hoch": "TEF-113",
-       "karte": "beldum"
-      },
-      "schluessel": "beldum"
-     },
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Metang",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_114_R_EN_LG.png",
-       "de": "Metang",
-       "druck": "TEF-114",
-       "en": "Metang",
-       "hoch": "TEF-114",
-       "karte": "metang"
-      },
-      "schluessel": "metang"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Metagross",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_061_R_EN_LG.png",
-       "de": "Metagross",
-       "druck": "CRI-61",
-       "en": "Metagross",
-       "hoch": "CRI-61",
-       "karte": "metagross"
-      },
-      "schluessel": "metagross"
-     },
-     {
-      "ace": false,
-      "n": 3,
-      "name": "Drilbur",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_046_R_EN_LG.png",
-       "de": "Rotomurf",
-       "druck": "PBL-46",
-       "en": "Drilbur",
-       "hoch": "PBL-46",
-       "karte": "drilbur"
-      },
-      "schluessel": "drilbur"
-     },
-     {
-      "ace": false,
-      "n": 2,
-      "name": "Mega Excadrill ex",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_065_R_EN_LG.png",
-       "de": "Mega-Stalobor-ex",
-       "druck": "PBL-65",
-       "en": "Mega Excadrill ex",
-       "hoch": "PBL-103",
-       "karte": "mega-excadrill-ex"
-      },
-      "schluessel": "mega excadrill ex"
-     },
-     {
-      "ace": false,
-      "n": 2,
-      "name": "Genesect ex",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_067_R_EN_LG.png",
-       "de": "Genesect-ex",
-       "druck": "BLK-67",
-       "en": "Genesect ex",
-       "hoch": "BLK-169",
-       "karte": "genesect-ex"
-      },
-      "schluessel": "genesect ex"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Piplup",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_027_R_EN_LG.png",
-       "de": "Plinfa",
-       "druck": "PFL-27",
-       "en": "Piplup",
-       "hoch": "PFL-98",
-       "karte": "piplup"
-      },
-      "schluessel": "piplup"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Empoleon ex",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_070_R_EN_LG.png",
-       "de": "Impoleon-ex",
-       "druck": "PFL-70",
-       "en": "Empoleon ex",
-       "hoch": "PFL-114",
-       "karte": "empoleon-ex"
-      },
-      "schluessel": "empoleon ex"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Fezandipiti ex",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_142_R_EN_LG.png",
-       "de": "Beatori-ex",
-       "druck": "ASC-142",
-       "en": "Fezandipiti ex",
-       "hoch": "ASC-288",
-       "karte": "fezandipiti-ex"
-      },
-      "schluessel": "fezandipiti ex"
-     },
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Team Rocket's Petrel",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png",
-       "de": "Team Rockets Lambda",
-       "druck": "ASC-207",
-       "en": "Team Rocket's Petrel",
-       "hoch": "DRI-226",
-       "karte": "team-rocket-s-petrel"
-      },
-      "schluessel": "team rocket's petrel"
-     },
-     {
-      "ace": false,
-      "n": 2,
-      "name": "Lillie's Determination",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png",
-       "de": "Lillys Entschlossenheit",
-       "druck": "ASC-192",
-       "en": "Lillie's Determination",
-       "hoch": "MEG-184",
-       "karte": "lillie-s-determination"
-      },
-      "schluessel": "lillie's determination"
-     },
-     {
-      "ace": false,
-      "n": 2,
-      "name": "Boss's Orders",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png",
-       "de": "Befehl vom Boss",
-       "druck": "ASC-183",
-       "en": "Boss's Orders",
-       "hoch": "ASC-256",
-       "karte": "boss-s-orders"
-      },
-      "schluessel": "boss's orders"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Brock's Scouting",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_146_R_EN_LG.png",
-       "de": "Rockos Erkundung",
-       "druck": "JTG-146",
-       "en": "Brock's Scouting",
-       "hoch": "JTG-179",
-       "karte": "brock-s-scouting"
-      },
-      "schluessel": "brock's scouting"
-     },
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Team Rocket's Transceiver",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_209_R_EN_LG.png",
-       "de": "Team Rockets Transceiver",
-       "druck": "ASC-209",
-       "en": "Team Rocket's Transceiver",
-       "hoch": "ASC-263",
-       "karte": "team-rocket-s-transceiver"
-      },
-      "schluessel": "team rocket's transceiver"
-     },
-     {
-      "ace": false,
-      "n": 3,
-      "name": "Buddy-Buddy Poffin",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png",
-       "de": "Dicke-Freunde-Knursp",
-       "druck": "ASC-184",
-       "en": "Buddy-Buddy Poffin",
-       "hoch": "TWM-223",
-       "karte": "buddy-buddy-poffin"
-      },
-      "schluessel": "buddy-buddy poffin"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Iron Defender",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_118_R_EN_LG.png",
-       "de": "Eisendefensive",
-       "druck": "MEG-118",
-       "en": "Iron Defender",
-       "hoch": "MEG-118",
-       "karte": "iron-defender"
-      },
-      "schluessel": "iron defender"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Energy Recycler",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_164_R_EN_LG.png",
-       "de": "Energieaufbereitung",
-       "druck": "DRI-164",
-       "en": "Energy Recycler",
-       "hoch": "DRI-164",
-       "karte": "energy-recycler"
-      },
-      "schluessel": "energy recycler"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Special Red Card",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_082_R_EN_LG.png",
-       "de": "Spezielle Rote Karte",
-       "druck": "CRI-82",
-       "en": "Special Red Card",
-       "hoch": "CRI-113",
-       "karte": "special-red-card"
-      },
-      "schluessel": "special red card"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Ultra Ball",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png",
-       "de": "Hyperball",
-       "druck": "ASC-213",
-       "en": "Ultra Ball",
-       "hoch": "ASC-264",
-       "karte": "ultra-ball"
-      },
-      "schluessel": "ultra ball"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Rare Candy",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png",
-       "de": "Sonderbonbon",
-       "druck": "MEG-125",
-       "en": "Rare Candy",
-       "hoch": "MEG-175",
-       "karte": "rare-candy"
-      },
-      "schluessel": "rare candy"
-     },
-     {
-      "ace": true,
-      "n": 1,
-      "name": "Precious Trolley",
-      "neu": {
-       "ace": true,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png",
-       "de": "Edler Rollwagen",
-       "druck": "SSP-185",
-       "en": "Precious Trolley",
-       "hoch": "SSP-185",
-       "karte": "precious-trolley"
-      },
-      "schluessel": "precious trolley"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Jumbo Ice Cream",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png",
-       "de": "Rieseneis",
-       "druck": "PFL-91",
-       "en": "Jumbo Ice Cream",
-       "hoch": "PFL-91",
-       "karte": "jumbo-ice-cream"
-      },
-      "schluessel": "jumbo ice cream"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Jamming Tower",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_153_R_EN_LG.png",
-       "de": "Störturm",
-       "druck": "TWM-153",
-       "en": "Jamming Tower",
-       "hoch": "DRI-243",
-       "karte": "jamming-tower"
-      },
-      "schluessel": "jamming tower"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Community Center",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_146_R_EN_LG.png",
-       "de": "Gemeindehaus",
-       "druck": "TWM-146",
-       "en": "Community Center",
-       "hoch": "TWM-146",
-       "karte": "community-center"
-      },
-      "schluessel": "community center"
-     },
-     {
-      "ace": false,
-      "n": 16,
-      "name": "Metal Energy",
-      "neu": null,
-      "schluessel": "metal energy"
-     }
-    ],
-    "name": "EvanCampbell94 · 5. von 128"
-   },
-   {
-    "fakten": "7. Platz von 139 (4–1–0), „Rare Candy Club Blitz #9 DELTA REIGN LEGAL“, 13.11.2026.",
-    "karten": [
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Drilbur",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_046_R_EN_LG.png",
-       "de": "Rotomurf",
-       "druck": "PBL-46",
-       "en": "Drilbur",
-       "hoch": "PBL-46",
-       "karte": "drilbur"
-      },
-      "schluessel": "drilbur"
-     },
-     {
-      "ace": false,
-      "n": 2,
-      "name": "Mega Excadrill ex",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_065_R_EN_LG.png",
-       "de": "Mega-Stalobor-ex",
-       "druck": "PBL-65",
-       "en": "Mega Excadrill ex",
-       "hoch": "PBL-103",
-       "karte": "mega-excadrill-ex"
-      },
-      "schluessel": "mega excadrill ex"
-     },
      {
       "ace": false,
       "n": 4,
@@ -5242,289 +4849,6 @@
        "druck": "CRI-59",
        "en": "Beldum",
        "hoch": "CRI-59",
-       "karte": "beldum"
-      },
-      "schluessel": "beldum"
-     },
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Metang",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_114_R_EN_LG.png",
-       "de": "Metang",
-       "druck": "TEF-114",
-       "en": "Metang",
-       "hoch": "TEF-114",
-       "karte": "metang"
-      },
-      "schluessel": "metang"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Metagross",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_061_R_EN_LG.png",
-       "de": "Metagross",
-       "druck": "CRI-61",
-       "en": "Metagross",
-       "hoch": "CRI-61",
-       "karte": "metagross"
-      },
-      "schluessel": "metagross"
-     },
-     {
-      "ace": false,
-      "n": 2,
-      "name": "Genesect ex",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_067_R_EN_LG.png",
-       "de": "Genesect-ex",
-       "druck": "BLK-67",
-       "en": "Genesect ex",
-       "hoch": "BLK-169",
-       "karte": "genesect-ex"
-      },
-      "schluessel": "genesect ex"
-     },
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Team Rocket's Petrel",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png",
-       "de": "Team Rockets Lambda",
-       "druck": "ASC-207",
-       "en": "Team Rocket's Petrel",
-       "hoch": "DRI-226",
-       "karte": "team-rocket-s-petrel"
-      },
-      "schluessel": "team rocket's petrel"
-     },
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Lillie's Determination",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png",
-       "de": "Lillys Entschlossenheit",
-       "druck": "ASC-192",
-       "en": "Lillie's Determination",
-       "hoch": "MEG-184",
-       "karte": "lillie-s-determination"
-      },
-      "schluessel": "lillie's determination"
-     },
-     {
-      "ace": false,
-      "n": 3,
-      "name": "Boss's Orders",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png",
-       "de": "Befehl vom Boss",
-       "druck": "ASC-183",
-       "en": "Boss's Orders",
-       "hoch": "ASC-256",
-       "karte": "boss-s-orders"
-      },
-      "schluessel": "boss's orders"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Judge",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_076_R_EN_LG.png",
-       "de": "Richter",
-       "druck": "POR-76",
-       "en": "Judge",
-       "hoch": "DRI-222",
-       "karte": "judge"
-      },
-      "schluessel": "judge"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Kieran",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_113_R_EN_LG.png",
-       "de": "Jo",
-       "druck": "PRE-113",
-       "en": "Kieran",
-       "hoch": "PRE-174",
-       "karte": "kieran"
-      },
-      "schluessel": "kieran"
-     },
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Buddy-Buddy Poffin",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png",
-       "de": "Dicke-Freunde-Knursp",
-       "druck": "ASC-184",
-       "en": "Buddy-Buddy Poffin",
-       "hoch": "TWM-223",
-       "karte": "buddy-buddy-poffin"
-      },
-      "schluessel": "buddy-buddy poffin"
-     },
-     {
-      "ace": false,
-      "n": 2,
-      "name": "Pokégear 3.0",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png",
-       "de": "Pokécom 3.0",
-       "druck": "BLK-84",
-       "en": "Pokégear 3.0",
-       "hoch": "BLK-84",
-       "karte": "pok-gear-3-0"
-      },
-      "schluessel": "pokégear 3.0"
-     },
-     {
-      "ace": false,
-      "n": 2,
-      "name": "Jumbo Ice Cream",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png",
-       "de": "Rieseneis",
-       "druck": "PFL-91",
-       "en": "Jumbo Ice Cream",
-       "hoch": "PFL-91",
-       "karte": "jumbo-ice-cream"
-      },
-      "schluessel": "jumbo ice cream"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Energy Recycler",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_164_R_EN_LG.png",
-       "de": "Energieaufbereitung",
-       "druck": "DRI-164",
-       "en": "Energy Recycler",
-       "hoch": "DRI-164",
-       "karte": "energy-recycler"
-      },
-      "schluessel": "energy recycler"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Switch",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png",
-       "de": "Tausch",
-       "druck": "MEG-130",
-       "en": "Switch",
-       "hoch": "PFL-123",
-       "karte": "switch"
-      },
-      "schluessel": "switch"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Ultra Ball",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png",
-       "de": "Hyperball",
-       "druck": "ASC-213",
-       "en": "Ultra Ball",
-       "hoch": "ASC-264",
-       "karte": "ultra-ball"
-      },
-      "schluessel": "ultra ball"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Special Red Card",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_082_R_EN_LG.png",
-       "de": "Spezielle Rote Karte",
-       "druck": "CRI-82",
-       "en": "Special Red Card",
-       "hoch": "CRI-113",
-       "karte": "special-red-card"
-      },
-      "schluessel": "special red card"
-     },
-     {
-      "ace": true,
-      "n": 1,
-      "name": "Hero's Cape",
-      "neu": {
-       "ace": true,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_152_R_EN_LG.png",
-       "de": "Heldenumhang",
-       "druck": "TEF-152",
-       "en": "Hero's Cape",
-       "hoch": "TEF-152",
-       "karte": "hero-s-cape"
-      },
-      "schluessel": "hero's cape"
-     },
-     {
-      "ace": false,
-      "n": 1,
-      "name": "Gravity Mountain",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png",
-       "de": "Erdanziehungsberg",
-       "druck": "SSP-177",
-       "en": "Gravity Mountain",
-       "hoch": "SSP-250",
-       "karte": "gravity-mountain"
-      },
-      "schluessel": "gravity mountain"
-     },
-     {
-      "ace": false,
-      "n": 16,
-      "name": "Metal Energy",
-      "neu": null,
-      "schluessel": "metal energy"
-     }
-    ],
-    "name": "Savantay · 7. von 139"
-   },
-   {
-    "fakten": "12. Platz von 202 (5–2–0), „Rare Candy Club Showdown #52 DELTA REIGN LEGAL“, 16.11.2026.",
-    "karten": [
-     {
-      "ace": false,
-      "n": 4,
-      "name": "Beldum",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_113_R_EN_LG.png",
-       "de": "Tanhel",
-       "druck": "TEF-113",
-       "en": "Beldum",
-       "hoch": "TEF-113",
        "karte": "beldum"
       },
       "schluessel": "beldum"
@@ -5622,17 +4946,17 @@
      {
       "ace": false,
       "n": 1,
-      "name": "Fezandipiti ex",
+      "name": "Shaymin",
       "neu": {
        "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_142_R_EN_LG.png",
-       "de": "Beatori-ex",
-       "druck": "ASC-142",
-       "en": "Fezandipiti ex",
-       "hoch": "ASC-288",
-       "karte": "fezandipiti-ex"
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png",
+       "de": "Shaymin",
+       "druck": "DRI-10",
+       "en": "Shaymin",
+       "hoch": "DRI-185",
+       "karte": "shaymin"
       },
-      "schluessel": "fezandipiti ex"
+      "schluessel": "shaymin"
      },
      {
       "ace": false,
@@ -5651,21 +4975,6 @@
      },
      {
       "ace": false,
-      "n": 4,
-      "name": "Judge",
-      "neu": {
-       "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_076_R_EN_LG.png",
-       "de": "Richter",
-       "druck": "POR-76",
-       "en": "Judge",
-       "hoch": "DRI-222",
-       "karte": "judge"
-      },
-      "schluessel": "judge"
-     },
-     {
-      "ace": false,
       "n": 2,
       "name": "Brock's Scouting",
       "neu": {
@@ -5681,18 +4990,63 @@
      },
      {
       "ace": false,
-      "n": 4,
-      "name": "Pokégear 3.0",
+      "n": 2,
+      "name": "Lillie's Determination",
       "neu": {
        "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png",
-       "de": "Pokécom 3.0",
-       "druck": "BLK-84",
-       "en": "Pokégear 3.0",
-       "hoch": "BLK-84",
-       "karte": "pok-gear-3-0"
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png",
+       "de": "Lillys Entschlossenheit",
+       "druck": "ASC-192",
+       "en": "Lillie's Determination",
+       "hoch": "MEG-184",
+       "karte": "lillie-s-determination"
       },
-      "schluessel": "pokégear 3.0"
+      "schluessel": "lillie's determination"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Boss's Orders",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png",
+       "de": "Befehl vom Boss",
+       "druck": "ASC-183",
+       "en": "Boss's Orders",
+       "hoch": "ASC-256",
+       "karte": "boss-s-orders"
+      },
+      "schluessel": "boss's orders"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Kieran",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_113_R_EN_LG.png",
+       "de": "Jo",
+       "druck": "PRE-113",
+       "en": "Kieran",
+       "hoch": "PRE-174",
+       "karte": "kieran"
+      },
+      "schluessel": "kieran"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Judge",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_076_R_EN_LG.png",
+       "de": "Richter",
+       "druck": "POR-76",
+       "en": "Judge",
+       "hoch": "DRI-222",
+       "karte": "judge"
+      },
+      "schluessel": "judge"
      },
      {
       "ace": false,
@@ -5710,19 +5064,19 @@
       "schluessel": "buddy-buddy poffin"
      },
      {
-      "ace": true,
-      "n": 1,
-      "name": "Precious Trolley",
+      "ace": false,
+      "n": 3,
+      "name": "Jumbo Ice Cream",
       "neu": {
-       "ace": true,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png",
-       "de": "Edler Rollwagen",
-       "druck": "SSP-185",
-       "en": "Precious Trolley",
-       "hoch": "SSP-185",
-       "karte": "precious-trolley"
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png",
+       "de": "Rieseneis",
+       "druck": "PFL-91",
+       "en": "Jumbo Ice Cream",
+       "hoch": "PFL-91",
+       "karte": "jumbo-ice-cream"
       },
-      "schluessel": "precious trolley"
+      "schluessel": "jumbo ice cream"
      },
      {
       "ace": false,
@@ -5742,17 +5096,32 @@
      {
       "ace": false,
       "n": 1,
-      "name": "Jumbo Ice Cream",
+      "name": "Pokégear 3.0",
       "neu": {
        "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png",
-       "de": "Rieseneis",
-       "druck": "PFL-91",
-       "en": "Jumbo Ice Cream",
-       "hoch": "PFL-91",
-       "karte": "jumbo-ice-cream"
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png",
+       "de": "Pokécom 3.0",
+       "druck": "BLK-84",
+       "en": "Pokégear 3.0",
+       "hoch": "BLK-84",
+       "karte": "pok-gear-3-0"
       },
-      "schluessel": "jumbo ice cream"
+      "schluessel": "pokégear 3.0"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Special Red Card",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_082_R_EN_LG.png",
+       "de": "Spezielle Rote Karte",
+       "druck": "CRI-82",
+       "en": "Special Red Card",
+       "hoch": "CRI-113",
+       "karte": "special-red-card"
+      },
+      "schluessel": "special red card"
      },
      {
       "ace": false,
@@ -5771,18 +5140,48 @@
      },
      {
       "ace": false,
-      "n": 4,
-      "name": "Team Rocket's Watchtower",
+      "n": 1,
+      "name": "Ultra Ball",
       "neu": {
        "ace": false,
-       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png",
-       "de": "Team Rockets Wachturm",
-       "druck": "ASC-210",
-       "en": "Team Rocket's Watchtower",
-       "hoch": "ASC-210",
-       "karte": "team-rocket-s-watchtower"
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png",
+       "de": "Hyperball",
+       "druck": "ASC-213",
+       "en": "Ultra Ball",
+       "hoch": "ASC-264",
+       "karte": "ultra-ball"
       },
-      "schluessel": "team rocket's watchtower"
+      "schluessel": "ultra ball"
+     },
+     {
+      "ace": true,
+      "n": 1,
+      "name": "Hero's Cape",
+      "neu": {
+       "ace": true,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_152_R_EN_LG.png",
+       "de": "Heldenumhang",
+       "druck": "TEF-152",
+       "en": "Hero's Cape",
+       "hoch": "TEF-152",
+       "karte": "hero-s-cape"
+      },
+      "schluessel": "hero's cape"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Gravity Mountain",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png",
+       "de": "Erdanziehungsberg",
+       "druck": "SSP-177",
+       "en": "Gravity Mountain",
+       "hoch": "SSP-250",
+       "karte": "gravity-mountain"
+      },
+      "schluessel": "gravity mountain"
      },
      {
       "ace": false,
@@ -5792,7 +5191,708 @@
       "schluessel": "metal energy"
      }
     ],
-    "name": "EvanCampbell94 · 12. von 202"
+    "name": "salsiccia08 · 4. von 171"
+   },
+   {
+    "fakten": "6. Platz von 120 (5–2–1), „⚡ Surge's TCG Vault Winner Takes All - 100 Codes“, 17.11.2026.",
+    "karten": [
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Beldum",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_113_R_EN_LG.png",
+       "de": "Tanhel",
+       "druck": "TEF-113",
+       "en": "Beldum",
+       "hoch": "TEF-113",
+       "karte": "beldum"
+      },
+      "schluessel": "beldum"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Metang",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_114_R_EN_LG.png",
+       "de": "Metang",
+       "druck": "TEF-114",
+       "en": "Metang",
+       "hoch": "TEF-114",
+       "karte": "metang"
+      },
+      "schluessel": "metang"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Metagross",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_061_R_EN_LG.png",
+       "de": "Metagross",
+       "druck": "CRI-61",
+       "en": "Metagross",
+       "hoch": "CRI-61",
+       "karte": "metagross"
+      },
+      "schluessel": "metagross"
+     },
+     {
+      "ace": false,
+      "n": 3,
+      "name": "Drilbur",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_046_R_EN_LG.png",
+       "de": "Rotomurf",
+       "druck": "PBL-46",
+       "en": "Drilbur",
+       "hoch": "PBL-46",
+       "karte": "drilbur"
+      },
+      "schluessel": "drilbur"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Mega Excadrill ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_065_R_EN_LG.png",
+       "de": "Mega-Stalobor-ex",
+       "druck": "PBL-65",
+       "en": "Mega Excadrill ex",
+       "hoch": "PBL-103",
+       "karte": "mega-excadrill-ex"
+      },
+      "schluessel": "mega excadrill ex"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Piplup",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_027_R_EN_LG.png",
+       "de": "Plinfa",
+       "druck": "PFL-27",
+       "en": "Piplup",
+       "hoch": "PFL-98",
+       "karte": "piplup"
+      },
+      "schluessel": "piplup"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Empoleon ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_070_R_EN_LG.png",
+       "de": "Impoleon-ex",
+       "druck": "PFL-70",
+       "en": "Empoleon ex",
+       "hoch": "PFL-114",
+       "karte": "empoleon-ex"
+      },
+      "schluessel": "empoleon ex"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Genesect ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_067_R_EN_LG.png",
+       "de": "Genesect-ex",
+       "druck": "BLK-67",
+       "en": "Genesect ex",
+       "hoch": "BLK-169",
+       "karte": "genesect-ex"
+      },
+      "schluessel": "genesect ex"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Shaymin",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png",
+       "de": "Shaymin",
+       "druck": "DRI-10",
+       "en": "Shaymin",
+       "hoch": "DRI-185",
+       "karte": "shaymin"
+      },
+      "schluessel": "shaymin"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Mega Skarmory ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_055_R_EN_LG.png",
+       "de": "Mega-Panzaeron-ex",
+       "druck": "POR-55",
+       "en": "Mega Skarmory ex",
+       "hoch": "POR-106",
+       "karte": "mega-skarmory-ex"
+      },
+      "schluessel": "mega skarmory ex"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Team Rocket's Petrel",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png",
+       "de": "Team Rockets Lambda",
+       "druck": "ASC-207",
+       "en": "Team Rocket's Petrel",
+       "hoch": "DRI-226",
+       "karte": "team-rocket-s-petrel"
+      },
+      "schluessel": "team rocket's petrel"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Brock's Scouting",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_146_R_EN_LG.png",
+       "de": "Rockos Erkundung",
+       "druck": "JTG-146",
+       "en": "Brock's Scouting",
+       "hoch": "JTG-179",
+       "karte": "brock-s-scouting"
+      },
+      "schluessel": "brock's scouting"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Judge",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_076_R_EN_LG.png",
+       "de": "Richter",
+       "druck": "POR-76",
+       "en": "Judge",
+       "hoch": "DRI-222",
+       "karte": "judge"
+      },
+      "schluessel": "judge"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Team Rocket's Transceiver",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_209_R_EN_LG.png",
+       "de": "Team Rockets Transceiver",
+       "druck": "ASC-209",
+       "en": "Team Rocket's Transceiver",
+       "hoch": "ASC-263",
+       "karte": "team-rocket-s-transceiver"
+      },
+      "schluessel": "team rocket's transceiver"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Jumbo Ice Cream",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png",
+       "de": "Rieseneis",
+       "druck": "PFL-91",
+       "en": "Jumbo Ice Cream",
+       "hoch": "PFL-91",
+       "karte": "jumbo-ice-cream"
+      },
+      "schluessel": "jumbo ice cream"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Buddy-Buddy Poffin",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png",
+       "de": "Dicke-Freunde-Knursp",
+       "druck": "ASC-184",
+       "en": "Buddy-Buddy Poffin",
+       "hoch": "TWM-223",
+       "karte": "buddy-buddy-poffin"
+      },
+      "schluessel": "buddy-buddy poffin"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Energy Recycler",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_164_R_EN_LG.png",
+       "de": "Energieaufbereitung",
+       "druck": "DRI-164",
+       "en": "Energy Recycler",
+       "hoch": "DRI-164",
+       "karte": "energy-recycler"
+      },
+      "schluessel": "energy recycler"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Special Red Card",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_082_R_EN_LG.png",
+       "de": "Spezielle Rote Karte",
+       "druck": "CRI-82",
+       "en": "Special Red Card",
+       "hoch": "CRI-113",
+       "karte": "special-red-card"
+      },
+      "schluessel": "special red card"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Switch",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png",
+       "de": "Tausch",
+       "druck": "MEG-130",
+       "en": "Switch",
+       "hoch": "PFL-123",
+       "karte": "switch"
+      },
+      "schluessel": "switch"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Ultra Ball",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png",
+       "de": "Hyperball",
+       "druck": "ASC-213",
+       "en": "Ultra Ball",
+       "hoch": "ASC-264",
+       "karte": "ultra-ball"
+      },
+      "schluessel": "ultra ball"
+     },
+     {
+      "ace": true,
+      "n": 1,
+      "name": "Precious Trolley",
+      "neu": {
+       "ace": true,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png",
+       "de": "Edler Rollwagen",
+       "druck": "SSP-185",
+       "en": "Precious Trolley",
+       "hoch": "SSP-185",
+       "karte": "precious-trolley"
+      },
+      "schluessel": "precious trolley"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Rare Candy",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png",
+       "de": "Sonderbonbon",
+       "druck": "MEG-125",
+       "en": "Rare Candy",
+       "hoch": "MEG-175",
+       "karte": "rare-candy"
+      },
+      "schluessel": "rare candy"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Jamming Tower",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_153_R_EN_LG.png",
+       "de": "Störturm",
+       "druck": "TWM-153",
+       "en": "Jamming Tower",
+       "hoch": "DRI-243",
+       "karte": "jamming-tower"
+      },
+      "schluessel": "jamming tower"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Gravity Mountain",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png",
+       "de": "Erdanziehungsberg",
+       "druck": "SSP-177",
+       "en": "Gravity Mountain",
+       "hoch": "SSP-250",
+       "karte": "gravity-mountain"
+      },
+      "schluessel": "gravity mountain"
+     },
+     {
+      "ace": false,
+      "n": 16,
+      "name": "Metal Energy",
+      "neu": null,
+      "schluessel": "metal energy"
+     }
+    ],
+    "name": "Lordeyebrow · 6. von 120"
+   },
+   {
+    "fakten": "12. Platz von 155 (4–1–0), „Rare Candy Club Blitz #10 DELTA REIGN LEGAL“, 20.11.2026.",
+    "karten": [
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Beldum",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_113_R_EN_LG.png",
+       "de": "Tanhel",
+       "druck": "TEF-113",
+       "en": "Beldum",
+       "hoch": "TEF-113",
+       "karte": "beldum"
+      },
+      "schluessel": "beldum"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Metang",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_114_R_EN_LG.png",
+       "de": "Metang",
+       "druck": "TEF-114",
+       "en": "Metang",
+       "hoch": "TEF-114",
+       "karte": "metang"
+      },
+      "schluessel": "metang"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Metagross",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/CRI/CRI_061_R_EN_LG.png",
+       "de": "Metagross",
+       "druck": "CRI-61",
+       "en": "Metagross",
+       "hoch": "CRI-61",
+       "karte": "metagross"
+      },
+      "schluessel": "metagross"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Drilbur",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_046_R_EN_LG.png",
+       "de": "Rotomurf",
+       "druck": "PBL-46",
+       "en": "Drilbur",
+       "hoch": "PBL-46",
+       "karte": "drilbur"
+      },
+      "schluessel": "drilbur"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Mega Excadrill ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PBL/PBL_065_R_EN_LG.png",
+       "de": "Mega-Stalobor-ex",
+       "druck": "PBL-65",
+       "en": "Mega Excadrill ex",
+       "hoch": "PBL-103",
+       "karte": "mega-excadrill-ex"
+      },
+      "schluessel": "mega excadrill ex"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Duraludon",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_069_R_EN_LG.png",
+       "de": "Duraludon",
+       "druck": "PRE-69",
+       "en": "Duraludon",
+       "hoch": "PRE-69",
+       "karte": "duraludon"
+      },
+      "schluessel": "duraludon"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Archaludon ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_130_R_EN_LG.png",
+       "de": "Briduradon-ex",
+       "druck": "SSP-130",
+       "en": "Archaludon ex",
+       "hoch": "SSP-241",
+       "karte": "archaludon-ex"
+      },
+      "schluessel": "archaludon ex"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Genesect ex",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_067_R_EN_LG.png",
+       "de": "Genesect-ex",
+       "druck": "BLK-67",
+       "en": "Genesect ex",
+       "hoch": "BLK-169",
+       "karte": "genesect-ex"
+      },
+      "schluessel": "genesect ex"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Team Rocket's Petrel",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png",
+       "de": "Team Rockets Lambda",
+       "druck": "ASC-207",
+       "en": "Team Rocket's Petrel",
+       "hoch": "DRI-226",
+       "karte": "team-rocket-s-petrel"
+      },
+      "schluessel": "team rocket's petrel"
+     },
+     {
+      "ace": false,
+      "n": 3,
+      "name": "Boss's Orders",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png",
+       "de": "Befehl vom Boss",
+       "druck": "ASC-183",
+       "en": "Boss's Orders",
+       "hoch": "ASC-256",
+       "karte": "boss-s-orders"
+      },
+      "schluessel": "boss's orders"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Judge",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/POR/POR_076_R_EN_LG.png",
+       "de": "Richter",
+       "druck": "POR-76",
+       "en": "Judge",
+       "hoch": "DRI-222",
+       "karte": "judge"
+      },
+      "schluessel": "judge"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Kieran",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_113_R_EN_LG.png",
+       "de": "Jo",
+       "druck": "PRE-113",
+       "en": "Kieran",
+       "hoch": "PRE-174",
+       "karte": "kieran"
+      },
+      "schluessel": "kieran"
+     },
+     {
+      "ace": false,
+      "n": 4,
+      "name": "Team Rocket's Transceiver",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_209_R_EN_LG.png",
+       "de": "Team Rockets Transceiver",
+       "druck": "ASC-209",
+       "en": "Team Rocket's Transceiver",
+       "hoch": "ASC-263",
+       "karte": "team-rocket-s-transceiver"
+      },
+      "schluessel": "team rocket's transceiver"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Buddy-Buddy Poffin",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png",
+       "de": "Dicke-Freunde-Knursp",
+       "druck": "ASC-184",
+       "en": "Buddy-Buddy Poffin",
+       "hoch": "TWM-223",
+       "karte": "buddy-buddy-poffin"
+      },
+      "schluessel": "buddy-buddy poffin"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Jumbo Ice Cream",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png",
+       "de": "Rieseneis",
+       "druck": "PFL-91",
+       "en": "Jumbo Ice Cream",
+       "hoch": "PFL-91",
+       "karte": "jumbo-ice-cream"
+      },
+      "schluessel": "jumbo ice cream"
+     },
+     {
+      "ace": false,
+      "n": 2,
+      "name": "Ultra Ball",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png",
+       "de": "Hyperball",
+       "druck": "ASC-213",
+       "en": "Ultra Ball",
+       "hoch": "ASC-264",
+       "karte": "ultra-ball"
+      },
+      "schluessel": "ultra ball"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Energy Recycler",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_164_R_EN_LG.png",
+       "de": "Energieaufbereitung",
+       "druck": "DRI-164",
+       "en": "Energy Recycler",
+       "hoch": "DRI-164",
+       "karte": "energy-recycler"
+      },
+      "schluessel": "energy recycler"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Switch",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png",
+       "de": "Tausch",
+       "druck": "MEG-130",
+       "en": "Switch",
+       "hoch": "PFL-123",
+       "karte": "switch"
+      },
+      "schluessel": "switch"
+     },
+     {
+      "ace": true,
+      "n": 1,
+      "name": "Precious Trolley",
+      "neu": {
+       "ace": true,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png",
+       "de": "Edler Rollwagen",
+       "druck": "SSP-185",
+       "en": "Precious Trolley",
+       "hoch": "SSP-185",
+       "karte": "precious-trolley"
+      },
+      "schluessel": "precious trolley"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Night Stretcher",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png",
+       "de": "Nachttrage",
+       "druck": "ASC-196",
+       "en": "Night Stretcher",
+       "hoch": "SSP-251",
+       "karte": "night-stretcher"
+      },
+      "schluessel": "night stretcher"
+     },
+     {
+      "ace": false,
+      "n": 1,
+      "name": "Gravity Mountain",
+      "neu": {
+       "ace": false,
+       "bild": "https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png",
+       "de": "Erdanziehungsberg",
+       "druck": "SSP-177",
+       "en": "Gravity Mountain",
+       "hoch": "SSP-250",
+       "karte": "gravity-mountain"
+      },
+      "schluessel": "gravity mountain"
+     },
+     {
+      "ace": false,
+      "n": 15,
+      "name": "Metal Energy",
+      "neu": null,
+      "schluessel": "metal energy"
+     }
+    ],
+    "name": "Micahokie · 12. von 155"
    }
   ],
   "max_plaetze": 5,

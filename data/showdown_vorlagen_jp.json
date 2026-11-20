@@ -180,10 +180,10 @@
    "tier": 1,
    "quelle": "city-league",
    "turnier": "City League (JP)",
-   "turnier_id": "5261",
-   "datum": "2026-11-12",
+   "turnier_id": "5312",
+   "datum": "2026-11-14",
    "platz": 1,
-   "spieler": "ほるす",
+   "spieler": "ノリノリたけし",
    "archetyp_liste": "Dragapult Dudunsparce",
    "titel": {
     "name": "Dragapult ex",
@@ -229,21 +229,15 @@
     },
     {
      "anzahl": 1,
-     "name": "Dudunsparce ex",
-     "set": "JTG",
-     "nummer": "121"
-    },
-    {
-     "anzahl": 1,
      "name": "Dudunsparce",
      "set": "TEF",
      "nummer": "129"
     },
     {
      "anzahl": 1,
-     "name": "Moltres",
-     "set": "PFL",
-     "nummer": "14"
+     "name": "Dudunsparce ex",
+     "set": "JTG",
+     "nummer": "121"
     },
     {
      "anzahl": 1,
@@ -289,9 +283,9 @@
     },
     {
      "anzahl": 4,
-     "name": "Poké Pad",
+     "name": "Crushing Hammer",
      "set": "POR",
-     "nummer": "81"
+     "nummer": "71"
     },
     {
      "anzahl": 4,
@@ -300,19 +294,19 @@
      "nummer": "144"
     },
     {
+     "anzahl": 4,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
      "anzahl": 3,
      "name": "Ultra Ball",
      "set": "MEG",
      "nummer": "131"
     },
     {
-     "anzahl": 3,
-     "name": "Crushing Hammer",
-     "set": "POR",
-     "nummer": "71"
-    },
-    {
-     "anzahl": 3,
+     "anzahl": 2,
      "name": "Night Stretcher",
      "set": "ASC",
      "nummer": "196"
@@ -322,6 +316,12 @@
      "name": "Unfair Stamp",
      "set": "TWM",
      "nummer": "165"
+    },
+    {
+     "anzahl": 1,
+     "name": "Special Red Card",
+     "set": "CRI",
+     "nummer": "82"
     },
     {
      "anzahl": 2,
@@ -1178,6 +1178,162 @@
    ]
   },
   {
+   "archetyp": "Hydrapple Ogerpon",
+   "tier": 2,
+   "quelle": "city-league",
+   "turnier": "City League (JP)",
+   "turnier_id": "5292",
+   "datum": "2026-11-15",
+   "platz": 1,
+   "spieler": "こねP",
+   "archetyp_liste": "Hydrapple Ogerpon",
+   "titel": {
+    "name": "Hydrapple ex",
+    "set": "SCR",
+    "nummer": "14"
+   },
+   "karten": [
+    {
+     "anzahl": 4,
+     "name": "Teal Mask Ogerpon ex",
+     "set": "TWM",
+     "nummer": "25"
+    },
+    {
+     "anzahl": 2,
+     "name": "Applin",
+     "set": "SCR",
+     "nummer": "12"
+    },
+    {
+     "anzahl": 2,
+     "name": "Dipplin",
+     "set": "TWM",
+     "nummer": "18"
+    },
+    {
+     "anzahl": 2,
+     "name": "Hydrapple ex",
+     "set": "SCR",
+     "nummer": "14"
+    },
+    {
+     "anzahl": 2,
+     "name": "Chikorita",
+     "set": "ASC",
+     "nummer": "8"
+    },
+    {
+     "anzahl": 2,
+     "name": "Bayleef",
+     "set": "ASC",
+     "nummer": "9"
+    },
+    {
+     "anzahl": 2,
+     "name": "Meganium",
+     "set": "MEG",
+     "nummer": "10"
+    },
+    {
+     "anzahl": 1,
+     "name": "Celebi",
+     "set": "MEG",
+     "nummer": "12"
+    },
+    {
+     "anzahl": 1,
+     "name": "Tapu Bulu",
+     "set": "SFA",
+     "nummer": "6"
+    },
+    {
+     "anzahl": 1,
+     "name": "Fezandipiti ex",
+     "set": "ASC",
+     "nummer": "142"
+    },
+    {
+     "anzahl": 1,
+     "name": "Meowth ex",
+     "set": "POR",
+     "nummer": "62"
+    },
+    {
+     "anzahl": 4,
+     "name": "Lillie's Determination",
+     "set": "MEG",
+     "nummer": "119"
+    },
+    {
+     "anzahl": 2,
+     "name": "Lucian",
+     "set": "TWM",
+     "nummer": "157"
+    },
+    {
+     "anzahl": 2,
+     "name": "Boss's Orders",
+     "set": "MEG",
+     "nummer": "114"
+    },
+    {
+     "anzahl": 1,
+     "name": "Dawn",
+     "set": "PFL",
+     "nummer": "87"
+    },
+    {
+     "anzahl": 1,
+     "name": "Lana's Aid",
+     "set": "TWM",
+     "nummer": "155"
+    },
+    {
+     "anzahl": 4,
+     "name": "Bug Catching Set",
+     "set": "TWM",
+     "nummer": "143"
+    },
+    {
+     "anzahl": 4,
+     "name": "Ultra Ball",
+     "set": "MEG",
+     "nummer": "131"
+    },
+    {
+     "anzahl": 2,
+     "name": "Poké Pad",
+     "set": "POR",
+     "nummer": "81"
+    },
+    {
+     "anzahl": 2,
+     "name": "Night Stretcher",
+     "set": "ASC",
+     "nummer": "196"
+    },
+    {
+     "anzahl": 1,
+     "name": "Unfair Stamp",
+     "set": "TWM",
+     "nummer": "165"
+    },
+    {
+     "anzahl": 4,
+     "name": "Forest of Vitality",
+     "set": "MEG",
+     "nummer": "117"
+    },
+    {
+     "anzahl": 13,
+     "name": "Grass Energy",
+     "set": "MEE",
+     "nummer": "9"
+    }
+   ]
+  },
+  {
    "archetyp": "N's Zoroark",
    "tier": 2,
    "quelle": "city-league",
@@ -1354,162 +1510,6 @@
      "name": "Darkness Energy",
      "set": "MEE",
      "nummer": "15"
-    }
-   ]
-  },
-  {
-   "archetyp": "Hydrapple Ogerpon",
-   "tier": 2,
-   "quelle": "city-league",
-   "turnier": "City League (JP)",
-   "turnier_id": "5292",
-   "datum": "2026-11-15",
-   "platz": 1,
-   "spieler": "こねP",
-   "archetyp_liste": "Hydrapple Ogerpon",
-   "titel": {
-    "name": "Hydrapple ex",
-    "set": "SCR",
-    "nummer": "14"
-   },
-   "karten": [
-    {
-     "anzahl": 4,
-     "name": "Teal Mask Ogerpon ex",
-     "set": "TWM",
-     "nummer": "25"
-    },
-    {
-     "anzahl": 2,
-     "name": "Applin",
-     "set": "SCR",
-     "nummer": "12"
-    },
-    {
-     "anzahl": 2,
-     "name": "Dipplin",
-     "set": "TWM",
-     "nummer": "18"
-    },
-    {
-     "anzahl": 2,
-     "name": "Hydrapple ex",
-     "set": "SCR",
-     "nummer": "14"
-    },
-    {
-     "anzahl": 2,
-     "name": "Chikorita",
-     "set": "ASC",
-     "nummer": "8"
-    },
-    {
-     "anzahl": 2,
-     "name": "Bayleef",
-     "set": "ASC",
-     "nummer": "9"
-    },
-    {
-     "anzahl": 2,
-     "name": "Meganium",
-     "set": "MEG",
-     "nummer": "10"
-    },
-    {
-     "anzahl": 1,
-     "name": "Celebi",
-     "set": "MEG",
-     "nummer": "12"
-    },
-    {
-     "anzahl": 1,
-     "name": "Tapu Bulu",
-     "set": "SFA",
-     "nummer": "6"
-    },
-    {
-     "anzahl": 1,
-     "name": "Fezandipiti ex",
-     "set": "ASC",
-     "nummer": "142"
-    },
-    {
-     "anzahl": 1,
-     "name": "Meowth ex",
-     "set": "POR",
-     "nummer": "62"
-    },
-    {
-     "anzahl": 4,
-     "name": "Lillie's Determination",
-     "set": "MEG",
-     "nummer": "119"
-    },
-    {
-     "anzahl": 2,
-     "name": "Lucian",
-     "set": "TWM",
-     "nummer": "157"
-    },
-    {
-     "anzahl": 2,
-     "name": "Boss's Orders",
-     "set": "MEG",
-     "nummer": "114"
-    },
-    {
-     "anzahl": 1,
-     "name": "Dawn",
-     "set": "PFL",
-     "nummer": "87"
-    },
-    {
-     "anzahl": 1,
-     "name": "Lana's Aid",
-     "set": "TWM",
-     "nummer": "155"
-    },
-    {
-     "anzahl": 4,
-     "name": "Bug Catching Set",
-     "set": "TWM",
-     "nummer": "143"
-    },
-    {
-     "anzahl": 4,
-     "name": "Ultra Ball",
-     "set": "MEG",
-     "nummer": "131"
-    },
-    {
-     "anzahl": 2,
-     "name": "Poké Pad",
-     "set": "POR",
-     "nummer": "81"
-    },
-    {
-     "anzahl": 2,
-     "name": "Night Stretcher",
-     "set": "ASC",
-     "nummer": "196"
-    },
-    {
-     "anzahl": 1,
-     "name": "Unfair Stamp",
-     "set": "TWM",
-     "nummer": "165"
-    },
-    {
-     "anzahl": 4,
-     "name": "Forest of Vitality",
-     "set": "MEG",
-     "nummer": "117"
-    },
-    {
-     "anzahl": 13,
-     "name": "Grass Energy",
-     "set": "MEE",
-     "nummer": "9"
     }
    ]
   },

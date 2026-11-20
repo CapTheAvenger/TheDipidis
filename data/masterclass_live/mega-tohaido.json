@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-20T03:44:50Z",
+  "erzeugt_am": "2026-11-20T10:33:44Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1419,8 +1419,8 @@
    }
   ],
   "liste_online": {
-   "bilanz": "5-0-1",
-   "datum": "11.11.2026",
+   "bilanz": "1-1-4",
+   "datum": "15.11.2026",
    "karten": [
     [
      3,
@@ -1454,15 +1454,15 @@
     ],
     [
      2,
-     "Tatsugiri",
-     "TWM",
-     "131"
-    ],
-    [
-     2,
      "Munkidori",
      "TWM",
      "95"
+    ],
+    [
+     2,
+     "Tatsugiri",
+     "TWM",
+     "131"
     ],
     [
      1,
@@ -1496,15 +1496,15 @@
     ],
     [
      1,
-     "Wally's Compassion",
-     "MEG",
-     "132"
-    ],
-    [
-     1,
      "Team Rocket's Petrel",
      "DRI",
      "176"
+    ],
+    [
+     4,
+     "Poké Pad",
+     "POR",
+     "81"
     ],
     [
      4,
@@ -1514,12 +1514,6 @@
     ],
     [
      4,
-     "Poké Pad",
-     "POR",
-     "81"
-    ],
-    [
-     3,
      "Ultra Ball",
      "MEG",
      "131"
@@ -1561,10 +1555,10 @@
      "15"
     ]
    ],
-   "platz": 1,
-   "spieler": "korrilakitty",
-   "turnier": "⚡Surge's TCG Vault Webcam Wednesdays! #25⚡",
-   "von": 9
+   "platz": 2,
+   "spieler": "Derek Pereira",
+   "turnier": "TCG League Cup Season 1 Casa de Ruter",
+   "von": 27
   },
   "listen_vor_ort": [
    {
@@ -1849,14 +1843,14 @@
   "name": "Sharpedo Toxtricity",
   "online": {
    "anteil": "1,48",
-   "anteil14": "1,65",
+   "anteil14": "1,58",
    "bilanz": [
     187,
     193,
     1
    ],
    "bis": "20.11.2026",
-   "fenster14": "09.11.–17.11.2026",
+   "fenster14": "09.11.–20.11.2026",
    "format": "TEF–DLR",
    "kurz_anteil": "1,51",
    "kurz_bilanz": [

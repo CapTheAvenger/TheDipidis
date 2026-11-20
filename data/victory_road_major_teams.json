@@ -1,7 +1,7 @@
 {
  "_meta": {
   "title": "Letztes Major — Teams zum Nachbauen",
-  "erzeugt_am": "2026-11-17",
+  "erzeugt_am": "2026-11-20",
   "quelle": "https://victoryroad.pro/2027-season-calendar/",
   "quelle_pastes": "https://www.vrpastes.com/",
   "tiefe": 32,
@@ -13,9 +13,9 @@
     "ende": "2026-11-15",
     "format": "M-C OTS",
     "sieger": "Ezequiel Bustamante",
-    "platzierungen_gesamt": 34,
-    "mit_replica_code": 0,
-    "mit_ots": 34,
+    "platzierungen_gesamt": 35,
+    "mit_replica_code": 3,
+    "mit_ots": 35,
     "gezogen": 32
    },
    {
@@ -43,19 +43,19 @@
    "platz": 1,
    "swiss": "8-1",
    "trainer": "Ezequiel Bustamante",
-   "trainer_tag": "",
+   "trainer_tag": "Eze",
    "preis": "2027 Worlds 350 CP",
-   "replica_code": "",
+   "replica_code": "7D0JB7WVTH",
    "ots_url": "https://www.vrpastes.com/CpaWVGgQ",
    "paste_id": "CpaWVGgQ",
    "team_name": "Ezequiel Bustamante's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Baxcalibur Mega",
     "Raichu Mega Y",
+    "Baxcalibur Mega",
+    "Incineroar",
     "Volcarona",
     "Milotic",
-    "Incineroar",
     "Rillaboom"
    ],
    "pokemon": [
@@ -277,484 +277,9 @@
    "turnier_datum": "2026-11-15",
    "platz": 1,
    "swiss": "3-0",
-   "trainer": "Gabriel C.",
-   "trainer_tag": "",
-   "preis": "2027 Worlds 350 CP",
-   "replica_code": "",
-   "ots_url": "https://www.vrpastes.com/m1EBVOwN",
-   "paste_id": "m1EBVOwN",
-   "team_name": "Gabriel C.'s 2027 Buenos Aires Special Championships OTS",
-   "format": "VGC Regulation Set M-C",
-   "team_vorschau": [
-    "Gardevoir Mega",
-    "Indeedee F",
-    "Talonflame",
-    "Sneasler",
-    "Armarouge",
-    "Kommo O"
-   ],
-   "pokemon": [
-    {
-     "name": "Gardevoir",
-     "name_de": "Guardevoir",
-     "item": "Gardevoirite",
-     "item_de": "Guardevoirnit",
-     "ability": "Trace",
-     "ability_de": "Erfassen",
-     "nature": "Timid",
-     "nature_de": "Scheu",
-     "moves": [
-      "Hyper Voice",
-      "Expanding Force",
-      "Thunderbolt",
-      "Protect"
-     ],
-     "moves_de": [
-      "Schallwelle",
-      "Flächenmacht",
-      "Donnerblitz",
-      "Schutzschild"
-     ],
-     "typen": [
-      "Psychic",
-      "Fairy"
-     ],
-     "base_stats": {
-      "hp": 68,
-      "atk": 65,
-      "def": 65,
-      "spa": 125,
-      "spd": 115,
-      "spe": 80
-     },
-     "evs": ""
-    },
-    {
-     "name": "Indeedee-F",
-     "name_de": "Servol [Weiblich]",
-     "item": "Rocky Helmet",
-     "item_de": "Beulenhelm",
-     "ability": "Psychic Surge",
-     "ability_de": "Psycho-Erzeuger",
-     "nature": "Bold",
-     "nature_de": "Kühn",
-     "moves": [
-      "Follow Me",
-      "Helping Hand",
-      "Psyshock",
-      "Protect"
-     ],
-     "moves_de": [
-      "Spotlight",
-      "Rechte Hand",
-      "Psychoschock",
-      "Schutzschild"
-     ],
-     "typen": [
-      "Psychic",
-      "Normal"
-     ],
-     "base_stats": {
-      "hp": 70,
-      "atk": 55,
-      "def": 65,
-      "spa": 95,
-      "spd": 105,
-      "spe": 85
-     },
-     "evs": ""
-    },
-    {
-     "name": "Talonflame",
-     "name_de": "Fiaro",
-     "item": "Expert Belt",
-     "item_de": "Expertengurt",
-     "ability": "Gale Wings",
-     "ability_de": "Orkanschwingen",
-     "nature": "Jolly",
-     "nature_de": "Froh",
-     "moves": [
-      "Flare Blitz",
-      "Brave Bird",
-      "Tailwind",
-      "Protect"
-     ],
-     "moves_de": [
-      "Flammenblitz",
-      "Sturzflug",
-      "Rückenwind",
-      "Schutzschild"
-     ],
-     "typen": [
-      "Fire",
-      "Flying"
-     ],
-     "base_stats": {
-      "hp": 78,
-      "atk": 81,
-      "def": 71,
-      "spa": 74,
-      "spd": 69,
-      "spe": 126
-     },
-     "evs": ""
-    },
-    {
-     "name": "Sneasler",
-     "name_de": "Snieboss",
-     "item": "Psychic Seed",
-     "item_de": "Psycho-Samen",
-     "ability": "Unburden",
-     "ability_de": "Entlastung",
-     "nature": "Adamant",
-     "nature_de": "Hart",
-     "moves": [
-      "Close Combat",
-      "Rock Tomb",
-      "Protect",
-      "Dire Claw"
-     ],
-     "moves_de": [
-      "Nahkampf",
-      "Felsgrab",
-      "Schutzschild",
-      "Unheilsklauen"
-     ],
-     "typen": [
-      "Fighting",
-      "Poison"
-     ],
-     "base_stats": {
-      "hp": 80,
-      "atk": 130,
-      "def": 60,
-      "spa": 40,
-      "spd": 80,
-      "spe": 120
-     },
-     "evs": ""
-    },
-    {
-     "name": "Armarouge",
-     "name_de": "Crimanzo",
-     "item": "Focus Sash",
-     "item_de": "Fokusgurt",
-     "ability": "Weak Armor",
-     "ability_de": "Bruchrüstung",
-     "nature": "Timid",
-     "nature_de": "Scheu",
-     "moves": [
-      "Armor Cannon",
-      "Expanding Force",
-      "Protect",
-      "Wide Guard"
-     ],
-     "moves_de": [
-      "Rüstungskanone",
-      "Flächenmacht",
-      "Schutzschild",
-      "Rundumschutz"
-     ],
-     "typen": [
-      "Fire",
-      "Psychic"
-     ],
-     "base_stats": {
-      "hp": 85,
-      "atk": 60,
-      "def": 100,
-      "spa": 125,
-      "spd": 80,
-      "spe": 75
-     },
-     "evs": ""
-    },
-    {
-     "name": "Kommo-o",
-     "name_de": "Grandiras",
-     "item": "Life Orb",
-     "item_de": "Leben-Orb",
-     "ability": "Soundproof",
-     "ability_de": "Lärmschutz",
-     "nature": "Modest",
-     "nature_de": "Mäßig",
-     "moves": [
-      "Aura Sphere",
-      "Clanging Scales",
-      "Flamethrower",
-      "Protect"
-     ],
-     "moves_de": [
-      "Aurasphäre",
-      "Schuppenrasseln",
-      "Flammenwurf",
-      "Schutzschild"
-     ],
-     "typen": [
-      "Dragon",
-      "Fighting"
-     ],
-     "base_stats": {
-      "hp": 75,
-      "atk": 110,
-      "def": 125,
-      "spa": 100,
-      "spd": 105,
-      "spe": 85
-     },
-     "evs": ""
-    }
-   ],
-   "hat_ev": false,
-   "quelle": "victory-road-major",
-   "rank": 2
-  },
-  {
-   "turnier": "Buenos Aires SC",
-   "turnier_url": "https://victoryroad.pro/2027-buenos-aires/",
-   "turnier_datum": "2026-11-15",
-   "platz": 2,
-   "swiss": "7-2",
-   "trainer": "Bruno Quiroga",
-   "trainer_tag": "",
-   "preis": "325 CP",
-   "replica_code": "",
-   "ots_url": "https://www.vrpastes.com/fOaNTaGX",
-   "paste_id": "fOaNTaGX",
-   "team_name": "Bruno Quiroga's 2027 Buenos Aires Special Championships OTS",
-   "format": "VGC Regulation Set M-C",
-   "team_vorschau": [
-    "Charizard Mega Y",
-    "Aerodactyl Mega",
-    "Garchomp",
-    "Sylveon",
-    "Kingambit",
-    "Farigiraf"
-   ],
-   "pokemon": [
-    {
-     "name": "Charizard",
-     "name_de": "Glurak",
-     "item": "Charizardite Y",
-     "item_de": "Gluraknit Y",
-     "ability": "Blaze",
-     "ability_de": "Großbrand",
-     "nature": "Modest",
-     "nature_de": "Mäßig",
-     "moves": [
-      "Heat Wave",
-      "Weather Ball",
-      "Protect",
-      "Solar Beam"
-     ],
-     "moves_de": [
-      "Hitzewelle",
-      "Meteorologe",
-      "Schutzschild",
-      "Solarstrahl"
-     ],
-     "typen": [
-      "Fire",
-      "Flying"
-     ],
-     "base_stats": {
-      "hp": 78,
-      "atk": 84,
-      "def": 78,
-      "spa": 109,
-      "spd": 85,
-      "spe": 100
-     },
-     "evs": ""
-    },
-    {
-     "name": "Aerodactyl",
-     "name_de": "Aerodactyl",
-     "item": "Aerodactylite",
-     "item_de": "Aerodactylonit",
-     "ability": "Unnerve",
-     "ability_de": "Anspannung",
-     "nature": "Jolly",
-     "nature_de": "Froh",
-     "moves": [
-      "Dual Wingbeat",
-      "Rock Slide",
-      "Protect",
-      "Tailwind"
-     ],
-     "moves_de": [
-      "Doppelflügel",
-      "Steinhagel",
-      "Schutzschild",
-      "Rückenwind"
-     ],
-     "typen": [
-      "Rock",
-      "Flying"
-     ],
-     "base_stats": {
-      "hp": 80,
-      "atk": 105,
-      "def": 65,
-      "spa": 60,
-      "spd": 75,
-      "spe": 130
-     },
-     "evs": ""
-    },
-    {
-     "name": "Garchomp",
-     "name_de": "Knakrack",
-     "item": "Life Orb",
-     "item_de": "Leben-Orb",
-     "ability": "Rough Skin",
-     "ability_de": "Rauhaut",
-     "nature": "Jolly",
-     "nature_de": "Froh",
-     "moves": [
-      "Dragon Claw",
-      "Stomping Tantrum",
-      "Protect",
-      "Earthquake"
-     ],
-     "moves_de": [
-      "Drachenklaue",
-      "Fruststampfer",
-      "Schutzschild",
-      "Erdbeben"
-     ],
-     "typen": [
-      "Dragon",
-      "Ground"
-     ],
-     "base_stats": {
-      "hp": 108,
-      "atk": 130,
-      "def": 95,
-      "spa": 80,
-      "spd": 85,
-      "spe": 102
-     },
-     "evs": ""
-    },
-    {
-     "name": "Sylveon",
-     "name_de": "Feelinara",
-     "item": "Fairy Feather",
-     "item_de": "Feendaune",
-     "ability": "Pixilate",
-     "ability_de": "Feenschicht",
-     "nature": "Modest",
-     "nature_de": "Mäßig",
-     "moves": [
-      "Hyper Voice",
-      "Moonblast",
-      "Protect",
-      "Yawn"
-     ],
-     "moves_de": [
-      "Schallwelle",
-      "Mondgewalt",
-      "Schutzschild",
-      "Gähner"
-     ],
-     "typen": [
-      "Fairy"
-     ],
-     "base_stats": {
-      "hp": 95,
-      "atk": 65,
-      "def": 65,
-      "spa": 110,
-      "spd": 130,
-      "spe": 60
-     },
-     "evs": ""
-    },
-    {
-     "name": "Kingambit",
-     "name_de": "Gladimperio",
-     "item": "Focus Sash",
-     "item_de": "Fokusgurt",
-     "ability": "Defiant",
-     "ability_de": "Siegeswille",
-     "nature": "Adamant",
-     "nature_de": "Hart",
-     "moves": [
-      "Kowtow Cleave",
-      "Iron Head",
-      "Sucker Punch",
-      "Low Kick"
-     ],
-     "moves_de": [
-      "Kniefallspalter",
-      "Eisenschädel",
-      "Tiefschlag",
-      "Fußkick"
-     ],
-     "typen": [
-      "Dark",
-      "Steel"
-     ],
-     "base_stats": {
-      "hp": 100,
-      "atk": 135,
-      "def": 120,
-      "spa": 60,
-      "spd": 85,
-      "spe": 50
-     },
-     "evs": ""
-    },
-    {
-     "name": "Farigiraf",
-     "name_de": "Farigiraf",
-     "item": "Sitrus Berry",
-     "item_de": "Tsitrubeere",
-     "ability": "Armor Tail",
-     "ability_de": "Schweifrüstung",
-     "nature": "Bold",
-     "nature_de": "Kühn",
-     "moves": [
-      "Psychic Noise",
-      "Protect",
-      "Trick Room",
-      "Helping Hand"
-     ],
-     "moves_de": [
-      "Psycholärm",
-      "Schutzschild",
-      "Bizarroraum",
-      "Rechte Hand"
-     ],
-     "typen": [
-      "Normal",
-      "Psychic"
-     ],
-     "base_stats": {
-      "hp": 120,
-      "atk": 90,
-      "def": 70,
-      "spa": 110,
-      "spd": 70,
-      "spe": 60
-     },
-     "evs": ""
-    }
-   ],
-   "hat_ev": false,
-   "quelle": "victory-road-major",
-   "rank": 3
-  },
-  {
-   "turnier": "Buenos Aires SC",
-   "turnier_url": "https://victoryroad.pro/2027-buenos-aires/",
-   "turnier_datum": "2026-11-15",
-   "platz": 2,
-   "swiss": "3-0",
    "trainer": "Carlos V.",
    "trainer_tag": "",
-   "preis": "325 CP",
+   "preis": "2027 Worlds 350 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/4Flma4Oj",
    "paste_id": "4Flma4Oj",
@@ -981,7 +506,720 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
+   "rank": 2
+  },
+  {
+   "turnier": "Buenos Aires SC",
+   "turnier_url": "https://victoryroad.pro/2027-buenos-aires/",
+   "turnier_datum": "2026-11-15",
+   "platz": 1,
+   "swiss": "3-0",
+   "trainer": "Gabriel C.",
+   "trainer_tag": "",
+   "preis": "2027 Worlds 350 CP",
+   "replica_code": "",
+   "ots_url": "https://www.vrpastes.com/m1EBVOwN",
+   "paste_id": "m1EBVOwN",
+   "team_name": "Gabriel C.'s 2027 Buenos Aires Special Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Gardevoir Mega",
+    "Talonflame",
+    "Sneasler",
+    "Kommo O",
+    "Armarouge",
+    "Indeedee F"
+   ],
+   "pokemon": [
+    {
+     "name": "Gardevoir",
+     "name_de": "Guardevoir",
+     "item": "Gardevoirite",
+     "item_de": "Guardevoirnit",
+     "ability": "Trace",
+     "ability_de": "Erfassen",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Hyper Voice",
+      "Expanding Force",
+      "Thunderbolt",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schallwelle",
+      "Flächenmacht",
+      "Donnerblitz",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Psychic",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 68,
+      "atk": 65,
+      "def": 65,
+      "spa": 125,
+      "spd": 115,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Indeedee-F",
+     "name_de": "Servol [Weiblich]",
+     "item": "Rocky Helmet",
+     "item_de": "Beulenhelm",
+     "ability": "Psychic Surge",
+     "ability_de": "Psycho-Erzeuger",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Follow Me",
+      "Helping Hand",
+      "Psyshock",
+      "Protect"
+     ],
+     "moves_de": [
+      "Spotlight",
+      "Rechte Hand",
+      "Psychoschock",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Psychic",
+      "Normal"
+     ],
+     "base_stats": {
+      "hp": 70,
+      "atk": 55,
+      "def": 65,
+      "spa": 95,
+      "spd": 105,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Talonflame",
+     "name_de": "Fiaro",
+     "item": "Expert Belt",
+     "item_de": "Expertengurt",
+     "ability": "Gale Wings",
+     "ability_de": "Orkanschwingen",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Flare Blitz",
+      "Brave Bird",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Flammenblitz",
+      "Sturzflug",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 81,
+      "def": 71,
+      "spa": 74,
+      "spd": 69,
+      "spe": 126
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "Psychic Seed",
+     "item_de": "Psycho-Samen",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Close Combat",
+      "Rock Tomb",
+      "Protect",
+      "Dire Claw"
+     ],
+     "moves_de": [
+      "Nahkampf",
+      "Felsgrab",
+      "Schutzschild",
+      "Unheilsklauen"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Armarouge",
+     "name_de": "Crimanzo",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Weak Armor",
+     "ability_de": "Bruchrüstung",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Armor Cannon",
+      "Expanding Force",
+      "Protect",
+      "Wide Guard"
+     ],
+     "moves_de": [
+      "Rüstungskanone",
+      "Flächenmacht",
+      "Schutzschild",
+      "Rundumschutz"
+     ],
+     "typen": [
+      "Fire",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 60,
+      "def": 100,
+      "spa": 125,
+      "spd": 80,
+      "spe": 75
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kommo-o",
+     "name_de": "Grandiras",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Soundproof",
+     "ability_de": "Lärmschutz",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Aura Sphere",
+      "Clanging Scales",
+      "Flamethrower",
+      "Protect"
+     ],
+     "moves_de": [
+      "Aurasphäre",
+      "Schuppenrasseln",
+      "Flammenwurf",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Fighting"
+     ],
+     "base_stats": {
+      "hp": 75,
+      "atk": 110,
+      "def": 125,
+      "spa": 100,
+      "spd": 105,
+      "spe": 85
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 3
+  },
+  {
+   "turnier": "Buenos Aires SC",
+   "turnier_url": "https://victoryroad.pro/2027-buenos-aires/",
+   "turnier_datum": "2026-11-15",
+   "platz": 2,
+   "swiss": "7-2",
+   "trainer": "Bruno Quiroga",
+   "trainer_tag": "Bruno",
+   "preis": "325 CP",
+   "replica_code": "",
+   "ots_url": "https://www.vrpastes.com/fOaNTaGX",
+   "paste_id": "fOaNTaGX",
+   "team_name": "Bruno Quiroga's 2027 Buenos Aires Special Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Charizard Mega Y",
+    "Aerodactyl Mega",
+    "Farigiraf",
+    "Kingambit",
+    "Sylveon",
+    "Garchomp"
+   ],
+   "pokemon": [
+    {
+     "name": "Charizard",
+     "name_de": "Glurak",
+     "item": "Charizardite Y",
+     "item_de": "Gluraknit Y",
+     "ability": "Blaze",
+     "ability_de": "Großbrand",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Heat Wave",
+      "Weather Ball",
+      "Protect",
+      "Solar Beam"
+     ],
+     "moves_de": [
+      "Hitzewelle",
+      "Meteorologe",
+      "Schutzschild",
+      "Solarstrahl"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 84,
+      "def": 78,
+      "spa": 109,
+      "spd": 85,
+      "spe": 100
+     },
+     "evs": ""
+    },
+    {
+     "name": "Aerodactyl",
+     "name_de": "Aerodactyl",
+     "item": "Aerodactylite",
+     "item_de": "Aerodactylonit",
+     "ability": "Unnerve",
+     "ability_de": "Anspannung",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Dual Wingbeat",
+      "Rock Slide",
+      "Protect",
+      "Tailwind"
+     ],
+     "moves_de": [
+      "Doppelflügel",
+      "Steinhagel",
+      "Schutzschild",
+      "Rückenwind"
+     ],
+     "typen": [
+      "Rock",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 105,
+      "def": 65,
+      "spa": 60,
+      "spd": 75,
+      "spe": 130
+     },
+     "evs": ""
+    },
+    {
+     "name": "Garchomp",
+     "name_de": "Knakrack",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Rough Skin",
+     "ability_de": "Rauhaut",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Dragon Claw",
+      "Stomping Tantrum",
+      "Protect",
+      "Earthquake"
+     ],
+     "moves_de": [
+      "Drachenklaue",
+      "Fruststampfer",
+      "Schutzschild",
+      "Erdbeben"
+     ],
+     "typen": [
+      "Dragon",
+      "Ground"
+     ],
+     "base_stats": {
+      "hp": 108,
+      "atk": 130,
+      "def": 95,
+      "spa": 80,
+      "spd": 85,
+      "spe": 102
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sylveon",
+     "name_de": "Feelinara",
+     "item": "Fairy Feather",
+     "item_de": "Feendaune",
+     "ability": "Pixilate",
+     "ability_de": "Feenschicht",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Hyper Voice",
+      "Moonblast",
+      "Protect",
+      "Yawn"
+     ],
+     "moves_de": [
+      "Schallwelle",
+      "Mondgewalt",
+      "Schutzschild",
+      "Gähner"
+     ],
+     "typen": [
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 95,
+      "atk": 65,
+      "def": 65,
+      "spa": 110,
+      "spd": 130,
+      "spe": 60
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kingambit",
+     "name_de": "Gladimperio",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Kowtow Cleave",
+      "Iron Head",
+      "Sucker Punch",
+      "Low Kick"
+     ],
+     "moves_de": [
+      "Kniefallspalter",
+      "Eisenschädel",
+      "Tiefschlag",
+      "Fußkick"
+     ],
+     "typen": [
+      "Dark",
+      "Steel"
+     ],
+     "base_stats": {
+      "hp": 100,
+      "atk": 135,
+      "def": 120,
+      "spa": 60,
+      "spd": 85,
+      "spe": 50
+     },
+     "evs": ""
+    },
+    {
+     "name": "Farigiraf",
+     "name_de": "Farigiraf",
+     "item": "Sitrus Berry",
+     "item_de": "Tsitrubeere",
+     "ability": "Armor Tail",
+     "ability_de": "Schweifrüstung",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Psychic Noise",
+      "Protect",
+      "Trick Room",
+      "Helping Hand"
+     ],
+     "moves_de": [
+      "Psycholärm",
+      "Schutzschild",
+      "Bizarroraum",
+      "Rechte Hand"
+     ],
+     "typen": [
+      "Normal",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 120,
+      "atk": 90,
+      "def": 70,
+      "spa": 110,
+      "spd": 70,
+      "spe": 60
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
    "rank": 4
+  },
+  {
+   "turnier": "Buenos Aires SC",
+   "turnier_url": "https://victoryroad.pro/2027-buenos-aires/",
+   "turnier_datum": "2026-11-15",
+   "platz": 2,
+   "swiss": "2-1",
+   "trainer": "Lia M.",
+   "trainer_tag": "",
+   "preis": "325 CP",
+   "replica_code": "",
+   "ots_url": "https://www.vrpastes.com/6KxTJQPf",
+   "paste_id": "6KxTJQPf",
+   "team_name": "Lia M.'s 2027 Buenos Aires Special Championships OTS",
+   "format": "VGC Regulation Set M-C",
+   "team_vorschau": [
+    "Gardevoir Mega",
+    "Talonflame",
+    "Sneasler",
+    "Kommo O",
+    "Armarouge",
+    "Indeedee F"
+   ],
+   "pokemon": [
+    {
+     "name": "Gardevoir",
+     "name_de": "Guardevoir",
+     "item": "Gardevoirite",
+     "item_de": "Guardevoirnit",
+     "ability": "Synchronize",
+     "ability_de": "Synchro",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Hyper Voice",
+      "Expanding Force",
+      "Thunderbolt",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schallwelle",
+      "Flächenmacht",
+      "Donnerblitz",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Psychic",
+      "Fairy"
+     ],
+     "base_stats": {
+      "hp": 68,
+      "atk": 65,
+      "def": 65,
+      "spa": 125,
+      "spd": 115,
+      "spe": 80
+     },
+     "evs": ""
+    },
+    {
+     "name": "Kommo-o",
+     "name_de": "Grandiras",
+     "item": "Life Orb",
+     "item_de": "Leben-Orb",
+     "ability": "Soundproof",
+     "ability_de": "Lärmschutz",
+     "nature": "Modest",
+     "nature_de": "Mäßig",
+     "moves": [
+      "Clanging Scales",
+      "Aura Sphere",
+      "Flamethrower",
+      "Protect"
+     ],
+     "moves_de": [
+      "Schuppenrasseln",
+      "Aurasphäre",
+      "Flammenwurf",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Dragon",
+      "Fighting"
+     ],
+     "base_stats": {
+      "hp": 75,
+      "atk": 110,
+      "def": 125,
+      "spa": 100,
+      "spd": 105,
+      "spe": 85
+     },
+     "evs": ""
+    },
+    {
+     "name": "Talonflame",
+     "name_de": "Fiaro",
+     "item": "Expert Belt",
+     "item_de": "Expertengurt",
+     "ability": "Gale Wings",
+     "ability_de": "Orkanschwingen",
+     "nature": "Jolly",
+     "nature_de": "Froh",
+     "moves": [
+      "Dual Wingbeat",
+      "Flare Blitz",
+      "Tailwind",
+      "Protect"
+     ],
+     "moves_de": [
+      "Doppelflügel",
+      "Flammenblitz",
+      "Rückenwind",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Flying"
+     ],
+     "base_stats": {
+      "hp": 78,
+      "atk": 81,
+      "def": 71,
+      "spa": 74,
+      "spd": 69,
+      "spe": 126
+     },
+     "evs": ""
+    },
+    {
+     "name": "Sneasler",
+     "name_de": "Snieboss",
+     "item": "Psychic Seed",
+     "item_de": "Psycho-Samen",
+     "ability": "Unburden",
+     "ability_de": "Entlastung",
+     "nature": "Adamant",
+     "nature_de": "Hart",
+     "moves": [
+      "Dire Claw",
+      "Close Combat",
+      "Rock Tomb",
+      "Protect"
+     ],
+     "moves_de": [
+      "Unheilsklauen",
+      "Nahkampf",
+      "Felsgrab",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fighting",
+      "Poison"
+     ],
+     "base_stats": {
+      "hp": 80,
+      "atk": 130,
+      "def": 60,
+      "spa": 40,
+      "spd": 80,
+      "spe": 120
+     },
+     "evs": ""
+    },
+    {
+     "name": "Armarouge",
+     "name_de": "Crimanzo",
+     "item": "Focus Sash",
+     "item_de": "Fokusgurt",
+     "ability": "Weak Armor",
+     "ability_de": "Bruchrüstung",
+     "nature": "Timid",
+     "nature_de": "Scheu",
+     "moves": [
+      "Armor Cannon",
+      "Expanding Force",
+      "Wide Guard",
+      "Protect"
+     ],
+     "moves_de": [
+      "Rüstungskanone",
+      "Flächenmacht",
+      "Rundumschutz",
+      "Schutzschild"
+     ],
+     "typen": [
+      "Fire",
+      "Psychic"
+     ],
+     "base_stats": {
+      "hp": 85,
+      "atk": 60,
+      "def": 100,
+      "spa": 125,
+      "spd": 80,
+      "spe": 75
+     },
+     "evs": ""
+    },
+    {
+     "name": "Indeedee-F",
+     "name_de": "Servol [Weiblich]",
+     "item": "Rocky Helmet",
+     "item_de": "Beulenhelm",
+     "ability": "Psychic Surge",
+     "ability_de": "Psycho-Erzeuger",
+     "nature": "Bold",
+     "nature_de": "Kühn",
+     "moves": [
+      "Follow Me",
+      "Protect",
+      "Helping Hand",
+      "Psyshock"
+     ],
+     "moves_de": [
+      "Spotlight",
+      "Schutzschild",
+      "Rechte Hand",
+      "Psychoschock"
+     ],
+     "typen": [
+      "Psychic",
+      "Normal"
+     ],
+     "base_stats": {
+      "hp": 70,
+      "atk": 55,
+      "def": 65,
+      "spa": 95,
+      "spd": 105,
+      "spe": 85
+     },
+     "evs": ""
+    }
+   ],
+   "hat_ev": false,
+   "quelle": "victory-road-major",
+   "rank": 5
   },
   {
    "turnier": "Buenos Aires SC",
@@ -989,21 +1227,21 @@
    "turnier_datum": "2026-11-15",
    "platz": 3,
    "swiss": "8-1",
-   "trainer": "Samuel Pereira Marante",
-   "trainer_tag": "",
+   "trainer": "Samuel Pereira",
+   "trainer_tag": "CSK",
    "preis": "300 CP",
-   "replica_code": "",
+   "replica_code": "5DP2SBUDYQ",
    "ots_url": "https://www.vrpastes.com/MWlozsOx",
    "paste_id": "MWlozsOx",
    "team_name": "Samuel Pereira Marante's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Staraptor Mega",
     "Raichu Mega Y",
+    "Staraptor Mega",
     "Arcanine Hisui",
     "Gholdengo",
-    "Rillaboom",
-    "Milotic"
+    "Milotic",
+    "Rillaboom"
    ],
    "pokemon": [
     {
@@ -1216,7 +1454,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 5
+   "rank": 6
   },
   {
    "turnier": "Buenos Aires SC",
@@ -1224,8 +1462,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 4,
    "swiss": "7-2",
-   "trainer": "Diego Ferreira Silva",
-   "trainer_tag": "",
+   "trainer": "Diego Ferreira",
+   "trainer_tag": "Diego",
    "preis": "300 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/VaDw7hBz",
@@ -1234,11 +1472,11 @@
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
     "Staraptor Mega",
-    "Kingambit",
-    "Armarouge",
-    "Rillaboom",
     "Indeedee F",
-    "Torkoal"
+    "Armarouge",
+    "Kingambit",
+    "Torkoal",
+    "Rillaboom"
    ],
    "pokemon": [
     {
@@ -1452,7 +1690,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 6
+   "rank": 7
   },
   {
    "turnier": "Buenos Aires SC",
@@ -1461,7 +1699,7 @@
    "platz": 5,
    "swiss": "8-1",
    "trainer": "Len Deuel",
-   "trainer_tag": "",
+   "trainer_tag": "Len",
    "preis": "280 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/iBhX6Gt9",
@@ -1471,10 +1709,10 @@
    "team_vorschau": [
     "Tyranitar Mega",
     "Salamence Mega",
-    "Excadrill",
     "Sneasler",
+    "Gholdengo",
     "Clefable",
-    "Gholdengo"
+    "Excadrill"
    ],
    "pokemon": [
     {
@@ -1689,7 +1927,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 7
+   "rank": 8
   },
   {
    "turnier": "Buenos Aires SC",
@@ -1698,7 +1936,7 @@
    "platz": 6,
    "swiss": "7-2",
    "trainer": "Juan Velasco",
-   "trainer_tag": "",
+   "trainer_tag": "Anya",
    "preis": "280 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/dmTpddSM",
@@ -1708,10 +1946,10 @@
    "team_vorschau": [
     "Charizard Mega Y",
     "Floette Mega",
-    "Garchomp",
-    "Whimsicott",
     "Basculegion",
-    "Kingambit"
+    "Kingambit",
+    "Whimsicott",
+    "Garchomp"
    ],
    "pokemon": [
     {
@@ -1926,7 +2164,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 8
+   "rank": 9
   },
   {
    "turnier": "Buenos Aires SC",
@@ -1934,8 +2172,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 7,
    "swiss": "7-2",
-   "trainer": "Robson Hamilton",
-   "trainer_tag": "",
+   "trainer": "Robson Hamilton Carréa",
+   "trainer_tag": "OZasquense",
    "preis": "280 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/wxsjhIju",
@@ -1943,12 +2181,12 @@
    "team_name": "Robson Hamilton's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Staraptor Mega",
     "Glimmora Mega",
-    "Hippowdon",
-    "Whimsicott",
+    "Staraptor Mega",
+    "Houndstone",
     "Kingambit",
-    "Houndstone"
+    "Whimsicott",
+    "Hippowdon"
    ],
    "pokemon": [
     {
@@ -2162,7 +2400,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 9
+   "rank": 10
   },
   {
    "turnier": "Buenos Aires SC",
@@ -2171,20 +2409,20 @@
    "platz": 8,
    "swiss": "7-2",
    "trainer": "Luis Roquet",
-   "trainer_tag": "",
+   "trainer_tag": "Aparocks",
    "preis": "280 CP",
    "replica_code": "",
-   "ots_url": "https://www.vrpastes.com/q9odFtp1",
-   "paste_id": "q9odFtp1",
+   "ots_url": "https://www.vrpastes.com/oEdOYQLf",
+   "paste_id": "oEdOYQLf",
    "team_name": "Luis Roquet's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
     "Raichu Mega Y",
     "Staraptor Mega",
-    "Armarouge",
-    "Indeedee F",
     "Basculegion",
-    "Kingambit"
+    "Kingambit",
+    "Armarouge",
+    "Indeedee F"
    ],
    "pokemon": [
     {
@@ -2331,8 +2569,8 @@
      "name_de": "Gladimperio",
      "item": "Focus Sash",
      "item_de": "Fokusgurt",
-     "ability": "",
-     "ability_de": "",
+     "ability": "Defiant",
+     "ability_de": "Siegeswille",
      "nature": "Adamant",
      "nature_de": "Hart",
      "moves": [
@@ -2399,7 +2637,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 10
+   "rank": 11
   },
   {
    "turnier": "Buenos Aires SC",
@@ -2408,7 +2646,7 @@
    "platz": 9,
    "swiss": "7-2",
    "trainer": "Guilherme Schilling",
-   "trainer_tag": "",
+   "trainer_tag": "Gspm02",
    "preis": "200 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/hqJKUdyP",
@@ -2418,10 +2656,10 @@
    "team_vorschau": [
     "Froslass Mega",
     "Garchomp Mega Z",
-    "Rillaboom",
     "Sneasler",
+    "Volcarona",
     "Lycanroc Dusk",
-    "Volcarona"
+    "Rillaboom"
    ],
    "pokemon": [
     {
@@ -2635,7 +2873,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 11
+   "rank": 12
   },
   {
    "turnier": "Buenos Aires SC",
@@ -2643,8 +2881,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 10,
    "swiss": "7-2",
-   "trainer": "Juan Francisco Salerno",
-   "trainer_tag": "",
+   "trainer": "Juan Salerno",
+   "trainer_tag": "Juanfi",
    "preis": "200 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/HBGhNEg3",
@@ -2653,11 +2891,11 @@
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
     "Charizard Mega Y",
-    "Venusaur",
+    "Garchomp",
     "Incineroar",
-    "Sylveon",
     "Aegislash",
-    "Garchomp"
+    "Sylveon",
+    "Venusaur"
    ],
    "pokemon": [
     {
@@ -2872,7 +3110,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 12
+   "rank": 13
   },
   {
    "turnier": "Buenos Aires SC",
@@ -2880,8 +3118,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 11,
    "swiss": "7-2",
-   "trainer": "Ivan Charles",
-   "trainer_tag": "",
+   "trainer": "Iván Charles",
+   "trainer_tag": "Guschar",
    "preis": "200 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/ECdMUdy2",
@@ -2889,12 +3127,12 @@
    "team_name": "Ivan Charles's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Garchomp Mega Z",
     "Charizard Mega Y",
-    "Venusaur",
-    "Archaludon",
+    "Garchomp Mega Z",
     "Grimmsnarl",
-    "Pelipper"
+    "Archaludon",
+    "Pelipper",
+    "Venusaur"
    ],
    "pokemon": [
     {
@@ -3110,7 +3348,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 13
+   "rank": 14
   },
   {
    "turnier": "Buenos Aires SC",
@@ -3118,8 +3356,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 12,
    "swiss": "7-2",
-   "trainer": "Jimmy Espitia",
-   "trainer_tag": "",
+   "trainer": "Jimmy Suárez",
+   "trainer_tag": "Sley",
    "preis": "200 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/GNVpvjdx",
@@ -3129,10 +3367,10 @@
    "team_vorschau": [
     "Raichu Mega Y",
     "Floette Mega",
-    "Rillaboom",
     "Incineroar",
     "Volcarona",
-    "Basculegion"
+    "Basculegion",
+    "Rillaboom"
    ],
    "pokemon": [
     {
@@ -3345,7 +3583,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 14
+   "rank": 15
   },
   {
    "turnier": "Buenos Aires SC",
@@ -3353,8 +3591,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 13,
    "swiss": "6-3",
-   "trainer": "Juan Pablo Cambon",
-   "trainer_tag": "",
+   "trainer": "Juan Pablo Cambón",
+   "trainer_tag": "Juampi",
    "preis": "200 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/ThOSSEcO",
@@ -3365,8 +3603,8 @@
     "Raichu Mega Y",
     "Camerupt Mega",
     "Incineroar",
-    "Sylveon",
     "Farigiraf",
+    "Sylveon",
     "Rillaboom"
    ],
    "pokemon": [
@@ -3580,7 +3818,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 15
+   "rank": 16
   },
   {
    "turnier": "Buenos Aires SC",
@@ -3588,8 +3826,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 14,
    "swiss": "6-3",
-   "trainer": "Matias Morales",
-   "trainer_tag": "",
+   "trainer": "Matías Morales",
+   "trainer_tag": "Ponje",
    "preis": "200 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/S6PP9rU0",
@@ -3598,11 +3836,11 @@
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
     "Charizard Mega Y",
-    "Pelipper",
-    "Archaludon",
-    "Venusaur",
+    "Garchomp",
     "Grimmsnarl",
-    "Garchomp"
+    "Archaludon",
+    "Pelipper",
+    "Venusaur"
    ],
    "pokemon": [
     {
@@ -3818,7 +4056,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 16
+   "rank": 17
   },
   {
    "turnier": "Buenos Aires SC",
@@ -3826,8 +4064,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 15,
    "swiss": "6-3",
-   "trainer": "Agustin Marinucci",
-   "trainer_tag": "",
+   "trainer": "Agustín Marinucci",
+   "trainer_tag": "Mari",
    "preis": "200 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/984iz2u8",
@@ -3837,10 +4075,10 @@
    "team_vorschau": [
     "Raichu Mega Y",
     "Camerupt Mega",
-    "Rillaboom",
+    "Incineroar",
     "Farigiraf",
     "Sylveon",
-    "Incineroar"
+    "Rillaboom"
    ],
    "pokemon": [
     {
@@ -4053,7 +4291,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 17
+   "rank": 18
   },
   {
    "turnier": "Buenos Aires SC",
@@ -4062,9 +4300,9 @@
    "platz": 16,
    "swiss": "6-3",
    "trainer": "Francisco Kinaszuk",
-   "trainer_tag": "",
+   "trainer_tag": "Kina",
    "preis": "200 CP",
-   "replica_code": "",
+   "replica_code": "7KTY4TY4QK",
    "ots_url": "https://www.vrpastes.com/zxmIbU4S",
    "paste_id": "zxmIbU4S",
    "team_name": "Francisco Kinaszuk's 2027 Buenos Aires Special Championships OTS",
@@ -4072,9 +4310,9 @@
    "team_vorschau": [
     "Delphox Mega",
     "Dragonite Mega",
-    "Basculegion",
     "Sneasler",
     "Kingambit",
+    "Basculegion",
     "Garchomp"
    ],
    "pokemon": [
@@ -4291,7 +4529,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 18
+   "rank": 19
   },
   {
    "turnier": "Buenos Aires SC",
@@ -4299,8 +4537,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 17,
    "swiss": "6-3",
-   "trainer": "Antonio Marco Rodrigo Jimenez",
-   "trainer_tag": "",
+   "trainer": "Antonio Marco Rodrigo",
+   "trainer_tag": "EXHOUL",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/oMT3qqA4",
@@ -4310,10 +4548,10 @@
    "team_vorschau": [
     "Charizard Mega Y",
     "Gardevoir Mega",
-    "Indeedee F",
-    "Garchomp",
     "Basculegion",
-    "Whimsicott"
+    "Indeedee F",
+    "Whimsicott",
+    "Garchomp"
    ],
    "pokemon": [
     {
@@ -4529,7 +4767,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 19
+   "rank": 20
   },
   {
    "turnier": "Buenos Aires SC",
@@ -4538,7 +4776,7 @@
    "platz": 18,
    "swiss": "6-3",
    "trainer": "Xoakin Rinaldi",
-   "trainer_tag": "",
+   "trainer_tag": "Amelia",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/vvhAi3Rh",
@@ -4548,10 +4786,10 @@
    "team_vorschau": [
     "Floette Mega",
     "Salamence Mega",
-    "Espathra",
     "Incineroar",
-    "Rillaboom",
-    "Sneasler"
+    "Espathra",
+    "Sneasler",
+    "Rillaboom"
    ],
    "pokemon": [
     {
@@ -4764,7 +5002,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 20
+   "rank": 21
   },
   {
    "turnier": "Buenos Aires SC",
@@ -4773,7 +5011,7 @@
    "platz": 19,
    "swiss": "6-3",
    "trainer": "Nazareno Rodríguez",
-   "trainer_tag": "",
+   "trainer_tag": "Mayoh",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/h9hoA6zr",
@@ -4781,12 +5019,12 @@
    "team_name": "Nazareno Rodríguez's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Salamence Mega",
     "Floette Mega",
+    "Salamence Mega",
     "Incineroar",
-    "Rillaboom",
+    "Basculegion",
     "Sneasler",
-    "Basculegion"
+    "Rillaboom"
    ],
    "pokemon": [
     {
@@ -5000,7 +5238,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 21
+   "rank": 22
   },
   {
    "turnier": "Buenos Aires SC",
@@ -5009,7 +5247,7 @@
    "platz": 20,
    "swiss": "6-3",
    "trainer": "Felipe Fredes",
-   "trainer_tag": "",
+   "trainer_tag": "Fredex",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/a1uLdV8V",
@@ -5018,11 +5256,11 @@
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
     "Charizard Mega Y",
-    "Whimsicott",
     "Garchomp",
+    "Farigiraf",
     "Kingambit",
     "Sylveon",
-    "Farigiraf"
+    "Whimsicott"
    ],
    "pokemon": [
     {
@@ -5237,7 +5475,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 22
+   "rank": 23
   },
   {
    "turnier": "Buenos Aires SC",
@@ -5246,7 +5484,7 @@
    "platz": 21,
    "swiss": "6-3",
    "trainer": "Gonzalo Barrera",
-   "trainer_tag": "",
+   "trainer_tag": "GonzAL-TH",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/ohUcD6uj",
@@ -5254,11 +5492,11 @@
    "team_name": "Gonzalo Barrera's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Garchomp Mega Z",
     "Floette Mega",
+    "Garchomp Mega Z",
+    "Incineroar",
     "Kingambit",
     "Sneasler",
-    "Incineroar",
     "Basculegion"
    ],
    "pokemon": [
@@ -5474,7 +5712,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 23
+   "rank": 24
   },
   {
    "turnier": "Buenos Aires SC",
@@ -5482,8 +5720,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 22,
    "swiss": "6-3",
-   "trainer": "Weslei Henrique",
-   "trainer_tag": "",
+   "trainer": "Weslei Henrique Silva",
+   "trainer_tag": "Wesleihas",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/e3phezm5",
@@ -5491,11 +5729,11 @@
    "team_name": "Weslei Henrique's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Dragonite Mega",
     "Floette Mega",
+    "Dragonite Mega",
     "Sneasler",
-    "Basculegion",
     "Kingambit",
+    "Basculegion",
     "Garchomp"
    ],
    "pokemon": [
@@ -5711,7 +5949,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 24
+   "rank": 25
   },
   {
    "turnier": "Buenos Aires SC",
@@ -5719,8 +5957,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 23,
    "swiss": "6-3",
-   "trainer": "Sebastian Lobos",
-   "trainer_tag": "",
+   "trainer": "Sebastián Lobos",
+   "trainer_tag": "PollitoA7",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/O9QIr1VN",
@@ -5728,11 +5966,11 @@
    "team_name": "Sebastian Lobos's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Salamence Mega",
     "Delphox Mega",
+    "Salamence Mega",
     "Sneasler",
-    "Basculegion",
     "Kingambit",
+    "Basculegion",
     "Rillaboom"
    ],
    "pokemon": [
@@ -5948,7 +6186,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 25
+   "rank": 26
   },
   {
    "turnier": "Buenos Aires SC",
@@ -5956,8 +6194,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 24,
    "swiss": "6-3",
-   "trainer": "Agustin De Cicco",
-   "trainer_tag": "",
+   "trainer": "Agustín de Cicco",
+   "trainer_tag": "N",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/KM9z4ZBY",
@@ -5967,10 +6205,10 @@
    "team_vorschau": [
     "Glimmora Mega",
     "Salamence Mega",
+    "Garchomp",
     "Kingambit",
-    "Rillaboom",
     "Volcarona",
-    "Garchomp"
+    "Rillaboom"
    ],
    "pokemon": [
     {
@@ -6185,7 +6423,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 26
+   "rank": 27
   },
   {
    "turnier": "Buenos Aires SC",
@@ -6193,8 +6431,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 25,
    "swiss": "5-4",
-   "trainer": "Samuel Honorio Ribeiro",
-   "trainer_tag": "",
+   "trainer": "Samuel Ribeiro",
+   "trainer_tag": "SamuKa",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/6SvVmKtJ",
@@ -6202,11 +6440,11 @@
    "team_name": "Samuel Honorio Ribeiro's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Dragonite Mega",
     "Floette Mega",
+    "Dragonite Mega",
     "Sneasler",
-    "Basculegion",
     "Kingambit",
+    "Basculegion",
     "Garchomp"
    ],
    "pokemon": [
@@ -6422,7 +6660,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 27
+   "rank": 28
   },
   {
    "turnier": "Buenos Aires SC",
@@ -6431,7 +6669,7 @@
    "platz": 26,
    "swiss": "5-4",
    "trainer": "Dorian Quiñonez",
-   "trainer_tag": "",
+   "trainer_tag": "GarnetSP",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/XB67AU18",
@@ -6439,12 +6677,12 @@
    "team_name": "Dorian Quiñonez's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Garchomp Mega Z",
     "Floette Mega",
+    "Garchomp Mega Z",
+    "Incineroar",
     "Kingambit",
     "Sneasler",
-    "Basculegion",
-    "Incineroar"
+    "Basculegion"
    ],
    "pokemon": [
     {
@@ -6659,7 +6897,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 28
+   "rank": 29
   },
   {
    "turnier": "Buenos Aires SC",
@@ -6668,7 +6906,7 @@
    "platz": 27,
    "swiss": "5-4",
    "trainer": "Camilo Liberona",
-   "trainer_tag": "",
+   "trainer_tag": "Linko",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/PKMBTbS3",
@@ -6677,10 +6915,10 @@
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
     "Staraptor Mega",
-    "Torkoal",
     "Indeedee F",
-    "Kingambit",
     "Armarouge",
+    "Kingambit",
+    "Torkoal",
     "Rillaboom"
    ],
    "pokemon": [
@@ -6895,7 +7133,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 29
+   "rank": 30
   },
   {
    "turnier": "Buenos Aires SC",
@@ -6903,8 +7141,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 28,
    "swiss": "5-4",
-   "trainer": "Jose Vaccaloni",
-   "trainer_tag": "",
+   "trainer": "José Vaccaloni",
+   "trainer_tag": "rWz",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/ecTOQPeV",
@@ -6912,8 +7150,8 @@
    "team_name": "Jose Vaccaloni's 2027 Buenos Aires Special Championships OTS",
    "format": "VGC Regulation Set M-C",
    "team_vorschau": [
-    "Floette Mega",
     "Charizard Mega Y",
+    "Floette Mega",
     "Basculegion",
     "Kingambit",
     "Whimsicott",
@@ -7132,7 +7370,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-major",
-   "rank": 30
+   "rank": 31
   },
   {
    "turnier": "Buenos Aires SC",
@@ -7140,8 +7378,8 @@
    "turnier_datum": "2026-11-15",
    "platz": 29,
    "swiss": "5-4",
-   "trainer": "Luca Alarcon",
-   "trainer_tag": "",
+   "trainer": "Luca Alarcón",
+   "trainer_tag": "Luca",
    "preis": "160 CP",
    "replica_code": "",
    "ots_url": "https://www.vrpastes.com/IhwUJO56",
@@ -7152,9 +7390,9 @@
     "Raichu Mega Y",
     "Floette Mega",
     "Incineroar",
-    "Rillaboom",
+    "Volcarona",
     "Basculegion",
-    "Volcarona"
+    "Rillaboom"
    ],
    "pokemon": [
     {
@@ -7361,243 +7599,6 @@
       "spa": 135,
       "spd": 105,
       "spe": 100
-     },
-     "evs": ""
-    }
-   ],
-   "hat_ev": false,
-   "quelle": "victory-road-major",
-   "rank": 31
-  },
-  {
-   "turnier": "Buenos Aires SC",
-   "turnier_url": "https://victoryroad.pro/2027-buenos-aires/",
-   "turnier_datum": "2026-11-15",
-   "platz": 30,
-   "swiss": "4-3",
-   "trainer": "Juan Isidro Chazarreta",
-   "trainer_tag": "",
-   "preis": "160 CP",
-   "replica_code": "",
-   "ots_url": "https://www.vrpastes.com/M8wRVOXP",
-   "paste_id": "M8wRVOXP",
-   "team_name": "Juan Isidro Chazarreta's 2027 Buenos Aires Special Championships OTS",
-   "format": "VGC Regulation Set M-C",
-   "team_vorschau": [
-    "Floette Mega",
-    "Delphox Mega",
-    "Sinistcha",
-    "Incineroar",
-    "Sneasler",
-    "Kingambit"
-   ],
-   "pokemon": [
-    {
-     "name": "Floette-Eternal",
-     "name_de": "Floette [Ewigblütler]",
-     "item": "Floettite",
-     "item_de": "Floetteonit",
-     "ability": "Flower Veil",
-     "ability_de": "Blütenhülle",
-     "nature": "Modest",
-     "nature_de": "Mäßig",
-     "moves": [
-      "Moonblast",
-      "Dazzling Gleam",
-      "Calm Mind",
-      "Protect"
-     ],
-     "moves_de": [
-      "Mondgewalt",
-      "Zauberschein",
-      "Gedankengut",
-      "Schutzschild"
-     ],
-     "typen": [
-      "Fairy"
-     ],
-     "base_stats": {
-      "hp": 74,
-      "atk": 65,
-      "def": 67,
-      "spa": 125,
-      "spd": 128,
-      "spe": 92
-     },
-     "evs": ""
-    },
-    {
-     "name": "Delphox",
-     "name_de": "Fennexis",
-     "item": "Delphoxite",
-     "item_de": "Fennexisnit",
-     "ability": "Blaze",
-     "ability_de": "Großbrand",
-     "nature": "Timid",
-     "nature_de": "Scheu",
-     "moves": [
-      "Heat Wave",
-      "Psyshock",
-      "Nasty Plot",
-      "Protect"
-     ],
-     "moves_de": [
-      "Hitzewelle",
-      "Psychoschock",
-      "Ränkeschmied",
-      "Schutzschild"
-     ],
-     "typen": [
-      "Fire",
-      "Psychic"
-     ],
-     "base_stats": {
-      "hp": 75,
-      "atk": 69,
-      "def": 72,
-      "spa": 114,
-      "spd": 100,
-      "spe": 104
-     },
-     "evs": ""
-    },
-    {
-     "name": "Sinistcha",
-     "name_de": "Fatalitcha",
-     "item": "Occa Berry",
-     "item_de": "Koakobeere",
-     "ability": "Hospitality",
-     "ability_de": "Gastlichkeit",
-     "nature": "Bold",
-     "nature_de": "Kühn",
-     "moves": [
-      "Matcha Gotcha",
-      "Rage Powder",
-      "Trick Room",
-      "Protect"
-     ],
-     "moves_de": [
-      "Quirlschuss",
-      "Wutpulver",
-      "Bizarroraum",
-      "Schutzschild"
-     ],
-     "typen": [
-      "Grass",
-      "Ghost"
-     ],
-     "base_stats": {
-      "hp": 71,
-      "atk": 60,
-      "def": 106,
-      "spa": 121,
-      "spd": 80,
-      "spe": 70
-     },
-     "evs": ""
-    },
-    {
-     "name": "Incineroar",
-     "name_de": "Fuegro",
-     "item": "Sitrus Berry",
-     "item_de": "Tsitrubeere",
-     "ability": "Intimidate",
-     "ability_de": "Bedroher",
-     "nature": "Careful",
-     "nature_de": "Sacht",
-     "moves": [
-      "Flare Blitz",
-      "Snarl",
-      "Parting Shot",
-      "Fake Out"
-     ],
-     "moves_de": [
-      "Flammenblitz",
-      "Standpauke",
-      "Abgangstirade",
-      "Mogelhieb"
-     ],
-     "typen": [
-      "Fire",
-      "Dark"
-     ],
-     "base_stats": {
-      "hp": 95,
-      "atk": 115,
-      "def": 90,
-      "spa": 80,
-      "spd": 90,
-      "spe": 60
-     },
-     "evs": ""
-    },
-    {
-     "name": "Sneasler",
-     "name_de": "Snieboss",
-     "item": "Focus Sash",
-     "item_de": "Fokusgurt",
-     "ability": "Poison Touch",
-     "ability_de": "Giftgriff",
-     "nature": "Jolly",
-     "nature_de": "Froh",
-     "moves": [
-      "Close Combat",
-      "Poison Jab",
-      "Quick Guard",
-      "Fake Out"
-     ],
-     "moves_de": [
-      "Nahkampf",
-      "Gifthieb",
-      "Rapidschutz",
-      "Mogelhieb"
-     ],
-     "typen": [
-      "Fighting",
-      "Poison"
-     ],
-     "base_stats": {
-      "hp": 80,
-      "atk": 130,
-      "def": 60,
-      "spa": 40,
-      "spd": 80,
-      "spe": 120
-     },
-     "evs": ""
-    },
-    {
-     "name": "Kingambit",
-     "name_de": "Gladimperio",
-     "item": "Life Orb",
-     "item_de": "Leben-Orb",
-     "ability": "Defiant",
-     "ability_de": "Siegeswille",
-     "nature": "Adamant",
-     "nature_de": "Hart",
-     "moves": [
-      "Kowtow Cleave",
-      "Sucker Punch",
-      "Swords Dance",
-      "Protect"
-     ],
-     "moves_de": [
-      "Kniefallspalter",
-      "Tiefschlag",
-      "Schwerttanz",
-      "Schutzschild"
-     ],
-     "typen": [
-      "Dark",
-      "Steel"
-     ],
-     "base_stats": {
-      "hp": 100,
-      "atk": 135,
-      "def": 120,
-      "spa": 60,
-      "spd": 85,
-      "spe": 50
      },
      "evs": ""
     }

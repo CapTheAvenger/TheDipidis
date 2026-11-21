@@ -38,6 +38,7 @@ import collections
 import io
 import json
 import os
+import re
 
 import pytest
 
@@ -201,6 +202,9 @@ def test_der_kartentext_widerspricht_keinem_pin(pins):
         unser = text.get(f'{r["set"].strip().upper()}|{r["number"].strip()}')
         if not unser:
             continue
+        # Geschlechtsmarke VOR dem Attackenteil ("Nidoran [F] [Find a Friend
+        # | Gnaw]", DLR-55, 21.11.2026) ist Teil des Namens, kein Kartentext.
+        name = re.sub(r"\s\[[FM]\](?=\s*\[)", "", name)
         klammer = name[name.index("[") + 1:name.rindex("]")]
         # Der Set-Code steht bei manchen Produkten mit in der Klammer
         # ("Chimchar [Flare | UPR]"); er gehoert nicht zum Kartentext.

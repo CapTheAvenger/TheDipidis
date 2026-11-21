@@ -4125,6 +4125,7 @@ DLR,51,918873,unique,Onix
 DLR,52,918875,unique,Steelix
 DLR,53,918876,live-verified,Groudon
 DLR,54,918877,unique,Landorus
+DLR,55,918878,manual-pin,Nidoran♀
 DLR,56,918879,unique,Nidorina
 DLR,57,918880,unique,Nidoqueen
 DLR,58,918881,unique,Spinarak
@@ -4159,12 +4160,18 @@ DLR,86,918914,unique,Fletchling
 DLR,87,918915,unique,Fletchinder
 DLR,88,918916,live-verified,Talonflame ex
 DLR,89,918917,live-verified,Aarune
+DLR,90,918918,manual-pin,Adventure Lantern
 DLR,91,918919,live-verified,Custom Vest
 DLR,92,918920,live-verified,Emcee's Hype
 DLR,93,918921,unique,Grisham
-DLR,96,918926,priced-by-date(2↔2),Legendary Summit
-DLR,97,918927,priced-by-date(2↔2),Legendary Summit
+DLR,94,918923,manual-pin,Legendary Pyroduct
+DLR,95,918924,manual-pin,Legendary Pyroduct
+DLR,96,918926,manual-pin,Legendary Summit
+DLR,97,918927,manual-pin,Legendary Summit
+DLR,98,918928,manual-pin,Legendary Trench
+DLR,99,918929,manual-pin,Legendary Trench
 DLR,100,918931,unique,Mega Rayquaza Cap
+DLR,101,918932,manual-pin,Tasty Rice Ball
 DLR,102,918934,live-verified,Tate & Liza's Training
 DLR,103,918935,live-verified,Zinnia's Trust
 DLR,104,918940,live-verified,Masquerain
@@ -4189,11 +4196,15 @@ DLR,122,918961,live-verified,Mega Golurk ex
 DLR,123,918962,live-verified,Mega Malamar ex
 DLR,124,918963,live-verified,Talonflame ex
 DLR,125,918964,live-verified,Aarune
+DLR,126,918965,manual-pin,Adventure Lantern
 DLR,127,918966,live-verified,Custom Vest
 DLR,128,918967,live-verified,Emcee's Hype
 DLR,129,918968,unique,Pokémon Catcher
 DLR,130,918969,live-verified,Tate & Liza's Training
 DLR,131,918970,live-verified,Zinnia's Trust
+DLR,132,918974,manual-pin,Bubbly Water Energy
+DLR,133,918976,manual-pin,Growing Grass Energy
+DLR,134,918977,manual-pin,Nitro Fire Energy
 DLR,135,918979,live-verified,Mega Golisopod ex
 DLR,136,918980,live-verified,Raikou ex
 DLR,137,918981,live-verified,Mega Golurk ex

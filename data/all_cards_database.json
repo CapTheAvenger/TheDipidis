@@ -5,7 +5,7 @@
   "cards": [
     {
       "name_en": "Heracross",
-      "name_de": "",
+      "name_de": "Skaraborn",
       "set": "DLR",
       "number": "1",
       "type": "Basic",
@@ -22,7 +22,7 @@
     },
     {
       "name_en": "Surskit",
-      "name_de": "",
+      "name_de": "Gehweiher",
       "set": "DLR",
       "number": "2",
       "type": "Basic",
@@ -39,7 +39,7 @@
     },
     {
       "name_en": "Masquerain",
-      "name_de": "",
+      "name_de": "Maskeregen",
       "set": "DLR",
       "number": "3",
       "type": "Stage 1",
@@ -56,7 +56,7 @@
     },
     {
       "name_en": "Cacnea",
-      "name_de": "",
+      "name_de": "Tuska",
       "set": "DLR",
       "number": "4",
       "type": "Basic",
@@ -73,7 +73,7 @@
     },
     {
       "name_en": "Cacturne",
-      "name_de": "",
+      "name_de": "Noktuska",
       "set": "DLR",
       "number": "5",
       "type": "Stage 1",
@@ -90,7 +90,7 @@
     },
     {
       "name_en": "Combee",
-      "name_de": "",
+      "name_de": "Wadribie",
       "set": "DLR",
       "number": "6",
       "type": "Basic",
@@ -107,7 +107,7 @@
     },
     {
       "name_en": "Vespiquen",
-      "name_de": "",
+      "name_de": "Honweisel",
       "set": "DLR",
       "number": "7",
       "type": "Stage 1",
@@ -124,7 +124,7 @@
     },
     {
       "name_en": "Shaymin",
-      "name_de": "",
+      "name_de": "Shaymin",
       "set": "DLR",
       "number": "8",
       "type": "Basic",
@@ -141,7 +141,7 @@
     },
     {
       "name_en": "Virizion",
-      "name_de": "",
+      "name_de": "Viridium",
       "set": "DLR",
       "number": "9",
       "type": "Basic",
@@ -158,7 +158,7 @@
     },
     {
       "name_en": "Wimpod",
-      "name_de": "",
+      "name_de": "Reißlaus",
       "set": "DLR",
       "number": "10",
       "type": "Basic",
@@ -175,7 +175,7 @@
     },
     {
       "name_en": "Mega Golisopod ex",
-      "name_de": "",
+      "name_de": "Mega-Tectass-ex",
       "set": "DLR",
       "number": "11",
       "type": "Stage 1",
@@ -192,7 +192,7 @@
     },
     {
       "name_en": "Sprigatito",
-      "name_de": "",
+      "name_de": "Felori",
       "set": "DLR",
       "number": "12",
       "type": "Basic",
@@ -209,7 +209,7 @@
     },
     {
       "name_en": "Floragato",
-      "name_de": "",
+      "name_de": "Feliospa",
       "set": "DLR",
       "number": "13",
       "type": "Stage 1",
@@ -226,7 +226,7 @@
     },
     {
       "name_en": "Meowscarada ex",
-      "name_de": "",
+      "name_de": "Maskagato-ex",
       "set": "DLR",
       "number": "14",
       "type": "Stage 2",
@@ -243,7 +243,7 @@
     },
     {
       "name_en": "Smoliv",
-      "name_de": "",
+      "name_de": "Olini",
       "set": "DLR",
       "number": "15",
       "type": "Basic",
@@ -260,7 +260,7 @@
     },
     {
       "name_en": "Dolliv",
-      "name_de": "",
+      "name_de": "Olivinio",
       "set": "DLR",
       "number": "16",
       "type": "Stage 1",
@@ -277,7 +277,7 @@
     },
     {
       "name_en": "Arboliva",
-      "name_de": "",
+      "name_de": "Olithena",
       "set": "DLR",
       "number": "17",
       "type": "Stage 2",
@@ -294,7 +294,7 @@
     },
     {
       "name_en": "Growlithe",
-      "name_de": "",
+      "name_de": "Fukano",
       "set": "DLR",
       "number": "18",
       "type": "Basic",
@@ -311,7 +311,7 @@
     },
     {
       "name_en": "Arcanine",
-      "name_de": "",
+      "name_de": "Arkani",
       "set": "DLR",
       "number": "19",
       "type": "Stage 1",
@@ -328,7 +328,7 @@
     },
     {
       "name_en": "Magmar",
-      "name_de": "",
+      "name_de": "Magmar",
       "set": "DLR",
       "number": "20",
       "type": "Basic",
@@ -345,7 +345,7 @@
     },
     {
       "name_en": "Magmortar",
-      "name_de": "",
+      "name_de": "Magbrant",
       "set": "DLR",
       "number": "21",
       "type": "Stage 1",
@@ -362,7 +362,7 @@
     },
     {
       "name_en": "Torkoal",
-      "name_de": "",
+      "name_de": "Qurtel",
       "set": "DLR",
       "number": "22",
       "type": "Basic",
@@ -379,7 +379,7 @@
     },
     {
       "name_en": "Heat Rotom ex",
-      "name_de": "",
+      "name_de": "Hitze-Rotom-ex",
       "set": "DLR",
       "number": "23",
       "type": "Basic",
@@ -396,7 +396,7 @@
     },
     {
       "name_en": "Heatmor",
-      "name_de": "",
+      "name_de": "Furnifraß",
       "set": "DLR",
       "number": "24",
       "type": "Basic",
@@ -413,7 +413,7 @@
     },
     {
       "name_en": "Mantine",
-      "name_de": "",
+      "name_de": "Mantax",
       "set": "DLR",
       "number": "25",
       "type": "Basic",
@@ -430,7 +430,7 @@
     },
     {
       "name_en": "Kyogre",
-      "name_de": "",
+      "name_de": "Kyogre",
       "set": "DLR",
       "number": "26",
       "type": "Basic",
@@ -447,7 +447,7 @@
     },
     {
       "name_en": "Frillish",
-      "name_de": "",
+      "name_de": "Quabbel",
       "set": "DLR",
       "number": "27",
       "type": "Basic",
@@ -464,7 +464,7 @@
     },
     {
       "name_en": "Jellicent",
-      "name_de": "",
+      "name_de": "Apoquallyp",
       "set": "DLR",
       "number": "28",
       "type": "Stage 1",
@@ -481,7 +481,7 @@
     },
     {
       "name_en": "Wishiwashi ex",
-      "name_de": "",
+      "name_de": "Lusardin-ex",
       "set": "DLR",
       "number": "29",
       "type": "Basic",
@@ -498,7 +498,7 @@
     },
     {
       "name_en": "Electabuzz",
-      "name_de": "",
+      "name_de": "Elektek",
       "set": "DLR",
       "number": "30",
       "type": "Basic",
@@ -515,7 +515,7 @@
     },
     {
       "name_en": "Electivire",
-      "name_de": "",
+      "name_de": "Elevoltek",
       "set": "DLR",
       "number": "31",
       "type": "Stage 1",
@@ -532,7 +532,7 @@
     },
     {
       "name_en": "Jolteon",
-      "name_de": "",
+      "name_de": "Blitza",
       "set": "DLR",
       "number": "32",
       "type": "Stage 1",
@@ -549,7 +549,7 @@
     },
     {
       "name_en": "Raikou ex",
-      "name_de": "",
+      "name_de": "Raikou-ex",
       "set": "DLR",
       "number": "33",
       "type": "Basic",
@@ -566,7 +566,7 @@
     },
     {
       "name_en": "Rotom",
-      "name_de": "",
+      "name_de": "Rotom",
       "set": "DLR",
       "number": "34",
       "type": "Basic",
@@ -583,7 +583,7 @@
     },
     {
       "name_en": "Thundurus",
-      "name_de": "",
+      "name_de": "Voltolos",
       "set": "DLR",
       "number": "35",
       "type": "Basic",
@@ -600,7 +600,7 @@
     },
     {
       "name_en": "Pincurchin",
-      "name_de": "",
+      "name_de": "Britzigel",
       "set": "DLR",
       "number": "36",
       "type": "Basic",
@@ -617,7 +617,7 @@
     },
     {
       "name_en": "Pawmi",
-      "name_de": "",
+      "name_de": "Pamo",
       "set": "DLR",
       "number": "37",
       "type": "Basic",
@@ -634,7 +634,7 @@
     },
     {
       "name_en": "Pawmo",
-      "name_de": "",
+      "name_de": "Pamamo",
       "set": "DLR",
       "number": "38",
       "type": "Stage 1",
@@ -651,7 +651,7 @@
     },
     {
       "name_en": "Pawmot",
-      "name_de": "",
+      "name_de": "Pamomamo",
       "set": "DLR",
       "number": "39",
       "type": "Stage 2",
@@ -668,7 +668,7 @@
     },
     {
       "name_en": "Wattrel",
-      "name_de": "",
+      "name_de": "Voltrel",
       "set": "DLR",
       "number": "40",
       "type": "Basic",
@@ -685,7 +685,7 @@
     },
     {
       "name_en": "Kilowattrel",
-      "name_de": "",
+      "name_de": "Voltrean",
       "set": "DLR",
       "number": "41",
       "type": "Stage 1",
@@ -702,7 +702,7 @@
     },
     {
       "name_en": "Miraidon",
-      "name_de": "",
+      "name_de": "Miraidon",
       "set": "DLR",
       "number": "42",
       "type": "Basic",
@@ -719,7 +719,7 @@
     },
     {
       "name_en": "Drowzee",
-      "name_de": "",
+      "name_de": "Traumato",
       "set": "DLR",
       "number": "43",
       "type": "Basic",
@@ -736,7 +736,7 @@
     },
     {
       "name_en": "Hypno",
-      "name_de": "",
+      "name_de": "Hypno",
       "set": "DLR",
       "number": "44",
       "type": "Stage 1",
@@ -753,7 +753,7 @@
     },
     {
       "name_en": "Giratina",
-      "name_de": "",
+      "name_de": "Giratina",
       "set": "DLR",
       "number": "45",
       "type": "Basic",
@@ -770,7 +770,7 @@
     },
     {
       "name_en": "Golett",
-      "name_de": "",
+      "name_de": "Golbit",
       "set": "DLR",
       "number": "46",
       "type": "Basic",
@@ -787,7 +787,7 @@
     },
     {
       "name_en": "Mega Golurk ex",
-      "name_de": "",
+      "name_de": "Mega-Golgantes-ex",
       "set": "DLR",
       "number": "47",
       "type": "Stage 1",
@@ -804,7 +804,7 @@
     },
     {
       "name_en": "Enamorus",
-      "name_de": "",
+      "name_de": "Cupidos",
       "set": "DLR",
       "number": "48",
       "type": "Basic",
@@ -821,7 +821,7 @@
     },
     {
       "name_en": "Sandshrew",
-      "name_de": "",
+      "name_de": "Sandan",
       "set": "DLR",
       "number": "49",
       "type": "Basic",
@@ -838,7 +838,7 @@
     },
     {
       "name_en": "Sandslash",
-      "name_de": "",
+      "name_de": "Sandamer",
       "set": "DLR",
       "number": "50",
       "type": "Stage 1",
@@ -855,7 +855,7 @@
     },
     {
       "name_en": "Onix",
-      "name_de": "",
+      "name_de": "Onix",
       "set": "DLR",
       "number": "51",
       "type": "Basic",
@@ -872,7 +872,7 @@
     },
     {
       "name_en": "Steelix",
-      "name_de": "",
+      "name_de": "Stahlos",
       "set": "DLR",
       "number": "52",
       "type": "Stage 1",
@@ -889,7 +889,7 @@
     },
     {
       "name_en": "Groudon",
-      "name_de": "",
+      "name_de": "Groudon",
       "set": "DLR",
       "number": "53",
       "type": "Basic",
@@ -906,7 +906,7 @@
     },
     {
       "name_en": "Landorus",
-      "name_de": "",
+      "name_de": "Demeteros",
       "set": "DLR",
       "number": "54",
       "type": "Basic",
@@ -923,7 +923,7 @@
     },
     {
       "name_en": "Nidoran♀",
-      "name_de": "",
+      "name_de": "Nidoran♀",
       "set": "DLR",
       "number": "55",
       "type": "Basic",
@@ -940,7 +940,7 @@
     },
     {
       "name_en": "Nidorina",
-      "name_de": "",
+      "name_de": "Nidorina",
       "set": "DLR",
       "number": "56",
       "type": "Stage 1",
@@ -957,7 +957,7 @@
     },
     {
       "name_en": "Nidoqueen",
-      "name_de": "",
+      "name_de": "Nidoqueen",
       "set": "DLR",
       "number": "57",
       "type": "Stage 2",
@@ -974,7 +974,7 @@
     },
     {
       "name_en": "Spinarak",
-      "name_de": "",
+      "name_de": "Webarak",
       "set": "DLR",
       "number": "58",
       "type": "Basic",
@@ -991,7 +991,7 @@
     },
     {
       "name_en": "Ariados",
-      "name_de": "",
+      "name_de": "Ariados",
       "set": "DLR",
       "number": "59",
       "type": "Stage 1",
@@ -1008,7 +1008,7 @@
     },
     {
       "name_en": "Sableye",
-      "name_de": "",
+      "name_de": "Zobiris",
       "set": "DLR",
       "number": "60",
       "type": "Basic",
@@ -1025,7 +1025,7 @@
     },
     {
       "name_en": "Carvanha",
-      "name_de": "",
+      "name_de": "Kanivanha",
       "set": "DLR",
       "number": "61",
       "type": "Basic",
@@ -1042,7 +1042,7 @@
     },
     {
       "name_en": "Sharpedo",
-      "name_de": "",
+      "name_de": "Tohaido",
       "set": "DLR",
       "number": "62",
       "type": "Stage 1",
@@ -1059,7 +1059,7 @@
     },
     {
       "name_en": "Darkrai",
-      "name_de": "",
+      "name_de": "Darkrai",
       "set": "DLR",
       "number": "63",
       "type": "Basic",
@@ -1076,7 +1076,7 @@
     },
     {
       "name_en": "Purrloin",
-      "name_de": "",
+      "name_de": "Felilou",
       "set": "DLR",
       "number": "64",
       "type": "Basic",
@@ -1093,7 +1093,7 @@
     },
     {
       "name_en": "Liepard",
-      "name_de": "",
+      "name_de": "Kleoparda",
       "set": "DLR",
       "number": "65",
       "type": "Stage 1",
@@ -1110,7 +1110,7 @@
     },
     {
       "name_en": "Zorua",
-      "name_de": "",
+      "name_de": "Zorua",
       "set": "DLR",
       "number": "66",
       "type": "Basic",
@@ -1127,7 +1127,7 @@
     },
     {
       "name_en": "Zoroark ex",
-      "name_de": "",
+      "name_de": "Zoroark-ex",
       "set": "DLR",
       "number": "67",
       "type": "Stage 1",
@@ -1144,7 +1144,7 @@
     },
     {
       "name_en": "Inkay",
-      "name_de": "",
+      "name_de": "Iscalar",
       "set": "DLR",
       "number": "68",
       "type": "Basic",
@@ -1161,7 +1161,7 @@
     },
     {
       "name_en": "Mega Malamar ex",
-      "name_de": "",
+      "name_de": "Mega-Calamanero-ex",
       "set": "DLR",
       "number": "69",
       "type": "Stage 1",
@@ -1178,7 +1178,7 @@
     },
     {
       "name_en": "Morpeko",
-      "name_de": "",
+      "name_de": "Morpeko",
       "set": "DLR",
       "number": "70",
       "type": "Basic",
@@ -1195,7 +1195,7 @@
     },
     {
       "name_en": "Zarude",
-      "name_de": "",
+      "name_de": "Zarude",
       "set": "DLR",
       "number": "71",
       "type": "Basic",
@@ -1212,7 +1212,7 @@
     },
     {
       "name_en": "Druddigon",
-      "name_de": "",
+      "name_de": "Shardrago",
       "set": "DLR",
       "number": "72",
       "type": "Basic",
@@ -1229,7 +1229,7 @@
     },
     {
       "name_en": "Jangmo-o",
-      "name_de": "",
+      "name_de": "Miniras",
       "set": "DLR",
       "number": "73",
       "type": "Basic",
@@ -1246,7 +1246,7 @@
     },
     {
       "name_en": "Hakamo-o",
-      "name_de": "",
+      "name_de": "Mediras",
       "set": "DLR",
       "number": "74",
       "type": "Stage 1",
@@ -1263,7 +1263,7 @@
     },
     {
       "name_en": "Kommo-o",
-      "name_de": "",
+      "name_de": "Grandiras",
       "set": "DLR",
       "number": "75",
       "type": "Stage 2",
@@ -1280,7 +1280,7 @@
     },
     {
       "name_en": "Cyclizar",
-      "name_de": "",
+      "name_de": "Mopex",
       "set": "DLR",
       "number": "76",
       "type": "Basic",
@@ -1297,7 +1297,7 @@
     },
     {
       "name_en": "Tauros",
-      "name_de": "",
+      "name_de": "Tauros",
       "set": "DLR",
       "number": "77",
       "type": "Basic",
@@ -1314,7 +1314,7 @@
     },
     {
       "name_en": "Eevee",
-      "name_de": "",
+      "name_de": "Evoli",
       "set": "DLR",
       "number": "78",
       "type": "Basic",
@@ -1331,7 +1331,7 @@
     },
     {
       "name_en": "Delibird",
-      "name_de": "",
+      "name_de": "Botogel",
       "set": "DLR",
       "number": "79",
       "type": "Basic",
@@ -1348,7 +1348,7 @@
     },
     {
       "name_en": "Azurill",
-      "name_de": "",
+      "name_de": "Azurill",
       "set": "DLR",
       "number": "80",
       "type": "Basic",
@@ -1365,7 +1365,7 @@
     },
     {
       "name_en": "Swablu",
-      "name_de": "",
+      "name_de": "Wablu",
       "set": "DLR",
       "number": "81",
       "type": "Basic",
@@ -1382,7 +1382,7 @@
     },
     {
       "name_en": "Altaria",
-      "name_de": "",
+      "name_de": "Altaria",
       "set": "DLR",
       "number": "82",
       "type": "Stage 1",
@@ -1399,7 +1399,7 @@
     },
     {
       "name_en": "Kecleon",
-      "name_de": "",
+      "name_de": "Kecleon",
       "set": "DLR",
       "number": "83",
       "type": "Basic",
@@ -1416,7 +1416,7 @@
     },
     {
       "name_en": "Mega Rayquaza ex",
-      "name_de": "",
+      "name_de": "Mega-Rayquaza-ex",
       "set": "DLR",
       "number": "84",
       "type": "Basic",
@@ -1433,7 +1433,7 @@
     },
     {
       "name_en": "Tornadus",
-      "name_de": "",
+      "name_de": "Boreos",
       "set": "DLR",
       "number": "85",
       "type": "Basic",
@@ -1450,7 +1450,7 @@
     },
     {
       "name_en": "Fletchling",
-      "name_de": "",
+      "name_de": "Dartiri",
       "set": "DLR",
       "number": "86",
       "type": "Basic",
@@ -1467,7 +1467,7 @@
     },
     {
       "name_en": "Fletchinder",
-      "name_de": "",
+      "name_de": "Dartignis",
       "set": "DLR",
       "number": "87",
       "type": "Stage 1",
@@ -1484,7 +1484,7 @@
     },
     {
       "name_en": "Talonflame ex",
-      "name_de": "",
+      "name_de": "Fiaro-ex",
       "set": "DLR",
       "number": "88",
       "type": "Stage 2",
@@ -1501,7 +1501,7 @@
     },
     {
       "name_en": "Aarune",
-      "name_de": "",
+      "name_de": "Johnson",
       "set": "DLR",
       "number": "89",
       "type": "Supporter",
@@ -1518,7 +1518,7 @@
     },
     {
       "name_en": "Adventure Lantern",
-      "name_de": "",
+      "name_de": "Abenteuerlaterne",
       "set": "DLR",
       "number": "90",
       "type": "Item",
@@ -1535,7 +1535,7 @@
     },
     {
       "name_en": "Custom Vest",
-      "name_de": "",
+      "name_de": "Funktionsweste",
       "set": "DLR",
       "number": "91",
       "type": "Tool",
@@ -1569,7 +1569,7 @@
     },
     {
       "name_en": "Grisham",
-      "name_de": "",
+      "name_de": "Gris",
       "set": "DLR",
       "number": "93",
       "type": "Supporter",
@@ -1586,7 +1586,7 @@
     },
     {
       "name_en": "Legendary Pyroduct",
-      "name_de": "",
+      "name_de": "Legendäre Lavaröhre",
       "set": "DLR",
       "number": "94",
       "type": "Stadium",
@@ -1603,7 +1603,7 @@
     },
     {
       "name_en": "Legendary Pyroduct",
-      "name_de": "",
+      "name_de": "Legendäre Lavaröhre",
       "set": "DLR",
       "number": "95",
       "type": "Stadium",
@@ -1620,7 +1620,7 @@
     },
     {
       "name_en": "Legendary Summit",
-      "name_de": "",
+      "name_de": "Legendärer Gipfel",
       "set": "DLR",
       "number": "96",
       "type": "Stadium",
@@ -1637,7 +1637,7 @@
     },
     {
       "name_en": "Legendary Summit",
-      "name_de": "",
+      "name_de": "Legendärer Gipfel",
       "set": "DLR",
       "number": "97",
       "type": "Stadium",
@@ -1654,7 +1654,7 @@
     },
     {
       "name_en": "Legendary Trench",
-      "name_de": "",
+      "name_de": "Legendärer Graben",
       "set": "DLR",
       "number": "98",
       "type": "Stadium",
@@ -1671,7 +1671,7 @@
     },
     {
       "name_en": "Legendary Trench",
-      "name_de": "",
+      "name_de": "Legendärer Graben",
       "set": "DLR",
       "number": "99",
       "type": "Stadium",
@@ -1688,7 +1688,7 @@
     },
     {
       "name_en": "Mega Rayquaza Cap",
-      "name_de": "",
+      "name_de": "Mega-Rayquaza-Kappe",
       "set": "DLR",
       "number": "100",
       "type": "Tool",
@@ -1705,7 +1705,7 @@
     },
     {
       "name_en": "Tasty Rice Ball",
-      "name_de": "",
+      "name_de": "Leckerer Reisball",
       "set": "DLR",
       "number": "101",
       "type": "Item",
@@ -1722,7 +1722,7 @@
     },
     {
       "name_en": "Tate & Liza's Training",
-      "name_de": "",
+      "name_de": "Ben & Svenjas Training",
       "set": "DLR",
       "number": "102",
       "type": "Supporter",
@@ -1739,7 +1739,7 @@
     },
     {
       "name_en": "Zinnia's Trust",
-      "name_de": "",
+      "name_de": "Amalias Vertrauen",
       "set": "DLR",
       "number": "103",
       "type": "Supporter",
@@ -1756,7 +1756,7 @@
     },
     {
       "name_en": "Masquerain",
-      "name_de": "",
+      "name_de": "Maskeregen",
       "set": "DLR",
       "number": "104",
       "type": "Stage 1",
@@ -1773,7 +1773,7 @@
     },
     {
       "name_en": "Sprigatito",
-      "name_de": "",
+      "name_de": "Felori",
       "set": "DLR",
       "number": "105",
       "type": "Basic",
@@ -1790,7 +1790,7 @@
     },
     {
       "name_en": "Growlithe",
-      "name_de": "",
+      "name_de": "Fukano",
       "set": "DLR",
       "number": "106",
       "type": "Basic",
@@ -1807,7 +1807,7 @@
     },
     {
       "name_en": "Magmortar",
-      "name_de": "",
+      "name_de": "Magbrant",
       "set": "DLR",
       "number": "107",
       "type": "Stage 1",
@@ -1824,7 +1824,7 @@
     },
     {
       "name_en": "Electivire",
-      "name_de": "",
+      "name_de": "Elevoltek",
       "set": "DLR",
       "number": "108",
       "type": "Stage 1",
@@ -1841,7 +1841,7 @@
     },
     {
       "name_en": "Pincurchin",
-      "name_de": "",
+      "name_de": "Britzigel",
       "set": "DLR",
       "number": "109",
       "type": "Basic",
@@ -1858,7 +1858,7 @@
     },
     {
       "name_en": "Enamorus",
-      "name_de": "",
+      "name_de": "Cupidos",
       "set": "DLR",
       "number": "110",
       "type": "Basic",
@@ -1875,7 +1875,7 @@
     },
     {
       "name_en": "Groudon",
-      "name_de": "",
+      "name_de": "Groudon",
       "set": "DLR",
       "number": "111",
       "type": "Basic",
@@ -1892,7 +1892,7 @@
     },
     {
       "name_en": "Zorua",
-      "name_de": "",
+      "name_de": "Zorua",
       "set": "DLR",
       "number": "112",
       "type": "Basic",
@@ -1909,7 +1909,7 @@
     },
     {
       "name_en": "Inkay",
-      "name_de": "",
+      "name_de": "Iscalar",
       "set": "DLR",
       "number": "113",
       "type": "Basic",
@@ -1926,7 +1926,7 @@
     },
     {
       "name_en": "Eevee",
-      "name_de": "",
+      "name_de": "Evoli",
       "set": "DLR",
       "number": "114",
       "type": "Basic",
@@ -1943,7 +1943,7 @@
     },
     {
       "name_en": "Azurill",
-      "name_de": "",
+      "name_de": "Azurill",
       "set": "DLR",
       "number": "115",
       "type": "Basic",
@@ -1960,7 +1960,7 @@
     },
     {
       "name_en": "Altaria",
-      "name_de": "",
+      "name_de": "Altaria",
       "set": "DLR",
       "number": "116",
       "type": "Stage 1",
@@ -1977,7 +1977,7 @@
     },
     {
       "name_en": "Kecleon",
-      "name_de": "",
+      "name_de": "Kecleon",
       "set": "DLR",
       "number": "117",
       "type": "Basic",
@@ -1994,7 +1994,7 @@
     },
     {
       "name_en": "Mega Golisopod ex",
-      "name_de": "",
+      "name_de": "Mega-Tectass-ex",
       "set": "DLR",
       "number": "118",
       "type": "Stage 1",
@@ -2011,7 +2011,7 @@
     },
     {
       "name_en": "Heat Rotom ex",
-      "name_de": "",
+      "name_de": "Hitze-Rotom-ex",
       "set": "DLR",
       "number": "119",
       "type": "Basic",
@@ -2028,7 +2028,7 @@
     },
     {
       "name_en": "Wishiwashi ex",
-      "name_de": "",
+      "name_de": "Lusardin-ex",
       "set": "DLR",
       "number": "120",
       "type": "Basic",
@@ -2045,7 +2045,7 @@
     },
     {
       "name_en": "Raikou ex",
-      "name_de": "",
+      "name_de": "Raikou-ex",
       "set": "DLR",
       "number": "121",
       "type": "Basic",
@@ -2062,7 +2062,7 @@
     },
     {
       "name_en": "Mega Golurk ex",
-      "name_de": "",
+      "name_de": "Mega-Golgantes-ex",
       "set": "DLR",
       "number": "122",
       "type": "Stage 1",
@@ -2079,7 +2079,7 @@
     },
     {
       "name_en": "Mega Malamar ex",
-      "name_de": "",
+      "name_de": "Mega-Calamanero-ex",
       "set": "DLR",
       "number": "123",
       "type": "Stage 1",
@@ -2096,7 +2096,7 @@
     },
     {
       "name_en": "Talonflame ex",
-      "name_de": "",
+      "name_de": "Fiaro-ex",
       "set": "DLR",
       "number": "124",
       "type": "Stage 2",
@@ -2113,7 +2113,7 @@
     },
     {
       "name_en": "Aarune",
-      "name_de": "",
+      "name_de": "Johnson",
       "set": "DLR",
       "number": "125",
       "type": "Supporter",
@@ -2130,7 +2130,7 @@
     },
     {
       "name_en": "Adventure Lantern",
-      "name_de": "",
+      "name_de": "Abenteuerlaterne",
       "set": "DLR",
       "number": "126",
       "type": "Item",
@@ -2147,7 +2147,7 @@
     },
     {
       "name_en": "Custom Vest",
-      "name_de": "",
+      "name_de": "Funktionsweste",
       "set": "DLR",
       "number": "127",
       "type": "Tool",
@@ -2198,7 +2198,7 @@
     },
     {
       "name_en": "Tate & Liza's Training",
-      "name_de": "",
+      "name_de": "Ben & Svenjas Training",
       "set": "DLR",
       "number": "130",
       "type": "Supporter",
@@ -2215,7 +2215,7 @@
     },
     {
       "name_en": "Zinnia's Trust",
-      "name_de": "",
+      "name_de": "Amalias Vertrauen",
       "set": "DLR",
       "number": "131",
       "type": "Supporter",
@@ -2283,7 +2283,7 @@
     },
     {
       "name_en": "Mega Golisopod ex",
-      "name_de": "",
+      "name_de": "Mega-Tectass-ex",
       "set": "DLR",
       "number": "135",
       "type": "Stage 1",
@@ -2300,7 +2300,7 @@
     },
     {
       "name_en": "Raikou ex",
-      "name_de": "",
+      "name_de": "Raikou-ex",
       "set": "DLR",
       "number": "136",
       "type": "Basic",
@@ -2317,7 +2317,7 @@
     },
     {
       "name_en": "Mega Golurk ex",
-      "name_de": "",
+      "name_de": "Mega-Golgantes-ex",
       "set": "DLR",
       "number": "137",
       "type": "Stage 1",
@@ -2334,7 +2334,7 @@
     },
     {
       "name_en": "Mega Rayquaza ex",
-      "name_de": "",
+      "name_de": "Mega-Rayquaza-ex",
       "set": "DLR",
       "number": "138",
       "type": "Basic",
@@ -2351,7 +2351,7 @@
     },
     {
       "name_en": "Aarune",
-      "name_de": "",
+      "name_de": "Johnson",
       "set": "DLR",
       "number": "139",
       "type": "Supporter",
@@ -2368,7 +2368,7 @@
     },
     {
       "name_en": "Zinnia's Trust",
-      "name_de": "",
+      "name_de": "Amalias Vertrauen",
       "set": "DLR",
       "number": "140",
       "type": "Supporter",
@@ -2385,7 +2385,7 @@
     },
     {
       "name_en": "Mega Rayquaza ex",
-      "name_de": "",
+      "name_de": "Mega-Rayquaza-ex",
       "set": "DLR",
       "number": "141",
       "type": "Basic",

@@ -320,6 +320,46 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
     return complete_cards, existing_keys, incomplete_cards
 
 
+# ── Deutsche Namen nachtragen (21.11.2026, UI-163) ─────────────────────
+#
+# Ursache: die deutsche Namensliste wurde nur fuer NEUE oder UNVOLLSTAENDIGE
+# Karten geholt. Eine Karte, die beim ersten Lauf ohne deutschen Namen
+# vollstaendig wurde (Limitless fuehrt den deutschen Namen oft erst Tage nach
+# dem Englischen), wurde nie wieder angefasst — `_classify_incompleteness`
+# schaut nicht auf name_de. Folge: "Abenteuerlaterne" fand 0 Karten, 135 von
+# 141 DLR-Karten hatten keinen deutschen Namen.
+#
+# Signal: eine Karte MIT deutschem Kartentext (`card_text_de`, gefuellt von
+# scrape_kartentexte.py) ohne deutschen Namen hat eine deutsche Fassung —
+# der Name fehlt also nur bei uns. Karten ohne deutschen Text (Japan-Promos
+# usw.) bleiben unberuehrt; sie haben keine deutsche Fassung, "fehlt" waere
+# dort falsch (5.194 leere Namen im Gesamtbestand, nur 351 mit Textbeleg).
+def fehlende_deutsche_namen(karten: list) -> set:
+    """Schluessel 'SET::NUMMER' der Karten mit deutschem Text, aber ohne Namen."""
+    return {
+        f"{k.get('set', '')}::{k.get('number', '')}"
+        for k in karten
+        if not (k.get("name_de") or "").strip()
+        and (k.get("card_text_de") or "").strip()
+    }
+
+
+def deutsche_namen_nachtragen(karten: list, de_lookup: dict) -> int:
+    """Traegt Namen aus de_lookup ein, ueberschreibt nie einen vorhandenen.
+
+    Verbindung ueber (Set, Nummer), nie ueber den Namen.
+    """
+    n = 0
+    for k in karten:
+        if (k.get("name_de") or "").strip():
+            continue
+        name = (de_lookup.get(f"{k.get('set', '')}::{k.get('number', '')}") or "").strip()
+        if name:
+            k["name_de"] = name
+            n += 1
+    return n
+
+
 # PHASE 1: FAST LIST SCRAPING
 def scrape_all_cards_list(
     settings: dict,
@@ -850,6 +890,7 @@ def main():
         for ic in incomplete_cards:
             if not ic.get("name_de"):
                 de_needed_keys.add(f"{ic['set']}::{ic['number']}")
+        de_needed_keys |= fehlende_deutsche_namen(existing_cards)
 
         if de_needed_keys:
             logger.info("=" * 60)
@@ -877,6 +918,9 @@ def main():
                 key = f"{ic['set']}::{ic['number']}"
                 if key in de_lookup:
                     ic["name_de"] = de_lookup[key]
+        nachgetragen = deutsche_namen_nachtragen(existing_cards, de_lookup)
+        if nachgetragen:
+            logger.info("Deutsche Namen nachgetragen: %s bereits vollstaendige Karten.", nachgetragen)
 
         # Prepare incomplete cards for re-scrape
         for ic in incomplete_cards:
@@ -889,7 +933,7 @@ def main():
 
         all_cards = incomplete_cards + en_cards
 
-        if not all_cards:
+        if not all_cards and not nachgetragen:
             logger.info("Keine neuen oder unvollstaendigen Karten gefunden. Beende.")
             return
 
@@ -902,7 +946,7 @@ def main():
         # detail scrape to update the quarantine state.
         attempted_keys = {f"{ic.get('set','')}::{ic.get('number','')}" for ic in incomplete_cards}
 
-        if not settings.get("skip_detail_scraping", False):
+        if all_cards and not settings.get("skip_detail_scraping", False):
             logger.info("=" * 60)
             logger.info("PHASE 2: Detail-Seiten scrapen ...")
             logger.info("=" * 60)

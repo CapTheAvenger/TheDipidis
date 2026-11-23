@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "last_updated": "2026-11-22",
+    "last_updated": "2026-11-23",
     "window_days": 14,
-    "window_start": "2026-11-08",
-    "window_end": "2026-11-22",
+    "window_start": "2026-11-09",
+    "window_end": "2026-11-23",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
     "content_to": "2026-11-19",
-    "samples_outside_window": 300,
-    "team_count": 67,
-    "teams_with_samples": 65,
-    "sample_count": 396,
+    "samples_outside_window": 336,
+    "team_count": 66,
+    "teams_with_samples": 64,
+    "sample_count": 390,
     "species_count": 75,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
@@ -2744,48 +2744,6 @@
       "nature": "Jolly",
       "date": "11 Nov 2026",
       "replica": "JBQ9R170NL"
-    },
-    {
-      "species": "Floette-Eternal",
-      "evs": "16 HP / 12 Def / 15 SpA / 23 Spe",
-      "nature": "Modest",
-      "date": "8 Nov 2026",
-      "replica": "YYG0UU9QF8"
-    },
-    {
-      "species": "Metagross",
-      "evs": "28 HP / 8 Atk / 1 Def / 1 SpD / 28 Spe",
-      "nature": "Jolly",
-      "date": "8 Nov 2026",
-      "replica": "YYG0UU9QF8"
-    },
-    {
-      "species": "Rillaboom",
-      "evs": "26 HP / 5 Atk / 1 Def / 31 SpD / 3 Spe",
-      "nature": "Adamant",
-      "date": "8 Nov 2026",
-      "replica": "YYG0UU9QF8"
-    },
-    {
-      "species": "Incineroar",
-      "evs": "31 HP / 20 Def / 15 SpD",
-      "nature": "Impish",
-      "date": "8 Nov 2026",
-      "replica": "YYG0UU9QF8"
-    },
-    {
-      "species": "Basculegion",
-      "evs": "28 Atk / 14 Def / 24 Spe",
-      "nature": "Adamant",
-      "date": "8 Nov 2026",
-      "replica": "YYG0UU9QF8"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "5 HP / 30 Atk / 1 Def / 1 SpD / 29 Spe",
-      "nature": "Adamant",
-      "date": "8 Nov 2026",
-      "replica": "YYG0UU9QF8"
     }
   ]
 }

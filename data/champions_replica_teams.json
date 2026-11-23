@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-11-22",
+    "last_updated": "2026-11-23",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-C=gid2001945654, M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-C",
@@ -11,7 +11,7 @@
       "M-B",
       "M-A"
     ],
-    "team_count": 67
+    "team_count": 66
   },
   "teams": [
     {
@@ -6458,105 +6458,6 @@
             "Bullet Seed",
             "Pin Missile",
             "Detect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 67,
-      "replica_code": "YYG0UU9QF8",
-      "team_name": "BTrickroomZ's Metagross Floette Team",
-      "tournament": "-",
-      "trainer": "Yuta Ishigaki",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "",
-      "date_shared": "8 Nov 2026",
-      "pokepaste_url": "https://pokepast.es/fd2afbddd0a66106",
-      "pokemon": [
-        {
-          "name": "Floette-Eternal",
-          "item": "Floettite",
-          "ability": "Flower Veil",
-          "tera_type": "",
-          "evs": "16 HP / 12 Def / 15 SpA / 23 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Moonblast",
-            "Dazzling Gleam",
-            "Calm Mind",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Metagross",
-          "item": "Metagrossite",
-          "ability": "Clear Body",
-          "tera_type": "",
-          "evs": "28 HP / 8 Atk / 1 Def / 1 SpD / 28 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Psychic Fangs",
-            "Body Press",
-            "Iron Defense",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Rillaboom",
-          "item": "Miracle Seed",
-          "ability": "Grassy Surge",
-          "tera_type": "",
-          "evs": "26 HP / 5 Atk / 1 Def / 31 SpD / 3 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Wood Hammer",
-            "Grassy Glide",
-            "U-turn",
-            "Fake Out"
-          ]
-        },
-        {
-          "name": "Incineroar",
-          "item": "Sitrus Berry",
-          "ability": "Intimidate",
-          "tera_type": "",
-          "evs": "31 HP / 20 Def / 15 SpD",
-          "nature": "Impish",
-          "moves": [
-            "Flare Blitz",
-            "Helping Hand",
-            "Parting Shot",
-            "Fake Out"
-          ]
-        },
-        {
-          "name": "Basculegion",
-          "item": "Life Orb",
-          "ability": "Adaptability",
-          "tera_type": "",
-          "evs": "28 Atk / 14 Def / 24 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Wave Crash",
-            "Last Respects",
-            "Aqua Jet",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Garchomp",
-          "item": "Choice Scarf",
-          "ability": "Rough Skin",
-          "tera_type": "",
-          "evs": "5 HP / 30 Atk / 1 Def / 1 SpD / 29 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Dragon Claw",
-            "Earthquake",
-            "Rock Slide",
-            "Stomping Tantrum"
           ]
         }
       ],

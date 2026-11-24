@@ -2182,6 +2182,11 @@
                 selectedMetaFilters,
                 sortOrder,
                 showOnlyOnePrint,
+                // UI-165: ohne diese drei blieb ein Klick auf „Im Besitz“ an der
+                // Signaturpruefung haengen — gleiche Signatur, kein Neuzeichnen.
+                besitzFilter,
+                sammlungAnsicht,
+                angemeldet: !!(typeof auth !== 'undefined' && auth && auth.currentUser),
                 dataLen: window.allCardsData.length
             });
 

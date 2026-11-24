@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-23T03:45:07Z",
+  "erzeugt_am": "2026-11-24T03:45:12Z",
   "id": "mega-stalobor",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -8,11 +8,11 @@
   "deck": "mega-excadrill-ex",
   "gegner": [
    {
-    "anteil": "10,08",
+    "anteil": "10,25",
     "name": "Dragapult",
     "online": [
-     49,
-     43,
+     51,
+     50,
      3
     ],
     "slug": "dragapult-ex",
@@ -23,11 +23,11 @@
     ]
    },
    {
-    "anteil": "9,33",
+    "anteil": "8,82",
     "name": "Mega Rayquaza",
     "online": [
      34,
-     30,
+     36,
      0
     ],
     "slug": "mega-rayquaza-ex",
@@ -38,11 +38,11 @@
     ]
    },
    {
-    "anteil": "6,05",
+    "anteil": "6,09",
     "name": "Basic Box",
     "online": [
-     25,
-     27,
+     28,
+     28,
      0
     ],
     "slug": "basic-box-m",
@@ -53,11 +53,11 @@
     ]
    },
    {
-    "anteil": "4,36",
+    "anteil": "4,19",
     "name": "Slowking",
     "online": [
      20,
-     21,
+     22,
      0
     ],
     "slug": "slowking-scr",
@@ -68,11 +68,11 @@
     ]
    },
    {
-    "anteil": "3,74",
+    "anteil": "3,96",
     "name": "Ogerpon Meganium Hydrapple",
     "online": [
-     9,
-     24,
+     10,
+     27,
      0
     ],
     "slug": "ogerpon-meganium-hydrapple",
@@ -83,26 +83,11 @@
     ]
    },
    {
-    "anteil": "3,33",
-    "name": "N's Zoroark",
-    "online": [
-     17,
-     13,
-     1
-    ],
-    "slug": "n-zoroark",
-    "vor_ort": [
-     155,
-     110,
-     45
-    ]
-   },
-   {
-    "anteil": "3,28",
+    "anteil": "3,53",
     "name": "Talonflame Dusknoir",
     "online": [
-     6,
-     16,
+     8,
+     18,
      1
     ],
     "slug": "talonflame-dusknoir",
@@ -113,11 +98,26 @@
     ]
    },
    {
-    "anteil": "3,12",
+    "anteil": "3,50",
+    "name": "N's Zoroark",
+    "online": [
+     20,
+     15,
+     1
+    ],
+    "slug": "n-zoroark",
+    "vor_ort": [
+     155,
+     110,
+     45
+    ]
+   },
+   {
+    "anteil": "3,29",
     "name": "Alakazam Dudunsparce",
     "online": [
      8,
-     15,
+     22,
      0
     ],
     "slug": "alakazam-dudunsparce",
@@ -128,11 +128,11 @@
     ]
    },
    {
-    "anteil": "2,58",
+    "anteil": "2,54",
     "name": "Dhelmise",
     "online": [
-     9,
-     2,
+     12,
+     5,
      0
     ],
     "slug": "dhelmise-pbl",
@@ -143,10 +143,25 @@
     ]
    },
    {
-    "anteil": "2,55",
+    "anteil": "2,50",
+    "name": "Crustle",
+    "online": [
+     25,
+     5,
+     0
+    ],
+    "slug": "crustle-dri",
+    "vor_ort": [
+     87,
+     21,
+     11
+    ]
+   },
+   {
+    "anteil": "2,47",
     "name": "Lopunny Dudunsparce",
     "online": [
-     9,
+     10,
      13,
      0
     ],
@@ -158,26 +173,11 @@
     ]
    },
    {
-    "anteil": "2,45",
-    "name": "Crustle",
-    "online": [
-     24,
-     3,
-     0
-    ],
-    "slug": "crustle-dri",
-    "vor_ort": [
-     87,
-     21,
-     11
-    ]
-   },
-   {
-    "anteil": "2,35",
+    "anteil": "2,21",
     "name": "Dragapult Dudunsparce",
     "online": [
      16,
-     11,
+     12,
      1
     ],
     "slug": "dragapult-dudunsparce",
@@ -191,8 +191,8 @@
     "anteil": "2,19",
     "name": "Festival Lead",
     "online": [
-     10,
-     5,
+     11,
+     7,
      0
     ],
     "slug": "festival-lead",
@@ -203,11 +203,11 @@
     ]
    },
    {
-    "anteil": "2,12",
+    "anteil": "2,19",
     "name": "Mega Lucario",
     "online": [
-     9,
-     13,
+     10,
+     14,
      1
     ],
     "slug": "mega-lucario-ex",
@@ -218,11 +218,11 @@
     ]
    },
    {
-    "anteil": "2,02",
+    "anteil": "1,97",
     "name": "Rocket's Honchkrow",
     "online": [
      6,
-     17,
+     18,
      0
     ],
     "slug": "rockets-honchkrow",
@@ -233,10 +233,10 @@
     ]
    },
    {
-    "anteil": "1,71",
+    "anteil": "1,69",
     "name": "Greninja",
     "online": [
-     11,
+     13,
      4,
      0
     ],
@@ -248,7 +248,7 @@
     ]
    },
    {
-    "anteil": "1,58",
+    "anteil": "1,55",
     "name": "Dragapult Blaziken",
     "online": [
      4,
@@ -263,7 +263,7 @@
     ]
    },
    {
-    "anteil": "1,53",
+    "anteil": "1,47",
     "name": "Sharpedo Toxtricity",
     "online": [
      5,
@@ -279,6 +279,21 @@
    },
    {
     "anteil": "1,42",
+    "name": "Cynthia's Garchomp",
+    "online": [
+     8,
+     2,
+     0
+    ],
+    "slug": "cynthia-garchomp-ex",
+    "vor_ort": [
+     20,
+     29,
+     11
+    ]
+   },
+   {
+    "anteil": "1,30",
     "name": "Dragapult Dusknoir",
     "online": [
      7,
@@ -293,26 +308,11 @@
     ]
    },
    {
-    "anteil": "1,37",
-    "name": "Cynthia's Garchomp",
-    "online": [
-     6,
-     2,
-     0
-    ],
-    "slug": "cynthia-garchomp-ex",
-    "vor_ort": [
-     20,
-     29,
-     11
-    ]
-   },
-   {
-    "anteil": "1,17",
+    "anteil": "1,21",
     "name": "Mega Golisopod",
     "online": [
      6,
-     4,
+     5,
      0
     ],
     "slug": "mega-golisopod-ex",
@@ -323,7 +323,22 @@
     ]
    },
    {
-    "anteil": "1,14",
+    "anteil": "1,07",
+    "name": "Lucario Hariyama",
+    "online": [
+     4,
+     9,
+     0
+    ],
+    "slug": "lucario-hariyama",
+    "vor_ort": [
+     26,
+     62,
+     9
+    ]
+   },
+   {
+    "anteil": "1,05",
     "name": "Iron Thorns",
     "online": [
      4,
@@ -338,7 +353,7 @@
     ]
    },
    {
-    "anteil": "1,09",
+    "anteil": "1,04",
     "name": "Alakazam Dusknoir",
     "online": [
      1,
@@ -353,22 +368,7 @@
     ]
    },
    {
-    "anteil": "1,03",
-    "name": "Lucario Hariyama",
-    "online": [
-     4,
-     6,
-     0
-    ],
-    "slug": "lucario-hariyama",
-    "vor_ort": [
-     26,
-     62,
-     9
-    ]
-   },
-   {
-    "anteil": "1,00",
+    "anteil": "0,92",
     "name": "Grimmsnarl Froslass",
     "online": [
      6,
@@ -383,11 +383,11 @@
     ]
    },
    {
-    "anteil": "0,83",
+    "anteil": "0,80",
     "name": "Mega Greninja",
     "online": [
      5,
-     0,
+     1,
      0
     ],
     "slug": "mega-greninja-ex",
@@ -398,7 +398,52 @@
     ]
    },
    {
-    "anteil": "0,72",
+    "anteil": "0,69",
+    "name": "Toucannon",
+    "online": [
+     4,
+     5,
+     0
+    ],
+    "slug": "toucannon-pbl",
+    "vor_ort": [
+     6,
+     12,
+     1
+    ]
+   },
+   {
+    "anteil": "0,66",
+    "name": "Igglybuff",
+    "online": [
+     4,
+     5,
+     0
+    ],
+    "slug": "igglybuff-30c",
+    "vor_ort": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,64",
+    "name": "Manectric Eelektrik",
+    "online": [
+     1,
+     3,
+     0
+    ],
+    "slug": "manectric-eelektrik",
+    "vor_ort": [
+     2,
+     3,
+     0
+    ]
+   },
+   {
+    "anteil": "0,64",
     "name": "Ogerpon Meganium Arboliva",
     "online": [
      1,
@@ -413,85 +458,10 @@
     ]
    },
    {
-    "anteil": "0,67",
-    "name": "Igglybuff",
-    "online": [
-     3,
-     5,
-     0
-    ],
-    "slug": "igglybuff-30c",
-    "vor_ort": [
-     0,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,62",
-    "name": "Mega Starmie",
-    "online": [
-     1,
-     2,
-     0
-    ],
-    "slug": "mega-starmie-ex",
-    "vor_ort": [
-     9,
-     6,
-     4
-    ]
-   },
-   {
-    "anteil": "0,62",
-    "name": "Rocket's Mewtwo",
-    "online": [
-     1,
-     2,
-     0
-    ],
-    "slug": "rocket-mewtwo-ex",
-    "vor_ort": [
-     32,
-     6,
-     3
-    ]
-   },
-   {
-    "anteil": "0,60",
-    "name": "Seaking Festival Lead",
-    "online": [
-     5,
-     4,
-     0
-    ],
-    "slug": "seaking-pre",
-    "vor_ort": [
-     7,
-     22,
-     7
-    ]
-   },
-   {
-    "anteil": "0,60",
-    "name": "Toucannon",
-    "online": [
-     3,
-     4,
-     0
-    ],
-    "slug": "toucannon-pbl",
-    "vor_ort": [
-     6,
-     12,
-     1
-    ]
-   },
-   {
-    "anteil": "0,59",
+    "anteil": "0,63",
     "name": "Lopunny Dusknoir",
     "online": [
-     2,
+     3,
      3,
      0
     ],
@@ -503,11 +473,41 @@
     ]
    },
    {
-    "anteil": "0,59",
+    "anteil": "0,63",
+    "name": "Mega Starmie",
+    "online": [
+     1,
+     4,
+     0
+    ],
+    "slug": "mega-starmie-ex",
+    "vor_ort": [
+     9,
+     6,
+     4
+    ]
+   },
+   {
+    "anteil": "0,63",
+    "name": "Rocket's Mewtwo",
+    "online": [
+     2,
+     2,
+     0
+    ],
+    "slug": "rocket-mewtwo-ex",
+    "vor_ort": [
+     32,
+     6,
+     3
+    ]
+   },
+   {
+    "anteil": "0,61",
     "name": "Mega Malamar",
     "online": [
      3,
-     3,
+     4,
      0
     ],
     "slug": "mega-malamar-ex",
@@ -518,11 +518,26 @@
     ]
    },
    {
+    "anteil": "0,58",
+    "name": "Seaking Festival Lead",
+    "online": [
+     5,
+     5,
+     0
+    ],
+    "slug": "seaking-pre",
+    "vor_ort": [
+     7,
+     22,
+     7
+    ]
+   },
+   {
     "anteil": "0,57",
     "name": "Ethan's Typhlosion",
     "online": [
      2,
-     3,
+     5,
      0
     ],
     "slug": "ethan-typhlosion",
@@ -534,25 +549,10 @@
    },
    {
     "anteil": "0,57",
-    "name": "Manectric Eelektrik",
-    "online": [
-     1,
-     2,
-     0
-    ],
-    "slug": "manectric-eelektrik",
-    "vor_ort": [
-     2,
-     3,
-     0
-    ]
-   },
-   {
-    "anteil": "0,55",
     "name": "Mega Charizard Y",
     "online": [
      3,
-     3,
+     4,
      0
     ],
     "slug": "mega-charizard-y-ex",
@@ -578,10 +578,10 @@
     ]
    },
    {
-    "anteil": "0,51",
+    "anteil": "0,53",
     "name": "Okidogi Barbaracle",
     "online": [
-     1,
+     2,
      4,
      0
     ],
@@ -593,10 +593,10 @@
     ]
    },
    {
-    "anteil": "0,47",
+    "anteil": "0,51",
     "name": "Kangaskhan Bouffalant",
     "online": [
-     1,
+     2,
      1,
      0
     ],
@@ -608,11 +608,11 @@
     ]
    },
    {
-    "anteil": "0,47",
+    "anteil": "0,50",
     "name": "Raging Bolt Ogerpon",
     "online": [
-     2,
-     2,
+     3,
+     3,
      0
     ],
     "slug": "raging-bolt-ogerpon",
@@ -623,26 +623,11 @@
     ]
    },
    {
-    "anteil": "0,46",
-    "name": "Hop's Trevenant",
-    "online": [
-     0,
-     3,
-     0
-    ],
-    "slug": "hops-trevenant",
-    "vor_ort": [
-     9,
-     7,
-     5
-    ]
-   },
-   {
-    "anteil": "0,46",
+    "anteil": "0,48",
     "name": "Mega Venusaur",
     "online": [
      1,
-     2,
+     3,
      0
     ],
     "slug": "mega-venusaur-ex",
@@ -653,10 +638,10 @@
     ]
    },
    {
-    "anteil": "0,41",
+    "anteil": "0,42",
     "name": "Beedrill",
     "online": [
-     3,
+     4,
      1,
      0
     ],
@@ -668,7 +653,22 @@
     ]
    },
    {
-    "anteil": "0,39",
+    "anteil": "0,42",
+    "name": "Hop's Trevenant",
+    "online": [
+     0,
+     4,
+     0
+    ],
+    "slug": "hops-trevenant",
+    "vor_ort": [
+     9,
+     7,
+     5
+    ]
+   },
+   {
+    "anteil": "0,41",
     "name": "Starmie Froslass",
     "online": [
      1,
@@ -679,6 +679,21 @@
     "vor_ort": [
      9,
      4,
+     1
+    ]
+   },
+   {
+    "anteil": "0,39",
+    "name": "Mega Charizard X",
+    "online": [
+     2,
+     1,
+     1
+    ],
+    "slug": "mega-charizard-x-ex",
+    "vor_ort": [
+     1,
+     2,
      1
     ]
    },
@@ -698,37 +713,7 @@
     ]
    },
    {
-    "anteil": "0,38",
-    "name": "Mega Charizard X",
-    "online": [
-     1,
-     1,
-     1
-    ],
-    "slug": "mega-charizard-x-ex",
-    "vor_ort": [
-     1,
-     2,
-     1
-    ]
-   },
-   {
-    "anteil": "0,38",
-    "name": "Mega Manectric",
-    "online": [
-     3,
-     0,
-     0
-    ],
-    "slug": "mega-manectric-ex-meg",
-    "vor_ort": [
-     0,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,36",
+    "anteil": "0,35",
     "name": "Iono's Bellibolt",
     "online": [
      1,
@@ -743,10 +728,10 @@
     ]
    },
    {
-    "anteil": "0,31",
+    "anteil": "0,35",
     "name": "Mega Darkrai",
     "online": [
-     2,
+     5,
      4,
      0
     ],
@@ -758,7 +743,37 @@
     ]
    },
    {
+    "anteil": "0,35",
+    "name": "Mega Manectric",
+    "online": [
+     3,
+     0,
+     0
+    ],
+    "slug": "mega-manectric-ex-meg",
+    "vor_ort": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
     "anteil": "0,29",
+    "name": "Ceruledge",
+    "online": [
+     0,
+     3,
+     0
+    ],
+    "slug": "ceruledge-ex",
+    "vor_ort": [
+     8,
+     13,
+     0
+    ]
+   },
+   {
+    "anteil": "0,28",
     "name": "Froslass Munkidori",
     "online": [
      0,
@@ -774,17 +789,17 @@
    },
    {
     "anteil": "0,28",
-    "name": "Ceruledge",
+    "name": "Toxtricity Box",
     "online": [
-     0,
-     3,
+     2,
+     1,
      0
     ],
-    "slug": "ceruledge-ex",
+    "slug": "toxtricity-box",
     "vor_ort": [
-     8,
-     13,
-     0
+     4,
+     6,
+     1
     ]
    },
    {
@@ -804,36 +819,21 @@
    },
    {
     "anteil": "0,26",
-    "name": "Mega Absol Box",
+    "name": "Mega Dragonite",
     "online": [
-     2,
-     1,
-     0
-    ],
-    "slug": "mega-absol-box",
-    "vor_ort": [
-     2,
      0,
-     1
-    ]
-   },
-   {
-    "anteil": "0,26",
-    "name": "Toxtricity Box",
-    "online": [
-     1,
-     1,
+     2,
      0
     ],
-    "slug": "toxtricity-box",
+    "slug": "mega-dragonite-ex",
     "vor_ort": [
-     4,
-     6,
-     1
+     0,
+     1,
+     0
     ]
    },
    {
-    "anteil": "0,24",
+    "anteil": "0,25",
     "name": "Cinccino",
     "online": [
      0,
@@ -848,48 +848,33 @@
     ]
    },
    {
-    "anteil": "0,24",
-    "name": "Mega Dragonite",
+    "anteil": "0,25",
+    "name": "Mega Absol Box",
     "online": [
-     0,
+     2,
      1,
      0
     ],
-    "slug": "mega-dragonite-ex",
+    "slug": "mega-absol-box",
     "vor_ort": [
+     2,
      0,
-     1,
-     0
+     1
     ]
    },
    {
     "anteil": "0,23",
-    "name": "Flareon Noctowl",
+    "name": "Mega Chandelure",
     "online": [
      0,
      1,
      0
     ],
-    "slug": "flareon-noctowl",
+    "slug": "mega-chandelure-ex",
     "vor_ort": [
-     2,
      4,
-     0
-    ]
-   },
-   {
-    "anteil": "0,23",
-    "name": "Mega Abomasnow",
-    "online": [
-     2,
-     1,
-     0
-    ],
-    "slug": "mega-abomasnow-ex",
-    "vor_ort": [
-     1,
-     0,
-     0
+     10,
+     5
     ]
    },
    {
@@ -908,7 +893,37 @@
     ]
    },
    {
-    "anteil": "0,23",
+    "anteil": "0,22",
+    "name": "Flareon Noctowl",
+    "online": [
+     0,
+     1,
+     0
+    ],
+    "slug": "flareon-noctowl",
+    "vor_ort": [
+     2,
+     4,
+     0
+    ]
+   },
+   {
+    "anteil": "0,22",
+    "name": "Mega Abomasnow",
+    "online": [
+     2,
+     1,
+     0
+    ],
+    "slug": "mega-abomasnow-ex",
+    "vor_ort": [
+     1,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,20",
     "name": "Toxtricity",
     "online": [
      1,
@@ -923,7 +938,7 @@
     ]
    },
    {
-    "anteil": "0,21",
+    "anteil": "0,19",
     "name": "Hydreigon",
     "online": [
      2,
@@ -938,22 +953,22 @@
     ]
    },
    {
-    "anteil": "0,21",
-    "name": "Mega Chandelure",
+    "anteil": "0,19",
+    "name": "Joltik Box",
     "online": [
      0,
-     1,
+     0,
      0
     ],
-    "slug": "mega-chandelure-ex",
+    "slug": "joltik-box",
     "vor_ort": [
-     4,
-     10,
-     5
+     0,
+     0,
+     1
     ]
    },
    {
-    "anteil": "0,20",
+    "anteil": "0,19",
     "name": "Palafin",
     "online": [
      0,
@@ -965,36 +980,6 @@
      1,
      2,
      1
-    ]
-   },
-   {
-    "anteil": "0,20",
-    "name": "Steven's Metagross",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "stevens-metagross",
-    "vor_ort": [
-     4,
-     3,
-     2
-    ]
-   },
-   {
-    "anteil": "0,18",
-    "name": "Froslass Dudunsparce",
-    "online": [
-     0,
-     1,
-     0
-    ],
-    "slug": "mega-froslass-dudunsparce",
-    "vor_ort": [
-     1,
-     0,
-     0
     ]
    },
    {
@@ -1013,22 +998,37 @@
     ]
    },
    {
-    "anteil": "0,16",
-    "name": "Joltik Box",
+    "anteil": "0,18",
+    "name": "Steven's Metagross",
     "online": [
      0,
      0,
      0
     ],
-    "slug": "joltik-box",
+    "slug": "stevens-metagross",
     "vor_ort": [
-     0,
-     0,
-     1
+     4,
+     3,
+     2
     ]
    },
    {
     "anteil": "0,16",
+    "name": "Froslass Dudunsparce",
+    "online": [
+     0,
+     1,
+     0
+    ],
+    "slug": "mega-froslass-dudunsparce",
+    "vor_ort": [
+     1,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,15",
     "name": "Mega Lopunny",
     "online": [
      1,
@@ -1043,7 +1043,7 @@
     ]
    },
    {
-    "anteil": "0,16",
+    "anteil": "0,15",
     "name": "Mega Zygarde",
     "online": [
      0,
@@ -1058,7 +1058,7 @@
     ]
    },
    {
-    "anteil": "0,16",
+    "anteil": "0,15",
     "name": "Metagross",
     "online": [
      1,
@@ -1074,36 +1074,6 @@
    },
    {
     "anteil": "0,13",
-    "name": "Decidueye",
-    "online": [
-     0,
-     1,
-     0
-    ],
-    "slug": "decidueye-ex",
-    "vor_ort": [
-     2,
-     1,
-     0
-    ]
-   },
-   {
-    "anteil": "0,13",
-    "name": "Yanmega",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "yanmega-ex",
-    "vor_ort": [
-     3,
-     1,
-     1
-    ]
-   },
-   {
-    "anteil": "0,11",
     "name": "Archaludon",
     "online": [
      0,
@@ -1118,7 +1088,37 @@
     ]
    },
    {
-    "anteil": "0,11",
+    "anteil": "0,13",
+    "name": "Mamoswine",
+    "online": [
+     1,
+     1,
+     0
+    ],
+    "slug": "mamoswine-ex",
+    "vor_ort": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,12",
+    "name": "Decidueye",
+    "online": [
+     0,
+     1,
+     0
+    ],
+    "slug": "decidueye-ex",
+    "vor_ort": [
+     2,
+     1,
+     0
+    ]
+   },
+   {
+    "anteil": "0,12",
     "name": "Doublade",
     "online": [
      1,
@@ -1133,22 +1133,22 @@
     ]
    },
    {
-    "anteil": "0,11",
-    "name": "Mamoswine",
+    "anteil": "0,12",
+    "name": "Yanmega",
     "online": [
      0,
-     1,
+     0,
      0
     ],
-    "slug": "mamoswine-ex",
+    "slug": "yanmega-ex",
     "vor_ort": [
-     0,
-     0,
-     0
+     3,
+     1,
+     1
     ]
    },
    {
-    "anteil": "0,10",
+    "anteil": "0,09",
     "name": "Dragapult Alakazam",
     "online": [
      1,
@@ -1163,37 +1163,7 @@
     ]
    },
    {
-    "anteil": "0,10",
-    "name": "Rocket's Spidops",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "rocket-spidops",
-    "vor_ort": [
-     1,
-     1,
-     0
-    ]
-   },
-   {
-    "anteil": "0,08",
-    "name": "Archaludon Zoroark",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "archaludon-zoroark",
-    "vor_ort": [
-     0,
-     1,
-     0
-    ]
-   },
-   {
-    "anteil": "0,08",
+    "anteil": "0,09",
     "name": "Dragapult Iron Thorns",
     "online": [
      1,
@@ -1208,22 +1178,7 @@
     ]
    },
    {
-    "anteil": "0,08",
-    "name": "Eelektrik",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "eelektrik-blk",
-    "vor_ort": [
-     1,
-     0,
-     1
-    ]
-   },
-   {
-    "anteil": "0,08",
+    "anteil": "0,09",
     "name": "Hop's Zacian",
     "online": [
      0,
@@ -1238,7 +1193,22 @@
     ]
    },
    {
-    "anteil": "0,08",
+    "anteil": "0,09",
+    "name": "Mega Camerupt",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "mega-camerupt-ex",
+    "vor_ort": [
+     0,
+     3,
+     1
+    ]
+   },
+   {
+    "anteil": "0,09",
     "name": "Ogerpon Meganium",
     "online": [
      1,
@@ -1253,31 +1223,31 @@
     ]
    },
    {
-    "anteil": "0,08",
-    "name": "Scovillain",
+    "anteil": "0,09",
+    "name": "Rocket's Spidops",
     "online": [
-     1,
+     0,
      0,
      0
     ],
-    "slug": "scovillain-ex",
+    "slug": "rocket-spidops",
     "vor_ort": [
-     0,
-     0,
+     1,
+     1,
      0
     ]
    },
    {
-    "anteil": "0,08",
-    "name": "Slaking",
+    "anteil": "0,09",
+    "name": "Ursaluna Lunatone",
     "online": [
-     2,
-     1,
+     0,
+     0,
      0
     ],
-    "slug": "slaking-ex",
+    "slug": "ursaluna-lunatone",
     "vor_ort": [
-     0,
+     1,
      0,
      0
     ]
@@ -1299,6 +1269,36 @@
    },
    {
     "anteil": "0,07",
+    "name": "Archaludon Zoroark",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "archaludon-zoroark",
+    "vor_ort": [
+     0,
+     1,
+     0
+    ]
+   },
+   {
+    "anteil": "0,07",
+    "name": "Eelektrik",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "eelektrik-blk",
+    "vor_ort": [
+     1,
+     0,
+     1
+    ]
+   },
+   {
+    "anteil": "0,07",
     "name": "Lillie's Clefairy",
     "online": [
      2,
@@ -1314,21 +1314,36 @@
    },
    {
     "anteil": "0,07",
-    "name": "Mega Camerupt",
+    "name": "Scovillain",
     "online": [
-     0,
+     1,
      0,
      0
     ],
-    "slug": "mega-camerupt-ex",
+    "slug": "scovillain-ex",
     "vor_ort": [
      0,
-     3,
-     1
+     0,
+     0
     ]
    },
    {
     "anteil": "0,07",
+    "name": "Slaking",
+    "online": [
+     2,
+     1,
+     0
+    ],
+    "slug": "slaking-ex",
+    "vor_ort": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,06",
     "name": "Sinistcha Ogerpon",
     "online": [
      1,
@@ -1343,22 +1358,7 @@
     ]
    },
    {
-    "anteil": "0,07",
-    "name": "Ursaluna Lunatone",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "ursaluna-lunatone",
-    "vor_ort": [
-     1,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,07",
+    "anteil": "0,06",
     "name": "Wailord",
     "online": [
      1,
@@ -1384,6 +1384,21 @@
     "vor_ort": [
      0,
      1,
+     0
+    ]
+   },
+   {
+    "anteil": "0,03",
+    "name": "Dragonite Eelektrik",
+    "online": [
+     1,
+     0,
+     0
+    ],
+    "slug": "dragonite-eelektrik",
+    "vor_ort": [
+     0,
+     0,
      0
     ]
    },
@@ -1433,7 +1448,7 @@
     ]
    },
    {
-    "anteil": "0,02",
+    "anteil": "0,01",
     "name": "Blaziken Zoroark",
     "online": [
      0,
@@ -1448,7 +1463,7 @@
     ]
    },
    {
-    "anteil": "0,02",
+    "anteil": "0,01",
     "name": "Clefairy Ogerpon",
     "online": [
      0,
@@ -1463,7 +1478,7 @@
     ]
    },
    {
-    "anteil": "0,02",
+    "anteil": "0,01",
     "name": "Cornerstone Mask Ogerpon",
     "online": [
      0,
@@ -1478,7 +1493,7 @@
     ]
    },
    {
-    "anteil": "0,02",
+    "anteil": "0,01",
     "name": "Diancie Dusknoir",
     "online": [
      0,
@@ -1493,7 +1508,7 @@
     ]
    },
    {
-    "anteil": "0,02",
+    "anteil": "0,01",
     "name": "Dragapult Toucannon",
     "online": [
      1,
@@ -1503,6 +1518,21 @@
     "slug": "dragapult-toucannon",
     "vor_ort": [
      0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,01",
+    "name": "Okidogi",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "okidogi-twm",
+    "vor_ort": [
+     2,
      0,
      0
     ]
@@ -1548,21 +1578,6 @@
     "slug": "mega-diancie-ex",
     "vor_ort": [
      1,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,00",
-    "name": "okidogi-twm",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "okidogi-twm",
-    "vor_ort": [
-     2,
      0,
      0
     ]
@@ -1995,29 +2010,29 @@
   ],
   "name": "Mega Excadrill",
   "online": {
-   "anteil": "2,66",
+   "anteil": "2,72",
    "anteil14": "3,21",
    "bilanz": [
-    416,
-    420,
+    459,
+    484,
     9
    ],
-   "bis": "22.11.2026",
+   "bis": "23.11.2026",
    "fenster14": "09.11.–20.11.2026",
    "format": "TEF–DLR",
-   "kurz_anteil": "2,75",
+   "kurz_anteil": "2,73",
    "kurz_bilanz": [
-    161,
-    148,
+    155,
+    158,
     6
    ],
-   "kurz_listen": 58,
-   "kurz_turniere": 12,
-   "kurz_von": "16.11.2026",
-   "listen": 163,
+   "kurz_listen": 60,
+   "kurz_turniere": 13,
+   "kurz_von": "17.11.2026",
+   "listen": 186,
    "seit": "06.11.2026",
    "trend14": "",
-   "turniere": 36
+   "turniere": 40
   },
   "vor_ort": {
    "format": "TEF–30C",
@@ -2319,7 +2334,7 @@
    "majors-satz": "sind die letzten Majors (Brisbane, Frankfurt, Recife, Louisville, Nice, Puebla, Gdańsk und Buenos Aires) — die liefen noch im Format TEF–30C.",
    "majors-turniere": "73, 74, 75, 76, 77, 78, 79 und 80",
    "stand-online-davor": "2026-11-09",
-   "stand-online-jetzt": "2026-11-23"
+   "stand-online-jetzt": "2026-11-24"
   },
   "zellen": {
    "alakazam-dudunsparce": {
@@ -2330,10 +2345,10 @@
      "<i>(171)</i>"
     ],
     "jetzt": [
-     "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 8–15–0 (W–L–T) aus 23 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 4.3 Punkte.",
-     "8–15–0",
-     "<i>(23)</i>"
+     "mcl-wrz",
+     "26,7 % Win % nach Matchpunkten, aus 30 Matches, Bilanz 8–22–0 (W–L–T)",
+     "26,7 %",
+     "<i>(30)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -2437,9 +2452,9 @@
     ],
     "jetzt": [
      "mcl-wrz",
-     "48,1 % Win % nach Matchpunkten, aus 52 Matches, Bilanz 25–27–0 (W–L–T)",
-     "48,1 %",
-     "<i>(52)</i>"
+     "50,0 % Win % nach Matchpunkten, aus 56 Matches, Bilanz 28–28–0 (W–L–T)",
+     "50,0 %",
+     "<i>(56)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -2457,9 +2472,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 3–1–0 (W–L–T) aus 4 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 25.0 Punkte.",
-     "3–1–0",
-     "<i>(4)</i>"
+     "Bilanz 4–1–0 (W–L–T) aus 5 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 20.0 Punkte.",
+     "4–1–0",
+     "<i>(5)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -2576,10 +2591,10 @@
      "<i>(67)</i>"
     ],
     "jetzt": [
-     "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 24–3–0 (W–L–T) aus 27 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 3.7 Punkte.",
-     "24–3–0",
-     "<i>(27)</i>"
+     "mcl-wrz",
+     "83,3 % Win % nach Matchpunkten, aus 30 Matches, Bilanz 25–5–0 (W–L–T)",
+     "83,3 %",
+     "<i>(30)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -2597,9 +2612,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 6–2–0 (W–L–T) aus 8 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 12.5 Punkte.",
-     "6–2–0",
-     "<i>(8)</i>"
+     "Bilanz 8–2–0 (W–L–T) aus 10 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 10.0 Punkte.",
+     "8–2–0",
+     "<i>(10)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -2637,9 +2652,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 9–2–0 (W–L–T) aus 11 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 9.1 Punkte.",
-     "9–2–0",
-     "<i>(11)</i>"
+     "Bilanz 12–5–0 (W–L–T) aus 17 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 5.9 Punkte.",
+     "12–5–0",
+     "<i>(17)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -2719,9 +2734,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 16–11–1 (W–L–T) aus 28 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 3.6 Punkte.",
-     "16–11–1",
-     "<i>(28)</i>"
+     "Bilanz 16–12–1 (W–L–T) aus 29 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 3.4 Punkte.",
+     "16–12–1",
+     "<i>(29)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -2759,9 +2774,9 @@
     ],
     "jetzt": [
      "mcl-wrz",
-     "52,6 % Win % nach Matchpunkten, aus 95 Matches, Bilanz 49–43–3 (W–L–T)",
-     "52,6 %",
-     "<i>(95)</i>"
+     "50,0 % Win % nach Matchpunkten, aus 104 Matches, Bilanz 51–50–3 (W–L–T)",
+     "50,0 %",
+     "<i>(104)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -2793,6 +2808,14 @@
     ]
    },
    "dragapult-toucannon": {
+    "jetzt": [
+     "mcl-wrz mcl-wrz-duenn",
+     "Bilanz 1–0–0 (W–L–T) aus 1 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 100.0 Punkte.",
+     "1–0–0",
+     "<i>(1)</i>"
+    ]
+   },
+   "dragonite-eelektrik": {
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
      "Bilanz 1–0–0 (W–L–T) aus 1 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 100.0 Punkte.",
@@ -2833,9 +2856,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 2–3–0 (W–L–T) aus 5 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 20.0 Punkte.",
-     "2–3–0",
-     "<i>(5)</i>"
+     "Bilanz 2–5–0 (W–L–T) aus 7 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 14.3 Punkte.",
+     "2–5–0",
+     "<i>(7)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -2853,9 +2876,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 10–5–0 (W–L–T) aus 15 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 6.7 Punkte.",
-     "10–5–0",
-     "<i>(15)</i>"
+     "Bilanz 11–7–0 (W–L–T) aus 18 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 5.6 Punkte.",
+     "11–7–0",
+     "<i>(18)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -2935,9 +2958,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 11–4–0 (W–L–T) aus 15 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 6.7 Punkte.",
-     "11–4–0",
-     "<i>(15)</i>"
+     "Bilanz 13–4–0 (W–L–T) aus 17 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 5.9 Punkte.",
+     "13–4–0",
+     "<i>(17)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3003,9 +3026,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 0–3–0 (W–L–T) aus 3 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 33.3 Punkte.",
-     "0–3–0",
-     "<i>(3)</i>"
+     "Bilanz 0–4–0 (W–L–T) aus 4 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 25.0 Punkte.",
+     "0–4–0",
+     "<i>(4)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3043,9 +3066,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 3–5–0 (W–L–T) aus 8 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 12.5 Punkte.",
-     "3–5–0",
-     "<i>(8)</i>"
+     "Bilanz 4–5–0 (W–L–T) aus 9 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 11.1 Punkte.",
+     "4–5–0",
+     "<i>(9)</i>"
     ]
    },
    "iono-bellibolt": {
@@ -3101,9 +3124,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 1–1–0 (W–L–T) aus 2 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 50.0 Punkte.",
-     "1–1–0",
-     "<i>(2)</i>"
+     "Bilanz 2–1–0 (W–L–T) aus 3 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 33.3 Punkte.",
+     "2–1–0",
+     "<i>(3)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3141,9 +3164,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 9–13–0 (W–L–T) aus 22 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 4.5 Punkte.",
-     "9–13–0",
-     "<i>(22)</i>"
+     "Bilanz 10–13–0 (W–L–T) aus 23 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 4.3 Punkte.",
+     "10–13–0",
+     "<i>(23)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3161,9 +3184,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 2–3–0 (W–L–T) aus 5 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 20.0 Punkte.",
-     "2–3–0",
-     "<i>(5)</i>"
+     "Bilanz 3–3–0 (W–L–T) aus 6 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 16.7 Punkte.",
+     "3–3–0",
+     "<i>(6)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3181,9 +3204,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 4–6–0 (W–L–T) aus 10 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 10.0 Punkte.",
-     "4–6–0",
-     "<i>(10)</i>"
+     "Bilanz 4–9–0 (W–L–T) aus 13 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 7.7 Punkte.",
+     "4–9–0",
+     "<i>(13)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3203,9 +3226,9 @@
    "mamoswine-ex": {
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 0–1–0 (W–L–T) aus 1 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 100.0 Punkte.",
-     "0–1–0",
-     "<i>(1)</i>"
+     "Bilanz 1–1–0 (W–L–T) aus 2 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 50.0 Punkte.",
+     "1–1–0",
+     "<i>(2)</i>"
     ]
    },
    "manectric-eelektrik": {
@@ -3217,9 +3240,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 1–2–0 (W–L–T) aus 3 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 33.3 Punkte.",
-     "1–2–0",
-     "<i>(3)</i>"
+     "Bilanz 1–3–0 (W–L–T) aus 4 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 25.0 Punkte.",
+     "1–3–0",
+     "<i>(4)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3345,9 +3368,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 1–1–1 (W–L–T) aus 3 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 33.3 Punkte.",
-     "1–1–1",
-     "<i>(3)</i>"
+     "Bilanz 2–1–1 (W–L–T) aus 4 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 25.0 Punkte.",
+     "2–1–1",
+     "<i>(4)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3359,9 +3382,9 @@
    "mega-charizard-y-ex": {
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 3–3–0 (W–L–T) aus 6 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 16.7 Punkte.",
-     "3–3–0",
-     "<i>(6)</i>"
+     "Bilanz 3–4–0 (W–L–T) aus 7 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 14.3 Punkte.",
+     "3–4–0",
+     "<i>(7)</i>"
     ]
    },
    "mega-darkrai-ex": {
@@ -3373,9 +3396,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 2–4–0 (W–L–T) aus 6 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 16.7 Punkte.",
-     "2–4–0",
-     "<i>(6)</i>"
+     "Bilanz 5–4–0 (W–L–T) aus 9 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 11.1 Punkte.",
+     "5–4–0",
+     "<i>(9)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3407,9 +3430,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 0–1–0 (W–L–T) aus 1 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 100.0 Punkte.",
-     "0–1–0",
-     "<i>(1)</i>"
+     "Bilanz 0–2–0 (W–L–T) aus 2 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 50.0 Punkte.",
+     "0–2–0",
+     "<i>(2)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3427,9 +3450,9 @@
     ],
     "jetzt": [
      "mcl-wrz",
-     "50,0 % Win % nach Matchpunkten, aus 32 Matches, Bilanz 16–16–0 (W–L–T)",
+     "50,0 % Win % nach Matchpunkten, aus 38 Matches, Bilanz 19–19–0 (W–L–T)",
      "50,0 %",
-     "<i>(32)</i>"
+     "<i>(38)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3491,9 +3514,9 @@
    "mega-golisopod-ex": {
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 6–4–0 (W–L–T) aus 10 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 10.0 Punkte.",
-     "6–4–0",
-     "<i>(10)</i>"
+     "Bilanz 6–5–0 (W–L–T) aus 11 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 9.1 Punkte.",
+     "6–5–0",
+     "<i>(11)</i>"
     ]
    },
    "mega-greninja-ex": {
@@ -3505,9 +3528,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 5–0–0 (W–L–T) aus 5 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 20.0 Punkte.",
-     "5–0–0",
-     "<i>(5)</i>"
+     "Bilanz 5–1–0 (W–L–T) aus 6 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 16.7 Punkte.",
+     "5–1–0",
+     "<i>(6)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3545,9 +3568,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 9–13–1 (W–L–T) aus 23 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 4.3 Punkte.",
-     "9–13–1",
-     "<i>(23)</i>"
+     "Bilanz 10–14–1 (W–L–T) aus 25 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 4.0 Punkte.",
+     "10–14–1",
+     "<i>(25)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3559,9 +3582,9 @@
    "mega-malamar-ex": {
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 3–3–0 (W–L–T) aus 6 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 16.7 Punkte.",
-     "3–3–0",
-     "<i>(6)</i>"
+     "Bilanz 3–4–0 (W–L–T) aus 7 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 14.3 Punkte.",
+     "3–4–0",
+     "<i>(7)</i>"
     ]
    },
    "mega-manectric-ex-meg": {
@@ -3575,9 +3598,9 @@
    "mega-rayquaza-ex": {
     "jetzt": [
      "mcl-wrz",
-     "53,1 % Win % nach Matchpunkten, aus 64 Matches, Bilanz 34–30–0 (W–L–T)",
-     "53,1 %",
-     "<i>(64)</i>"
+     "48,6 % Win % nach Matchpunkten, aus 70 Matches, Bilanz 34–36–0 (W–L–T)",
+     "48,6 %",
+     "<i>(70)</i>"
     ]
    },
    "mega-starmie-ex": {
@@ -3589,9 +3612,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 1–2–0 (W–L–T) aus 3 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 33.3 Punkte.",
-     "1–2–0",
-     "<i>(3)</i>"
+     "Bilanz 1–4–0 (W–L–T) aus 5 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 20.0 Punkte.",
+     "1–4–0",
+     "<i>(5)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3609,9 +3632,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 1–2–0 (W–L–T) aus 3 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 33.3 Punkte.",
-     "1–2–0",
-     "<i>(3)</i>"
+     "Bilanz 1–3–0 (W–L–T) aus 4 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 25.0 Punkte.",
+     "1–3–0",
+     "<i>(4)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3685,9 +3708,9 @@
     ],
     "jetzt": [
      "mcl-wrz",
-     "55,9 % Win % nach Matchpunkten, aus 31 Matches, Bilanz 17–13–1 (W–L–T)",
-     "55,9 %",
-     "<i>(31)</i>"
+     "56,5 % Win % nach Matchpunkten, aus 36 Matches, Bilanz 20–15–1 (W–L–T)",
+     "56,5 %",
+     "<i>(36)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3745,9 +3768,9 @@
     ],
     "jetzt": [
      "mcl-wrz",
-     "27,3 % Win % nach Matchpunkten, aus 33 Matches, Bilanz 9–24–0 (W–L–T)",
-     "27,3 %",
-     "<i>(33)</i>"
+     "27,0 % Win % nach Matchpunkten, aus 37 Matches, Bilanz 10–27–0 (W–L–T)",
+     "27,0 %",
+     "<i>(37)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3765,9 +3788,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 1–4–0 (W–L–T) aus 5 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 20.0 Punkte.",
-     "1–4–0",
-     "<i>(5)</i>"
+     "Bilanz 2–4–0 (W–L–T) aus 6 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 16.7 Punkte.",
+     "2–4–0",
+     "<i>(6)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -3823,9 +3846,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 2–2–0 (W–L–T) aus 4 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 25.0 Punkte.",
-     "2–2–0",
-     "<i>(4)</i>"
+     "Bilanz 3–3–0 (W–L–T) aus 6 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 16.7 Punkte.",
+     "3–3–0",
+     "<i>(6)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3843,9 +3866,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 1–2–0 (W–L–T) aus 3 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 33.3 Punkte.",
-     "1–2–0",
-     "<i>(3)</i>"
+     "Bilanz 2–2–0 (W–L–T) aus 4 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 25.0 Punkte.",
+     "2–2–0",
+     "<i>(4)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3877,9 +3900,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 6–17–0 (W–L–T) aus 23 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 4.3 Punkte.",
-     "6–17–0",
-     "<i>(23)</i>"
+     "Bilanz 6–18–0 (W–L–T) aus 24 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 4.2 Punkte.",
+     "6–18–0",
+     "<i>(24)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3905,9 +3928,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 5–4–0 (W–L–T) aus 9 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 11.1 Punkte.",
-     "5–4–0",
-     "<i>(9)</i>"
+     "Bilanz 5–5–0 (W–L–T) aus 10 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 10.0 Punkte.",
+     "5–5–0",
+     "<i>(10)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -3973,9 +3996,9 @@
     ],
     "jetzt": [
      "mcl-wrz",
-     "48,8 % Win % nach Matchpunkten, aus 41 Matches, Bilanz 20–21–0 (W–L–T)",
-     "48,8 %",
-     "<i>(41)</i>"
+     "47,6 % Win % nach Matchpunkten, aus 42 Matches, Bilanz 20–22–0 (W–L–T)",
+     "47,6 %",
+     "<i>(42)</i>"
     ],
     "majors": [
      "mcl-wrz",
@@ -4049,9 +4072,9 @@
    "talonflame-dusknoir": {
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 6–16–1 (W–L–T) aus 23 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 4.3 Punkte.",
-     "6–16–1",
-     "<i>(23)</i>"
+     "Bilanz 8–18–1 (W–L–T) aus 27 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 3.7 Punkte.",
+     "8–18–1",
+     "<i>(27)</i>"
     ]
    },
    "tera-box": {
@@ -4091,9 +4114,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 3–4–0 (W–L–T) aus 7 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 14.3 Punkte.",
-     "3–4–0",
-     "<i>(7)</i>"
+     "Bilanz 4–5–0 (W–L–T) aus 9 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 11.1 Punkte.",
+     "4–5–0",
+     "<i>(9)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",
@@ -4111,9 +4134,9 @@
     ],
     "jetzt": [
      "mcl-wrz mcl-wrz-duenn",
-     "Bilanz 1–1–0 (W–L–T) aus 2 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 50.0 Punkte.",
-     "1–1–0",
-     "<i>(2)</i>"
+     "Bilanz 2–1–0 (W–L–T) aus 3 Matches. Unter 30 Matches steht hier keine Quote — ein einzelnes Match verschiebt sie um 33.3 Punkte.",
+     "2–1–0",
+     "<i>(3)</i>"
     ],
     "majors": [
      "mcl-wrz mcl-wrz-duenn",

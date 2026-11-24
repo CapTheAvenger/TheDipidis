@@ -1,6 +1,6 @@
 {
   "quelle": "tournament_decklists_per_player",
-  "stand": "2026-11-24T07:05:10+00:00",
+  "stand": "2026-11-24T12:15:25+00:00",
   "schluessel": "<meta>_<jjjj-mm des tournament_date>; ohne Format: _unsorted",
   "meta_keys": [
     "TEF-30C",
@@ -24,7 +24,7 @@
       "monat": "2026-10",
       "datei": "tournament_decklists_per_player_TEF-30C_2026-10.csv",
       "zeilen": 308860,
-      "bytes": 68428356
+      "bytes": 68428392
     },
     {
       "schluessel": "TEF-30C_2026-11",
@@ -32,7 +32,7 @@
       "monat": "2026-11",
       "datei": "tournament_decklists_per_player_TEF-30C_2026-11.csv",
       "zeilen": 138704,
-      "bytes": 31571451
+      "bytes": 31571465
     },
     {
       "schluessel": "TEF-CRI_2026-06",
@@ -64,7 +64,7 @@
       "monat": "2026-09",
       "datei": "tournament_decklists_per_player_TEF-PBL_2026-09.csv",
       "zeilen": 170170,
-      "bytes": 38457743
+      "bytes": 38457749
     }
   ],
   "_hinweis": "Welche Auszuege der Decklisten je Spieler es gibt: je Format und Monat des Turnierdatums (SC-45, GitHub-100-MiB-Grenze). Das Frontend fragt hier nach, statt Dateien zu raten; Python-Leser nehmen scripts/per_player_auszuege.py. Gebaut aus demselben Ordner, in dem die Auszuege liegen."

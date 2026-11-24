@@ -248,3 +248,26 @@ describe('Konto: Reverse ist ein eigener Zaehler', () => {
         assert.match(FC, /collectionReverseCounts: \{\}/);
     });
 });
+
+describe('Anmeldung kommt nach dem Zeichnen', () => {
+    it('der Auth-Wechsel gleicht die Besitzleiste ab, das Laden zieht die Pillen nach', () => {
+        const cfg = ohneKommentare(lies('js/firebase-config.js'));
+        const cb = cfg.slice(cfg.indexOf('onAuthStateChanged'));
+        assert.match(cb.slice(0, 1500), /sammlungLeisteAbgleichen\(\)/);
+        const fg = ohneKommentare(lies('js/firebase-globals.js'));
+        const nachLaden = fg.slice(fg.indexOf('window.userCollectionReverseCounts = new Map(Object.entries('));
+        assert.match(nachLaden.slice(0, 1500), /renderCardDatabase\(window\.filteredCardsData, \{ scrollToTop: false, wishlistUpdate: true \}\)/);
+    });
+});
+
+describe('Filter und Ansicht loesen ein Neuzeichnen aus', () => {
+    it('die Signatur der Filterung kennt Besitzfilter, Ansicht und Anmeldung', () => {
+        // Live 24.11.2026: „Im Besitz“ filterte nichts — die Signatur war gleich, filterAndRenderCards brach ab.
+        const code = ohneKommentare(DB);
+        const a = code.indexOf('const signature = JSON.stringify({');
+        const block = code.slice(a, code.indexOf('});', a));
+        assert.match(block, /\bbesitzFilter\b/);
+        assert.match(block, /\bsammlungAnsicht\b/);
+        assert.match(block, /angemeldet:/);
+    });
+});

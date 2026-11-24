@@ -16,6 +16,7 @@
     "tournament_cards_data_cards_SVI-PFL.csv",
     "tournament_cards_data_cards_TEF-30C.csv",
     "tournament_cards_data_cards_TEF-CRI.csv",
+    "tournament_cards_data_cards_TEF-DLR.csv",
     "tournament_cards_data_cards_TEF-PBL.csv",
     "tournament_cards_data_cards_TEF-POR.csv"
   ],
@@ -35,6 +36,7 @@
     "SVI-PFL",
     "TEF-30C",
     "TEF-CRI",
+    "TEF-DLR",
     "TEF-PBL",
     "TEF-POR"
   ],
@@ -99,6 +101,10 @@
       "min_date": "2026-06-06",
       "max_date": "2026-06-12"
     },
+    "tournament_cards_data_cards_TEF-DLR.csv": {
+      "min_date": "2026-11-20",
+      "max_date": "2026-11-20"
+    },
     "tournament_cards_data_cards_TEF-PBL.csv": {
       "min_date": "2026-08-28",
       "max_date": "2026-09-19"
@@ -108,6 +114,6 @@
       "max_date": "2026-05-30"
     }
   },
-  "total_rows": 473089,
-  "generated": "2026-11-20T10:15:37.814621"
+  "total_rows": 474329,
+  "generated": "2026-11-24T06:22:05.798438"
 }

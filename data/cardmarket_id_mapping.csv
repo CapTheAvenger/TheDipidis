@@ -25,25 +25,25 @@
 30C,24,907658,priced-by-date(30↔31),Pikachu
 30C,25,907645,priced-by-date(30↔31),Pikachu
 30C,26,907656,priced-by-date(30↔31),Pikachu
-30C,27,907659,priced-by-date(30↔31),Pikachu
-30C,28,907631,priced-by-date(30↔31),Pikachu
+30C,27,907631,priced-by-date(30↔31),Pikachu
+30C,28,907659,priced-by-date(30↔31),Pikachu
 30C,29,907644,priced-by-date(30↔31),Pikachu
 30C,30,907648,priced-by-date(30↔31),Pikachu
 30C,31,907650,priced-by-date(30↔31),Pikachu
-30C,32,907651,priced-by-date(30↔31),Pikachu
-30C,33,907652,priced-by-date(30↔31),Pikachu
-30C,34,907630,priced-by-date(30↔31),Pikachu
-30C,35,907646,priced-by-date(30↔31),Pikachu
-30C,36,907632,priced-by-date(30↔31),Pikachu
-30C,37,907640,priced-by-date(30↔31),Pikachu
+30C,32,907652,priced-by-date(30↔31),Pikachu
+30C,33,907646,priced-by-date(30↔31),Pikachu
+30C,34,907651,priced-by-date(30↔31),Pikachu
+30C,35,907630,priced-by-date(30↔31),Pikachu
+30C,36,907640,priced-by-date(30↔31),Pikachu
+30C,37,907632,priced-by-date(30↔31),Pikachu
 30C,38,907634,priced-by-date(30↔31),Pikachu
 30C,39,907635,priced-by-date(30↔31),Pikachu
 30C,40,907643,priced-by-date(30↔31),Pikachu
 30C,41,907638,priced-by-date(30↔31),Pikachu
-30C,42,907653,priced-by-date(30↔31),Pikachu
-30C,43,907633,priced-by-date(30↔31),Pikachu
-30C,44,907636,priced-by-date(30↔31),Pikachu
-30C,45,907649,priced-by-date(30↔31),Pikachu
+30C,42,907633,priced-by-date(30↔31),Pikachu
+30C,43,907636,priced-by-date(30↔31),Pikachu
+30C,44,907649,priced-by-date(30↔31),Pikachu
+30C,45,907653,priced-by-date(30↔31),Pikachu
 30C,46,907655,priced-by-date(30↔31),Pikachu
 30C,47,907654,priced-by-date(30↔31),Pikachu
 30C,48,907657,priced-by-date(30↔31),Pikachu
@@ -10859,7 +10859,7 @@ PAR,44,740521,live-verified,Vanillish
 PAR,45,740525,live-verified,Vanilluxe
 PAR,46,740526,live-verified,Tsareena ex
 PAR,47,740530,live-verified,Wimpod
-PAR,48,740527,priced-by-date(3↔3),Wimpod
+PAR,48,740530,priced-by-date(3↔3),Wimpod
 PAR,49,740532,live-verified,Golisopod
 PAR,50,740535,live-verified,Golisopod ex
 PAR,51,740539,live-verified,Wiglett
@@ -13847,7 +13847,7 @@ SP,69,516344,live-verified,Lugia
 SP,70,427081,priced-by-all(2↔3),Grookey
 SP,71,427086,priced-by-all(3↔4),Scorbunny
 SP,72,516359,unique,Vaporeon
-SP,73,516364,priced-by-all(2↔3),Sobble
+SP,73,427091,priced-by-all(2↔3),Sobble
 SP,76,522960,live-verified,Zacian V
 SP,77,522965,live-verified,Zamazenta V
 SP,78,522970,live-verified,Orbeetle V
@@ -14032,7 +14032,7 @@ SP,261,674369,unique,Charizard VMAX
 SP,262,674370,unique,Charizard VSTAR
 SP,263,669838,unique,Zeraora V
 SP,264,669839,unique,Zeraora VMAX
-SP,265,669840,priced-by-date(1↔2),Zeraora VSTAR
+SP,265,669841,priced-by-date(1↔2),Zeraora VSTAR
 SP,266,669842,unique,Deoxys V
 SP,267,669843,unique,Deoxys VMAX
 SP,268,669845,live-verified,Deoxys VSTAR
@@ -14304,7 +14304,7 @@ SSH,138,427176,priced-by-all(3↔4),Zacian V
 SSH,139,427171,priced-by-all(3↔4),Zamazenta V
 SSH,140,436799,unique,Snorlax
 SSH,141,436804,live-verified,Snorlax V
-SSH,142,437119,priced-by-all(2↔3),Snorlax VMAX
+SSH,142,427236,priced-by-all(2↔3),Snorlax VMAX
 SSH,143,436809,unique,Hoothoot
 SSH,144,436814,unique,Noctowl
 SSH,145,436819,live-verified,Minccino
@@ -14379,8 +14379,8 @@ SSH,213,439503,live-verified,Air Balloon
 SSH,214,439508,live-verified,Metal Saucer
 SSH,215,439513,live-verified,Ordinary Rod
 SSH,216,439518,live-verified,Quick Ball
-SSP,1,794256,priced-by-date(3↔3),Exeggcute
-SSP,2,794257,priced-by-date(3↔3),Exeggcute
+SSP,1,794257,priced-by-date(3↔3),Exeggcute
+SSP,2,794256,priced-by-date(3↔3),Exeggcute
 SSP,3,794258,unique,Exeggutor
 SSP,4,794259,live-verified,Durant ex
 SSP,5,794260,unique,Scatterbug
@@ -14898,7 +14898,7 @@ SVE,3,903149,priced-by-date(3↔10),Water Energy
 SVE,4,903154,priced-by-date(3↔10),Lightning Energy
 SVE,5,903160,priced-by-date(3↔10),Psychic Energy
 SVE,6,903164,priced-by-date(3↔10),Fighting Energy
-SVE,7,903167,priced-by-date(3↔8),Darkness Energy
+SVE,7,903169,priced-by-date(3↔8),Darkness Energy
 SVE,8,903171,priced-by-date(3↔8),Metal Energy
 SVE,9,903141,priced-by-date(3↔10),Grass Energy
 SVE,10,903144,priced-by-date(3↔10),Fire Energy
@@ -14906,7 +14906,7 @@ SVE,11,903150,priced-by-date(3↔10),Water Energy
 SVE,12,903155,priced-by-date(3↔10),Lightning Energy
 SVE,13,903161,priced-by-date(3↔10),Psychic Energy
 SVE,14,903162,priced-by-date(3↔10),Fighting Energy
-SVE,15,903169,priced-by-date(3↔8),Darkness Energy
+SVE,15,903167,priced-by-date(3↔8),Darkness Energy
 SVE,16,903170,priced-by-date(3↔8),Metal Energy
 SVE,17,903139,priced-by-date(3↔10),Grass Energy
 SVE,18,903143,priced-by-date(3↔10),Fire Energy
@@ -15075,7 +15075,7 @@ SVI,156,702451,priced-by-date(3↔9),Lechonk
 SVI,157,702453,unique,Oinkologne
 SVI,158,702454,live-verified,Oinkologne ex
 SVI,159,702456,live-verified,Tandemaus
-SVI,160,702456,priced-by-date(2↔2),Tandemaus
+SVI,160,702455,priced-by-date(2↔2),Tandemaus
 SVI,161,702457,unique,Maushold
 SVI,162,702458,unique,Squawkabilly
 SVI,163,702459,live-verified,Cyclizar
@@ -15198,7 +15198,7 @@ SVP,23,703191,unique,Smoliv
 SVP,24,703192,unique,Growlithe
 SVP,25,703193,unique,Tinkatink
 SVP,26,703194,unique,Varoom
-SVP,27,780209,priced-by-all(3↔10),Pikachu
+SVP,27,832224,priced-by-all(3↔10),Pikachu
 SVP,28,703197,live-verified,Miraidon ex
 SVP,29,703198,live-verified,Koraidon ex
 SVP,30,709539,unique,Chien-Pao ex
@@ -16349,8 +16349,8 @@ UD,49,279302,unique,Gligar
 UD,50,279303,unique,Grimer
 UD,51,279304,unique,Hitmonchan
 UD,52,279305,unique,Hitmonlee
-UD,53,279307,priced-by-date(2↔2),Houndour
-UD,54,279306,priced-by-date(2↔2),Houndour
+UD,53,279306,priced-by-date(2↔2),Houndour
+UD,54,279307,priced-by-date(2↔2),Houndour
 UD,55,279308,unique,Makuhita
 UD,56,279309,unique,Mawile
 UD,57,279310,unique,Misdreavus
@@ -16503,26 +16503,26 @@ UF,116,276762,unique,Rocket's Persian ex
 UF,117,276763,unique,Celebi ex
 UF,!,276640,priced-by-date(28↔28),Unown
 UF,?,276625,priced-by-date(28↔28),Unown
-UF,A,276627,priced-by-date(28↔28),Unown
-UF,B,276635,priced-by-date(28↔28),Unown
+UF,A,276635,priced-by-date(28↔28),Unown
+UF,B,276643,priced-by-date(28↔28),Unown
 UF,C,276644,priced-by-date(28↔28),Unown
-UF,D,276643,priced-by-date(28↔28),Unown
-UF,E,276622,priced-by-date(28↔28),Unown
-UF,F,276623,priced-by-date(28↔28),Unown
-UF,G,276624,priced-by-date(28↔28),Unown
-UF,H,276645,priced-by-date(28↔28),Unown
-UF,I,276633,priced-by-date(28↔28),Unown
-UF,J,276637,priced-by-date(28↔28),Unown
-UF,K,276621,priced-by-date(28↔28),Unown
-UF,L,276629,priced-by-date(28↔28),Unown
-UF,M,276630,priced-by-date(28↔28),Unown
+UF,D,276624,priced-by-date(28↔28),Unown
+UF,E,276645,priced-by-date(28↔28),Unown
+UF,F,276627,priced-by-date(28↔28),Unown
+UF,G,276633,priced-by-date(28↔28),Unown
+UF,H,276623,priced-by-date(28↔28),Unown
+UF,I,276637,priced-by-date(28↔28),Unown
+UF,J,276621,priced-by-date(28↔28),Unown
+UF,K,276630,priced-by-date(28↔28),Unown
+UF,L,276622,priced-by-date(28↔28),Unown
+UF,M,276641,priced-by-date(28↔28),Unown
 UF,N,276632,priced-by-date(28↔28),Unown
-UF,O,276641,priced-by-date(28↔28),Unown
+UF,O,276629,priced-by-date(28↔28),Unown
 UF,P,276619,priced-by-date(28↔28),Unown
 UF,Q,276634,priced-by-date(28↔28),Unown
 UF,R,276642,priced-by-date(28↔28),Unown
-UF,S,276631,priced-by-date(28↔28),Unown
-UF,T,276636,priced-by-date(28↔28),Unown
+UF,S,276636,priced-by-date(28↔28),Unown
+UF,T,276631,priced-by-date(28↔28),Unown
 UF,U,276628,priced-by-date(28↔28),Unown
 UF,V,276626,priced-by-date(28↔28),Unown
 UF,W,276639,priced-by-date(28↔28),Unown

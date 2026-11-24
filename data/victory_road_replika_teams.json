@@ -1,13 +1,13 @@
 {
  "_meta": {
   "title": "Victory Road — Replika-Sammlung",
-  "erzeugt_am": "2026-11-20",
+  "erzeugt_am": "2026-11-24",
   "quelle": "https://victoryroad.pro/champions-replica/",
   "eintraege_mit_code": 147,
   "team_count": 6,
   "davon_auf_der_seite": 6,
   "behalten_vom_bestand": 0,
-  "entfallen_nach_frist": 80,
+  "entfallen_nach_frist": 0,
   "behalten_tage": 28,
   "ohne_paste": 141,
   "ohne_paste_codes": [
@@ -153,7 +153,7 @@
    "08DGXVMXNN",
    "FH4H7J3X0Y"
   ],
-  "ohne_paste_stand": "2026-11-20",
+  "ohne_paste_stand": "2026-11-24",
   "hat_ev": false,
   "hinweis": "Die verlinkten Listen sind Open Team Lists und fuehren keine EVs und IVs."
  },
@@ -387,7 +387,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-11-20"
+   "zuletzt_gesehen": "2026-11-24"
   },
   {
    "rank": 2,
@@ -619,7 +619,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-11-20"
+   "zuletzt_gesehen": "2026-11-24"
   },
   {
    "rank": 3,
@@ -851,7 +851,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-11-20"
+   "zuletzt_gesehen": "2026-11-24"
   },
   {
    "rank": 4,
@@ -1082,7 +1082,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-11-20"
+   "zuletzt_gesehen": "2026-11-24"
   },
   {
    "rank": 5,
@@ -1313,7 +1313,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-11-20"
+   "zuletzt_gesehen": "2026-11-24"
   },
   {
    "rank": 6,
@@ -1545,7 +1545,7 @@
    ],
    "hat_ev": false,
    "quelle": "victory-road-replika",
-   "zuletzt_gesehen": "2026-11-20"
+   "zuletzt_gesehen": "2026-11-24"
   }
  ]
 }

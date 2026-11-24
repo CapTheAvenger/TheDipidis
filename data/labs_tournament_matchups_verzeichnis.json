@@ -1,6 +1,6 @@
 {
   "quelle": "labs_tournament_matchups",
-  "stand": "2026-11-20T10:17:18+00:00",
+  "stand": "2026-11-24T06:33:40+00:00",
   "meta_keys": [
     "BRS-PRE",
     "BRS-SCR",
@@ -14,6 +14,7 @@
     "SVI-PFL",
     "TEF-30C",
     "TEF-CRI",
+    "TEF-DLR",
     "TEF-PBL",
     "TEF-POR"
   ],

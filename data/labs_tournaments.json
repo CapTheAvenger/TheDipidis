@@ -1,5 +1,13 @@
 [
   {
+    "tournament_id": "0081",
+    "tournament_name": "International Championship São Paulo",
+    "tournament_date": "2026-11-20",
+    "tournament_type": "international",
+    "country": "BR",
+    "total_players": 2638
+  },
+  {
     "tournament_id": "0080",
     "tournament_name": "Special Event Buenos Aires",
     "tournament_date": "2026-11-14",
@@ -166,13 +174,5 @@
     "tournament_type": "regional",
     "country": "US",
     "total_players": 2734
-  },
-  {
-    "tournament_id": "0081",
-    "tournament_name": "International Championship São Paulo",
-    "tournament_date": "",
-    "tournament_type": "special",
-    "country": "",
-    "total_players": 0
   }
 ]

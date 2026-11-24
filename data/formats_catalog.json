@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-17 06:16:46",
+  "last_updated": "2026-11-24 06:16:06",
   "formats": [
     {
       "code": "BRS-PRE",
@@ -74,6 +74,11 @@
     {
       "code": "TEF-30C",
       "name": "TEF-30C",
+      "source": "scraped"
+    },
+    {
+      "code": "TEF-DLR",
+      "name": "TEF-DLR",
       "source": "scraped"
     },
     {

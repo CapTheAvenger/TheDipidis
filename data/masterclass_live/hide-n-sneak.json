@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-24T03:45:11Z",
+  "erzeugt_am": "2026-11-24T07:08:13Z",
   "id": "hide-n-sneak",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -17,9 +17,9 @@
     ],
     "slug": "dragapult-ex",
     "vor_ort": [
-     512,
-     386,
-     197
+     84,
+     36,
+     36
     ]
    },
    {
@@ -32,9 +32,9 @@
     ],
     "slug": "mega-rayquaza-ex",
     "vor_ort": [
-     0,
-     0,
-     0
+     6,
+     18,
+     4
     ]
    },
    {
@@ -47,9 +47,9 @@
     ],
     "slug": "basic-box-m",
     "vor_ort": [
-     136,
-     209,
-     75
+     18,
+     46,
+     6
     ]
    },
    {
@@ -62,9 +62,9 @@
     ],
     "slug": "slowking-scr",
     "vor_ort": [
-     193,
-     78,
-     82
+     25,
+     13,
+     10
     ]
    },
    {
@@ -77,9 +77,9 @@
     ],
     "slug": "ogerpon-meganium-hydrapple",
     "vor_ort": [
-     58,
-     133,
-     58
+     5,
+     17,
+     5
     ]
    },
    {
@@ -93,7 +93,7 @@
     "slug": "talonflame-dusknoir",
     "vor_ort": [
      0,
-     0,
+     1,
      0
     ]
    },
@@ -107,9 +107,9 @@
     ],
     "slug": "n-zoroark",
     "vor_ort": [
-     47,
-     215,
-     47
+     15,
+     43,
+     13
     ]
    },
    {
@@ -122,9 +122,9 @@
     ],
     "slug": "alakazam-dudunsparce",
     "vor_ort": [
-     125,
-     70,
-     44
+     13,
+     21,
+     8
     ]
    },
    {
@@ -137,9 +137,9 @@
     ],
     "slug": "mega-excadrill-ex",
     "vor_ort": [
-     87,
-     108,
-     46
+     8,
+     9,
+     5
     ]
    },
    {
@@ -152,9 +152,9 @@
     ],
     "slug": "crustle-dri",
     "vor_ort": [
-     50,
-     49,
-     23
+     11,
+     18,
+     3
     ]
    },
    {
@@ -167,9 +167,9 @@
     ],
     "slug": "lopunny-dudunsparce",
     "vor_ort": [
-     18,
-     76,
-     13
+     2,
+     5,
+     2
     ]
    },
    {
@@ -182,9 +182,9 @@
     ],
     "slug": "dragapult-dudunsparce",
     "vor_ort": [
-     18,
      13,
-     8
+     16,
+     10
     ]
    },
    {
@@ -197,9 +197,9 @@
     ],
     "slug": "festival-lead",
     "vor_ort": [
-     73,
-     102,
-     36
+     5,
+     4,
+     1
     ]
    },
    {
@@ -212,9 +212,9 @@
     ],
     "slug": "mega-lucario-ex",
     "vor_ort": [
-     50,
-     3,
-     4
+     6,
+     2,
+     0
     ]
    },
    {
@@ -227,9 +227,9 @@
     ],
     "slug": "rockets-honchkrow",
     "vor_ort": [
-     41,
-     21,
-     13
+     10,
+     3,
+     2
     ]
    },
    {
@@ -242,8 +242,8 @@
     ],
     "slug": "greninja-ex",
     "vor_ort": [
-     15,
-     4,
+     3,
+     1,
      1
     ]
    },
@@ -257,9 +257,9 @@
     ],
     "slug": "dragapult-blaziken",
     "vor_ort": [
-     72,
-     142,
-     60
+     4,
+     16,
+     3
     ]
    },
    {
@@ -272,9 +272,9 @@
     ],
     "slug": "sharpedo-toxtricity",
     "vor_ort": [
-     17,
-     71,
-     23
+     1,
+     6,
+     2
     ]
    },
    {
@@ -287,9 +287,9 @@
     ],
     "slug": "cynthia-garchomp-ex",
     "vor_ort": [
-     23,
-     28,
-     12
+     1,
+     1,
+     1
     ]
    },
    {
@@ -302,9 +302,9 @@
     ],
     "slug": "dragapult-dusknoir",
     "vor_ort": [
-     127,
-     76,
-     33
+     13,
+     2,
+     2
     ]
    },
    {
@@ -318,7 +318,7 @@
     "slug": "mega-golisopod-ex",
     "vor_ort": [
      0,
-     0,
+     1,
      0
     ]
    },
@@ -332,9 +332,9 @@
     ],
     "slug": "lucario-hariyama",
     "vor_ort": [
-     112,
-     3,
-     5
+     9,
+     1,
+     2
     ]
    },
    {
@@ -349,7 +349,7 @@
     "vor_ort": [
      0,
      0,
-     0
+     1
     ]
    },
    {
@@ -362,9 +362,9 @@
     ],
     "slug": "alakazam-dusknoir",
     "vor_ort": [
-     66,
-     9,
-     5
+     5,
+     1,
+     1
     ]
    },
    {
@@ -377,9 +377,9 @@
     ],
     "slug": "grimmsnarl-froslass",
     "vor_ort": [
-     9,
-     40,
-     11
+     1,
+     2,
+     1
     ]
    },
    {
@@ -392,9 +392,9 @@
     ],
     "slug": "mega-greninja-ex",
     "vor_ort": [
-     14,
-     12,
-     9
+     0,
+     1,
+     0
     ]
    },
    {
@@ -407,9 +407,9 @@
     ],
     "slug": "toucannon-pbl",
     "vor_ort": [
-     7,
-     11,
-     3
+     1,
+     0,
+     0
     ]
    },
    {
@@ -422,9 +422,9 @@
     ],
     "slug": "igglybuff-30c",
     "vor_ort": [
-     2,
-     2,
-     2
+     0,
+     1,
+     0
     ]
    },
    {
@@ -437,8 +437,8 @@
     ],
     "slug": "manectric-eelektrik",
     "vor_ort": [
+     0,
      1,
-     3,
      0
     ]
    },
@@ -452,9 +452,9 @@
     ],
     "slug": "ogerpon-meganium-arboliva",
     "vor_ort": [
-     10,
-     19,
-     11
+     0,
+     3,
+     3
     ]
    },
    {
@@ -467,9 +467,9 @@
     ],
     "slug": "lopunny-dusknoir",
     "vor_ort": [
-     60,
-     13,
-     8
+     2,
+     1,
+     0
     ]
    },
    {
@@ -482,8 +482,8 @@
     ],
     "slug": "mega-starmie-ex",
     "vor_ort": [
-     6,
-     10,
+     1,
+     0,
      0
     ]
    },
@@ -497,9 +497,9 @@
     ],
     "slug": "rocket-mewtwo-ex",
     "vor_ort": [
-     22,
-     20,
-     10
+     7,
+     2,
+     0
     ]
    },
    {
@@ -527,9 +527,9 @@
     ],
     "slug": "seaking-pre",
     "vor_ort": [
-     13,
-     15,
-     4
+     0,
+     0,
+     0
     ]
    },
    {
@@ -542,8 +542,8 @@
     ],
     "slug": "ethan-typhlosion",
     "vor_ort": [
-     10,
-     5,
+     4,
+     0,
      0
     ]
    },
@@ -558,7 +558,7 @@
     "slug": "mega-charizard-y-ex",
     "vor_ort": [
      0,
-     0,
+     1,
      0
     ]
    },
@@ -572,9 +572,9 @@
     ],
     "slug": "mew-ex-30c",
     "vor_ort": [
-     15,
-     16,
-     5
+     2,
+     0,
+     0
     ]
    },
    {
@@ -587,9 +587,9 @@
     ],
     "slug": "okidogi-barbaracle",
     "vor_ort": [
-     6,
-     2,
-     2
+     1,
+     1,
+     0
     ]
    },
    {
@@ -602,8 +602,8 @@
     ],
     "slug": "kangaskhan-bouffalant",
     "vor_ort": [
-     1,
-     6,
+     0,
+     0,
      0
     ]
    },
@@ -617,9 +617,9 @@
     ],
     "slug": "raging-bolt-ogerpon",
     "vor_ort": [
-     18,
-     12,
-     9
+     1,
+     3,
+     1
     ]
    },
    {
@@ -632,9 +632,9 @@
     ],
     "slug": "mega-venusaur-ex",
     "vor_ort": [
-     4,
-     10,
-     3
+     3,
+     0,
+     1
     ]
    },
    {
@@ -647,9 +647,9 @@
     ],
     "slug": "beedrill-ex-cri",
     "vor_ort": [
-     6,
-     9,
-     1
+     0,
+     3,
+     0
     ]
    },
    {
@@ -662,9 +662,9 @@
     ],
     "slug": "hops-trevenant",
     "vor_ort": [
-     10,
-     5,
-     5
+     0,
+     0,
+     0
     ]
    },
    {
@@ -677,8 +677,8 @@
     ],
     "slug": "starmie-froslass",
     "vor_ort": [
+     1,
      4,
-     9,
      0
     ]
    },
@@ -692,7 +692,7 @@
     ],
     "slug": "mega-charizard-x-ex",
     "vor_ort": [
-     2,
+     0,
      0,
      0
     ]
@@ -707,8 +707,8 @@
     ],
     "slug": "mega-absol-mega-audino",
     "vor_ort": [
-     1,
-     9,
+     0,
+     0,
      0
     ]
    },
@@ -737,8 +737,8 @@
     ],
     "slug": "mega-darkrai-ex",
     "vor_ort": [
-     1,
-     1,
+     0,
+     0,
      0
     ]
    },
@@ -753,7 +753,7 @@
     "slug": "mega-manectric-ex-meg",
     "vor_ort": [
      0,
-     0,
+     1,
      0
     ]
    },
@@ -767,9 +767,9 @@
     ],
     "slug": "ceruledge-ex",
     "vor_ort": [
-     8,
-     5,
-     2
+     0,
+     2,
+     1
     ]
    },
    {
@@ -797,9 +797,9 @@
     ],
     "slug": "toxtricity-box",
     "vor_ort": [
-     2,
-     8,
-     2
+     0,
+     0,
+     0
     ]
    },
    {
@@ -812,8 +812,8 @@
     ],
     "slug": "gengar-ex",
     "vor_ort": [
-     1,
-     1,
+     0,
+     0,
      0
     ]
    },
@@ -827,9 +827,9 @@
     ],
     "slug": "mega-dragonite-ex",
     "vor_ort": [
-     3,
      0,
-     1
+     0,
+     0
     ]
    },
    {
@@ -843,8 +843,8 @@
     "slug": "cinccino-ex",
     "vor_ort": [
      0,
-     2,
-     1
+     0,
+     0
     ]
    },
    {
@@ -857,8 +857,8 @@
     ],
     "slug": "mega-absol-box",
     "vor_ort": [
-     2,
-     3,
+     0,
+     0,
      0
     ]
    },
@@ -872,9 +872,9 @@
     ],
     "slug": "mega-chandelure-ex",
     "vor_ort": [
-     15,
-     3,
-     4
+     0,
+     0,
+     0
     ]
    },
    {
@@ -887,23 +887,8 @@
     ],
     "slug": "starmie-dusknoir",
     "vor_ort": [
-     5,
-     4,
-     1
-    ]
-   },
-   {
-    "anteil": "0,22",
-    "name": "Flareon Noctowl",
-    "online": [
      0,
      0,
-     0
-    ],
-    "slug": "flareon-noctowl",
-    "vor_ort": [
-     0,
-     4,
      0
     ]
    },
@@ -917,7 +902,7 @@
     ],
     "slug": "mega-abomasnow-ex",
     "vor_ort": [
-     1,
+     2,
      0,
      0
     ]
@@ -932,7 +917,7 @@
     ],
     "slug": "toxtricity-pfl",
     "vor_ort": [
-     2,
+     0,
      0,
      0
     ]
@@ -948,7 +933,7 @@
     "slug": "hydreigon-ex",
     "vor_ort": [
      0,
-     1,
+     0,
      0
     ]
    },
@@ -962,9 +947,9 @@
     ],
     "slug": "joltik-box",
     "vor_ort": [
-     1,
      0,
-     0
+     0,
+     2
     ]
    },
    {
@@ -977,7 +962,7 @@
     ],
     "slug": "palafin-ex",
     "vor_ort": [
-     1,
+     0,
      0,
      0
     ]
@@ -992,9 +977,9 @@
     ],
     "slug": "stevens-metagross",
     "vor_ort": [
-     3,
-     2,
-     5
+     1,
+     0,
+     0
     ]
    },
    {
@@ -1009,7 +994,7 @@
     "vor_ort": [
      0,
      0,
-     1
+     0
     ]
    },
    {
@@ -1022,7 +1007,7 @@
     ],
     "slug": "mega-lopunny-ex",
     "vor_ort": [
-     2,
+     0,
      0,
      0
     ]
@@ -1037,8 +1022,8 @@
     ],
     "slug": "metagross-cri",
     "vor_ort": [
-     2,
-     6,
+     0,
+     0,
      0
     ]
    },
@@ -1067,8 +1052,23 @@
     ],
     "slug": "archaludon-ex",
     "vor_ort": [
-     2,
-     2,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "anteil": "0,12",
+    "name": "Blaziken",
+    "online": [
+     0,
+     0,
+     0
+    ],
+    "slug": "blaziken-ex-jtg",
+    "vor_ort": [
+     0,
+     1,
      0
     ]
    },
@@ -1082,7 +1082,7 @@
     ],
     "slug": "decidueye-ex",
     "vor_ort": [
-     1,
+     0,
      0,
      0
     ]
@@ -1097,7 +1097,7 @@
     ],
     "slug": "doublade-por",
     "vor_ort": [
-     2,
+     0,
      0,
      0
     ]
@@ -1118,21 +1118,6 @@
     ]
    },
    {
-    "anteil": "0,12",
-    "name": "Yanmega",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "yanmega-ex",
-    "vor_ort": [
-     1,
-     2,
-     1
-    ]
-   },
-   {
     "anteil": "0,09",
     "name": "Dragapult Alakazam",
     "online": [
@@ -1142,8 +1127,8 @@
     ],
     "slug": "dragapult-alakazam",
     "vor_ort": [
-     1,
-     2,
+     0,
+     0,
      0
     ]
    },
@@ -1164,21 +1149,6 @@
    },
    {
     "anteil": "0,09",
-    "name": "Hop's Zacian",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "hop-zacian",
-    "vor_ort": [
-     1,
-     2,
-     0
-    ]
-   },
-   {
-    "anteil": "0,09",
     "name": "Ogerpon Meganium",
     "online": [
      0,
@@ -1188,81 +1158,6 @@
     "slug": "ogerpon-meganium",
     "vor_ort": [
      0,
-     2,
-     1
-    ]
-   },
-   {
-    "anteil": "0,09",
-    "name": "Rocket's Spidops",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "rocket-spidops",
-    "vor_ort": [
-     2,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,07",
-    "name": "Alakazam",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "alakazam-meg",
-    "vor_ort": [
-     1,
-     0,
-     1
-    ]
-   },
-   {
-    "anteil": "0,07",
-    "name": "Eelektrik",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "eelektrik-blk",
-    "vor_ort": [
-     1,
-     2,
-     1
-    ]
-   },
-   {
-    "anteil": "0,07",
-    "name": "Lillie's Clefairy",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "lillie-clefairy",
-    "vor_ort": [
-     2,
-     5,
-     0
-    ]
-   },
-   {
-    "anteil": "0,06",
-    "name": "Paldean Tauros",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "paldean-tauros-pfl",
-    "vor_ort": [
-     1,
      0,
      0
     ]
@@ -1299,21 +1194,6 @@
    },
    {
     "anteil": "0,04",
-    "name": "Flareon",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "flareon-ex",
-    "vor_ort": [
-     1,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,04",
     "name": "Flygon",
     "online": [
      1,
@@ -1337,8 +1217,8 @@
     ],
     "slug": "archaludon-dudunsparce",
     "vor_ort": [
-     3,
-     3,
+     1,
+     0,
      0
     ]
    },
@@ -1389,61 +1269,16 @@
    },
    {
     "anteil": "0,03",
-    "name": "Tera Box",
+    "name": "Marnie's Grimmsnarl",
     "online": [
      0,
      0,
      0
     ],
-    "slug": "tera-box",
-    "vor_ort": [
-     1,
-     2,
-     2
-    ]
-   },
-   {
-    "anteil": "0,03",
-    "name": "Zygarde Barbaracle",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "zygarde-barbaracle",
+    "slug": "marnie-grimmsnarl-ex",
     "vor_ort": [
      0,
      1,
-     0
-    ]
-   },
-   {
-    "anteil": "0,01",
-    "name": "Blaziken Zoroark",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "blaziken-zoroark",
-    "vor_ort": [
-     0,
-     0,
-     1
-    ]
-   },
-   {
-    "anteil": "0,01",
-    "name": "Clefairy Ogerpon",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "clefairy-ogerpon",
-    "vor_ort": [
-     2,
-     4,
      0
     ]
    },
@@ -1457,22 +1292,7 @@
     ],
     "slug": "dragapult-toucannon",
     "vor_ort": [
-     1,
      0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,01",
-    "name": "Heatran Metang",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "heatran-metang",
-    "vor_ort": [
-     1,
      0,
      0
     ]
@@ -1489,118 +1309,13 @@
     "vor_ort": [
      0,
      0,
-     1
-    ]
-   },
-   {
-    "anteil": "0,00",
-    "name": "alakazam-slowking",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "alakazam-slowking",
-    "vor_ort": [
-     3,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,00",
-    "name": "azumarill-ssp",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "azumarill-ssp",
-    "vor_ort": [
-     2,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,00",
-    "name": "blissey-ex",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "blissey-ex",
-    "vor_ort": [
-     1,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,00",
-    "name": "dragapult-froslass",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "dragapult-froslass",
-    "vor_ort": [
-     1,
-     1,
-     0
-    ]
-   },
-   {
-    "anteil": "0,00",
-    "name": "hydrapple-ogerpon",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "hydrapple-ogerpon",
-    "vor_ort": [
-     1,
-     0,
-     0
-    ]
-   },
-   {
-    "anteil": "0,00",
-    "name": "jellicent-dusknoir",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "jellicent-dusknoir",
-    "vor_ort": [
-     4,
-     0,
-     1
-    ]
-   },
-   {
-    "anteil": "0,00",
-    "name": "relicanth-pbl",
-    "online": [
-     0,
-     0,
-     0
-    ],
-    "slug": "relicanth-pbl",
-    "vor_ort": [
-     1,
-     0,
      0
     ]
    }
   ],
   "liste_online": {
-   "bilanz": "4-0-1",
-   "datum": "14.11.2026",
+   "bilanz": "5-0-0",
+   "datum": "20.11.2026",
    "karten": [
     [
      4,
@@ -1609,13 +1324,19 @@
      "5"
     ],
     [
-     4,
+     2,
      "Sinistcha",
      "PBL",
      "6"
     ],
     [
      4,
+     "Dhelmise",
+     "PBL",
+     "39"
+    ],
+    [
+     3,
      "Shuppet",
      "PBL",
      "33"
@@ -1627,34 +1348,28 @@
      "34"
     ],
     [
-     4,
-     "Dhelmise",
-     "PBL",
-     "39"
+     2,
+     "Dunsparce",
+     "JTG",
+     "120"
+    ],
+    [
+     2,
+     "Dudunsparce",
+     "TEF",
+     "129"
     ],
     [
      1,
-     "Spiritomb",
-     "PBL",
-     "35"
+     "Dudunsparce ex",
+     "JTG",
+     "121"
     ],
     [
-     1,
+     2,
      "Lillie's Clefairy ex",
      "JTG",
      "56"
-    ],
-    [
-     1,
-     "Bloodmoon Ursaluna ex",
-     "TWM",
-     "141"
-    ],
-    [
-     1,
-     "Patrat",
-     "CRI",
-     "70"
     ],
     [
      1,
@@ -1663,13 +1378,19 @@
      "76"
     ],
     [
+     1,
+     "Spiritomb",
+     "PBL",
+     "35"
+    ],
+    [
      4,
      "Lillie's Determination",
      "MEG",
      "119"
     ],
     [
-     4,
+     3,
      "Gwynn",
      "PBL",
      "78"
@@ -1688,21 +1409,27 @@
     ],
     [
      4,
-     "Poké Pad",
-     "POR",
-     "81"
-    ],
-    [
-     4,
      "Ultra Ball",
      "MEG",
      "131"
+    ],
+    [
+     4,
+     "Poké Pad",
+     "POR",
+     "81"
     ],
     [
      3,
      "Night Stretcher",
      "ASC",
      "196"
+    ],
+    [
+     1,
+     "Pokégear 3.0",
+     "SVI",
+     "186"
     ],
     [
      3,
@@ -1717,7 +1444,7 @@
      "88"
     ],
     [
-     3,
+     2,
      "Psychic Energy",
      "MEE",
      "13"
@@ -1730,27 +1457,15 @@
     ]
    ],
    "platz": 1,
-   "spieler": "Max Andreev",
-   "turnier": "Московская лига Pokémon TCG | X сезон #11",
-   "von": 20
+   "spieler": "JuanPabloVega",
+   "turnier": "Nightshades Friday Challenge 7 (25 Codes)",
+   "von": 66
   },
   "listen_vor_ort": [
    {
-    "bilanz": "14-2-2",
-    "datum": "17.10.2026",
+    "bilanz": "10-3-1",
+    "datum": "20.11.2026",
     "karten": [
-     [
-      4,
-      "Shuppet",
-      "PBL",
-      "33"
-     ],
-     [
-      4,
-      "Banette",
-      "PBL",
-      "34"
-     ],
      [
       4,
       "Poltchageist",
@@ -1758,7 +1473,7 @@
       "5"
      ],
      [
-      4,
+      2,
       "Sinistcha",
       "PBL",
       "6"
@@ -1770,22 +1485,40 @@
       "39"
      ],
      [
+      3,
+      "Shuppet",
+      "PBL",
+      "33"
+     ],
+     [
+      4,
+      "Banette",
+      "PBL",
+      "34"
+     ],
+     [
+      2,
+      "Dunsparce",
+      "JTG",
+      "120"
+     ],
+     [
+      2,
+      "Dudunsparce",
+      "TEF",
+      "129"
+     ],
+     [
+      1,
+      "Dudunsparce ex",
+      "JTG",
+      "121"
+     ],
+     [
       2,
       "Lillie's Clefairy ex",
       "JTG",
       "56"
-     ],
-     [
-      1,
-      "Spiritomb",
-      "PBL",
-      "35"
-     ],
-     [
-      1,
-      "Latias ex",
-      "SSP",
-      "76"
      ],
      [
       1,
@@ -1794,22 +1527,22 @@
       "141"
      ],
      [
+      1,
+      "Latias ex",
+      "SSP",
+      "76"
+     ],
+     [
       4,
-      "Explorer's Guidance",
-      "TEF",
-      "147"
-     ],
-     [
-      3,
-      "Lillie's Determination",
-      "MEG",
-      "119"
-     ],
-     [
-      3,
       "Gwynn",
       "PBL",
       "78"
+     ],
+     [
+      4,
+      "Lillie's Determination",
+      "MEG",
+      "119"
      ],
      [
       3,
@@ -1819,9 +1552,9 @@
      ],
      [
       2,
-      "Naveen",
-      "POR",
-      "79"
+      "Explorer's Guidance",
+      "TEF",
+      "147"
      ],
      [
       4,
@@ -1830,7 +1563,7 @@
       "131"
      ],
      [
-      3,
+      4,
       "Poké Pad",
       "POR",
       "81"
@@ -1842,7 +1575,7 @@
       "196"
      ],
      [
-      2,
+      3,
       "Prism Tower",
       "CRI",
       "80"
@@ -1854,7 +1587,7 @@
       "88"
      ],
      [
-      3,
+      2,
       "Psychic Energy",
       "MEE",
       "13"
@@ -1866,17 +1599,23 @@
       "167"
      ]
     ],
-    "platz": 2,
-    "spieler": "Maxime Launay",
-    "turnier": "Nice",
-    "von": 2330
+    "platz": 45,
+    "spieler": "Victória Bechara",
+    "turnier": "IC São Paulo",
+    "von": 2638
    },
    {
-    "bilanz": "13-2-2",
-    "datum": "09.10.2026",
+    "bilanz": "8-2-4",
+    "datum": "20.11.2026",
     "karten": [
      [
       4,
+      "Dhelmise",
+      "PBL",
+      "39"
+     ],
+     [
+      3,
       "Poltchageist",
       "PBL",
       "5"
@@ -1886,12 +1625,6 @@
       "Sinistcha",
       "PBL",
       "6"
-     ],
-     [
-      4,
-      "Dhelmise",
-      "PBL",
-      "39"
      ],
      [
       3,
@@ -1906,7 +1639,7 @@
       "34"
      ],
      [
-      2,
+      3,
       "Dunsparce",
       "JTG",
       "120"
@@ -2008,23 +1741,23 @@
       "167"
      ]
     ],
-    "platz": 4,
-    "spieler": "Rahul Reddy",
-    "turnier": "Louisville",
-    "von": 2918
+    "platz": 118,
+    "spieler": "Augusto Cesar Beringuer",
+    "turnier": "IC São Paulo",
+    "von": 2638
    }
   ],
   "name": "Dhelmise",
   "online": {
    "anteil": "2,54",
-   "anteil14": "2,8",
+   "anteil14": "2,68",
    "bilanz": [
     403,
     457,
     5
    ],
    "bis": "23.11.2026",
-   "fenster14": "09.11.–20.11.2026",
+   "fenster14": "10.11.–24.11.2026",
    "format": "TEF–DLR",
    "kurz_anteil": "2,32",
    "kurz_bilanz": [
@@ -2041,139 +1774,34 @@
    "turniere": 40
   },
   "vor_ort": {
-   "format": "TEF–30C",
+   "format": "TEF–DLR",
    "summe": {
-    "anteil": "4,59",
+    "anteil": "3,60",
     "bilanz": [
-     2306,
-     2241,
-     947
+     301,
+     321,
+     140
     ],
-    "day2": 109,
-    "decks": 662,
+    "day2": 15,
+    "decks": 95,
     "sieg": 0,
-    "spieler": 14432,
-    "top8": 2
+    "spieler": 2638,
+    "top8": 0
    },
    "turniere": [
     {
-     "anteil": "4,60",
+     "anteil": "3,60",
      "bilanz": [
-      77,
-      84,
-      45
-     ],
-     "datum": "14.11.2026",
-     "day2": 5,
-     "decks": 25,
-     "name": "Buenos Aires",
-     "sieg": 0,
-     "spieler": 543,
-     "top8": 0
-    },
-    {
-     "anteil": "7,54",
-     "bilanz": [
-      396,
-      460,
-      168
-     ],
-     "datum": "31.10.2026",
-     "day2": 14,
-     "decks": 131,
-     "name": "Gdańsk",
-     "sieg": 0,
-     "spieler": 1738,
-     "top8": 0
-    },
-    {
-     "anteil": "5,00",
-     "bilanz": [
-      444,
-      382,
-      192
-     ],
-     "datum": "24.10.2026",
-     "day2": 29,
-     "decks": 111,
-     "name": "Puebla",
-     "sieg": 0,
-     "spieler": 2222,
-     "top8": 0
-    },
-    {
-     "anteil": "5,49",
-     "bilanz": [
-      470,
-      429,
-      186
-     ],
-     "datum": "17.10.2026",
-     "day2": 21,
-     "decks": 128,
-     "name": "Nice",
-     "sieg": 0,
-     "spieler": 2330,
-     "top8": 1
-    },
-    {
-     "anteil": "3,91",
-     "bilanz": [
-      420,
-      362,
-      134
-     ],
-     "datum": "09.10.2026",
-     "day2": 22,
-     "decks": 114,
-     "name": "Louisville",
-     "sieg": 0,
-     "spieler": 2918,
-     "top8": 1
-    },
-    {
-     "anteil": "2,33",
-     "bilanz": [
-      63,
-      85,
-      34
-     ],
-     "datum": "03.10.2026",
-     "day2": 1,
-     "decks": 25,
-     "name": "Recife",
-     "sieg": 0,
-     "spieler": 1072,
-     "top8": 0
-    },
-    {
-     "anteil": "3,47",
-     "bilanz": [
-      355,
+      301,
       321,
-      148
+      140
      ],
-     "datum": "26.09.2026",
-     "day2": 14,
-     "decks": 97,
-     "name": "Frankfurt",
+     "datum": "20.11.2026",
+     "day2": 15,
+     "decks": 95,
+     "name": "IC São Paulo",
      "sieg": 0,
-     "spieler": 2793,
-     "top8": 0
-    },
-    {
-     "anteil": "3,80",
-     "bilanz": [
-      81,
-      118,
-      40
-     ],
-     "datum": "26.09.2026",
-     "day2": 3,
-     "decks": 31,
-     "name": "Brisbane",
-     "sieg": 0,
-     "spieler": 816,
+     "spieler": 2638,
      "top8": 0
     }
    ]

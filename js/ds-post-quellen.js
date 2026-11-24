@@ -264,6 +264,29 @@ function passtIn(text, grenze) {
     text = String(text);
     return text.length <= grenze ? text : text.slice(0, grenze - 1).trim() + '…';
 }
+/* EINE NENNERZEILE, DIE IN EINE ZEILE PASST (WZ-52, 24.11.2026).
+ *
+ * Die Zahl-Vorlage malt zwei Zeilen zu je rund 56 Zeichen. Seit das
+ * Ankerturnier "International Championship São Paulo" heisst, wurde
+ * "39 of 2.638 Spielern, International São Paulo, geschrumpft" 59 Zeichen
+ * lang, brach um — und der Vorbehalt "5,2 % des Online-Metas sind neu"
+ * rutschte in die dritte Zeile, die malZahl ohne Auslassungszeichen
+ * wegwirft. Der Turniername gibt nach: erst das in der Szene uebliche
+ * Kuerzel (IC, SE), dann hart. Vorn und hinten werden nie gekuerzt. */
+var NENNER_BREITE = 56;
+var TURNIER_KUERZEL = [
+    [/^International\s+/, 'IC '],
+    [/^Special Event\s+/, 'SE '],
+    [/^League Challenge\s+/, 'LC ']
+];
+function nennerZeile(vorn, turnier, hinten) {
+    var platz = NENNER_BREITE - String(vorn).length - String(hinten).length;
+    var t = kurzTurnier(turnier);
+    for (var i = 0; i < TURNIER_KUERZEL.length && t.length > platz; i++) {
+        t = t.replace(TURNIER_KUERZEL[i][0], TURNIER_KUERZEL[i][1]);
+    }
+    return vorn + passtIn(t, Math.max(6, platz)) + hinten;
+}
 var FUSS_MAX = 48;
 function fussZeile(vorn, hinten) {
     /* `hinten` traegt den Nenner und wird nie gekuerzt. */
@@ -1364,9 +1387,10 @@ REZEPTE['day2-prognose'] = {
                          * 56 Zeichen; mit "World Championship San
                          * Francisco" waren es 69, und die dritte Zeile
                          * wirft malZahl ohne Auslassungszeichen weg. */
-                        zahlNenner: Math.round(r.spieler) + ' of ' +
-                            tausend(anker.spieler || 0) + ' Spielern, ' +
-                            kurzTurnier(anker.name) + ', geschrumpft' +
+                        zahlNenner: nennerZeile(
+                            Math.round(r.spieler) + ' of ' +
+                                tausend(anker.spieler || 0) + ' Spielern, ',
+                            anker.name, ', geschrumpft') +
                             (vorbehalt ? '\n' + vorbehalt : '')
                     };
                 }

@@ -802,6 +802,35 @@ test('der Nenner der Zahl-Vorlage ueberlebt den Umbruch', async () => {
     }
 });
 
+test('der Day-2-Nenner bleibt bei langem Ankerturnier zweizeilig', async () => {
+    /* WZ-52 (24.11.2026): gesetzter Fall, unabhaengig vom Ankerturnier
+     * der Woche. "International Championship São Paulo" mit 2.638
+     * Spielern machte die erste Zeile 59 Zeichen lang; der Vorbehalt
+     * fiel als dritte Zeile vom Bild (Guardian 45366260391). */
+    const BREITE = 56;
+    const fall = (name) => JSON.stringify({
+        anker: [{ id: 'T', name, datum: '2026-11-20', spieler: 2638 }],
+        rangliste: [{ deck: 'Festival Lead', day2_geschrumpft: 41.3, ankerspieler: 39 }],
+        online_abdeckung: { anteil_unbekannt: 5.18 },
+        min_ankerspieler_anzeige: 30
+    });
+    for (const name of ['International Championship São Paulo',
+        'Special Event Ein Sehr Langer Ortsname Mit Vielen Woertern']) {
+        const Qf = fenster({ 'data/deckempfehlung.json': fall(name) }).window.DsPostQuellen;
+        const z = (await Qf.lade('day2-prognose')).zahlFuer('Festival Lead');
+        const [erste, zweite] = z.zahlNenner.split('\n');
+        assert.ok(erste.length <= BREITE,
+            `${name}: erste Nennerzeile ${erste.length} Zeichen, die Zeile fasst ${BREITE}: "${erste}"`);
+        assert.ok(/^39 of 2[.,]638 Spielern, /.test(erste) && erste.endsWith(', geschrumpft'),
+            `Zahl oder Zusatz gekuerzt: "${erste}"`);
+        assert.ok(/des Online-Metas sind neu/.test(zweite || ''),
+            `der Vorbehalt steht nicht in Zeile zwei: ${JSON.stringify(z.zahlNenner)}`);
+    }
+    const ic = (await fenster({ 'data/deckempfehlung.json': fall('International Championship São Paulo') })
+        .window.DsPostQuellen.lade('day2-prognose')).zahlFuer('Festival Lead');
+    assert.ok(ic.zahlNenner.includes('IC São Paulo'), ic.zahlNenner);
+});
+
 test('Champions zaehlt keinen Platzhalter als Turnier', async () => {
     /* 13 der 114 Teams trugen tournament: "-". Die erste Fassung zaehlte
      * den Platzhalter als 25. Turnier.

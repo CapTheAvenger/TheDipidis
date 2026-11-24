@@ -558,6 +558,11 @@ async function loadUserData(userId) {
       _scheduleIntlIdMigration(userId);
 
       if (typeof updateCollectionUI === 'function') updateCollectionUI();
+      // UI-165: Bestandspillen der schon gezeichneten Kartendatenbank nachziehen
+      // (Normal + Reverse kommen erst jetzt aus dem Konto).
+      if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+        try { renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true }); } catch (e) { /* egal */ }
+      }
 
       // Profile (render after collection is loaded so cards/value are correct)
       window.userProfile = data;

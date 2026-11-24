@@ -131,6 +131,9 @@ function initFirebaseRuntime() {
       document.documentElement.classList.toggle('is-signed-out', !user);
       document.documentElement.classList.toggle('is-signed-in', !!user);
     } catch (e) { /* nie an einer Klasse scheitern */ }
+    // UI-165: der Besitzfilter der Kartendatenbank gilt nur angemeldet — die
+    // Leiste kann schon gezeichnet sein, bevor die Anmeldung zurueckkommt.
+    try { if (typeof sammlungLeisteAbgleichen === 'function') sammlungLeisteAbgleichen(); } catch (e) { /* egal */ }
     if (user) {
       console.info('[Auth] Firebase state: signed in', user.email || user.uid || 'unknown-user');
       if (_fbDev) console.log('✓ User signed in:', user.email);

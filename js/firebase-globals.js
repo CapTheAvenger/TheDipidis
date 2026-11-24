@@ -18,6 +18,7 @@ window.db   = firebase.firestore();
 if (!window.userDecks)            window.userDecks            = [];
 if (!window.userCollection)       window.userCollection       = new Set();
 if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
+if (!window.userCollectionReverseCounts) window.userCollectionReverseCounts = new Map();
 if (!window.userWishlist)         window.userWishlist         = new Set();
 if (!window.userWishlistCounts)  window.userWishlistCounts  = new Map();
 if (!window.userWishlistMaxPrices) window.userWishlistMaxPrices = new Map();
@@ -200,6 +201,7 @@ function onUserSignedIn(user) {
 
   window.userCollection       = new Set();
   window.userCollectionCounts = new Map();
+  window.userCollectionReverseCounts = new Map();
   window.userWishlist         = new Set();
   window.userWishlistCounts  = new Map();
   window.userWishlistMaxPrices = new Map();
@@ -542,6 +544,8 @@ async function loadUserData(userId) {
 
       window.userCollection = new Set(mergedCollection);
       window.userCollectionCounts = new Map(Object.entries(counts));
+      // UI-165: Reverse Holo als eigener Zaehler (flache Kartennummern, geschrieben per FieldPath)
+      window.userCollectionReverseCounts = new Map(Object.entries(flattenCountsObject(data.collectionReverseCounts || {})));
       window.userCollection.forEach(cardId => {
         if (!window.userCollectionCounts.has(cardId)) {
           window.userCollectionCounts.set(cardId, 1);
@@ -1031,6 +1035,7 @@ const USER_STATE_SLOTS = {
   userProfile:            () => null,
   userCollection:         () => new Set(),
   userCollectionCounts:   () => new Map(),
+  userCollectionReverseCounts: () => new Map(),
   userWishlist:           () => new Set(),
   userWishlistCounts:     () => new Map(),
   userWishlistMaxPrices:  () => new Map(),

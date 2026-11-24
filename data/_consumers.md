@@ -93,7 +93,16 @@ Each Prize Pack card mapped to its **original** print (`set_code` + `set_number`
 the join key into any card database) and to both official image URLs.
 
 ### `price_data.csv`
-`name, set, number, eur_price, eur_low, cardmarket_url, last_updated, price_status, mapping_status`
+`name, set, number, eur_price, eur_low, cardmarket_url, last_updated, price_status, mapping_status, eur_price_reverse`
+
+**`eur_price_reverse`** (added 2026-11-24, UI-165): Cardmarket trend of the
+**reverse holo** version (`trend-holo` in the price guide), same format as
+`eur_price` (`0,08€`). **Empty means the card has no reverse holo** — Cardmarket
+publishes 0 for ex, full arts and special rares, which the merger writes as
+empty. Measured on DLR: 93 of 141 cards carry a value, all numbered ≤ 103 (main
+set). The site uses it both to decide whether a card gets a reverse counter in
+the collection and as the price shown in the reverse view. It is carried into
+`all_cards_merged.csv/json` and into the card chunks (there only where non-empty).
 
 **Two independent trust dimensions — don't collapse them.**
 `price_status` answers *which number to read* (see the table below).

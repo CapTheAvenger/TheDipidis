@@ -382,6 +382,72 @@ async function addToCollection(cardId) {
   }
 }
 
+// ── Reverse Holo als eigene Fassung (UI-165, Hausi 24.11.2026) ──────────
+// Eigener Zaehler `collectionReverseCounts` neben `collectionCounts`; der
+// bisherige Bestand gilt als Normal (Hausi: „ja“). Gleiche Grenze 4, gleicher
+// Weg wie addToCollection: erst lokal, dann schreiben, bei Ablehnung genau
+// diesen Tipper zuruecknehmen. Kein Eintrag in `collection` — die Liste
+// fuehrt weiter, was als Normal im Besitz ist.
+function _reverseZaehler() {
+  if (!(window.userCollectionReverseCounts instanceof Map)) window.userCollectionReverseCounts = new Map();
+  return window.userCollectionReverseCounts;
+}
+function _reverseNachAenderung() {
+  if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+    renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
+  }
+}
+async function addReverseToCollection(cardId) {
+  if (!requireSignIn()) return;
+  const user = auth.currentUser;
+  const zaehler = _reverseZaehler();
+  const vorher = zaehler.get(cardId) || 0;
+  const de = getLang() === 'de';
+  if (vorher >= 4) {
+    showNotification(de ? 'Höchstens 4 Reverse Holo je Karte' : 'Maximum 4 reverse holos per card', 'info');
+    return;
+  }
+  const neu = vorher + 1;
+  zaehler.set(cardId, neu);
+  _reverseNachAenderung();
+  showNotification(de ? `Reverse Holo in der Sammlung (${neu}/4)` : `Reverse holo added (${neu}/4)`, 'success');
+  db.collection('users').doc(user.uid).update(
+    countFieldRef('collectionReverseCounts', cardId), neu
+  ).catch(err => {
+    console.error('[collection] reverse persist failed, reverting:', err);
+    const zurueck = (zaehler.get(cardId) || 0) - 1;
+    if (zurueck > 0) zaehler.set(cardId, zurueck); else zaehler.delete(cardId);
+    _reverseNachAenderung();
+    showNotification(de ? 'Konnte nicht gespeichert werden' : 'Could not be saved', 'error');
+  });
+}
+async function removeReverseFromCollection(cardId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const zaehler = _reverseZaehler();
+  const vorher = zaehler.get(cardId) || 0;
+  if (vorher <= 0) return;
+  const neu = vorher - 1;
+  const de = getLang() === 'de';
+  if (neu <= 0) {
+    zaehler.delete(cardId);
+    db.collection('users').doc(user.uid).update(
+      countFieldRef('collectionReverseCounts', cardId), firebase.firestore.FieldValue.delete()
+    ).catch(err => console.error('[collection] reverse remove failed:', err));
+  } else {
+    zaehler.set(cardId, neu);
+    db.collection('users').doc(user.uid).update(
+      countFieldRef('collectionReverseCounts', cardId), neu
+    ).catch(err => console.error('[collection] reverse decrement failed:', err));
+  }
+  _reverseNachAenderung();
+  showNotification(de
+    ? (neu > 0 ? `Reverse Holo: ${neu}/4` : 'Reverse Holo aus der Sammlung entfernt')
+    : (neu > 0 ? `Reverse holo: ${neu}/4` : 'Reverse holo removed'), 'success');
+}
+window.addReverseToCollection = addReverseToCollection;
+window.removeReverseFromCollection = removeReverseFromCollection;
+
 // Remove card from collection (decrement count)
 async function removeFromCollection(cardId) {
   const user = auth.currentUser;
@@ -1579,11 +1645,13 @@ async function clearCollection() {
     // reload — the reset only ever looked like it worked.
     await updateUserDoc({
       collection: [],
-      collectionCounts: {}
+      collectionCounts: {},
+      collectionReverseCounts: {}
     });
 
     window.userCollection = new Set();
     window.userCollectionCounts = new Map();
+    window.userCollectionReverseCounts = new Map();
     updateCollectionUI();
 
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
@@ -1957,6 +2025,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             ${cmUrl
               ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, var(--solid-ok), #1b8044); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
               : `<div style="font-size: 0.8em; color: var(--ink-3); margin-top: 4px;">${priceDisplay}</div>`}${priceTrustBadge(card, cmUrl)}
+            <button type="button" class="wunsch-prints" onclick="openRaritySwitcherFromDB('${safeNameJs}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}', 'wunschliste')" title="${getLang()==='de' ? 'Andere Prints dieser Karte — einzeln auf die Wunschliste' : 'Other prints of this card — add individually to the wishlist'}">★ ${getLang()==='de' ? 'Prints' : 'Prints'}</button>
             ${lowDisplay ? `<div style="font-size: 0.7em; color: var(--ink-3); margin-top: 2px;">${lowDisplay}</div>` : ''}
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: var(--profil-decks-ink); font-weight: 600;">Max:</span>

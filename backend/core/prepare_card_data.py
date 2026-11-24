@@ -511,12 +511,15 @@ def create_merged_database():
             # mapping_status = is it the right product's number at all.
             card['price_status'] = status or ''
             card['mapping_status'] = row.get('mapping_status', '')
+            # Reverse-Holo-Trend (UI-165) — leer, wenn es keine Reverse gibt.
+            card['eur_price_reverse'] = row.get('eur_price_reverse', '')
         else:
             card['eur_price'] = card.get('eur_price', '')
             card['eur_low'] = card.get('eur_low', '')
             card['price_last_updated'] = card.get('price_last_updated', '')
             card['price_status'] = card.get('price_status', '')
             card['mapping_status'] = card.get('mapping_status', '')
+            card['eur_price_reverse'] = card.get('eur_price_reverse', '')
             
         # For JP-only cards whose international counterpart hasn't
         # shipped yet, swap the raw Japanese scan for the English
@@ -633,7 +636,7 @@ def create_merged_database():
     # New columns go LAST: extrasaction='ignore' drops anything missing here
     # without a word, and positional readers keep working (data/_consumers.md
     # documents adding a column as safe, removing/reordering one as not).
-    fieldnames = ['name_en', 'name_de', 'set', 'number', 'pokedex_number', 'type', 'energy_type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'eur_low', 'price_last_updated', 'price_status', 'mapping_status']
+    fieldnames = ['name_en', 'name_de', 'set', 'number', 'pokedex_number', 'type', 'energy_type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'eur_low', 'price_last_updated', 'price_status', 'mapping_status', 'eur_price_reverse']
     
     with open(csv_path, 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
@@ -857,6 +860,12 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
         # einen Text, den 40 % der Karten dort gar nicht haben.
         if aera == "legacy":
             card.pop("card_text_de", None)
+
+        # REVERSE-PREIS NUR, WO ES EINE REVERSE GIBT (UI-165, 24.11.2026):
+        # ein leeres Feld an jeder der ~20.000 Karten waere reiner Ballast
+        # in den Chunks; die Seite liest "Feld fehlt" als "keine Reverse".
+        if not card.get("eur_price_reverse"):
+            card.pop("eur_price_reverse", None)
 
         if aera == "standard":
             standard.append(card)

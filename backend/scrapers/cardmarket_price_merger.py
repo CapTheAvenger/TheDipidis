@@ -202,6 +202,13 @@ def main():
             # legacy 'unverified_mapping' value for consumers that already
             # read it; mapping_status carries the same fact unconditionally.
             unverified = mapping_status == 'unverified'
+            # REVERSE HOLO (UI-165, 24.11.2026): Cardmarket fuehrt die
+            # Reverse-Holo-Fassung als dasselbe Produkt mit eigenen Feldern
+            # `*-holo`. 0 heisst "es gibt keine Reverse" (ex, Full Arts,
+            # Special Rares), nicht "wertlos" — gemessen DLR: 93 von 141
+            # Karten mit Wert, alle mit Nummer <= 103 (Hauptset). Die Seite
+            # entscheidet daran, ob eine Karte einen Reverse-Zaehler bekommt.
+            reverse_trend = guide_entry.get('trend-holo')
             out_rows.append({
                 'name': name,
                 'set': c['set'],
@@ -210,6 +217,8 @@ def main():
                 'eur_low': fmt_price(low),
                 'cardmarket_url': cm_url,
                 'last_updated': now,
+                'eur_price_reverse': (fmt_price(reverse_trend)
+                                      if reverse_trend not in (None, '', 0, 0.0) else ''),
                 'price_status': ('no_trend' if not has_trend
                                  else 'trend_below_low' if trend_below_low
                                  else 'unverified_mapping' if unverified
@@ -227,6 +236,7 @@ def main():
                 'eur_low': row.get('eur_low', ''),
                 'cardmarket_url': cm_url or row.get('cardmarket_url', ''),
                 'last_updated': row.get('last_updated', ''),
+                'eur_price_reverse': row.get('eur_price_reverse', ''),
                 # Carried over from an earlier run: today's guide has no entry
                 # for this product. The price is real but not current, which
                 # last_updated already shows and price_status now makes
@@ -272,7 +282,7 @@ def main():
     # documents adding a column as safe, removing or reordering one as not.
     fieldnames = ['name', 'set', 'number', 'eur_price', 'eur_low',
                   'cardmarket_url', 'last_updated', 'price_status',
-                  'mapping_status']
+                  'mapping_status', 'eur_price_reverse']
 
     def _write(f):
         w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')

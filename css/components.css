@@ -499,6 +499,8 @@ th:nth-last-child(-n+2) .ds-term::before { left: auto; right: 0; }
  */
 html.is-signed-out [onclick*="Collection"],
 html.is-signed-out [onclick*="collection"],
+html.is-signed-out [onclick*="sammlungPlus"],
+html.is-signed-out [onclick*="sammlungMinus"],
 html.is-signed-out [onclick*="Wishlist"],
 html.is-signed-out [onclick*="ishlist"],
 html.is-signed-out [onclick*="Tradelist"],
@@ -518,6 +520,8 @@ html.is-signed-out [onclick*="radelist"] {
     filter: grayscale(.85);
 }
 html.is-signed-out [onclick*="Collection"]:hover,
+html.is-signed-out [onclick*="sammlungPlus"]:hover,
+html.is-signed-out [onclick*="sammlungMinus"]:hover,
 html.is-signed-out [onclick*="Wishlist"]:hover,
 html.is-signed-out [onclick*="ishlist"]:hover,
 html.is-signed-out [onclick*="Tradelist"]:hover,

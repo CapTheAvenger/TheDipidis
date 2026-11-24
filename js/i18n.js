@@ -1890,6 +1890,15 @@ const translations = {
     // ── Cards tab ────────────────────────────────────────────
     'cards.standardPrint':      'Standard Print',
     'cards.allPrints':          'All Prints',
+    'cards.ansichtNormal':      'Normal',
+    'cards.ansichtReverse':     '✦ Reverse',
+    'cards.besitzAlle':         'All',
+    'cards.besitzBesitz':       'Owned',
+    'cards.besitzFehlt':        'Missing',
+    'cards.besitzWunsch':       '♡ Wishlist',
+    'cards.besitzTausch':       '⇄ Trade list',
+    'rarity.wunschAdd':         '♡ Wishlist',
+    'rarity.wunschDrauf':       '♥ On wishlist',
 
     // ── Beginner Tooltip ────────────────────────────────────
     'tip.beginnerTitle':       'Beginner Strategy',
@@ -4835,6 +4844,15 @@ const translations = {
     // ── Karten-Tab ──────────────────────────────────────────
     'cards.standardPrint':      'Standard-Print',
     'cards.allPrints':          'Alle Prints',
+    'cards.ansichtNormal':      'Normal',
+    'cards.ansichtReverse':     '✦ Reverse',
+    'cards.besitzAlle':         'Alle',
+    'cards.besitzBesitz':       'Im Besitz',
+    'cards.besitzFehlt':        'Fehlt',
+    'cards.besitzWunsch':       '♡ Wunschliste',
+    'cards.besitzTausch':       '⇄ Tauschliste',
+    'rarity.wunschAdd':         '♡ Wunschliste',
+    'rarity.wunschDrauf':       '♥ Auf der Wunschliste',
 
     // ── Beginner Tooltip ────────────────────────────────────
     'tip.beginnerTitle':       'Einsteiger-Strategie',

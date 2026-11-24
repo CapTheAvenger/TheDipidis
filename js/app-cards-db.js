@@ -35,7 +35,128 @@
         // Card Database Variables
         let allCardsData = [];
         let filteredCardsData = [];
-        
+
+        /* UI-165 (Hausi, 24.11.2026): Sammlung je Fassung — Normal und
+         * Reverse Holo. Ob eine Karte eine Reverse hat, steht in den Daten
+         * (`eur_price_reverse`, Cardmarket-Feld `trend-holo`), nicht in einer
+         * Seltenheitsregel: gemessen DLR 93 von 141, alle im Hauptset.
+         * Die Ansicht (Normal | ✦ Reverse) bestimmt, welche Zahl − + aendert
+         * und welcher Preis auf der Kachel steht; beide Zahlen stehen immer
+         * auf der Kachel. Der Besitzfilter zaehlt nach der Ansicht. */
+        const SAMMLUNG_ANSICHT_KEY = 'cardDbSammlungAnsicht';
+        const BESITZ_FILTER_KEY = 'cardDbBesitzFilter';
+        const BESITZ_FILTER = ['alle', 'besitz', 'fehlt', 'wunsch', 'tausch'];
+        let sammlungAnsicht = 'normal';
+        let besitzFilter = 'alle';
+        try {
+            if (localStorage.getItem(SAMMLUNG_ANSICHT_KEY) === 'reverse') sammlungAnsicht = 'reverse';
+            const _bf = localStorage.getItem(BESITZ_FILTER_KEY);
+            if (BESITZ_FILTER.indexOf(_bf) !== -1) besitzFilter = _bf;
+        } catch (_e) { /* ohne Speicher: Vorgabe */ }
+
+        function reversePreisZahl(card) {
+            const roh = String((card && card.eur_price_reverse) || '').replace(/[^\d,.-]/g, '').replace(',', '.');
+            const n = parseFloat(roh);
+            return isFinite(n) && n > 0 ? n : 0;
+        }
+        function kartenHatReverse(card) {
+            return reversePreisZahl(card) > 0;
+        }
+        function sammlungKartenId(card) {
+            return `${card.name}|${card.set}|${card.number}`;
+        }
+        /* Reine Regel, ausgefuehrt in tests/unit/test-ui165-sammlung-reverse.js.
+         * listen = { normal: Map, reverse: Map, wunsch: Set, tausch: Set } */
+        function besitzFilterPasst(card, filter, ansicht, listen) {
+            if (!filter || filter === 'alle') return true;
+            const id = sammlungKartenId(card);
+            const l = listen || {};
+            if (filter === 'wunsch') return !!(l.wunsch && l.wunsch.has(id));
+            if (filter === 'tausch') return !!(l.tausch && l.tausch.has(id));
+            const rev = ansicht === 'reverse';
+            if (rev && !kartenHatReverse(card)) return false;
+            const zaehler = rev ? l.reverse : l.normal;
+            const n = (zaehler && zaehler.get(id)) || 0;
+            if (filter === 'besitz') return n > 0;
+            if (filter === 'fehlt') return n === 0;
+            return true;
+        }
+        /* Set und Stufe in EINER Zeile (Hausi 24.11.: „Basic, Stage 1 und
+         * Stage 2 sinnvoll abkuerzen“). Der volle Name steht im title. */
+        const TYP_KURZ = {
+            'Basic': 'B', 'Stage 1': 'S1', 'Stage 2': 'S2', 'Supporter': 'Sup',
+            'Stadium': 'Stad', 'Special Energy': 'Sp. Energy', 'Basic Energy': 'Energy', 'Level Up': 'LV.X'
+        };
+        function typKurz(typ) {
+            const s = String(typ || '');
+            return Object.prototype.hasOwnProperty.call(TYP_KURZ, s) ? TYP_KURZ[s] : s;
+        }
+        function sammlungListen() {
+            return {
+                normal: window.userCollectionCounts instanceof Map ? window.userCollectionCounts : new Map(),
+                reverse: window.userCollectionReverseCounts instanceof Map ? window.userCollectionReverseCounts : new Map(),
+                wunsch: window.userWishlist instanceof Set ? window.userWishlist : new Set(),
+                tausch: window.userTradelist instanceof Set ? window.userTradelist : new Set()
+            };
+        }
+        function sammlungLeisteAbgleichen() {
+            const n = document.getElementById('btnAnsichtNormal');
+            const r = document.getElementById('btnAnsichtReverse');
+            if (n) { n.classList.toggle('active', sammlungAnsicht === 'normal'); n.setAttribute('aria-pressed', String(sammlungAnsicht === 'normal')); }
+            if (r) { r.classList.toggle('active', sammlungAnsicht === 'reverse'); r.setAttribute('aria-pressed', String(sammlungAnsicht === 'reverse')); }
+            document.querySelectorAll('#cardsBesitzFilter [data-besitz]').forEach(b => {
+                const an = b.getAttribute('data-besitz') === besitzFilter;
+                b.classList.toggle('active', an);
+                b.setAttribute('aria-pressed', String(an));
+            });
+            const box = document.getElementById('cardsBesitzFilter');
+            if (box) {
+                const angemeldet = !!(typeof auth !== 'undefined' && auth && auth.currentUser);
+                box.hidden = !angemeldet;
+            }
+        }
+        function setSammlungAnsicht(ansicht) {
+            sammlungAnsicht = ansicht === 'reverse' ? 'reverse' : 'normal';
+            try { localStorage.setItem(SAMMLUNG_ANSICHT_KEY, sammlungAnsicht); } catch (_e) { /* egal */ }
+            sammlungLeisteAbgleichen();
+            filterAndRenderCards({ scrollToTop: false });
+        }
+        function setBesitzFilter(filter) {
+            besitzFilter = BESITZ_FILTER.indexOf(filter) !== -1 ? filter : 'alle';
+            try { localStorage.setItem(BESITZ_FILTER_KEY, besitzFilter); } catch (_e) { /* egal */ }
+            sammlungLeisteAbgleichen();
+            filterAndRenderCards();
+        }
+        function sammlungPlusAusDb(btn) {
+            const id = btn && btn.getAttribute('data-card-id');
+            if (!id) return;
+            if (sammlungAnsicht === 'reverse') { if (typeof addReverseToCollection === 'function') addReverseToCollection(id); }
+            else addToCollection(id);
+        }
+        function sammlungMinusAusDb(btn) {
+            const id = btn && btn.getAttribute('data-card-id');
+            if (!id) return;
+            if (sammlungAnsicht === 'reverse') { if (typeof removeReverseFromCollection === 'function') removeReverseFromCollection(id); }
+            else removeFromCollection(id);
+        }
+        /* Die Bestandspille oben links auf dem Bild: „3×“ und, wenn es eine
+         * Reverse gibt, „✦1×“. Die Zahl der aktiven Ansicht ist markiert. */
+        function bestandPilleHtml(card, cardId, andereDrucke) {
+            const l = sammlungListen();
+            const n = l.normal.get(cardId) || 0;
+            const rev = kartenHatReverse(card);
+            const r = rev ? (l.reverse.get(cardId) || 0) : 0;
+            const de = !(typeof getLang === 'function' && getLang() === 'en');
+            const titel = de
+                ? `Im Besitz: ${n}× Normal` + (rev ? `, ${r}× Reverse Holo` : ' (keine Reverse Holo)')
+                : `Owned: ${n}× normal` + (rev ? `, ${r}× reverse holo` : ' (no reverse holo)');
+            const andere = andereDrucke > 0 ? (de ? ` · andere Prints: ${andereDrucke}×` : ` · other prints: ${andereDrucke}×`) : '';
+            return `<div class="card-database-bestand" title="${escapeHtml(titel + andere)}">`
+                + `<span class="bestand-normal${n ? '' : ' leer'}${sammlungAnsicht === 'normal' ? ' aktiv' : ''}">${n}×</span>`
+                + (rev ? `<span class="bestand-reverse${r ? '' : ' leer'}${sammlungAnsicht === 'reverse' ? ' aktiv' : ''}">✦${r}×</span>` : '')
+                + `</div>`;
+        }
+
         // Mutual exclusion for base meta radio buttons — no handler needed,
         // radio buttons inherently allow only one selection.
         // Kept as a no-op stub so existing onchange references don't error.
@@ -2119,6 +2240,10 @@
                 _regMarkenLaden();
                 regMarkK = regMarkIndexKontext(_regMarkenDaten, window.ArchetypBox && window.ArchetypBox.marken);
             }
+            const _besitzListen = sammlungListen();
+            // Abgemeldet gibt es keinen Besitz — ein gemerkter Filter darf dann nicht alles ausblenden.
+            const _besitzAktiv = besitzFilter !== 'alle' && !!(typeof auth !== 'undefined' && auth && auth.currentUser);
+            sammlungLeisteAbgleichen();
             window.filteredCardsData = window.allCardsData.filter(card => {
                 // Skip invalid cards (allow missing image_url — UI will show placeholder)
                 if (!card || !card.name || card.name === 'name') {
@@ -2446,6 +2571,11 @@
                 }
                 if (metaLegalSets && metaMarkenKontexte && !_regPromoPasst(card, metaMarkenKontexte, metaMarkenDruck)) {
                     failedFormatSet++;
+                    return false;
+                }
+
+                // UI-165: Besitzfilter (Alle · Im Besitz · Fehlt · Wunschliste · Tauschliste)
+                if (_besitzAktiv && !besitzFilterPasst(card, besitzFilter, sammlungAnsicht, _besitzListen)) {
                     return false;
                 }
                 
@@ -3222,18 +3352,16 @@
 
                 const owned = (window.userCollectionCounts && window.userCollectionCounts.get(cardId)) || 0;
 
-                // Owned badge
-                let ownedBadge = item.querySelector('.card-database-owned-badge');
-                if (owned > 0) {
-                    if (!ownedBadge) {
-                        ownedBadge = document.createElement('div');
-                        ownedBadge.className = 'card-database-owned-badge';
-                        const imgWrap = item.querySelector('.card-database-image-wrap');
-                        if (imgWrap) imgWrap.appendChild(ownedBadge);
-                    }
-                    ownedBadge.textContent = owned;
-                } else if (ownedBadge) {
-                    ownedBadge.remove();
+                // UI-165: Bestandspille (Normal + Reverse) neu schreiben
+                const pille = item.querySelector('.card-database-bestand');
+                const karte = item._cardData || (item.parentElement && item.parentElement._cardData);
+                if (pille && karte && !karte.__prizePack) {
+                    const neu = document.createElement('div');
+                    neu.innerHTML = bestandPilleHtml(karte, cardId, 0);
+                    pille.replaceWith(neu.firstElementChild);
+                } else if (pille) {
+                    const n = pille.querySelector('.bestand-normal');
+                    if (n) { n.textContent = `${owned}×`; n.classList.toggle('leer', owned === 0); }
                 }
 
                 // Wishlist button
@@ -3246,18 +3374,10 @@
                     wishBtn.title = t(inWishlist ? 'akt.removeWishlist' : 'akt.addWishlist');
                 }
 
-                // Collection remove button style
-                const removeBtn = item.querySelector('[onclick*="removeCollectionFromCardDbButton"]');
-                if (removeBtn) {
-                    removeBtn.style.color = owned > 0 ? '#fff' : '#999';
-                    removeBtn.style.background = owned > 0 ? '#dc3545' : '#fff';
-                }
-
-                // Collection add button title
-                const addBtn = item.querySelector('[onclick*="addCollectionFromCardDbButton"]');
-                if (addBtn) {
-                    addBtn.title = `Add to collection (${owned}/4)`;
-                }
+                // − in der Reverse-Ansicht ohne Reverse: nichts zu zaehlen
+                const _k = item._cardData || (item.parentElement && item.parentElement._cardData);
+                const _ohneRev = sammlungAnsicht === 'reverse' && _k && !_k.__prizePack && !kartenHatReverse(_k);
+                item.querySelectorAll('[data-sammlung]').forEach(b => { b.disabled = _ohneRev; });
             });
         }
 
@@ -3578,12 +3698,10 @@
                          onclick="showImageView('${escapedImg}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(marketUrl))}', '${escapeHtmlAttr(escapeJsStr(ppsSet))}', '${escapeHtmlAttr(escapeJsStr(ppsNumber))}')" role="button" tabindex="0"
                          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImg}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(marketUrl))}', '${escapeHtmlAttr(escapeJsStr(ppsSet))}', '${escapeHtmlAttr(escapeJsStr(ppsNumber))}');}"
                          aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Open ${displayName} Prize Pack image in fullscreen` : `${displayName} (Prize Pack) im Vollbild öffnen`}">
-                    ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
+                    <div class="card-database-bestand" title="${escapeHtml((typeof getLang === 'function' && getLang() === 'en') ? `Owned: ${ownedCount}×` : `Im Besitz: ${ownedCount}×`)}"><span class="bestand-normal${ownedCount ? '' : ' leer'} aktiv">${ownedCount}×</span></div>
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
+                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Remove ${displayName} Prize Pack from collection` : `${displayName} (Prize Pack) aus der Sammlung`}">−</button>
                         <button type="button" data-card-id="${safeCardId}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Add ${displayName} Prize Pack to collection` : `${displayName} (Prize Pack) in die Sammlung`}">+</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Remove ${displayName} Prize Pack from collection` : `${displayName} (Prize Pack) aus der Sammlung`}">-</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#16233a; background: ${userWantsCard ? '#F06292' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#F06292' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t('akt.toggleWishlist').replace('{n}', displayName))}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
-                        <button type="button" data-card-id="${safeCardId}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#16233a; background: ${userTradesCard ? '#3fbfa4' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#3fbfa4' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t('akt.toggleTradelist').replace('{n}', displayName))}">&#8644;</button>
                     </div>
                 </div>
                 <div class="card-database-info">
@@ -3600,6 +3718,10 @@
                     <div class="card-database-secondary-row">
                         <button type="button" onclick="addCardToProxy('${escapedName}', '${escapeHtmlAttr(escapeJsStr(ppsSet))}', '${escapeHtmlAttr(escapeJsStr(ppsNumber))}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add stamped print to proxy queue" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Add ${displayName} Prize Pack to proxy queue` : `${displayName} (Prize Pack) in die Proxy-Warteschlange`}">Proxy</button>
                         ${limitlessBtn}
+                    </div>
+                    <div class="card-database-listen-row">
+                        <button type="button" data-card-id="${safeCardId}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-database-listen-btn" data-klein style="color:#16233a; background: ${userWantsCard ? '#F06292' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#F06292' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t('akt.toggleWishlist').replace('{n}', displayName))}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${safeCardId}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-database-listen-btn" data-klein style="color:#16233a; background: ${userTradesCard ? '#3fbfa4' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#3fbfa4' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t('akt.toggleTradelist').replace('{n}', displayName))}">&#8644;</button>
                     </div>
                 </div>
             `;
@@ -3659,7 +3781,16 @@
             
             // Format price button
             let priceButton = '';
-            if (card.eur_price && card.eur_price !== '' && card.eur_price !== '0' && card.eur_price !== 'N/A') {
+            const _hatReverse = kartenHatReverse(card);
+            const _de165 = !(typeof getLang === 'function' && getLang() === 'en');
+            if (sammlungAnsicht === 'reverse') {
+                // UI-165: in der Reverse-Ansicht steht der Reverse-Holo-Trend auf der Kachel.
+                priceButton = _hatReverse
+                    ? `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn card-database-price-reverse" title="${_de165 ? 'Cardmarket-Trendpreis Reverse Holo' : 'Cardmarket trend price, reverse holo'}" aria-label="${_de165 ? `${displayName} Reverse Holo bei Cardmarket ansehen (neuer Tab)` : `View ${displayName} reverse holo on CardMarket (opens in new tab)`}">
+                        <span class="card-database-price-value">Trend ✦ ${_zahlNachSprache(reversePreisZahl(card), 2)} €</span>
+                    </a>`
+                    : `<div class="card-database-price-placeholder card-database-kein-reverse" title="${_de165 ? 'Diese Karte gibt es nicht als Reverse Holo' : 'This card has no reverse holo'}">${_de165 ? 'kein Reverse' : 'no reverse'}</div>`;
+            } else if (card.eur_price && card.eur_price !== '' && card.eur_price !== '0' && card.eur_price !== 'N/A') {
                 const price = parseLocaleNumber(card.eur_price, 0);
                 if (!isNaN(price)) {
                     // Das Vertrauenszeichen hing bis zum 20.08.2026 allein an
@@ -3778,20 +3909,17 @@
             item.innerHTML = `
                 <div class="pos-rel card-database-image-wrap">
                     <img src="${attrImageUrl}" alt="${displayName}" loading="lazy" decoding="async" onclick="showImageView('${escapedImageUrl}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(rawCardMarketUrl))}', '${escapeHtmlAttr(escapeJsStr(proxySetCode))}', '${escapeHtmlAttr(escapeJsStr(proxySetNumber))}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImageUrl}', '${escapedName}', '${escapeHtmlAttr(escapeJsStr(rawCardMarketUrl))}', '${escapeHtmlAttr(escapeJsStr(proxySetCode))}', '${escapeHtmlAttr(escapeJsStr(proxySetNumber))}');}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Open ${displayName} image in fullscreen` : `${displayName} im Vollbild öffnen`}">
-                    ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
-                    ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="Owned other INT prints">${altPrintOwnedCount}</div>` : ''}
+                    ${bestandPilleHtml(card, cardId, altPrintOwnedCount)}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Add ${displayName} to collection` : `${displayName} in die Sammlung`}">+</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Remove ${displayName} from collection` : `${displayName} aus der Sammlung`}">-</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color:#16233a; background: ${userWantsCard ? '#F06292' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#F06292' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist') + ' — ' + displayName)}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color:#16233a; background: ${userTradesCard ? '#3fbfa4' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#3fbfa4' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist') + ' — ' + displayName)}">${userTradesCard ? '&#8644;' : '&#8644;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="sammlungMinusAusDb(this)" data-sammlung="minus" ${sammlungAnsicht === 'reverse' && !_hatReverse ? 'disabled' : ''} class="btn-red card-badge" title="${escapeHtml(t('akt.removeCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Remove ${displayName} from collection` : `${displayName} aus der Sammlung`}">−</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="sammlungPlusAusDb(this)" data-sammlung="plus" ${sammlungAnsicht === 'reverse' && !_hatReverse ? 'disabled' : ''} class="btn-green card-badge" title="${escapeHtml(t('akt.addCollection').replace('{n}', ownedCount))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Add ${displayName} to collection` : `${displayName} in die Sammlung`}">+</button>
                     </div>
                 </div>
                 <div class="card-database-info">
                     <div class="card-database-name">${displayName}</div>
                     <div class="card-database-meta">
                         <span class="card-database-set">${displaySet} ${displayNumber}</span>
-                        <span class="card-database-type">${displayType}</span>
+                        <span class="card-database-type" title="${displayType}">${escapeHtml(typKurz(card.type || 'Unknown'))}</span>
                     </div>
                     <div class="card-database-button-row">
                         ${priceButton}
@@ -3802,6 +3930,10 @@
                     <div class="card-database-secondary-row">
                         <button type="button" onclick="addCardToProxy('${escapedName}', '${escapeHtmlAttr(escapeJsStr(proxySetCode))}', '${escapeHtmlAttr(escapeJsStr(proxySetNumber))}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="${escapeHtml(t('akt.addProxyQueue'))}" aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Add ${displayName} to proxy queue` : `${displayName} in die Proxy-Warteschlange`}">Proxy</button>
                         ${limitlessButton}
+                    </div>
+                    <div class="card-database-listen-row">
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-database-listen-btn" data-klein style="color:#16233a; background: ${userWantsCard ? '#F06292' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#F06292' : '#F48FB1'};" title="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist'))}" aria-label="${escapeHtml(t(userWantsCard ? 'akt.removeWishlist' : 'akt.addWishlist') + ' — ' + displayName)}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-database-listen-btn" data-klein style="color:#16233a; background: ${userTradesCard ? '#3fbfa4' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#3fbfa4' : '#a3d9cd'};" title="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist'))}" aria-label="${escapeHtml(t(userTradesCard ? 'akt.removeTradelist' : 'akt.addTradelist') + ' — ' + displayName)}">${userTradesCard ? '&#8644;' : '&#8644;'}</button>
                     </div>
                     ${coverageDisplay}
                 </div>
@@ -4656,6 +4788,27 @@
          * bis hierher lief genau dieser Weg in "Diese Karte wurde im
          * aktuellen Deck nicht gefunden", weil er nach einem Deck suchte,
          * das es nie gab. */
+        /* UI-165 (Hausi 24.11.2026): „ueber den Rarity-Switcher eine andere
+         * Raritaet ZUSAETZLICH auf die Wunschliste“. Ein Knopf je Print, der
+         * genau diesen Print (Name|Set|Nummer) setzt oder entfernt. */
+        function raritySwitcherWunschKnopf(cardId) {
+            const drauf = !!(window.userWishlist && window.userWishlist.has(cardId));
+            return `<button type="button" class="rarity-option-wunsch${drauf ? ' ist-gewuenscht' : ''}"
+                        data-card-id="${escapeHtmlAttr(cardId)}" aria-pressed="${drauf ? 'true' : 'false'}"
+                        onclick="event.stopPropagation(); raritySwitcherWunsch(this)">${t(drauf ? 'rarity.wunschDrauf' : 'rarity.wunschAdd')}</button>`;
+        }
+        async function raritySwitcherWunsch(btn) {
+            const id = btn && btn.getAttribute('data-card-id');
+            if (!id || typeof toggleWishlist !== 'function') return;
+            await toggleWishlist(id);
+            const drauf = !!(window.userWishlist && window.userWishlist.has(id));
+            btn.classList.toggle('ist-gewuenscht', drauf);
+            btn.setAttribute('aria-pressed', drauf ? 'true' : 'false');
+            btn.textContent = t(drauf ? 'rarity.wunschDrauf' : 'rarity.wunschAdd');
+            if (typeof window.staplesHerzenAbgleichen === 'function') window.staplesHerzenAbgleichen();
+        }
+        window.raritySwitcherWunsch = raritySwitcherWunsch;
+
         async function openRaritySwitcher(cardName, deckKey, sourceHint = '', anzeigeZiel = '') {
             const isReady = await ensureCardDatabaseReadyForRaritySwitcher();
             if (!isReady) {
@@ -4708,7 +4861,9 @@
              * Fehlermeldung ("Diese Karte wurde im aktuellen Deck nicht
              * gefunden"), weil das Fenster nach einem Deck suchte, das
              * es an dieser Stelle nie gab. */
-            const nurAnzeige = anzeigeZiel === 'staples' || !activeDeckContext;
+            const nurAnzeige = anzeigeZiel === 'staples' || anzeigeZiel === 'wunschliste' || !activeDeckContext;
+            // Aus der Wunschliste geoeffnet gibt es nichts „anzuzeigen“ — dort zaehlt nur ♡ je Print.
+            const ohneZeigen = anzeigeZiel === 'wunschliste';
             devLog('[RaritySwitch][open] resolved target', {
                 input: { cardName, deckKey: safeDeckKey, sourceHint },
                 resolved: currentRaritySwitcherCard
@@ -4822,17 +4977,18 @@
                     <div class="rarity-badge" style="--rarity-badge-bg: ${rarityBadgeColor};">
                         ${version.rarity || 'Unknown'}
                     </div>
-                    ${nurAnzeige ? `
+                    ${nurAnzeige ? (ohneZeigen ? '' : `
                     <button class="btn btn-primary rarity-option-swap-all-btn"
                             onclick="event.stopPropagation(); waehleAnzeigeDruck('${safeOptionCardName}', '${escapeHtmlAttr(escapeJsStr(currentSet))}', '${escapeHtmlAttr(escapeJsStr(currentNumber))}', '${escapeHtmlAttr(escapeJsStr(optionSet))}', '${escapeHtmlAttr(escapeJsStr(optionNumber))}')"
                             title="${t('rarity.showThisPrint')}">
                         ${t('rarity.showThisPrint')}
-                    </button>` : `
+                    </button>`) : `
                     <button class="btn btn-primary rarity-option-swap-all-btn"
                             onclick="event.stopPropagation(); selectRarityVersion('${escapeHtmlAttr(escapeJsStr(optionSet))}', '${escapeHtmlAttr(escapeJsStr(optionNumber))}', '${escapeHtmlAttr(escapeJsStr(safeDeckKey))}', '${safeOptionCardName}', '${escapeHtmlAttr(escapeJsStr((currentRaritySwitcherCard && currentRaritySwitcherCard.source) || ''))}')"
                             title="${t('rarity.swapAll')}">
                         ${t('rarity.swapAll')}
                     </button>`}
+                    ${raritySwitcherWunschKnopf(_rsCollId)}
                     ${cardmarketUrl ? `
                         <button class="${cardmarketBtnClass} card-database-price-btn" 
                                 onclick="event.stopPropagation(); openCardmarket('${escapeHtmlAttr(escapeJsStr(cardmarketUrl))}', '');" 

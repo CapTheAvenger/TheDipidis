@@ -224,7 +224,11 @@ describe('Karten der Format-Staples', () => {
         // escapeHtmlAttr: der Wert landet in einem HTML-Attribut, und der
         // HTML-Zerteiler laeuft vor dem JS-Zerteiler. escapeJsStr allein
         // liess ein " aus dem onclick ausbrechen.
-        assert.match(TIER, /addToWishlist\('\$\{escapeHtmlAttr\(escapeJsStr\(kartenId\)\)\}'\)/);
+        // Seit UI-165 (24.11.2026) liest das Herz seine Kennung aus dem
+        // Attribut data-wunsch-id (HTML-maskiert), damit es dem angezeigten
+        // Print folgt — kein JS-String mehr im onclick, also nichts zum Ausbrechen.
+        assert.match(TIER, /data-wunsch-id="\$\{escapeHtml\(kartenId\)\}"/);
+        assert.match(TIER, /onclick="addToWishlist\(this\.getAttribute\('data-wunsch-id'\)\)"/);
         assert.match(TIER, /openRaritySwitcherFromDB\('\$\{escapeHtmlAttr\(escapeJsStr\(card\.name\)\)\}'/);
     });
 

@@ -243,7 +243,7 @@
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
-    flex-wrap: wrap !important;
+    flex-wrap: nowrap !important;
     margin: 0 !important;
 }
 
@@ -778,4 +778,120 @@
     font-weight: 400;
     font-size: 0.85em;
     opacity: 0.92;
+}
+
+/* ── UI-165 (Hausi 24.11.2026): Sammlung Normal + Reverse Holo ───────────
+   Oben auf dem Bild nur noch der Bestand: Pille links („3× ✦1×“), − + rechts.
+   ♡ und ⇄ stehen in einer eigenen Zeile unter der Karte. Das runde
+   Bestandsabzeichen lag unter dem „+“ und ist weg. Ohne !important
+   (test-design-tokens: der Zaehler darf nicht steigen) — neue Klassen,
+   ID-Spezifitaet, und die Listenknoepfe tragen bewusst NICHT .card-badge
+   (dort haengen zwoelf !important-Regeln), sondern data-klein. */
+#cards .card-database-bestand {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 26px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: rgba(12, 18, 34, 0.86);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+#cards .card-database-bestand .leer { color: #8b93a7; }
+#cards .card-database-bestand .bestand-reverse { color: #ffd76a; }
+#cards .card-database-bestand .bestand-reverse.leer { color: #9c8a52; }
+#cards .card-database-bestand .aktiv {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+}
+#cards .card-database-top-actions .card-badge[disabled] { opacity: 0.35; cursor: not-allowed; }
+#cards #cardsContent .card-database-price-reverse { background: linear-gradient(135deg, #8a6410, #b8860b); color: #fff; }
+#cards #cardsContent .card-database-kein-reverse { font-style: italic; opacity: 0.8; }
+
+#cards .card-database-listen-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px;
+}
+#cards #cardsContent .card-database-listen-btn {
+    width: 100%;
+    height: 24px;
+    padding: 0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Set und Stufe in einer Zeile (Stufe abgekuerzt, voller Name im title). */
+#cards #cardsContent .card-database-meta { flex-direction: row; justify-content: center; }
+#cards #cardsContent .card-database-meta .card-database-set { min-width: 0; flex: 0 1 auto; }
+#cards #cardsContent .card-database-meta .card-database-type { flex: 0 0 auto; }
+
+#cards .cards-besitz-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+#cards .cards-besitz-filter[hidden] { display: none; }
+#cards .cards-besitz-filter button {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line, #3c4466);
+    background: transparent;
+    color: inherit;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
+#cards .cards-besitz-filter button.active {
+    background: #3b4bc8;
+    border-color: #3b4bc8;
+    color: #fff;
+}
+
+/* UI-165: ♡ je Print im Rarity Switcher */
+#raritySwitcherModal .rarity-option-wunsch {
+    margin-top: 6px;
+    width: 100%;
+    padding: 8px;
+    border: 0;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    background: #F48FB1;
+    color: var(--on-light, #16233a);
+    cursor: pointer;
+}
+#raritySwitcherModal .rarity-option-wunsch.ist-gewuenscht { background: #F06292; }
+
+/* UI-165: Wunschliste — andere Prints derselben Karte ueber den Rarity Switcher */
+.wunsch-prints {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-size: 0.78em;
+    font-weight: 700;
+    cursor: pointer;
 }

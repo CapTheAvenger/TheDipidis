@@ -438,7 +438,7 @@ describe('Einschleusungsversuche durch jede reparierte Bauform', () => {
  * Die Zahlen stammen aus dem Bestand am 07.09.2026, nachgezaehlt:
  *   js/app-city-league.js  12   js/app-deck-builder.js   6
  *   (City League 16 -> 12: UI-45, 28.09.2026, die Vergleichsrubriken sind weg)
- *   js/app-meta-cards.js    5   js/app-tier-meta.js     10
+ *   js/app-meta-cards.js    5   js/app-tier-meta.js      9
  * Kommt eine Stelle dazu, muss sie hier eingetragen werden — und das
  * ist Absicht: der Eintrag zwingt zum Hinsehen.
  */
@@ -446,7 +446,9 @@ const ERWARTET = {
     'app-city-league.js': 12,
     'app-deck-builder.js': 6,
     'app-meta-cards.js': 5,
-    'app-tier-meta.js': 10,
+    // 10 -> 9 (UI-165, 24.11.2026): das Staples-Herz liest seine Kartennummer jetzt aus
+    // data-wunsch-id statt aus einem eingebetteten JS-String (folgt dem angezeigten Print).
+    'app-tier-meta.js': 9,
 };
 
 describe('die vier Module maskieren an jeder Stelle in beiden Sprachen', () => {

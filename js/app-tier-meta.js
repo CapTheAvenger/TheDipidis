@@ -3722,7 +3722,16 @@
                 if (!eintrag || !img || !eintrag.url) return;
                 if (img.getAttribute('src') !== eintrag.url) img.setAttribute('src', eintrag.url);
                 el.dataset.druck = eintrag.set + ' ' + eintrag.number;
+                /* UI-165 (Hausi 24.11.2026): „Rarity geaendert, dann hinzugefuegt —
+                 * er hat bloss die normale hinzugefuegt“. Das Herz trug die Nummer
+                 * des Standarddrucks fest im onclick; jetzt gehoert es dem Print,
+                 * der gerade angezeigt wird. */
+                const herz = el.querySelector('.top-card-herz');
+                if (herz && eintrag.name && eintrag.set && eintrag.number) {
+                    herz.setAttribute('data-wunsch-id', `${eintrag.name}|${eintrag.set}|${eintrag.number}`);
+                }
             });
+            staplesHerzenAbgleichen();
         }
 
         /* Ein von Hand gewaehltes Artwork wirkt sofort, ohne Neuaufbau. */
@@ -4071,7 +4080,7 @@
                             <button type="button" class="top-card-act top-card-herz${aufWunschliste ? ' ist-gewuenscht' : ''}"
                                     data-wunsch-id="${escapeHtml(kartenId)}"
                                     aria-pressed="${aufWunschliste ? 'true' : 'false'}"
-                                    onclick="addToWishlist('${escapeHtmlAttr(escapeJsStr(kartenId))}')"
+                                    onclick="addToWishlist(this.getAttribute('data-wunsch-id'))"
                                     title="${escapeHtml(t('akt.addWishlist'))}"
                                     aria-label="${escapeHtml((deLbl ? 'Auf die Wunschliste: ' : 'Add to wishlist: ') + card.name)}">${aufWunschliste ? '♥' : '♡'}</button>
                             <button type="button" class="top-card-act"

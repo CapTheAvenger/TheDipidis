@@ -443,6 +443,7 @@ def run():
                 'bj.profileTitle', 'bj.openShort',
                 'filter.typeAll', 'meta.typeTrainer',
                 'cards.cityLeague', 'cl.tierAceSpec',
+                'cards.ansichtNormal', 'cards.ansichtReverse',
             ]);
             for (const key of Object.keys(translations.en)) {
                 if (skip.has(key)) continue;

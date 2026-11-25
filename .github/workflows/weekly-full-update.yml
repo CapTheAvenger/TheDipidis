@@ -819,6 +819,8 @@ jobs:
                   echo "::warning::per_player_auszuege aufteilen exited with $rc — Auszuege in data/ unveraendert"
               fi
               python3 scripts/per_player_auszuege.py stand data
+              # UI-166: Major-Mengen je Karte fuer die Wunschliste (nicht blockierend)
+              python3 scripts/build_major_kartenmengen.py data || echo "::warning::build_major_kartenmengen.py fehlgeschlagen — major_kartenmengen.json unveraendert"
           else
               echo "::warning::backend/core/data/tournament_decklists_per_player.csv fehlt — Auszuege in data/ unveraendert"
           fi

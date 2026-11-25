@@ -104,8 +104,16 @@ describe('Formularelemente bekommen mit der Flaeche auch eine Textfarbe', () => 
         const FC = ohneKomm(lies('js/firebase-collection.js'));
         assert.doesNotMatch(FC, /color: #8e44ad/,
             'die feste Schriftfarbe der Wunschlisten-Eingabe ist zurueck');
-        assert.match(FC, /background: var\(--surface-1\); color: var\(--profil-decks-ink\)/,
+        /* UI-166 (25.11.2026): das Feld traegt keine Inline-Farben mehr,
+           sondern die Klasse wunsch-ziel-input; die Flaeche steht in CSS. */
+        assert.match(FC, /class="wunsch-ziel-input"/,
+            'das Zielpreis-Feld hat seine Klasse verloren');
+        const regel = ohneKomm(lies('css/cards-tabs.css')).match(/\.wunsch-info \.wunsch-ziel-input\s*\{[^}]*\}/);
+        assert.ok(regel, 'die Regel fuer das Zielpreis-Feld fehlt');
+        assert.match(regel[0], /background:\s*var\(--surface-1\)/,
             'das Eingabefeld setzt keine drehende Flaeche — dann ist es wieder weiss');
+        assert.match(regel[0], /color:\s*var\(--ink\)/,
+            'das Eingabefeld setzt keine drehende Schrift');
     });
 
     it('eine feste helle Flaeche und drehende Schrift kommen nicht zusammen vor', () => {

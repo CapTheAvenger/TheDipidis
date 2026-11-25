@@ -42,13 +42,28 @@ def _fenster(data_dir):
     return aktuell, vorher
 
 
+def ist_legendary_haelfte(zeile):
+    """Legendary-Stadien (z. B. DLR 94/95) bestehen aus zwei Haelften mit gleichem
+    Namen; je Haelfte duerfen hoechstens 2 ins Deck. `international_prints` fuehrt
+    beide Haelften als EINE Karte — fuer die Zaehlung sind es zwei (Hausi, 25.11.2026).
+    Erkannt an Kartentyp und englischem Namen in der Datenbank, damit
+    ein neues Set ohne Handgriff mitkommt."""
+    return ((zeile.get("type") or "").strip() == "Stadium"
+            and (zeile.get("name_en") or "").strip().startswith("Legendary "))
+
+
 def _familien(data_dir):
     """(SET, NUM) -> frozenset der Prints derselben Karte."""
     fam = {}
+    haelften = set()
     with open(os.path.join(data_dir, "all_cards_database.csv"), encoding="utf-8-sig", newline="") as f:
         for r in csv.DictReader(f):
             s, n = (r.get("set") or "").strip(), (r.get("number") or "").strip()
             if not s or not n:
+                continue
+            if ist_legendary_haelfte(r):
+                # Jede Haelfte bleibt fuer sich: die Partnerhaelfte ist eine andere Karte.
+                haelften.add((s, n))
                 continue
             menge = {(s, n)}
             for p in (r.get("international_prints") or "").split(","):
@@ -61,6 +76,8 @@ def _familien(data_dir):
     for k, menge in list(fam.items()):
         for m in menge:
             fam.setdefault(m, {m}).update(menge)
+    for h in haelften:
+        fam[h] = {h}
     return {k: frozenset(v) for k, v in fam.items()}
 
 

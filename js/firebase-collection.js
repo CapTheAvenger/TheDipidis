@@ -1870,10 +1870,44 @@ function priceTrustBadge(card, cmUrl) {
 }
 if (typeof window !== 'undefined') window.priceTrustBadge = priceTrustBadge;
 
+/* UI-166 (Hausi 25.11.2026): „damit ich immer die richtige Menge in der
+ * Wishlist setzen kann“ — wie oft die Karte auf Majors gespielt wird, in den
+ * Listen, die sie spielen: meist N× · max M×. Zahlen aus
+ * data/major_kartenmengen.json (scripts/build_major_kartenmengen.py). */
+function wunschMajorZeile(set, nummer, gewuenscht) {
+  const de = !(typeof getLang === 'function' && getLang() === 'en');
+  const daten = window.majorKartenmengen;
+  if (!daten || !daten.karten) return '';
+  const k = daten.karten[`${String(set || '').toUpperCase()}-${String(nummer || '')}`];
+  if (!k) {
+    return `<div class="wunsch-major leer">${de ? 'Majors: nicht gespielt' : 'Majors: not played'}</div>`;
+  }
+  const zuViel = gewuenscht > k.max;
+  const titel = de
+    ? `In ${k.decks} Major-Listen: am häufigsten ${k.meist}×, höchstens ${k.max}×` + (zuViel ? ` — auf der Wunschliste stehen ${gewuenscht}×` : '')
+    : `In ${k.decks} major lists: most often ${k.meist}×, at most ${k.max}×` + (zuViel ? ` — your wishlist has ${gewuenscht}×` : '');
+  return `<div class="wunsch-major${zuViel ? ' zu-viel' : ''}" title="${escapeHtml(titel)}">`
+    + `<span class="wunsch-major-titel">Majors</span> <span class="wunsch-major-werte">${de ? 'meist' : 'usually'} <b>${k.meist}×</b> · max <b>${k.max}×</b></span></div>`;
+}
+function majorKartenmengenLaden() {
+  if (window.majorKartenmengen || window._majorKartenmengenLaedt) return;
+  window._majorKartenmengenLaedt = true;
+  fetch('data/major_kartenmengen.json', { cache: 'no-cache' })
+    .then(r => (r.ok ? r.json() : null))
+    .then(d => {
+      window.majorKartenmengen = d || { karten: {} };
+      const such = document.getElementById('wishlist-search');
+      const set = document.getElementById('wishlist-set-filter');
+      if (typeof updateWishlistUI === 'function') updateWishlistUI(such ? such.value : '', set ? set.value : '');
+    })
+    .catch(() => { window.majorKartenmengen = { karten: {} }; });
+}
+
 function updateWishlistUI(searchFilter = '', setFilter = '') {
   if (typeof window.staplesHerzenAbgleichen === 'function') window.staplesHerzenAbgleichen();
   const wishlistGrid = document.getElementById('wishlist-grid');
   if (!wishlistGrid) return;
+  majorKartenmengenLaden();
 
   // Update tab counter (always reflects total size)
   const tabCount = document.getElementById('tab-count-wishlist');
@@ -2014,29 +2048,27 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #aa5a13; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Noch eine gesucht' : 'Need more'} (${wantedCount}/4)">+</button>
             <button onclick="removeFromWishlist('${safeCardIdJs}')" style="background: var(--solid-bad); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Eine Kopie entfernen' : 'Remove copy'}">−</button>
           </div>
-          <div style="padding: 8px; background: var(--surface-1);">
-            <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
-            <div style="font-size: 0.75em; color: var(--ink-2);">${safeSetHtml} ${safeNumberHtml}</div>
-            <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
-              <span style="font-size: 0.75em; color: ${ownedCount > 0 ? '#4CAF50' : '#999'}; font-weight: 600;">✓ ${ownedCount}/${maxLabel}</span>
-              <button type="button" class="wunsch-entfernen" onclick="wunschlisteKarteEntfernen('${safeCardIdJs}', '${escapeHtml(safeNameJs)}')">${getLang()==='de' ? 'Entfernen ✕' : 'Remove ✕'}</button>
-              <button onclick="addOwnedFromWishlist('${safeCardIdJs}')" style="background: #377e39; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; line-height: 1;" title="${escapeHtml(t('akt.addCollectionOwned').replace('{n}', ownedCount))}">+</button>
-            </div>
-            ${cmUrl
-              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, var(--solid-ok), #1b8044); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
-              : `<div style="font-size: 0.8em; color: var(--ink-3); margin-top: 4px;">${priceDisplay}</div>`}${priceTrustBadge(card, cmUrl)}
-            <button type="button" class="wunsch-prints" onclick="openRaritySwitcherFromDB('${safeNameJs}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}', 'wunschliste')" title="${getLang()==='de' ? 'Andere Prints dieser Karte — einzeln auf die Wunschliste' : 'Other prints of this card — add individually to the wishlist'}">★ ${getLang()==='de' ? 'Prints' : 'Prints'}</button>
-            ${lowDisplay ? `<div style="font-size: 0.7em; color: var(--ink-3); margin-top: 2px;">${lowDisplay}</div>` : ''}
-            <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
-              <span style="font-size: 0.72em; color: var(--profil-decks-ink); font-weight: 600;">Max:</span>
-              <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
+          <div class="wunsch-info">
+            <div class="wunsch-name">${safeNameHtml}</div>
+            <div class="wunsch-set">${safeSetHtml} ${safeNumberHtml}</div>
+            <div class="wunsch-preis">${cmUrl
+              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" class="wunsch-trend" title="View on Cardmarket">${priceDisplay}</a>${priceTrustBadge(card, cmUrl)}`
+              : `<span class="wunsch-trend ohne">${priceDisplay}</span>${priceTrustBadge(card, cmUrl)}`}${lowDisplay ? `<span class="wunsch-ab">${lowDisplay}</span>` : ''}</div>
+            ${wunschMajorZeile(cardSet, cardNumber, wantedCount)}
+            <div class="wunsch-ziel">
+              <span class="wunsch-ziel-label">${getLang()==='de' ? 'Ziel' : 'Target'}</span>
+              <input data-klein class="wunsch-ziel-input" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
                 aria-label="${(typeof getLang === 'function' && getLang() === 'en') ? `Maximum price for ${safeNameHtml}` : `Höchstpreis für ${safeNameHtml}`}"
-                style="width: 80px; min-width: 60px; padding: 4px 6px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 0.85em; font-weight: 600; background: var(--surface-1); color: var(--profil-decks-ink); text-align: right; outline: none; box-sizing: border-box;"
-                onfocus="this.style.borderColor='var(--profil-decks-ink)'; selectPriceInput(this)" onblur="this.style.borderColor='var(--line)'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
+                onfocus="selectPriceInput(this)" onblur="saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">
-              <span style="font-size: 0.72em; color: var(--profil-decks-ink); font-weight: 600;">€</span>
+              <span class="wunsch-ziel-eur">€</span>
+              ${buildWishlistTargetPill(wishlistPriceRaw, maxPrice)}
             </div>
-            ${buildWishlistTargetPill(wishlistPriceRaw, maxPrice)}
+            <div class="wunsch-knoepfe">
+              <button type="button" data-klein class="wunsch-knopf wunsch-prints" onclick="openRaritySwitcherFromDB('${safeNameJs}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}', 'wunschliste')" title="${getLang()==='de' ? 'Andere Prints dieser Karte — einzeln auf die Wunschliste' : 'Other prints of this card — add individually to the wishlist'}">★<span class="wunsch-knopf-text"> Prints</span></button>
+              <button type="button" data-klein class="wunsch-knopf wunsch-sammlung${ownedCount > 0 ? ' hat' : ''}" onclick="addOwnedFromWishlist('${safeCardIdJs}')" title="${escapeHtml(t('akt.addCollectionOwned').replace('{n}', ownedCount))}">+<span class="wunsch-knopf-text"> ${getLang()==='de' ? 'Sammlung' : 'Owned'}</span> ${ownedCount}/${maxLabel}</button>
+              <button type="button" data-klein class="wunsch-knopf wunsch-entfernen" onclick="wunschlisteKarteEntfernen('${safeCardIdJs}', '${escapeHtml(safeNameJs)}')" title="${getLang()==='de' ? 'Von der Wunschliste entfernen' : 'Remove from wishlist'}" aria-label="${getLang()==='de' ? 'Entfernen' : 'Remove'}">✕</button>
+            </div>
           </div>
         </div>
       `);

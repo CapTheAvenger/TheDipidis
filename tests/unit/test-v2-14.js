@@ -85,7 +85,9 @@ describe('F2-10: „−“ bei der letzten Kopie bietet Rückgängig an', () => 
 describe('N-25 / N2-10 / N2-17', () => {
     const FC = ohneKommentare(lies('js/firebase-collection.js'));
     it('Wunschliste hat einen Knopf „Entfernen ✕“', () => {
-        assert.match(FC, /onclick="wunschlisteKarteEntfernen\('\$\{safeCardIdJs\}', '\$\{escapeHtml\(safeNameJs\)\}'\)">\$\{getLang\(\)==='de' \? 'Entfernen ✕'/);
+        // UI-166 (25.11.2026): die Kachel ist schmal, der Knopf zeigt nur ✕ —
+        // der Name „Entfernen“ steht im aria-label und im title.
+        assert.match(FC, /onclick="wunschlisteKarteEntfernen\('\$\{safeCardIdJs\}', '\$\{escapeHtml\(safeNameJs\)\}'\)"[^>]*aria-label="\$\{getLang\(\)==='de' \? 'Entfernen' : 'Remove'\}">✕<\/button>/);
     });
     it('der Profil-Builder speichert ohne zweite Meldung', () => {
         assert.match(ohneKommentare(lies('js/app-profile-deck-builder.js')), /window\.saveDeck\(nutzlast, \{ stumm: true \}\);/);

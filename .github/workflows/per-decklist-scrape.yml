@@ -320,6 +320,8 @@ jobs:
           if [ -f backend/core/data/tournament_decklists_per_player.csv ]; then
             python3 scripts/per_player_auszuege.py aufteilen backend/core/data --ziel data
             python3 scripts/per_player_auszuege.py stand data
+            # UI-166: Major-Mengen je Karte fuer die Wunschliste (nicht blockierend)
+            python3 scripts/build_major_kartenmengen.py data || echo "::warning::build_major_kartenmengen.py fehlgeschlagen — major_kartenmengen.json unveraendert"
           fi
 
       # No bump here. deploy-pages.yml rewrites ?v=, APP_VERSION, the service
@@ -391,6 +393,7 @@ jobs:
           # -A mit git-Muster: auch ein entfernter Auszug (Schluessel weg) geht mit
           git add -A -- 'data/tournament_decklists_per_player_*'
           git add data/data_stand.json data/datenluecken.json
+          git add data/major_kartenmengen.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No changes — skipping push."
             echo "pushed=false" >> "$GITHUB_OUTPUT"

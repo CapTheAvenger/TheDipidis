@@ -1889,6 +1889,24 @@ function wunschMajorZeile(set, nummer, gewuenscht) {
   return `<div class="wunsch-major${zuViel ? ' zu-viel' : ''}" title="${escapeHtml(titel)}">`
     + `<span class="wunsch-major-titel">Majors</span> <span class="wunsch-major-werte">${de ? 'meist' : 'usually'} <b>${k.meist}×</b> · max <b>${k.max}×</b></span></div>`;
 }
+/* UI-168 (Hausi 25.11.2026): Schnellfilter „Nur Meta-Karten“ — dieselben Daten
+   wie die Majors-Zeile. Solange die Daten fehlen, wird nichts weggefiltert. */
+function wunschIstMeta(set, nummer) {
+  const daten = window.majorKartenmengen;
+  if (!daten || !daten.karten) return true;
+  return !!daten.karten[`${String(set || '').toUpperCase()}-${String(nummer || '')}`];
+}
+function wunschMetaFilterUmschalten() {
+  window.wunschNurMeta = !window.wunschNurMeta;
+  const knopf = document.getElementById('wishlist-meta-filter');
+  if (knopf) {
+    knopf.setAttribute('aria-pressed', window.wunschNurMeta ? 'true' : 'false');
+    knopf.classList.toggle('toolbar-action--green', !!window.wunschNurMeta);
+  }
+  if (typeof filterWishlist === 'function') filterWishlist();
+}
+window.wunschMetaFilterUmschalten = wunschMetaFilterUmschalten;
+
 function majorKartenmengenLaden() {
   if (window.majorKartenmengen || window._majorKartenmengenLaedt) return;
   window._majorKartenmengenLaedt = true;
@@ -1901,6 +1919,35 @@ function majorKartenmengenLaden() {
       if (typeof updateWishlistUI === 'function') updateWishlistUI(such ? such.value : '', set ? set.value : '');
     })
     .catch(() => { window.majorKartenmengen = { karten: {} }; });
+}
+
+/* UI-167 (25.11.2026, Hausi am iPhone): „+“ auf einer Wunschlisten-Karte baut
+   das ganze Raster neu; die Seite sprang, man musste zur Karte zurueckscrollen.
+   Zwei Sicherungen: das Bild reserviert seine Hoehe (aspect-ratio), und die
+   zuletzt angetippte Kachel — sonst die erste sichtbare — steht nach dem
+   Neuaufbau an derselben Stelle im Fenster. */
+function wunschKacheln(grid) {
+  return Array.prototype.filter.call(grid.children, k => k.dataset && k.dataset.wunschId);
+}
+function wunschAnkerMerken(grid) {
+  if (!grid._wunschAnkerHoerer) {
+    grid._wunschAnkerHoerer = true;
+    grid.addEventListener('pointerdown', e => {
+      const k = e.target && e.target.closest ? e.target.closest('[data-wunsch-id]') : null;
+      if (k) grid._wunschZuletzt = k.dataset.wunschId;
+    }, true);
+  }
+  const kacheln = wunschKacheln(grid);
+  const k = kacheln.find(x => x.dataset.wunschId === grid._wunschZuletzt)
+    || kacheln.find(x => x.getBoundingClientRect().bottom > 0);
+  return k ? { id: k.dataset.wunschId, top: k.getBoundingClientRect().top } : null;
+}
+function wunschAnkerHalten(grid, anker) {
+  if (!anker) return;
+  const k = wunschKacheln(grid).find(x => x.dataset.wunschId === anker.id);
+  if (!k) return;
+  const d = k.getBoundingClientRect().top - anker.top;
+  if (Math.abs(d) > 1) window.scrollBy({ top: d, behavior: 'instant' });
 }
 
 function updateWishlistUI(searchFilter = '', setFilter = '') {
@@ -1980,6 +2027,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
 
       // Apply set filter
       if (setFilter && cardSet !== setFilter) return;
+      if (window.wunschNurMeta && !wunschIstMeta(cardSet, cardNumber)) return;
 
       // Apply search filter
       if (searchFilter) {
@@ -2041,8 +2089,8 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       const maxPriceVal = maxPrice ? parseFloat(maxPrice).toFixed(2).replace('.', ',') : '';
 
       wishlistHtml.push(`
-        <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
-          <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}', '${escapeJsSingleQuoted(card.cardmarket_url || '')}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}')">
+        <div data-wunsch-id="${escapeHtml(cardId)}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+          <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; aspect-ratio: 2.5 / 3.5; object-fit: cover; display: block; cursor: pointer;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}', '${escapeJsSingleQuoted(card.cardmarket_url || '')}', '${escapeJsSingleQuoted(cardSet || '')}', '${escapeJsSingleQuoted(cardNumber || '')}')">
           <div style="position: absolute; top: 5px; left: 5px; background: #aa5a13; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${wantedCount}× ${getLang()==='de' ? 'gesucht' : 'wanted'}">${wantedCount}x</div>
           <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
             <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #aa5a13; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="${getLang()==='de' ? 'Noch eine gesucht' : 'Need more'} (${wantedCount}/4)">+</button>
@@ -2078,7 +2126,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
   // Update search results info
   const searchResults = document.getElementById('wishlist-search-results');
   if (searchResults) {
-    const isFiltered = searchFilter || setFilter;
+    const isFiltered = searchFilter || setFilter || window.wunschNurMeta;
     const valueStr = totalValue > 0 ? ` · ~${totalValue.toFixed(2).replace('.', ',')} €` : '';
     searchResults.textContent = isFiltered
       ? `Showing ${matchingCards} of ${totalCards} cards${valueStr}`
@@ -2086,8 +2134,10 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
   }
 
   if (wishlistHtml.length > 0) {
+    const anker = wunschAnkerMerken(wishlistGrid);
     wishlistGrid.innerHTML = wishlistHtml.join('');
-  } else if (searchFilter || setFilter) {
+    wunschAnkerHalten(wishlistGrid, anker);
+  } else if (searchFilter || setFilter || window.wunschNurMeta) {
     wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current filters.', icon: 'cards' });
   } else {
     wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: t('leer.wishlistTitle'), description: t('leer.wishlistDesc'), icon: 'pokeball' });

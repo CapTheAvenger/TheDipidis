@@ -86,3 +86,28 @@ def test_voriges_format_nur_solange_das_neue_zu_duenn_ist(tmp_path):
     e = m.berechne(str(tmp_path))
     assert e["_meta"]["formate"] == ["TEF-NEU", "TEF-ALT"]
     assert e["karten"]["AAA-1"] == {"decks": 2, "meist": 3, "max": 3}   # 2 (neu) und 3 (alt): Gleichstand -> 3
+
+
+def test_legendary_haelften_zaehlen_einzeln(tmp_path):
+    """Hausi 25.11.2026: DLR 94/95 zeigten „meist 4× · max 4×“ — je Haelfte sind
+    hoechstens 2 erlaubt. international_prints fuehrt beide als eine Karte."""
+    m = _mod()
+    (tmp_path / "format_window.json").write_text(json.dumps(
+        {"current_set": "NEU", "previous_format_key": ""}), encoding="utf-8")
+    _schreibe(tmp_path / "all_cards_database.csv", ["name_en", "type", "set", "number", "international_prints"], [
+        {"name_en": "Legendary Glut", "type": "Stadium", "set": "AAA", "number": "94", "international_prints": "AAA-94,AAA-95"},
+        {"name_en": "Legendary Glut", "type": "Stadium", "set": "AAA", "number": "95", "international_prints": "AAA-94,AAA-95"},
+        {"name_en": "Professor", "type": "Supporter", "set": "AAA", "number": "10", "international_prints": "AAA-10,AAA-11"},
+        {"name_en": "Professor", "type": "Supporter", "set": "AAA", "number": "11", "international_prints": "AAA-10,AAA-11"},
+    ])
+    zeilen = []
+    for t in range(2):
+        for nr, n in (("94", "2"), ("95", "2"), ("10", "2"), ("11", "2")):
+            zeilen.append({"tournament_name": f"R{t}", "tournament_date": f"2026-11-2{t}", "player_name": "A",
+                           "set_code": "AAA", "set_number": nr, "count": n, "quelle": "papier"})
+    _schreibe(tmp_path / "tournament_decklists_per_player_TEF-NEU_2026-11.csv", FELDER, zeilen)
+    e = m.berechne(str(tmp_path))
+    assert e["karten"]["AAA-94"] == {"decks": 2, "meist": 2, "max": 2}
+    assert e["karten"]["AAA-95"] == {"decks": 2, "meist": 2, "max": 2}
+    # Gegenprobe: zwei Prints einer gewoehnlichen Karte zaehlen weiter zusammen
+    assert e["karten"]["AAA-10"] == {"decks": 2, "meist": 4, "max": 4}

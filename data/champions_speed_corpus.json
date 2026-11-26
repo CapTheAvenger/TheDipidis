@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "last_updated": "2026-11-25",
+    "last_updated": "2026-11-26",
     "window_days": 14,
-    "window_start": "2026-11-11",
-    "window_end": "2026-11-25",
+    "window_start": "2026-11-12",
+    "window_end": "2026-11-26",
     "window_applies_to": "the recency pool only. The corpus is that pool UNION the rank-selected top teams, which carry no date bound — so samples outside this window are expected, not a defect. For what the file actually covers, read content_from / content_to.",
     "content_from": "2026-09-10",
     "content_to": "2026-11-19",
     "samples_outside_window": 336,
-    "team_count": 66,
-    "teams_with_samples": 64,
-    "sample_count": 390,
+    "team_count": 65,
+    "teams_with_samples": 63,
+    "sample_count": 384,
     "species_count": 75,
     "source": "VGCPastes Champions M-A spreadsheet (gid=791705272)"
   },
@@ -2702,48 +2702,6 @@
       "nature": "Adamant",
       "date": "15 Nov 2026",
       "replica": "7DCN9BSNQK"
-    },
-    {
-      "species": "Glimmora",
-      "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-      "nature": "Modest",
-      "date": "11 Nov 2026",
-      "replica": "JBQ9R170NL"
-    },
-    {
-      "species": "Garchomp",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Adamant",
-      "date": "11 Nov 2026",
-      "replica": "JBQ9R170NL"
-    },
-    {
-      "species": "Delphox",
-      "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "11 Nov 2026",
-      "replica": "JBQ9R170NL"
-    },
-    {
-      "species": "Whimsicott",
-      "evs": "2 HP / 32 SpA / 32 Spe",
-      "nature": "Timid",
-      "date": "11 Nov 2026",
-      "replica": "JBQ9R170NL"
-    },
-    {
-      "species": "Farigiraf",
-      "evs": "27 HP / 20 Def / 15 SpD / 4 Spe",
-      "nature": "Bold",
-      "date": "11 Nov 2026",
-      "replica": "JBQ9R170NL"
-    },
-    {
-      "species": "Heracross",
-      "evs": "2 HP / 32 Atk / 32 Spe",
-      "nature": "Jolly",
-      "date": "11 Nov 2026",
-      "replica": "JBQ9R170NL"
     }
   ]
 }

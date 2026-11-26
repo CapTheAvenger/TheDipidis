@@ -2,7 +2,7 @@
   "_meta": {
     "title": "Pokémon Champions — Current Top Doubles Teams",
     "subtitle": "Replica codes from top tournament finishes. Tap a code to copy.",
-    "last_updated": "2026-11-25",
+    "last_updated": "2026-11-26",
     "source": "VGCPastes Champions spreadsheet (auto-discovered tabs: M-C=gid2001945654, M-B=gid1458357160, M-A=gid791705272)",
     "source_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXHOfUSKTZyVoxF7BO-XIEqtbrsq1OSh_4bSaO0bhAMHqtsvYqM_4eZWIMqdZ--SKCb86EXuk75o1i/pub?gid=1458357160&single=true&output=csv",
     "current_regulation": "M-C",
@@ -11,7 +11,7 @@
       "M-B",
       "M-A"
     ],
-    "team_count": 66
+    "team_count": 65
   },
   "teams": [
     {
@@ -6359,105 +6359,6 @@
             "Extreme Speed",
             "Low Kick",
             "Protect"
-          ]
-        }
-      ],
-      "strategy": []
-    },
-    {
-      "rank": 66,
-      "replica_code": "JBQ9R170NL",
-      "team_name": "barudoru's Heracross Delphox Team",
-      "tournament": "-",
-      "trainer": "Ryota Otsubo",
-      "format": "VGC Champions",
-      "regulation": "M-C",
-      "sheet_rank": "",
-      "date_shared": "11 Nov 2026",
-      "pokepaste_url": "https://pokepast.es/561acb65db7d21b1",
-      "pokemon": [
-        {
-          "name": "Glimmora",
-          "item": "Life Orb",
-          "ability": "Toxic Debris",
-          "tera_type": "",
-          "evs": "1 HP / 32 SpA / 1 SpD / 32 Spe",
-          "nature": "Modest",
-          "moves": [
-            "Sludge Bomb",
-            "Power Gem",
-            "Earth Power",
-            "Spiky Shield"
-          ]
-        },
-        {
-          "name": "Garchomp",
-          "item": "Choice Scarf",
-          "ability": "Rough Skin",
-          "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Spe",
-          "nature": "Adamant",
-          "moves": [
-            "Earthquake",
-            "Rock Slide",
-            "Stomping Tantrum",
-            "Dragon Claw"
-          ]
-        },
-        {
-          "name": "Delphox",
-          "item": "Delphoxite",
-          "ability": "Blaze",
-          "tera_type": "",
-          "evs": "1 HP / 1 Def / 32 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Heat Wave",
-            "Psychic",
-            "Encore",
-            "Protect"
-          ]
-        },
-        {
-          "name": "Whimsicott",
-          "item": "Focus Sash",
-          "ability": "Prankster",
-          "tera_type": "",
-          "evs": "2 HP / 32 SpA / 32 Spe",
-          "nature": "Timid",
-          "moves": [
-            "Moonblast",
-            "Tailwind",
-            "Encore",
-            "Endeavor"
-          ]
-        },
-        {
-          "name": "Farigiraf",
-          "item": "Sitrus Berry",
-          "ability": "Armor Tail",
-          "tera_type": "",
-          "evs": "27 HP / 20 Def / 15 SpD / 4 Spe",
-          "nature": "Bold",
-          "moves": [
-            "Expanding Force",
-            "Hyper Voice",
-            "Trick Room",
-            "Imprison"
-          ]
-        },
-        {
-          "name": "Heracross",
-          "item": "Heracronite",
-          "ability": "Moxie",
-          "tera_type": "",
-          "evs": "2 HP / 32 Atk / 32 Spe",
-          "nature": "Jolly",
-          "moves": [
-            "Close Combat",
-            "Bullet Seed",
-            "Pin Missile",
-            "Detect"
           ]
         }
       ],

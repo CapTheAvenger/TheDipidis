@@ -125,7 +125,7 @@
    "PLS 130"
   ]
  },
- "champions_teams": 66,
+ "champions_teams": 65,
  "champions_ueber_grenze": 0,
  "empty_files": {
   "labs_tournament_decks__unsorted.csv": true
@@ -141,17 +141,17 @@
   "champions_type_chart.json": 183,
   "cm_expansions.csv": 793,
   "japanese_cards_database.csv": 1192,
-  "online_api_archetypes.csv": 26634,
-  "online_api_cards_TEF-DLR.csv": 63401,
-  "online_api_matchups_TEF-DLR.csv": 19052,
-  "online_api_tournaments.csv": 605,
+  "online_api_archetypes.csv": 26754,
+  "online_api_cards_TEF-DLR.csv": 67007,
+  "online_api_matchups_TEF-DLR.csv": 20036,
+  "online_api_tournaments.csv": 608,
   "opgg_champions_moves.json": 2072,
   "pokemon_go_liste.json": 981,
   "pokemon_go_shiny.json": 1006,
   "price_data.csv": 20759,
   "prizepack_official_images.csv": 266
  },
- "generated": "2026-11-25 09:35 UTC",
+ "generated": "2026-11-26 09:34 UTC",
  "jp_set_rows": {
   "HSP": 9,
   "M4": 83,
@@ -171,8 +171,8 @@
    "live-verified": 5989,
    "manual-pin": 91,
    "priced-by-all": 80,
-   "priced-by-date": 430,
-   "unique": 11135
+   "priced-by-date": 431,
+   "unique": 11134
   },
   "nonempty_eur_price": 20748,
   "verified_collision_owners": {},

@@ -1,5 +1,5 @@
 {
- "erzeugt": "2026-11-24 07:07:26+00:00",
+ "erzeugt": "2026-11-27 07:16:10+00:00",
  "format": "TEF-DLR",
  "betriebsart": "A",
  "betriebsart_klartext": "Anker aus dem laufenden Format",
@@ -15,28 +15,28 @@
  ],
  "ankerspieler_gesamt": 2638,
  "online_abdeckung": {
-  "schnappschuss": "2026-11-24",
-  "anteil_unbekannt": 5.18,
+  "schnappschuss": "2026-11-27",
+  "anteil_unbekannt": 5.14,
   "groesste_unbekannte": [
    {
-    "deck": "Mega Darkrai",
-    "anteil": 0.35
+    "deck": "Iono's Bellibolt",
+    "anteil": 0.33
    },
    {
-    "deck": "Iono's Bellibolt",
+    "deck": "Toxtricity Box",
+    "anteil": 0.32
+   },
+   {
+    "deck": "Mega Darkrai",
     "anteil": 0.32
    },
    {
     "deck": "Gengar",
-    "anteil": 0.29
-   },
-   {
-    "deck": "Toxtricity Box",
-    "anteil": 0.25
+    "anteil": 0.28
    },
    {
     "deck": "Hydreigon",
-    "anteil": 0.23
+    "anteil": 0.22
    }
   ]
  },

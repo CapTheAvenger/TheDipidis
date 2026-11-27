@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-27T03:44:53Z",
+  "erzeugt_am": "2026-11-27T07:16:50Z",
   "id": "hide-n-sneak",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1345,7 +1345,7 @@
   ],
   "liste_online": {
    "bilanz": "5-0-0",
-   "datum": "20.11.2026",
+   "datum": "27.11.2026",
    "karten": [
     [
      4,
@@ -1403,27 +1403,27 @@
     ],
     [
      1,
+     "Bloodmoon Ursaluna ex",
+     "TWM",
+     "141"
+    ],
+    [
+     1,
      "Latias ex",
      "SSP",
      "76"
     ],
     [
-     1,
-     "Spiritomb",
+     4,
+     "Gwynn",
      "PBL",
-     "35"
+     "78"
     ],
     [
      4,
      "Lillie's Determination",
      "MEG",
      "119"
-    ],
-    [
-     3,
-     "Gwynn",
-     "PBL",
-     "78"
     ],
     [
      3,
@@ -1456,12 +1456,6 @@
      "196"
     ],
     [
-     1,
-     "Pokégear 3.0",
-     "SVI",
-     "186"
-    ],
-    [
      3,
      "Prism Tower",
      "CRI",
@@ -1487,9 +1481,9 @@
     ]
    ],
    "platz": 1,
-   "spieler": "JuanPabloVega",
-   "turnier": "Nightshades Friday Challenge 7 (25 Codes)",
-   "von": 66
+   "spieler": "Ethan Schott",
+   "turnier": "Torneo Relámpago ⚡ #94 PTCG Live (25 CODES)",
+   "von": 97
   },
   "listen_vor_ort": [
    {
@@ -1780,14 +1774,14 @@
   "name": "Dhelmise",
   "online": {
    "anteil": "2,64",
-   "anteil14": "2,68",
+   "anteil14": "2,7",
    "bilanz": [
     452,
     545,
     5
    ],
    "bis": "26.11.2026",
-   "fenster14": "10.11.–24.11.2026",
+   "fenster14": "13.11.–27.11.2026",
    "format": "TEF–DLR",
    "kurz_anteil": "2,57",
    "kurz_bilanz": [

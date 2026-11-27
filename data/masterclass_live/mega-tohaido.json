@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "erzeugt_am": "2026-11-27T03:44:53Z",
+  "erzeugt_am": "2026-11-27T07:16:50Z",
   "id": "mega-tohaido",
   "quelle": "data/ (Turnierdaten), erzeugt von scripts/masterclass_zahlen_nachziehen.py und scripts/masterclass_listen_nachziehen.py"
  },
@@ -1149,8 +1149,8 @@
    }
   ],
   "liste_online": {
-   "bilanz": "6-1-0",
-   "datum": "20.11.2026",
+   "bilanz": "10-3-0",
+   "datum": "21.11.2026",
    "karten": [
     [
      3,
@@ -1184,15 +1184,15 @@
     ],
     [
      2,
-     "Munkidori",
-     "TWM",
-     "95"
-    ],
-    [
-     2,
      "Tatsugiri",
      "TWM",
      "131"
+    ],
+    [
+     2,
+     "Munkidori",
+     "TWM",
+     "95"
     ],
     [
      1,
@@ -1219,16 +1219,22 @@
      "114"
     ],
     [
-     3,
+     2,
+     "Team Rocket's Petrel",
+     "DRI",
+     "176"
+    ],
+    [
+     2,
      "Judge",
      "POR",
      "76"
     ],
     [
      1,
-     "Team Rocket's Petrel",
-     "DRI",
-     "176"
+     "Janine's Secret Art",
+     "PRE",
+     "112"
     ],
     [
      4,
@@ -1250,15 +1256,15 @@
     ],
     [
      1,
-     "Unfair Stamp",
-     "TWM",
-     "165"
-    ],
-    [
-     1,
      "Night Stretcher",
      "ASC",
      "196"
+    ],
+    [
+     1,
+     "Unfair Stamp",
+     "TWM",
+     "165"
     ],
     [
      3,
@@ -1267,7 +1273,7 @@
      "95"
     ],
     [
-     3,
+     2,
      "Team Rocket's Watchtower",
      "DRI",
      "180"
@@ -1286,9 +1292,9 @@
     ]
    ],
    "platz": 2,
-   "spieler": "DinnerGaming",
-   "turnier": "Turtwig Den Revival Series Season 2 Challenge 9",
-   "von": 72
+   "spieler": "William Stull",
+   "turnier": "TOURNAMENT OF DOOM! Stuff.",
+   "von": 355
   },
   "listen_vor_ort": [
    {
@@ -1567,14 +1573,14 @@
   "name": "Sharpedo Toxtricity",
   "online": {
    "anteil": "1,49",
-   "anteil14": "1,52",
+   "anteil14": "1,53",
    "bilanz": [
     252,
     275,
     2
    ],
    "bis": "26.11.2026",
-   "fenster14": "10.11.–24.11.2026",
+   "fenster14": "13.11.–27.11.2026",
    "format": "TEF–DLR",
    "kurz_anteil": "1,55",
    "kurz_bilanz": [

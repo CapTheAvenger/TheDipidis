@@ -12,16 +12,16 @@
   "form_count": 2,
   "aus_mega": [],
   "aus_teams": [
-   "Basculegion-F",
    "Indeedee-F",
    "Sirfetch’d"
   ],
-  "aus_teams_count": 3,
+  "aus_teams_count": 2,
   "aus_teams_ohne_werte": [],
   "geschlechtsformen": [
+   "Basculegion-F",
    "Meowstic-F"
   ],
-  "geschlechtsformen_count": 1,
+  "geschlechtsformen_count": 2,
   "aus_nutzung": [
    "Farfetch’d",
    "Gourgeist-Large",
@@ -364,8 +364,8 @@
   "Zoroark-Hisui",
   "Indeedee-F",
   "Sirfetch’d",
-  "Basculegion-F",
   "Meowstic-F",
+  "Basculegion-F",
   "Farfetch’d",
   "Gourgeist-Large",
   "Gourgeist-Small",
